@@ -10,12 +10,14 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import java.io.Serializable;
 
+import com.vaadin.ui.Component;
+
 /**
  *
  *
  *
  */
-public interface ConfigurationGroup {
+public interface ConfigurationGroup extends Component {
 
     /**
      * called to store any configuration changes.
@@ -26,6 +28,13 @@ public interface ConfigurationGroup {
      * called to rollback any configuration changes.
      */
     void undo();
+
+    /**
+     * called to verify that the Input done by the user is valid
+     * 
+     * @return true when the data is valid, false otherwise
+     */
+    boolean isUserInputValid();
 
     /**
      * Adds a configuration change listener to notify about configuration
@@ -40,8 +49,6 @@ public interface ConfigurationGroup {
     /**
      * Configuration Change Listener to be notified about configuration changes
      * in configuration group.
-     * 
-     *
      *
      */
     interface ConfigurationGroupChangeListener extends Serializable {

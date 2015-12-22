@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -26,7 +23,6 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -40,8 +36,8 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SpringComponent
 @ViewScope
-public class AuthenticationConfigurationView extends CustomComponent
-        implements ConfigurationGroup, TenantConfigurationItem.TenantConfigurationChangeListener {
+public class AuthenticationConfigurationView extends BaseConfigurationView
+        implements ConfigurationGroup, TenantConfigurationItem.TenantConfigurationChangeListener, ValueChangeListener {
 
     /**
     *
@@ -64,8 +60,6 @@ public class AuthenticationConfigurationView extends CustomComponent
 
     @Autowired
     private GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
-
-    private final List<ConfigurationGroupChangeListener> configurationChangeListeners = new ArrayList<>();
 
     private CheckBox gatewaySecTokenCheckBox;
 
@@ -100,16 +94,14 @@ public class AuthenticationConfigurationView extends CustomComponent
 
         certificateAuthCheckbox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         certificateAuthCheckbox.setValue(certificateAuthenticationConfigurationItem.isConfigEnabled());
-        certificateAuthCheckbox.addValueChangeListener(new AuthenticationTenantConfigurationItemChangeListener(
-                certificateAuthCheckbox, certificateAuthenticationConfigurationItem));
+        certificateAuthCheckbox.addValueChangeListener(this);
         certificateAuthenticationConfigurationItem.addConfigurationChangeListener(this);
         gridLayout.addComponent(certificateAuthCheckbox, 0, 0);
         gridLayout.addComponent(certificateAuthenticationConfigurationItem, 1, 0);
 
         targetSecTokenCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         targetSecTokenCheckBox.setValue(targetSecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
-        targetSecTokenCheckBox.addValueChangeListener(new AuthenticationTenantConfigurationItemChangeListener(
-                targetSecTokenCheckBox, targetSecurityTokenAuthenticationConfigurationItem));
+        targetSecTokenCheckBox.addValueChangeListener(this);
         targetSecurityTokenAuthenticationConfigurationItem.addConfigurationChangeListener(this);
         gridLayout.addComponent(targetSecTokenCheckBox, 0, 1);
         gridLayout.addComponent(targetSecurityTokenAuthenticationConfigurationItem, 1, 1);
@@ -117,8 +109,7 @@ public class AuthenticationConfigurationView extends CustomComponent
         gatewaySecTokenCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         gatewaySecTokenCheckBox.setId("gatewaysecuritycheckbox");
         gatewaySecTokenCheckBox.setValue(gatewaySecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
-        gatewaySecTokenCheckBox.addValueChangeListener(new AuthenticationTenantConfigurationItemChangeListener(
-                gatewaySecTokenCheckBox, gatewaySecurityTokenAuthenticationConfigurationItem));
+        gatewaySecTokenCheckBox.addValueChangeListener(this);
         gatewaySecurityTokenAuthenticationConfigurationItem.addConfigurationChangeListener(this);
         gridLayout.addComponent(gatewaySecTokenCheckBox, 0, 2);
         gridLayout.addComponent(gatewaySecurityTokenAuthenticationConfigurationItem, 1, 2);
@@ -126,7 +117,6 @@ public class AuthenticationConfigurationView extends CustomComponent
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
-
     }
 
     /*
@@ -160,47 +150,42 @@ public class AuthenticationConfigurationView extends CustomComponent
         gatewaySecTokenCheckBox.setValue(gatewaySecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
     }
 
-    private void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationChanged());
-    }
-
-    @Override
-    public void addChangeListener(final ConfigurationGroupChangeListener listener) {
-        configurationChangeListeners.add(listener);
-    }
-
     @Override
     public void configurationHasChanged() {
         notifyConfigurationChanged();
     }
 
-    private final class AuthenticationTenantConfigurationItemChangeListener implements ValueChangeListener {
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.vaadin.data.Property.ValueChangeListener#valueChange(com.vaadin.
+     * data.Property. ValueChangeEvent)
+     */
+    @Override
+    public void valueChange(final ValueChangeEvent event) {
 
-        private static final long serialVersionUID = 1L;
-        private final CheckBox checkBox;
-        private final TenantConfigurationItem configurationItem;
-
-        private AuthenticationTenantConfigurationItemChangeListener(final CheckBox checkBox,
-                final TenantConfigurationItem configurationItem) {
-            this.checkBox = checkBox;
-            this.configurationItem = configurationItem;
-        }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * com.vaadin.data.Property.ValueChangeListener#valueChange(com.vaadin.
-         * data.Property. ValueChangeEvent)
-         */
-        @Override
-        public void valueChange(final ValueChangeEvent event) {
+        if (event.getProperty() instanceof CheckBox) {
             notifyConfigurationChanged();
+
+            CheckBox checkBox = (CheckBox) event.getProperty();
+            TenantConfigurationItem configurationItem = null;
+
+            if (checkBox == gatewaySecTokenCheckBox) {
+                configurationItem = gatewaySecurityTokenAuthenticationConfigurationItem;
+            } else if (checkBox == targetSecTokenCheckBox) {
+                configurationItem = targetSecurityTokenAuthenticationConfigurationItem;
+            } else if (checkBox == certificateAuthCheckbox) {
+                configurationItem = certificateAuthenticationConfigurationItem;
+            } else {
+                return;
+            }
+
             if (checkBox.getValue()) {
                 configurationItem.configEnable();
             } else {
                 configurationItem.configDisable();
             }
+
         }
     }
 }

@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -52,6 +57,9 @@ public class TenantConfigurationDashboardView extends CustomComponent
     private AuthenticationConfigurationView authenticationConfigurationView;
 
     @Autowired
+    private PollingConfigurationView pollingConfigurationView;
+
+    @Autowired
     private I18N i18n;
 
     @Autowired
@@ -59,6 +67,18 @@ public class TenantConfigurationDashboardView extends CustomComponent
 
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
+
+    private List<ConfigurationGroup> configurationViews = new ArrayList<ConfigurationGroup>();
+
+    /**
+     * init method adds all Configuration Views to the list of Views.
+     */
+    @PostConstruct
+    public void init() {
+        configurationViews.add(defaultDistributionSetTypeLayout);
+        configurationViews.add(authenticationConfigurationView);
+        configurationViews.add(pollingConfigurationView);
+    }
 
     @Override
     public void enter(final ViewChangeEvent event) {
@@ -70,17 +90,20 @@ public class TenantConfigurationDashboardView extends CustomComponent
         rootLayout.setSizeFull();
         rootLayout.setMargin(true);
         rootLayout.setSpacing(true);
-        rootLayout.addComponent(defaultDistributionSetTypeLayout);
-        rootLayout.addComponent(authenticationConfigurationView);
+
+        configurationViews.forEach(view -> {
+            rootLayout.addComponent(view);
+        });
+
         final HorizontalLayout buttonContent = saveConfigurationButtonsLayout();
         rootLayout.addComponent(buttonContent);
         rootLayout.setComponentAlignment(buttonContent, Alignment.BOTTOM_LEFT);
         rootPanel.setContent(rootLayout);
         setCompositionRoot(rootPanel);
 
-        authenticationConfigurationView.addChangeListener(this);
-        defaultDistributionSetTypeLayout.addChangeListener(this);
-
+        configurationViews.forEach(view -> {
+            view.addChangeListener(this);
+        });
     }
 
     private HorizontalLayout saveConfigurationButtonsLayout() {
@@ -108,19 +131,30 @@ public class TenantConfigurationDashboardView extends CustomComponent
     }
 
     private void saveConfiguration() {
-        defaultDistributionSetTypeLayout.save();
-        authenticationConfigurationView.save();
 
-        // More methods
-        saveConfigurationBtn.setEnabled(false);
-        undoConfigurationBtn.setEnabled(false);
-        uINotification.displaySuccess(i18n.get("notification.configuration.save"));
+        boolean isUserInputValid = configurationViews.stream().allMatch(confView -> {
+            return confView.isUserInputValid();
+        });
+
+        if (isUserInputValid) {
+            configurationViews.forEach(confView -> {
+                confView.save();
+            });
+
+            // More methods
+            saveConfigurationBtn.setEnabled(false);
+            undoConfigurationBtn.setEnabled(false);
+            uINotification.displaySuccess(i18n.get("notification.configuration.save.successful"));
+
+        } else {
+            uINotification.displayValidationError(i18n.get("notification.configuration.save.notpossible"));
+        }
     }
 
     private void undoConfiguration() {
-        defaultDistributionSetTypeLayout.undo();
-        authenticationConfigurationView.undo();
-
+        configurationViews.forEach(confView -> {
+            confView.undo();
+        });
         // More methods
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);
