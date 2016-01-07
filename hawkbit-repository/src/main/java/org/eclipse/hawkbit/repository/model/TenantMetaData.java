@@ -60,6 +60,12 @@ public class TenantMetaData implements Serializable {
     @Column(name = "tenant", nullable = false, length = 40)
     private String tenant;
 
+    @Column(name = "polling_time", nullable = true, length = 10)
+    private String pollingTime;
+
+    @Column(name = "polling_overdue_time", nullable = true, length = 10)
+    private String pollingOverdueTime;
+
     private String createdBy;
     private String lastModifiedBy;
     private Long createdAt;
@@ -256,4 +262,19 @@ public class TenantMetaData implements Serializable {
         return true;
     }
 
+    public String getPollingTime() {
+        return pollingTime;
+    }
+
+    public void setPollingTime(String pollingTime) {
+        this.pollingTime = pollingTime;
+    }
+
+    public String getPollingOverdueTime() {
+        return pollingOverdueTime;
+    }
+
+    public void setPollingOverdueTime(String pollingOverdueTime) {
+        this.pollingOverdueTime = pollingOverdueTime;
+    }
 }
