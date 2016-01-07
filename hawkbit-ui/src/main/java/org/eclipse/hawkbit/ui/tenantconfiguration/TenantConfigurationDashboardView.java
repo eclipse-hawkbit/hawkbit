@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
-import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationGroup.ConfigurationGroupChangeListener;
+import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationElement.ConfigurationGroupChangeListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;

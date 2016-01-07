@@ -110,7 +110,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
             @JoinColumn(name = "target_id") }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target") )
     // use deprecated annotation until HHH-8862 is fixed
-    @SuppressWarnings("deprecation")
+
     // @org.hibernate.annotations.ForeignKey( name = "fk_targ_attrib_target" )
     private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
 
@@ -181,7 +181,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     }
 
     /**
-     * @param ipAddress
+     * @param address
      *            the ipAddress to set
      *
      * @throws IllegalArgumentException
@@ -382,6 +382,9 @@ public class TargetInfo implements Persistable<Long>, Serializable {
             return overdueDate;
         }
 
+        /**
+         * @return the current date
+         */
         public LocalDateTime getCurrentDate() {
             return currentDate;
         }
