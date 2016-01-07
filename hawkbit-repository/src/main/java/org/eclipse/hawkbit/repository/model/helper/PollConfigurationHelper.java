@@ -13,6 +13,7 @@ import java.time.Duration;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,11 @@ import org.springframework.context.EnvironmentAware;
  */
 public final class PollConfigurationHelper {
 
+    /**
+     * Expected format of the Polling Time String
+     */
+    public static final String EXPECTED_POLLING_TIME_FORMAT = "(([0-1]?[0-9]|2[0-3])(:[0-5][0-9]){2})";
+
     private static final Logger LOG = LoggerFactory.getLogger(PollConfigurationHelper.class);
     private static final PollConfigurationHelper INSTANCE = new PollConfigurationHelper();
 
@@ -46,6 +52,9 @@ public final class PollConfigurationHelper {
     @Autowired
     private ControllerPollProperties controllerPollProperties;
 
+    @Autowired
+    private SystemManagement systemManagement;
+
     private Duration controllerPollTimeDuration;
     private Duration controllerOverduePollTimeDuration;
 
@@ -53,7 +62,7 @@ public final class PollConfigurationHelper {
     }
 
     /**
-     * Bean post construct to calcualte the poll time and poll overdue time only
+     * Bean post construct to calculate the poll time and poll overdue time only
      * once.
      */
     @PostConstruct
@@ -67,7 +76,6 @@ public final class PollConfigurationHelper {
                 DEFAULT_OVERDUE_HOUR, DEFAULT_OVERDUE_MINUTE, DEFAULT_OVERDUE_SECOND);
         this.controllerOverduePollTimeDuration = Duration.ZERO.plusHours(controllerOverduePollTimeSplit[0])
                 .plusMinutes(controllerOverduePollTimeSplit[1]).plusSeconds(controllerOverduePollTimeSplit[2]);
-
     }
 
     /**
@@ -80,12 +88,31 @@ public final class PollConfigurationHelper {
     }
 
     /**
+     * @return the poll time interval configured in the configuration
+     *         {@code hawkbit.server.controller.polling} or the default value
+     *         which is {@code 00:05:00} never {@code null}.
+     */
+    public String getPollTimeIntervalAsFormattedString() {
+        return durationToFormattedString(controllerPollTimeDuration);
+    }
+
+    /**
      * @return the overdue poll threshold configured in the configuration
      *         {@code hawkbit.server.controller.polling.overdue} or the default
      *         value which is {@code 00:05:00} never {@code null}.
      */
     public Duration getOverduePollTimeInterval() {
         return controllerOverduePollTimeDuration;
+    }
+
+    /**
+     * @return the overdue poll threshold as a formatted string (HH:MM:SS)
+     *         configured in the configuration
+     *         {@code hawkbit.server.controller.polling.overdue} or the default
+     *         value which is {@code 00:05:00} never {@code null}.
+     */
+    public String getOverduePollTimeIntervalAsFormattedString() {
+        return durationToFormattedString(controllerOverduePollTimeDuration);
     }
 
     /**
@@ -109,5 +136,39 @@ public final class PollConfigurationHelper {
         }
         LOG.warn("Using default configuration hour:{} min:{}, second:{}", defaultHour, defaultMinute, defaultSecond);
         return new long[] { defaultHour, defaultMinute, defaultSecond };
+    }
+
+    private String durationToFormattedString(Duration duration) {
+        long seconds = duration.getSeconds();
+        long minuts = seconds / 60;
+        long hours = minuts / 60;
+
+        seconds = seconds % 60;
+        minuts = minuts % 60;
+        hours = hours % 100;
+
+        return String.format("%02d:%02d:%02d", hours, minuts, seconds);
+    }
+
+    private Duration formattedStringToDuration(String formattedDuration) {
+        if (formattedDuration == null || !formattedDuration.matches(EXPECTED_POLLING_TIME_FORMAT)) {
+            LOG.warn("Cannot parse the given poll configuration {}", formattedDuration);
+            throw new IllegalArgumentException(
+                    "String is not in the EXPECTED_POLLING_TIME_FORMAT. Parsing not possible.");
+        }
+
+        final String[] split = formattedDuration.split(":");
+        if (split.length == 3) {
+            try {
+                return Duration.ofHours(Long.parseLong(split[0])).plusMinutes(Long.parseLong(split[1]))
+                        .plusSeconds(Long.parseLong(split[2]));
+            } catch (final NumberFormatException e) {
+                LOG.warn("Cannot parse the given poll configuration {}", formattedDuration);
+            }
+        }
+
+        LOG.error("Cannot parse the given poll String {}, even it matches the regex \"{}\".", formattedDuration,
+                EXPECTED_POLLING_TIME_FORMAT);
+        throw new IllegalArgumentException("String is in the expected format. But parsing is not possible anyway.");
     }
 }
