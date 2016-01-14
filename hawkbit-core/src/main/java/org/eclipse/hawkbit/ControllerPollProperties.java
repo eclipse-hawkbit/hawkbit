@@ -20,6 +20,8 @@ public class ControllerPollProperties {
 
     private String pollingTime = "00:05:00";
     private String pollingOverdueTime = "00:05:00";
+    private String maxPollingTime = "23:59:00";
+    private String minPollingTime = "23:59:00";
 
     public String getPollingTime() {
         return pollingTime;
@@ -35,5 +37,21 @@ public class ControllerPollProperties {
 
     public void setPollingOverdueTime(final String pollingOverdue) {
         this.pollingOverdueTime = pollingOverdue;
+    }
+
+    public String getMaxPollingTime() {
+        return maxPollingTime;
+    }
+
+    public void setMaxPollingTime(String maxPollingTime) {
+        this.maxPollingTime = maxPollingTime;
+    }
+
+    public String getMinPollingTime() {
+        return minPollingTime;
+    }
+
+    public void setMinPollingTime(String minPollingTime) {
+        this.minPollingTime = minPollingTime;
     }
 }
