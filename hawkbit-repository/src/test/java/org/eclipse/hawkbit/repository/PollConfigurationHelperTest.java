@@ -1,14 +1,13 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.repository.model.helper.DurationHelper;
 import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +53,7 @@ public class PollConfigurationHelperTest {
         pollConfigurationHelperUnderTest.initializeConfigurationValues();
     }
 
-    private void setTenantConfiguration(String polling, String overdue) {
+    private void setTenantConfiguration(Duration polling, Duration overdue) {
 
         when(tenantMetaData.getPollingTime()).thenReturn(polling);
         when(tenantMetaData.getPollingOverdueTime()).thenReturn(overdue);
@@ -113,17 +112,17 @@ public class PollConfigurationHelperTest {
     @Test
     public void getPollingValuesFromTenant() {
 
-        setTenantConfiguration("00:11:00", "00:13:00");
+        setTenantConfiguration(Duration.ofMinutes(11), Duration.ofMinutes(17));
 
         assertThat(pollConfigurationHelperUnderTest.getPollTimeInterval()).isEqualTo(Duration.ofMinutes(11));
-        assertThat(pollConfigurationHelperUnderTest.getOverduePollTimeInterval()).isEqualTo(Duration.ofMinutes(13));
+        assertThat(pollConfigurationHelperUnderTest.getOverduePollTimeInterval()).isEqualTo(Duration.ofMinutes(17));
 
     }
 
     @Test
     public void getInvalidPollingValuesFromTenant() {
 
-        setTenantConfiguration("00:00:01", "00:130:00");
+        setTenantConfiguration(Duration.ZERO, Duration.ofHours(30));
 
         assertThat(pollConfigurationHelperUnderTest.getPollTimeInterval()).isEqualTo(DEFAULT_POLLING);
         assertThat(pollConfigurationHelperUnderTest.getOverduePollTimeInterval()).isEqualTo(DEFAULT_OVERDUE);
@@ -131,21 +130,18 @@ public class PollConfigurationHelperTest {
     }
 
     @Test
-    public void setTenantConfiguration() {
-        pollConfigurationHelperUnderTest.setTenantPollTimeIntervall(Duration.ofHours(3).plusSeconds(3));
-        pollConfigurationHelperUnderTest.setTenantOverduePollTimeIntervall(Duration.ofMinutes(7).plusSeconds(7));
+    public void basicTestingOfDurationHelper() {
+        DurationHelper dh = new DurationHelper();
 
-        verify(tenantMetaData, times(1)).setPollingTime("03:00:03");
-        verify(tenantMetaData, times(1)).setPollingOverdueTime("00:07:07");
+        assertThat(dh.durationToFormattedString(null)).isNull();
+        assertThat(dh.durationToFormattedString(Duration.ofHours(1).plusMinutes(2).plusSeconds(1)))
+                .isEqualTo("01:02:01");
+
+        assertThat(dh.formattedStringToDuration(null)).isNull();
+        assertThat(dh.formattedStringToDuration("01:02:01"))
+                .isEqualTo(Duration.ofHours(1).plusMinutes(2).plusSeconds(1));
+
+        assertThat(dh.getDurationByTimeValues(0, 0, 0)).isEqualTo(Duration.ZERO);
+
     }
-
-    @Test
-    public void setTenantConfigurationToNull() {
-        pollConfigurationHelperUnderTest.setTenantPollTimeIntervall(null);
-        pollConfigurationHelperUnderTest.setTenantOverduePollTimeIntervall(null);
-
-        verify(tenantMetaData, times(1)).setPollingTime(null);
-        verify(tenantMetaData, times(1)).setPollingOverdueTime(null);
-    }
-
 }

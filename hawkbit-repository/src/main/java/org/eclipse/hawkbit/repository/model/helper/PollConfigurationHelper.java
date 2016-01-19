@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.repository.model.helper;
 
 import java.time.Duration;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAccessor;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
@@ -38,7 +35,6 @@ public final class PollConfigurationHelper {
      * Format of the expected Duration String. Pattern has to be in Valid Format
      * for SimpleDateFormat
      */
-    public static final String DURATION_FORMAT = "HH:mm:ss";
 
     private static final Logger LOG = LoggerFactory.getLogger(PollConfigurationHelper.class);
     private static final PollConfigurationHelper INSTANCE = new PollConfigurationHelper();
@@ -58,6 +54,8 @@ public final class PollConfigurationHelper {
     private static final int DEFAULT_MIN_HOUR = 0;
     private static final int DEFAULT_MIN_MINUTE = 0;
     private static final int DEFAULT_MIN_SECOND = 30;
+
+    private static DurationHelper dh = new DurationHelper();
 
     @Autowired
     private ControllerPollProperties controllerPollProperties;
@@ -91,32 +89,33 @@ public final class PollConfigurationHelper {
 
     private void readGlobalDurationsFromConfiguration() {
         try {
-            configurationMaximumPollTime = formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
+            configurationMaximumPollTime = dh.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
         } catch (DateTimeParseException e) {
             // Set to default values
-            configurationMaximumPollTime = getDurationByTimeValues(DEFAULT_MAX_HOUR, DEFAULT_MAX_MINUTE,
+            configurationMaximumPollTime = dh.getDurationByTimeValues(DEFAULT_MAX_HOUR, DEFAULT_MAX_MINUTE,
                     DEFAULT_MAX_SECOND);
         }
 
         try {
-            configurationMinimumPollTime = formattedStringToDuration(controllerPollProperties.getMinPollingTime());
+            configurationMinimumPollTime = dh.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
         } catch (DateTimeParseException e) {
             // Set to default values
-            configurationMinimumPollTime = getDurationByTimeValues(DEFAULT_MIN_HOUR, DEFAULT_MIN_MINUTE,
+            configurationMinimumPollTime = dh.getDurationByTimeValues(DEFAULT_MIN_HOUR, DEFAULT_MIN_MINUTE,
                     DEFAULT_MIN_SECOND);
         }
 
         try {
-            configurationPollTime = formattedStringToDuration(controllerPollProperties.getPollingTime());
+            configurationPollTime = dh.formattedStringToDuration(controllerPollProperties.getPollingTime());
         } catch (DateTimeParseException e) {
-            configurationPollTime = getDurationByTimeValues(DEFAULT_POLL_HOUR, DEFAULT_POLL_MINUTE,
+            configurationPollTime = dh.getDurationByTimeValues(DEFAULT_POLL_HOUR, DEFAULT_POLL_MINUTE,
                     DEFAULT_POLL_SECOND);
         }
 
         try {
-            configurationOverduePollTime = formattedStringToDuration(controllerPollProperties.getPollingOverdueTime());
+            configurationOverduePollTime = dh
+                    .formattedStringToDuration(controllerPollProperties.getPollingOverdueTime());
         } catch (DateTimeParseException e) {
-            configurationOverduePollTime = getDurationByTimeValues(DEFAULT_OVERDUE_HOUR, DEFAULT_OVERDUE_MINUTE,
+            configurationOverduePollTime = dh.getDurationByTimeValues(DEFAULT_OVERDUE_HOUR, DEFAULT_OVERDUE_MINUTE,
                     DEFAULT_OVERDUE_SECOND);
         }
 
@@ -129,27 +128,26 @@ public final class PollConfigurationHelper {
             LOG.warn("The configured maximum value of the polling time is smaller"
                     + " than the configured minimum value. Both are replaced by default values.");
 
-            configurationMaximumPollTime = getDurationByTimeValues(DEFAULT_MAX_HOUR, DEFAULT_MAX_MINUTE,
+            configurationMaximumPollTime = dh.getDurationByTimeValues(DEFAULT_MAX_HOUR, DEFAULT_MAX_MINUTE,
                     DEFAULT_MAX_SECOND);
-            configurationMinimumPollTime = getDurationByTimeValues(DEFAULT_MIN_HOUR, DEFAULT_MIN_MINUTE,
+            configurationMinimumPollTime = dh.getDurationByTimeValues(DEFAULT_MIN_HOUR, DEFAULT_MIN_MINUTE,
                     DEFAULT_MIN_SECOND);
         }
 
         if (!isWithinRange(configurationPollTime)) {
             // poll time value not within allowed range ==> use default value
-            configurationPollTime = getDurationByTimeValues(DEFAULT_POLL_HOUR, DEFAULT_POLL_MINUTE,
+            configurationPollTime = dh.getDurationByTimeValues(DEFAULT_POLL_HOUR, DEFAULT_POLL_MINUTE,
                     DEFAULT_POLL_SECOND);
         }
 
         if (!isWithinRange(configurationOverduePollTime)) {
             // overdue poll time value not within range => use default value
-            configurationOverduePollTime = getDurationByTimeValues(DEFAULT_OVERDUE_HOUR, DEFAULT_OVERDUE_MINUTE,
+            configurationOverduePollTime = dh.getDurationByTimeValues(DEFAULT_OVERDUE_HOUR, DEFAULT_OVERDUE_MINUTE,
                     DEFAULT_OVERDUE_SECOND);
         }
     }
 
     private boolean isWithinRange(@NotNull Duration duration) {
-
         return duration.compareTo(configurationMinimumPollTime) > 0
                 && duration.compareTo(configurationMaximumPollTime) < 0;
     }
@@ -161,22 +159,17 @@ public final class PollConfigurationHelper {
      *         the default value which is {@code 00:05:00} never {@code null}.
      */
     public Duration getPollTimeInterval() {
-        Duration tenantPollTimeInterval = getTenantPollTimeIntervall();
+        Duration tenantPollTimeInterval = systemManagement.getTenantMetadata().getPollingTime();
 
         if (tenantPollTimeInterval != null) {
-            return tenantPollTimeInterval;
+            if (isWithinRange(tenantPollTimeInterval)) {
+                return tenantPollTimeInterval;
+            }
+            LOG.warn(
+                    "Tenant {} has stored a pollign interval {} which is not in the allowed range. Configured default value is loaded.",
+                    systemManagement.currentTenant(), tenantPollTimeInterval);
         }
         return configurationPollTime;
-    }
-
-    /**
-     * @return the poll time interval stored in the tenant meta data. If there
-     *         is no value stored this function returns {@code null}
-     */
-    public Duration getTenantPollTimeIntervall() {
-        String tenantPollingTime = systemManagement.getTenantMetadata().getPollingTime();
-
-        return validateDurationStringAndGetDuration(tenantPollingTime, "polling time");
     }
 
     /**
@@ -190,23 +183,6 @@ public final class PollConfigurationHelper {
     }
 
     /**
-     * Stores the changed value in the tenant meta data configuration. The value
-     * {@code null} is clearly allowed. Setting the poll time to {@code null}
-     * means no specific tenant configuration and global configuration are used.
-     * 
-     * @param pollingTime
-     *            polling time interval as formatted string {@code HH:mm:ss} or
-     *            {@code null}
-     */
-    public void setTenantPollTimeIntervall(Duration pollingTime) {
-        if (pollingTime == null) {
-            systemManagement.getTenantMetadata().setPollingTime(null);
-            return;
-        }
-        systemManagement.getTenantMetadata().setPollingTime(durationToFormattedString(pollingTime));
-    }
-
-    /**
      * @return the overdue poll time interval stored in the tenant meta data. If
      *         there is no tenant specific configuration the global value,
      *         configured in the configuration
@@ -214,45 +190,18 @@ public final class PollConfigurationHelper {
      *         which is {@code 00:05:00} never {@code null}.
      */
     public Duration getOverduePollTimeInterval() {
-        Duration tenantOverduePollTimeInterval = getTenantOverduePollTimeIntervall();
+        Duration tenantOverduePollTimeInterval = systemManagement.getTenantMetadata().getPollingOverdueTime();
 
         if (tenantOverduePollTimeInterval != null) {
-            return tenantOverduePollTimeInterval;
+            if (isWithinRange(tenantOverduePollTimeInterval)) {
+                return tenantOverduePollTimeInterval;
+            }
+            LOG.warn(
+                    "Tenant {} has stored an overdue polling interval {} which is not in the allowed range. Configured default value is loaded.",
+                    systemManagement.currentTenant(), tenantOverduePollTimeInterval);
         }
         return configurationOverduePollTime;
     };
-
-    /**
-     * @return the poll time interval stored in the tenant meta data. If there
-     *         is no value stored this function returns {@code null}
-     */
-    public Duration getTenantOverduePollTimeIntervall() {
-        String tenantOverduePollingTime = systemManagement.getTenantMetadata().getPollingOverdueTime();
-
-        return validateDurationStringAndGetDuration(tenantOverduePollingTime, "overdue polling time");
-    }
-
-    private Duration validateDurationStringAndGetDuration(String pollingTime, String paramNameForLog) {
-        if (pollingTime == null) {
-            return null;
-        }
-
-        try {
-            Duration d = formattedStringToDuration(pollingTime);
-
-            if (isWithinRange(d)) {
-                return d;
-            }
-
-            LOG.warn("Tenant {} has stored a {} {} which is not in the allowed range.",
-                    systemManagement.currentTenant(), paramNameForLog, pollingTime);
-
-        } catch (DateTimeParseException ex) {
-            LOG.warn("Tenant {} has stored an invalid {} {} in its meta data.", systemManagement.currentTenant(),
-                    paramNameForLog, pollingTime);
-        }
-        return null;
-    }
 
     /**
      * @return the overdue poll time interval configured in the configuration
@@ -261,25 +210,6 @@ public final class PollConfigurationHelper {
      */
     public Duration getGlobalOverduePollTimeInterval() {
         return configurationOverduePollTime;
-    }
-
-    /**
-     * Stores the polling overtime interval value in the tenant meta data
-     * configuration. The value {@code null} is clearly allowed. Setting the
-     * overdue poll time to {@code null} means no specific tenant configuration
-     * and global configuration are used.
-     * 
-     * @param pollingTime
-     *            polling time interval as formatted string {@code HH:mm:ss} or
-     *            {@code null}
-     */
-    public void setTenantOverduePollTimeIntervall(Duration pollingTime) {
-        if (pollingTime == null) {
-            systemManagement.getTenantMetadata().setPollingOverdueTime(null);
-            return;
-        }
-
-        systemManagement.getTenantMetadata().setPollingOverdueTime(durationToFormattedString(pollingTime));
     }
 
     /**
@@ -300,26 +230,13 @@ public final class PollConfigurationHelper {
         return configurationMinimumPollTime;
     }
 
-    private String durationToFormattedString(@NotNull Duration duration) {
-        return LocalTime.ofNanoOfDay(duration.toNanos()).format(DateTimeFormatter.ofPattern(DURATION_FORMAT));
-    }
-
-    private Duration formattedStringToDuration(String formattedDuration) throws DateTimeParseException {
-        final TemporalAccessor ta = DateTimeFormatter.ofPattern(DURATION_FORMAT).parse(formattedDuration.trim());
-        return Duration.between(LocalTime.MIDNIGHT, LocalTime.from(ta));
-    }
-
-    private Duration getDurationByTimeValues(long hours, long minutes, long seconds) {
-        return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
-    }
-
     /**
      * sets the ControllerPollProperties in a not spring handled context. Don't
      * forget to call {@code initializeConfigurationValues} afterwards to read
      * the values from the PollProperties.
      * 
      * @param controllerPollProperties
-     *            the controll properties
+     *            the controller poll properties
      */
     public void setControllerPollProperties(ControllerPollProperties controllerPollProperties) {
         this.controllerPollProperties = controllerPollProperties;

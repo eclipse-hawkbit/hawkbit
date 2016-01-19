@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -24,9 +25,11 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.eclipse.hawkbit.repository.model.helper.DurationHelper;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -82,6 +85,9 @@ public class TenantMetaData implements Serializable {
     // @org.hibernate.annotations.ForeignKey( name =
     // "fk_tenant_md_default_ds_type" )
     private DistributionSetType defaultDsType;
+
+    @Transient
+    private DurationHelper dh = new DurationHelper();
 
     public TenantMetaData() {
     }
@@ -262,19 +268,19 @@ public class TenantMetaData implements Serializable {
         return true;
     }
 
-    public String getPollingTime() {
-        return pollingTime;
+    public Duration getPollingTime() {
+        return dh.formattedStringToDuration(pollingTime);
     }
 
-    public void setPollingTime(String pollingTime) {
-        this.pollingTime = pollingTime;
+    public void setPollingTime(Duration pollingTime) {
+        this.pollingTime = dh.durationToFormattedString(pollingTime);
     }
 
-    public String getPollingOverdueTime() {
-        return pollingOverdueTime;
+    public Duration getPollingOverdueTime() {
+        return dh.formattedStringToDuration(pollingOverdueTime);
     }
 
-    public void setPollingOverdueTime(String pollingOverdueTime) {
-        this.pollingOverdueTime = pollingOverdueTime;
+    public void setPollingOverdueTime(Duration pollingOverdueTime) {
+        this.pollingOverdueTime = dh.durationToFormattedString(pollingOverdueTime);
     }
 }

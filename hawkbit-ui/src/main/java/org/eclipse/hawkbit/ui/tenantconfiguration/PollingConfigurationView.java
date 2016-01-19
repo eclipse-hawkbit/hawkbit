@@ -4,6 +4,8 @@ import java.time.Duration;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -35,6 +37,9 @@ public class PollingConfigurationView extends BaseConfigurationView
     PollConfigurationHelper pollConfigurationHelper;
 
     @Autowired
+    private transient SystemManagement systemManagement;
+
+    @Autowired
     private DurationConfigField fieldPollingTime;
 
     @Autowired
@@ -61,7 +66,9 @@ public class PollingConfigurationView extends BaseConfigurationView
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 
-        tenantPollingTime = pollConfigurationHelper.getTenantPollTimeIntervall();
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
+
+        tenantPollingTime = tenantMetaData.getPollingTime();
         fieldPollingTime.setInitValues(i18n.get("configuration.polling.time"), tenantPollingTime,
                 pollConfigurationHelper.getGlobalPollTimeInterval());
         fieldPollingTime.setAllowedRange(pollConfigurationHelper.getMinimumPollingInterval(),
@@ -70,7 +77,7 @@ public class PollingConfigurationView extends BaseConfigurationView
 
         vLayout.addComponent(fieldPollingTime);
 
-        tenantPollingOverdueTime = pollConfigurationHelper.getTenantOverduePollTimeIntervall();
+        tenantPollingOverdueTime = tenantMetaData.getPollingOverdueTime();
 
         fieldPollingOverdueTime.setInitValues(i18n.get("configuration.polling.overduetime"), tenantPollingOverdueTime,
                 pollConfigurationHelper.getGlobalOverduePollTimeInterval());
@@ -88,16 +95,25 @@ public class PollingConfigurationView extends BaseConfigurationView
     public void save() {
         // make sure values are only saved, when the value has been changed
 
+        boolean hasChanged = false;
+
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
+
         if (!compareDurations(tenantPollingTime, fieldPollingTime.getValue())) {
             tenantPollingTime = fieldPollingTime.getValue();
-            pollConfigurationHelper.setTenantPollTimeIntervall(fieldPollingTime.getValue());
+            tenantMetaData.setPollingTime(fieldPollingTime.getValue());
+            hasChanged = true;
         }
 
         if (!compareDurations(tenantPollingOverdueTime, fieldPollingOverdueTime.getValue())) {
             tenantPollingOverdueTime = fieldPollingOverdueTime.getValue();
-            pollConfigurationHelper.setTenantOverduePollTimeIntervall(fieldPollingOverdueTime.getValue());
+            tenantMetaData.setPollingOverdueTime(fieldPollingOverdueTime.getValue());
+            hasChanged = true;
         }
 
+        if (hasChanged) {
+            systemManagement.updateTenantMetadata(tenantMetaData);
+        }
     }
 
     @Override

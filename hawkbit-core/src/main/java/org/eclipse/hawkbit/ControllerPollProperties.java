@@ -21,7 +21,7 @@ public class ControllerPollProperties {
     private String pollingTime = "00:05:00";
     private String pollingOverdueTime = "00:05:00";
     private String maxPollingTime = "23:59:00";
-    private String minPollingTime = "23:59:00";
+    private String minPollingTime = "00:00:30";
 
     public String getPollingTime() {
         return pollingTime;
