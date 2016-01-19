@@ -2,7 +2,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import java.io.Serializable;
 
-public interface ConfigurationElement {
+public interface ConfigurationItem {
 
     /**
      * called to verify that the Input done by the user is valid
@@ -19,17 +19,17 @@ public interface ConfigurationElement {
      *            the listener to be notified in case the item changes some
      *            configuration
      */
-    void addChangeListener(ConfigurationGroupChangeListener listener);
+    void addChangeListener(final ConfigurationItemChangeListener listener);
 
     /**
      * Configuration Change Listener to be notified about configuration changes
      * in configuration group.
      *
      */
-    interface ConfigurationGroupChangeListener extends Serializable {
+    interface ConfigurationItemChangeListener extends Serializable {
         /**
          * called to notify about configuration has been changed.
          */
-        void configurationChanged();
+        void configurationHasChanged();
     }
 }

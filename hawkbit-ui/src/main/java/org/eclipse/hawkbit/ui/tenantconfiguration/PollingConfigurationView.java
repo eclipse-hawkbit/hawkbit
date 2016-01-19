@@ -24,7 +24,7 @@ import com.vaadin.ui.VerticalLayout;
 @SpringComponent
 @ViewScope
 public class PollingConfigurationView extends BaseConfigurationView
-        implements ConfigurationGroup, ConfigurationElement.ConfigurationGroupChangeListener {
+        implements ConfigurationGroup, ConfigurationItem.ConfigurationItemChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -97,6 +97,7 @@ public class PollingConfigurationView extends BaseConfigurationView
             tenantPollingOverdueTime = fieldPollingOverdueTime.getValue();
             pollConfigurationHelper.setTenantOverduePollTimeIntervall(fieldPollingOverdueTime.getValue());
         }
+
     }
 
     @Override
@@ -111,7 +112,7 @@ public class PollingConfigurationView extends BaseConfigurationView
     }
 
     @Override
-    public void configurationChanged() {
+    public void configurationHasChanged() {
         notifyConfigurationChanged();
     }
 

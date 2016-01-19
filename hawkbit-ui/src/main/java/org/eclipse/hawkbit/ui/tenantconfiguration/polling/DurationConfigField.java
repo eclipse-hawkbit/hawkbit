@@ -8,7 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationElement;
+import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,11 @@ import com.vaadin.ui.Label;
 @SpringComponent
 @ViewScope
 @Scope("prototype")
-public class DurationConfigField extends GridLayout implements ValueChangeListener, ConfigurationElement {
+public class DurationConfigField extends GridLayout implements ValueChangeListener, ConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
-    private final List<ConfigurationGroupChangeListener> configurationChangeListeners = new ArrayList<>();
+    private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
     private CheckBox checkBox;
     private DurationField durationField;
@@ -171,11 +171,11 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
     }
 
     private void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationChanged());
+        configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
     }
 
     @Override
-    public void addChangeListener(final ConfigurationGroupChangeListener listener) {
+    public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);
     }
 }

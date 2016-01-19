@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
-import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationElement.ConfigurationGroupChangeListener;
+import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -45,7 +45,7 @@ import com.vaadin.ui.VerticalLayout;
 @SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = HawkbitUI.class)
 @ViewScope
 public class TenantConfigurationDashboardView extends CustomComponent
-        implements View, ConfigurationGroupChangeListener {
+        implements View, ConfigurationItemChangeListener {
 
     public static final String VIEW_NAME = "spSystemConfig";
     private static final long serialVersionUID = 1L;
@@ -168,7 +168,7 @@ public class TenantConfigurationDashboardView extends CustomComponent
      * ConfigurationGroupChangeListener #configurationChanged()
      */
     @Override
-    public void configurationChanged() {
+    public void configurationHasChanged() {
         saveConfigurationBtn.setEnabled(true);
         undoConfigurationBtn.setEnabled(true);
     }

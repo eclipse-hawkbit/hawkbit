@@ -15,14 +15,14 @@ public abstract class BaseConfigurationView extends CustomComponent implements C
 
     private static final long serialVersionUID = 1L;
 
-    private final List<ConfigurationGroupChangeListener> configurationChangeListeners = new ArrayList<>();
+    private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
     protected void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationChanged());
+        configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
     }
 
     @Override
-    public void addChangeListener(final ConfigurationGroupChangeListener listener) {
+    public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);
     }
 

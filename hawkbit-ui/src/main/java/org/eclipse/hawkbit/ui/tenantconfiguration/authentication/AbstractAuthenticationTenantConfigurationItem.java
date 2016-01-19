@@ -25,7 +25,8 @@ import com.vaadin.ui.VerticalLayout;
  *
  *
  */
-abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout implements TenantConfigurationItem {
+abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout
+        implements AuthenticationConfigurationItem {
 
     /**
     *
@@ -35,7 +36,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
     private final TenantConfigurationKey configurationKey;
     private final transient SystemManagement systemManagement;
 
-    private final List<TenantConfigurationChangeListener> configurationChangeListeners = new ArrayList<>();
+    private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
     /**
      * @param configurationKey
@@ -65,7 +66,8 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      */
     @Override
     public boolean isConfigEnabled() {
-        return systemManagement.getConfigurationValue(configurationKey, Boolean.class);
+        boolean b = systemManagement.getConfigurationValue(configurationKey, Boolean.class);
+        return b;
     }
 
     /**
@@ -95,7 +97,12 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      * TenantConfigurationChangeListener)
      */
     @Override
-    public void addConfigurationChangeListener(final TenantConfigurationChangeListener listener) {
+    public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);
+    }
+
+    @Override
+    public boolean isUserInputValid() {
+        return true;
     }
 }

@@ -15,7 +15,7 @@ import com.vaadin.ui.Component;
  *
  *
  */
-public interface ConfigurationGroup extends Component, ConfigurationElement {
+public interface ConfigurationGroup extends Component, ConfigurationItem {
 
     /**
      * called to store any configuration changes.
