@@ -20,6 +20,25 @@ The simulator has user authentication enabled by default. Default credentials:
 This can be configured/disabled by spring boot properties
 
 ## Usage
+
+### Graphical User Interface
+The device simulator comes with a graphical user interface which makes it very easy to generate dummy devices handled by the device simulator.
+The status and the update progress of the simulated device are shown in the UI.
+The UI can be accessed via the URL:
+```
+http://localhost:8083
+```
+
+`Basic Authentication Credentials are admin / admin`
+
+ ![](src/main/images/generateScreenshot.png)
+ 
+ ![](src/main/images/updateProcessScreenshot.png)
+ 
+ ![](src/main/images/updateResultOverviewScreenshot.png)
+
+
+### REST API
 The device simulator exposes an REST-API which can be used to trigger device creation.
 
 Optional parameters:

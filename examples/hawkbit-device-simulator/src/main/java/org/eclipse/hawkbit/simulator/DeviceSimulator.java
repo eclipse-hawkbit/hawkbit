@@ -8,8 +8,15 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import java.util.concurrent.Executors;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
+import com.vaadin.spring.annotation.EnableVaadin;
 
 /**
  * The main-method to start the Spring-Boot application.
@@ -18,10 +25,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
+@EnableVaadin
 public class DeviceSimulator {
 
-    private DeviceSimulator() {
+    public DeviceSimulator() {
         // utility class
+    }
+
+    /**
+     * @return an asynchronous event bus to publish and retrieve events.
+     */
+    @Bean
+    public EventBus eventBus() {
+        return new AsyncEventBus(Executors.newFixedThreadPool(4));
     }
 
     /**
