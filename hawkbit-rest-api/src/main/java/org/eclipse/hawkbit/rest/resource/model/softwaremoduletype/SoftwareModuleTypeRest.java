@@ -9,15 +9,11 @@
 package org.eclipse.hawkbit.rest.resource.model.softwaremoduletype;
 
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A json annotated rest model for SoftwareModuleType to RESTful API
@@ -29,18 +25,14 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Software Module")
 public class SoftwareModuleTypeRest extends NamedEntityRest {
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID, required = true)
     @JsonProperty(value = "id", required = true)
     private Long moduleId;
 
-    @ApiModelProperty(value = ApiModelProperties.SM_TYPE_KEY)
     @JsonProperty
     private String key;
 
-    @ApiModelProperty(value = ApiModelProperties.SM_MAX_ASSIGNMENTS)
     @JsonProperty
     private int maxAssignments;
 

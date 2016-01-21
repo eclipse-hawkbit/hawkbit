@@ -11,34 +11,23 @@ package org.eclipse.hawkbit.controller.model;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactHash;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Download information for all artifacts related to a specific {@link Chunk}.
  *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.ARTIFACTS)
 public class Artifact extends ResourceSupport {
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_PROVIDED_FILENAME, required = true)
     @NotNull
     @JsonProperty
     private String filename;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_HASHES)
     @JsonProperty
     private ArtifactHash hashes;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_SIZE)
     @JsonProperty
     private Long size;
 

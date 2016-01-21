@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,9 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A json annotated rest model for DistributionSet to RESTful API
@@ -34,30 +30,23 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Distribution set")
 public class DistributionSetRest extends NamedEntityRest {
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID)
     @JsonProperty(value = "id", required = true)
     private Long dsId;
 
-    @ApiModelProperty(value = ApiModelProperties.VERSION)
     @JsonProperty
     private String version;
 
-    @ApiModelProperty(value = ApiModelProperties.DS_MODULES)
     @JsonProperty
-    private List<SoftwareModuleRest> modules = new ArrayList<SoftwareModuleRest>();
+    private List<SoftwareModuleRest> modules = new ArrayList<>();
 
-    @ApiModelProperty(value = ApiModelProperties.DS_REQUIRED_STEP)
     @JsonProperty
     private boolean requiredMigrationStep;
 
-    @ApiModelProperty(value = ApiModelProperties.DS_TYPE)
     @JsonProperty
     private String type;
 
-    @ApiModelProperty(value = ApiModelProperties.DS_COMPLETE)
     @JsonProperty
     private Boolean complete;
 

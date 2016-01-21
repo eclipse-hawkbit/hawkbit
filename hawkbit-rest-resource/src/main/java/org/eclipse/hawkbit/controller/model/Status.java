@@ -12,35 +12,22 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Details status information concerning the action processing.
  *
- *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.TARGET_STATUS)
 public class Status {
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_EXEC_STATUS, required = true)
     @NotNull
     private final ExecutionStatus execution;
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_RESULT_VALUE, required = true)
     @NotNull
     private final Result result;
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_RESULT_DETAILS)
     private final List<String> details;
 
     /**
@@ -78,12 +65,7 @@ public class Status {
      * The element status contains information about the execution of the
      * operation.
      *
-     *
-     *
-     *
-     *
      */
-    @ApiModel(ApiModelProperties.TARGET_EXEC_STATUS)
     public enum ExecutionStatus {
         /**
          * Execution of the action has finished.
@@ -132,7 +114,7 @@ public class Status {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

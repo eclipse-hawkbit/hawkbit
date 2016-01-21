@@ -8,8 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -24,11 +28,13 @@ import javax.persistence.UniqueConstraint;
  *
  */
 @Entity
-@Table(name = "sp_distributionset_tag", indexes = {
-        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_ds_tag") )
+@Table(name = "sp_distributionset_tag", indexes = { @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
+        "name", "tenant" }, name = "uk_ds_tag"))
 public class DistributionSetTag extends Tag {
     private static final long serialVersionUID = 1L;
+
+    @ManyToMany(mappedBy = "tags", targetEntity = DistributionSet.class, fetch = FetchType.LAZY)
+    private List<DistributionSet> assignedToDistributionSet;
 
     /**
      * Public constructor.
@@ -56,6 +62,10 @@ public class DistributionSetTag extends Tag {
 
     DistributionSetTag() {
         super();
+    }
+
+    public List<DistributionSet> getAssignedToDistributionSet() {
+        return assignedToDistributionSet;
     }
 
     /*

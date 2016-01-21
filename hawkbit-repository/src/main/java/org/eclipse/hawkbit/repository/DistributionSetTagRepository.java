@@ -13,6 +13,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface DistributionSetTagRepository extends BaseEntityRepository<DistributionSetTag, Long> {
+public interface DistributionSetTagRepository extends BaseEntityRepository<DistributionSetTag, Long>,
+        JpaSpecificationExecutor<DistributionSetTag> {
     /**
      * deletes the {@link DistributionSet} with the given name.
      * 
@@ -51,4 +53,7 @@ public interface DistributionSetTagRepository extends BaseEntityRepository<Distr
      */
     @Override
     List<DistributionSetTag> findAll();
+
+    @Override
+    <S extends DistributionSetTag> List<S> save(Iterable<S> entities);
 }

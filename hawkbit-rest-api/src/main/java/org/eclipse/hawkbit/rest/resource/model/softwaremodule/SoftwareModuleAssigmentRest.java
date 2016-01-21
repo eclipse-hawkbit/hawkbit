@@ -12,8 +12,6 @@ import org.eclipse.hawkbit.rest.resource.model.IdRest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.swagger.annotations.ApiModel;
-
 /**
  * Request Body of SoftwareModule for assignment operations (ID only).
  *
@@ -22,7 +20,6 @@ import io.swagger.annotations.ApiModel;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Software Module ID")
 public class SoftwareModuleAssigmentRest extends IdRest {
 
 }

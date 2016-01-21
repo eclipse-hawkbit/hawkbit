@@ -98,7 +98,7 @@ public class DosFilter extends OncePerRequestFilter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.springframework.web.filter.OncePerRequestFilter#doFilterInternal(
      * javax.servlet.http. HttpServletRequest,
@@ -108,7 +108,7 @@ public class DosFilter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain filterChain) throws ServletException, IOException {
 
-        boolean processChain = true;
+        boolean processChain;
 
         final String ip = IpUtil.getClientIpFromRequest(request, forwardHeader).getHost();
         if (checkIpFails(ip)) {
@@ -147,11 +147,11 @@ public class DosFilter extends OncePerRequestFilter {
         return true;
     }
 
-    private boolean checkIpFails(final String ip) {
+    private static boolean checkIpFails(final String ip) {
         return ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip);
     }
 
-    private boolean handleMissingIpAddress(final HttpServletResponse response) {
+    private static boolean handleMissingIpAddress(final HttpServletResponse response) {
         boolean processChain;
         LOG.error("Failed to get peer IP adress");
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

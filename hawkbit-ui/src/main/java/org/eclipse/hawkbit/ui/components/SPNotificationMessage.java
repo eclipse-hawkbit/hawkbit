@@ -45,11 +45,13 @@ public class SPNotificationMessage extends Notification {
      *            message description
      * @param autoClose
      *            flag to indicate enable close option
+     * @param page
+     *            current {@link Page}
      */
     public void showNotification(final String styleName, final String caption, final String description,
-            final Boolean autoClose) {
+            final Boolean autoClose, final Page page) {
         decorate(styleName, caption, description, autoClose);
-        this.show(Page.getCurrent());
+        this.show(page);
     }
 
     /**

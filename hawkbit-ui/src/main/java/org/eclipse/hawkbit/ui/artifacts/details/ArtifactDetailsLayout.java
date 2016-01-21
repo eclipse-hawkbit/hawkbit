@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -96,6 +97,9 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     @Autowired
     private ArtifactUploadState artifactUploadState;
 
+    @Autowired
+    private transient UINotification uINotification;
+
     private Label titleOfArtifactDetails;
 
     private SPUIButton maxMinButton;
@@ -121,8 +125,10 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         ui = UI.getCurrent();
         if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
             final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-            populateArtifactDetails(selectedSoftwareModule.getId(), HawkbitCommonUtil
-                    .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion()));
+            populateArtifactDetails(
+                    selectedSoftwareModule.getId(),
+                    HawkbitCommonUtil.getFormattedNameVersion(selectedSoftwareModule.getName(),
+                            selectedSoftwareModule.getVersion()));
         }
         if (isMaximized()) {
             maximizedArtifactDetailsView();
@@ -258,10 +264,10 @@ public class ArtifactDetailsLayout extends VerticalLayout {
             public Button generateCell(final Table source, final Object itemId, final Object columnId) {
                 final String fileName = (String) table.getContainerDataSource().getItem(itemId)
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
-                final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + SPUIComponetIdProvider.UPLOAD_FILE_DELETE_ICON, "",
-                        SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "redicon", true,
-                        FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
+                final Button deleteIcon = SPUIComponentProvider.getButton(fileName + "-"
+                        + SPUIComponetIdProvider.UPLOAD_FILE_DELETE_ICON, "", SPUILabelDefinitions.DISCARD,
+                        ValoTheme.BUTTON_TINY + " " + "redicon", true, FontAwesome.TRASH_O,
+                        SPUIButtonStyleSmallNoBorder.class);
                 deleteIcon.setData(itemId);
                 deleteIcon.addClickListener(event -> confirmAndDeleteArtifact((Long) itemId, fileName));
                 return deleteIcon;
@@ -273,17 +279,22 @@ public class ArtifactDetailsLayout extends VerticalLayout {
 
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.delete.artifact.confirmbox"),
                 i18n.get("message.delete.artifact", new Object[] { fileName }), i18n.get("button.ok"),
-                i18n.get("button.cancel"), ok -> {
+                i18n.get("button.cancel"),
+                ok -> {
                     if (ok) {
-
                         final ArtifactManagement artifactManagement = SpringContextHelper
                                 .getBean(ArtifactManagement.class);
                         artifactManagement.deleteLocalArtifact(id);
-
-                        populateArtifactDetails(artifactUploadState.getSelectedBaseSwModuleId().get(),
-                                HawkbitCommonUtil.getFormattedNameVersion(
-                                        artifactUploadState.getSelectedBaseSoftwareModule().get().getName(),
-                                        artifactUploadState.getSelectedBaseSoftwareModule().get().getVersion()));
+                        uINotification.displaySuccess(i18n.get("message.artifact.deleted", fileName));
+                        if (artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
+                            populateArtifactDetails(
+                                    artifactUploadState.getSelectedBaseSwModuleId().get(),
+                                    HawkbitCommonUtil.getFormattedNameVersion(artifactUploadState
+                                            .getSelectedBaseSoftwareModule().get().getName(), artifactUploadState
+                                            .getSelectedBaseSoftwareModule().get().getVersion()));
+                        } else {
+                            populateArtifactDetails(null, null);
+                        }
                     }
                 });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
@@ -458,8 +469,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE) {
             ui.access(() -> {
                 if (softwareModuleEvent.getSoftwareModule() != null) {
-                    populateArtifactDetails(softwareModuleEvent.getSoftwareModule().getId(),
-                            HawkbitCommonUtil.getFormattedNameVersion(softwareModuleEvent.getSoftwareModule().getName(),
+                    populateArtifactDetails(softwareModuleEvent.getSoftwareModule().getId(), HawkbitCommonUtil
+                            .getFormattedNameVersion(softwareModuleEvent.getSoftwareModule().getName(),
                                     softwareModuleEvent.getSoftwareModule().getVersion()));
                 } else {
                     populateArtifactDetails(null, null);
@@ -469,8 +480,8 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.ARTIFACTS_CHANGED) {
             ui.access(() -> {
                 if (softwareModuleEvent.getSoftwareModule() != null) {
-                    populateArtifactDetails(softwareModuleEvent.getSoftwareModule().getId(),
-                            HawkbitCommonUtil.getFormattedNameVersion(softwareModuleEvent.getSoftwareModule().getName(),
+                    populateArtifactDetails(softwareModuleEvent.getSoftwareModule().getId(), HawkbitCommonUtil
+                            .getFormattedNameVersion(softwareModuleEvent.getSoftwareModule().getName(),
                                     softwareModuleEvent.getSoftwareModule().getVersion()));
                 } else {
                     populateArtifactDetails(null, null);

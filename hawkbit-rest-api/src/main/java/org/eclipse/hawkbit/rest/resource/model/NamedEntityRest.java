@@ -8,26 +8,17 @@
  */
 package org.eclipse.hawkbit.rest.resource.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A json annotated rest model for NamedEntity to RESTful API representation.
  *
- *
- *
- *
  */
 public abstract class NamedEntityRest extends BaseEntityRest {
 
-    @ApiModelProperty(value = ApiModelProperties.NAME, required = true)
     @JsonProperty(required = true)
     private String name;
 
-    @ApiModelProperty(value = ApiModelProperties.DESCRPTION)
     @JsonProperty
     private String description;
 

@@ -25,11 +25,11 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
+
+import com.google.common.collect.Lists;
 
 /**
  * Test class for {@link TagManagement}.
@@ -90,34 +90,32 @@ public class TagManagementTest extends AbstractIntegrationTest {
         DistributionSetFilterBuilder distributionSetFilterBuilder;
 
         // search for not deleted
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagA.getName()));
-        assertEquals(
-                dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
-                        + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setTagNames(
+                Lists.newArrayList(tagA.getName()));
+        assertEquals(dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
+                + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagB.getName()));
-        assertEquals(
-                dsBs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
-                        + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setTagNames(
+                Lists.newArrayList(tagB.getName()));
+        assertEquals(dsBs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
+                + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagC.getName()));
-        assertEquals(
-                dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
-                        + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setTagNames(
+                Lists.newArrayList(tagC.getName()));
+        assertEquals(dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
+                + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
-                .setTagNames(Lists.newArrayList(tagX.getName()));
-        assertEquals(0, distributionSetManagement
-                .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getTotalElements());
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setTagNames(
+                Lists.newArrayList(tagX.getName()));
+        assertEquals(0,
+                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                        .getTotalElements());
 
         assertEquals(5, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
@@ -129,24 +127,23 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.deleteDistributionSetTag(tagB.getName());
         assertEquals(2, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setTagNames(Lists.newArrayList(tagA.getName()));
-        assertEquals(
-                dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
-                        + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setTagNames(
+                Lists.newArrayList(tagA.getName()));
+        assertEquals(dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
+                + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
                         .getTotalElements());
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setTagNames(Lists.newArrayList(tagB.getName()));
-        assertEquals(0, distributionSetManagement
-                .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getTotalElements());
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setTagNames(
+                Lists.newArrayList(tagB.getName()));
+        assertEquals(0,
+                distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
+                        .getTotalElements());
 
-        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setTagNames(Lists.newArrayList(tagC.getName()));
-        assertEquals(
-                dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
-                        + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
+        distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setTagNames(
+                Lists.newArrayList(tagC.getName()));
+        assertEquals(dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
+                + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
                         .getTotalElements());
     }
@@ -209,8 +206,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
-                    .doesNotContain(toDelete);
+            assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags()).doesNotContain(
+                    toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).isNull();
         assertThat(tagManagement.findAllTargetTags()).hasSize(19);
@@ -281,8 +278,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
         final DistributionSetTag toDelete = tags.iterator().next();
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
-            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
-                    .contains(toDelete);
+            assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags()).contains(
+                    toDelete);
         }
 
         // delete
@@ -290,7 +287,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         // check
         assertThat(distributionSetTagRepository.findOne(toDelete.getId())).isNull();
-        assertThat(tagManagement.findDistributionSetTagsAll()).hasSize(19);
+        assertThat(tagManagement.findAllDistributionSetTags()).hasSize(19);
         for (final DistributionSet set : distributionSetRepository.findAll()) {
             assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
                     .doesNotContain(toDelete);
@@ -329,13 +326,13 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.updateDistributionSetTag(savedAssigned);
 
         // check data
-        assertThat(tagManagement.findDistributionSetTagsAll()).hasSize(tags.size());
+        assertThat(tagManagement.findAllDistributionSetTags()).hasSize(tags.size());
         assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).isEqualTo("test123");
     }
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#findDistributionSetTagsAll()}
+     * {@link org.eclipse.hawkbit.repository.TagManagement#findAllDistributionSetTags()}
      * .
      */
     @Test
@@ -345,7 +342,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
         // test
-        assertThat(tagManagement.findDistributionSetTagsAll()).hasSize(tags.size());
+        assertThat(tagManagement.findAllDistributionSetTags()).hasSize(tags.size());
         assertThat(distributionSetTagRepository.findAll()).hasSize(20);
     }
 
@@ -362,11 +359,11 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         final List<DistributionSet> sets = TestDataUtil.generateDistributionSets(20, softwareManagement,
                 distributionSetManagement);
-        final Iterable<DistributionSetTag> tags = tagManagement
-                .createDistributionSetTags(TestDataUtil.generateDistributionSetTags(20));
+        final Iterable<DistributionSetTag> tags = tagManagement.createDistributionSetTags(TestDataUtil
+                .generateDistributionSetTags(20));
 
         tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(sets, tag));
 
-        return tagManagement.findDistributionSetTagsAll();
+        return tagManagement.findAllDistributionSetTags();
     }
 }

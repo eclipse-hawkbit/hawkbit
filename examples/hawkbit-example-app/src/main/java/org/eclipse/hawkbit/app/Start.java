@@ -10,25 +10,27 @@ package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
+import org.eclipse.hawkbit.controller.EnableDirectDeviceApi;
+import org.eclipse.hawkbit.rest.resource.EnableRestResources;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 /**
- * A {@link SpringBootApplication} annoated class with a main method to start.
- * The minimal configuration for the standalone hawkBit server.
- * 
- *
+ * A {@link SpringBootApplication} annotated class with a main method to start.
+ * The minimal configuration for the stand alone hawkBit server.
  *
  */
 @SpringBootApplication
 @Import({ RepositoryApplicationConfiguration.class })
 @EnableHawkbitManagedSecurityConfiguration
+@EnableRestResources
+@EnableDirectDeviceApi
 public class Start {
 
     /**
      * Main method to start the spring-boot application.
-     * 
+     *
      * @param args
      *            the VM arguments.
      */

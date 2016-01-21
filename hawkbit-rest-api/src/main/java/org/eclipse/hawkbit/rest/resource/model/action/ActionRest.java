@@ -9,15 +9,11 @@
 package org.eclipse.hawkbit.rest.resource.model.action;
 
 import org.eclipse.hawkbit.rest.resource.model.BaseEntityRest;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A json annotated rest model for Action to RESTful API representation.
@@ -28,7 +24,6 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("SP Action")
 public class ActionRest extends BaseEntityRest {
 
     /**
@@ -45,16 +40,12 @@ public class ActionRest extends BaseEntityRest {
 
     public static final String ACTION_PENDING = "pending";
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID)
     @JsonProperty("id")
     private Long actionId;
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_TYPE, allowableValues = ACTION_UPDATE + "," + ACTION_CANCEL)
     @JsonProperty
     private String type;
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_EXECUTION_STATUS, allowableValues = ACTION_FINISHED + ","
-            + ACTION_PENDING)
     @JsonProperty
     private String status;
 

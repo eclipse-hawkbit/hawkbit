@@ -44,22 +44,10 @@
 
 
    <scm>
-      <connection>scm:git:https://github.com/bsinno/hawkbit-update-server.git</connection>
-      <developerConnection>scm:git:https://github.com/bsinno/hawkbit-update-server.git</developerConnection>
-      <url>https://github.com/bsinno/hawkbit-update-server.git</url>
+      <connection>scm:git:https://github.com/eclipse/hawkbit.git</connection>
+      <developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</developerConnection>
+      <url>https://github.com/eclipse/hawkbit.git</url>
    </scm>
-
-   <distributionManagement>
-      <snapshotRepository>
-         <id>sp-snapshots</id>
-         <uniqueVersion>false</uniqueVersion>
-         <url>https://repo.bosch-si.com/content/repositories/sp-snapshots</url>
-      </snapshotRepository>
-      <repository>
-         <id>sp-releases</id>
-         <url>https://repo.bosch-si.com/content/repositories/sp-releases</url>
-      </repository>
-   </distributionManagement>
 
    <repositories>
       <repository>
@@ -128,6 +116,7 @@
       <!-- Tells Sonar where the Jacoco coverage result file is located for
          Integration Tests -->
       <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
+      <guava.version>19.0</guava.version>
    </properties>
 
 
@@ -354,10 +343,9 @@
             <artifactId>vaadin-push</artifactId>
             <version>${vaadin.version}</version>
          </dependency>
-         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory).
-            For widgetset compilation, vaadin-client-compiler is automatically added
-            on the compilation classpath by vaadin-maven-plugin so normally there is
-            no need for an explicit dependency. -->
+         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory). For widgetset compilation,
+            vaadin-client-compiler is automatically added on the compilation classpath by vaadin-maven-plugin so normally there is no
+            need for an explicit dependency. -->
          <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-client-compiler</artifactId>
@@ -414,17 +402,6 @@
             <groupId>net._01001111</groupId>
             <artifactId>jlorem</artifactId>
             <version>1.1</version>
-         </dependency>
-         <!-- Swagger for generating REST APIs -->
-         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.0.3</version>
-         </dependency>
-         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.0</version>
          </dependency>
          <!-- Spring -->
          <dependency>
@@ -506,8 +483,7 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Override of classmate version, that is a hibernate validator
-            dependency. allow PB of CQ -->
+         <!-- Override of classmate version, that is a hibernate validator dependency. allow PB of CQ -->
          <dependency>
             <groupId>com.fasterxml</groupId>
             <artifactId>classmate</artifactId>
@@ -618,6 +594,11 @@
             <artifactId>mariadb-java-client</artifactId>
             <version>1.2.3</version>
             <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
          </dependency>
       </dependencies>
    </dependencyManagement>

@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.rest.resource.model.softwaremodule;
 
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,19 +16,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * A json annotated rest model for SoftwareModule to RESTful API representation.
- * 
- *
- *
  *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Software Module")
 public class SoftwareModuleRest extends NamedEntityRest {
     /**
      * API definition for {@link SoftwareModule.Type#RUNTIME}.
@@ -44,19 +36,15 @@ public class SoftwareModuleRest extends NamedEntityRest {
      */
     public static final String SM_APPLICATION = "application";
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID, required = true)
     @JsonProperty(value = "id", required = true)
     private Long moduleId;
 
-    @ApiModelProperty(value = ApiModelProperties.VERSION, required = true)
     @JsonProperty(required = true)
     private String version;
 
-    @ApiModelProperty(value = ApiModelProperties.SOFTWARE_MODULE_TYPE, required = true)
     @JsonProperty(required = true)
     private String type;
 
-    @ApiModelProperty(value = ApiModelProperties.VENDOR)
     @JsonProperty
     private String vendor;
 

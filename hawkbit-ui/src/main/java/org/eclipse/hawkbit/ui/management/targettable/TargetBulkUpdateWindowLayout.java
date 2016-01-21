@@ -13,12 +13,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PreDestroy;
+
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
+import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -30,13 +36,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.spring.events.EventBus;
 import org.vaadin.tokenfield.TokenField;
 
 import com.vaadin.data.Container;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
@@ -46,8 +55,6 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Window.CloseEvent;
-import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -58,7 +65,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class TargetBulkUpdateWindowLayout extends CustomComponent implements CloseListener {
+public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private I18N i18n;
@@ -68,6 +75,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
 
     @Autowired
     private transient UINotification uINotification;
+
+    @Autowired
+    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private TargetBulkTokenTags targetBulkTokenTags;
@@ -87,6 +97,10 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
     private ProgressBar progressBar;
     private Label targetsCountLabel;
     private Link linkToSystemConfigHelp;
+    private Window bulkUploadWindow;
+    private Label windowCaption;
+    private Button minimizeButton;
+    private Button closeButton;
 
     /**
      * Initialize the Add Update Window Component for Target.
@@ -94,55 +108,130 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
     public void init() {
         createRequiredComponents();
         buildLayout();
+        setImmediate(true);
         setCompositionRoot(mainLayout);
+        eventBus.subscribe(this);
     }
 
-    /**
-    * 
-    */
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
+    }
+
+    protected void onStartOfUpload() {
+        final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
+        targetBulkUpload.setDsNameAndVersion((DistributionSetIdName) dsNamecomboBox.getValue());
+        targetBulkUpload.setDescription(descTextArea.getValue());
+        targetBulkUpload.setProgressBarCurrentValue(0F);
+        targetBulkUpload.setFailedUploadCount(0L);
+        targetBulkUpload.setSucessfulUploadCount(0L);
+        closeButton.setEnabled(false);
+        minimizeButton.setEnabled(true);
+    }
+
+    protected void setProgressBarValue(final Float value) {
+        progressBar.setValue(value);
+        progressBar.setVisible(true);
+    }
+
     private void createRequiredComponents() {
-
-        final TokenField tokenField = targetBulkTokenTags.getTokenField();
-        tokenVerticalLayout = SPUIComponentProvider.getDetailTabLayout();
-        tokenVerticalLayout.addStyleName("bulk-target-tags-layout");
-        tokenVerticalLayout.addComponent(tokenField);
-        tokenVerticalLayout.setSpacing(false);
-        tokenVerticalLayout.setMargin(false);
-        tokenVerticalLayout.setWidth("185px");
-        tokenVerticalLayout.setHeight("100px");
-        tokenVerticalLayout.setId(SPUIComponetIdProvider.BULK_UPLOAD_TAG);
-
-        final Container container = createContainer();
-        dsNamecomboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
-                i18n.get("bulkupload.ds.name"));
-        dsNamecomboBox.addStyleName(SPUIDefinitions.BULK_UPLOD_DS_COMBO_STYLE);
-        dsNamecomboBox.setImmediate(true);
-        dsNamecomboBox.setFilteringMode(FilteringMode.STARTSWITH);
-        dsNamecomboBox.setPageLength(7);
-        dsNamecomboBox.setContainerDataSource(container);
-        dsNamecomboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        dsNamecomboBox.setId(SPUIComponetIdProvider.BULK_UPLOAD_DS_COMBO);
-
-        descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponetIdProvider.BULK_UPLOAD_DESC);
-        descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
-        progressBar = new ProgressBar(0.5f);
-        progressBar.setWidth(185f, Unit.PIXELS);
-        progressBar.addStyleName("bulk-upload-label");
-
-        targetsCountLabel = new Label();
-        targetsCountLabel.setImmediate(false);
-        targetsCountLabel.addStyleName("bulk-upload-label");
-        targetsCountLabel.setVisible(false);
-        targetsCountLabel.setId(SPUIComponetIdProvider.BULK_UPLOAD_COUNT);
-        bulkUploader = new BulkUploadHandler(this, targetManagement, managementUIState, deploymentManagement,
-                uINotification, i18n);
-        bulkUploader.buildLayout();
-        bulkUploader.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
-
+        tokenVerticalLayout = getTokenFieldLayout();
+        dsNamecomboBox = getDsComboField();
+        descTextArea = getDescriptionTextArea();
+        progressBar = creatreProgressBar();
+        targetsCountLabel = getStatusCountLabel();
+        bulkUploader = getBulkUploadHandler();
         linkToSystemConfigHelp = DocumentationPageLink.DEPLOYMENT_VIEW.getLink();
+        windowCaption = new Label(i18n.get("caption.bulk.upload.targets"));
+        minimizeButton = getMinimizeButton();
+        closeButton = getCloseButton();
+    }
 
+    private ProgressBar creatreProgressBar() {
+        final ProgressBar progressBarIndicator = new ProgressBar(0F);
+        progressBarIndicator.addStyleName("bulk-upload-label");
+        progressBarIndicator.setSizeFull();
+        return progressBarIndicator;
+    }
+
+    private Button getCloseButton() {
+        final Button closeBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
+                "", "", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        closeBtn.addClickListener(event -> closePopup());
+        return closeBtn;
+    }
+
+    private Button getMinimizeButton() {
+        final Button minimizeBtn = SPUIComponentProvider.getButton(
+                SPUIComponetIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
+                SPUIButtonStyleSmallNoBorder.class);
+        minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        minimizeBtn.addClickListener(event -> minimizeWindow());
+        minimizeBtn.setEnabled(false);
+        return minimizeBtn;
+    }
+
+    private BulkUploadHandler getBulkUploadHandler() {
+        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(this, targetManagement, managementUIState,
+                deploymentManagement, uINotification, i18n);
+        bulkUploadHandler.buildLayout();
+        bulkUploadHandler.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_BUTTON);
+        return bulkUploadHandler;
+    }
+
+    private Label getStatusCountLabel() {
+        final Label countLabel = new Label();
+        countLabel.setImmediate(true);
+        countLabel.addStyleName("bulk-upload-label");
+        countLabel.setVisible(false);
+        countLabel.setCaptionAsHtml(true);
+        countLabel.setId(SPUIComponetIdProvider.BULK_UPLOAD_COUNT);
+        return countLabel;
+    }
+
+    private TextArea getDescriptionTextArea() {
+        final TextArea description = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY,
+                false, null, i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        description.setId(SPUIComponetIdProvider.BULK_UPLOAD_DESC);
+        description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
+        description.setWidth("100%");
+        return description;
+    }
+
+    private ComboBox getDsComboField() {
+        final Container container = createContainer();
+        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
+                i18n.get("bulkupload.ds.name"));
+        dsComboBox.setSizeUndefined();
+        dsComboBox.addStyleName(SPUIDefinitions.BULK_UPLOD_DS_COMBO_STYLE);
+        dsComboBox.setImmediate(true);
+        dsComboBox.setFilteringMode(FilteringMode.STARTSWITH);
+        dsComboBox.setPageLength(7);
+        dsComboBox.setContainerDataSource(container);
+        dsComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME_VERSION);
+        dsComboBox.setId(SPUIComponetIdProvider.BULK_UPLOAD_DS_COMBO);
+        dsComboBox.setWidth("100%");
+        return dsComboBox;
+    }
+
+    private VerticalLayout getTokenFieldLayout() {
+        final TokenField tokenField = targetBulkTokenTags.getTokenField();
+        final VerticalLayout tokenLayout = SPUIComponentProvider.getDetailTabLayout();
+        tokenLayout.addStyleName("bulk-target-tags-layout");
+        tokenLayout.addComponent(tokenField);
+        tokenLayout.setSpacing(false);
+        tokenLayout.setMargin(false);
+        tokenLayout.setSizeFull();
+        tokenLayout.setHeight("100px");
+        tokenLayout.setId(SPUIComponetIdProvider.BULK_UPLOAD_TAG);
+        return tokenLayout;
+    }
+
+    private void closePopup() {
+        clearPreviousSessionData();
+        bulkUploadWindow.close();
+        eventBus.publish(this, BulkUploadPopupEvent.CLOSED);
     }
 
     /**
@@ -165,7 +254,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
         final LazyQueryContainer distributionContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                Integer.MAX_VALUE, SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
+                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
+
         return distributionContainer;
 
     }
@@ -174,14 +264,22 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
         mainLayout = new VerticalLayout();
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.setSizeUndefined();
+        mainLayout.setWidth("200px");
+
+        final HorizontalLayout captionLayout = new HorizontalLayout();
+        captionLayout.setSizeFull();
+        captionLayout.addComponents(windowCaption, minimizeButton, closeButton);
+        captionLayout.setExpandRatio(windowCaption, 1.0F);
+        captionLayout.addStyleName("v-window-header");
+
         final HorizontalLayout uploaderLayout = new HorizontalLayout();
         uploaderLayout.addComponent(bulkUploader);
         uploaderLayout.addComponent(linkToSystemConfigHelp);
         uploaderLayout.setComponentAlignment(linkToSystemConfigHelp, Alignment.BOTTOM_RIGHT);
         uploaderLayout.setExpandRatio(bulkUploader, 1.0F);
         uploaderLayout.setSizeFull();
-        mainLayout.addComponents(dsNamecomboBox, descTextArea, tokenVerticalLayout, descTextArea, progressBar,
-                targetsCountLabel, uploaderLayout);
+        mainLayout.addComponents(captionLayout, dsNamecomboBox, descTextArea, tokenVerticalLayout, descTextArea,
+                progressBar, targetsCountLabel, uploaderLayout);
     }
 
     /**
@@ -195,30 +293,85 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
         progressBar.setValue(0f);
         progressBar.setVisible(false);
         targetsCountLabel.setVisible(false);
+    }
 
+    private void clearPreviousSessionData() {
+        final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
+        targetBulkUpload.setDescription(null);
+        targetBulkUpload.setDsNameAndVersion(null);
+        targetBulkUpload.setFailedUploadCount(0L);
+        targetBulkUpload.setSucessfulUploadCount(0L);
+        targetBulkUpload.getAssignedTagNames().clear();
+        targetBulkUpload.getTargetsCreated().clear();
+    }
+
+    /**
+     * Restore the target bulk upload layout field values.
+     */
+    public void restoreComponentsValue() {
+        targetBulkTokenTags.populateContainer();
+        final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
+        progressBar.setValue(targetBulkUpload.getProgressBarCurrentValue());
+        dsNamecomboBox.setValue(targetBulkUpload.getDsNameAndVersion());
+        descTextArea.setValue(targetBulkUpload.getDescription());
+        targetBulkTokenTags.addAlreadySelectedTags();
+        if (targetBulkUpload.getSucessfulUploadCount() > 0 || targetBulkUpload.getFailedUploadCount() > 0) {
+            targetsCountLabel.setVisible(true);
+            targetsCountLabel.setCaption(getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
+                    targetBulkUpload.getFailedUploadCount()));
+        }
+        if (targetBulkUpload.getProgressBarCurrentValue() < 1) {
+            bulkUploader.getUpload().setEnabled(false);
+        }
+    }
+
+    /**
+     * Actions once bulk upload is completed.
+     */
+    public void onUploadCompletion() {
+        final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
+
+        final String targetCountLabel = getFormattedCountLabelValue(targetBulkUpload.getSucessfulUploadCount(),
+                targetBulkUpload.getFailedUploadCount());
+        getTargetsCountLabel().setVisible(true);
+        getTargetsCountLabel().setCaption(targetCountLabel);
+
+        getBulkUploader().getUpload().setEnabled(true);
+
+        closeButton.setEnabled(true);
+        minimizeButton.setEnabled(false);
+    }
+
+    private static String getFormattedCountLabelValue(final long succussfulUploadCount, final long failedUploadCount) {
+        return new StringBuilder().append("Successful :").append(succussfulUploadCount)
+                .append("<font color=RED> Failed :").append(failedUploadCount).append("</font>").toString();
     }
 
     /**
      * @return
      */
     public Window getWindow() {
-        final Window bulkUploadWindow = SPUIComponentProvider.getWindow(i18n.get("caption.bulk.upload.targets"), null,
-                SPUIDefinitions.BULK_UPLOAD_WINDOW);
+        managementUIState.setBulkUploadWindowMinimised(false);
+        bulkUploadWindow = SPUIComponentProvider.getWindow("", null, SPUIDefinitions.CREATE_UPDATE_WINDOW);
+        bulkUploadWindow.addStyleName("bulk-upload-window");
+        bulkUploadWindow.setImmediate(true);
         bulkUploadWindow.setContent(this);
-        bulkUploadWindow.addCloseListener(this);
+        if (isNoBulkUploadInProgress()) {
+            bulkUploader.getUpload().setEnabled(true);
+        }
         return bulkUploadWindow;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.Window.CloseListener#windowClose(com.vaadin.ui.Window.
-     * CloseEvent)
-     */
-    @Override
-    public void windowClose(final CloseEvent e) {
-        e.getWindow().close();
+    private boolean isNoBulkUploadInProgress() {
+        final float progressBarCurrentValue = managementUIState.getTargetTableFilters().getBulkUpload()
+                .getProgressBarCurrentValue();
+        return Math.abs(progressBarCurrentValue - 0) < 0.00001 || Math.abs(progressBarCurrentValue - 1) < 0.00001;
+    }
 
+    private void minimizeWindow() {
+        bulkUploadWindow.close();
+        managementUIState.setBulkUploadWindowMinimised(true);
+        eventBus.publish(this, BulkUploadPopupEvent.MINIMIZED);
     }
 
     /**
@@ -254,6 +407,20 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent implements Clo
      */
     public Label getTargetsCountLabel() {
         return targetsCountLabel;
+    }
+
+    /**
+     * @return the eventBus
+     */
+    public EventBus.SessionEventBus getEventBus() {
+        return eventBus;
+    }
+
+    /**
+     * @return the bulkUploader
+     */
+    public BulkUploadHandler getBulkUploader() {
+        return bulkUploader;
     }
 
 }

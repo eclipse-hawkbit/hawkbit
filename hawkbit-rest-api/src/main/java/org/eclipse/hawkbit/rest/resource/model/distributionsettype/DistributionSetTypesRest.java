@@ -16,17 +16,11 @@ import java.util.ListIterator;
 
 import org.springframework.hateoas.ResourceSupport;
 
-import io.swagger.annotations.ApiModel;
-
 /**
  * List representation of the {@link DistributionSetTypeRest} because Spring MVC
  * cannot handle plain lists interfaces as request body.
  *
- *
- *
- *
  */
-@ApiModel("DistributionSetType")
 public class DistributionSetTypesRest extends ResourceSupport implements List<DistributionSetTypeRest> {
 
     private final List<DistributionSetTypeRest> delegate = new ArrayList<>();

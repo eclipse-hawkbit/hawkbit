@@ -131,10 +131,22 @@ public class SpReceiverService extends ReceiverService {
                 DownloadAndUpdateRequest.class);
         final Long actionId = downloadAndUpdateRequest.getActionId();
 
+        try {
+            Thread.sleep(1_000);
+        } catch (final InterruptedException e) {
+            LOGGER.error("Sleep interrupted", e);
+        }
+
         spSenderService.sendActionStatusMessage(tenant, ActionStatus.RUNNING,
                 "device Simulator retrieved update request. proceeding with simulation.", actionId);
 
         final SimulatedUpdate update = new SimulatedUpdate(tenant, thingId, actionId);
+
+        try {
+            Thread.sleep(1_000);
+        } catch (final InterruptedException e) {
+            LOGGER.error("Sleep interrupted", e);
+        }
 
         spSenderService.finishUpdateProcess(update, "Simulation complete!");
     }

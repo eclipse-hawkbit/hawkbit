@@ -12,25 +12,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Response Body of Target for assignment operations.
- * 
+ *
  *
  *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Target Assignment Response")
 public class TargetAssignmentResponseBody {
 
-    @ApiModelProperty(value = "The number of targets have been assigned")
     private int assigned;
-    @ApiModelProperty(value = "The number of targets which already have been the assignment")
     private int alreadyAssigned;
-    @ApiModelProperty(value = "The total number of targets")
     private int total;
 
     /**

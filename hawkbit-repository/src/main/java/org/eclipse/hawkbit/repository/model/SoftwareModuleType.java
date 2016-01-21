@@ -138,4 +138,9 @@ public class SoftwareModuleType extends NamedEntity {
         this.colour = colour;
     }
 
+    @Override
+    public String toString() {
+        return "SoftwareModuleType [key=" + key + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+    }
+
 }

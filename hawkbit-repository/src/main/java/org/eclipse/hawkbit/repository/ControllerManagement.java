@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -135,8 +134,8 @@ public class ControllerManagement implements EnvironmentAware {
         final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(targetId, module);
 
         if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
-            throw new EntityNotFoundException("No assigment found for module " + module.getId() + " to target "
-                    + targetId);
+            throw new EntityNotFoundException(
+                    "No assigment found for module " + module.getId() + " to target " + targetId);
         }
 
         return action.get(0);
@@ -270,22 +269,20 @@ public class ControllerManagement implements EnvironmentAware {
     }
 
     /**
-     * Reports an {@link ActionStatus} for a {@link CancelAction}.
-     *
-     * @param actionStatusMessages
+     * Adds an {@link ActionStatus} for a {@link UpdateAction} and cancels the
+     * {@link UpdateAction} if necessary.
+     * 
+     * @param actionStatus
      *            to be updated
-     * @param target2
-     *
-     * @throws EntityAlreadyExistsException
-     *             if a given entity already exists
-     * @throws ToManyStatusEntriesException
-     *             if more than the allowed number of status entries are
-     *             inserted
+     * @param action
+     *            the status is for
+     * @return the persisted {@link Action}
+     * 
      */
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    public void addCancelActionStatus(@NotNull final ActionStatus actionStatus, final Action action) {
+    public Action addCancelActionStatus(@NotNull final ActionStatus actionStatus, final Action action) {
 
         checkForToManyStatusEntries(action);
         action.setStatus(actionStatus.getStatus());
@@ -298,12 +295,9 @@ public class ControllerManagement implements EnvironmentAware {
         case CANCELED:
         case FINISHED:
             // in case of successful cancelation we also report the success at
-            // the canceled action
-            // itself.
+            // the canceled action itself.
             actionStatus.addMessage("Cancelation completion is finished sucessfully.");
-            // set action inactive
-            action.setActive(false);
-            successCancellation(action);
+            deploymentManagement.successCancellation(action);
             break;
         case RETRIEVED:
             actionStatus.addMessage("Cancelation request retrieved");
@@ -312,30 +306,18 @@ public class ControllerManagement implements EnvironmentAware {
         }
         actionRepository.save(action);
         actionStatusRepository.save(actionStatus);
-    }
 
-    private void successCancellation(final Action action) {
-        final Target target = action.getTarget();
-        final List<Action> nextActiveActions = actionRepository.findByTargetAndActiveOrderByIdAsc(target, true)
-                .stream().filter(a -> !a.getId().equals(action.getId())).collect(Collectors.toList());
-
-        if (nextActiveActions.isEmpty()) {
-            target.setAssignedDistributionSet(target.getTargetInfo().getInstalledDistributionSet());
-            deploymentManagement.updateTargetInfo(target, TargetUpdateStatus.IN_SYNC, false);
-        } else {
-            target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
-        }
-        targetManagement.updateTarget(target);
+        return action;
     }
 
     /**
-     * Reports an {@link ActionStatus} for a {@link UpdateAction}.
+     * Updates an {@link ActionStatus} for a {@link UpdateAction}.
      *
      * @param actionStatus
      *            to be updated
      * @param action
      *            the update is for
-     * @return the persisted {@link ActionStatus}
+     * @return the persisted {@link Action}
      *
      * @throws EntityAlreadyExistsException
      *             if a given entity already exists
@@ -420,8 +402,8 @@ public class ControllerManagement implements EnvironmentAware {
         final TargetInfo targetInfo = target.getTargetInfo();
         final DistributionSet ds = entityManager.merge(action.getDistributionSet());
         targetInfo.setInstalledDistributionSet(ds);
-        if (target.getAssignedDistributionSet() != null && targetInfo.getInstalledDistributionSet() != null
-                && target.getAssignedDistributionSet().getId().equals(targetInfo.getInstalledDistributionSet().getId())) {
+        if (target.getAssignedDistributionSet() != null && targetInfo.getInstalledDistributionSet() != null && target
+                .getAssignedDistributionSet().getId().equals(targetInfo.getInstalledDistributionSet().getId())) {
             targetInfo.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
             targetInfo.setInstallationDate(System.currentTimeMillis());
         } else {
@@ -461,8 +443,7 @@ public class ControllerManagement implements EnvironmentAware {
         target.getTargetInfo().getControllerAttributes().putAll(data);
 
         if (target.getTargetInfo().getControllerAttributes().size() > maxAttributes) {
-            LOG_DOS.info(
-                    "Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
+            LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
                     maxAttributes);
             throw new ToManyAttributeEntriesException(String.valueOf(maxAttributes));
         }
@@ -474,7 +455,7 @@ public class ControllerManagement implements EnvironmentAware {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
      * springframework.core.env. Environment)
      */

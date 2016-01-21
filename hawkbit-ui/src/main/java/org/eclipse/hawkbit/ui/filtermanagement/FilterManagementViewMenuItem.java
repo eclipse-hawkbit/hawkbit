@@ -23,7 +23,6 @@ import com.vaadin.server.Resource;
  * 
  * Menu item for target filter management view.
  * 
- * @author Venugopal Boodidadinne(RBEI BSO3).
  *
  */
 @Component

@@ -13,6 +13,8 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
+import com.vaadin.server.Resource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -25,7 +27,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  *
- *        module.
+ * module.
  *
  *
  *
@@ -55,8 +57,33 @@ public class ConfirmationDialog implements Button.ClickListener {
      */
     public ConfirmationDialog(final String caption, final String question, final String okLabel,
             final String cancelLabel, final ConfirmationDialogCallback callback) {
+        this(caption, question, okLabel, cancelLabel, callback, null);
+    }
+
+    /**
+     * Constructor for configuring confirmation dialog.
+     * 
+     * @param caption
+     *            the dialog caption.
+     * @param question
+     *            the question.
+     * @param okLabel
+     *            the Ok button label.
+     * @param cancelLabel
+     *            the cancel button label.
+     * @param callback
+     *            the callback.
+     * @param icon
+     *            the icon of the dialog
+     */
+    public ConfirmationDialog(final String caption, final String question, final String okLabel,
+            final String cancelLabel, final ConfirmationDialogCallback callback, final Resource icon) {
         window = new Window(caption);
         window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+
+        if (icon != null) {
+            window.setIcon(icon);
+        }
 
         okButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.OK_BUTTON, okLabel, "",
                 ValoTheme.BUTTON_PRIMARY, false, null, SPUIButtonStyleTiny.class);
@@ -73,10 +100,11 @@ public class ConfirmationDialog implements Button.ClickListener {
         final VerticalLayout vLayout = new VerticalLayout();
 
         if (question != null) {
-            final Label questionLbl = new Label();
-            questionLbl.setValue(question);
+            final Label questionLbl = new Label(String.format("<p>%s</p>", question.replaceAll("\n", "<br/>")),
+                    ContentMode.HTML);
             questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
             vLayout.addComponent(questionLbl);
+
         }
 
         final HorizontalLayout hButtonLayout = new HorizontalLayout();
@@ -106,6 +134,11 @@ public class ConfirmationDialog implements Button.ClickListener {
         callback.response(event.getSource().equals(okButton));
     }
 
+    /**
+     * Get the window which holds the confirmation dialog
+     * 
+     * @return the window which holds the confirmation dialog
+     */
     public Window getWindow() {
         return window;
     }

@@ -9,10 +9,10 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,15 +27,17 @@ import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
+import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
 import org.eclipse.hawkbit.ui.filter.Filters;
+import org.eclipse.hawkbit.ui.filter.target.CustomTargetFilter;
 import org.eclipse.hawkbit.ui.filter.target.TargetSearchTextFilter;
 import org.eclipse.hawkbit.ui.filter.target.TargetStatusFilter;
 import org.eclipse.hawkbit.ui.filter.target.TargetTagFilter;
@@ -48,8 +50,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetAddUpdateWindowEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent.TargetTagComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -66,7 +66,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -75,6 +74,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.Action;
@@ -98,8 +98,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Concrete implementation of Target table.
- *
- *
  *
  */
 @SpringComponent
@@ -152,27 +150,27 @@ public class TargetTable extends AbstractTable implements Handler {
         setNoDataAvailable();
     }
 
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
+    }
+
     /**
-     * EventListener method which is called by the event bus to notify about a
-     * {@link TargetCreatedEvent}.
+     * EventListener method which is called when a list of events is published.
+     * Event types should not be mixed up.
      *
-     * @param targetCreatedEvent
-     *            the target created event
+     * @param events
+     *            list of events
      */
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvent(final TargetCreatedEvent targetCreatedEvent) {
-        final Target createdTarget = targetCreatedEvent.getEntity();
-        final TargetTableFilters targetTableFilters = managementUIState.getTargetTableFilters();
-        final List<FilterExpression> filters = new ArrayList<>();
-        if (targetTableFilters.getSearchText().isPresent()) {
-            filters.add(new TargetSearchTextFilter(createdTarget, targetTableFilters.getSearchText().get()));
-        }
-        filters.add(new TargetStatusFilter(createdTarget, targetTableFilters.getClickedStatusTargetTags()));
-        filters.add(new TargetTagFilter(createdTarget, targetTableFilters.getClickedTargetTags(), targetTableFilters
-                .isNoTagSelected()));
-
-        if (!Filters.or(filters).doFilter()) {
-            addNewTarget(createdTarget);
+    public void onEvents(final List<?> events) {
+        final Object firstEvent = events.get(0);
+        if (TargetCreatedEvent.class.isInstance(firstEvent)) {
+            onTargetCreatedEvents();
+        } else if (TargetInfoUpdateEvent.class.isInstance(firstEvent)) {
+            onTargetInfoUpdateEvents((List<TargetInfoUpdateEvent>) events);
+        } else if (TargetDeletedEvent.class.isInstance(firstEvent)) {
+            onTargetDeletedEvent((List<TargetDeletedEvent>) events);
         }
     }
 
@@ -183,28 +181,6 @@ public class TargetTable extends AbstractTable implements Handler {
         } else {
             UI.getCurrent().access(() -> removeStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_TABLE));
         }
-    }
-
-    /**
-     * EventListener method which is called by the event bus to notify about a
-     * {@link TargetCreatedEvent}.
-     *
-     * @param event
-     *            the target created event
-     */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvent(final TargetDeletedEvent event) {
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final TargetIdName targetIdName = new TargetIdName(event.getTargetId(), null, null);
-        if (getVisibleItemIds().contains(targetIdName)) {
-            targetContainer.removeItem(targetIdName);
-            targetContainer.commit();
-
-        }
-        if (managementUIState.getTargetsCountAll() > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-            ((LazyQueryContainer) getContainerDataSource()).refresh();
-        }
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.DELETE_TARGET, targetIdName));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -222,11 +198,6 @@ public class TargetTable extends AbstractTable implements Handler {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void addOrEditEvent(final TargetAddUpdateWindowEvent targetUIEvent) {
-        if (targetUIEvent.getTargetComponentEvent() == TargetComponentEvent.ADD_TARGET) {
-            /** Below line to be removed when push is re-enable **/
-            UI.getCurrent().access(() -> addNewTarget(targetUIEvent.getTarget()));
-            setData(SPUIDefinitions.DATA_AVAILABLE);
-        }
         if (targetUIEvent.getTargetComponentEvent() == TargetComponentEvent.EDIT_TARGET) {
             UI.getCurrent().access(() -> updateTarget(targetUIEvent.getTarget()));
         }
@@ -237,10 +208,6 @@ public class TargetTable extends AbstractTable implements Handler {
         UI.getCurrent().access(() -> {
             if (checkFilterEvent(filterEvent)) {
                 refreshFilter();
-                /*
-                 * TobeDone : remove explicit SHOW_COUNT_MESSAGE instead use
-                 * TargetFilterEvent
-                 */
                 eventBus.publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
             }
         });
@@ -260,11 +227,14 @@ public class TargetTable extends AbstractTable implements Handler {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent event) {
         if (event == SaveActionWindowEvent.SAVED_ASSIGNMENTS) {
-            refreshFilter();
+            refreshTablecontainer();
         }
-        if (event == SaveActionWindowEvent.DELETED_TARGETS) {
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.DELETE_TARGET, (Target) null));
-        }
+    }
+
+    private void refreshTablecontainer() {
+        final LazyQueryContainer tableContainer = (LazyQueryContainer) getContainerDataSource();
+        tableContainer.refresh();
+        selectRow();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -313,31 +283,6 @@ public class TargetTable extends AbstractTable implements Handler {
         return targetTableContainer;
     }
 
-    private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        managementUIState.getTargetTableFilters().getSearchText()
-                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-        managementUIState.getTargetTableFilters().getDistributionSet()
-                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION, value.getId()));
-        managementUIState.getTargetTableFilters().getPinnedDistId()
-                .ifPresent(value -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, value));
-        managementUIState.getTargetTableFilters().getTargetFilterQuery()
-                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY, value));
-        queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG, managementUIState.getTargetTableFilters().isNoTagSelected());
-
-        if (!managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty()) {
-            final List<String> list = new ArrayList<String>();
-            list.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
-            queryConfig.put(SPUIDefinitions.FILTER_BY_TAG, list.toArray(new String[list.size()]));
-        }
-        if (!managementUIState.getTargetTableFilters().getClickedStatusTargetTags().isEmpty()) {
-            final List<TargetUpdateStatus> statusList = managementUIState.getTargetTableFilters()
-                    .getClickedStatusTargetTags();
-            queryConfig.put(SPUIDefinitions.FILTER_BY_STATUS, statusList);
-        }
-        return queryConfig;
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -346,30 +291,23 @@ public class TargetTable extends AbstractTable implements Handler {
      */
     @Override
     protected void addContainerProperties(final Container container) {
-        final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
-                TargetUpdateStatus.UNKNOWN, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
-                false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class,
-                "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
-                "", false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
-                true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
-                false, true);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
+        HawkbitCommonUtil.addTargetTableContainerProperties(container);
+    }
+
+    @Override
+    public Action[] getActions(final Object target, final Object sender) {
+        return new Action[] { actionSelectAll, actionUnSelectAll };
+    }
+
+    @Override
+    public void handleAction(final Action action, final Object sender, final Object target) {
+        if (actionSelectAll.equals(action)) {
+            selectAll();
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELLECT_ALL));
+        }
+        if (actionUnSelectAll.equals(action)) {
+            unSelectAll();
+        }
     }
 
     /*
@@ -384,163 +322,6 @@ public class TargetTable extends AbstractTable implements Handler {
                 (source, itemId, columnId) -> getTagetPinButton(itemId));
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME,
                 (source, itemId, columnId) -> getTagetPollTime(itemId));
-    }
-
-    private Label getTagetPollTime(final Object itemId) {
-        final Label statusLabel = new Label();
-        statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
-        statusLabel.setHeightUndefined();
-        statusLabel.setContentMode(ContentMode.HTML);
-        final String pollStatusToolTip = (String) getContainerDataSource().getItem(itemId)
-                .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(pollStatusToolTip) != null) {
-            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-        } else {
-            statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
-        }
-        statusLabel.setDescription(pollStatusToolTip);
-        return statusLabel;
-    }
-
-    private Button getTagetPinButton(final Object itemId) {
-        final Button pinBtn = new Button();
-        final StringBuilder pinBtnStyle = new StringBuilder(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        pinBtnStyle.append(' ');
-        pinBtnStyle.append(ValoTheme.BUTTON_SMALL);
-        pinBtnStyle.append(' ');
-        pinBtnStyle.append(ValoTheme.BUTTON_ICON_ONLY);
-        pinBtn.setStyleName(pinBtnStyle.toString());
-        pinBtn.setHeightUndefined();
-        pinBtn.setData(itemId);
-        pinBtn.setId(SPUIComponetIdProvider.TARGET_PIN_ICON + "." + itemId);
-        pinBtn.addClickListener(event -> addPinClickListener(event));
-        if (isPinned(((TargetIdName) itemId).getControllerId())) {
-            stylePinnedButton(pinBtn);
-            isTargetPinned = Boolean.TRUE;
-            targetPinnedBtn = pinBtn;
-            eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
-        }
-        pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
-        applyStatusLblStyle(pinBtn, itemId);
-        return pinBtn;
-    }
-
-    private boolean isPinned(final String targetId) {
-        boolean result = false;
-        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
-                && targetId.equals(managementUIState.getDistributionTableFilters().getPinnedTargetId().get())) {
-            result = true;
-        } else {
-            result = false;
-        }
-        return result;
-    }
-
-    /**
-     * Add listener to pin.
-     *
-     * @param pinBtn
-     *            as event
-     */
-    private void addPinClickListener(final ClickEvent event) {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        checkifAlreadyPinned(event.getButton());
-        if (isTargetPinned) {
-            pinTarget(event.getButton());
-        } else {
-            unPinTarget(event.getButton());
-        }
-
-    }
-
-    /**
-     * Check already pinned.
-     *
-     * @param eventBtn
-     *            as button
-     */
-    private void checkifAlreadyPinned(final Button eventBtn) {
-        final String newPinnedTargetItemId = ((TargetIdName) eventBtn.getData()).getControllerId();
-        String targetId = null;
-        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()) {
-            targetId = managementUIState.getDistributionTableFilters().getPinnedTargetId().get();
-        }
-        if (targetId == null) {
-            isTargetPinned = !isTargetPinned;
-            managementUIState.getDistributionTableFilters().setPinnedTargetId(newPinnedTargetItemId);
-        } else if (targetId.equals(newPinnedTargetItemId)) {
-            isTargetPinned = Boolean.FALSE;
-        } else {
-            isTargetPinned = true;
-            managementUIState.getDistributionTableFilters().setPinnedTargetId(newPinnedTargetItemId);
-            if (null != targetPinnedBtn) {
-                resetPinStyle(targetPinnedBtn);
-            }
-        }
-        targetPinnedBtn = eventBtn;
-    }
-
-    private void pinTarget(final Button eventBtn) {
-        /* if distribution set is pinned ,unpin target if pinned */
-        managementUIState.getTargetTableFilters().setPinnedDistId(null);
-        /* on unpin of target dist table should refresh Dist table restyle */
-        eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
-        /* change target table styling */
-        styleTargetTable();
-        stylePinnedButton(eventBtn);
-        isTargetPinned = Boolean.FALSE;
-    }
-
-    private void unPinTarget(final Button eventBtn) {
-        managementUIState.getDistributionTableFilters().setPinnedTargetId(null);
-        eventBus.publish(this, PinUnpinEvent.UNPIN_TARGET);
-        resetPinStyle(eventBtn);
-    }
-
-    private void resetPinStyle(final Button pinBtn) {
-        pinBtn.removeStyleName("targetPinned");
-        pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
-        applyStatusLblStyle(pinBtn, pinBtn.getData());
-
-    }
-
-    /**
-     * Set style of target table.
-     *
-     */
-    @SuppressWarnings("serial")
-    private void styleTargetTable() {
-        setCellStyleGenerator((source, itemId, propertyId) -> null);
-    }
-
-    private void stylePinnedButton(final Button eventBtn) {
-        eventBtn.addStyleName("targetPinned");
-    }
-
-    /**
-     * Status Label Style.
-     *
-     * @param pinBtn
-     * @param itemId
-     */
-    private void applyStatusLblStyle(final Button pinBtn, final Object itemId) {
-        final Item item = getItem(itemId);
-        if (item != null) {
-            final TargetUpdateStatus updateStatus = (TargetUpdateStatus) item.getItemProperty(
-                    SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
-            pinBtn.removeStyleName("statusIconRed statusIconBlue statusIconGreen statusIconYellow statusIconLightBlue");
-            if (updateStatus == TargetUpdateStatus.ERROR) {
-                pinBtn.addStyleName("statusIconRed");
-            } else if (updateStatus == TargetUpdateStatus.UNKNOWN) {
-                pinBtn.addStyleName("statusIconBlue");
-            } else if (updateStatus == TargetUpdateStatus.IN_SYNC) {
-                pinBtn.addStyleName("statusIconGreen");
-            } else if (updateStatus == TargetUpdateStatus.PENDING) {
-                pinBtn.addStyleName("statusIconYellow");
-            } else if (updateStatus == TargetUpdateStatus.REGISTERED) {
-                pinBtn.addStyleName("statusIconLightBlue");
-            }
-        }
     }
 
     /*
@@ -563,6 +344,7 @@ public class TargetTable extends AbstractTable implements Handler {
     @Override
     protected Object getItemIdToSelect() {
         if (managementUIState.getSelectedTargetIdName().isPresent()) {
+            setCurrentPageFirstItemId(managementUIState.getLastSelectedTargetIdName());
             return managementUIState.getSelectedTargetIdName().get();
         }
         return null;
@@ -578,24 +360,14 @@ public class TargetTable extends AbstractTable implements Handler {
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         @SuppressWarnings("unchecked")
-        final Set<TargetIdName> values = (Set) getValue();
-        TargetIdName value = null;
+        final Set<TargetIdName> values = HawkbitCommonUtil.getSelectedTargetDetails(this);
         if (values != null && !values.isEmpty()) {
-            final Iterator<TargetIdName> iterator = values.iterator();
-
-            while (iterator.hasNext()) {
-                value = iterator.next();
-            }
-            /**
-             * Adding null check to make to avoid NPE.Its weird that at times
-             * getValue returns null.
-             */
-            if (null != value) {
-                managementUIState.setSelectedTargetIdName(values);
-                managementUIState.setLastSelectedTargetIdName(value);
-                final Target target = targetManagement.findTargetByControllerIDWithDetails(value.getControllerId());
-                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, target));
-            }
+            final TargetIdName lastSelectedItem = getLastSelectedItem(values);
+            managementUIState.setSelectedTargetIdName(values);
+            managementUIState.setLastSelectedTargetIdName(lastSelectedItem);
+            final Target target = targetManagement.findTargetByControllerIDWithDetails(lastSelectedItem
+                    .getControllerId());
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, target));
         } else {
             managementUIState.setSelectedTargetIdName(null);
             managementUIState.setLastSelectedTargetIdName(null);
@@ -665,6 +437,188 @@ public class TargetTable extends AbstractTable implements Handler {
         };
     }
 
+    private void onTargetDeletedEvent(final List<TargetDeletedEvent> events) {
+        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        boolean shouldRefreshTargets = false;
+        for (final TargetDeletedEvent deletedEvent : events) {
+            final TargetIdName targetIdName = new TargetIdName(deletedEvent.getTargetId(), null, null);
+            if (visibleItemIds.contains(targetIdName)) {
+                targetContainer.removeItem(targetIdName);
+            } else {
+                shouldRefreshTargets = true;
+            }
+            unselect(targetIdName);
+        }
+        if (shouldRefreshTargets) {
+            refreshOnDelete();
+        } else {
+            targetContainer.commit();
+            selectRow();
+        }
+    }
+
+    private void refreshOnDelete() {
+        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
+        final int size = targetContainer.size();
+        refreshTablecontainer();
+        if (size != 0) {
+            setData(SPUIDefinitions.DATA_AVAILABLE);
+        }
+        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
+    }
+
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        managementUIState.getTargetTableFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+        managementUIState.getTargetTableFilters().getDistributionSet()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION, value.getId()));
+        managementUIState.getTargetTableFilters().getPinnedDistId()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, value));
+        managementUIState.getTargetTableFilters().getTargetFilterQuery()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TARGET_FILTER_QUERY, value));
+        queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG, managementUIState.getTargetTableFilters().isNoTagSelected());
+
+        if (isFilteredByTags()) {
+            final List<String> list = new ArrayList<String>();
+            list.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
+            queryConfig.put(SPUIDefinitions.FILTER_BY_TAG, list.toArray(new String[list.size()]));
+        }
+        if (isFilteredByStatus()) {
+            final List<TargetUpdateStatus> statusList = managementUIState.getTargetTableFilters()
+                    .getClickedStatusTargetTags();
+            queryConfig.put(SPUIDefinitions.FILTER_BY_STATUS, statusList);
+        }
+        return queryConfig;
+    }
+
+    private Label getTagetPollTime(final Object itemId) {
+        final Label statusLabel = new Label();
+        statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        statusLabel.setHeightUndefined();
+        statusLabel.setContentMode(ContentMode.HTML);
+        final String pollStatusToolTip = (String) getContainerDataSource().getItem(itemId)
+                .getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).getValue();
+        if (HawkbitCommonUtil.trimAndNullIfEmpty(pollStatusToolTip) != null) {
+            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+        } else {
+            statusLabel.setValue(FontAwesome.CLOCK_O.getHtml());
+        }
+        statusLabel.setDescription(pollStatusToolTip);
+        return statusLabel;
+    }
+
+    private Button getTagetPinButton(final Object itemId) {
+        final Button pinBtn = new Button();
+        final StringBuilder pinBtnStyle = new StringBuilder(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        pinBtnStyle.append(' ');
+        pinBtnStyle.append(ValoTheme.BUTTON_SMALL);
+        pinBtnStyle.append(' ');
+        pinBtnStyle.append(ValoTheme.BUTTON_ICON_ONLY);
+        pinBtn.setStyleName(pinBtnStyle.toString());
+        pinBtn.setHeightUndefined();
+        pinBtn.setData(itemId);
+        pinBtn.setId(SPUIComponetIdProvider.TARGET_PIN_ICON + "." + itemId);
+        pinBtn.addClickListener(event -> addPinClickListener(event));
+        if (isPinned(((TargetIdName) itemId).getControllerId())) {
+            pinBtn.addStyleName("targetPinned");
+            isTargetPinned = Boolean.TRUE;
+            targetPinnedBtn = pinBtn;
+            eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+        }
+        pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
+        HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, itemId);
+        return pinBtn;
+    }
+
+    private boolean isPinned(final String targetId) {
+        boolean result = false;
+        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
+                && targetId.equals(managementUIState.getDistributionTableFilters().getPinnedTargetId().get())) {
+            result = true;
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    /**
+     * Add listener to pin.
+     *
+     * @param pinBtn
+     *            as event
+     */
+    private void addPinClickListener(final ClickEvent event) {
+        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+        checkifAlreadyPinned(event.getButton());
+        if (isTargetPinned) {
+            pinTarget(event.getButton());
+        } else {
+            unPinTarget(event.getButton());
+        }
+
+    }
+
+    /**
+     * Check already pinned.
+     *
+     * @param eventBtn
+     *            as button
+     */
+    private void checkifAlreadyPinned(final Button eventBtn) {
+        final String newPinnedTargetItemId = ((TargetIdName) eventBtn.getData()).getControllerId();
+        String targetId = null;
+        if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()) {
+            targetId = managementUIState.getDistributionTableFilters().getPinnedTargetId().get();
+        }
+        if (targetId == null) {
+            isTargetPinned = !isTargetPinned;
+            managementUIState.getDistributionTableFilters().setPinnedTargetId(newPinnedTargetItemId);
+        } else if (targetId.equals(newPinnedTargetItemId)) {
+            isTargetPinned = Boolean.FALSE;
+        } else {
+            isTargetPinned = true;
+            managementUIState.getDistributionTableFilters().setPinnedTargetId(newPinnedTargetItemId);
+            if (null != targetPinnedBtn) {
+                resetPinStyle(targetPinnedBtn);
+            }
+        }
+        targetPinnedBtn = eventBtn;
+    }
+
+    private void pinTarget(final Button eventBtn) {
+        /* if distribution set is pinned ,unpin target if pinned */
+        managementUIState.getTargetTableFilters().setPinnedDistId(null);
+        /* on unpin of target dist table should refresh Dist table restyle */
+        eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
+        /* change target table styling */
+        styleTargetTable();
+        eventBtn.addStyleName("targetPinned");
+        isTargetPinned = Boolean.FALSE;
+    }
+
+    private void unPinTarget(final Button eventBtn) {
+        managementUIState.getDistributionTableFilters().setPinnedTargetId(null);
+        eventBus.publish(this, PinUnpinEvent.UNPIN_TARGET);
+        resetPinStyle(eventBtn);
+    }
+
+    private void resetPinStyle(final Button pinBtn) {
+        pinBtn.removeStyleName("targetPinned");
+        pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
+        HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, pinBtn.getData());
+    }
+
+    /**
+     * Set style of target table.
+     *
+     */
+    @SuppressWarnings("serial")
+    private void styleTargetTable() {
+        setCellStyleGenerator((source, itemId, propertyId) -> null);
+    }
+
     private void doAssignments(final DragAndDropEvent event) {
         if (event.getTransferable().getSourceComponent() instanceof Table) {
             dsToTargetAssignment(event);
@@ -688,7 +642,7 @@ public class TargetTable extends AbstractTable implements Handler {
     private void tagAssignment(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
         final Table targetTable = (Table) taregtDet.getTarget();
-        final Set<TargetIdName> targetSelected = (Set<TargetIdName>) targetTable.getValue();
+        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(targetTable);
         final Set<String> targetList = new HashSet<String>();
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
@@ -705,25 +659,6 @@ public class TargetTable extends AbstractTable implements Handler {
         notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {
             refreshFilter();
-        }
-        updateTagLayoutInDetails(result, targTagName);
-    }
-
-    private void updateTagLayoutInDetails(final TargetTagAssigmentResult result, final String targTagName) {
-        if (result.getAssigned() > 0) {
-            final List<String> assignedTargetNames = result.getAssignedTargets().stream().map(t -> t.getControllerId())
-                    .collect(Collectors.toList());
-            if (assignedTargetNames.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
-                eventBus.publish(this, new TargetTagEvent(TargetTagComponentEvent.ASSIGNED, targTagName));
-            }
-        } else if (result.getUnassigned() > 0) {
-
-            final List<String> unassignedTargetNames = result.getUnassignedTargets().stream()
-                    .map(t -> t.getControllerId()).collect(Collectors.toList());
-            if (unassignedTargetNames.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
-                eventBus.publish(this, new TargetTagEvent(TargetTagComponentEvent.UNASSIGNED, targTagName));
-            }
-
         }
     }
 
@@ -763,10 +698,10 @@ public class TargetTable extends AbstractTable implements Handler {
         return true;
     }
 
-    private Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
+    private static Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
             final Table source) {
         @SuppressWarnings("unchecked")
-        final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) source.getValue();
+        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(source);
         final Set<DistributionSetIdName> distributionIdSet = new HashSet<DistributionSetIdName>();
         if (!distSelected.contains(transferable.getData(ITEMID))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData(ITEMID));
@@ -916,7 +851,6 @@ public class TargetTable extends AbstractTable implements Handler {
         return isFilterEvent;
     }
 
-    // Added by - Asha
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
         final Long distPinned = managementUIState.getTargetTableFilters().getPinnedDistId().isPresent() ? managementUIState
                 .getTargetTableFilters().getPinnedDistId().get()
@@ -977,77 +911,121 @@ public class TargetTable extends AbstractTable implements Handler {
      * @param newTarget
      *            as reference
      */
-    public void addNewTarget(final Target newTarget) {
+    private void refreshTargets() {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        targetContainer.refresh();
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.ADD_TARGET, newTarget));
+        final int size = targetContainer.size();
+        if (size < SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
+            refreshTablecontainer();
+        } else {
+            // If table is not refreshed , explicitly target total count and
+            // truncated count has to be updated
+            resetTargetCountDetails();
+        }
+
+        if (size != 0) {
+            setData(SPUIDefinitions.DATA_AVAILABLE);
+        }
+
+        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
     private void updateVisibleItemOnEvent(final TargetInfo targetInfo, final Target target,
-            final TargetIdName targetIdName, final LazyQueryContainer targetContainer) {
+            final TargetIdName targetIdName) {
+        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final Item item = targetContainer.getItem(targetIdName);
         item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
         item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).setValue(
                 HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+    }
 
-        // workaround until push is available for action history, re-select the
-        // updated target so
-        // the action history gets refreshed.
-        if (isSelected(targetIdName)) {
-            unselect(targetIdName);
-            select(targetIdName);
-        }
+    private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
+        return null != managementUIState.getLastSelectedTargetIdName()
+                && managementUIState.getLastSelectedTargetIdName().equals(targetIdName);
     }
 
     /**
      * EventListener method which is called by the event bus to notify about a
-     * {@link TargetInfoUpdateEvent}.
+     * list of {@link TargetInfoUpdateEvent}.
      *
-     * @param targetInfoUpdateEvent
-     *            the target info update event
+     * @param targetInfoUpdateEvents
+     *            list of target info update event
      */
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvent(final TargetInfoUpdateEvent targetInfoUpdateEvent) {
-        final TargetInfo targetInfo = targetInfoUpdateEvent.getEntity();
-        final Target target = targetInfo.getTarget();
-        final TargetIdName targetIdName = target.getTargetIdName();
-        final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
-        final TargetTableFilters targetTableFilters = managementUIState.getTargetTableFilters();
-
-        @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
+    private void onTargetInfoUpdateEvents(final List<TargetInfoUpdateEvent> targetInfoUpdateEvents) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        if (visibleItemIds.contains(targetIdName)) {
-            updateVisibleItemOnEvent(targetInfo, target, targetIdName, targetContainer);
-        } else {
-            final List<FilterExpression> filters = new ArrayList<>();
-            if (targetTableFilters.getSearchText().isPresent()) {
-                filters.add(new TargetSearchTextFilter(target, targetTableFilters.getSearchText().get()));
+        boolean shoulTargetsUpdated = false;
+        Target lastSelectedTarget = null;
+        for (final TargetInfoUpdateEvent targetInfoUpdateEvent : targetInfoUpdateEvents) {
+            final TargetInfo targetInfo = targetInfoUpdateEvent.getEntity();
+            final Target target = targetInfo.getTarget();
+            final TargetIdName targetIdName = target.getTargetIdName();
+            if (Filters.or(getTargetTableFilters(target)).doFilter()) {
+                shoulTargetsUpdated = true;
+            } else {
+                if (visibleItemIds.contains(targetIdName)) {
+                    updateVisibleItemOnEvent(targetInfo, target, targetIdName);
+                }
             }
-            filters.add(new TargetStatusFilter(target, targetTableFilters.getClickedStatusTargetTags()));
-            filters.add(new TargetTagFilter(target, targetTableFilters.getClickedTargetTags(), targetTableFilters
-                    .isNoTagSelected()));
-
-            if (!Filters.or(filters).doFilter()) {
-                addNewTarget(target);
+            // workaround until push is available for action history, re-select
+            // the
+            // updated target so
+            // the action history gets refreshed.
+            if (isLastSelectedTarget(targetIdName)) {
+                lastSelectedTarget = target;
             }
-            addNewTarget(target);
         }
+        if (shoulTargetsUpdated) {
+            refreshTargets();
+        }
+        if (lastSelectedTarget != null) {
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, lastSelectedTarget));
+        }
+    }
+
+    private void onTargetCreatedEvents() {
+        refreshTargets();
+    }
+
+    private List<FilterExpression> getTargetTableFilters(final Target target) {
+        final TargetTableFilters targetTableFilters = managementUIState.getTargetTableFilters();
+        final List<FilterExpression> filters = new ArrayList<>();
+        if (targetTableFilters.getSearchText().isPresent()) {
+            filters.add(new TargetSearchTextFilter(target, targetTableFilters.getSearchText().get()));
+        }
+        filters.add(new TargetStatusFilter(targetTableFilters.getClickedStatusTargetTags()));
+        filters.add(new TargetTagFilter(target, targetTableFilters.getClickedTargetTags(), targetTableFilters
+                .isNoTagSelected()));
+        filters.add(new CustomTargetFilter(targetTableFilters.getTargetFilterQuery()));
+        return filters;
     }
 
     /**
      * Select all rows in the table.
      */
     public void selectAll() {
+        final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(), new Sort(
+                SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt"));
+        List<TargetIdName> targetIdList;
+        // is custom filter selected
+        if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
+            targetIdList = getTargetIdsByCustomFilters(pageRequest);
+        } else {
+            targetIdList = getTargetIdsBySimpleFilters(pageRequest);
+        }
+        setValue(targetIdList);
+    }
+
+    private List<TargetIdName> getTargetIdsBySimpleFilters(final PageRequest pageRequest) {
         final Long filterByDistId = managementUIState.getTargetTableFilters().getDistributionSet().isPresent() ? managementUIState
                 .getTargetTableFilters().getDistributionSet().get().getId()
                 : null;
         final List<TargetUpdateStatus> statusList = new ArrayList<TargetUpdateStatus>();
-        if (!managementUIState.getTargetTableFilters().getClickedStatusTargetTags().isEmpty()) {
+        if (isFilteredByStatus()) {
             statusList.addAll(managementUIState.getTargetTableFilters().getClickedStatusTargetTags());
         }
         final List<String> tagList = new ArrayList<String>();
-        if (!managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty()) {
+        if (isFilteredByTags()) {
             tagList.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
         }
         String searchText = managementUIState.getTargetTableFilters().getSearchText().isPresent() ? managementUIState
@@ -1059,41 +1037,27 @@ public class TargetTable extends AbstractTable implements Handler {
 
         final String[] tagArray = tagList.toArray(new String[tagList.size()]);
 
-        // limit the selection of all targets of the targets only currently
-        // showed in the list, so
-        // maxiumm the SP SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES
-        final PageRequest pageRequest = new OffsetBasedPageRequest(0, SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES,
-                new Sort(Direction.DESC, "createdAt"));
-        setValue(targetManagement.findAllTargetIdsByFilters(pageRequest, filterByDistId, statusList, searchText,
-                noTagSelected, tagList.toArray(tagArray)));
+        List<TargetIdName> targetIdList;
+        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, filterByDistId, statusList, searchText,
+                noTagSelected, tagList.toArray(tagArray));
+        Collections.reverse(targetIdList);
+        return targetIdList;
+    }
+
+    private List<TargetIdName> getTargetIdsByCustomFilters(final PageRequest pageRequest) {
+        List<TargetIdName> targetIdList;
+        final TargetFilterQuery targetFilterQuery = managementUIState.getTargetTableFilters().getTargetFilterQuery()
+                .isPresent() ? managementUIState.getTargetTableFilters().getTargetFilterQuery().get() : null;
+        targetIdList = targetManagement.findAllTargetIdsByTargetFilterQuery(pageRequest, targetFilterQuery);
+        Collections.reverse(targetIdList);
+        return targetIdList;
     }
 
     /**
      * Clear all selections in the table.
      */
-    public void unSelectAll() {
+    private void unSelectAll() {
         setValue(null);
-    }
-
-    @Override
-    public Action[] getActions(final Object target, final Object sender) {
-        return new Action[] { actionSelectAll, actionUnSelectAll };
-    }
-
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        if (actionSelectAll.equals(action)) {
-            selectAll();
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELLECT_ALL));
-        }
-        if (actionUnSelectAll.equals(action)) {
-            unSelectAll();
-        }
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     private void setNoDataAvailable() {
@@ -1103,6 +1067,92 @@ public class TargetTable extends AbstractTable implements Handler {
         } else {
             managementUIState.setNoDataAvilableTarget(false);
         }
+    }
+
+    /**
+     * Set total target count and count of targets truncated in target table.
+     */
+    private void resetTargetCountDetails() {
+        final long size;
+        final long totalTargetsCount = getTotalTargetsCount();
+        managementUIState.setTargetsCountAll(totalTargetsCount);
+
+        Collection<TargetUpdateStatus> status = null;
+        String[] targetTags = null;
+        Long distributionId = null;
+        String searchText = null;
+        Boolean noTagClicked = Boolean.FALSE;
+        Long pinnedDistId = null;
+
+        if (isFilteredByTags()) {
+            targetTags = (String[]) managementUIState.getTargetTableFilters().getClickedTargetTags().toArray();
+        }
+        if (isFilteredByStatus()) {
+            status = managementUIState.getTargetTableFilters().getClickedStatusTargetTags();
+        }
+        if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
+            distributionId = managementUIState.getTargetTableFilters().getDistributionSet().get().getId();
+        }
+        if (isFilteredByText()) {
+            searchText = String.format("%%%s%%", managementUIState.getTargetTableFilters().getSearchText().get());
+        }
+        noTagClicked = managementUIState.getTargetTableFilters().isNoTagSelected();
+        if (managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()) {
+            pinnedDistId = managementUIState.getTargetTableFilters().getPinnedDistId().get();
+        }
+
+        size = getTargetsCountWithFilter(totalTargetsCount, status, targetTags, distributionId, searchText,
+                noTagClicked, pinnedDistId);
+
+        if (size > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
+            managementUIState.setTargetsTruncated(size - SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
+        }
+    }
+
+    private long getTargetsCountWithFilter(final long totalTargetsCount, final Collection<TargetUpdateStatus> status,
+            final String[] targetTags, final Long distributionId, final String searchText, final Boolean noTagClicked,
+            final Long pinnedDistId) {
+        final long size;
+        if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
+            size = targetManagement.countTargetByTargetFilterQuery(managementUIState.getTargetTableFilters()
+                    .getTargetFilterQuery().get());
+        } else if (!anyFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
+            size = totalTargetsCount;
+        } else {
+            size = targetManagement.countTargetByFilters(status, searchText, distributionId, noTagClicked, targetTags);
+        }
+        return size;
+    }
+
+    private boolean isFilteredByText() {
+        return managementUIState.getTargetTableFilters().getSearchText().isPresent()
+                && !Strings.isNullOrEmpty(managementUIState.getTargetTableFilters().getSearchText().get());
+    }
+
+    private Boolean anyFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
+            final Boolean noTagClicked, final String[] targetTags, final String searchText) {
+        return status == null && distributionId == null && Strings.isNullOrEmpty(searchText)
+                && !isTagSelected(targetTags, noTagClicked);
+    }
+
+    private Boolean isTagSelected(final String[] targetTags, final Boolean noTagClicked) {
+        return targetTags == null && !noTagClicked;
+    }
+
+    private long getTotalTargetsCount() {
+        return targetManagement.countTargetsAll();
+    }
+
+    private static TargetIdName getLastSelectedItem(final Set<TargetIdName> values) {
+        return Iterables.getLast(values);
+    }
+
+    private boolean isFilteredByStatus() {
+        return !managementUIState.getTargetTableFilters().getClickedStatusTargetTags().isEmpty();
+    }
+
+    private boolean isFilteredByTags() {
+        return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
 
 }

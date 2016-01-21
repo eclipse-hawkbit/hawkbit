@@ -12,31 +12,26 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.eventbus.event.TargetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.UI;
 
 /**
  * Implementation of Target tag token.
@@ -45,40 +40,20 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class TargetTagToken extends AbstractTagToken {
+public class TargetTagToken extends AbstractTargetTagToken {
 
     private static final long serialVersionUID = 7124887018280196721L;
 
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
-    @Autowired
-    private SpPermissionChecker spChecker;
-
-    @Autowired
-    private I18N i18n;
 
     @Autowired
     private UINotification uinotification;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private transient TagManagement tagManagement;
-
-    @Autowired
     private transient TargetManagement targetManagement;
 
     private Target selectedTarget;
-
-    private UI ui;
-
-    @PostConstruct
-    protected void init() {
-        super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
-    }
 
     @Override
     protected String getTagStyleName() {
@@ -132,7 +107,7 @@ public class TargetTagToken extends AbstractTagToken {
 
     @Override
     protected Boolean isToggleTagAssignmentAllowed() {
-        return spChecker.hasUpdateTargetPermission();
+        return checker.hasUpdateTargetPermission();
     }
 
     @Override
@@ -154,6 +129,49 @@ public class TargetTagToken extends AbstractTagToken {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
+        final TargetTag entity = event.getEntity();
+        final Item item = container.getItem(entity.getId());
+        if (item != null) {
+            updateItem(entity.getName(), entity.getColour(), item);
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEvent event) {
+        final TargetTagAssigmentResult assignmentResult = event.getAssigmentResult();
+        final TargetTag targetTag = assignmentResult.getTargetTag();
+        if (isAssign(assignmentResult)) {
+            addNewToken(targetTag.getId());
+        } else if (isUnassign(assignmentResult)) {
+            removeTokenItem(targetTag.getId(), targetTag.getName());
+        }
+
+    }
+
+    protected boolean isAssign(final TargetTagAssigmentResult assignmentResult) {
+        if (assignmentResult.getAssigned() > 0) {
+            final List<String> assignedTargetNames = assignmentResult.getAssignedTargets().stream()
+                    .map(t -> t.getControllerId()).collect(Collectors.toList());
+            if (assignedTargetNames.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean isUnassign(final TargetTagAssigmentResult assignmentResult) {
+        if (assignmentResult.getUnassigned() > 0) {
+            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedTargets().stream()
+                    .map(t -> t.getControllerId()).collect(Collectors.toList());
+            if (unassignedTargetNamesList.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent targetTableEvent) {
         if (targetTableEvent.getTargetComponentEvent() == TargetComponentEvent.SELECTED_TARGET
                 && targetTableEvent.getTarget() != null) {
@@ -165,30 +183,6 @@ public class TargetTagToken extends AbstractTagToken {
                 repopulateToken();
             });
         }
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final TargetTagEvent event) {
-        ui.access(() -> {
-            if (event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.ADD_TARGETTAG) {
-                setContainerPropertValues(event.getTargetTag().getId(), event.getTargetTag().getName(),
-                        event.getTargetTag().getColour());
-            } else if (event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.DELETE_TARGETTAG) {
-                final Long deletedTagId = getTagIdByTagName(event.getTargetTagName());
-                removeTagFromCombo(deletedTagId);
-            } else if (event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.ASSIGNED) {
-                final Long newlyAssignedTagId = getTagIdByTagName(event.getTargetTagName());
-                addNewToken(newlyAssignedTagId);
-            } else if (event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.UNASSIGNED) {
-                final Long newlyUnAssignedTagId = getTagIdByTagName(event.getTargetTagName());
-                removeTokenItem(newlyUnAssignedTagId, event.getTargetTagName());
-            }
-        });
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
 }

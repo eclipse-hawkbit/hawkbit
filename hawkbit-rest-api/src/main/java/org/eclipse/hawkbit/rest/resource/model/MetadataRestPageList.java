@@ -10,18 +10,12 @@ package org.eclipse.hawkbit.rest.resource.model;
 
 import java.util.List;
 
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * The rest model for a paged meta data list.
- * 
- *
- *
  *
  */
 public class MetadataRestPageList extends PagedList<MetadataRest> {
 
-    @ApiModelProperty(value = "a list of meta data", required = true)
     private final List<MetadataRest> content;
 
     /**

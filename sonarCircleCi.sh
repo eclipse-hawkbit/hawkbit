@@ -15,7 +15,6 @@ if [ "$CIRCLE_BRANCH" = "master" ]; then
 else
   if [ -n "$CI_PULL_REQUEST" ]; then
     mvn org.jacoco:jacoco-maven-plugin:prepare-agent verify license:check sonar:sonar -B -e -V \
-      -Dmaven.test.failure.ignore=true \
       -Dclirr=true \
       -Dsonar.analysis.mode=issues \
       -Dsonar.github.pullRequest=`echo $CI_PULL_REQUEST| awk -F'/' '{print $7}'` \

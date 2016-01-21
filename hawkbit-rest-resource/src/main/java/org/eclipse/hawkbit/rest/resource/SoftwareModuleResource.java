@@ -8,12 +8,6 @@
  */
 package org.eclipse.hawkbit.rest.resource;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -22,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
@@ -35,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
-import org.eclipse.hawkbit.rest.resource.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
@@ -55,7 +47,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,9 +65,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  */
 @RestController
-@Transactional(readOnly = true)
 @RequestMapping(RestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
-@Api(value = "softwaremodules", description = "Software Modules Management API")
 public class SoftwareModuleResource {
     private static final Logger LOG = LoggerFactory.getLogger(SoftwareModuleResource.class);
 
@@ -108,17 +97,13 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/artifacts", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ArtifactRest.class, value = "Upload Artifact", notes = "Handles POST request for artifact upload. Required Permission: "
-            + SpPermission.CREATE_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<ArtifactRest> uploadArtifact(@PathVariable final Long softwareModuleId,
             @RequestParam("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
             @RequestParam(value = "sha1sum", required = false) final String sha1Sum) {
 
-        Artifact result = null;
+        Artifact result;
         if (!file.isEmpty()) {
             String fileName = optionalFileName;
 
@@ -138,10 +123,7 @@ public class SoftwareModuleResource {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        // we flush to ensure that entity is generated and we can return ID etc.
-        entityManager.flush();
-
-        return new ResponseEntity<ArtifactRest>(SoftwareModuleMapper.toResponse(result), HttpStatus.CREATED);
+        return new ResponseEntity<>(SoftwareModuleMapper.toResponse(result), HttpStatus.CREATED);
 
     }
 
@@ -157,15 +139,11 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/artifacts", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ArtifactsRest.class, value = "List Artifacts Metadata", notes = "Handles the GET request of retrieving all meta data of artifacts assigned to a software module. Required Permission: "
-            + SpPermission.READ_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class))
     @ResponseBody
     public ResponseEntity<ArtifactsRest> getArtifacts(@PathVariable final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
-        return new ResponseEntity<ArtifactsRest>(SoftwareModuleMapper.artifactsToResponse(module.getArtifacts()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(SoftwareModuleMapper.artifactsToResponse(module.getArtifacts()), HttpStatus.OK);
     }
 
     /**
@@ -184,9 +162,6 @@ public class SoftwareModuleResource {
      *         successful
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/artifacts/{artifactId}/download")
-    @ApiOperation(response = Void.class, value = "Download Artifact", notes = "Handles the GET request for downloading an artifact. Required Permission: "
-            + SpPermission.READ_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module or Artifact", response = ExceptionInfo.class))
     @ResponseBody
     public ResponseEntity<Void> downloadArtifact(@PathVariable final Long softwareModuleId,
             @PathVariable final Long artifactId, final HttpServletResponse servletResponse,
@@ -223,16 +198,13 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/artifacts/{artifactId}", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ArtifactRest.class, value = "Get Artifact Metadata", notes = "Handles the GET request of retrieving a single Artifact meta data request. Required Permission: "
-            + SpPermission.READ_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module or Artifact", response = ExceptionInfo.class))
     @ResponseBody
     public ResponseEntity<ArtifactRest> getArtifact(@PathVariable final Long softwareModuleId,
             @PathVariable final Long artifactId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
-        return new ResponseEntity<ArtifactRest>(SoftwareModuleMapper.toResponse(module.getLocalArtifact(artifactId)
-                .get()), HttpStatus.OK);
+        return new ResponseEntity<>(SoftwareModuleMapper.toResponse(module.getLocalArtifact(artifactId).get()),
+                HttpStatus.OK);
     }
 
     /**
@@ -246,11 +218,7 @@ public class SoftwareModuleResource {
      * @return status OK if delete as successful.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{softwareModuleId}/artifacts/{artifactId}")
-    @ApiOperation(value = "Delete Artifact", notes = "Handles the DELETE request for a single SoftwareModule within SP. Required Permission: "
-            + SpPermission.DELETE_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module or Artifact", response = ExceptionInfo.class))
     @ResponseBody
-    @Transactional
     public ResponseEntity<Void> deleteArtifact(@PathVariable final Long softwareModuleId,
             @PathVariable final Long artifactId) {
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
@@ -282,18 +250,11 @@ public class SoftwareModuleResource {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = SoftwareModulePagedList.class, value = "Get Software Modules", notes = "Handles the GET request of retrieving all softwaremodules within SP. Required Permission: "
-            + SpPermission.READ_REPOSITORY)
     public ResponseEntity<SoftwareModulePagedList> getSoftwareModules(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @ApiParam(required = false, value = "FIQL syntax search query"
-                    + "<table border=0>"
-                    + "<tr><td>version==1.0.0</td><td>softwaremodules with version 1.0.0</td></tr>"
-                    + "<tr><td>version=ge=2.0.0</td><td>softwaremodules with version greater-equal 2.0.0</td></tr>"
-                    + "<tr><td>version==1.0.0;type=application</td><td>softwaremodules with version 1.0.0 and type application</td></tr>"
-                    + "<tr><td>id=1,type=os</td><td>softwaremodules with id 1 or type os</td></tr>" + "</table>") @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -328,9 +289,6 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = SoftwareModuleRest.class, value = "Get Software Module", notes = "Handles the GET request of retrieving a single softwaremodule within SP. Required Permission: "
-            + SpPermission.READ_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class))
     public ResponseEntity<SoftwareModuleRest> getSoftwareModule(@PathVariable final Long softwareModuleId) {
         final SoftwareModule findBaseSoftareModule = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
@@ -349,23 +307,14 @@ public class SoftwareModuleResource {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = SoftwareModulesRest.class, value = "Create Software Modules", notes = "Handles the POST request of creating new software modules within SP. The request body must always be a list of modules. Required Permission: "
-            + SpPermission.CREATE_REPOSITORY)
-    @ApiResponses({
-            @ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class),
-            @ApiResponse(code = 409, message = "Conflict Software Module already exists", response = ExceptionInfo.class) })
-    @Transactional
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<SoftwareModulesRest> createSoftwareModules(
             @RequestBody final List<SoftwareModuleRequestBodyPost> softwareModules) {
         LOG.debug("creating {} softwareModules", softwareModules.size());
         final Iterable<SoftwareModule> createdSoftwareModules = softwareManagement
                 .createSoftwareModule(SoftwareModuleMapper.smFromRequest(softwareModules, softwareManagement));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
-
-        // we flush to ensure that entity is generated and we can return ID etc.
-        entityManager.flush();
 
         return new ResponseEntity<>(SoftwareModuleMapper.toResponseSoftwareModules(createdSoftwareModules),
                 HttpStatus.CREATED);
@@ -383,10 +332,6 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{softwareModuleId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(value = "Update Software Module", notes = "Handles the PUT request for a single softwaremodule within SP. Required Permission: "
-            + SpPermission.UPDATE_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<SoftwareModuleRest> updateSoftwareModule(@PathVariable final Long softwareModuleId,
             @RequestBody final SoftwareModuleRequestBodyPut restSoftwareModule) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
@@ -400,10 +345,6 @@ public class SoftwareModuleResource {
         }
 
         final SoftwareModule updateSoftwareModule = softwareManagement.updateSoftwareModule(module);
-
-        // we flush to ensure that entity is generated and we can return ID etc.
-        entityManager.flush();
-
         return new ResponseEntity<>(SoftwareModuleMapper.toResponse(updateSoftwareModule), HttpStatus.OK);
     }
 
@@ -416,10 +357,6 @@ public class SoftwareModuleResource {
      *
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{softwareModuleId}")
-    @ApiOperation(value = "Delete Software Module", notes = "Handles the DELETE request for a single softwaremodule within SP. Required Permission: "
-            + SpPermission.DELETE_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<Void> deleteSoftwareModule(@PathVariable final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
@@ -430,7 +367,7 @@ public class SoftwareModuleResource {
 
     /**
      * Gets a paged list of meta data for a software module.
-     * 
+     *
      * @param softwareModuleId
      *            the ID of the software module for the meta data
      * @param pagingOffsetParam
@@ -450,20 +387,11 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    @ApiOperation(response = MetadataRestPageList.class, value = "Get a paged list of meta data", notes = " Get a paged list of meta data for a software module."
-            + " Required Permission: " + SpPermission.READ_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module", response = ExceptionInfo.class))
-    @Transactional
-    public ResponseEntity<MetadataRestPageList> getMetadata(
-            @PathVariable final Long softwareModuleId,
+    public ResponseEntity<MetadataRestPageList> getMetadata(@PathVariable final Long softwareModuleId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @ApiParam(required = false, value = "FIQL syntax search query"
-                    + "<table border=0>"
-                    + "<tr><td>key==aKey,key==bKey</td><td>metadata with the key 'aKey' or 'bKey'</td></tr>"
-                    + "<tr><td>value=li=%25someValue%25</td><td>metadata which contains 'someValue' in the value ignore case</td></tr>"
-                    + "</table>") @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         // check if software module exists otherwise throw exception immediately
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
@@ -482,13 +410,15 @@ public class SoftwareModuleResource {
             metaDataPage = softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, pageable);
         }
 
-        return new ResponseEntity<>(new MetadataRestPageList(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage
-                .getContent()), metaDataPage.getTotalElements()), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new MetadataRestPageList(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
+                        metaDataPage.getTotalElements()),
+                HttpStatus.OK);
     }
 
     /**
      * Gets a single meta data value for a specific key of a software module.
-     * 
+     *
      * @param softwareModuleId
      *            the ID of the software module to get the meta data from
      * @param metadataKey
@@ -496,11 +426,8 @@ public class SoftwareModuleResource {
      * @return status OK if get request is successful with the value of the meta
      *         data
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = MetadataRest.class, value = "Get a single meta data value", notes = " Get a single meta data value for a meta data key."
-            + " Required Permission: " + SpPermission.READ_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module or meta data key", response = ExceptionInfo.class))
-    @Transactional
+    @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<MetadataRest> getMetadataValue(@PathVariable final Long softwareModuleId,
             @PathVariable final String metadataKey) {
         // check if distribution set exists otherwise throw exception
@@ -512,7 +439,7 @@ public class SoftwareModuleResource {
 
     /**
      * Updates a single meta data value of a software module.
-     * 
+     *
      * @param softwareModuleId
      *            the ID of the software module to update the meta data entry
      * @param metadataKey
@@ -522,10 +449,6 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    @ApiOperation(response = MetadataRest.class, value = "Update a single meta data value", notes = " Update a single meta data value for speficic key."
-            + " Required Permission: " + SpPermission.UPDATE_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module or meta data key", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<MetadataRest> updateMetadata(@PathVariable final Long softwareModuleId,
             @PathVariable final String metadataKey, @RequestBody final MetadataRest metadata) {
         // check if software module exists otherwise throw exception immediately
@@ -537,7 +460,7 @@ public class SoftwareModuleResource {
 
     /**
      * Deletes a single meta data entry from the software module.
-     * 
+     *
      * @param softwareModuleId
      *            the ID of the software module to delete the meta data entry
      * @param metadataKey
@@ -545,10 +468,6 @@ public class SoftwareModuleResource {
      * @return status OK if the delete request is successful
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{softwareModuleId}/metadata/{metadataKey}")
-    @ApiOperation(value = "Delete a single meta data", notes = " Delete a single meta data." + " Required Permission: "
-            + SpPermission.UPDATE_REPOSITORY)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Software Module or meta data key", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<Void> deleteMetadata(@PathVariable final Long softwareModuleId,
             @PathVariable final String metadataKey) {
         // check if software module exists otherwise throw exception immediately
@@ -559,7 +478,7 @@ public class SoftwareModuleResource {
 
     /**
      * Creates a list of meta data for a specific software module.
-     * 
+     *
      * @param softwareModuleId
      *            the ID of the distribution set to create meta data for
      * @param metadataRest
@@ -568,13 +487,8 @@ public class SoftwareModuleResource {
      *         the created meta data
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/metadata", consumes = {
-            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE,
-            "application/hal+json" })
-    @ApiOperation(response = MetadataRest.class, value = "Create a list of meta data entries", notes = "Create a list of meta data entries"
-            + " Required Permission: " + SpPermission.READ_REPOSITORY + " and " + SpPermission.UPDATE_TARGET)
-    @ApiResponses({ @ApiResponse(code = 409, message = "Conflict", response = ExceptionInfo.class),
-            @ApiResponse(code = 404, message = "Not Found Distribution Set", response = ExceptionInfo.class) })
-    @Transactional
+            MediaType.APPLICATION_JSON_VALUE,
+            "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     public ResponseEntity<List<MetadataRest>> createMetadata(@PathVariable final Long softwareModuleId,
             @RequestBody final List<MetadataRest> metadataRest) {
         // check if software module exists otherwise throw exception immediately
@@ -583,15 +497,12 @@ public class SoftwareModuleResource {
         final List<SoftwareModuleMetadata> created = softwareManagement
                 .createSoftwareModuleMetadata(SoftwareModuleMapper.fromRequestSwMetadata(sw, metadataRest));
 
-        // we flush to ensure that entity is generated and we can return ID etc.
-        entityManager.flush();
-
-        return new ResponseEntity<List<MetadataRest>>(SoftwareModuleMapper.toResponseSwMetadata(created),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(SoftwareModuleMapper.toResponseSwMetadata(created), HttpStatus.CREATED);
 
     }
 
-    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId, final Long artifactId) {
+    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
+            final Long artifactId) {
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
         if (module == null) {
             throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");

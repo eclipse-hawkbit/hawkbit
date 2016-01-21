@@ -15,18 +15,19 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent.TargetTagComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -280,49 +281,29 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         final Table source = transferable.getSourceComponent();
 
         @SuppressWarnings("unchecked")
-        final Set<TargetIdName> targetSelected = (Set<TargetIdName>) source.getValue();
+        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(source);
         final Set<String> targetList = new HashSet<String>();
-        if (!targetSelected.contains(transferable.getData(ITEMID))) {
-            targetList.add(((TargetIdName) transferable.getData(ITEMID)).getControllerId());
-        } else {
-            targetList.addAll(targetSelected.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
-        }
-
-        final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
-                SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
-
-        final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
-
-        final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
-        notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
-
-        if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
-            eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
-        }
-        if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty() && tagsClickedList.contains(targTagName)) {
-            eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
-        }
-
-        updateTargetTagLayoutInDetails(result, targTagName);
-
-    }
-
-    private void updateTargetTagLayoutInDetails(final TargetTagAssigmentResult assignmentResult,
-            final String targTagName) {
-        if (assignmentResult.getAssigned() > 0) {
-            final List<String> assignedTargetNamesList = assignmentResult.getAssignedTargets().stream()
-                    .map(t -> t.getControllerId()).collect(Collectors.toList());
-            if (assignedTargetNamesList.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
-                eventBus.publish(this, new TargetTagEvent(TargetTagComponentEvent.ASSIGNED, targTagName));
-            }
-        } else if (assignmentResult.getUnassigned() > 0) {
-
-            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedTargets().stream()
-                    .map(t -> t.getControllerId()).collect(Collectors.toList());
-            if (unassignedTargetNamesList.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
-                eventBus.publish(this, new TargetTagEvent(TargetTagComponentEvent.UNASSIGNED, targTagName));
+        if (transferable.getData(ITEMID) != null) {
+            if (!targetSelected.contains(transferable.getData(ITEMID))) {
+                targetList.add(((TargetIdName) transferable.getData(ITEMID)).getControllerId());
+            } else {
+                targetList.addAll(targetSelected.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
             }
 
+            final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
+                    SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+
+            final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
+
+            final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+            notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
+
+            if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
+                eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
+            }
+            if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty() && tagsClickedList.contains(targTagName)) {
+                eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
+            }
         }
     }
 
@@ -355,17 +336,25 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final TargetTagEvent event) {
-        if (event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.ADD_TARGETTAG
-                || event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.EDIT_TARGETTAG
-                || event.getTargetTagComponentEvent() == TargetTagEvent.TargetTagComponentEvent.DELETE_TARGETTAG) {
-            removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-            ((LazyQueryContainer) getContainerDataSource()).refresh();
-            addNewTargetTag(new TargetTag("NO TAG"));
-            addColumn();
+    void onEvent(final TargetTagUpdateEvent event) {
+        refreshContainer();
+    }
 
-        }
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
+        refreshContainer();
+    }
 
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
+        refreshContainer();
+    }
+
+    private void refreshContainer() {
+        removeGeneratedColumn(FILTER_BUTTON_COLUMN);
+        ((LazyQueryContainer) getContainerDataSource()).refresh();
+        addNewTargetTag(new TargetTag("NO TAG"));
+        addColumn();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

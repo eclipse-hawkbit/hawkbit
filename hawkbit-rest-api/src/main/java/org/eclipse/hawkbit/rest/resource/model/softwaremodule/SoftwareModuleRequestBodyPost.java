@@ -8,39 +8,26 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.softwaremodule;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Request Body for SoftwareModule POST.
  *
- *
- *
- *
  */
 public class SoftwareModuleRequestBodyPost {
 
-    @ApiModelProperty(value = ApiModelProperties.NAME, required = true)
     @JsonProperty(required = true)
     private String name;
 
-    @ApiModelProperty(value = ApiModelProperties.VERSION, required = true)
     @JsonProperty(required = true)
     private String version;
 
-    @ApiModelProperty(value = ApiModelProperties.SOFTWARE_MODULE_TYPE, required = true, allowableValues = SoftwareModuleRest.SM_RUNTIME
-            + "," + SoftwareModuleRest.SM_APPLICATION + "," + SoftwareModuleRest.SM_OS)
     @JsonProperty(required = true)
     private String type;
 
-    @ApiModelProperty(value = ApiModelProperties.DESCRPTION)
     @JsonProperty
     private String description;
 
-    @ApiModelProperty(value = ApiModelProperties.VENDOR)
     @JsonProperty
     private String vendor;
 
@@ -54,9 +41,12 @@ public class SoftwareModuleRequestBodyPost {
     /**
      * @param name
      *            the name to set
+     *
+     * @return updated body
      */
-    public void setName(final String name) {
+    public SoftwareModuleRequestBodyPost setName(final String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -69,9 +59,12 @@ public class SoftwareModuleRequestBodyPost {
     /**
      * @param version
      *            the version to set
+     *
+     * @return updated body
      */
-    public void setVersion(final String version) {
+    public SoftwareModuleRequestBodyPost setVersion(final String version) {
         this.version = version;
+        return this;
     }
 
     /**
@@ -84,9 +77,12 @@ public class SoftwareModuleRequestBodyPost {
     /**
      * @param type
      *            the type to set
+     *
+     * @return updated body
      */
-    public void setType(final String type) {
+    public SoftwareModuleRequestBodyPost setType(final String type) {
         this.type = type;
+        return this;
     }
 
     /**
@@ -99,9 +95,12 @@ public class SoftwareModuleRequestBodyPost {
     /**
      * @param description
      *            the description to set
+     *
+     * @return updated body
      */
-    public void setDescription(final String description) {
+    public SoftwareModuleRequestBodyPost setDescription(final String description) {
         this.description = description;
+        return this;
     }
 
     /**
@@ -114,9 +113,12 @@ public class SoftwareModuleRequestBodyPost {
     /**
      * @param vendor
      *            the vendor to set
+     *
+     * @return updated body
      */
-    public void setVendor(final String vendor) {
+    public SoftwareModuleRequestBodyPost setVendor(final String vendor) {
         this.vendor = vendor;
+        return this;
     }
 
 }

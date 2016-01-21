@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +100,12 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
      */
     protected void showRowCount(final DragAndDropEvent dragEvent, final Table compsource) {
         /* Show the number of rows that are dragging in the drag image */
-        final Set<String> targetSelectedList = (Set<String>) compsource.getValue();
+        final Set<String> targetSelectedList = new HashSet<>((Set<String>) compsource.getValue());
+        /**
+         * Remove null value if any .
+         */
+        targetSelectedList.remove(null);
+
         if (previousRowCount != targetSelectedList.size()) {
             previousRowCount = targetSelectedList.size();
             /*

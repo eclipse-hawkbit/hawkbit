@@ -199,8 +199,8 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private String computeSHA1Hash(final InputStream stream, final FileOutputStream os, final String providedSHA1Sum)
-            throws NoSuchAlgorithmException, IOException {
+    private static String computeSHA1Hash(final InputStream stream, final FileOutputStream os,
+            final String providedSHA1Sum) throws NoSuchAlgorithmException, IOException {
         String sha1Hash;
         // compute digest
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
@@ -240,6 +240,7 @@ public class ArtifactStore implements ArtifactRepository {
      *            the sha1-hashes of the files to lookup.
      * @return list of artfiacts
      */
+    @Override
     public List<DbArtifact> getArtifactsBySha1(final List<String> sha1Hashes) {
         return map(gridFs.find(new Query().addCriteria(Criteria.where(SHA1).in(sha1Hashes))));
     }

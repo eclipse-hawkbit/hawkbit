@@ -8,24 +8,14 @@
  */
 package org.eclipse.hawkbit.controller.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.springframework.hateoas.ResourceSupport;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
- * {@link ControllerBase} ressource content.
- *
- *
- *
- *
+ * {@link ControllerBase} resource content.
  *
  */
-@ApiModel("SP target base poll resource")
 public class ControllerBase extends ResourceSupport {
 
-    @ApiModelProperty(ApiModelProperties.TARGET_CONFIGURATION)
     private final Config config;
 
     /**

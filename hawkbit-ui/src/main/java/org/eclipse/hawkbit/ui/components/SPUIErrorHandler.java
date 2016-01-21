@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -39,7 +40,7 @@ public class SPUIErrorHandler extends DefaultErrorHandler {
     private static final Logger LOG = LoggerFactory.getLogger(SPUIErrorHandler.class);
 
     @Override
-    public void error(ErrorEvent event) {
+    public void error(final ErrorEvent event) {
         final SPNotificationMessage notification = new SPNotificationMessage();
         // Build error style
         final StringBuilder style = new StringBuilder(ValoTheme.NOTIFICATION_FAILURE);
@@ -47,14 +48,18 @@ public class SPUIErrorHandler extends DefaultErrorHandler {
         style.append(ValoTheme.NOTIFICATION_SMALL);
         style.append(' ');
         style.append(ValoTheme.NOTIFICATION_CLOSABLE);
-        final I18N i18n = (I18N) SpringContextHelper.getBean(I18N.class);
+        final I18N i18n = SpringContextHelper.getBean(I18N.class);
         String exceptionName = null;
         // From the exception trace we get the expected exception class name
         for (Throwable error = event.getThrowable(); error != null; error = error.getCause()) {
             exceptionName = HawkbitCommonUtil.getLastSequenceBySplitByDot(error.getClass().getName());
             LOG.error("Error in SP-UI:", error);
         }
-        notification.showNotification(style.toString(), i18n.get("caption.error"),
-                i18n.get("message.error.temp", new Object[] { exceptionName }), false);
+        final Component errorOrgin = findAbstractComponent(event);
+        if (null != errorOrgin && errorOrgin.getUI() != null) {
+            notification
+                    .showNotification(style.toString(), i18n.get("caption.error"), i18n.get("message.error.temp",
+                            new Object[] { exceptionName }), false, errorOrgin.getUI().getPage());
+        }
     }
 }

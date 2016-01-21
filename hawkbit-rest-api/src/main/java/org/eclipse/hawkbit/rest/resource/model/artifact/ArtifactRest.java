@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.rest.resource.model.artifact;
 
 import org.eclipse.hawkbit.rest.resource.model.BaseEntityRest;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,36 +17,24 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * A json annotated rest model for Artifact to RESTful API representation.
- *
- *
- *
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Software Artifact")
 public class ArtifactRest extends BaseEntityRest {
     @JsonProperty(required = true)
     private ArtifactType type;
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID, required = true)
     @JsonProperty("id")
     private Long artifactId;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_HASHES)
     @JsonProperty
     private ArtifactHash hashes;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_PROVIDED_FILENAME)
     @JsonProperty
     private String providedFilename;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_SIZE)
     @JsonProperty
     private Long size;
 

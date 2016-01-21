@@ -85,6 +85,23 @@ public class ManagementUIState implements Serializable {
 
     private boolean customFilterSelected;
 
+    private boolean bulkUploadWindowMinimised;
+
+    /**
+     * @return the bulkUploadWindowMinimised
+     */
+    public boolean isBulkUploadWindowMinimised() {
+        return bulkUploadWindowMinimised;
+    }
+
+    /**
+     * @param bulkUploadWindowMinimised
+     *            the bulkUploadWindowMinimised to set
+     */
+    public void setBulkUploadWindowMinimised(final boolean bulkUploadWindowMinimised) {
+        this.bulkUploadWindowMinimised = bulkUploadWindowMinimised;
+    }
+
     /**
      * @return the isCustomFilterSelected
      */

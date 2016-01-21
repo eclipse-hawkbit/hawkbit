@@ -78,7 +78,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.table.AbstractTableHeader#getHeaderCaption(
      * )
      */
@@ -89,7 +89,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.table.AbstractTableHeader#getSearchBoxId()
      */
     @Override
@@ -99,7 +99,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
      * getSearchRestIconId()
      */
@@ -110,7 +110,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.table.AbstractTableHeader#getAddIconId()
      */
     @Override
@@ -120,7 +120,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
      * onLoadSearchBoxValue()
      */
@@ -134,7 +134,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.table.AbstractTableHeader#getDropFilterId()
      */
     @Override
@@ -224,7 +224,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.table.AbstractTableHeader#canAddNewItem()
      */
     @Override
@@ -249,7 +249,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
      * getBulkUploadIconId()
      */
@@ -260,7 +260,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.table.AbstractTableHeader#bulkUpload(com.
      * vaadin.ui.Button.ClickEvent )
      */
@@ -273,12 +273,23 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
      * isBulkUploadAllowed()
      */
     @Override
     protected Boolean isBulkUploadAllowed() {
         return Boolean.FALSE;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
+     * isBulkUploadInProgress()
+     */
+    @Override
+    protected boolean isBulkUploadInProgress() {
+        return false;
     }
 }

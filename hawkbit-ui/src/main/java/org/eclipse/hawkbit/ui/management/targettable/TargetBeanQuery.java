@@ -46,7 +46,7 @@ import com.google.common.base.Strings;
  */
 public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private static final long serialVersionUID = -5645680058303167558L;
-    private Sort sort = new Sort(Direction.ASC, "createdAt");
+    private Sort sort = new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt");
     private Collection<TargetUpdateStatus> status = null;
     private String[] targetTags = null;
     private Long distributionId = null;

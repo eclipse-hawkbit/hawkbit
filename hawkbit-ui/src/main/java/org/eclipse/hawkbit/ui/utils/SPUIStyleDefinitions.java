@@ -227,6 +227,11 @@ public final class SPUIStyleDefinitions {
     public static final String ERROR_ICON = "error-icon";
 
     /**
+     * Bulk upload progress indicator style.
+     */
+    public static final String BULK_UPLOAD_PROGRESS_INDICATOR_STYLE = "app-loading";
+
+    /**
      * Constructor.
      */
     private SPUIStyleDefinitions() {

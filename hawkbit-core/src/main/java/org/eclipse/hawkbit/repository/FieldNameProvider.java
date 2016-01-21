@@ -12,10 +12,9 @@ package org.eclipse.hawkbit.repository;
  * An interface for declaring the name of the field described in the database
  * which is used as string representation of the field, e.g. for sorting the
  * fields over REST.
- * 
- *
  *
  */
+@FunctionalInterface
 public interface FieldNameProvider {
 
     /**

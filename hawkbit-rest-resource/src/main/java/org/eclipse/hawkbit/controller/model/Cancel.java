@@ -10,29 +10,19 @@ package org.eclipse.hawkbit.controller.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Cancel action to be provided to the target.
  *
- *
- *
  */
-@ApiModel("SP Target Cancel Action")
 public class Cancel {
-    @ApiModelProperty(value = ApiModelProperties.ACTION_ID)
     private final String id;
 
-    @ApiModelProperty(value = ApiModelProperties.CANCEL_ACTION, required = true)
     @NotNull
     private final CancelActionToStop cancelAction;
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param id
      *            of the {@link CancelAction}
      * @param cancelAction
@@ -60,7 +50,7 @@ public class Cancel {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

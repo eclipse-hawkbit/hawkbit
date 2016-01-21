@@ -11,7 +11,7 @@ package org.eclipse.hawkbit;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.aspects.SpExceptionMappingAspect;
+import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
@@ -123,11 +123,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return {@link SpExceptionMappingAspect} aspect bean
+     * @return {@link ExceptionMappingAspectHandler} aspect bean
      */
     @Bean
-    public SpExceptionMappingAspect createRepositoryExceptionHandlerAdvice() {
-        return new SpExceptionMappingAspect();
+    public ExceptionMappingAspectHandler createRepositoryExceptionHandlerAdvice() {
+        return new ExceptionMappingAspectHandler();
     }
 
     /*

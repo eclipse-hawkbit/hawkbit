@@ -8,11 +8,7 @@
  */
 package org.eclipse.hawkbit.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -58,7 +53,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,8 +74,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(ControllerConstants.BASE_V1_REQUEST_MAPPING)
-@Transactional
-@Api(value = "/", description = "SP Direct Device Integration API")
 public class RootController implements EnvironmentAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
@@ -130,7 +122,6 @@ public class RootController implements EnvironmentAware {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = org.eclipse.hawkbit.controller.model.Artifact.class, value = "Returns artifacts of given software module", notes = "Returns all artifacts whichs is assigned to the software module")
     public ResponseEntity<List<org.eclipse.hawkbit.controller.model.Artifact>> getSoftwareModulesArtifacts(
             @PathVariable final String targetid, @PathVariable final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", targetid);
@@ -148,36 +139,6 @@ public class RootController implements EnvironmentAware {
     }
 
     /**
-     * Returns all available software modules for a given target.
-     *
-     * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
-     * @param request
-     *            the HTTP request injected by spring
-     * @return the response
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/", produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = SoftwareModule.class, value = " Returns software modules of given target", notes = "Returns all available software modules for a given target")
-    public ResponseEntity<List<org.eclipse.hawkbit.controller.model.SoftwareModule>> getSoftwareModules(
-            @PathVariable final String targetid, final HttpServletRequest request) {
-        LOG.debug("getSoftwareModules({})", targetid);
-
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
-
-        final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
-
-        if (assignedDistributionSet == null) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(DataConversionHelper.createSoftwareModules(targetid, assignedDistributionSet,
-                tenantAware), HttpStatus.OK);
-    }
-
-    /**
      * Root resource for an individual {@link Target}.
      *
      * @param targetid
@@ -189,9 +150,6 @@ public class RootController implements EnvironmentAware {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ControllerBase.class, value = "Controller base poll resource", notes = "This base resource can be regularly polled by the controller on the provisiong target or device "
-            + "in order to retrieve actions that need to be executed. The resource supports Etag based modification "
-            + "checks in order to save traffic.")
     public ResponseEntity<ControllerBase> getControllerBase(@PathVariable final String targetid,
             final HttpServletRequest request) {
         LOG.debug("getControllerBase({})", targetid);
@@ -205,7 +163,7 @@ public class RootController implements EnvironmentAware {
                     System.currentTimeMillis(), IpUtil.getClientIpFromRequest(request, requestHeader));
         }
 
-        return new ResponseEntity<ControllerBase>(DataConversionHelper.fromTarget(target,
+        return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
                 controllerManagement.findActionByTargetAndActive(target), controllerPollProperties.getPollingTime(),
                 tenantAware), HttpStatus.OK);
     }
@@ -230,13 +188,10 @@ public class RootController implements EnvironmentAware {
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
-    @ApiOperation(response = Void.class, value = "Downstream of given artifact", notes = "Download resource for artifacts. The resource supports partial download "
-            + "as specified by RFC7233 (range requests). Keep in mind that the controller "
-            + "needs to have the artifact assigned in order to be granted permission to download.")
     public ResponseEntity<Void> downloadArtifact(@PathVariable final String targetid,
             @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
             final HttpServletResponse response, final HttpServletRequest request) {
-        ResponseEntity<Void> result = null;
+        ResponseEntity<Void> result;
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(request, requestHeader));
@@ -283,7 +238,7 @@ public class RootController implements EnvironmentAware {
         return action;
     }
 
-    private boolean checkModule(final String fileName, final SoftwareModule module) {
+    private static boolean checkModule(final String fileName, final SoftwareModule module) {
         return null == module || !module.getLocalArtifactByFilename(fileName).isPresent();
     }
 
@@ -306,9 +261,6 @@ public class RootController implements EnvironmentAware {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
             + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(response = Void.class, value = "Downstream of given artifacts MD5SUM file", notes = "Download resource for MD5SUM file is an optional functionally especially usefull for "
-            + "Linux based devices on order to check artifact coonsitency after download by using the md5sum "
-            + "command line tool. The MD5 and SHA1 are in addition available as metadata in the deployment command itself.")
     public ResponseEntity<Void> downloadArtifactMd5(@PathVariable final String targetid,
             @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
             final HttpServletResponse response, final HttpServletRequest request) {
@@ -350,7 +302,6 @@ public class RootController implements EnvironmentAware {
      * @return the response
      */
     @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(response = DeploymentBase.class, value = "Deployment or update action", notes = "Core resource for deployment operations. Contains all information necessary in order to execute the operation.")
     public ResponseEntity<DeploymentBase> getControllerBasedeploymentAction(
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
@@ -380,10 +331,10 @@ public class RootController implements EnvironmentAware {
             controllerManagement.registerRetrieved(action,
                     "Controller retrieved update action and should start now the download.");
 
-            return new ResponseEntity<DeploymentBase>(base, HttpStatus.OK);
+            return new ResponseEntity<>(base, HttpStatus.OK);
         }
 
-        return new ResponseEntity<DeploymentBase>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -403,12 +354,9 @@ public class RootController implements EnvironmentAware {
      */
     @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
             + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(response = ActionFeedback.class, value = "Feedback channel for update actions", notes = "Feedback channel. It is up to the device to decided how much intermediate feedback is "
-            + "provided. However, the action will be kept open until the controller on the device reports a "
-            + "finished (either successfull or error).")
-    public ResponseEntity<ActionFeedback> postBasedeploymentActionFeedback(
-            @Valid @RequestBody final ActionFeedback feedback, @PathVariable final String targetid,
-            @PathVariable @NotEmpty final Long actionId, final HttpServletRequest request) {
+    public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
+            @PathVariable final String targetid, @PathVariable @NotEmpty final Long actionId,
+            final HttpServletRequest request) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", targetid, actionId, feedback);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
@@ -418,7 +366,7 @@ public class RootController implements EnvironmentAware {
             LOG.warn(
                     "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
                     feedback.getId(), actionId);
-            return new ResponseEntity<ActionFeedback>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -430,13 +378,13 @@ public class RootController implements EnvironmentAware {
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
                     action.getId(), feedback.getId());
-            return new ResponseEntity<ActionFeedback>(HttpStatus.GONE);
+            return new ResponseEntity<>(HttpStatus.GONE);
         }
 
         controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action),
                 action);
 
-        return new ResponseEntity<ActionFeedback>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
@@ -461,25 +409,10 @@ public class RootController implements EnvironmentAware {
             actionStatus.addMessage("Controller reported internal ERROR and REJECTED update.");
             break;
         case CLOSED:
-            LOG.debug("Controller reported closed (actionid: {}, targetid: {}) as we got {} report.", actionid,
-                    targetid, feedback.getStatus().getExecution());
-            if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
-                actionStatus.setStatus(Status.ERROR);
-                actionStatus.addMessage("Controller reported CLOSED with ERROR!");
-            } else {
-                actionStatus.setStatus(Status.FINISHED);
-                actionStatus.addMessage("Controller reported CLOSED with OK!");
-            }
+            handleClosedUpdateStatus(feedback, targetid, actionid, actionStatus);
             break;
         default:
-            LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.",
-                    actionid, targetid, feedback.getStatus().getExecution());
-            actionStatus.setStatus(Status.RUNNING);
-            // MECS-400: we should not use the unstructed message list for
-            // the
-            // server comment on the
-            // status.
-            actionStatus.addMessage("Controller reported: " + feedback.getStatus().getExecution());
+            handleDefaultUpdateStatus(feedback, targetid, actionid, actionStatus);
             break;
         }
 
@@ -495,6 +428,29 @@ public class RootController implements EnvironmentAware {
         return actionStatus;
     }
 
+    private static void handleDefaultUpdateStatus(final ActionFeedback feedback, final String targetid,
+            final Long actionid, final ActionStatus actionStatus) {
+        LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.",
+                actionid, targetid, feedback.getStatus().getExecution());
+        actionStatus.setStatus(Status.RUNNING);
+        // MECS-400: we should not use the unstructed message list for
+        // the server comment on the status.
+        actionStatus.addMessage("Controller reported: " + feedback.getStatus().getExecution());
+    }
+
+    private static void handleClosedUpdateStatus(final ActionFeedback feedback, final String targetid,
+            final Long actionid, final ActionStatus actionStatus) {
+        LOG.debug("Controller reported closed (actionid: {}, targetid: {}) as we got {} report.", actionid, targetid,
+                feedback.getStatus().getExecution());
+        if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
+            actionStatus.setStatus(Status.ERROR);
+            actionStatus.addMessage("Controller reported CLOSED with ERROR!");
+        } else {
+            actionStatus.setStatus(Status.FINISHED);
+            actionStatus.addMessage("Controller reported CLOSED with OK!");
+        }
+    }
+
     /**
      * This is the feedback channel for the config data action.
      *
@@ -508,16 +464,13 @@ public class RootController implements EnvironmentAware {
      * @return status of the request
      */
     @RequestMapping(value = "/{targetid}/" + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(response = ConfigData.class, value = "Response to a requested metadata pull from the provisioning target device.", notes = "The usual behaviour is that when a new device resgisters at the server it is "
-            + "requested to provide the meta information that will allow the server to identify the device on a "
-            + "hardware level (e.g. hardware revision, mac address, serial number etc.).")
-    public ResponseEntity<ConfigData> putConfigData(@Valid @RequestBody final ConfigData configData,
+    public ResponseEntity<Void> putConfigData(@Valid @RequestBody final ConfigData configData,
             @PathVariable final String targetid, final HttpServletRequest request) {
         controllerManagement.updateLastTargetQuery(targetid, IpUtil.getClientIpFromRequest(request, requestHeader));
 
         controllerManagement.updateControllerAttributes(targetid, configData.getData());
 
-        return new ResponseEntity<ConfigData>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -533,8 +486,6 @@ public class RootController implements EnvironmentAware {
      * @return the {@link Cancel} response
      */
     @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(response = Cancel.class, value = "Cancel an action", notes = "The SP server might cancel an operation, e.g. an unfinished update has a sucessor. "
-            + "It is up to the provisiong target to decide to accept the cancelation or reject it.")
     public ResponseEntity<Cancel> getControllerCancelAction(@PathVariable @NotEmpty final String targetid,
             @PathVariable @NotEmpty final Long actionId, final HttpServletRequest request) {
         LOG.debug("getControllerCancelAction({})", targetid);
@@ -557,10 +508,10 @@ public class RootController implements EnvironmentAware {
             controllerManagement.registerRetrieved(action,
                     "Controller retrieved cancel action and should start now the cancelation.");
 
-            return new ResponseEntity<Cancel>(cancel, HttpStatus.OK);
+            return new ResponseEntity<>(cancel, HttpStatus.OK);
         }
 
-        return new ResponseEntity<Cancel>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -578,12 +529,10 @@ public class RootController implements EnvironmentAware {
      *
      * @return the {@link ActionFeedback} response
      */
+
     @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION + "/{actionId}/"
             + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(response = Cancel.class, value = "Feedback channel for cancel actions", notes = "It is up to the device to decided how much intermediate feedback is "
-            + "provided. However, the action will be kept open until the controller on the device reports a "
-            + "finished (either successfull or error) or rejects the oprtioan, e.g. the canceled actions have been started already.")
-    public ResponseEntity<ActionFeedback> postCancelActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
+    public ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             final HttpServletRequest request) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", targetid, feedback);
@@ -595,7 +544,7 @@ public class RootController implements EnvironmentAware {
             LOG.warn(
                     "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
                     feedback.getId(), actionId);
-            return new ResponseEntity<ActionFeedback>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -606,7 +555,7 @@ public class RootController implements EnvironmentAware {
 
         controllerManagement.addCancelActionStatus(
                 generateActionCancelStatus(feedback, target, feedback.getId(), action), action);
-        return new ResponseEntity<ActionFeedback>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private static ActionStatus generateActionCancelStatus(final ActionFeedback feedback, final Target target,
@@ -629,11 +578,7 @@ public class RootController implements EnvironmentAware {
             actionStatus.setStatus(Status.WARNING);
             break;
         case CLOSED:
-            if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
-                actionStatus.setStatus(Status.ERROR);
-            } else {
-                actionStatus.setStatus(Status.CANCELED);
-            }
+            handleClosedCancelStatus(feedback, actionStatus);
             break;
         default:
             actionStatus.setStatus(Status.RUNNING);
@@ -651,6 +596,14 @@ public class RootController implements EnvironmentAware {
 
         return actionStatus;
 
+    }
+
+    private static void handleClosedCancelStatus(final ActionFeedback feedback, final ActionStatus actionStatus) {
+        if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
+            actionStatus.setStatus(Status.ERROR);
+        } else {
+            actionStatus.setStatus(Status.CANCELED);
+        }
     }
 
     private Action findActionWithExceptionIfNotFound(final Long actionId) {

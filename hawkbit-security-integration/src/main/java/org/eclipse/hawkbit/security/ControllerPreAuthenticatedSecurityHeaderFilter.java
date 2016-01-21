@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * An pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
  * {@link TenantSecruityToken}.
- * 
+ *
  *
  *
  */
@@ -50,7 +50,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
 
     /**
      * Constructor.
-     * 
+     *
      * @param caCommonNameHeader
      *            the http-header which holds the common-name of the certificate
      * @param caAuthorityNameHeader
@@ -118,7 +118,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     private String getIssuerHashHeader(final TenantSecruityToken secruityToken, final String knownIssuerHash) {
         // iterate over the headers until we get a null header.
         int iHeader = 1;
-        String foundHash = null;
+        String foundHash;
         while ((foundHash = secruityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
             if (foundHash.equals(knownIssuerHash)) {
                 if (LOGGER.isTraceEnabled()) {

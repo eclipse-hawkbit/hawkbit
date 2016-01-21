@@ -69,13 +69,13 @@ public class DistributionSet extends NamedVersionedEntity {
     @JoinTable(name = "sp_ds_module", joinColumns = {
             @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds") ) }, inverseJoinColumns = {
                     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module") ) })
-    private final Set<SoftwareModule> modules = new HashSet<SoftwareModule>();
+    private final Set<SoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = DistributionSetTag.class)
     @JoinTable(name = "sp_ds_dstag", joinColumns = {
             @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds") ) }, inverseJoinColumns = {
                     @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag") ) })
-    private Set<DistributionSetTag> tags = new HashSet<DistributionSetTag>();
+    private Set<DistributionSetTag> tags = new HashSet<>();
 
     @Column(name = "deleted")
     private boolean deleted = false;
@@ -110,7 +110,7 @@ public class DistributionSet extends NamedVersionedEntity {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param name
      *            of the {@link DistributionSet}
      * @param version
@@ -128,7 +128,7 @@ public class DistributionSet extends NamedVersionedEntity {
 
         this.type = type;
         if (moduleList != null) {
-            moduleList.forEach(module -> addModule(module));
+            moduleList.forEach(this::addModule);
         }
         complete = type.checkComplete(this);
     }
@@ -160,7 +160,7 @@ public class DistributionSet extends NamedVersionedEntity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -173,7 +173,7 @@ public class DistributionSet extends NamedVersionedEntity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -234,7 +234,7 @@ public class DistributionSet extends NamedVersionedEntity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -322,8 +322,8 @@ public class DistributionSet extends NamedVersionedEntity {
      * Searches through modules for the given type.
      *
      * @param type
-     *            to serach for
-     * @return SoftwareModule of giben type or <code>null</code> if not in the
+     *            to seach for
+     * @return SoftwareModule of given type or <code>null</code> if not in the
      *         list.
      */
     public SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {

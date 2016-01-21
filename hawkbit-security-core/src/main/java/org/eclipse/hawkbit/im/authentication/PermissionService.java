@@ -25,7 +25,7 @@ public class PermissionService {
     /**
      * Checks if the given {@code permission} contains in the. In case no
      * {@code context} is available {@code false} will be returned.
-     * 
+     *
      * @param permission
      *            the permission to check against the
      * @return {@code true} if a is available and contains the given
@@ -52,7 +52,7 @@ public class PermissionService {
     }
 
     public List<String> getAllPermission() {
-        final List<String> permissions = new ArrayList<String>();
+        final List<String> permissions = new ArrayList<>();
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context == null) {
             return permissions;
@@ -71,7 +71,7 @@ public class PermissionService {
      * Checks if at least on permission of the given {@code permissions}
      * contains in the . In case no {@code context} is available {@code false}
      * will be returned.
-     * 
+     *
      * @param permissions
      *            the permissions to check against the
      * @return {@code true} if a is available and contains the given
@@ -80,18 +80,23 @@ public class PermissionService {
      */
     public boolean hasAtLeastOnePermission(final List<String> permissions) {
         final SecurityContext context = SecurityContextHolder.getContext();
-        if (context != null) {
-            final Authentication authentication = context.getAuthentication();
-            if (authentication != null) {
-                for (final GrantedAuthority authority : authentication.getAuthorities()) {
-                    for (final String permission : permissions) {
-                        if (authority.getAuthority().equals(permission)) {
-                            return true;
-                        }
-                    }
+        if (context == null) {
+            return false;
+        }
+
+        final Authentication authentication = context.getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+
+        for (final GrantedAuthority authority : authentication.getAuthorities()) {
+            for (final String permission : permissions) {
+                if (authority.getAuthority().equals(permission)) {
+                    return true;
                 }
             }
         }
+
         return false;
     }
 

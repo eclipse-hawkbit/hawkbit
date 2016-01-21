@@ -103,6 +103,7 @@ public class ActionHistoryHeader extends VerticalLayout {
      * Populate Header Data for Target.
      * 
      * @param targetName
+     *            name of the target
      */
     public void populateHeader(final String targetName) {
         updateActionHistoryHeader(targetName);
@@ -135,6 +136,7 @@ public class ActionHistoryHeader extends VerticalLayout {
      * Updates header with target name.
      * 
      * @param targetName
+     *            name of the target
      */
     public void updateActionHistoryHeader(final String targetName) {
         titleOfActionHistory.setValue(HawkbitCommonUtil.getActionHistoryLabelId(targetName));

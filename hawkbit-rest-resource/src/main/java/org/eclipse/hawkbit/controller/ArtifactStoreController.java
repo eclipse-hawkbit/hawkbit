@@ -35,7 +35,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,7 +54,6 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
-@Transactional
 @RequestMapping(ControllerConstants.ARTIFACTS_V1_REQUEST_MAPPING)
 public class ArtifactStoreController implements EnvironmentAware {
     private static final Logger LOG = LoggerFactory.getLogger(ArtifactStoreController.class);
@@ -101,7 +99,7 @@ public class ArtifactStoreController implements EnvironmentAware {
     public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable final String fileName,
             final HttpServletResponse response, final HttpServletRequest request,
             @AuthenticationPrincipal final String targetid) {
-        ResponseEntity<Void> result = null;
+        ResponseEntity<Void> result;
 
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 

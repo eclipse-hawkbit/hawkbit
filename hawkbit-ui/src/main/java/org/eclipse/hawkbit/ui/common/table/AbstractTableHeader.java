@@ -103,7 +103,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
              * If table is maximized display the minimize icon.
              */
             showMinIcon();
-            hideAddIcon();
+            hideAddAndUploadIcon();
         }
 
         if (onLoadIsShowFilterButtonDisplayed()) {
@@ -113,15 +113,20 @@ public abstract class AbstractTableHeader extends VerticalLayout {
              */
             setFilterButtonsIconVisible(true);
         }
+        if (isBulkUploadInProgress()) {
+            disableBulkUpload();
+        }
 
     }
 
-    private void hideAddIcon() {
+    private void hideAddAndUploadIcon() {
         addIcon.setVisible(false);
+        bulkUploadIcon.setVisible(false);
     }
 
-    private void showAddIcon() {
+    private void showAddAndUploadIcon() {
         addIcon.setVisible(true);
+        bulkUploadIcon.setVisible(true);
     }
 
     private void buildLayout() {
@@ -278,13 +283,13 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private void maximizedTableView() {
         showMinIcon();
-        hideAddIcon();
+        hideAddAndUploadIcon();
         maximizeTable();
     }
 
     private void minimizeTableView() {
         showMaxIcon();
-        showAddIcon();
+        showAddAndUploadIcon();
         minimizeTable();
     }
 
@@ -320,6 +325,14 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     protected HorizontalLayout getFilterDroppedInfo() {
         return filterDroppedInfo;
+    }
+
+    protected void enableBulkUpload() {
+        bulkUploadIcon.setEnabled(true);
+    }
+
+    protected void disableBulkUpload() {
+        bulkUploadIcon.setEnabled(false);
     }
 
     /**
@@ -483,6 +496,8 @@ public abstract class AbstractTableHeader extends VerticalLayout {
      * @return true if requires to delete, otherwise false.
      */
     public abstract Boolean onLoadIsShowFilterButtonDisplayed();
+
+    protected abstract boolean isBulkUploadInProgress();
 
     protected abstract void searchBy(String newSearchText);
 

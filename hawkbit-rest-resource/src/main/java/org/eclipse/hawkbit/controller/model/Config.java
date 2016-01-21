@@ -8,23 +8,12 @@
  */
 package org.eclipse.hawkbit.controller.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Standard configuration for the target.
  *
- *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.TARGET_CONFIGURATION)
 public class Config {
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_POLL_TIME)
     private final Polling polling;
 
     /**

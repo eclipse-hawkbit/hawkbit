@@ -47,7 +47,7 @@ public class AmqpConfiguration {
 
     /**
      * Method to set the Jackson2JsonMessageConverter.
-     * 
+     *
      * @return the Jackson2JsonMessageConverter
      */
     @Bean
@@ -59,7 +59,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the sp receiver queue.
-     * 
+     *
      * @return the receiver queue
      */
     @Bean
@@ -69,7 +69,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the dead letter fanout exchange.
-     * 
+     *
      * @return the fanout exchange
      */
     @Bean
@@ -79,7 +79,7 @@ public class AmqpConfiguration {
 
     /**
      * Create dead letter queue.
-     * 
+     *
      * @return the queue
      */
     @Bean
@@ -89,7 +89,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the dead letter fanout exchange.
-     * 
+     *
      * @return the fanout exchange
      */
     @Bean
@@ -99,7 +99,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the Binding deadLetterQueue to exchangeDeadLetter.
-     * 
+     *
      * @return the binding
      */
     @Bean
@@ -110,7 +110,7 @@ public class AmqpConfiguration {
     /**
      * Create the Binding {@link AmqpConfiguration#receiverQueueFromSp()} to
      * {@link AmqpConfiguration#senderConnectorToSpExchange()}.
-     * 
+     *
      * @return the binding and create the queue and exchange
      */
     @Bean
@@ -120,7 +120,7 @@ public class AmqpConfiguration {
 
     /**
      * Create amqp handler service bean.
-     * 
+     *
      * @return
      */
     @Bean
@@ -130,7 +130,7 @@ public class AmqpConfiguration {
 
     /**
      * Returns the Listener factory.
-     * 
+     *
      * @return the {@link SimpleMessageListenerContainer} that gets used receive
      *         AMQP messages
      */
@@ -143,7 +143,7 @@ public class AmqpConfiguration {
     }
 
     private Map<String, Object> getDeadLetterExchangeArgs() {
-        final Map<String, Object> args = new HashMap<String, Object>();
+        final Map<String, Object> args = new HashMap<>();
         args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
         return args;
     }

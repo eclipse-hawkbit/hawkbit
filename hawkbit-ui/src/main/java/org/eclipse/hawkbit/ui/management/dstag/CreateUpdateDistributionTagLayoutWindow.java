@@ -11,21 +11,20 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent.DistTagComponentEvent;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
 import com.vaadin.shared.ui.colorpicker.Color;
@@ -51,31 +50,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     private static final long serialVersionUID = 444276149954167545L;
 
     @Autowired
-    private transient TagManagement tagManagementService;
-
-    @Autowired
     private transient UINotification uiNotification;
 
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
     private static final String MISSING_TAG_NAME = "message.error.missing.tagname";
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";
 
     private Window distTagWindow;
-
-    /**
-     * Initialize distribution Tag layout.
-     */
-    public void initDistTagLayout() {
-        super.init();
-    }
 
     public Window getWindow() {
         reset();
@@ -89,7 +70,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     @Override
     protected void populateTagNameCombo() {
         tagNameComboBox.removeAllItems();
-        final List<DistributionSetTag> distTagNameList = tagManagementService.findDistributionSetTagsAll();
+        final List<DistributionSetTag> distTagNameList = tagManagement.findAllDistributionSetTags();
         distTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
@@ -99,7 +80,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     @Override
     public void save(final ClickEvent event) {
         if (mandatoryValuesPresent()) {
-            final DistributionSetTag existingDistTag = tagManagementService.findDistributionSetTag(tagName.getValue());
+            final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
             if (optiongroup.getValue().equals(createTagNw)) {
                 if (!checkIsDuplicate(existingDistTag)) {
                     crateNewTag();
@@ -129,11 +110,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
             if (colorPicked != null) {
                 newDistTag.setColour(colorPicked);
             }
-            newDistTag = tagManagementService.createDistributionSetTag(newDistTag);
+            newDistTag = tagManagement.createDistributionSetTag(newDistTag);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistTag.getName() }));
-
-            eventBus.publish(this, new DistributionTagEvent(DistTagComponentEvent.ADD_DIST_TAG, newDistTag));
-
             resetDistTagValues();
 
         } else {
@@ -155,11 +133,9 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
             distObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
             // update target tag with color selected
             distObj.setColour(getColorPickedSting());
-            tagManagementService.updateDistributionSetTag(distObj);
+            tagManagement.updateDistributionSetTag(distObj);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { distObj.getName() }));
             closeWindow();
-            eventBus.publish(this, new DistributionTagEvent(DistTagComponentEvent.EDIT_DIST_TAG, distObj));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
@@ -276,7 +252,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
-        final DistributionSetTag selectedDistTag = tagManagementService.findDistributionSetTag(distTagSelected);
+        final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
         if (null != selectedDistTag) {
             tagDesc.setValue(selectedDistTag.getDescription());
             if (null == selectedDistTag.getColour()) {
@@ -304,11 +280,26 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
 
     private Boolean checkIsDuplicate(final DistributionSetTag existingDistTag) {
         if (existingDistTag != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingDistTag.getName() }));
+            uiNotification.displayValidationError(i18n.get("message.tag.duplicate.check",
+                    new Object[] { existingDistTag.getName() }));
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
+        populateTagNameCombo();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
+        populateTagNameCombo();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
+        populateTagNameCombo();
     }
 
 }

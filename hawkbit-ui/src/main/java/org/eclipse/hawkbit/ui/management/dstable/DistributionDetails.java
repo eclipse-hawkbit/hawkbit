@@ -82,7 +82,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
     protected void init() {
         eventBus.subscribe(this);
         softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(i18n);
+        softwareModuleTable.init(i18n, false, permissionChecker, null, null, null);
         super.init();
         ui = UI.getCurrent();
     }
@@ -95,8 +95,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE
-                || distributionTableEvent
-                        .getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
+                || distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
             ui.access(() -> {
                 /**
                  * distributionTableEvent.getDistributionSet() is null when
@@ -118,7 +117,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getDefaultCaption()
      */
@@ -129,7 +128,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * addTabs(com.vaadin. ui.TabSheet)
      */
@@ -144,7 +143,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onEdit(com.vaadin.ui .Button.ClickEvent)
      */
@@ -159,7 +158,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getEditButtonId()
      */
@@ -170,19 +169,19 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onLoadIsTableRowSelected ()
      */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
-        return !(managementUIState.getSelectedDsIdName().isPresent()
-                && managementUIState.getSelectedDsIdName().get().isEmpty());
+        return !(managementUIState.getSelectedDsIdName().isPresent() && managementUIState.getSelectedDsIdName().get()
+                .isEmpty());
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onLoadIsTableMaximized ()
      */
@@ -193,7 +192,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * populateDetailsWidget()
      */
@@ -204,7 +203,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * clearDetails()
      */
@@ -215,7 +214,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * hasEditPermission()
      */
@@ -226,7 +225,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getTabSheetId()
      */
@@ -290,9 +289,9 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(
-                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
-                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                    i18n.get("checkbox.dist.migration.required"),
+                    isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
         }
     }
 

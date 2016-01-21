@@ -8,33 +8,23 @@
  */
 package org.eclipse.hawkbit.controller.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Result information of the action progress which can by an intermediate or
  * final update.
  *
  *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.TARGET_RESULT_VALUE)
 public class Result {
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_RESULT_FINISHED, required = true)
     @NotEmpty
     private final FinalResult finished;
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_RESULT_PROGRESS)
     private final Progress progress;
 
     /**
@@ -64,12 +54,7 @@ public class Result {
     /**
      * Defined status of the final result.
      *
-     *
-     *
-     *
-     *
      */
-    @ApiModel(value = ApiModelProperties.TARGET_RESULT_FINISHED)
     public enum FinalResult {
         /**
          * Execution was successful.
@@ -104,7 +89,7 @@ public class Result {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

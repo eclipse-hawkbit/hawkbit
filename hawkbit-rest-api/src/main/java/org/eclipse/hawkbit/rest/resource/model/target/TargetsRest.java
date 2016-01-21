@@ -15,9 +15,6 @@ import org.springframework.hateoas.ResourceSupport;
  * A list representation of the {@link TargetRest} because Spring MVC cannot
  * handle plain lists interfaces as request body.
  *
- *
- *
- *
  */
 public class TargetsRest extends ResourceSupport implements List<TargetRest> {
 

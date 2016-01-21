@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyCreate;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentResponseBody;
@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentR
  *
  *
  */
-final class DistributionSetMapper {
+public final class DistributionSetMapper {
     private DistributionSetMapper() {
         // Utility class
     }
@@ -57,14 +57,14 @@ final class DistributionSetMapper {
         final DistributionSetType module = distributionSetManagement
                 .findDistributionSetTypeByKey(distributionSetTypekey);
         if (module == null) {
-            throw new EntityNotFoundException(
-                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
+            throw new EntityNotFoundException("DistributionSetType with key {" + distributionSetTypekey
+                    + "} does not exist");
         }
         return module;
     }
 
     /**
-     * {@link DistributionSetRequestBodyCreate}s to {@link DistributionSet}s.
+     * {@link DistributionSetRequestBodyPost}s to {@link DistributionSet}s.
      *
      * @param sets
      *            to convert
@@ -72,11 +72,11 @@ final class DistributionSetMapper {
      *            to use for conversion
      * @return converted list of {@link DistributionSet}s
      */
-    static List<DistributionSet> dsFromRequest(final Iterable<DistributionSetRequestBodyCreate> sets,
+    static List<DistributionSet> dsFromRequest(final Iterable<DistributionSetRequestBodyPost> sets,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
 
         final List<DistributionSet> mappedList = new ArrayList<>();
-        for (final DistributionSetRequestBodyCreate dsRest : sets) {
+        for (final DistributionSetRequestBodyPost dsRest : sets) {
             mappedList.add(fromRequest(dsRest, softwareManagement, distributionSetManagement));
         }
         return mappedList;
@@ -84,7 +84,7 @@ final class DistributionSetMapper {
     }
 
     /**
-     * {@link DistributionSetRequestBodyCreate} to {@link DistributionSet}.
+     * {@link DistributionSetRequestBodyPost} to {@link DistributionSet}.
      *
      * @param dsRest
      *            to convert
@@ -92,7 +92,7 @@ final class DistributionSetMapper {
      *            to use for conversion
      * @return converted {@link DistributionSet}
      */
-    static DistributionSet fromRequest(final DistributionSetRequestBodyCreate dsRest,
+    static DistributionSet fromRequest(final DistributionSetRequestBodyPost dsRest,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
 
         final DistributionSet result = new DistributionSet();
@@ -108,18 +108,18 @@ final class DistributionSetMapper {
         }
 
         if (dsRest.getApplication() != null) {
-            result.addModule(
-                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(), softwareManagement));
+            result.addModule(findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(),
+                    softwareManagement));
         }
 
         if (dsRest.getRuntime() != null) {
-            result.addModule(
-                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
+            result.addModule(findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
         }
 
         if (dsRest.getModules() != null) {
-            dsRest.getModules().forEach(module -> result
-                    .addModule(findSoftwareModuleWithExceptionIfNotFound(module.getId(), softwareManagement)));
+            dsRest.getModules().forEach(
+                    module -> result.addModule(findSoftwareModuleWithExceptionIfNotFound(module.getId(),
+                            softwareManagement)));
         }
 
         return result;
@@ -144,7 +144,14 @@ final class DistributionSetMapper {
         return mappedList;
     }
 
-    static DistributionSetRest toResponse(final DistributionSet distributionSet) {
+    /**
+     * Create a response for distribution set.
+     * 
+     * @param distributionSet
+     *            the ds set
+     * @return the response
+     */
+    public static DistributionSetRest toResponse(final DistributionSet distributionSet) {
         if (distributionSet == null) {
             return null;
         }
@@ -156,22 +163,23 @@ final class DistributionSetMapper {
         response.setComplete(distributionSet.isComplete());
         response.setType(distributionSet.getType().getKey());
 
-        distributionSet.getModules()
-                .forEach(module -> response.getModules().add(SoftwareModuleMapper.toResponse(module)));
+        distributionSet.getModules().forEach(
+                module -> response.getModules().add(SoftwareModuleMapper.toResponse(module)));
 
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
-        response.add(
-                linkTo(methodOn(DistributionSetResource.class).getDistributionSet(response.getDsId())).withRel("self"));
+        response.add(linkTo(methodOn(DistributionSetResource.class).getDistributionSet(response.getDsId())).withRel(
+                "self"));
 
         response.add(linkTo(
                 methodOn(DistributionSetTypeResource.class).getDistributionSetType(distributionSet.getType().getId()))
-                        .withRel("type"));
+                .withRel("type"));
 
-        response.add(linkTo(methodOn(DistributionSetResource.class).getMetadata(response.getDsId(),
-                Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
-                Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null))
-                        .withRel("metadata"));
+        response.add(linkTo(
+                methodOn(DistributionSetResource.class).getMetadata(response.getDsId(),
+                        Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
+                        Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null)).withRel(
+                "metadata"));
 
         return response;
     }
@@ -186,8 +194,11 @@ final class DistributionSetMapper {
 
     static DistributionSetsRest toResponseDistributionSets(final Iterable<DistributionSet> sets) {
         final DistributionSetsRest response = new DistributionSetsRest();
-        for (final DistributionSet set : sets) {
-            response.add(toResponse(set));
+        if (sets != null) {
+
+            for (final DistributionSet set : sets) {
+                response.add(toResponse(set));
+            }
         }
         return response;
     }

@@ -13,8 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.tokenfield.TokenField;
 import org.vaadin.tokenfield.TokenField.InsertPosition;
 
@@ -50,6 +52,9 @@ public abstract class AbstractTagToken implements Serializable {
     protected final Map<Long, TagData> tokensAdded = new HashMap<Long, TagData>();
 
     protected CssLayout tokenLayout = new CssLayout();
+
+    @Autowired
+    protected ManagementUIState managementUIState;
 
     protected void init() {
         createTokenField();
@@ -96,8 +101,12 @@ public abstract class AbstractTagToken implements Serializable {
     protected void setContainerPropertValues(final Long tagId, final String tagName, final String tagColor) {
         tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
         final Item item = container.addItem(tagId);
-        item.getItemProperty("name").setValue(tagName);
         item.getItemProperty("id").setValue(tagId);
+        updateItem(tagName, tagColor, item);
+    }
+
+    protected void updateItem(final String tagName, final String tagColor, final Item item) {
+        item.getItemProperty("name").setValue(tagName);
         item.getItemProperty(COLOR_PROPERTY).setValue(tagColor);
     }
 
@@ -224,7 +233,11 @@ public abstract class AbstractTagToken implements Serializable {
         return tokenField;
     }
 
-    static class TagData {
+    /**
+     * Tag details.
+     * 
+     */
+    public static class TagData {
 
         private String name;
 

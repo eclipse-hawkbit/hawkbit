@@ -19,7 +19,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
@@ -59,9 +61,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = 3494052985006132714L;
 
-    private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(
-            Arrays.asList(DragEvent.DISTRIBUTION_TYPE_DRAG, DragEvent.DISTRIBUTION_DRAG, DragEvent.SOFTWAREMODULE_DRAG,
-                    DragEvent.SOFTWAREMODULE_TYPE_DRAG));
+    private static final List<Object> DISPLAY_DROP_HINT_EVENTS = new ArrayList<>(Arrays.asList(
+            DragEvent.DISTRIBUTION_TYPE_DRAG, DragEvent.DISTRIBUTION_DRAG, DragEvent.SOFTWAREMODULE_DRAG,
+            DragEvent.SOFTWAREMODULE_TYPE_DRAG));
 
     @Autowired
     private I18N i18n;
@@ -77,6 +79,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Autowired
     private transient UINotification uiNotification;
+
+    @Autowired
+    private transient SystemManagement systemManagement;
 
     @Autowired
     private ManageDistUIState manageDistUIState;
@@ -230,16 +235,27 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private void processDeleteDitSetType(final String distTypeId) {
         final String distTypeName = HawkbitCommonUtil.removePrefix(distTypeId,
                 SPUIDefinitions.DISTRIBUTION_SET_TYPE_ID_PREFIXS);
-
-        if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType() && manageDistUIState
-                .getManageDistFilters().getClickedDistSetType().getName().equalsIgnoreCase(distTypeName)) {
-            notification
-                    .displayValidationError(i18n.get("message.dist.type.check.delete", new Object[] { distTypeName }));
+        if (isDsTypeSelected(distTypeName)) {
+            notification.displayValidationError(i18n.get("message.dist.type.check.delete",
+                    new Object[] { distTypeName }));
+        } else if (isDefaultDsType(distTypeName)) {
+            notification.displayValidationError(i18n.get("message.cannot.delete.default.dstype"));
         } else {
             manageDistUIState.getSelectedDeleteDistSetTypes().add(distTypeName);
             updateDSActionCount();
         }
+    }
 
+    /**
+     * Check if distribution set type is selected.
+     * 
+     * @param distTypeName
+     * @return true if ds type is selected
+     */
+    private boolean isDsTypeSelected(final String distTypeName) {
+        return null != manageDistUIState.getManageDistFilters().getClickedDistSetType()
+                && manageDistUIState.getManageDistFilters().getClickedDistSetType().getName()
+                        .equalsIgnoreCase(distTypeName);
     }
 
     private void processDeleteSWType(final String swTypeId) {
@@ -249,8 +265,8 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
                 && manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
                         .equalsIgnoreCase(swModuleTypeName)) {
-            notification.displayValidationError(
-                    i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
+            notification.displayValidationError(i18n.get("message.swmodule.type.check.delete",
+                    new Object[] { swModuleTypeName }));
         } else {
             manageDistUIState.getSelectedDeleteSWModuleTypes().add(swModuleTypeName);
             updateDSActionCount();
@@ -394,7 +410,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      * reloadActionCount()
      */
     @Override
-    protected void reloadActionCount() {
+    protected void restoreActionCount() {
         updateDSActionCount();
 
     }
@@ -473,4 +489,66 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * hasBulkUploadPermission()
+     */
+    @Override
+    protected boolean hasBulkUploadPermission() {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * showBulkUploadWindow()
+     */
+    @Override
+    protected void showBulkUploadWindow() {
+        /**
+         * Bulk upload not supported No implementation required.
+         */
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * restoreBulkUploadStatusCount()
+     */
+    @Override
+    protected void restoreBulkUploadStatusCount() {
+        /**
+         * No implementation required.As no bulk upload in Distribution view.
+         */
+    }
+
+    private DistributionSetType getCurrentDistributionSetType() {
+        return systemManagement.getTenantMetadata().getDefaultDsType();
+    }
+
+    /**
+     * Check if the distribution set type is default.
+     * 
+     * @param dsTypeName
+     *            distribution set name
+     * @return true if distribution set type is set default in configuration
+     */
+    private boolean isDefaultDsType(final String dsTypeName) {
+        return getCurrentDistributionSetType() != null && getCurrentDistributionSetType().getName().equals(dsTypeName);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * hasReadPermission()
+     */
+    @Override
+    protected boolean hasReadPermission() {
+        return permChecker.hasReadDistributionPermission();
+    }
 }

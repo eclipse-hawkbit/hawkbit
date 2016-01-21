@@ -116,6 +116,10 @@ public class Action extends BaseEntity implements Comparable<Action> {
         this.distributionSet = distributionSet;
     }
 
+    /**
+     * @return true when action is in state {@link Status#CANCELING} or
+     *         {@link Status#CANCELED}, false otherwise
+     */
     public boolean isCancelingOrCanceled() {
         return status == Status.CANCELING || status == Status.CANCELED;
     }
@@ -262,7 +266,7 @@ public class Action extends BaseEntity implements Comparable<Action> {
     }
 
     /**
-     * @return the forced
+     * @return true when action is forced, false otherwise
      */
     public boolean isForced() {
         return actionType == ActionType.FORCED;
@@ -331,13 +335,9 @@ public class Action extends BaseEntity implements Comparable<Action> {
     /**
      * Action status as reported by the controller.
      *
-     * Be aware that JPA is persiting the ordnial number of the enum by means
+     * Be aware that JPA is persisting the ordinal number of the enum by means
      * the ordered number in the enum. So don't re-order the enums within the
      * Status enum declaration!
-     *
-     *
-     *
-     *
      *
      */
     public enum Status {

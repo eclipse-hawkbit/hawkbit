@@ -12,22 +12,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Paged list rest model for {@link Action} to RESTful API representation.
  *
- *
- *
- *
  */
-@ApiModel("Paged list of actions")
 public class ActionPagedList extends PagedList<ActionRest> {
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_LIST)
     private final List<ActionRest> content;
 
     /**

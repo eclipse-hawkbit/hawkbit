@@ -12,14 +12,11 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A list representation with meta data for pagination, e.g. containing the
@@ -36,16 +33,13 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class PagedList<T> extends ResourceSupport {
 
-    @ApiModelProperty(value = ApiModelProperties.TOTAL_ELEMENTS, required = false)
     private final long totalElements;
-
-    @ApiModelProperty(value = ApiModelProperties.SIZE, required = true)
     private final int size;
 
     /**
      * creates a new paged list with the given {@code content} and {@code total}
      * .
-     * 
+     *
      * @param content
      *            the actual content of the list
      * @param total

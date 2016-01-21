@@ -10,15 +10,10 @@ package org.eclipse.hawkbit.rest.resource.model.action;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A json annotated rest model for ActionStatus to RESTful API representation.
@@ -29,7 +24,6 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("SP Action Status")
 public class ActionStatusRest {
 
     /**
@@ -61,20 +55,20 @@ public class ActionStatusRest {
      */
     public static final String AS_RETRIEVED = "retrieved";
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID)
+    /**
+     * Action has been canceled for this target.
+     */
+    public static final String AS_CANCELING = "canceling";
+
     @JsonProperty("id")
     private Long statusId;
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_STATUS_TYPE, required = true, allowableValues = AS_FINISHED
-            + "," + AS_ERROR + "," + AS_WARNING + "," + AS_RUNNING + "," + AS_CANCELED + "," + AS_RETRIEVED)
     @JsonProperty
     private String type;
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_STATUS_MESSAGES)
     @JsonProperty
     private List<String> messages;
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_STATUS_REPORTED_AT)
     @JsonProperty
     private Long reportedAt;
 

@@ -10,27 +10,17 @@ package org.eclipse.hawkbit.controller.model;
 
 import java.util.Map;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
- * feedback channel for ConfigData action.
- *
- *
- *
- *
+ * Feedback channel for ConfigData action.
  *
  */
-@ApiModel("Configuration or metadata that is reponded by the target")
 public class ConfigData extends ActionFeedback {
 
-    @ApiModelProperty(ApiModelProperties.TARGET_CONFIG_DATA)
     @NotEmpty
     private final Map<String, String> data;
 
@@ -64,7 +54,7 @@ public class ConfigData extends ActionFeedback {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

@@ -8,34 +8,23 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.softwaremoduletype;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Request Body for SoftwareModuleType POST.
  *
- *
- *
- *
  */
 public class SoftwareModuleTypeRequestBodyPost {
 
-    @ApiModelProperty(value = ApiModelProperties.NAME, required = true)
     @JsonProperty(required = true)
     private String name;
 
-    @ApiModelProperty(value = ApiModelProperties.DESCRPTION)
     @JsonProperty
     private String description;
 
-    @ApiModelProperty(value = ApiModelProperties.SM_TYPE_KEY)
     @JsonProperty
     private String key;
 
-    @ApiModelProperty(value = ApiModelProperties.SM_MAX_ASSIGNMENTS)
     @JsonProperty
     private int maxAssignments;
 
@@ -49,9 +38,12 @@ public class SoftwareModuleTypeRequestBodyPost {
     /**
      * @param name
      *            the name to set
+     *
+     * @return updated body
      */
-    public void setName(final String name) {
+    public SoftwareModuleTypeRequestBodyPost setName(final String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -64,9 +56,12 @@ public class SoftwareModuleTypeRequestBodyPost {
     /**
      * @param description
      *            the description to set
+     *
+     * @return updated body
      */
-    public void setDescription(final String description) {
+    public SoftwareModuleTypeRequestBodyPost setDescription(final String description) {
         this.description = description;
+        return this;
     }
 
     /**
@@ -79,9 +74,11 @@ public class SoftwareModuleTypeRequestBodyPost {
     /**
      * @param key
      *            the key to set
+     * @return updated body
      */
-    public void setKey(final String key) {
+    public SoftwareModuleTypeRequestBodyPost setKey(final String key) {
         this.key = key;
+        return this;
     }
 
     /**
@@ -94,9 +91,12 @@ public class SoftwareModuleTypeRequestBodyPost {
     /**
      * @param maxAssignments
      *            the maxAssignments to set
+     *
+     * @return updated body
      */
-    public void setMaxAssignments(final int maxAssignments) {
+    public SoftwareModuleTypeRequestBodyPost setMaxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
+        return this;
     }
 
 }

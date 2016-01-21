@@ -8,36 +8,26 @@
  */
 package org.eclipse.hawkbit.rest.resource.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * A json annotated rest model for BaseEntity to RESTful API representation.
- *
- *
- *
  *
  */
 public abstract class BaseEntityRest extends ResourceSupport {
 
-    @ApiModelProperty(value = ApiModelProperties.CREATED_BY)
     @JsonProperty
     private String createdBy;
 
-    @ApiModelProperty(value = ApiModelProperties.CREATED_AT)
     @JsonProperty
     private Long createdAt;
 
-    @ApiModelProperty(value = ApiModelProperties.LAST_MODIFIED_BY)
     @JsonProperty
     private String lastModifiedBy;
 
-    @ApiModelProperty(value = ApiModelProperties.LAST_MODIFIED_AT)
     @JsonProperty
     private Long lastModifiedAt;
 

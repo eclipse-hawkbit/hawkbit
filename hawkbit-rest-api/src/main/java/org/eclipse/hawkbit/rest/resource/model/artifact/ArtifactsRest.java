@@ -16,16 +16,10 @@ import java.util.ListIterator;
 
 import org.springframework.hateoas.ResourceSupport;
 
-import io.swagger.annotations.ApiModel;
-
 /**
  * List representation of the {@link ArtifactRest}.
  *
- *
- *
- *
  */
-@ApiModel
 public class ArtifactsRest extends ResourceSupport implements List<ArtifactRest> {
 
     private final List<ArtifactRest> delegate = new ArrayList<>();

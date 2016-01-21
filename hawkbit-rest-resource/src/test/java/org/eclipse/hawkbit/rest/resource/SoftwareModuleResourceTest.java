@@ -64,16 +64,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Tests for {@link SoftwareModuleResource} {@link RestController}.
  *
- *
- *
  */
 @Features("Component Tests - Management RESTful API")
 @Stories("Software Module Resource")
-// TODO: fully document tests -> @Description for long text and reasonable
-// method name as short text
 public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongoDB {
 
     @Test
+    @Description("Tests the update of software module metadata. It is verfied that only the selected fields for the update are really updated and the modification values are filled (i.e. updated by and at).")
+    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
     public void updateSoftwareModuleOnlyDescriptionAndVendorNameUntouched() throws Exception {
         final String knownSWName = "name1";
         final String knownSWVersion = "version1";
@@ -99,10 +97,16 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
         final String body = new JSONObject().put("vendor", updateVendor).put("description", updateDescription)
                 .put("name", "nameShouldNotBeChanged").toString();
 
+        // ensures that we are not to fast so that last modified is not set
+        // correctly
+        Thread.sleep(1);
+
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$id", equalTo(sm.getId().intValue())))
                 .andExpect(jsonPath("$vendor", equalTo(updateVendor)))
+                .andExpect(jsonPath("$lastModifiedBy", equalTo("smUpdateTester")))
+                .andExpect(jsonPath("$lastModifiedAt", not(equalTo(sm.getLastModifiedAt()))))
                 .andExpect(jsonPath("$description", equalTo(updateDescription)))
                 .andExpect(jsonPath("$name", equalTo(knownSWName))).andReturn();
 
@@ -112,12 +116,13 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
      * Test method for
      * {@link org.eclipse.hawkbit.rest.resource.SoftwareModuleResource#uploadArtifact(java.lang.Long, org.springframework.web.multipart.MultipartFile)}
      * .
-     * 
+     *
      * @throws Exception
      *             if test fails
      */
     @Test
-    public void testUploadArtifact() throws Exception {
+    @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
+    public void uploadArtifact() throws Exception {
         // prepare repo
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -139,6 +144,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$size", equalTo(random.length)))
                 .andExpect(jsonPath("$providedFilename", equalTo("origFilename"))).andReturn();
 
         // check rest of response compared to DB
@@ -179,7 +185,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testEmptyUploadArtifact() throws Exception {
+    @Description("Verfies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
+    public void emptyUploadArtifact() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
@@ -194,7 +201,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testDuplicateUploadArtifact() throws Exception {
+    @Description("Verfies that the system does not accept identical artifacts uploads for the same software module. Expected response: CONFLICT")
+    public void duplicateUploadArtifact() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
@@ -218,7 +226,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testUploadArtifactWithCustomName() throws Exception {
+    @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
+    public void uploadArtifactWithCustomName() throws Exception {
         // prepare repo
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -247,7 +256,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testUploadArtifactWithHashCheck() throws Exception {
+    @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
+    public void uploadArtifactWithHashCheck() throws Exception {
         // prepare repo
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -310,16 +320,9 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.rest.resource.SoftwareModuleResource#downloadArtifact(java.lang.Long, javax.servlet.http.HttpServletResponse)}
-     * .
-     * 
-     * @throws Exception
-     *             if test fails
-     */
     @Test
-    public void testDownloadArtifact() throws Exception {
+    @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
+    public void downloadArtifact() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
@@ -336,13 +339,16 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
         final MvcResult result = mvc
                 .perform(
                         get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact.getId()))
-                .andExpect(header().string("ETag", artifact.getSha1Hash())).andReturn();
+                .andExpect(header().string("ETag", artifact.getSha1Hash()))
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM)).andReturn();
 
         assertTrue(Arrays.equals(result.getResponse().getContentAsByteArray(), random));
 
-        final MvcResult result2 = mvc.perform(
-                get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact2.getId()))
-                .andExpect(header().string("ETag", artifact2.getSha1Hash())).andReturn();
+        final MvcResult result2 = mvc
+                .perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(),
+                        artifact2.getId()))
+                .andExpect(header().string("ETag", artifact2.getSha1Hash()))
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM)).andReturn();
 
         assertTrue(Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
 
@@ -351,7 +357,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetArtifact() throws Exception {
+    @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and download links.")
+    public void getArtifact() throws Exception {
         // check baseline
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -381,7 +388,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetArtifacts() throws Exception {
+    @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
+    public void getArtifacts() throws Exception {
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -420,7 +428,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testInvalidRequestsOnArtifactResource() throws Exception {
+    @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
+    public void invalidRequestsOnArtifactResource() throws Exception {
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
@@ -455,7 +464,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testInvalidRequestsOnSoftwaremodulesResource() throws Exception {
+    @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
+    public void invalidRequestsOnSoftwaremodulesResource() throws Exception {
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -493,7 +503,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetSoftwareModulesWithoutAddtionalRequestParameters() throws Exception {
+    @Description("Test of modules retrieval without any parameters. Will return all modules in the system as defined by standard page size.")
+    public void getSoftwareModulesWithoutAddtionalRequestParameters() throws Exception {
         final int modules = 5;
         createSoftwareModulesAlphabetical(modules);
         mvc.perform(get(RestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
@@ -504,7 +515,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetSoftwareModulesWithPagingLimitRequestParameter() throws Exception {
+    @Description("Test of modules retrieval with paging limit parameter. Will return all modules in the system as defined by given page size.")
+    public void detSoftwareModulesWithPagingLimitRequestParameter() throws Exception {
         final int modules = 5;
         final int limitSize = 1;
         createSoftwareModulesAlphabetical(modules);
@@ -517,7 +529,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetSoftwareModulesWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    @Description("Test of modules retrieval with paging limit offset parameters. Will return all modules in the system as defined by given page size starting from given offset.")
+    public void getSoftwareModulesWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int modules = 5;
         final int offsetParam = 2;
         final int expectedSize = modules - offsetParam;
@@ -533,7 +546,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
-    public void testGetSoftwareModules() throws Exception {
+    @Description("Test retrieval of all software modules the user has access to.")
+    public void getSoftwareModules() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
@@ -559,6 +573,11 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
                 .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.self.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.artifacts.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.metadata.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId()
+                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].name", equalTo("name1")))
                 .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].version", equalTo("version1")))
                 .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].description", equalTo("description1")))
@@ -571,6 +590,11 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
                 .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.self.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.artifacts.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.metadata.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
+                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].name", equalTo("name1")))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].version", equalTo("version1")))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].description", equalTo("description1")))
@@ -578,6 +602,11 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].type", equalTo("application")))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].createdAt", equalTo(ah.getCreatedAt())))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.artifacts.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.metadata.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId()
+                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.self.href",
@@ -587,7 +616,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetSoftwareModulesWithFilterParameters() throws Exception {
+    @Description("Test the various filter parameters, e.g. filter by name or type of the module.")
+    public void getSoftwareModulesWithFilterParameters() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
         SoftwareModule os1 = new SoftwareModule(osType, "osName1", "1.0.0", "description1", "vendor1");
@@ -663,14 +693,16 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testGetSoftwareModulesWithSyntaxErrorFilterParameter() throws Exception {
+    @Description("Verfies that the system answers as defined in case of a wrong filter parameter syntax. Expected result: BAD REQUEST with error description.")
+    public void getSoftwareModulesWithSyntaxErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongFIQLSyntax").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")));
     }
 
     @Test
-    public void testGetSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
+    @Description("Verfies that the system answers as defined in case of a wnon extsing field used in filter. Expected result: BAD REQUEST with error description.")
+    public void getSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongField==abc").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$errorCode", equalTo("hawkbit.server.error.rest.param.rsqlInvalidField")));
@@ -693,6 +725,9 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("os")))
                 .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$createdAt", equalTo(os.getCreatedAt())))
+                .andExpect(jsonPath("$_links.metadata.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId()
+                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$_links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
                 .andExpect(jsonPath("$_links.artifacts.href",
@@ -709,6 +744,9 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("runtime")))
                 .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$createdAt", equalTo(jvm.getCreatedAt())))
+                .andExpect(jsonPath("$_links.metadata.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId()
+                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$_links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
                 .andExpect(jsonPath("$_links.artifacts.href",
@@ -725,6 +763,9 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("application")))
                 .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$createdAt", equalTo(ah.getCreatedAt())))
+                .andExpect(jsonPath("$_links.metadata.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId()
+                                + "/metadata?offset=0&limit=50")))
                 .andExpect(jsonPath("$_links.type.href",
                         equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
                 .andExpect(jsonPath("$_links.artifacts.href",
@@ -735,6 +776,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
     public void createSoftwareModules() throws JSONException, Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
 
@@ -812,6 +854,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
+    @Description("Verifies successfull deletion of software modules that are not in use, i.e. assigned to a DS.")
     public void deleteUnassignedSoftwareModule() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
         assertThat(artifactRepository.findAll()).isEmpty();
@@ -837,6 +880,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
+    @Description("Verifies successfull deletion of software modules that are in use, i.e. assigned to a DS which should result in movinf the module to the archive.")
     public void deleteAssignedSoftwareModule() throws Exception {
         // check baseline
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
@@ -868,7 +912,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
-    public void testDeleteArtifact() throws Exception {
+    @Description("Tests the deletion of an artifact including verfication that the artifact is actually erased in the repository and removed from the software module.")
+    public void deleteArtifact() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
         assertThat(artifactRepository.findAll()).isEmpty();
 
@@ -902,6 +947,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
+    @Description("Verfies the successfull creation of metadata.")
     public void createMetadata() throws Exception {
 
         final String knownKey1 = "knownKey1";
@@ -931,6 +977,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
+    @Description("Verfies the successfull update of metadata based on given key.")
     public void updateMetadata() throws Exception {
         // prepare and create metadata for update
         final String knownKey = "knownKey";
@@ -954,6 +1001,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
+    @Description("Verfies the successfull deletion of metadata entry.")
     public void deleteMetadata() throws Exception {
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
@@ -975,6 +1023,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     }
 
     @Test
+    @Description("Verfies the successfull search of a metadata entry based on value.")
     public void searchSoftwareModuleMetadataRsql() throws Exception {
         final int totalMetadata = 10;
         final String knownKeyPrefix = "knownKey";

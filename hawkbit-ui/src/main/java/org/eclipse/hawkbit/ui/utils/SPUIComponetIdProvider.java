@@ -702,6 +702,22 @@ public final class SPUIComponetIdProvider {
     public static final String CUSTOM_FILTER_TARGET_TABLE_ID = "custom.filter.target.table.id";
 
     /**
+     * Bulk upload notification button id.
+     */
+    public static final String BULK_UPLOAD_STATUS_BUTTON = "bulk.upload.notification.id";
+
+    /**
+     * Target bulk upload minimize button id.
+     */
+    public static final String BULK_UPLOAD_MINIMIZE_BUTTON_ID = "bulk.upload.minimize.button.id";
+
+    /**
+     * Target bulk upload minimize button id.
+     */
+
+    public static final String BULK_UPLOAD_CLOSE_BUTTON_ID = "bulk.upload.close.button.id";
+
+    /**
      * /* Private Constructor.
      */
     private SPUIComponetIdProvider() {

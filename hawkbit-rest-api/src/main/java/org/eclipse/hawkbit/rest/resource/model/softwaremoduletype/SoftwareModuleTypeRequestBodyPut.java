@@ -8,22 +8,14 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.softwaremoduletype;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Request Body for SoftwareModuleType PUT.
  *
- *
- *
- *
  */
 public class SoftwareModuleTypeRequestBodyPut {
 
-    @ApiModelProperty(value = ApiModelProperties.DESCRPTION)
     @JsonProperty
     private String description;
 
@@ -37,9 +29,12 @@ public class SoftwareModuleTypeRequestBodyPut {
     /**
      * @param description
      *            the description to set
+     *
+     * @return updated body
      */
-    public void setDescription(final String description) {
+    public SoftwareModuleTypeRequestBodyPut setDescription(final String description) {
         this.description = description;
+        return this;
     }
 
 }

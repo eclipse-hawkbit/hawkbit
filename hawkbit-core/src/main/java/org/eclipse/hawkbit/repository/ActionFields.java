@@ -15,7 +15,7 @@ package org.eclipse.hawkbit.repository;
  *
  *
  */
-public enum ActionFields implements FieldNameProvider, FieldValueConverter<ActionFields> {
+public enum ActionFields implements FieldNameProvider,FieldValueConverter<ActionFields> {
 
     /**
      * The status field.
@@ -51,7 +51,7 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
         }
     }
 
-    private Object convertStatusValue(final String value) {
+    private static Object convertStatusValue(final String value) {
         final String trimmedValue = value.trim();
         if (trimmedValue.equalsIgnoreCase(ACTIVE)) {
             return 1;
@@ -62,12 +62,6 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.rest.resource.model.FieldValueConverter#
-     * possibleValues(java.lang.Enum)
-     */
     @Override
     public String[] possibleValues(final ActionFields e) {
         switch (e) {

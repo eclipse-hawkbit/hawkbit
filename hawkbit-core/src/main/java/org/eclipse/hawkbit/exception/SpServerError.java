@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.exception;
  *
  *
  *
- *         Define the Error code for Error handling
+ * Define the Error code for Error handling
  *
  */
 
@@ -69,8 +69,7 @@ public enum SpServerError {
     *
     */
     SP_REST_BODY_NOT_READABLE("hawkbit.server.error.rest.body.notReadable",
-            "The given request body is not well formed"), SP_UI_SEARCH("hawkbit.server.error.ui.searchError",
-                    "blabla :-)"),
+            "The given request body is not well formed"),
     /**
     *
     */
@@ -113,7 +112,6 @@ public enum SpServerError {
     /**
                *
                */
-
     SP_ARTIFACT_LOAD_FAILED("hawkbit.server.error.artifact.loadFailed",
             "Load of artifact failed with internal server error."),
 
@@ -124,26 +122,34 @@ public enum SpServerError {
             "Too many status entries have been inserted."),
 
     /**
-                *
-                */
+    *
+    */
     SP_ATTRIBUTES_TO_MANY_ENTRIES("hawkbit.server.error.target.attributes.tooManyEntries",
             "Too many attribute entries have been inserted."),
 
     /**
-    *
-    */
+     * error message, which describes that the action can not be canceled cause
+     * the action is inactive.
+     */
     SP_ACTION_NOT_CANCELABLE("hawkbit.server.error.action.notcancelable",
-            "Only active actions which are in status pending are canceable"),
+            "Only active actions which are in status pending are canceable."),
 
     /**
-               *
-               */
+     * error message, which describes that the action can not be force quit
+     * cause the action is inactive.
+     */
+    SP_ACTION_NOT_FORCE_QUITABLE("hawkbit.server.error.action.notforcequitable",
+            "Only active actions which are in status pending can be force quit."),
+
+    /**
+    *
+    */
     SP_DS_INCOMPLETE("hawkbit.server.error.distributionset.incomplete",
             "Distribution set is assigned to a a target that is incomplete (i.e. mandatory modules are missing)"),
 
     /**
-               *
-               */
+    *
+    */
     SP_DS_TYPE_UNDEFINED("hawkbit.server.error.distributionset.type.undefined",
             "Distribution set type is not yet defined. Modules cannot be added until definition."),
 
@@ -154,8 +160,8 @@ public enum SpServerError {
             "Distribution set type does not contain the given module, i.e. is incompatible."),
 
     /**
-                *
-                */
+    *
+    */
     SP_REPO_TENANT_NOT_EXISTS("hawkbit.server.error.repo.tenantNotExists",
             "The entity cannot be inserted due the tenant does not exists"),
 
@@ -181,10 +187,20 @@ public enum SpServerError {
         this.message = message;
     }
 
+    /**
+     * Gets the key of the error
+     * 
+     * @return the key of the error
+     */
     public String getKey() {
         return key;
     }
 
+    /**
+     * Gets the message of the error
+     * 
+     * @return message of the error
+     */
     public String getMessage() {
         return message;
     }

@@ -216,9 +216,7 @@ public class SpSenderService extends SenderService {
 
     private Message createActionStatusMessage(final SimulatedUpdate update, final String messageDescription,
             final ActionStatus status) {
-        final Message sendMessage = createActionStatusMessage(update.getTenant(), status, messageDescription,
-                update.getActionId());
-        return sendMessage;
+        return createActionStatusMessage(update.getTenant(), status, messageDescription, update.getActionId());
     }
 
 }

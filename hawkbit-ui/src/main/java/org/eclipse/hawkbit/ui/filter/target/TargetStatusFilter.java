@@ -5,7 +5,6 @@ package org.eclipse.hawkbit.ui.filter.target;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
 
@@ -16,7 +15,6 @@ import org.eclipse.hawkbit.ui.filter.FilterExpression;
  */
 public class TargetStatusFilter implements FilterExpression {
 
-    private final Target target;
     private final List<TargetUpdateStatus> targetUpdateStatus;
 
     /**
@@ -25,8 +23,7 @@ public class TargetStatusFilter implements FilterExpression {
      * @param updateStatus
      *            the target update status to check against the given target
      */
-    public TargetStatusFilter(final Target target, final List<TargetUpdateStatus> updateStatus) {
-        this.target = target;
+    public TargetStatusFilter(final List<TargetUpdateStatus> updateStatus) {
         this.targetUpdateStatus = updateStatus;
     }
 
@@ -40,6 +37,6 @@ public class TargetStatusFilter implements FilterExpression {
         if (targetUpdateStatus.isEmpty()) {
             return false;
         }
-        return !targetUpdateStatus.contains(target.getTargetInfo().getUpdateStatus());
+        return true;
     }
 }

@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.ui.management.tag;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.PreDestroy;
+
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -26,6 +29,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -71,10 +75,16 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected String updateTagNw;
 
     @Autowired
-    private I18N i18n;
+    protected I18N i18n;
 
     @Autowired
-    private TagManagement tagManagement;
+    protected TagManagement tagManagement;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    protected SpPermissionChecker permChecker;
     /**
      * Local Instance of ColorPickerPreview.
      */
@@ -138,10 +148,19 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     protected abstract void setTagDetails(final String tagSelected);
 
-    protected void init() {
+    /**
+     * Init the layout.
+     */
+    public void init() {
         createRequiredComponents();
         addListeners();
         buildLayout();
+        eventBus.subscribe(this);
+    }
+
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
     }
 
     private void createRequiredComponents() {
@@ -269,16 +288,15 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
             if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTagNw)) {
                 if (null != tagNameComboBox.getValue()) {
 
-                    final TargetTag targetTagSelected = tagManagement
-                            .findTargetTag(tagNameComboBox.getValue().toString());
+                    final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue()
+                            .toString());
                     if (null != targetTagSelected) {
-                        selectedColor = targetTagSelected.getColour() != null
-                                ? rgbToColorConverter(targetTagSelected.getColour())
-                                : rgbToColorConverter(DEFAULT_COLOR);
+                        selectedColor = targetTagSelected.getColour() != null ? rgbToColorConverter(targetTagSelected
+                                .getColour()) : rgbToColorConverter(DEFAULT_COLOR);
                     } else {
 
-                        final DistributionSetTag distTag = tagManagement
-                                .findDistributionSetTag(tagNameComboBox.getValue().toString());
+                        final DistributionSetTag distTag = tagManagement.findDistributionSetTag(tagNameComboBox
+                                .getValue().toString());
                         selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
                                 : rgbToColorConverter(DEFAULT_COLOR);
                     }
@@ -452,8 +470,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
             final double greenColorValue = color.getGreen();
             greenSlider.setValue(new Double(greenColorValue));
         } catch (final ValueOutOfBoundsException e) {
-            LOG.error("Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
-                    + color.getBlue(), e);
+            LOG.error(
+                    "Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
+                            + color.getBlue(), e);
         }
     }
 

@@ -9,13 +9,9 @@
 package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
 
 /**
- * Proxy for {@link Target}.
- *
- *
- *
+ * Proxy for {@link DistributionSet}.
  *
  *
  */
@@ -34,6 +30,23 @@ public class ProxyDistribution extends DistributionSet {
     private String modifiedByUser;
 
     private Boolean isComplete;
+
+    private String nameVersion;
+
+    /**
+     * @return the nameVersion
+     */
+    public String getNameVersion() {
+        return nameVersion;
+    }
+
+    /**
+     * @param nameVersion
+     *            the nameVersion to set
+     */
+    public void setNameVersion(final String nameVersion) {
+        this.nameVersion = nameVersion;
+    }
 
     public Boolean getIsComplete() {
         return isComplete;

@@ -10,31 +10,19 @@ package org.eclipse.hawkbit.controller.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Action fulfillment progress by means of gives the achieved amount of maximal
  * of possible levels.
  *
- *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.TARGET_RESULT_PROGRESS)
 public class Progress {
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_PROGRESS_CNT, required = true)
     @NotNull
     private final Integer cnt;
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_PROGRESS_OF)
     private final Integer of;
 
     /**
@@ -62,7 +50,7 @@ public class Progress {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

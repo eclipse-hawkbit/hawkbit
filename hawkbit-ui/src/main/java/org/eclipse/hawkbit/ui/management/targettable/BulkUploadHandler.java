@@ -19,27 +19,30 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken.TagData;
+import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
+import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
+import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
@@ -52,6 +55,8 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
 import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.StartedEvent;
+import com.vaadin.ui.Upload.StartedListener;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 
@@ -61,23 +66,29 @@ import com.vaadin.ui.Upload.SucceededListener;
  *
  *
  */
-public class BulkUploadHandler extends CustomComponent implements SucceededListener, FailedListener, Receiver {
+public class BulkUploadHandler extends CustomComponent implements SucceededListener, FailedListener, Receiver,
+        StartedListener {
 
     /**
-    * 
-    */
+     * *
+     */
     private static final long serialVersionUID = -1273494705754674501L;
     private static final Logger LOG = LoggerFactory.getLogger(BulkUploadHandler.class);
 
     private final transient TargetManagement targetManagement;
+    private final transient TagManagement tagManagement;
 
     private final ComboBox comboBox;
     private final TextArea descTextArea;
     private final I18N i18n;
     private final transient DeploymentManagement deploymentManagement;
+    private final transient DistributionSetManagement distributionSetManagement;
+
     private final UINotification uINotification;
 
     protected File tempFile = null;
+    private Upload upload;
+
     private final ProgressBar progressBar;
     private final ManagementUIState managementUIState;
     private final TargetBulkTokenTags targetBulkTokenTags;
@@ -85,9 +96,11 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
     private final Label targetsCountLabel;
     private long failedTargetCount = 0;
     private long successfullTargetCount = 0;
-    private final Set<TargetIdName> targetIdNames = new HashSet<>();
 
     private final transient Executor executor;
+    private transient EventBus.SessionEventBus eventBus;
+
+    final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
     /**
      * 
@@ -101,6 +114,7 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
     public BulkUploadHandler(final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout,
             final TargetManagement targetManagement, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final UINotification uINotification, final I18N i18n) {
+        this.targetBulkUpdateWindowLayout = targetBulkUpdateWindowLayout;
         this.comboBox = targetBulkUpdateWindowLayout.getDsNamecomboBox();
         this.descTextArea = targetBulkUpdateWindowLayout.getDescTextArea();
         this.targetManagement = targetManagement;
@@ -112,6 +126,9 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
         this.targetBulkTokenTags = targetBulkUpdateWindowLayout.getTargetBulkTokenTags();
         this.i18n = i18n;
         executor = (Executor) SpringContextHelper.getBean("uiExecutor");
+        this.eventBus = targetBulkUpdateWindowLayout.getEventBus();
+        distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
+        tagManagement = SpringContextHelper.getBean(TagManagement.class);
     }
 
     /**
@@ -119,13 +136,15 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
      */
     public void buildLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        final Upload upload = new Upload();
+        upload = new Upload();
+        upload.setEnabled(false);
         upload.setButtonCaption("Bulk Upload");
         upload.setReceiver(this);
         upload.setImmediate(true);
         upload.setWidthUndefined();
         upload.addSucceededListener(this);
         upload.addFailedListener(this);
+        upload.addStartedListener(this);
         horizontalLayout.addComponent(upload);
         horizontalLayout.setComponentAlignment(upload, Alignment.BOTTOM_RIGHT);
         setCompositionRoot(horizontalLayout);
@@ -139,19 +158,15 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
      */
     @Override
     public OutputStream receiveUpload(final String filename, final String mimeType) {
-        if (!filename.endsWith(".csv")) {
-            uINotification.displayError(i18n.get("bulk.targets.upload"), null, true);
-        } else {
-            try {
-                tempFile = File.createTempFile("temp", ".csv");
-                progressBar.setVisible(false);
-                targetsCountLabel.setVisible(false);
-                return new FileOutputStream(tempFile);
-            } catch (final FileNotFoundException e) {
-                LOG.error("File was not found with file name {}", filename, e);
-            } catch (final IOException e) {
-                LOG.error("Error while reading file {}", filename, e);
-            }
+        try {
+            tempFile = File.createTempFile("temp", ".csv");
+            progressBar.setVisible(false);
+            targetsCountLabel.setVisible(false);
+            return new FileOutputStream(tempFile);
+        } catch (final FileNotFoundException e) {
+            LOG.error("File was not found with file name {}", filename, e);
+        } catch (final IOException e) {
+            LOG.error("Error while reading file {}", filename, e);
         }
         return new NullOutputStream();
     }
@@ -198,26 +213,25 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
             String line;
             if (tempFile != null) {
                 try {
-                    LOG.info("Charset {}", Charset.defaultCharset());
+                    LOG.info("Bulk file upload started");
                     final double totalFileSize = getTotalNumberOfLines();
                     reader = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile),
                             Charset.defaultCharset()));
+                    /**
+                     * Once control is in upload succeeded method automatically
+                     * upload button is re-enabled. To disable the button firing
+                     * below event.
+                     */
+                    eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
                     while ((line = reader.readLine()) != null) {
                         innerCounter++;
-                        readEachLine(event, line, innerCounter, totalFileSize);
+                        readEachLine(line, innerCounter, totalFileSize);
                     }
-                    if (!targetIdNames.isEmpty()) {
-                        saveAllAssignments();
-                        assignTag();
-                    }
-                    String targetCountLabel = "";
-                    if (successfullTargetCount != 0 || failedTargetCount != 0) {
-                        targetCountLabel = new StringBuilder().append("Successful :").append(successfullTargetCount)
-                                .append("<font color=RED> Failed :").append(failedTargetCount).append("</font>")
-                                .toString();
-                    }
-                    final String count = targetCountLabel;
-                    event.getComponent().getUI().access(() -> displayCount(count));
+                    doAssignments();
+                    eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
+
+                    // Clearing after assignments are done
+                    managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
                 } catch (final FileNotFoundException e) {
                     LOG.error("File not found with name {}", tempFile.getName(), e);
                 } catch (final IOException e) {
@@ -237,6 +251,59 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
 
         }
 
+        private void doAssignments() {
+            final StringBuilder errorMessage = new StringBuilder();
+            String dsAssignmentFailedMsg = null;
+            String tagAssignmentFailedMsg = null;
+            if (ifTargetsCreatedSuccessfully()) {
+                if (ifTagsSelected()) {
+                    tagAssignmentFailedMsg = tagAssignment();
+                }
+                if (ifDsSelected()) {
+                    dsAssignmentFailedMsg = saveAllAssignments();
+                }
+            }
+            displayValidationMessage(errorMessage, dsAssignmentFailedMsg, tagAssignmentFailedMsg);
+        }
+
+        private boolean ifTagsSelected() {
+            return targetBulkTokenTags.getTokenField().getValue() != null;
+        }
+
+        /**
+         * @return
+         */
+        private boolean ifDsSelected() {
+            return comboBox.getValue() != null;
+        }
+
+        /**
+         * @return
+         */
+        private boolean ifTargetsCreatedSuccessfully() {
+            return !managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().isEmpty();
+        }
+
+        /**
+         * @param errorMessage
+         * @param dsAssignmentFailedMsg
+         * @param tagAssignmentFailedMsg
+         */
+        private void displayValidationMessage(final StringBuilder errorMessage, final String dsAssignmentFailedMsg,
+                final String tagAssignmentFailedMsg) {
+            if (dsAssignmentFailedMsg != null) {
+                errorMessage.append(dsAssignmentFailedMsg);
+            }
+            if (errorMessage.length() > 0) {
+                errorMessage.append("<br>");
+            }
+            if (tagAssignmentFailedMsg != null) {
+                errorMessage.append(tagAssignmentFailedMsg);
+            }
+            if (errorMessage.length() > 0) {
+                eventBus.publish(this, new BulkUploadValidationMessageEvent(errorMessage.toString()));
+            }
+        }
     }
 
     private double getTotalNumberOfLines() {
@@ -276,41 +343,24 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
         tempFile = null;
     }
 
-    private void readEachLine(final SucceededEvent event, final String line, final double innerCounter,
-            final double totalFileSize) {
+    private void readEachLine(final String line, final double innerCounter, final double totalFileSize) {
         final String csvDelimiter = ",";
         final String[] targets = line.split(csvDelimiter);
         if (targets.length == 2) {
             final String controllerId = targets[0];
             final String targetName = targets[1];
             addNewTarget(controllerId, targetName);
-            final float current = progressBar.getValue();
-            final float next = (float) (innerCounter / totalFileSize);
-            if (Math.abs(next - 0.1) < 0.00001 || current - next >= 0 || next - current >= 0.3
-                    || Math.abs(next - 1) < 0.00001) {
-                event.getComponent().getUI().access(() -> updateProgressBar(next));
-            }
         } else {
             failedTargetCount++;
         }
-
-    }
-
-    private void displayCount(final String targetCountLabel) {
-        targetsCountLabel.setVisible(true);
-        targetsCountLabel.setCaptionAsHtml(true);
-        targetsCountLabel.setCaption(targetCountLabel);
-    }
-
-    void updateProgressBar(final float value) {
-        progressBar.setVisible(true);
-        progressBar.setValue(value);
-        progressBar.getUI().push();
-    }
-
-    private void assignTag() {
-        if (targetBulkTokenTags.getTokenField().getValue() != null) {
-            tagAssignment();
+        final float current = managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue();
+        final float next = (float) (innerCounter / totalFileSize);
+        if (Math.abs(next - 0.1) < 0.00001 || current - next >= 0 || next - current >= 0.05
+                || Math.abs(next - 1) < 0.00001) {
+            managementUIState.getTargetTableFilters().getBulkUpload().setProgressBarCurrentValue(next);
+            managementUIState.getTargetTableFilters().getBulkUpload().setSucessfulUploadCount(successfullTargetCount);
+            managementUIState.getTargetTableFilters().getBulkUpload().setFailedUploadCount(failedTargetCount);
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_CREATED));
         }
     }
 
@@ -321,20 +371,12 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             /* create new target entity */
-            Target newTarget = new Target(newControllerId);
+            final Target newTarget = new Target(newControllerId);
             setTargetValues(newTarget, newName, newDesc);
-            newTarget = targetManagement.createTarget(newTarget);
-            if (comboBox.getValue() != null) {
-                dsToTargetAssignment(newTarget.getTargetIdName());
-            }
-            targetIdNames.add(newTarget.getTargetIdName());
+            targetManagement.createTarget(newTarget);
+            managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);
             successfullTargetCount++;
         }
-
-    }
-
-    private void dsToTargetAssignment(final TargetIdName targetId) {
-        managementUIState.getAssignedList().put(targetId, (DistributionSetIdName) comboBox.getValue());
 
     }
 
@@ -367,44 +409,40 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
         }
     }
 
-    private void saveAllAssignments() {
-        final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
-        Long distId;
-        List<TargetIdName> targetIdSetList;
-        List<TargetIdName> tempIdList;
-
-        final long forcedTimeStamp = new Date().getTime();
+    private String saveAllAssignments() {
         final ActionType actionType = ActionType.FORCED;
-
-        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = new HashMap<>();
-        for (final TargetIdName itemId : itemIds) {
-            final DistributionSetIdName distitem = managementUIState.getAssignedList().get(itemId);
-            distId = distitem.getId();
-
-            if (saveAssignedList.containsKey(distId)) {
-                targetIdSetList = saveAssignedList.get(distId);
-            } else {
-                targetIdSetList = new ArrayList<>();
-            }
-            targetIdSetList.add(itemId);
-            saveAssignedList.put(distId, (ArrayList<TargetIdName>) targetIdSetList);
+        final long forcedTimeStamp = new Date().getTime();
+        final TargetBulkUpload targetBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload();
+        final List<String> targetsList = targetBulkUpload.getTargetsCreated();
+        final DistributionSetIdName dsSelected = (DistributionSetIdName) comboBox.getValue();
+        if (distributionSetManagement.findDistributionSetById(dsSelected.getId()) == null) {
+            return i18n.get("message.bulk.upload.assignment.failed");
+        } else {
+            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion().getId(), actionType,
+                    forcedTimeStamp, targetsList.toArray(new String[targetsList.size()]));
+            return null;
         }
-
-        for (final Map.Entry<Long, ArrayList<TargetIdName>> mapEntry : saveAssignedList.entrySet()) {
-            tempIdList = saveAssignedList.get(mapEntry.getKey());
-            final String[] ids = tempIdList.stream().map(t -> t.getControllerId()).toArray(size -> new String[size]);
-            deploymentManagement.assignDistributionSet(mapEntry.getKey(), actionType, forcedTimeStamp, ids);
-        }
-
-        managementUIState.getAssignedList().clear();
     }
 
-    private void tagAssignment() {
-        final Set<String> targetList = new HashSet<>();
-        targetList.addAll(targetIdNames.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
-        for (final String tagName : targetBulkTokenTags.getAssignedTagNames()) {
-            targetManagement.toggleTagAssignment(targetList, tagName);
+    private String tagAssignment() {
+        final Map<Long, TagData> tokensSelected = targetBulkTokenTags.getTokensAdded();
+        final List<String> deletedTags = new ArrayList<>();
+        for (final TagData tagData : tokensSelected.values()) {
+            if (tagManagement.findTargetTagById(tagData.getId()) == null) {
+                deletedTags.add(tagData.getName());
+            } else {
+                targetManagement.toggleTagAssignment(managementUIState.getTargetTableFilters().getBulkUpload()
+                        .getTargetsCreated(), tagData.getName());
+            }
         }
+        if (!deletedTags.isEmpty()) {
+            if (deletedTags.size() == 1) {
+                return i18n.get("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
+            } else {
+                return i18n.get("message.bulk.upload.tag.assignments.failed");
+            }
+        }
+        return null;
     }
 
     private static class NullOutputStream extends OutputStream {
@@ -420,4 +458,28 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
         }
     }
 
+    /**
+     * @return the upload
+     */
+    public Upload getUpload() {
+        return upload;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.vaadin.ui.Upload.StartedListener#uploadStarted(com.vaadin.ui.Upload
+     * .StartedEvent)
+     */
+    @Override
+    public void uploadStarted(final StartedEvent event) {
+        if (!event.getFilename().endsWith(".csv")) {
+            uINotification.displayError(i18n.get("bulk.targets.upload"), null, true);
+            LOG.error("Wrong file format for file {}", event.getFilename());
+            upload.interruptUpload();
+        } else {
+            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED));
+        }
+    }
 }

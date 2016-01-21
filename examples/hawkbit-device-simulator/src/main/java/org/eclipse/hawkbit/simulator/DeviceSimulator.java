@@ -20,6 +20,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class DeviceSimulator {
 
+    private DeviceSimulator() {
+        // utility class
+    }
+
     /**
      * Start the Spring Boot Application.
      *

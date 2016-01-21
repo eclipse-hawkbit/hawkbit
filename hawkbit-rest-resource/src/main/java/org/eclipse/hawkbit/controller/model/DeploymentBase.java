@@ -10,31 +10,20 @@ package org.eclipse.hawkbit.controller.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
- * {@link UpdateAction} ressource.
- *
- *
- *
- *
+ * {@link UpdateAction} resource.
  *
  */
-@ApiModel("Deployment or update action")
 public class DeploymentBase extends ResourceSupport {
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID, required = false)
     @JsonProperty("id")
     @NotNull
     private final String deplyomentId;
 
-    @ApiModelProperty(value = ApiModelProperties.DEPLOYMENT, required = false)
     @NotNull
     private final Deployment deployment;
 
@@ -57,7 +46,7 @@ public class DeploymentBase extends ResourceSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

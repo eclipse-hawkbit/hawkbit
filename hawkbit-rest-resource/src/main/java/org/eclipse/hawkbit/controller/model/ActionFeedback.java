@@ -10,14 +10,9 @@ package org.eclipse.hawkbit.controller.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  *
@@ -38,23 +33,12 @@ import io.swagger.annotations.ApiModelProperty;
  * "success", "progress": {} } "details": [], } }
  * </p>
  *
- *
- *
- *
- *
- *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("SP Target Action Feedback")
 public class ActionFeedback {
-
-    @ApiModelProperty(value = ApiModelProperties.ACTION_ID)
     private final Long id;
-
-    @ApiModelProperty(value = ApiModelProperties.TARGET_TIME)
     private final String time;
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_STATUS, required = true)
     @NotNull
     private final Status status;
 
@@ -90,7 +74,7 @@ public class ActionFeedback {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

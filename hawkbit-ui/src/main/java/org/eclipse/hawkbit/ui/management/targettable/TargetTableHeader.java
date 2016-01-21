@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
+import org.eclipse.hawkbit.ui.management.event.BulkUploadValidationMessageEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
@@ -119,6 +121,41 @@ public class TargetTableHeader extends AbstractTableHeader {
         } else if (event == ManagementUIEvent.RESET_TARGET_FILTER_QUERY) {
             UI.getCurrent().access(() -> onCustomFilterReset());
         }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final BulkUploadPopupEvent event) {
+        if (BulkUploadPopupEvent.MAXIMIMIZED == event) {
+            targetBulkUpdateWindow.restoreComponentsValue();
+            openBulkUploadWindow();
+        } else if (BulkUploadPopupEvent.CLOSED == event) {
+            UI.getCurrent().access(() -> enableBulkUpload());
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final BulkUploadValidationMessageEvent event) {
+        this.getUI().access(() -> notification.displayValidationError(event.getValidationErrorMessage()));
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final TargetTableEvent event) {
+        if (TargetComponentEvent.BULK_TARGET_CREATED == event.getTargetComponentEvent()) {
+            this.getUI().access(
+                    () -> targetBulkUpdateWindow.setProgressBarValue(managementUIState.getTargetTableFilters()
+                            .getBulkUpload().getProgressBarCurrentValue()));
+        } else if (TargetComponentEvent.BULK_UPLOAD_COMPLETED == event.getTargetComponentEvent()) {
+            this.getUI().access(() -> targetBulkUpdateWindow.onUploadCompletion());
+        } else if (TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED == event.getTargetComponentEvent()) {
+            this.getUI().access(() -> onStartOfBulkUpload());
+        } else if (TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED == event.getTargetComponentEvent()) {
+            this.getUI().access(() -> targetBulkUpdateWindow.getBulkUploader().getUpload().setEnabled(false));
+        }
+    }
+
+    private void onStartOfBulkUpload() {
+        disableBulkUpload();
+        targetBulkUpdateWindow.onStartOfUpload();
     }
 
     private void onCustomFilterReset() {
@@ -277,6 +314,10 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected void bulkUpload(final ClickEvent event) {
         targetBulkUpdateWindow.resetComponents();
+        openBulkUploadWindow();
+    }
+
+    private void openBulkUploadWindow() {
         final Window bulkUploadTargetWindow = targetBulkUpdateWindow.getWindow();
         UI.getCurrent().addWindow(bulkUploadTargetWindow);
         bulkUploadTargetWindow.setVisible(true);
@@ -354,8 +395,8 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) transferable.getSourceComponent()
-                .getValue();
+        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(transferable
+                .getSourceComponent());
         final Set<DistributionSetIdName> distributionIdSet = new HashSet<DistributionSetIdName>();
         if (!distSelected.contains(transferable.getData("itemId"))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));
@@ -423,5 +464,17 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected String getFilterIconStyle() {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
+     * isBulkUploadInProgress()
+     */
+    @Override
+    protected boolean isBulkUploadInProgress() {
+        return managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount() != 0
+                || managementUIState.getTargetTableFilters().getBulkUpload().getFailedUploadCount() != 0;
     }
 }

@@ -18,6 +18,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
+import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -49,6 +50,9 @@ public class EntityChangeEventListener {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
+
     /**
      * In case the a {@link Target} is created a corresponding
      * {@link TargetInfo} is created as well. We need the {@link TargetInfo}
@@ -68,10 +72,6 @@ public class EntityChangeEventListener {
         final Object result = joinpoint.proceed();
         if (result instanceof TargetInfo) {
             if (isNew) {
-                // we need to flush here because seems like eclipselink
-                // implementation setting the ID of the target no immediately
-                // otherwise.
-                entityManager.flush();
                 notifyTargetCreated(entityManager.merge(entityManager.merge(((TargetInfo) result).getTarget())));
             } else {
                 notifyTargetInfoChanged((TargetInfo) result);
@@ -129,15 +129,16 @@ public class EntityChangeEventListener {
     }
 
     private void notifyTargetCreated(final Target t) {
-        eventBus.post(new TargetCreatedEvent(t));
+        afterCommit.afterCommit(() -> eventBus.post(new TargetCreatedEvent(t)));
+
     }
 
     private void notifyTargetInfoChanged(final TargetInfo targetInfo) {
-        eventBus.post(new TargetInfoUpdateEvent(targetInfo));
+        afterCommit.afterCommit(() -> eventBus.post(new TargetInfoUpdateEvent(targetInfo)));
     }
 
     private void notifyTargetDeleted(final String tenant, final Long targetId) {
-        eventBus.post(new TargetDeletedEvent(tenant, targetId));
+        afterCommit.afterCommit(() -> eventBus.post(new TargetDeletedEvent(tenant, targetId)));
     }
 
     private boolean isTargetInfoNew(final Object targetInfo) {

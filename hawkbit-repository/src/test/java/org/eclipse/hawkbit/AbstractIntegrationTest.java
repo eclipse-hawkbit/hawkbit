@@ -12,7 +12,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -87,7 +86,7 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class AbstractIntegrationTest implements EnvironmentAware {
     protected static Logger LOG = null;
 
-    protected final Pageable pageReq = new PageRequest(0, 400);
+    protected static final Pageable pageReq = new PageRequest(0, 400);
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -210,7 +209,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
      * springframework.core.env. Environment)
      */
@@ -221,42 +220,26 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Before
     public void before() throws Exception {
-        mvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .addFilter(
-                        new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
-                                "X-Forwarded-For"))
-                .addFilter(
-                        new ExcludePathAwareShallowETagFilter(
-                                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                                "/*/controller/artifacts/**")).build();
+        mvc = MockMvcBuilders.webAppContextSetup(context)
+                .addFilter(new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
+                        "X-Forwarded-For"))
+                .addFilter(new ExcludePathAwareShallowETagFilter(
+                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"))
+                .build();
 
-        standardDsType = securityRule.runAsPrivileged(new Callable<DistributionSetType>() {
-            @Override
-            public DistributionSetType call() throws Exception {
-                return systemManagement.getTenantMetadata().getDefaultDsType();
-            }
-        });
+        standardDsType = securityRule.runAsPrivileged(() -> systemManagement.getTenantMetadata().getDefaultDsType());
 
-        osType = securityRule.runAsPrivileged(new Callable<SoftwareModuleType>() {
-            @Override
-            public SoftwareModuleType call() throws Exception {
-                return softwareManagement.findSoftwareModuleTypeByKey("os");
-            }
-        });
+        osType = securityRule.runAsPrivileged(() -> softwareManagement.findSoftwareModuleTypeByKey("os"));
+        osType.setDescription("Updated description to have lastmodified available in tests");
+        osType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(osType));
 
-        appType = securityRule.runAsPrivileged(new Callable<SoftwareModuleType>() {
-            @Override
-            public SoftwareModuleType call() throws Exception {
-                return softwareManagement.findSoftwareModuleTypeByKey("application");
-            }
-        });
-        runtimeType = securityRule.runAsPrivileged(new Callable<SoftwareModuleType>() {
-            @Override
-            public SoftwareModuleType call() throws Exception {
-                return softwareManagement.findSoftwareModuleTypeByKey("runtime");
-            }
-        });
+        appType = securityRule.runAsPrivileged(() -> softwareManagement.findSoftwareModuleTypeByKey("application"));
+        appType.setDescription("Updated description to have lastmodified available in tests");
+        appType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(appType));
+
+        runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.findSoftwareModuleTypeByKey("runtime"));
+        runtimeType.setDescription("Updated description to have lastmodified available in tests");
+        runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(runtimeType));
     }
 
     @BeforeClass
@@ -297,20 +280,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Transactional
     protected void deleteAllRepos() throws Exception {
         final List<String> tenants = securityRule.runAs(WithSpringAuthorityRule.withUser(false),
-                new Callable<List<String>>() {
-                    @Override
-                    public List<String> call() throws Exception {
-                        return systemManagement.findTenants();
-                    }
-                });
+                () -> systemManagement.findTenants());
         tenants.forEach(tenant -> {
             try {
-                securityRule.runAs(WithSpringAuthorityRule.withUser(false), new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        systemManagement.deleteTenant(tenant);
-                        return null;
-                    }
+                securityRule.runAs(WithSpringAuthorityRule.withUser(false), () -> {
+                    systemManagement.deleteTenant(tenant);
+                    return null;
                 });
             } catch (final Exception e) {
                 e.printStackTrace();

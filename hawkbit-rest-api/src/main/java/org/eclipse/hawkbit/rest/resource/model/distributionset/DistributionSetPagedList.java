@@ -11,22 +11,13 @@ package org.eclipse.hawkbit.rest.resource.model.distributionset;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Paged list for SoftwareModule.
  *
- *
- *
- *
  */
-@ApiModel("Paged list of distribution sets")
 public class DistributionSetPagedList extends PagedList<DistributionSetRest> {
 
-    @ApiModelProperty(value = ApiModelProperties.SM_LIST, required = true)
     private final List<DistributionSetRest> content;
 
     /**

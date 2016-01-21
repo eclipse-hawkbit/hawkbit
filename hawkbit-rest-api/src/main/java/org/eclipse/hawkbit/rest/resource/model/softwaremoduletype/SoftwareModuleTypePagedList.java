@@ -11,22 +11,13 @@ package org.eclipse.hawkbit.rest.resource.model.softwaremoduletype;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Paged list for SoftwareModuleType.
  *
- *
- *
- *
  */
-@ApiModel("Paged list of software module typess")
 public class SoftwareModuleTypePagedList extends PagedList<SoftwareModuleTypeRest> {
 
-    @ApiModelProperty(value = ApiModelProperties.SM_TYPE_LIST, required = true)
     private final List<SoftwareModuleTypeRest> content;
 
     /**

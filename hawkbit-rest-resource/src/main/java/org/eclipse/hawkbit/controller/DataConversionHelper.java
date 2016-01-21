@@ -23,15 +23,12 @@ import org.eclipse.hawkbit.controller.model.Chunk;
 import org.eclipse.hawkbit.controller.model.Config;
 import org.eclipse.hawkbit.controller.model.ControllerBase;
 import org.eclipse.hawkbit.controller.model.Polling;
-import org.eclipse.hawkbit.controller.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactHash;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.hateoas.Link;
 
 import com.google.common.base.Charsets;
 
@@ -57,34 +54,6 @@ public final class DataConversionHelper {
 
     }
 
-    /**
-     * Creates all available (rest) software modules for a given distributionSet
-     * set.
-     * 
-     * @param targetid
-     *            of the target
-     * @param assignedDistributionSet
-     *            the assigned distribution set
-     * @param tenantAware
-     *            of the tenant
-     * @return a list of software modules or a empty list. Cannot be <null>.
-     */
-    public static List<SoftwareModule> createSoftwareModules(final String targetid,
-            final DistributionSet assignedDistributionSet, final TenantAware tenantAware) {
-        return assignedDistributionSet.getModules().stream()
-                .map(module -> createSoftwareModul(targetid, module, tenantAware)).collect(Collectors.toList());
-
-    }
-
-    private static SoftwareModule createSoftwareModul(final String targetid,
-            final org.eclipse.hawkbit.repository.model.SoftwareModule module, final TenantAware tenantAware) {
-        final List<Link> links = new ArrayList<Link>();
-        module.getLocalArtifacts().forEach(artifact -> createAndAddLinks(targetid, tenantAware, artifact, links));
-
-        return new SoftwareModule(module.getId(), module.getType().getKey(), module.getVersion(), module.getName(),
-                links);
-    }
-
     private static String mapChunkLegacyKeys(final String key) {
         if ("application".equals(key)) {
             return "bApp";
@@ -98,7 +67,7 @@ public final class DataConversionHelper {
 
     /**
      * Creates all (rest) artifacts for a given software module.
-     * 
+     *
      * @param targetid
      *            of the target
      * @param module
@@ -109,24 +78,21 @@ public final class DataConversionHelper {
      */
     public static List<Artifact> createArtifacts(final String targetid,
             final org.eclipse.hawkbit.repository.model.SoftwareModule module, final TenantAware tenantAware) {
-        final List<Artifact> files = new ArrayList<Artifact>();
+        final List<Artifact> files = new ArrayList<>();
         module.getLocalArtifacts().forEach(artifact -> {
             final Artifact file = new Artifact();
             file.setHashes(new ArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
             file.setFilename(artifact.getFilename());
             file.setSize(artifact.getSize());
-            createAndAddLinks(targetid, tenantAware, artifact, file.getLinks());
+
+            file.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).downloadArtifact(targetid,
+                    artifact.getSoftwareModule().getId(), artifact.getFilename(), null, null)).withRel("download"));
+            file.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).downloadArtifactMd5(targetid,
+                    artifact.getSoftwareModule().getId(), artifact.getFilename(), null, null)).withRel("md5sum"));
+
             files.add(file);
         });
         return files;
-    }
-
-    private static void createAndAddLinks(final String targetid, final TenantAware tenantAware,
-            final LocalArtifact artifact, final List<Link> links) {
-        links.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).downloadArtifact(targetid,
-                artifact.getSoftwareModule().getId(), artifact.getFilename(), null, null)).withRel("download"));
-        links.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).downloadArtifactMd5(targetid,
-                artifact.getSoftwareModule().getId(), artifact.getFilename(), null, null)).withRel("md5sum"));
     }
 
     static ControllerBase fromTarget(final Target target, final List<Action> actions,

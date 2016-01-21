@@ -43,6 +43,7 @@ import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.test.context.ActiveProfiles;
@@ -154,15 +155,15 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
                 CONTROLLER_ID, 1l, IpUtil.createAmqpUri("mytest"));
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getTargetAdress().getHost());
+        final Message sendMessage = createArgumentCapture(cancelTargetAssignmentDistributionSetEvent.getTargetAdress()
+                .getHost());
         assertCancelMessage(sendMessage);
 
     }
 
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
-        final Long actionId = (Long) messageConverter.fromMessage(sendMessage);
+        final Long actionId = convertMessage(sendMessage, Long.class);
         assertEquals(actionId, Long.valueOf(1));
         assertEquals(EventTopic.CANCEL_DOWNLOAD,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
@@ -171,8 +172,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
 
     private DownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
-        final DownloadAndUpdateRequest downloadAndUpdateRequest = (DownloadAndUpdateRequest) messageConverter
-                .fromMessage(sendMessage);
+        final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
+                DownloadAndUpdateRequest.class);
         assertEquals(downloadAndUpdateRequest.getActionId(), Long.valueOf(1));
         assertEquals(EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
@@ -195,6 +196,13 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final ArgumentCaptor<Message> argumentCaptor = ArgumentCaptor.forClass(Message.class);
         Mockito.verify(amqpMessageDispatcherService).sendMessage(eq(exchange), argumentCaptor.capture());
         return argumentCaptor.getValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T convertMessage(final Message message, final Class<T> clazz) {
+        message.getMessageProperties().getHeaders()
+                .put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
+        return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
 }

@@ -11,9 +11,7 @@ package org.eclipse.hawkbit.eventbus.event;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 
 /**
- *
- *
- *
+ * Event for update the targets info.
  */
 public class TargetInfoUpdateEvent implements EntityEvent {
 
@@ -24,6 +22,8 @@ public class TargetInfoUpdateEvent implements EntityEvent {
     private String nodeId;
 
     /**
+     * Constructor.
+     * 
      * @param targetInfo
      *            the target info entity
      */

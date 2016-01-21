@@ -56,7 +56,7 @@ public class SoftwareModule extends NamedVersionedEntity {
     private SoftwareModuleType type;
 
     @ManyToMany(mappedBy = "modules", targetEntity = DistributionSet.class, fetch = FetchType.LAZY)
-    private final List<DistributionSet> assignedTo = new ArrayList<DistributionSet>();
+    private final List<DistributionSet> assignedTo = new ArrayList<>();
 
     @Column(name = "deleted")
     private boolean deleted = false;
@@ -84,7 +84,7 @@ public class SoftwareModule extends NamedVersionedEntity {
 
     /**
      * parameterized constructor.
-     * 
+     *
      * @param type
      *            of the {@link SoftwareModule}
      * @param name
@@ -163,7 +163,7 @@ public class SoftwareModule extends NamedVersionedEntity {
      * @return the artifacts
      */
     public List<Artifact> getArtifacts() {
-        final List<Artifact> result = new ArrayList<Artifact>();
+        final List<Artifact> result = new ArrayList<>();
         result.addAll(artifacts);
         result.addAll(externalArtifacts);
 
@@ -241,18 +241,19 @@ public class SoftwareModule extends NamedVersionedEntity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return "SoftwareModule [type=" + type + ", deleted=" + deleted + ", getVersion()=" + getVersion()
-                + ", getOptLockRevision()=" + getOptLockRevision() + ", getId()=" + getId() + "]";
+                + ", getOptLockRevision()=" + getOptLockRevision() + ", getId()=" + getId() + ", getType()="
+                + getType().getName() + "]";
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -265,7 +266,7 @@ public class SoftwareModule extends NamedVersionedEntity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

@@ -8,23 +8,12 @@
  */
 package org.eclipse.hawkbit.controller.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Polling interval for the SP target.
  *
- *
- *
- *
- *
  */
-@ApiModel(value = ApiModelProperties.TARGET_POLL_TIME)
 public class Polling {
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_SLEEP)
     private final String sleep;
 
     /**

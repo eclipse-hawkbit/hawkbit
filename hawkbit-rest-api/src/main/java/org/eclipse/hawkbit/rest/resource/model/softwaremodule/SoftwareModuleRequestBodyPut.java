@@ -8,26 +8,17 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.softwaremodule;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Request Body for SoftwareModule PUT.
  *
- *
- *
- *
  */
 public class SoftwareModuleRequestBodyPut {
 
-    @ApiModelProperty(value = ApiModelProperties.DESCRPTION)
     @JsonProperty
     private String description;
 
-    @ApiModelProperty(value = ApiModelProperties.VENDOR)
     @JsonProperty
     private String vendor;
 
@@ -41,9 +32,12 @@ public class SoftwareModuleRequestBodyPut {
     /**
      * @param description
      *            the description to set
+     *
+     * @return updated body
      */
-    public void setDescription(final String description) {
+    public SoftwareModuleRequestBodyPut setDescription(final String description) {
         this.description = description;
+        return this;
     }
 
     /**
@@ -56,9 +50,12 @@ public class SoftwareModuleRequestBodyPut {
     /**
      * @param vendor
      *            the vendor to set
+     *
+     * @return updated body
      */
-    public void setVendor(final String vendor) {
+    public SoftwareModuleRequestBodyPut setVendor(final String vendor) {
         this.vendor = vendor;
+        return this;
     }
 
 }

@@ -37,14 +37,56 @@ public class TargetTableFilters implements Serializable {
     private String searchText;
     private DistributionSetIdName distributionSet;
     private Long pinnedDistId;
+    private Long targetsCreatedCount;
+    private Float progressBarCurrentValue;
+
+    private final TargetBulkUpload bulkUpload = new TargetBulkUpload();
+
     /**
      * Custom target filter query use dto filter target table.
      */
     private TargetFilterQuery targetFilterQuery;
-    /*
+    /**
      * Flag for NO TAG button status.
      */
     private Boolean noTagSelected = Boolean.FALSE;
+
+    /**
+     * @return the bulkUpload
+     */
+    public TargetBulkUpload getBulkUpload() {
+        return bulkUpload;
+    }
+
+    /**
+     * @return the progressBarCurrentValue
+     */
+    public Optional<Float> getProgressBarCurrentValue() {
+        return progressBarCurrentValue != null ? Optional.of(progressBarCurrentValue) : Optional.empty();
+    }
+
+    /**
+     * @param progressBarCurrentValue
+     *            the progressBarCurrentValue to set
+     */
+    public void setProgressBarCurrentValue(final Float progressBarCurrentValue) {
+        this.progressBarCurrentValue = progressBarCurrentValue;
+    }
+
+    /**
+     * @return the targetsCreatedCount
+     */
+    public Optional<Long> getTargetsCreatedCount() {
+        return targetsCreatedCount != null ? Optional.of(targetsCreatedCount) : Optional.empty();
+    }
+
+    /**
+     * @param targetsCreatedCount
+     *            the targetsCreatedCount to set
+     */
+    public void setTargetsCreatedCount(final Long targetsCreatedCount) {
+        this.targetsCreatedCount = targetsCreatedCount;
+    }
 
     public void setNoTagSelected(final Boolean noTagSelected) {
         this.noTagSelected = noTagSelected;

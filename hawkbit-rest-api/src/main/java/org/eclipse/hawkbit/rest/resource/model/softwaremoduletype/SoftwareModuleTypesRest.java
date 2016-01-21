@@ -16,17 +16,11 @@ import java.util.ListIterator;
 
 import org.springframework.hateoas.ResourceSupport;
 
-import io.swagger.annotations.ApiModel;
-
 /**
  * List representation of the {@link SoftwareModuleTypeRest} because Spring MVC
  * cannot handle plain lists interfaces as request body.
  *
- *
- *
- *
  */
-@ApiModel("SoftwareModuleType")
 public class SoftwareModuleTypesRest extends ResourceSupport implements List<SoftwareModuleTypeRest> {
 
     private final List<SoftwareModuleTypeRest> delegate = new ArrayList<>();

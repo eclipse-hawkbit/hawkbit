@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**

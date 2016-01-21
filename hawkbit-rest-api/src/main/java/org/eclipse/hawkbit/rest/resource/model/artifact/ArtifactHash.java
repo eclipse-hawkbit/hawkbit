@@ -8,28 +8,18 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.artifact;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Hashes for given Artifact.
  *
  *
- *
- *
  */
-@ApiModel(ApiModelProperties.ARTIFACT_HASHES)
 public class ArtifactHash {
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_HASHES_SHA1)
     @JsonProperty
     private String sha1;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACT_HASHES_MD5)
     @JsonProperty
     private String md5;
 

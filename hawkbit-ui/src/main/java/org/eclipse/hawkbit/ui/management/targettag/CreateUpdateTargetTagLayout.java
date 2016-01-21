@@ -11,21 +11,20 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTagEvent.TargetTagComponentEvent;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
 import com.vaadin.shared.ui.colorpicker.Color;
@@ -48,28 +47,9 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     private static final long serialVersionUID = 2446682350481560235L;
 
     @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient TagManagement tagManagementService;
-
-    @Autowired
     private transient UINotification uiNotification;
 
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
     private Window targetTagWindow;
-
-    /**
-     * Initialize the Target Tag Layout.
-     */
-    public void initTargetTagLayout() {
-        super.init();
-    }
 
     @Override
     protected void createOptionGroup() {
@@ -104,13 +84,28 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     }
 
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
+        populateTagNameCombo();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
+        populateTagNameCombo();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEventTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
+        populateTagNameCombo();
+    }
+
     /**
      * Populate target name combo.
      */
     @Override
     public void populateTagNameCombo() {
         tagNameComboBox.removeAllItems();
-        final List<TargetTag> trgTagNameList = tagManagementService.findAllTargetTags();
+        final List<TargetTag> trgTagNameList = tagManagement.findAllTargetTags();
         trgTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
@@ -124,7 +119,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     @Override
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        final TargetTag selectedTargetTag = tagManagementService.findTargetTag(targetTagSelected);
+        final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
         if (null != selectedTargetTag) {
             tagDesc.setValue(selectedTargetTag.getDescription());
             if (null == selectedTargetTag.getColour()) {
@@ -146,7 +141,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     @Override
     public void save(final ClickEvent event) {
         if (mandatoryValuesPresent()) {
-            final TargetTag existingTag = tagManagementService.findTargetTag(tagName.getValue());
+            final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
             if (optiongroup.getValue().equals(createTagNw)) {
                 if (!checkIsDuplicate(existingTag)) {
                     crateNewTag();
@@ -160,8 +155,8 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     private Boolean checkIsDuplicate(final TargetTag existingTag) {
         if (existingTag != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingTag.getName() }));
+            uiNotification.displayValidationError(i18n.get("message.tag.duplicate.check",
+                    new Object[] { existingTag.getName() }));
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
@@ -200,10 +195,9 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             if (colorPicked != null) {
                 newTargetTag.setColour(colorPicked);
             }
-            newTargetTag = tagManagementService.createTargetTag(newTargetTag);
+            newTargetTag = tagManagement.createTargetTag(newTargetTag);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTargetTag.getName() }));
             closeWindow();
-            eventBus.publish(this, new TargetTagEvent(TargetTagComponentEvent.ADD_TARGETTAG, newTargetTag));
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.tagname"));
 
@@ -221,11 +215,9 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             targetObj.setName(nameUpdateValue);
             targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
             targetObj.setColour(getColorPickedSting());
-            tagManagementService.updateTargetTag(targetObj);
+            tagManagement.updateTargetTag(targetObj);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
             closeWindow();
-            eventBus.publish(this, new TargetTagEvent(TargetTagComponentEvent.EDIT_TARGETTAG, targetObj));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }

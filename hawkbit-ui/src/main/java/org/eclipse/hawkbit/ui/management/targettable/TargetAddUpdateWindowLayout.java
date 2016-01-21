@@ -8,8 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
@@ -21,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -244,20 +249,19 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             setTargetValues(newTarget, newName, newDesc);
             /* save new target */
             newTarget = targetManagement.createTarget(newTarget);
+            final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
+            final Set<TargetIdName> s = new HashSet<>();
+            s.add(newTarget.getTargetIdName());
+            targetTable.setValue(s);
+
             /* display success msg */
             uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
-            // publishing through event bus
-            // eventBus.publish( this, new TargetAddUpdateWindowEvent(
-            // TargetComponentEvent.ADD_TARGET,
-            // newTarget ) );
             /* close the window */
             closeThisWindow();
         }
-
     }
 
     public Window getWindow() {
-
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         addTargetWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW);
@@ -276,9 +280,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         controllerIDTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         controllerIDTextField.clear();
         descTextArea.clear();
-        descTextArea.clear();
         editTarget = Boolean.FALSE;
-
     }
 
     private void closeThisWindow() {
@@ -316,13 +318,13 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * @param controllerId
      */
     public void populateValuesOfTarget(final String controllerId) {
+        resetComponents();
         this.controllerId = controllerId;
         editTarget = Boolean.TRUE;
         final Target target = targetManagement.findTargetByControllerID(controllerId);
         controllerIDTextField.setValue(target.getControllerId());
         controllerIDTextField.setReadOnly(Boolean.TRUE);
         nameTextField.setValue(target.getName());
-
         if (target.getDescription() != null) {
             descTextArea.setValue(target.getDescription());
         }

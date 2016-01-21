@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.data.domain.Sort.Direction;
+
 /**
  * Class to provide the unchanged constants.
  *
@@ -931,11 +933,6 @@ public final class SPUIDefinitions {
     public static final String BULK_UPLOD_DS_COMBO_STYLE = "bulk-upload-ds-combo";
 
     /**
-     * Bulk Targets upload window.
-     */
-    public static final String BULK_UPLOAD_WINDOW = "bulk-update-window";
-
-    /**
      * Filter by target filter query.
      */
     public static final String FILTER_BY_QUERY = "FilterByTargetFilterQueryText";
@@ -944,6 +941,11 @@ public final class SPUIDefinitions {
      * Filter by invalid target filter query.
      */
     public static final String FILTER_BY_INVALID_QUERY = "FilterByInvalidFilterQueryText";
+
+    /**
+     * Sort order of column - created at in target table.
+     */
+    public static final Direction TARGET_TABLE_CREATE_AT_SORT_ORDER = Direction.ASC;
 
     /**
      * /** Constructor.

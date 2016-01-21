@@ -368,4 +368,15 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
         return Boolean.FALSE;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
+     * isBulkUploadInProgress()
+     */
+    @Override
+    protected boolean isBulkUploadInProgress() {
+        return false;
+    }
+
 }

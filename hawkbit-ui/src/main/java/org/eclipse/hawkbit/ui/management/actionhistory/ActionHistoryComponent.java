@@ -82,7 +82,8 @@ public class ActionHistoryComponent extends VerticalLayout {
     /**
      * populate action header and table for the target.
      * 
-     * @param targetIdName
+     * @param target
+     *            the target
      */
     public void populateActionHistoryDetails(final Target target) {
         if (null != target) {

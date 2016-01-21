@@ -27,12 +27,12 @@ public final class ControllerConstants {
     /**
      * Deployment action resources.
      */
-    static final String DEPLOYMENT_BASE_ACTION = "deploymentBase";
+    public static final String DEPLOYMENT_BASE_ACTION = "deploymentBase";
 
     /**
      * Cancel action resources.
      */
-    static final String CANCEL_ACTION = "cancelAction";
+    public static final String CANCEL_ACTION = "cancelAction";
 
     /**
      * Feedback channel.
@@ -42,7 +42,7 @@ public final class ControllerConstants {
     /**
      * Config data action resources.
      */
-    static final String CONFIG_DATA_ACTION = "configData";
+    public static final String CONFIG_DATA_ACTION = "configData";
 
     /**
      * The artifact URL mapping rest resource.

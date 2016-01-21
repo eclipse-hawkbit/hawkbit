@@ -41,10 +41,6 @@ import com.google.common.base.Strings;
  *
  *
  *
- *
- *
- *
- *
  */
 public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
@@ -88,8 +84,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
             for (int distId = 1; distId < sortPropertyIds.length; distId++) {
-                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC,
-                        (String) sortPropertyIds[distId]));
+                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[distId]));
             }
         }
     }
@@ -117,8 +112,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     pinnedControllerId);
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            distBeans = getDistributionSetManagement()
-                    .findDistributionSetsAll(new OffsetBasedPageRequest(startIndex, count, sort), false, true);
+            distBeans = getDistributionSetManagement().findDistributionSetsAll(
+                    new OffsetBasedPageRequest(startIndex, count, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
@@ -139,6 +134,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             proxyDistribution.setDescription(distributionSet.getDescription());
             proxyDistribution.setCreatedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getCreatedBy()));
             proxyDistribution.setModifiedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getLastModifiedBy()));
+            proxyDistribution.setNameVersion(HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(),
+                    distributionSet.getVersion()));
             proxyDistributions.add(proxyDistribution);
         }
         return proxyDistributions;
@@ -157,8 +154,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     pinnedControllerId);
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement()
-                    .findDistributionSetsAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
+            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsAll(
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)

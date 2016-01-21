@@ -12,19 +12,23 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -34,6 +38,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
@@ -126,8 +131,8 @@ public class DistributionTagToken extends AbstractTagToken {
     private DistributionSetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
         final Set<Long> distributionList = new HashSet<Long>();
         distributionList.add(selectedDS.getId());
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
-                tagNameSelected);
+        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(
+                distributionList, tagNameSelected);
         uinotification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(tagNameSelected, result, i18n));
         return result;
     }
@@ -194,7 +199,7 @@ public class DistributionTagToken extends AbstractTagToken {
     @Override
     protected void populateContainer() {
         container.removeAllItems();
-        for (final DistributionSetTag tag : tagManagement.findDistributionSetTagsAll()) {
+        for (final DistributionSetTag tag : tagManagement.findAllDistributionSetTags()) {
             setContainerPropertValues(tag.getId(), tag.getName(), tag.getColour());
         }
     }
@@ -216,30 +221,64 @@ public class DistributionTagToken extends AbstractTagToken {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DistributionTagEvent event) {
-        ui.access(() -> {
-            if (event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.ADD_DIST_TAG) {
-                setContainerPropertValues(event.getDistributionTag().getId(), event.getDistributionTag().getName(),
-                        event.getDistributionTag().getColour());
-            } else if (event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.DELETE_DIST_TAG) {
-                final Long deletedTagId = getTagIdByTagName(event.getDistributionTagName());
-                removeTagFromCombo(deletedTagId);
-            } else if (event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.ASSIGNED) {
-                final Long newlyAssignedTagId = getTagIdByTagName(event.getDistributionTagName());
-                addNewToken(newlyAssignedTagId);
-            } else if (event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.UNASSIGNED) {
-                final Long newlyUnAssignedTagId = getTagIdByTagName(event.getDistributionTagName());
-                removeTokenItem(newlyUnAssignedTagId, event.getDistributionTagName());
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
+        for (final DistributionSetTag distributionSetTag : event.getEntities()) {
+            setContainerPropertValues(distributionSetTag.getId(), distributionSetTag.getName(),
+                    distributionSetTag.getColour());
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagDeletedEventBulkEvent(final DistributionSetTagDeletedEvent event) {
+        final Long deletedTagId = getTagIdByTagName(event.getEntity().getName());
+        removeTagFromCombo(deletedTagId);
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
+        final DistributionSetTag entity = event.getEntity();
+        final Item item = container.getItem(entity.getId());
+        if (item != null) {
+            updateItem(entity.getName(), entity.getColour(), item);
+        }
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onTargetTagAssigmentResultEvent(final DistributionSetTagAssigmentResultEvent event) {
+        final DistributionSetTagAssigmentResult assignmentResult = event.getAssigmentResult();
+        final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
+        if (isAssign(assignmentResult)) {
+            addNewToken(tag.getId());
+        } else if (isUnassign(assignmentResult)) {
+            removeTokenItem(tag.getId(), tag.getName());
+        }
+
+    }
+
+    protected boolean isAssign(final DistributionSetTagAssigmentResult assignmentResult) {
+        if (assignmentResult.getAssigned() > 0) {
+            final List<Long> assignedDsNames = assignmentResult.getAssignedDs().stream().map(t -> t.getId())
+                    .collect(Collectors.toList());
+            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
+                return true;
             }
-        });
+        }
+        return false;
+    }
+
+    protected boolean isUnassign(final DistributionSetTagAssigmentResult assignmentResult) {
+        if (assignmentResult.getUnassigned() > 0) {
+            final List<Long> assignedDsNames = assignmentResult.getUnassignedDs().stream().map(t -> t.getId())
+                    .collect(Collectors.toList());
+            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @PreDestroy
     void destroy() {
-        /*
-         * It's good to do this, even though vaadin-spring will automatically
-         * unsubscribe .
-         */
         eventBus.unsubscribe(this);
     }
 

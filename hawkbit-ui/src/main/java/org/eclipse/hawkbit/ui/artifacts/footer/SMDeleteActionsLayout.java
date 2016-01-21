@@ -40,8 +40,6 @@ import com.vaadin.ui.UI;
 /**
  * Upload view footer layout implementation.
  *
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -72,7 +70,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#init()
      */
@@ -135,7 +133,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * hasDeletePermission()
      */
@@ -146,7 +144,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * hasUpdatePermission()
      */
@@ -157,7 +155,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * getDeleteAreaLabel()
      */
@@ -173,7 +171,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * getDeleteLayoutAcceptCriteria()
      */
@@ -184,7 +182,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * processDroppedComponent(com.vaadin .event.dd.DragAndDropEvent)
      */
@@ -198,13 +196,13 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
         if (sourceComponent.getId().startsWith(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX)) {
 
-            final String swModuleTypeName = sourceComponent.getId()
-                    .replace(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
+            final String swModuleTypeName = sourceComponent.getId().replace(
+                    SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
             if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
                     && artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
                             .equalsIgnoreCase(swModuleTypeName)) {
-                notification.displayValidationError(
-                        i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
+                notification.displayValidationError(i18n.get("message.swmodule.type.check.delete",
+                        new Object[] { swModuleTypeName }));
             } else {
                 deleteSWModuleType(swModuleTypeName);
                 updateSWActionCount();
@@ -238,7 +236,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * getNoActionsButtonLabel()
      */
@@ -249,7 +247,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#
      * getActionsButtonLabel()
      */
@@ -259,13 +257,13 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     @Override
-    protected void reloadActionCount() {
+    protected void restoreActionCount() {
         updateSWActionCount();
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getUnsavedActionsWindowCaption ()
@@ -277,7 +275,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * unsavedActionsWindowClosed()
@@ -292,7 +290,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getUnsavedActionsWindowContent ()
@@ -305,7 +303,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * hasUnsavedActions()
@@ -324,6 +322,54 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     @Override
     protected Label getCountMessageLabel() {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * isBulkUploadAllowed()
+     */
+    @Override
+    protected boolean hasBulkUploadPermission() {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * showBulkUploadWindow()
+     */
+    @Override
+    protected void showBulkUploadWindow() {
+        /**
+         * Bulk upload not supported .No implementation required.
+         */
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * restoreBulkUploadStatusCount()
+     */
+    @Override
+    protected void restoreBulkUploadStatusCount() {
+        /**
+         * Bulk upload not supported .No implementation required.
+         */
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
+     * hasReadPermission()
+     */
+    @Override
+    protected boolean hasReadPermission() {
+        return permChecker.hasReadDistributionPermission();
     }
 
 }

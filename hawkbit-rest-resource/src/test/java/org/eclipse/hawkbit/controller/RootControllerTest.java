@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.controller;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,9 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-import org.eclipse.hawkbit.AbstractIntegrationTest;
+import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.MockMvcResultPrinter;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithSpringAuthorityRule;
@@ -51,40 +49,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Root Poll Resource")
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
-public class RootControllerTest extends AbstractIntegrationTest {
-
-    @Test()
-    @Description("Ensures that software modules are not found, when target does not exists ")
-    public void testSoftwareModulesIfTargetNotExists() throws Exception {
-        final String targetNotExist = "targetNotExist";
-        mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/", tenantAware.getCurrentTenant(),
-                targetNotExist)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
-
-    }
-
-    @Test()
-    @Description("Ensures that software modules are not found, when assigned distribution set exists with no modules")
-    public void testSoftwareModulesEmptyIfDistributionSetNotExists() throws Exception {
-        mvc.perform(get("/{tenant}/controller/v1/{targetExist}/softwaremodules/", tenantAware.getCurrentTenant(),
-                TestDataUtil.createTarget(targetManagement).getName())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
-    }
-
-    @Test()
-    @Description("Ensures that software modules are found, when assigned distribution set exists with modules")
-    public void testAvailableSoftwareModulesWithNoArtifacts() throws Exception {
-        final Target target = TestDataUtil.createTarget(targetManagement);
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-
-        deploymentManagement.assignDistributionSet(distributionSet.getId(), new String[] { target.getName() });
-
-        final int modulesSize = distributionSet.getModules().size();
-
-        mvc.perform(get("/{tenant}/controller/v1/{targetExist}/softwaremodules/", tenantAware.getCurrentTenant(),
-                target.getName())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(modulesSize)));
-    }
+public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
 
     @Test()
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
@@ -105,7 +70,6 @@ public class RootControllerTest extends AbstractIntegrationTest {
 
         mvc.perform(get("/{}/controller/v1/aControllerId", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
-
     }
 
     @Test
@@ -123,15 +87,11 @@ public class RootControllerTest extends AbstractIntegrationTest {
         // make a poll, audit information should not be changed, run as
         // controller principal!
         securityRule.runAs(
-                WithSpringAuthorityRule.withUser("controller", SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
-                new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        mvc.perform(get("/{tenant}/controller/v1/" + knownTargetControllerId,
-                                tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
-                                .andExpect(status().isOk());
-                        return null;
-                    }
+                WithSpringAuthorityRule.withUser("controller", SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    mvc.perform(
+                            get("/{tenant}/controller/v1/" + knownTargetControllerId, tenantAware.getCurrentTenant()))
+                            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                    return null;
                 });
 
         // verify that audit information has not changed
@@ -249,9 +209,6 @@ public class RootControllerTest extends AbstractIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$config.polling.sleep", equalTo("00:01:00")));
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())

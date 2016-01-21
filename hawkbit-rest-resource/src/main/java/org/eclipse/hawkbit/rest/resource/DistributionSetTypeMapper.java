@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyCreate;
+import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypesRest;
 
@@ -38,17 +38,17 @@ final class DistributionSetTypeMapper {
     }
 
     static List<DistributionSetType> smFromRequest(final SoftwareManagement softwareManagement,
-            final Iterable<DistributionSetTypeRequestBodyCreate> smTypesRest) {
+            final Iterable<DistributionSetTypeRequestBodyPost> smTypesRest) {
         final List<DistributionSetType> mappedList = new ArrayList<>();
 
-        for (final DistributionSetTypeRequestBodyCreate smRest : smTypesRest) {
+        for (final DistributionSetTypeRequestBodyPost smRest : smTypesRest) {
             mappedList.add(fromRequest(softwareManagement, smRest));
         }
         return mappedList;
     }
 
     static DistributionSetType fromRequest(final SoftwareManagement softwareManagement,
-            final DistributionSetTypeRequestBodyCreate smsRest) {
+            final DistributionSetTypeRequestBodyPost smsRest) {
 
         final DistributionSetType result = new DistributionSetType(smsRest.getKey(), smsRest.getName(),
                 smsRest.getDescription());

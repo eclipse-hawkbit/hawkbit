@@ -6,22 +6,12 @@ package org.eclipse.hawkbit.rest.resource.model.target;
 import org.eclipse.hawkbit.rest.resource.model.IdRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.ActionTypeRest;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Request Body of DistributionSet for assignment operations (ID only).
  *
- *
- *
- *
  */
-@ApiModel("Distribution Set Assignment")
 public class DistributionSetAssigmentRest extends IdRest {
-
-    @ApiModelProperty(value = "forcetime in milliseconds")
     private long forcetime;
-    @ApiModelProperty(value = "the assignment type default 'forced'")
     private ActionTypeRest type;
 
     /**

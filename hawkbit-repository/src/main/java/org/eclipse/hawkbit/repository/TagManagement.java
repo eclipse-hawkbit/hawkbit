@@ -15,6 +15,13 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -22,15 +29,19 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  *
@@ -57,6 +68,15 @@ public class TagManagement {
 
     @Autowired
     private DistributionSetRepository distributionSetRepository;
+
+    @Autowired
+    private EventBus eventBus;
+
+    @Autowired
+    private TenantAware tenantAware;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     /**
      * Find {@link TargetTag} based on given Name.
@@ -94,7 +114,12 @@ public class TagManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        return targetTagRepository.save(targetTag);
+        final TargetTag save = targetTagRepository.save(targetTag);
+
+        afterCommit
+                .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
+
+        return save;
     }
 
     /**
@@ -117,8 +142,10 @@ public class TagManagement {
                 throw new EntityAlreadyExistsException();
             }
         });
-
-        return targetTagRepository.save(targetTags);
+        final List<TargetTag> save = targetTagRepository.save(targetTags);
+        afterCommit
+                .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
+        return save;
     }
 
     /**
@@ -144,6 +171,9 @@ public class TagManagement {
 
         // finally delete the tag itself
         targetTagRepository.deleteByName(targetTagName);
+
+        afterCommit.afterCommit(() -> eventBus.post(new TargetTagDeletedEvent(tag)));
+
     }
 
     /**
@@ -155,6 +185,31 @@ public class TagManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public List<TargetTag> findAllTargetTags() {
         return targetTagRepository.findAll();
+    }
+
+    /**
+     * Retrieves all target tags based on the given specification.
+     *
+     * @param spec
+     *            the specification for the query
+     * @param pageable
+     *            pagination parameter
+     * @return the found {@link Target}s, never {@code null}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    public Page<TargetTag> findAllTargetTags(@NotNull final Specification<TargetTag> spec,
+            @NotNull final Pageable pageable) {
+        return targetTagRepository.findAll(spec, pageable);
+    }
+
+    /**
+     * count {@link TargetTag}s.
+     * 
+     * @return size of {@link TargetTag}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    public long countTargetTags() {
+        return targetTagRepository.count();
     }
 
     /**
@@ -171,7 +226,9 @@ public class TagManagement {
     public TargetTag updateTargetTag(@NotNull final TargetTag targetTag) {
         checkNotNull(targetTag.getName());
         checkNotNull(targetTag.getId());
-        return targetTagRepository.save(targetTag);
+        final TargetTag save = targetTagRepository.save(targetTag);
+        afterCommit.afterCommit(() -> eventBus.post(new TargetTagUpdateEvent(save)));
+        return save;
     }
 
     /**
@@ -208,7 +265,11 @@ public class TagManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        return distributionSetTagRepository.save(distributionSetTag);
+        final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
+
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware
+                .getCurrentTenant(), save)));
+        return save;
     }
 
     /**
@@ -223,15 +284,18 @@ public class TagManagement {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    public Iterable<DistributionSetTag> createDistributionSetTags(
+    public List<DistributionSetTag> createDistributionSetTags(
             @NotNull final Iterable<DistributionSetTag> distributionSetTags) {
         for (final DistributionSetTag dsTag : distributionSetTags) {
             if (dsTag.getId() != null) {
                 throw new EntityAlreadyExistsException();
             }
         }
+        final List<DistributionSetTag> save = distributionSetTagRepository.save(distributionSetTags);
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware
+                .getCurrentTenant(), save)));
 
-        return distributionSetTagRepository.save(distributionSetTags);
+        return save;
     }
 
     /**
@@ -257,6 +321,8 @@ public class TagManagement {
         distributionSetRepository.save(changed);
 
         distributionSetTagRepository.deleteByName(tagName);
+
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagDeletedEvent(tag)));
     }
 
     /**
@@ -275,7 +341,10 @@ public class TagManagement {
     public DistributionSetTag updateDistributionSetTag(@NotNull final DistributionSetTag distributionSetTag) {
         checkNotNull(distributionSetTag.getName());
         checkNotNull(distributionSetTag.getId());
-        return distributionSetTagRepository.save(distributionSetTag);
+        final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagUpdateEvent(save)));
+
+        return save;
     }
 
     /**
@@ -284,7 +353,7 @@ public class TagManagement {
      * @return all {@link DistributionTag}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public List<DistributionSetTag> findDistributionSetTagsAll() {
+    public List<DistributionSetTag> findAllDistributionSetTags() {
         return distributionSetTagRepository.findAll();
     }
 
@@ -328,16 +397,31 @@ public class TagManagement {
     }
 
     /**
-     * returns all {@link TargetTag}s.
+     * returns all {@link DistributionSetTag}s.
      *
      * @param pageReq
      *            page parameter
-     * @return all {@link TargetTag}s
+     * @return all {@link DistributionSetTag}s
      */
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public Page<DistributionSetTag> findDistributionSetTagsAll(@NotNull final Pageable pageReq) {
+    public Page<DistributionSetTag> findAllDistributionSetTags(@NotNull final Pageable pageReq) {
         return distributionSetTagRepository.findAll(pageReq);
+    }
+
+    /**
+     * Retrieves all DistributionSet tags based on the given specification.
+     *
+     * @param spec
+     *            the specification for the query
+     * @param pageable
+     *            pagination parameter
+     * @return the found {@link DistributionSetTag}s, never {@code null}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    public Page<DistributionSetTag> findAllDistributionSetTags(@NotNull final Specification<DistributionSetTag> spec,
+            @NotNull final Pageable pageable) {
+        return distributionSetTagRepository.findAll(spec, pageable);
     }
 
 }

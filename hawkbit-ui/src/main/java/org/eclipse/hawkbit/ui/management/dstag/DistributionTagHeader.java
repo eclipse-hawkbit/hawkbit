@@ -57,7 +57,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     public void init() {
         super.init();
         if (hasCreateUpdatePermission()) {
-            createORUpdateDistributionTagLayout.initDistTagLayout();
+            createORUpdateDistributionTagLayout.init();
         }
     }
 

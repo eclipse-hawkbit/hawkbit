@@ -6,29 +6,25 @@ package org.eclipse.hawkbit.rest.resource.model.target;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Paged list for targets.
  *
- *
- *
- *
  */
-@ApiModel("Paged list of targets")
 public class TargetPagedList extends PagedList<TargetRest> {
 
-    @ApiModelProperty(value = ApiModelProperties.TARGET_LIST, required = true)
     private final List<TargetRest> content;
 
     /**
      * @param content
      * @param total
      */
-    public TargetPagedList(final List<TargetRest> content, final long total) {
+    @JsonCreator
+    public TargetPagedList(@JsonProperty("content") final List<TargetRest> content,
+            @JsonProperty("total") final long total) {
         super(content, total);
         this.content = content;
     }

@@ -13,13 +13,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 /**
  * Indicates if the SP server runs in multi-tenancy mode. By means e.g. if a
  * login screen needs to allow to specifiy the tenant to login.
- * 
+ *
  * This can defere e.g. in case if the {@link AuthenticationProvider} allows
  * {@link TenantUserPasswordAuthenticationToken} tokens or not.
- * 
  *
  *
  */
+@FunctionalInterface
 public interface MultitenancyIndicator {
 
     /**

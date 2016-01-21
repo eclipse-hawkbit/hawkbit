@@ -33,4 +33,4 @@ mvn install
 # Device Integration
 There are two device integration APIs provided by the hawkbit update server.
 * [Direct Device Integration API (HTTP)](DDIA.md)
-* Device Management Federation API (AMQP)
+* [Device Management Federation API (AMQP)](DMFA.md)

@@ -355,4 +355,15 @@ public class DistributionTableHeader extends AbstractTableHeader {
     protected Boolean isBulkUploadAllowed() {
         return Boolean.FALSE;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
+     * isBulkUploadInProgress()
+     */
+    @Override
+    protected boolean isBulkUploadInProgress() {
+        return false;
+    }
 }

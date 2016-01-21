@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.rest.resource;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartException;
 
 /**
  * General controller advice for exception handling.
- * 
+ *
  *
  *
  *
@@ -37,7 +37,7 @@ import org.springframework.web.multipart.MultipartException;
 public class ResponseExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResponseExceptionHandler.class);
-    private static final Map<SpServerError, HttpStatus> ERROR_TO_HTTP_STATUS = new HashMap<>();
+    private static final Map<SpServerError, HttpStatus> ERROR_TO_HTTP_STATUS = new EnumMap<>(SpServerError.class);
     private static final HttpStatus DEFAULT_RESPONSE_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
     static {
@@ -58,6 +58,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_STATUS_TO_MANY_ENTRIES, HttpStatus.FORBIDDEN);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ATTRIBUTES_TO_MANY_ENTRIES, HttpStatus.FORBIDDEN);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_NOT_CANCELABLE, HttpStatus.METHOD_NOT_ALLOWED);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_NOT_FORCE_QUITABLE, HttpStatus.METHOD_NOT_ALLOWED);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_CREATION_FAILED_MISSING_MODULE, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_MODULE_UNSUPPORTED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_TYPE_UNDEFINED, HttpStatus.BAD_REQUEST);
@@ -96,7 +97,7 @@ public class ResponseExceptionHandler {
         } else {
             responseStatus = DEFAULT_RESPONSE_STATUS;
         }
-        return new ResponseEntity<ExceptionInfo>(response, responseStatus);
+        return new ResponseEntity<>(response, responseStatus);
     }
 
     /**
@@ -119,7 +120,7 @@ public class ResponseExceptionHandler {
         response.setErrorCode(SpServerError.SP_REST_BODY_NOT_READABLE.getKey());
         response.setMessage(SpServerError.SP_REST_BODY_NOT_READABLE.getMessage());
         response.setExceptionClass(MessageNotReadableException.class.getName());
-        return new ResponseEntity<ExceptionInfo>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -151,7 +152,7 @@ public class ResponseExceptionHandler {
             response.setExceptionClass(MultipartException.class.getName());
         }
 
-        return new ResponseEntity<ExceptionInfo>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     private static boolean searchForCause(final Throwable t, final Class<?> lookFor) {

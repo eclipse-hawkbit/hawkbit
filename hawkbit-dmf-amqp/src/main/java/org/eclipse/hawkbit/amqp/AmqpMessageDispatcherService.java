@@ -31,13 +31,14 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.eventbus.Subscribe;
 
 /**
  * {@link AmqpMessageDispatcherService} handles all outgoing AMQP messages.
- * 
+ *
  *
  *
  */
@@ -56,7 +57,7 @@ public class AmqpMessageDispatcherService {
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution
      * set has been assign to a Target.
-     * 
+     *
      * @param targetAssignDistributionSetEvent
      *            the object to be send.
      */
@@ -86,7 +87,7 @@ public class AmqpMessageDispatcherService {
     /**
      * Method to send a message to a RabbitMQ Exchange after the assignment of
      * the Distribution set to a Target has been canceled.
-     * 
+     *
      * @param cancelTargetAssignmentDistributionSetEvent
      *            the object to be send.
      */
@@ -104,13 +105,14 @@ public class AmqpMessageDispatcherService {
 
     /**
      * Send message to exchange.
-     * 
+     *
      * @param exchange
      *            the exchange
      * @param message
      *            the message
      */
     public void sendMessage(final String exchange, final Message message) {
+        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
         rabbitTemplate.setExchange(exchange);
         rabbitTemplate.send(message);
     }
@@ -124,7 +126,7 @@ public class AmqpMessageDispatcherService {
         return messageProperties;
     }
 
-    private MessageProperties createMessageProperties() {
+    private static MessageProperties createMessageProperties() {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);

@@ -97,6 +97,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     com.vaadin.event.Action actionCancel;
     com.vaadin.event.Action actionForce;
+    com.vaadin.event.Action actionForceQuit;
     private static final Logger LOG = LoggerFactory.getLogger(ActionHistoryTable.class);
     private static final String STATUS_ICON_GREEN = "statusIconGreen";
 
@@ -106,6 +107,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     @PostConstruct
     public void init() {
         actionCancel = new com.vaadin.event.Action(i18n.get("message.cancel.action"));
+        actionForceQuit = new com.vaadin.event.Action(i18n.get("message.forcequit.action"));
+        actionForceQuit.setIcon(FontAwesome.WARNING);
         actionForce = new com.vaadin.event.Action(i18n.get("message.force.action"));
         initializeTableSettings();
         buildComponent();
@@ -253,7 +256,6 @@ public class ActionHistoryTable extends TreeTable implements Handler {
      * @param actionHistoryMode
      *            as either {@link ActionHistoryMode.NORMAL} or
      *            {@link ActionHistoryMode.MAXIMIZED}
-     * @return next index
      */
     @SuppressWarnings("unchecked")
     private void addDetailsToContainer(final List<ActionWithStatusCount> actions) {
@@ -263,14 +265,14 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final Item item = hierarchicalContainer.addItem(actionWithStatusCount.getActionId());
 
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).setValue(
-                    actionWithStatusCount.getActionStatus());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
+                    .setValue(actionWithStatusCount.getActionStatus());
 
             /*
              * add action id.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID).setValue(
-                    actionWithStatusCount.getActionId().toString());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID)
+                    .setValue(actionWithStatusCount.getActionId().toString());
             /*
              * add active/inactive status to the item which will be used in
              * Column generator to generate respective icon
@@ -282,25 +284,24 @@ public class ActionHistoryTable extends TreeTable implements Handler {
              * add action Id to the item which will be used for fetching child
              * items ( previous action status ) during expand
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN).setValue(
-                    actionWithStatusCount.getActionId());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN)
+                    .setValue(actionWithStatusCount.getActionId());
 
             /*
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
-                    HawkbitCommonUtil.getFormattedText(actionWithStatusCount.getDsName() + ":"
-                            + actionWithStatusCount.getDsVersion()));
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(HawkbitCommonUtil
+                    .getFormattedText(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion()));
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
             ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), false);
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
-                    .setValue(
-                            SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null) ? actionWithStatusCount
-                                    .getActionLastModifiedAt() : actionWithStatusCount.getActionCreatedAt()));
+                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null)
+                            ? actionWithStatusCount.getActionLastModifiedAt()
+                            : actionWithStatusCount.getActionCreatedAt()));
 
             if (actionWithStatusCount.getActionStatusCount() > 0) {
                 ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), true);
@@ -371,10 +372,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).getValue();
         final String distName = (String) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).getValue();
-        final Label activeStatusIcon = createActiveStatusLabel(
-                activeValue,
+        final Label activeStatusIcon = createActiveStatusLabel(activeValue,
                 (Action.Status) hierarchicalContainer.getItem(itemId)
-                        .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).getValue() == Action.Status.ERROR);
+                        .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
+                        .getValue() == Action.Status.ERROR);
         activeStatusIcon.setId(new StringJoiner(".").add(distName).add(itemId.toString())
                 .add(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE).add(activeValue).toString());
         return activeStatusIcon;
@@ -428,14 +429,14 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                      */
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
-                            HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
+                            .setValue(HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
                                     + action.getDistributionSet().getVersion()));
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME).setValue(
-                            SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).setValue(
-                            actionStatus.getStatus());
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
+                            .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
+                            .setValue(actionStatus.getStatus());
                     showOrHideMessage(childItem, actionStatus);
                     /* No further child items allowed for the child items */
                     ((Hierarchical) hierarchicalContainer).setChildrenAllowed(childId, false);
@@ -538,13 +539,11 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         if (actionWithActiveStatus.isHitAutoForceTime(currentTimeMillis)) {
             autoForceLabel.setDescription("autoforced");
             autoForceLabel.setStyleName(STATUS_ICON_GREEN);
-            autoForceLabel.setDescription("auto forced since "
-                    + SPDateTimeUtil.getDurationFormattedString(actionWithActiveStatus.getForcedTime(),
-                            currentTimeMillis, i18n));
+            autoForceLabel.setDescription("auto forced since " + SPDateTimeUtil
+                    .getDurationFormattedString(actionWithActiveStatus.getForcedTime(), currentTimeMillis, i18n));
         } else {
-            autoForceLabel.setDescription("auto forcing in "
-                    + SPDateTimeUtil.getDurationFormattedString(currentTimeMillis,
-                            actionWithActiveStatus.getForcedTime(), i18n));
+            autoForceLabel.setDescription("auto forcing in " + SPDateTimeUtil
+                    .getDurationFormattedString(currentTimeMillis, actionWithActiveStatus.getForcedTime(), i18n));
             autoForceLabel.setStyleName("statusIconPending");
             autoForceLabel.setValue(FontAwesome.HISTORY.getHtml());
         }
@@ -684,6 +683,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
             }
         } else if (action.equals(actionForce)) {
             confirmAndForceAction(actionId);
+        } else if (action.equals(actionForceQuit)) {
+            confirmAndForceQuitAction(actionId);
         }
     }
 
@@ -702,7 +703,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                 }
                 if (!actionWithActiveStatus.isCancelingOrCanceled()) {
                     actions.add(actionCancel);
+                } else {
+                    actions.add(actionForceQuit);
                 }
+
             }
         }
         return actions.toArray(new com.vaadin.event.Action[actions.size()]);
@@ -732,6 +736,29 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                         notification.displaySuccess(i18n.get("message.force.action.success"));
                     }
                 });
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private void confirmAndForceQuitAction(final Long actionId) {
+        /* Display the confirmation */
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
+                i18n.get("message.forcequit.action.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                    if (ok) {
+                        final boolean cancelResult = forceQuitActiveAction(actionId);
+                        if (cancelResult) {
+                            /*
+                             * Refresh the action history table to show latest
+                             * change of the action cancellation and update the
+                             * Target Details
+                             */
+                            populateAndupdateTargetDetails(target);
+                            notification.displaySuccess(i18n.get("message.forcequit.action.success"));
+                        } else {
+                            notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
+                        }
+                    }
+                } , FontAwesome.WARNING);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
@@ -786,6 +813,21 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         return false;
     }
 
+    // service call to cancel the active action
+    private boolean forceQuitActiveAction(final Long actionId) {
+        if (actionId != null) {
+            final Action activeAction = deploymentManagement.findAction(actionId);
+            try {
+                deploymentManagement.forceQuitAction(activeAction, target);
+                return true;
+            } catch (final CancelActionNotAllowedException e) {
+                LOG.info("Force Cancel action not allowed exception :{}", e);
+                return false;
+            }
+        }
+        return false;
+    }
+
     private void updateTargetAndDsTable() {
         /*
          * Update the target status in the Target table and update the color
@@ -803,8 +845,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
         if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
                 && null != managementUIState.getDistributionTableFilters().getPinnedTargetId().get()) {
-            final String alreadyPinnedControllerId = managementUIState.getDistributionTableFilters()
-                    .getPinnedTargetId().get();
+            final String alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTargetId()
+                    .get();
             // if the current target is pinned publish a pin event again
             if (null != alreadyPinnedControllerId && alreadyPinnedControllerId.equals(target.getControllerId())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);

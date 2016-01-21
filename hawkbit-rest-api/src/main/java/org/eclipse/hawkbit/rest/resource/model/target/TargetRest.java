@@ -7,7 +7,6 @@ import java.net.URI;
 
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
 import org.eclipse.hawkbit.rest.resource.model.PollStatusRest;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,50 +14,35 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * A json annotated rest model for Target to RESTful API representation.
- * 
- *
- *
  *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Provisioning Target")
 public class TargetRest extends NamedEntityRest {
 
-    @ApiModelProperty(value = ApiModelProperties.ITEM_ID, required = true)
     @JsonProperty(required = true)
     private String controllerId;
 
-    @ApiModelProperty(value = ApiModelProperties.UPDATE_STATUS, allowableValues = "error, in_sync, pending, registered, unknown")
     @JsonProperty
     private String updateStatus;
 
-    @ApiModelProperty(value = ApiModelProperties.LAST_REQUEST_AT)
     @JsonProperty
     private Long lastControllerRequestAt;
 
-    @ApiModelProperty(value = ApiModelProperties.INSTALLED_AT)
     @JsonProperty
     private Long installedAt;
 
-    @ApiModelProperty(value = ApiModelProperties.IP_ADDRESS)
     @JsonProperty
     private String ipAddress;
 
-    @ApiModelProperty(value = ApiModelProperties.ADDRESS)
     @JsonProperty
     private String address;
 
-    @ApiModelProperty(value = ApiModelProperties.POLL_STATUS)
     @JsonProperty
     private PollStatusRest pollStatus;
 
-    @ApiModelProperty(value = ApiModelProperties.SECURITY_TOKEN)
     @JsonProperty
     private String securityToken;
 

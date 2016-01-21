@@ -19,8 +19,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
@@ -47,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
 import org.springframework.cache.Cache;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.AdviceMode;
@@ -68,9 +67,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -78,6 +75,7 @@ import org.springframework.security.web.authentication.preauth.RequestHeaderAuth
 import org.springframework.security.web.header.writers.frameoptions.StaticAllowFromStrategy;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter.XFrameOptionsMode;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
@@ -161,31 +159,35 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             }
 
             if (securityConfiguration.getAnonymousEnabled()) {
-                LOG.info(
-                        "******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
+                LOG.info("******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
-                        "controllerAnonymousFilter", "anonymous", Collections.singletonList(
-                                new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
+                        "controllerAnonymousFilter", "anonymous", Collections.singletonList(new SimpleGrantedAuthority(
+                                SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers("/*/controller/v1/**", "/*/controller/artifacts/v1/**").and()
                         .securityContext().disable().anonymous().authenticationFilter(anoymousFilter);
             } else {
-                httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
-                        .addFilter(gatewaySecurityTokenFilter).antMatcher("/*/controller/**").anonymous().disable()
-                        .authorizeRequests().anyRequest().authenticated().and().exceptionHandling()
-                        .authenticationEntryPoint(new AuthenticationEntryPoint() {
-                            @Override
-                            public void commence(final HttpServletRequest request, final HttpServletResponse response,
-                                    final AuthenticationException authException) throws IOException, ServletException {
-                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            }
-                        }).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                httpSec.addFilter(securityHeaderFilter)
+                        .addFilter(securityTokenFilter)
+                        .addFilter(gatewaySecurityTokenFilter)
+                        .antMatcher("/*/controller/**")
+                        .anonymous()
+                        .disable()
+                        .authorizeRequests()
+                        .anyRequest()
+                        .authenticated()
+                        .and()
+                        .exceptionHandling()
+                        .authenticationEntryPoint(
+                                (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED
+                                        .value())).and().sessionManagement()
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
             }
         }
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see
          * org.springframework.security.config.annotation.web.configuration.
          * WebSecurityConfigurerAdapter
@@ -194,8 +196,8 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
          */
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRpTrustedIPs()));
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration
+                    .getRpTrustedIPs()));
         }
     }
 
@@ -210,12 +212,10 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
     public FilterRegistrationBean dosFilter() {
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
-        filterRegBean
-                .setFilter(
-                        new DosFilter(environment.getProperty("security.dos.filter.maxRead", Integer.class, 100),
-                                environment.getProperty("security.dos.filter.maxWrite", Integer.class, 10),
-                                environment.getProperty("security.dos.filter.whitelist"), environment
-                                        .getProperty("security.clients.blacklist"),
+        filterRegBean.setFilter(new DosFilter(environment
+                .getProperty("security.dos.filter.maxRead", Integer.class, 200), environment.getProperty(
+                "security.dos.filter.maxWrite", Integer.class, 50), environment
+                .getProperty("security.dos.filter.whitelist"), environment.getProperty("security.clients.blacklist"),
                 environment.getProperty("security.rp.remote_ip_header", String.class, "X-Forwarded-For")));
         filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*", "/rest/*");
         return filterRegBean;
@@ -301,8 +301,7 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             }, RequestHeaderAuthenticationFilter.class)
                     .addFilterAfter(
                             new AuthenticationSuccessTenantMetadataCreationFilter(tenantAware, systemManagement),
-                            RequestHeaderAuthenticationFilter.class)
-                    .authorizeRequests().anyRequest().authenticated()
+                            RequestHeaderAuthenticationFilter.class).authorizeRequests().anyRequest().authenticated()
                     .antMatchers(RestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN).antMatchers(RestConstants.BASE_SYSTEM_MAPPING + "/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_DIAG);
@@ -311,14 +310,12 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
 
     /**
      * {@link WebSecurityConfigurer} for external (management) access.
-     *
-     *
+     * 
      */
     @Configuration
     @Order(400)
     @EnableVaadinSecurity
-    public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter
-            implements EnvironmentAware {
+    public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter implements EnvironmentAware {
 
         private static final String XFRAME_OPTION_DENY = "DENY";
         private static final String XFRAME_OPTION_SAMEORIGIN = "SAMEORIGIN";
@@ -370,6 +367,18 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             return handler;
         }
 
+        /**
+         * Listener to redirect to login page after session timeout. Close the
+         * vaadin session, because it's is not possible to redirect in
+         * atmospehere.
+         * 
+         * @return the servlet listener.
+         */
+        @Bean
+        public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+            return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
+        }
+
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
@@ -379,9 +388,10 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             if (confXframeOption.equals(XFAME_OPTION_ALLOW_FROM) && confAllowFromUri == null) {
                 // if allow-from option is specified but no allowFromUri throw
                 // exception
-                throw new IllegalStateException("hawkbit.server.security.xframe.option has been specified as ALLOW-FROM"
-                        + " but no hawkbit.server.security.xframe.option.allowfrom has been set, "
-                        + "please ensure to set allow from URIs");
+                throw new IllegalStateException(
+                        "hawkbit.server.security.xframe.option has been specified as ALLOW-FROM"
+                                + " but no hawkbit.server.security.xframe.option.allowfrom has been set, "
+                                + "please ensure to set allow from URIs");
             }
 
             // workaround regex: we need to exclude the URL /UI/HEARTBEAT here
@@ -390,22 +400,23 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             // vaadin-forum:
             // https://vaadin.com/forum#!/thread/3200565.
             HttpSecurity httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/UI.*$")
-                    // disable as CSRF is handled by Vaadin
+            // disable as CSRF is handled by Vaadin
                     .csrf().disable();
 
             if (springSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             } else {
-                LOG.info(
-                        "\"******************\\n** Requires HTTPS Security has been disabled for UI, should only use for developing purposes **\\n******************\"");
+                LOG.info("\"******************\\n** Requires HTTPS Security has been disabled for UI, should only use for developing purposes **\\n******************\"");
             }
 
             // for UI integrator we allow frame integration on same origin
             httpSec.headers()
-                    .addHeaderWriter(confXframeOption.equals(XFAME_OPTION_ALLOW_FROM)
-                            ? new XFrameOptionsHeaderWriter(new StaticAllowFromStrategy(new URI(confAllowFromUri)))
-                            : new XFrameOptionsHeaderWriter(xframeOptionFromStr(confXframeOption)))
-                    .contentTypeOptions().xssProtection().httpStrictTransportSecurity().and()
+                    .addHeaderWriter(
+                            confXframeOption.equals(XFAME_OPTION_ALLOW_FROM) ? new XFrameOptionsHeaderWriter(
+                                    new StaticAllowFromStrategy(new URI(confAllowFromUri)))
+                                    : new XFrameOptionsHeaderWriter(xframeOptionFromStr(confXframeOption)))
+                    .contentTypeOptions().xssProtection().httpStrictTransportSecurity()
+                    .and()
                     // UI
                     .authorizeRequests().antMatchers("/UI/login/**").permitAll().antMatchers("/UI/UIDL/**").permitAll()
                     .anyRequest().authenticated().and()
@@ -439,8 +450,8 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
 
         @Override
         public void configure(final WebSecurity webSecurity) throws Exception {
-            webSecurity.ignoring().antMatchers("/documentation/**", "/VAADIN/**", "/*.*", "/v2/api-docs/**",
-                    "/docs/**");
+            webSecurity.ignoring()
+                    .antMatchers("/documentation/**", "/VAADIN/**", "/*.*", "/v2/api-docs/**", "/docs/**");
         }
     }
 
@@ -471,15 +482,15 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             http.csrf().disable();
             http.anonymous().disable();
 
-            http.regexMatcher(HttpDownloadAuthenticationFilter.REQUEST_ID_REGEX_PATTERN)
-                    .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
+            http.regexMatcher(HttpDownloadAuthenticationFilter.REQUEST_ID_REGEX_PATTERN).addFilterBefore(
+                    downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
             http.authorizeRequests().anyRequest().authenticated();
         }
 
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRpTrustedIPs()));
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration
+                    .getRpTrustedIPs()));
         }
 
     }
@@ -499,7 +510,7 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.vaadin.spring.security.web.authentication.
      * SavedRequestAwareVaadinAuthenticationSuccessHandler
      * #onAuthenticationSuccess(org.springframework.security.core.
@@ -508,8 +519,8 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
     @Override
     public void onAuthenticationSuccess(final Authentication authentication) throws Exception {
         if (authentication.getClass().equals(TenantUserPasswordAuthenticationToken.class)) {
-            systemManagement
-                    .getTenantMetadata(((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
+            systemManagement.getTenantMetadata(((TenantUserPasswordAuthenticationToken) authentication).getTenant()
+                    .toString());
         } else if (authentication.getClass().equals(UsernamePasswordAuthenticationToken.class)) {
             // TODO: MECS-1078 vaadin4spring-ext-security does not give us the
             // fullyAuthenticatedToken

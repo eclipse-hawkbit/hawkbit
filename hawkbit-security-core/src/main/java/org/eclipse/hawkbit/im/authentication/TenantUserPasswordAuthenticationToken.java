@@ -16,22 +16,19 @@ import org.springframework.security.core.GrantedAuthority;
 /**
  * The authentication token which transports the username, password and the
  * tenant information for authentication.
- * 
- *
- *
  *
  */
 public class TenantUserPasswordAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
     /**
-    * 
+    *
     */
     private static final long serialVersionUID = 1L;
 
     final Object tenant;
 
     /**
-     * 
+     *
      * Creating a new {@link TenantUserPasswordAuthenticationToken} as
      * {@link #isAuthenticated()} will return {@code false}.
      *
@@ -51,7 +48,7 @@ public class TenantUserPasswordAuthenticationToken extends UsernamePasswordAuthe
     /**
      * Creating a new {@link TenantUserPasswordAuthenticationToken} as
      * {@link #isAuthenticated()} will return {@code true}.
-     * 
+     *
      * @param tenant
      *            the tenant to authenticate against
      * @param principal

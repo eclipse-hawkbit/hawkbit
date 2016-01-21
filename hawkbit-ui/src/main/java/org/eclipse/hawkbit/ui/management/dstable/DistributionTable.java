@@ -21,11 +21,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
@@ -33,8 +33,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent.DistTagComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
@@ -50,8 +48,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -86,8 +82,6 @@ import com.vaadin.ui.UI;
 public class DistributionTable extends AbstractTable {
 
     private static final long serialVersionUID = -1928335256399519494L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionTable.class);
 
     @Autowired
     private I18N i18n;
@@ -197,12 +191,13 @@ public class DistributionTable extends AbstractTable {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final ManagementUIEvent managementUIEvent) {
-        UI.getCurrent().access(() -> {
-            if (managementUIEvent == ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG
-                    || managementUIEvent == ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG) {
-                refreshFilter();
-            }
-        });
+        UI.getCurrent().access(
+                () -> {
+                    if (managementUIEvent == ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG
+                            || managementUIEvent == ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG) {
+                        refreshFilter();
+                    }
+                });
     }
 
     /*
@@ -231,8 +226,8 @@ public class DistributionTable extends AbstractTable {
         managementUIState.getDistributionTableFilters().getPinnedTargetId()
                 .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.ORDER_BY_PINNED_TARGET, value));
         final List<String> list = new ArrayList<String>();
-        queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG,
-                managementUIState.getDistributionTableFilters().isNoTagSelected());
+        queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG, managementUIState.getDistributionTableFilters()
+                .isNoTagSelected());
         if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
             list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
         }
@@ -240,9 +235,8 @@ public class DistributionTable extends AbstractTable {
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<DistributionBeanQuery>(
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distributionContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+        final LazyQueryContainer distributionContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
+                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
         return distributionContainer;
     }
 
@@ -310,7 +304,7 @@ public class DistributionTable extends AbstractTable {
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         @SuppressWarnings("unchecked")
-        final Set<DistributionSetIdName> values = (Set) getValue();
+        final Set<DistributionSetIdName> values = HawkbitCommonUtil.getSelectedDSDetails(this);
         DistributionSetIdName value = null;
         if (values != null && !values.isEmpty()) {
             final Iterator<DistributionSetIdName> iterator = values.iterator();
@@ -327,8 +321,8 @@ public class DistributionTable extends AbstractTable {
                 managementUIState.setLastSelectedDsIdName(value);
                 final DistributionSet lastSelectedDistSet = distributionSetManagement
                         .findDistributionSetByIdWithDetails(value.getId());
-                eventBus.publish(this,
-                        new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE, lastSelectedDistSet));
+                eventBus.publish(this, new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE,
+                        lastSelectedDistSet));
             }
         } else {
             managementUIState.setSelectedDsIdName(null);
@@ -401,7 +395,7 @@ public class DistributionTable extends AbstractTable {
     private void assignDsTag(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
         final Table distTable = (Table) taregtDet.getTarget();
-        final Set<DistributionSetIdName> distsSelected = (Set<DistributionSetIdName>) distTable.getValue();
+        final Set<DistributionSetIdName> distsSelected = HawkbitCommonUtil.getSelectedDSDetails(distTable);
         final Set<Long> distList = new HashSet<Long>();
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
@@ -423,37 +417,20 @@ public class DistributionTable extends AbstractTable {
         if (result.getAssigned() >= 1 && managementUIState.getDistributionTableFilters().isNoTagSelected()) {
             refreshFilter();
         }
-        updateTagLayoutInDetails(result, distTagName);
-    }
-
-    private void updateTagLayoutInDetails(final DistributionSetTagAssigmentResult result, final String distTagName) {
-        if (result.getAssigned() > 0) {
-            final List<Long> assignedDsNames = result.getAssignedDs().stream().map(t -> t.getId())
-                    .collect(Collectors.toList());
-            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
-                eventBus.publish(this, new DistributionTagEvent(DistTagComponentEvent.ASSIGNED, distTagName));
-            }
-        } else if (result.getUnassigned() > 0) {
-            final List<Long> unassignedDsNames = result.getUnassignedDs().stream().map(t -> t.getId())
-                    .collect(Collectors.toList());
-            if (unassignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
-                eventBus.publish(this, new DistributionTagEvent(DistTagComponentEvent.UNASSIGNED, distTagName));
-            }
-        }
     }
 
     private void assignTargetTag(final DragAndDropEvent event) {
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object distItemId = dropData.getItemIdOver();
-        final String targetTagName = HawkbitCommonUtil.removePrefix(
-                event.getTransferable().getSourceComponent().getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+        final String targetTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent()
+                .getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         // get all the targets assigned to the tag
         // assign dist to those targets
         final List<Target> assignedTargets = targetService.findTargetsByTag(targetTagName);
         if (!assignedTargets.isEmpty()) {
             final Set<TargetIdName> targetDetailsList = new HashSet<TargetIdName>();
-            assignedTargets.forEach(target -> targetDetailsList
-                    .add(new TargetIdName(target.getId(), target.getControllerId(), target.getName())));
+            assignedTargets.forEach(target -> targetDetailsList.add(new TargetIdName(target.getId(), target
+                    .getControllerId(), target.getName())));
             assignTargetToDs(getItem(distItemId), targetDetailsList);
         } else {
             notification.displaySuccess(i18n.get("message.no.targets.assiged.fortag", new Object[] { targetTagName }));
@@ -463,7 +440,7 @@ public class DistributionTable extends AbstractTable {
     private void assignTargetToDs(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final Table source = transferable.getSourceComponent();
-        final Set<TargetIdName> targetsSelected = (Set<TargetIdName>) source.getValue();
+        final Set<TargetIdName> targetsSelected = HawkbitCommonUtil.getSelectedTargetDetails(source);
         final Set<TargetIdName> targetDetailsList = new HashSet<TargetIdName>();
 
         if (!targetsSelected.contains(transferable.getData("itemId"))) {
@@ -484,8 +461,7 @@ public class DistributionTable extends AbstractTable {
             final Long distId = (Long) item.getItemProperty("id").getValue();
             final String distName = (String) item.getItemProperty("name").getValue();
             final String distVersion = (String) item.getItemProperty("version").getValue();
-            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distId, distName,
-                    distVersion);
+            final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distId, distName, distVersion);
             showOrHidePopupAndNotification(validate(targetDetailsList, distributionSetIdName));
         }
     }
@@ -537,14 +513,15 @@ public class DistributionTable extends AbstractTable {
 
     private Boolean isNoTagButton(final String tagData, final String targetNoTagData) {
         if (tagData.equals(targetNoTagData)) {
-            notification.displayValidationError(
-                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.get("label.no.tag.assigned") }));
             return true;
         }
         return false;
     }
 
     /**
+     * Validate the assignment.
      *
      * @param targetDetailsList
      * @param source
@@ -552,11 +529,9 @@ public class DistributionTable extends AbstractTable {
      * @param distName
      * @return String as indicator
      */
-    private String validate(final Set<TargetIdName> targetDetailsList,
-            final DistributionSetIdName distributionSetIdName) {
+    private String validate(final Set<TargetIdName> targetDetailsList, final DistributionSetIdName distributionSetIdName) {
         String pendingActionMessage = null;
         for (final TargetIdName trgtNameId : targetDetailsList) {
-            LOG.debug("Adding a log to check if trgtNameId is null : {} ", trgtNameId);
             if (null != trgtNameId) {
                 if (managementUIState.getAssignedList().keySet().contains(trgtNameId)
                         && managementUIState.getAssignedList().get(trgtNameId).equals(distributionSetIdName)) {
@@ -606,18 +581,18 @@ public class DistributionTable extends AbstractTable {
     }
 
     private void updateDistributionInTable(final DistributionSet editedDs) {
-        final Item item = getContainerDataSource()
-                .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
+        final Item item = getContainerDataSource().getItem(
+                new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(editedDs.getName());
         item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(editedDs.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(editedDs.getCreatedBy()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(editedDs.getCreatedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(editedDs.getLastModifiedBy()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(editedDs.getLastModifiedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).setValue(
+                HawkbitCommonUtil.getIMUser(editedDs.getCreatedBy()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE).setValue(
+                SPDateTimeUtil.getFormattedDate(editedDs.getCreatedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setValue(
+                HawkbitCommonUtil.getIMUser(editedDs.getLastModifiedBy()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setValue(
+                SPDateTimeUtil.getFormattedDate(editedDs.getLastModifiedAt()));
         item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(editedDs.getDescription());
     }
 
@@ -634,8 +609,8 @@ public class DistributionTable extends AbstractTable {
     }
 
     private void styleDistributionTableOnPinning() {
-        final Target targetObj = targetService.findTargetByControllerIDWithDetails(
-                managementUIState.getDistributionTableFilters().getPinnedTargetId().get());
+        final Target targetObj = targetService.findTargetByControllerIDWithDetails(managementUIState
+                .getDistributionTableFilters().getPinnedTargetId().get());
 
         if (targetObj != null) {
             final DistributionSet assignedDistribution = targetObj.getAssignedDistributionSet();

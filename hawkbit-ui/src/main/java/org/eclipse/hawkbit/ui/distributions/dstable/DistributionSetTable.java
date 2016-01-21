@@ -162,16 +162,15 @@ public class DistributionSetTable extends AbstractTable {
                 .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
         if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
-            queryConfiguration.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
-                    manageDistUIState.getManageDistFilters().getClickedDistSetType());
+            queryConfiguration.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE, manageDistUIState
+                    .getManageDistFilters().getClickedDistSetType());
         }
 
         final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<ManageDistBeanQuery>(
                 ManageDistBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
+        final LazyQueryContainer distContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
+                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
 
         return distContainer;
     }
@@ -255,8 +254,8 @@ public class DistributionSetTable extends AbstractTable {
 
                 final DistributionSet lastSelectedDistSet = distributionSetManagement
                         .findDistributionSetByIdWithDetails(value.getId());
-                eventBus.publish(this,
-                        new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE, lastSelectedDistSet));
+                eventBus.publish(this, new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE,
+                        lastSelectedDistSet));
             }
         } else {
             manageDistUIState.setSelectedDistributions(null);
@@ -395,8 +394,8 @@ public class DistributionSetTable extends AbstractTable {
     private void publishAssignEvent(final Long distId, final SoftwareModule softwareModule) {
         if (manageDistUIState.getLastSelectedDistribution().isPresent()
                 && manageDistUIState.getLastSelectedDistribution().get().getId().equals(distId)) {
-            eventBus.publish(this,
-                    new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE, softwareModule));
+            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE,
+                    softwareModule));
         }
     }
 
@@ -405,8 +404,8 @@ public class DistributionSetTable extends AbstractTable {
      * @param softwareModule
      * @param softwareModuleIdName
      */
-    private void handleFirmwareCase(final Map<Long, Set<SoftwareModuleIdName>> map, final SoftwareModule softwareModule,
-            final SoftwareModuleIdName softwareModuleIdName) {
+    private void handleFirmwareCase(final Map<Long, Set<SoftwareModuleIdName>> map,
+            final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
         if (softwareModule.getType().getMaxAssignments() == 1) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
@@ -423,8 +422,8 @@ public class DistributionSetTable extends AbstractTable {
      * @param softwareModule
      * @param softwareModuleIdName
      */
-    private void handleSoftwareCase(final Map<Long, Set<SoftwareModuleIdName>> map, final SoftwareModule softwareModule,
-            final SoftwareModuleIdName softwareModuleIdName) {
+    private void handleSoftwareCase(final Map<Long, Set<SoftwareModuleIdName>> map,
+            final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
         if (softwareModule.getType().getMaxAssignments() == Integer.MAX_VALUE) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
@@ -548,15 +547,19 @@ public class DistributionSetTable extends AbstractTable {
         item.getItemProperty(SPUILabelDefinitions.VAR_ID).setValue(distributionSet.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(distributionSet.getDescription());
         item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(distributionSet.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(distributionSet.getCreatedBy()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(distributionSet.getLastModifiedBy()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).setValue(
+                HawkbitCommonUtil.getIMUser(distributionSet.getCreatedBy()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setValue(
+                HawkbitCommonUtil.getIMUser(distributionSet.getLastModifiedBy()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE).setValue(
+                SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setValue(
+                SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
         item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(distributionSet.isComplete());
+        if (manageDistUIState.getSelectedDistributions().isPresent()) {
+            manageDistUIState.getSelectedDistributions().get().stream().forEach(dsNameId -> unselect(dsNameId));
+        }
+        select(distributionSet.getDistributionSetIdName());
     }
 
     private void addTableStyleGenerator() {
@@ -566,8 +569,8 @@ public class DistributionSetTable extends AbstractTable {
                 if (propertyId == null) {
                     // Styling for row
                     final Item item = getItem(itemId);
-                    final Boolean isComplete = (Boolean) item
-                            .getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).getValue();
+                    final Boolean isComplete = (Boolean) item.getItemProperty(
+                            SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).getValue();
                     if (!isComplete) {
                         return SPUIDefinitions.DISABLE_DISTRIBUTION;
                     }

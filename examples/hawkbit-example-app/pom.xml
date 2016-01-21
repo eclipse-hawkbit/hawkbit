@@ -50,6 +50,11 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-rest-resource</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-dmf-amqp</artifactId>
          <version>${project.version}</version>
       </dependency>
@@ -91,10 +96,6 @@
       <dependency>
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-aspects</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>io.springfox</groupId>
-         <artifactId>springfox-swagger2</artifactId>
       </dependency>
       <dependency>
          <groupId>com.h2database</groupId>

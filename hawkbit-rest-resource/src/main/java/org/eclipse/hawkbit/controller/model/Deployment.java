@@ -11,31 +11,19 @@ package org.eclipse.hawkbit.controller.model;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Detailed {@link UpdateAction} information.
  *
- *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.DEPLOYMENT)
 public class Deployment {
 
-    @ApiModelProperty(value = ApiModelProperties.HANDLING_DOWNLOAD)
     private final HandlingType download;
 
-    @ApiModelProperty(value = ApiModelProperties.HANDLING_UPDATE)
     private final HandlingType update;
 
-    @ApiModelProperty(value = ApiModelProperties.CHUNK)
     private final List<Chunk> chunks;
 
     /**
@@ -70,12 +58,7 @@ public class Deployment {
     /**
      * The handling type for the update {@link Action}.
      *
-     *
-     *
-     *
-     *
      */
-    @ApiModel("Handling type for the deployment part")
     public enum HandlingType {
         /**
          * Not necessary for the command.
@@ -109,7 +92,7 @@ public class Deployment {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

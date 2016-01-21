@@ -61,6 +61,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
@@ -228,24 +229,14 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Test
     public void cancelActionOK() throws Exception {
         // prepare test
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        ;
-        final Target tA = targetManagement
-                .createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
-        // assign a distribution set so we get an active update action
-        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
-
-        // verify active action
-        final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
-        assertThat(actionsByTarget.getContent()).hasSize(1);
+        Target tA = createTargetAndStartAction();
 
         // test - cancel the active action
         mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                tA.getControllerId(), actionsByTarget.getContent().get(0).getId())).andDo(MockMvcResultPrinter.print())
+                tA.getControllerId(), tA.getActions().get(0).getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
-        final Action action = deploymentManagement.findAction(actionsByTarget.getContent().get(0).getId());
+        final Action action = deploymentManagement.findAction(tA.getActions().get(0).getId());
         // still active because in "canceling" state and waiting for controller
         // feedback
         assertThat(action.isActive()).isTrue();
@@ -261,18 +252,10 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Test
     public void cancelAnCancelActionIsNotAllowed() throws Exception {
         // prepare test
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        ;
-        Target tA = targetManagement.createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
-        // assign a distribution set so we get an active update action
-        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
-        // verify active action
-        final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
-        assertThat(actionsByTarget.getContent()).hasSize(1);
+        Target tA = createTargetAndStartAction();
+
         // cancel the active action
-        tA = targetManagement.findTargetByControllerID(tA.getControllerId());
-        deploymentManagement.cancelAction(actionsByTarget.getContent().get(0), tA);
+        deploymentManagement.cancelAction(tA.getActions().get(0), tA);
 
         // find the current active action
         final List<Action> cancelActions = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA)
@@ -282,6 +265,39 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // test - cancel an cancel action returns forbidden
         mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
                 tA.getControllerId(), cancelActions.get(0).getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    @Description("Force Quit an Action, which is already canceled. Expected Result is an HTTP response code 204.")
+    public void forceQuitAnCanceledActionReturnsOk() throws Exception {
+
+        Target tA = createTargetAndStartAction();
+
+        // cancel the active action
+        deploymentManagement.cancelAction(tA.getActions().get(0), tA);
+
+        // find the current active action
+        final List<Action> cancelActions = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA)
+                .getContent().stream().filter(action -> action.isCancelingOrCanceled()).collect(Collectors.toList());
+        assertThat(cancelActions).hasSize(1);
+        assertThat(cancelActions.get(0).isCancelingOrCanceled()).isTrue();
+
+        // test - force quit an canceled action should return 204
+        mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
+                tA.getControllerId(), cancelActions.get(0).getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Description("Force Quit an Action, which is not canceled. Expected Result is an HTTP response code 405.")
+    public void forceQuitAnNotCanceledActionReturnsMethodNotAllowed() throws Exception {
+
+        Target tA = createTargetAndStartAction();
+
+        // test - cancel an cancel action returns forbidden
+        mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
+                tA.getControllerId(), tA.getActions().get(0).getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
     }
 
@@ -1205,5 +1221,23 @@ public class TargetResourceTest extends AbstractIntegrationTest {
 
         final ActionStatus actionStatus = new ActionStatus(action, Status.FINISHED, 0l);
         controllerManagement.addUpdateActionStatus(actionStatus, action);
+    }
+
+    /**
+     * helper method to create a target and start an action on it.
+     * 
+     * @return The targetid of the created target.
+     */
+    private Target createTargetAndStartAction() {
+        // prepare test
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+        Target tA = targetManagement.createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
+        // assign a distribution set so we get an active update action
+        deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
+        // verify active action
+        final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(new PageRequest(0, 100), tA);
+        assertThat(actionsByTarget.getContent()).hasSize(1);
+        return targetManagement.findTargetByControllerID(tA.getControllerId());
     }
 }

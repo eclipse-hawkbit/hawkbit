@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.tenancy;
 
 /**
  * Interface for components that are aware of the application's current tenant.
- * 
+ *
  *
  *
  *
@@ -20,7 +20,7 @@ public interface TenantAware {
     /**
      * Implementation might retrieve the current tenant from a session or
      * thread-local.
-     * 
+     *
      * @return the current tenant
      */
     String getCurrentTenant();
@@ -31,7 +31,7 @@ public interface TenantAware {
      * specific tenant e.g. under control of an {@link ThreadLocal}. After the
      * {@link TenantRunner} it must be ensured that the original tenant before
      * this invocation is reset.
-     * 
+     *
      * @param tenant
      *            the tenant which the specific code should run
      * @param tenantRunner
@@ -47,17 +47,18 @@ public interface TenantAware {
      * An {@link TenantRunner} interface which allows to run specific code under
      * a given tenant by using the
      * {@link TenantAware#runAsTenant(String, TenantRunner)}.
-     * 
+     *
      *
      *
      *
      * @param <T>
      *            the return type of the runner
      */
+    @FunctionalInterface
     interface TenantRunner<T> {
         /**
          * Called to run specific code and a given tenant.
-         * 
+         *
          * @return the return of the code block running under a certain tenant
          */
         T run();

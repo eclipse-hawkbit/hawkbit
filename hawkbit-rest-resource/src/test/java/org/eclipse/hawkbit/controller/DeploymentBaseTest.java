@@ -57,8 +57,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
     @Test()
-    @Description("Ensures that artifact not found, when softare module not exists ")
-    public void testArtifactsNotFound() throws Exception {
+    @Description("Ensures that artifacts are not found, when softare module does not exists.")
+    public void artifactsNotFound() throws Exception {
         final Target target = TestDataUtil.createTarget(targetManagement);
         final Long softwareModuleIdNotExist = 1l;
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
@@ -67,8 +67,8 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test()
-    @Description("Ensures that artifact are found, when softare module exists ")
-    public void testArtifactsExists() throws Exception {
+    @Description("Ensures that artifacts are found, when software module exists.")
+    public void artifactsExists() throws Exception {
         final Target target = TestDataUtil.createTarget(targetManagement);
         final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
@@ -89,24 +89,6 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                 .andExpect(jsonPath("$[?(@.filename==filename1)]", hasSize(1)))
                 .andExpect(jsonPath("$[?(@.filename==filename2)]", hasSize(1)));
 
-    }
-
-    @Test()
-    @Description("Ensures that software modules are found, when assigned distribution set exists with modules and atrifacts")
-    public void testAvailableSoftwareModulesWithArtifacts() throws Exception {
-        final Target target = TestDataUtil.createTarget(targetManagement);
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-
-        deploymentManagement.assignDistributionSet(distributionSet.getId(), new String[] { target.getName() });
-        final Long softwareModuleId = distributionSet.getModules().stream().findFirst().get().getId();
-        TestDataUtil.generateArtifacts(artifactManagement, softwareModuleId);
-
-        final int modulesSize = distributionSet.getModules().size();
-
-        mvc.perform(get("/{tenant}/controller/v1/{targetExist}/softwaremodules/", tenantAware.getCurrentTenant(),
-                target.getName())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(modulesSize)));
     }
 
     @Test
@@ -160,7 +142,6 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).hasSize(2);
 
         current = System.currentTimeMillis();
-        Thread.sleep(1);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement
                 .findDistributionSetByAction(action);
@@ -284,7 +265,6 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).hasSize(2);
 
         current = System.currentTimeMillis();
-        Thread.sleep(1);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement
                 .findDistributionSetByAction(action);
@@ -407,7 +387,6 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).hasSize(2);
 
         current = System.currentTimeMillis();
-        Thread.sleep(1);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement
                 .findDistributionSetByAction(action);
@@ -584,17 +563,11 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
         long current = System.currentTimeMillis();
         long lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action1.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         myT = targetManagement.findTargetByControllerIDWithDetails("4712");
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
@@ -615,17 +588,11 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         // action2 done
         current = System.currentTimeMillis();
         lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action2.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         myT = targetManagement.findTargetByControllerIDWithDetails("4712");
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
@@ -641,18 +608,11 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         // action3 done
         current = System.currentTimeMillis();
         lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action3.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action3.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
-
         myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
@@ -684,17 +644,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
         long current = System.currentTimeMillis();
         long lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed", "failure"))
+                        .content(JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed", "failure",
+                                "error message"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
         Target myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
@@ -720,17 +675,13 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         final Action action2 = deploymentManagement.findActiveActionsByTarget(myT).get(0);
         current = System.currentTimeMillis();
         lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
+
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action2.getId() + "/feedback",
                 tenantAware.getCurrentTenant())
                         .content(JsonBuilder.deploymentActionFeedback(action2.getId().toString(), "closed", "success"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
+
         myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);

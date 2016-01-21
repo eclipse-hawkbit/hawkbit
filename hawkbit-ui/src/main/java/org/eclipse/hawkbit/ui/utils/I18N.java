@@ -18,9 +18,7 @@
 /**
  * copied and adapted by Bosch Software Innovations GmbH, Germany.
  *
- * @see https 
- *      ://github.com/peholmst/vaadin4spring/blob/master/spring-vaadin-i18n/src/main/java/org/vaadin
- *      /spring/i18n/I18N.java
+ * @see https://github.com/peholmst/vaadin4spring/blob/master/addons/i18n/src/main/java/org/vaadin/spring/i18n/I18N.java
  */
 package org.eclipse.hawkbit.ui.utils;
 

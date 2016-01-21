@@ -57,7 +57,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     public void init() {
         super.init();
         if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
-            createUpdateTargetTagLayout.initTargetTagLayout();
+            createUpdateTargetTagLayout.init();
         }
     }
 

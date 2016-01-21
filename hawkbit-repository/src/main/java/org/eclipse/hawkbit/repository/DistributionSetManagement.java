@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.repository;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +28,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
+import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.exception.DistributionSetCreationFailedMissingMandatoryModuleException;
@@ -38,6 +42,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetTypeElement;
 import org.eclipse.hawkbit.repository.model.DistributionSet_;
@@ -62,6 +67,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Strings;
+import com.google.common.eventbus.EventBus;
 
 /**
  * Business facade for managing the {@link DistributionSet}s.
@@ -95,6 +101,12 @@ public class DistributionSetManagement {
 
     @Autowired
     private ActionRepository actionRepository;
+
+    @Autowired
+    private EventBus eventBus;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded)
@@ -183,12 +195,15 @@ public class DistributionSetManagement {
                     allDSs.add(set);
                 }
             }
-            result = new DistributionSetTagAssigmentResult(dsIds.size() - allDSs.size(), 0, allDSs.size(), null,
-                    distributionSetRepository.save(allDSs));
+            result = new DistributionSetTagAssigmentResult(dsIds.size() - allDSs.size(), 0, allDSs.size(),
+                    Collections.emptyList(), distributionSetRepository.save(allDSs), myTag);
         } else {
             result = new DistributionSetTagAssigmentResult(dsIds.size() - allDSs.size(), allDSs.size(), 0,
-                    distributionSetRepository.save(allDSs), null);
+                    distributionSetRepository.save(allDSs), Collections.emptyList(), myTag);
         }
+
+        final DistributionSetTagAssigmentResult resultAssignment = result;
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -204,8 +219,7 @@ public class DistributionSetManagement {
      * @return the found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public List<DistributionSet> findDistributionSetListWithDetails(
-            @NotEmpty final Collection<Long> distributionIdSet) {
+    public List<DistributionSet> findDistributionSetListWithDetails(@NotEmpty final Collection<Long> distributionIdSet) {
         return distributionSetRepository.findAll(DistributionSetSpecification.byIds(distributionIdSet));
     }
 
@@ -383,8 +397,7 @@ public class DistributionSetManagement {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    public DistributionSet unassignSoftwareModule(@NotNull final DistributionSet ds,
-            final SoftwareModule softwareModule) {
+    public DistributionSet unassignSoftwareModule(@NotNull final DistributionSet ds, final SoftwareModule softwareModule) {
         final Set<SoftwareModule> softwareModules = new HashSet<SoftwareModule>();
         softwareModules.add(softwareModule);
         ds.removeModule(softwareModule);
@@ -416,9 +429,9 @@ public class DistributionSetManagement {
         // throw exception if user tries to update a DS type that is already in
         // use
         if (!persisted.areModuleEntriesIdentical(dsType) && distributionSetRepository.countByType(persisted) > 0) {
-            throw new EntityReadOnlyException(
-                    String.format("distribution set type %s set is already assigned to targets and cannot be changed",
-                            dsType.getName()));
+            throw new EntityReadOnlyException(String.format(
+                    "distribution set type %s set is already assigned to targets and cannot be changed",
+                    dsType.getName()));
         }
 
         return distributionSetTypeRepository.save(dsType);
@@ -584,16 +597,14 @@ public class DistributionSetManagement {
 
         final DistributionSetFilter filterWithInstalledTargets = distributionSetFilterBuilder
                 .setInstalledTargetId(assignedOrInstalled).setAssignedTargetId(null).build();
-        final DistributionSet installedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
-                filterWithInstalledTargets);
+        final DistributionSet installedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(filterWithInstalledTargets);
 
         final DistributionSetFilter filterWithAssignedTargets = distributionSetFilterBuilder.setInstalledTargetId(null)
                 .setAssignedTargetId(assignedOrInstalled).build();
-        final DistributionSet assignedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
-                filterWithAssignedTargets);
+        final DistributionSet assignedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(filterWithAssignedTargets);
 
-        final DistributionSetFilter dsFilterWithNoTargetLinked = distributionSetFilterBuilder.setInstalledTargetId(null)
-                .setAssignedTargetId(null).build();
+        final DistributionSetFilter dsFilterWithNoTargetLinked = distributionSetFilterBuilder
+                .setInstalledTargetId(null).setAssignedTargetId(null).build();
         // first fine the distribution sets filtered by the given filter
         // parameters
         final Page<DistributionSet> findDistributionSetsByFilters = findDistributionSetsByFilters(pageable,
@@ -643,8 +654,8 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public DistributionSet findDistributionSetByNameAndVersion(@NotEmpty final String distributionName,
             @NotEmpty final String version) {
-        final Specification<DistributionSet> spec = DistributionSetSpecification
-                .equalsNameAndVersionIgnoreCase(distributionName, version);
+        final Specification<DistributionSet> spec = DistributionSetSpecification.equalsNameAndVersionIgnoreCase(
+                distributionName, version);
         return distributionSetRepository.findOne(spec);
 
     }
@@ -998,17 +1009,17 @@ public class DistributionSetManagement {
             final Set<SoftwareModule> softwareModules) {
         if (!new HashSet<SoftwareModule>(distributionSet.getModules()).equals(softwareModules)
                 && actionRepository.countByDistributionSet(distributionSet) > 0) {
-            throw new EntityLockedException(
-                    String.format("distribution set %s:%s is already assigned to targets and cannot be changed",
-                            distributionSet.getName(), distributionSet.getVersion()));
+            throw new EntityLockedException(String.format(
+                    "distribution set %s:%s is already assigned to targets and cannot be changed",
+                    distributionSet.getName(), distributionSet.getVersion()));
         }
     }
 
     private void checkDistributionSetSoftwareModulesIsAllowedToModify(final DistributionSet distributionSet) {
         if (actionRepository.countByDistributionSet(distributionSet) > 0) {
-            throw new EntityLockedException(
-                    String.format("distribution set %s:%s is already assigned to targets and cannot be changed",
-                            distributionSet.getName(), distributionSet.getVersion()));
+            throw new EntityLockedException(String.format(
+                    "distribution set %s:%s is already assigned to targets and cannot be changed",
+                    distributionSet.getName(), distributionSet.getVersion()));
         }
     }
 
@@ -1057,8 +1068,8 @@ public class DistributionSetManagement {
 
     private void checkAndThrowAlreadyIfDistributionSetMetadataExists(final DsMetadataCompositeKey metadataId) {
         if (distributionSetMetadataRepository.exists(metadataId)) {
-            throw new EntityAlreadyExistsException(
-                    "Metadata entry with key '" + metadataId.getKey() + "' already exists");
+            throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataId.getKey()
+                    + "' already exists");
         }
     }
 
@@ -1066,4 +1077,74 @@ public class DistributionSetManagement {
         throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataKey + "' already exists");
     }
 
+    /**
+     * Assign a {@link DistributionSetTag} assignment to given
+     * {@link DistributionSet}s.
+     *
+     * @param dsIds
+     *            to assign for
+     * @param tag
+     *            to assign
+     * @return list of assigned ds
+     */
+    @Modifying
+    @Transactional
+    @NotNull
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    public List<DistributionSet> assignTag(@NotEmpty final Collection<Long> dsIds, @NotNull final DistributionSetTag tag) {
+        final List<DistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
+
+        allDs.forEach(ds -> ds.getTags().add(tag));
+        final List<DistributionSet> save = distributionSetRepository.save(allDs);
+
+        afterCommit.afterCommit(() -> {
+
+            final DistributionSetTagAssigmentResult result = new DistributionSetTagAssigmentResult(0, save.size(), 0,
+                    save, Collections.emptyList(), tag);
+            eventBus.post(new DistributionSetTagAssigmentResultEvent(result));
+        });
+
+        return save;
+    }
+
+    /**
+     * Unassign all {@link DistributionSet} from a given
+     * {@link DistributionSetTag} .
+     *
+     * @param tag
+     *            to unassign all ds
+     * @return list of unassigned ds
+     */
+    @Modifying
+    @Transactional
+    @NotNull
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    public List<DistributionSet> unAssignAllDistributionSetsByTag(@NotNull final DistributionSetTag tag) {
+        return unAssignTag(tag.getAssignedToDistributionSet(), tag);
+    }
+
+    /**
+     * Unassign a {@link DistributionSetTag} assignment to given
+     * {@link DistributionSet}.
+     *
+     * @param dsId
+     *            to unassign for
+     * @param distributionSetTag
+     *            to unassign
+     * @return the unassigned ds or <null> if no ds is unassigned
+     */
+    @Modifying
+    @Transactional
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    public DistributionSet unAssignTag(@NotNull final Long dsId, @NotNull final DistributionSetTag distributionSetTag) {
+        final List<DistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
+        final List<DistributionSet> unAssignTag = unAssignTag(allDs, distributionSetTag);
+        return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
+    }
+
+    private List<DistributionSet> unAssignTag(final Collection<DistributionSet> distributionSets,
+            final DistributionSetTag tag) {
+        distributionSets.forEach(ds -> ds.getTags().remove(tag));
+        return distributionSetRepository.save(distributionSets);
+    }
 }

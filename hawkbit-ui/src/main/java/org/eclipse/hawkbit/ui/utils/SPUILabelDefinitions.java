@@ -107,6 +107,10 @@ public final class SPUILabelDefinitions {
      */
     public static final String VAR_NAME = "name";
     /**
+     * NAME and VERSION.
+     */
+    public static final String VAR_NAME_VERSION = "nameVersion";
+    /**
      * Color.
      */
     public static final String VAR_COLOR = "colour";

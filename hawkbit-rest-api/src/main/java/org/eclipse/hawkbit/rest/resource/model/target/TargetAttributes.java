@@ -6,18 +6,10 @@ package org.eclipse.hawkbit.rest.resource.model.target;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-
 /**
- * {@link Map} with attribtes of SP Target.
- *
- *
- *
+ * {@link Map} with attributes of SP Target.
  *
  */
-@ApiModel(ApiModelProperties.TARGET_ATTRIBUTES)
 public class TargetAttributes extends HashMap<String, String> {
 
 }

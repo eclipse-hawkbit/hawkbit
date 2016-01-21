@@ -14,10 +14,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent.DistTagComponentEvent;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -91,8 +90,8 @@ public class DistributionTagDropEvent implements DropHandler {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.get("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -177,29 +176,12 @@ public class DistributionTagDropEvent implements DropHandler {
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
         final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
-                distTagName);
+        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(
+                distributionList, distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {
             eventBus.publish(this, TargetFilterEvent.FILTER_BY_TAG);
-        }
-        updateTagLayoutInDetails(result, distTagName);
-    }
-
-    private void updateTagLayoutInDetails(final DistributionSetTagAssigmentResult result, final String distTagName) {
-        if (result.getAssigned() > 0) {
-            final List<Long> assignedDsNames = result.getAssignedDs().stream().map(t -> t.getId())
-                    .collect(Collectors.toList());
-            if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
-                eventBus.publish(this, new DistributionTagEvent(DistTagComponentEvent.ASSIGNED, distTagName));
-            }
-        } else if (result.getUnassigned() > 0) {
-            final List<Long> unassignedDsNames = result.getUnassignedDs().stream().map(t -> t.getId())
-                    .collect(Collectors.toList());
-            if (unassignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
-                eventBus.publish(this, new DistributionTagEvent(DistTagComponentEvent.UNASSIGNED, distTagName));
-            }
         }
     }
 

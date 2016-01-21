@@ -11,18 +11,26 @@ package org.eclipse.hawkbit.ui.utils;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
-import org.eclipse.hawkbit.repository.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
+import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,8 +42,10 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 
 import com.vaadin.data.Container;
+import com.vaadin.data.Item;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
@@ -422,10 +432,12 @@ public final class HawkbitCommonUtil {
     public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
             final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
-            return "Overdue for " + SPDateTimeUtil.getDurationFormattedString(
-                    pollStatus.getOverdueDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant().toEpochMilli(),
-                    pollStatus.getCurrentDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant().toEpochMilli(),
-                    i18N);
+            return "Overdue for "
+                    + SPDateTimeUtil.getDurationFormattedString(
+                            pollStatus.getOverdueDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()
+                                    .toEpochMilli(),
+                            pollStatus.getCurrentDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()
+                                    .toEpochMilli(), i18N);
         }
         return null;
     }
@@ -467,8 +479,8 @@ public final class HawkbitCommonUtil {
      * @return extra height required to increase.
      */
     public static float findRequiredExtraHeight(final float newBrowserHeight) {
-        return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT : 0;
+        return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT ? newBrowserHeight
+                - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT : 0;
     }
 
     /**
@@ -479,8 +491,8 @@ public final class HawkbitCommonUtil {
      * @return float heigth of software module table
      */
     public static float findRequiredSwModuleExtraHeight(final float newBrowserHeight) {
-        return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT : 0;
+        return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT ? newBrowserHeight
+                - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT : 0;
     }
 
     /**
@@ -491,8 +503,8 @@ public final class HawkbitCommonUtil {
      * @return float width of software module table
      */
     public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
-        return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH : 0;
+        return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH ? newBrowserWidth
+                - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH : 0;
     }
 
     /**
@@ -554,8 +566,8 @@ public final class HawkbitCommonUtil {
      * @return extra width required to be increased.
      */
     public static float findExtraWidth(final float newBrowserWidth) {
-        return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH : 0;
+        return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH ? newBrowserWidth
+                - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH : 0;
     }
 
     /**
@@ -688,12 +700,12 @@ public final class HawkbitCommonUtil {
         final StringBuilder exeJS = new StringBuilder(DRAG_COUNT_ELEMENT).append(JS_DRAG_COUNT_REM_CHILD);
         final String currentTheme = UI.getCurrent().getTheme();
         if (count > 1) {
-            exeJS.append(COUNT_STYLE).append(COUNT_STYLE_ID)
+            exeJS.append(COUNT_STYLE)
+                    .append(COUNT_STYLE_ID)
                     .append(" countStyle.innerHTML = '." + currentTheme + " tbody.v-drag-element tr:after { content:\""
                             + count + "\";top:-15px } ." + currentTheme + " tr.v-drag-element:after { content:\""
                             + count + CLOSE_BRACE_NOSEMICOLON + "." + currentTheme
-                            + " table.v-drag-element:after{ content:\"" + count + CLOSE_BRACE)
-                    .append(APPEND_CHILD);
+                            + " table.v-drag-element:after{ content:\"" + count + CLOSE_BRACE).append(APPEND_CHILD);
         }
         return exeJS.toString();
     }
@@ -888,8 +900,9 @@ public final class HawkbitCommonUtil {
         final int unassignedCount = result.getUnassigned();
 
         if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedTargets().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.assigned.one", new Object[] {
+                            result.getAssignedTargets().get(0).getName(), targTagName })).append("<br>");
 
         } else if (assignedCount > 1) {
             formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
@@ -903,8 +916,9 @@ public final class HawkbitCommonUtil {
         }
 
         if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedTargets().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.unassigned.one", new Object[] {
+                            result.getUnassignedTargets().get(0).getName(), targTagName })).append("<br>");
 
         } else if (unassignedCount > 1) {
             formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
@@ -934,8 +948,9 @@ public final class HawkbitCommonUtil {
         final int unassignedCount = result.getUnassigned();
 
         if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedDs().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.assigned.one", new Object[] { result.getAssignedDs().get(0).getName(),
+                            targTagName })).append("<br>");
 
         } else if (assignedCount > 1) {
             formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
@@ -949,8 +964,9 @@ public final class HawkbitCommonUtil {
         }
 
         if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedDs().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.unassigned.one", new Object[] { result.getUnassignedDs().get(0).getName(),
+                            targTagName })).append("<br>");
         } else if (unassignedCount > 1) {
             formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
                     .append("<br>");
@@ -971,8 +987,8 @@ public final class HawkbitCommonUtil {
             final BeanQueryFactory<? extends AbstractBeanQuery> queryFactory) {
         final Map<String, Object> queryConfig = new HashMap<String, Object>();
         queryFactory.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer typeContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
+        final LazyQueryContainer typeContainer = new LazyQueryContainer(new LazyQueryDefinition(true, 20,
+                SPUILabelDefinitions.VAR_NAME), queryFactory);
         return typeContainer;
     }
 
@@ -1030,10 +1046,10 @@ public final class HawkbitCommonUtil {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
             columnList
                     .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"),
                     0.1f));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                    i18n.get("header.modifiedDate"), 0.1f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2f));
         } else if (isShowPinColumn) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.7f));
@@ -1081,7 +1097,9 @@ public final class HawkbitCommonUtil {
      */
     public static String changeToNewSelectedPreviewColor(final String colorPickedPreview) {
         final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT).append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
+        scriptBuilder
+                .append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT)
+                .append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
                 .append("var newColorPreviewStyle = \".v-app .new-tag-name{ border: solid 3px ")
                 .append(colorPickedPreview)
                 .append(" !important; width:138px; margin-left:2px !important; box-shadow:none !important; } \"; ")
@@ -1101,7 +1119,9 @@ public final class HawkbitCommonUtil {
      */
     public static String getPreviewButtonColorScript(final String color) {
         final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT).append(PREVIEW_BUTTON_COLOR_CREATE_SCRIPT)
+        scriptBuilder
+                .append(PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT)
+                .append(PREVIEW_BUTTON_COLOR_CREATE_SCRIPT)
                 .append("var tagColorPreviewStyle = \".v-app .tag-color-preview{ height: 15px !important; padding: 0 10px !important; border: 0px !important; margin-left:12px !important;  margin-top: 4px !important; border-width: 0 !important; background: ")
                 .append(color)
                 .append(" } .v-app .tag-color-preview:after{ border-color: none !important; box-shadow:none !important;} \"; ")
@@ -1152,4 +1172,100 @@ public final class HawkbitCommonUtil {
     public static String hideDeleteDropHintScript() {
         return DELETE_TAG_DROP_REMOVE_SCRIPT;
     }
+
+    /**
+     * Get the details of selected rows of {@link TargetTable}.
+     * 
+     * @param sourceTable
+     * @return set of {@link TargetIdName}
+     */
+    public static Set<TargetIdName> getSelectedTargetDetails(final Table sourceTable) {
+        Set<TargetIdName> targetSelected = null;
+        if (sourceTable.getValue() != null) {
+            targetSelected = new LinkedHashSet<>((Set) sourceTable.getValue());
+            targetSelected.remove(null);
+        }
+        return targetSelected;
+    }
+
+    /**
+     * Get the details of selected rows of {@link DistributionTable}.
+     * 
+     * @param sourceTable
+     * @return set of {@link DistributionSetIdName}
+     */
+    public static Set<DistributionSetIdName> getSelectedDSDetails(final Table sourceTable) {
+        Set<DistributionSetIdName> distSelected = null;
+        if (sourceTable.getValue() != null) {
+            distSelected = new LinkedHashSet<>((Set) sourceTable.getValue());
+            distSelected.remove(null);
+        }
+        return distSelected;
+    }
+
+    /**
+     * 
+     * Add target table container properties.
+     * 
+     * @param container
+     *            table container
+     */
+    public static void addTargetTableContainerProperties(final Container container) {
+        final LazyQueryContainer targetTableContainer = (LazyQueryContainer) container;
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class,
+                TargetUpdateStatus.UNKNOWN, false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID, Long.class, null,
+                false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
+                false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class,
+                "", false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
+                "", false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false,
+                true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
+                true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null,
+                false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
+                false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
+    }
+
+    /**
+     * 
+     * Apply style for status label in target table.
+     * 
+     * @param targetTable
+     *            target table
+     * @param pinBtn
+     *            pin button used for status display and pin on mouse over
+     * @param itemId
+     *            id of the tabel row
+     */
+    public static void applyStatusLblStyle(final Table targetTable, final Button pinBtn, final Object itemId) {
+        final Item item = targetTable.getItem(itemId);
+        if (item != null) {
+            final TargetUpdateStatus updateStatus = (TargetUpdateStatus) item.getItemProperty(
+                    SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
+            pinBtn.removeStyleName("statusIconRed statusIconBlue statusIconGreen statusIconYellow statusIconLightBlue");
+            if (updateStatus == TargetUpdateStatus.ERROR) {
+                pinBtn.addStyleName("statusIconRed");
+            } else if (updateStatus == TargetUpdateStatus.UNKNOWN) {
+                pinBtn.addStyleName("statusIconBlue");
+            } else if (updateStatus == TargetUpdateStatus.IN_SYNC) {
+                pinBtn.addStyleName("statusIconGreen");
+            } else if (updateStatus == TargetUpdateStatus.PENDING) {
+                pinBtn.addStyleName("statusIconYellow");
+            } else if (updateStatus == TargetUpdateStatus.REGISTERED) {
+                pinBtn.addStyleName("statusIconLightBlue");
+            }
+        }
+    }
+
 }

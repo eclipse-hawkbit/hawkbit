@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,13 +18,13 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.TenantAware.TenantRunner;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +48,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * Central system management operations of the SP server.
- *
- *
- *
  *
  */
 @Transactional(readOnly = true)
@@ -102,6 +100,9 @@ public class SystemManagement implements EnvironmentAware {
     private TenantAware tenantAware;
 
     @Autowired
+    private TenantStatsManagement systemStatsManagement;
+
+    @Autowired
     private TenancyCacheManager cacheManager;
 
     private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
@@ -111,11 +112,60 @@ public class SystemManagement implements EnvironmentAware {
     private Environment environment;
 
     /**
+     * Calculated system usage statistics, both overall for the entire system
+     * and per tenant;
+     *
+     * @return SystemUsageReport of the current system
+     */
+    @NotNull
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    public SystemUsageReport getSystemUsageStatistics() {
+
+        BigDecimal sumOfArtifacts = (BigDecimal) entityManager
+                .createNativeQuery(
+                        "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
+                .getSingleResult();
+
+        if (sumOfArtifacts == null) {
+            sumOfArtifacts = new BigDecimal(0);
+        }
+
+        // we use native queries to punch through the tenant boundaries. This
+        // has to be used with care!
+        final Long targets = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
+                .getSingleResult();
+
+        final Long artifacts = (Long) entityManager
+                .createNativeQuery(
+                        "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
+                .getSingleResult();
+
+        final Long actions = (Long) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
+                .getSingleResult();
+
+        final SystemUsageReport result = new SystemUsageReport(targets, artifacts, actions,
+                sumOfArtifacts.setScale(0, BigDecimal.ROUND_HALF_UP).longValue());
+
+        usageStatsPerTenant(result);
+
+        return result;
+    }
+
+    private void usageStatsPerTenant(final SystemUsageReport report) {
+        final List<String> tenants = findTenants();
+
+        tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
+            report.addTenantData(systemStatsManagement.getStatsOfTenant(tenant));
+            return null;
+        }));
+    }
+
+    /**
      * Registers the key generator for the {@link #currentTenant()} method
      * because this key generator is aware of the {@link #createInitialTenant}
      * thread local in case we are currently creating a tenant and insert the
      * default distribution set types.
-     * 
+     *
      * @return the {@link CurrentTenantKeyGenerator}
      */
     @Bean
@@ -127,8 +177,8 @@ public class SystemManagement implements EnvironmentAware {
      * Returns {@link TenantMetaData} of given and current tenant.
      *
      * DISCLAIMER: this variant is used during initial login (where the tenant
-     * is not yet in teh session). Please user {@link #getTenantMetadata()} for
-     * reluar requests.
+     * is not yet in the session). Please user {@link #getTenantMetadata()} for
+     * regular requests.
      *
      * @param tenant
      * @return
@@ -179,25 +229,22 @@ public class SystemManagement implements EnvironmentAware {
     public void deleteTenant(@NotNull final String tenant) {
         cacheManager.evictCaches(tenant);
         cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
-        tenantAware.runAsTenant(tenant, new TenantRunner<Void>() {
-            @Override
-            public Void run() {
-                entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant.toUpperCase());
-                tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
-                tenantConfigurationRepository.deleteByTenantIgnoreCase(tenant);
-                targetRepository.deleteByTenantIgnoreCase(tenant);
-                artifactRepository.deleteByTenantIgnoreCase(tenant);
-                externalArtifactRepository.deleteByTenantIgnoreCase(tenant);
-                externalArtifactProviderRepository.deleteByTenantIgnoreCase(tenant);
-                targetTagRepository.deleteByTenantIgnoreCase(tenant);
-                actionRepository.deleteByTenantIgnoreCase(tenant);
-                distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
-                distributionSetRepository.deleteByTenantIgnoreCase(tenant);
-                distributionSetTypeRepository.deleteByTenantIgnoreCase(tenant);
-                softwareModuleRepository.deleteByTenantIgnoreCase(tenant);
-                softwareModuleTypeRepository.deleteByTenantIgnoreCase(tenant);
-                return null;
-            }
+        tenantAware.runAsTenant(tenant, () -> {
+            entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant.toUpperCase());
+            tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
+            tenantConfigurationRepository.deleteByTenantIgnoreCase(tenant);
+            targetRepository.deleteByTenantIgnoreCase(tenant);
+            artifactRepository.deleteByTenantIgnoreCase(tenant);
+            externalArtifactRepository.deleteByTenantIgnoreCase(tenant);
+            externalArtifactProviderRepository.deleteByTenantIgnoreCase(tenant);
+            targetTagRepository.deleteByTenantIgnoreCase(tenant);
+            actionRepository.deleteByTenantIgnoreCase(tenant);
+            distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
+            distributionSetRepository.deleteByTenantIgnoreCase(tenant);
+            distributionSetTypeRepository.deleteByTenantIgnoreCase(tenant);
+            softwareModuleRepository.deleteByTenantIgnoreCase(tenant);
+            softwareModuleTypeRepository.deleteByTenantIgnoreCase(tenant);
+            return null;
         });
     }
 
@@ -218,7 +265,7 @@ public class SystemManagement implements EnvironmentAware {
 
     /**
      * Checks if a specific tenant exists. The tenant will not be created lazy.
-     * 
+     *
      * @param tenant
      *            the tenant to check
      * @return {@code true} in case the tenant exits or {@code false} if not
@@ -268,7 +315,7 @@ public class SystemManagement implements EnvironmentAware {
      * Retrieves a configuration value from the e.g. tenant overwritten
      * configuration values or in case the tenant does not a have a specific
      * configuration the global default value hold in the {@link Environment}.
-     * 
+     *
      * @param configurationKey
      *            the key of the configuration
      * @param propertyType
@@ -298,7 +345,7 @@ public class SystemManagement implements EnvironmentAware {
 
     /**
      * Adds or updates a specific configuration for a specific tenant.
-     * 
+     *
      * @param tenantConf
      *            the tenant configuration object which contains the key and
      *            value of the specific configuration to update
@@ -319,7 +366,7 @@ public class SystemManagement implements EnvironmentAware {
 
     /**
      * Deletes a specific configuration for the current tenant.
-     * 
+     *
      * @param configurationKey
      *            the configuration key to be deleted
      */
@@ -337,7 +384,7 @@ public class SystemManagement implements EnvironmentAware {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
      * springframework.core.env. Environment)
      */
@@ -379,7 +426,7 @@ public class SystemManagement implements EnvironmentAware {
      * {@link TenantAware}, but in case we are in a tenant creation with its
      * default types we need to use the tenant the current tenant which is
      * currently created and not the one currently in the {@link TenantAware}.
-     * 
+     *
      *
      *
      */
@@ -387,7 +434,7 @@ public class SystemManagement implements EnvironmentAware {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.springframework.cache.interceptor.KeyGenerator#generate(java.lang
          * .Object, java.lang.reflect.Method, java.lang.Object[])

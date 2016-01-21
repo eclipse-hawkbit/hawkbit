@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON representation of download and update request.
- * 
+ *
  *
  *
  *
@@ -29,7 +29,7 @@ public class DownloadAndUpdateRequest {
     @JsonProperty
     private Long actionId;
     @JsonProperty
-    private final List<SoftwareModule> softwareModules = new LinkedList<SoftwareModule>();
+    private final List<SoftwareModule> softwareModules = new LinkedList<>();
 
     public Long getActionId() {
         return actionId;
@@ -45,7 +45,7 @@ public class DownloadAndUpdateRequest {
 
     /**
      * Add a Software module.
-     * 
+     *
      * @param createSoftwareModule
      *            the module
      */

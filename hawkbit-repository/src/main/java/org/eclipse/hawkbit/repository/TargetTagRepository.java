@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TargetTagRepository extends BaseEntityRepository<TargetTag, Long> {
+public interface TargetTagRepository extends BaseEntityRepository<TargetTag, Long>, JpaSpecificationExecutor<TargetTag> {
 
     /**
      * deletes the {@link TargetTag}s with the given tag names.

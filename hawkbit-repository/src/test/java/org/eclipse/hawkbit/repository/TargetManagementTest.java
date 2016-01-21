@@ -66,6 +66,40 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that targets can assigned and unassigned to a target tag. Not exists target will be ignored for the assignment.")
+    public void assignAndUnassignTargetsToTag() {
+        final List<String> assignTarget = new ArrayList<String>();
+        assignTarget.add(targetManagement.createTarget(new Target("targetId123")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new Target("targetId1234")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new Target("targetId1235")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new Target("targetId1236")).getControllerId());
+        assignTarget.add("NotExist");
+
+        final TargetTag targetTag = tagManagement.createTargetTag(new TargetTag("Tag1"));
+
+        final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag);
+        assertThat(assignedTargets.size()).isEqualTo(4);
+        assignedTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(1));
+
+        TargetTag findTargetTag = tagManagement.findTargetTag("Tag1");
+        assertThat(assignedTargets.size()).isEqualTo(findTargetTag.getAssignedToTargets().size());
+
+        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag)).isNull();
+
+        final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag);
+        assertThat(unAssignTarget.getControllerId()).isEqualTo("targetId123");
+        assertThat(unAssignTarget.getTags().size()).isEqualTo(0);
+        findTargetTag = tagManagement.findTargetTag("Tag1");
+        assertThat(findTargetTag.getAssignedToTargets().size()).isEqualTo(3);
+
+        final List<Target> unAssignTargets = targetManagement.unAssignAllTargetsByTag(findTargetTag);
+        findTargetTag = tagManagement.findTargetTag("Tag1");
+        assertThat(findTargetTag.getAssignedToTargets().size()).isEqualTo(0);
+        assertThat(unAssignTargets.size()).isEqualTo(3);
+        unAssignTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(0));
+    }
+
+    @Test
     @Description("Ensures that targets can deleted e.g. test all cascades")
     public void deleteAndCreateTargets() {
         Target target = targetManagement.createTarget(new Target("targetId123"));

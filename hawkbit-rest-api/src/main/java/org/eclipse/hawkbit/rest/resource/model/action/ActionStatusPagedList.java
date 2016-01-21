@@ -12,12 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Paged list rest model for ActionStatus to RESTful API representation.
@@ -27,10 +23,8 @@ import io.swagger.annotations.ApiModelProperty;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Paged list of action status")
 public class ActionStatusPagedList extends PagedList<ActionStatusRest> {
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_STATUS_LIST)
     private final List<ActionStatusRest> content;
 
     /**

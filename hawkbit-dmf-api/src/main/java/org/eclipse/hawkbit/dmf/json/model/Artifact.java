@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON representation of artifact.
- * 
+ *
  *
  *
  */
@@ -28,11 +28,9 @@ public class Artifact {
 
     /**
      * Represented the supported protocols for artifact url's.
-     * 
-     *
      *
      */
-    public static enum UrlProtocol {
+    public enum UrlProtocol {
         COAP, HTTP, HTTPS
     }
 
@@ -46,7 +44,7 @@ public class Artifact {
     private Long size;
 
     @JsonProperty
-    private Map<UrlProtocol, String> urls = new HashMap<>();
+    private Map<UrlProtocol, String> urls = new EnumMap<>(UrlProtocol.class);
 
     public Map<UrlProtocol, String> getUrls() {
         return urls;

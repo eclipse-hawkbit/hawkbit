@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON representation of a software module.
- * 
+ *
  *
  *
  *
@@ -35,7 +35,7 @@ public class SoftwareModule {
     @JsonProperty
     private String moduleVersion;
     @JsonProperty
-    private List<Artifact> artifacts = new LinkedList<Artifact>();
+    private List<Artifact> artifacts = new LinkedList<>();
 
     public String getModuleType() {
         return moduleType;

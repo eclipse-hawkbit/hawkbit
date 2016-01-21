@@ -9,20 +9,40 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link LocalArtifact} repository.
  *
- *
- *
  */
 @Transactional(readOnly = true)
 public interface LocalArtifactRepository extends BaseEntityRepository<LocalArtifact, Long> {
+
+    /**
+     * Counts artifacts size where the related software module is not
+     * deleted/archived.
+     *
+     * @return sum of artifacts size in bytes
+     */
+    @Query("SELECT SUM(la.size) FROM LocalArtifact la WHERE la.softwareModule.deleted = 0")
+    Optional<Long> getSumOfUndeletedArtifactSize();
+
+    /**
+     * Counts artifacts where the related software module is deleted/archived.
+     *
+     * @param deleted
+     *            to true for counting the deleted artifacts
+     *
+     * @return number of artifacts
+     */
+    Long countBySoftwareModuleDeleted(boolean deleted);
+
     /**
      * Searches for a {@link LocalArtifact} based on given gridFsFileName.
      *

@@ -48,11 +48,13 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private Window unsavedActionsWindow;
 
+    private Button bulkUploadStatusButton;
+
     /**
      * Initialize.
      */
     protected void init() {
-        if (hasDeletePermission() || hasUpdatePermission()) {
+        if (hasReadPermission() || hasDeletePermission() || hasUpdatePermission() || hasBulkUploadPermission()) {
             createComponents();
             buildLayout();
             reload();
@@ -60,15 +62,19 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private void reload() {
-        reloadActionCount();
+        restoreActionCount();
+        restoreBulkUploadStatusCount();
     }
 
     private void createComponents() {
         if (hasDeletePermission()) {
             deleteWrapper = createDeleteWrapperLayout();
         }
-        if (hasUpdatePermission()) {
+        if (hasDeletePermission() || hasUpdatePermission()) {
             noActionBtn = createActionsButton();
+        }
+        if (hasBulkUploadPermission()) {
+            bulkUploadStatusButton = createBulkUploadStatusButton();
         }
     }
 
@@ -80,13 +86,17 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         final HorizontalLayout hLayout = new HorizontalLayout();
         hLayout.setSpacing(true);
         hLayout.setSizeUndefined();
-        if (hasDeletePermission()) {
+        if (null != deleteWrapper) {
             hLayout.addComponent(deleteWrapper);
             hLayout.setComponentAlignment(deleteWrapper, Alignment.BOTTOM_LEFT);
         }
-        if (hasUpdatePermission()) {
+        if (null != noActionBtn) {
             hLayout.addComponent(noActionBtn);
             hLayout.setComponentAlignment(noActionBtn, Alignment.BOTTOM_LEFT);
+        }
+        if (null != bulkUploadStatusButton) {
+            hLayout.addComponent(bulkUploadStatusButton);
+            hLayout.setComponentAlignment(bulkUploadStatusButton, Alignment.BOTTOM_LEFT);
         }
         addComponent(dropHintLayout);
         addComponent(hLayout);
@@ -103,7 +113,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         dropToDelete.setIcon(FontAwesome.TRASH_O);
         dropToDelete.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         dropToDelete.addStyleName("drop-to-delete-button");
-        dropToDelete.addStyleName("action-button");
+        dropToDelete.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         dropToDelete.addStyleName("del-action-button");
         dropToDelete.addStyleName("delete-icon");
 
@@ -118,14 +128,48 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private Button createActionsButton() {
         final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.PENDING_ACTION_BUTTON,
-                getNoActionsButtonLabel(), "", "", false, null, SPUIButtonStyleSmall.class);
-        button.setIcon(FontAwesome.BELL);
-        button.setStyleName("action-button");
+                getNoActionsButtonLabel(), "", "", false, FontAwesome.BELL, SPUIButtonStyleSmall.class);
+        button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName("del-action-button");
 
         button.addClickListener(event -> actionButtonClicked());
         button.setHtmlContentAllowed(true);
         return button;
+    }
+
+    private Button createBulkUploadStatusButton() {
+        final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
+                "", false, null, SPUIButtonStyleSmall.class);
+        button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        button.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        button.setWidth("100px");
+        button.setHtmlContentAllowed(true);
+        button.addClickListener(event -> onClickBulkUploadNotificationButton());
+        button.setVisible(false);
+        return button;
+    }
+
+    private void onClickBulkUploadNotificationButton() {
+        hideBulkUploadStatusButton();
+        showBulkUploadWindow();
+    }
+
+    protected void setUploadStatusButtonCaption(final Long count) {
+        bulkUploadStatusButton.setCaption("<div class='unread'>" + count + "</div>");
+    }
+
+    protected void enableBulkUploadStatusButton() {
+        bulkUploadStatusButton.setVisible(true);
+    }
+
+    protected void updateUploadBtnIconToComplete() {
+        bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        bulkUploadStatusButton.setIcon(FontAwesome.UPLOAD);
+    }
+
+    protected void updateUploadBtnIconToProgressIndicator() {
+        bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        bulkUploadStatusButton.setIcon(null);
     }
 
     protected void actionButtonClicked() {
@@ -198,6 +242,11 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         }
     }
 
+    protected void hideBulkUploadStatusButton() {
+        bulkUploadStatusButton.setCaption(null);
+        bulkUploadStatusButton.setVisible(false);
+    }
+
     /**
      * Check user has delete permission.
      * 
@@ -258,7 +307,12 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     /**
      * reload the count value.
      */
-    protected abstract void reloadActionCount();
+    protected abstract void restoreActionCount();
+
+    /**
+     * restore the upload status count.
+     */
+    protected abstract void restoreBulkUploadStatusCount();
 
     /**
      * Get caption of unsaved actions window.
@@ -295,5 +349,15 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     protected abstract boolean hasCountMessage();
 
     protected abstract Label getCountMessageLabel();
+
+    /**
+     * @return true if bulk upload is allowed and has required create
+     *         permissions.
+     */
+    protected abstract boolean hasBulkUploadPermission();
+
+    protected abstract void showBulkUploadWindow();
+
+    protected abstract boolean hasReadPermission();
 
 }

@@ -10,11 +10,6 @@ package org.eclipse.hawkbit.rest.resource;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +17,6 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -36,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
-import org.eclipse.hawkbit.rest.resource.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionPagedList;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusPagedList;
@@ -58,7 +51,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,9 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
-@Transactional(readOnly = true)
 @RequestMapping(RestConstants.TARGET_V1_REQUEST_MAPPING)
-@Api(value = "targets", description = "Provisioning Target Management API")
 public class TargetResource {
     private static final Logger LOG = LoggerFactory.getLogger(TargetResource.class);
 
@@ -100,25 +90,12 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = TargetRest.class, value = "Get single Target", notes = "Handles the GET request of retrieving a single target within SP. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
     public ResponseEntity<TargetRest> getTarget(@PathVariable final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
-        final TargetRest response = TargetMapper.toResponse(findTarget, true);
-        // add links
-        response.add(linkTo(methodOn(TargetResource.class).getAssignedDistributionSet(response.getControllerId()))
-                .withRel(RestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET));
-        response.add(linkTo(methodOn(TargetResource.class).getInstalledDistributionSet(response.getControllerId()))
-                .withRel(RestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET));
-        response.add(linkTo(methodOn(TargetResource.class).getAttributes(response.getControllerId())).withRel(
-                RestConstants.TARGET_V1_ATTRIBUTES));
-        response.add(linkTo(
-                methodOn(TargetResource.class).getActionHistory(response.getControllerId(), 0,
-                        RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                        ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null)).withRel(
-                RestConstants.TARGET_V1_ACTIONS));
+        final TargetRest response = TargetMapper.toResponse(findTarget);
+        TargetMapper.addPollStatus(findTarget, response);
+        TargetMapper.addTargetLinks(response);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -143,20 +120,11 @@ public class TargetResource {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = TargetPagedList.class, value = "Get paged list of Targets", notes = "Handles the GET request of retrieving all targets within SP. Required Permission: "
-            + SpPermission.READ_TARGET)
     public ResponseEntity<TargetPagedList> getTargets(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @ApiParam(required = false, value = "FIQL syntax search query"
-                    + "<table border=0>"
-                    + "<tr><td>updatestatus==unknown,updatestatus==error</td><td>targets with status 'unknown' or 'error'</td></tr>"
-                    + "<tr><td>installedAt=ge=1424699220</td><td>targets which installation date later than 1424699220</td></tr>"
-                    + "<tr><td>name=li=%25ccu%25</td><td>targets which contain 'ccu' in their name ingore case</td></tr>"
-                    + "<tr><td>controllerId==target0815</td><td>target which has the ID 'target0815'</td></tr>"
-                    + "<tr><td>ipaddress=li=171.%25</td><td>target which starts with IP address '171.'</td></tr>"
-                    + "</table>") @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -193,19 +161,10 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = TargetsRest.class, value = "Create list of Targets", notes = "Handles the POST request of creating new targets within SP. The request body must always be a list of targets.  Required Permission: "
-            + SpPermission.CREATE_TARGET)
-    @ApiResponses(@ApiResponse(code = 409, message = "Conflict", response = ExceptionInfo.class))
-    @Transactional
-    public ResponseEntity<TargetsRest> createTargets(
-            @RequestBody @ApiParam(value = "List of targets", required = true) final List<TargetRequestBody> targets) {
+    public ResponseEntity<TargetsRest> createTargets(@RequestBody final List<TargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
         final Iterable<Target> createdTargets = targetManagement.createTargets(TargetMapper.fromRequest(targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
-
-        // we flush to ensure that entity is generated and we can return ID etc.
-        entityManager.flush();
-
         return new ResponseEntity<>(TargetMapper.toResponse(createdTargets), HttpStatus.CREATED);
     }
 
@@ -213,7 +172,7 @@ public class TargetResource {
      * Handles the PUT request of updating a target within SP. The ID is within
      * the URL path of the request. A given ID in the request body is ignored.
      * It's not possible to set fields to {@code null} values.
-     * 
+     *
      * @param targetId
      *            the path parameter which contains the ID of the target
      * @param targetRest
@@ -225,12 +184,8 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{targetId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = TargetRest.class, value = "Updates a target", notes = "Handles the PUT request of updating a target within SP.  Required Permission: "
-            + SpPermission.UPDATE_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<TargetRest> updateTarget(@PathVariable final String targetId,
-            @RequestBody @ApiParam(value = "Target to be updated", required = true) final TargetRequestBody targetRest) {
+            @RequestBody final TargetRequestBody targetRest) {
         final Target existingTarget = findTargetWithExceptionIfNotFound(targetId);
         LOG.debug("updating target {}", existingTarget.getId());
         if (targetRest.getDescription() != null) {
@@ -240,17 +195,13 @@ public class TargetResource {
             existingTarget.setName(targetRest.getName());
         }
         final Target updateTarget = targetManagement.updateTarget(existingTarget);
-        LOG.debug("target {} updated, return status {}", updateTarget.getId(), HttpStatus.OK);
 
-        // we flush to ensure that entity is generated and we can return ID etc.
-        entityManager.flush();
-
-        return new ResponseEntity<>(TargetMapper.toResponse(updateTarget, false), HttpStatus.OK);
+        return new ResponseEntity<>(TargetMapper.toResponse(updateTarget), HttpStatus.OK);
     }
 
     /**
      * Handles the DELETE request of deleting a target within SP.
-     * 
+     *
      * @param targetId
      *            the ID of the target to be deleted
      * @return If the given targetId could exists and could be deleted Http OK.
@@ -259,10 +210,6 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(value = "Deletes a target", notes = "Handles the DELETE request of deleting a single target within SP. Required Permission: "
-            + SpPermission.DELETE_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
-    @Transactional
     public ResponseEntity<Void> deleteTarget(@PathVariable final String targetId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
         targetManagement.deleteTargets(target.getId());
@@ -282,9 +229,6 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/attributes", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = TargetAttributes.class, value = "Get attributes of Target", notes = "Handles the GET request of retrieving the attributes of a specific target. Reponse is a key/value list. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
     public ResponseEntity<TargetAttributes> getAttributes(@PathVariable final String targetId) {
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
         final Map<String, String> controllerAttributes = foundTarget.getTargetInfo().getControllerAttributes();
@@ -323,18 +267,12 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ActionPagedList.class, value = "List all actions of Target", notes = "Handles the GET request of retrieving the full action history of a specific target. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
     public ResponseEntity<ActionPagedList> getActionHistory(
             @PathVariable final String targetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @ApiParam(required = false, value = "FIQL syntax search query" + "<table border=0>"
-                    + "<tr><td>status==finished</td><td>actions which are already 'finished'</td></tr>"
-                    + "<tr><td>status==pending</td><td>actions which are currently in 'pending' state</td></tr>"
-                    + "</table>") @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
 
@@ -354,8 +292,8 @@ public class TargetResource {
             totalActionCount = deploymentManagement.countActionsByTarget(foundTarget);
         }
 
-        return new ResponseEntity<ActionPagedList>(new ActionPagedList(TargetMapper.toResponse(targetId,
-                activeActions.getContent()), totalActionCount), HttpStatus.OK);
+        return new ResponseEntity<>(new ActionPagedList(TargetMapper.toResponse(targetId, activeActions.getContent()),
+                totalActionCount), HttpStatus.OK);
     }
 
     /**
@@ -370,9 +308,6 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ActionRest.class, value = "Get assigned action of Target", notes = "Handles the GET request of retrieving a specific action on a specific target. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target or Action", response = ExceptionInfo.class))
     public ResponseEntity<ActionRest> getAction(@PathVariable final String targetId, @PathVariable final Long actionId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
 
@@ -399,17 +334,19 @@ public class TargetResource {
                         ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC)).withRel(
                 RestConstants.TARGET_V1_ACTION_STATUS));
 
-        return new ResponseEntity<ActionRest>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
      * Handles the DELETE request of canceling an specific {@link Action}s of a
      * specific {@link Target}.
-     * 
+     *
      * @param targetId
      *            the ID of the target in the URL path parameter
      * @param actionId
      *            the ID of the action in the URL path parameter
+     * @param force
+     *            optional parameter, which indicates a force cancel
      * @return status no content in case cancellation was successful
      * @throws CancelActionNotAllowedException
      *             if the given action is not active and cannot be canceled.
@@ -417,20 +354,20 @@ public class TargetResource {
      *             if the target or the action is not found
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}/actions/{actionId}")
-    @ApiOperation(value = "Cancels an active action", notes = "Cancels an active action, only active actions can be deleted. Required Permission: "
-            + SpPermission.UPDATE_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target or Action", response = ExceptionInfo.class))
-    public ResponseEntity<Void> cancelAction(@PathVariable final String targetId, @PathVariable final Long actionId) {
+    public ResponseEntity<Void> cancelAction(@PathVariable final String targetId, @PathVariable final Long actionId,
+            @RequestParam(required = false, defaultValue = "false") final boolean force) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
-        // cancel action will throw an exception if action cannot be canceled
-        // which is mapped by
-        // response exception handler.
-        deploymentManagement.cancelAction(action, target);
+        if (force) {
+            deploymentManagement.forceQuitAction(action, target);
+        } else {
+            deploymentManagement.cancelAction(action, target);
+        }
+        // both functions will throw an exception, when action is in wrong
+        // state, which is mapped by ResponseExceptionHandler.
 
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -457,9 +394,6 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}/status", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = ActionStatusPagedList.class, value = "Get assigned action of Target", notes = "Handles the GET request of retrieving a specific action on a specific target. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target or Action", response = ExceptionInfo.class))
     public ResponseEntity<ActionStatusPagedList> getActionStatusList(
             @PathVariable final String targetId,
             @PathVariable final Long actionId,
@@ -500,9 +434,6 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/assignedDS", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = DistributionSetRest.class, value = "Get assigned Distribution Set of Target", notes = "Handles the GET request of retrieving the assigned distribution set of an specific target. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
     public ResponseEntity<DistributionSetRest> getAssignedDistributionSet(@PathVariable final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         final DistributionSetRest distributionSetRest = DistributionSetMapper.toResponse(findTarget
@@ -531,13 +462,8 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{targetId}/assignedDS", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = Void.class, value = "Assigned Distribution Set to Target", notes = "Handles the POST request for assigning a distribution set to a specific target. Required Permission: "
-            + SpPermission.READ_REPOSITORY + " and " + SpPermission.UPDATE_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
-    @Transactional
-    public ResponseEntity<Void> postAssignedDistributionSet(
-            @PathVariable final String targetId,
-            @RequestBody @ApiParam(value = "Distribution Set ID", required = true) final DistributionSetAssigmentRest dsId) {
+    public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable final String targetId,
+            @RequestBody final DistributionSetAssigmentRest dsId) {
 
         findTargetWithExceptionIfNotFound(targetId);
         final ActionType type = (dsId.getType() != null) ? RestResourceConversionHelper.convertActionType(dsId
@@ -558,7 +484,7 @@ public class TargetResource {
     /**
      * Handles the GET request of retrieving the installed distribution set of
      * an specific target.
-     * 
+     *
      * @param targetId
      *            the ID of the target to retrieve
      * @return the assigned installed set with status OK, if none is installed
@@ -568,9 +494,6 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/installedDS", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    @ApiOperation(response = DistributionSetRest.class, value = "Get installed Distribution Set of Target", notes = "Handles the GET request of retrieving the installed distribution set of an specific target. Required Permission: "
-            + SpPermission.READ_TARGET)
-    @ApiResponses(@ApiResponse(code = 404, message = "Not Found Target", response = ExceptionInfo.class))
     public ResponseEntity<DistributionSetRest> getInstalledDistributionSet(@PathVariable final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         final DistributionSetRest distributionSetRest = DistributionSetMapper.toResponse(findTarget.getTargetInfo()

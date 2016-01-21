@@ -12,35 +12,21 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Deployment chunks.
  *
- *
- *
- *
- *
  */
-@ApiModel(ApiModelProperties.CHUNK)
 public class Chunk {
 
-    @ApiModelProperty(value = ApiModelProperties.CHUNK_TYPE, required = true)
     @NotNull
     private final String part;
 
-    @ApiModelProperty(value = ApiModelProperties.CHUNK_VERSION, required = true)
     @NotNull
     private final String version;
 
-    @ApiModelProperty(value = ApiModelProperties.CHUNK_NAME, required = true)
     @NotNull
     private final String name;
 
-    @ApiModelProperty(value = ApiModelProperties.ARTIFACTS)
     private final List<Artifact> artifacts;
 
     /**

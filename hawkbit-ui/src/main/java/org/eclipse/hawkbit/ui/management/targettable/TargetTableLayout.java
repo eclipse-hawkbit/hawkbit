@@ -43,10 +43,10 @@ public class TargetTableLayout extends AbstractTableLayout {
     private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
-    private TargetTableHeader targetTableHeader;
+    private TargetDetails targetDetails;
 
     @Autowired
-    private TargetDetails targetDetails;
+    private TargetTableHeader targetTableHeader;
 
     @Autowired
     private TargetTable targetTable;

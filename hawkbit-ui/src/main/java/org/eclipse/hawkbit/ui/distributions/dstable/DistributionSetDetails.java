@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleAssignmentDiscardEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -43,8 +44,10 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
@@ -65,6 +68,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     private static final long serialVersionUID = -4595004466943546669L;
 
     private static final String SOFT_MODULE = "softwareModule";
+
+    private static final String UNASSIGN_SOFT_MODULE = "unassignSoftModule";
 
     @Autowired
     private I18N i18n;
@@ -109,7 +114,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     @PostConstruct
     protected void init() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(i18n);
+        softwareModuleTable.init(i18n, true, permissionChecker, distributionSetManagement, eventBus, manageDistUIState);
         super.init();
         ui = UI.getCurrent();
         eventBus.subscribe(this);
@@ -176,14 +181,33 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
                                     .append(getUnsavedAssigedSwModule(softwareModule.getName(),
                                             softwareModule.getVersion())).append("<I>"));
                 }
+
             }
             for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
                 item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
                     item.getItemProperty(SOFT_MODULE).setValue(
                             HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
+                    assignSoftModuleButton(item, entry);
+
                 }
             }
+        }
+    }
+
+    /**
+     * @param item
+     * @param entry
+     */
+    private void assignSoftModuleButton(final Item item, final Map.Entry<String, StringBuilder> entry) {
+        if (permissionChecker.hasUpdateDistributionPermission()
+                && distributionSetManagement
+                        .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
+                        .getAssignedTargets().isEmpty()) {
+            final Button reassignSoftModule = SPUIComponentProvider.getButton(entry.getKey(), "", "", "", true,
+                    FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+            reassignSoftModule.setEnabled(false);
+            item.getItemProperty(UNASSIGN_SOFT_MODULE).setValue(reassignSoftModule);
         }
     }
 
@@ -201,6 +225,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
              * assigned to that type. Hence if multipe softwares belongs to same
              * type is drroped, then add to the list.
              */
+
             if (module.getType().getMaxAssignments() == Integer.MAX_VALUE) {
                 assignedSWModule.get(module.getType().getName()).append("</br>").append("<I>")
                         .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>");
@@ -231,6 +256,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
             if (item != null) {
                 item.getItemProperty(SOFT_MODULE).setValue(
                         HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
+                assignSoftModuleButton(item, entry);
+
             }
         }
     }
@@ -499,4 +526,5 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponetIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
+
 }

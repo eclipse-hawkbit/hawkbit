@@ -11,27 +11,19 @@ package org.eclipse.hawkbit.controller.model;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * The {@link Action} that has to be stopped by the target.
  *
- *
- *
  */
-@ApiModel(ApiModelProperties.CANCEL_ACTION)
 public class CancelActionToStop {
 
-    @ApiModelProperty(value = ApiModelProperties.ACTION_ID, required = true)
     @NotNull
     private final String stopId;
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param stopId
      *            ID of the {@link Action} to be stoppedW
      */
@@ -49,7 +41,7 @@ public class CancelActionToStop {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

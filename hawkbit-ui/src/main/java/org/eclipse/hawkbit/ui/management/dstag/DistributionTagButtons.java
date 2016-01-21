@@ -13,12 +13,14 @@ import java.util.Map;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DistributionTagDropEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTagEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
@@ -80,12 +82,18 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final DistributionTagEvent event) {
-        if (event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.ADD_DIST_TAG
-                || event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.EDIT_DIST_TAG
-                || event.getDistTagComponentEvent() == DistributionTagEvent.DistTagComponentEvent.DELETE_DIST_TAG) {
-            refreshTagTable();
-        }
+    void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
+        refreshTagTable();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
+        refreshTagTable();
+    }
+
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
+        refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -123,8 +131,9 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<DistributionTagBeanQuery>(
                 DistributionTagBeanQuery.class);
         tagQF.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer tagContainer = HawkbitCommonUtil.createDSLazyQueryContainer(
-                new BeanQueryFactory<DistributionTagBeanQuery>(DistributionTagBeanQuery.class));
+        final LazyQueryContainer tagContainer = HawkbitCommonUtil
+                .createDSLazyQueryContainer(new BeanQueryFactory<DistributionTagBeanQuery>(
+                        DistributionTagBeanQuery.class));
         return tagContainer;
 
     }

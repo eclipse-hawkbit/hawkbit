@@ -21,11 +21,9 @@ public class TargetTableEvent {
     /**
      * Target table components events.
      *
-     *
-     *
      */
     public enum TargetComponentEvent {
-        ADD_TARGET, EDIT_TARGET, DELETE_TARGET, SELECTED_TARGET, MAXIMIZED, MINIMIZED, SELLECT_ALL
+        REFRESH_TARGETS, EDIT_TARGET, DELETE_TARGET, SELECTED_TARGET, MAXIMIZED, MINIMIZED, SELLECT_ALL, BULK_TARGET_CREATED, BULK_UPLOAD_COMPLETED, BULK_TARGET_UPLOAD_STARTED, BULK_UPLOAD_PROCESS_STARTED
     }
 
     private TargetComponentEvent targetComponentEvent;

@@ -325,23 +325,14 @@ public final class RSQLUtility {
             final String finalProperty = validatePropertyFieldName(propertyFieldName, isDefinedInEnum, classMetadata,
                     metaModel, node);
 
-            final String value = node.getArguments().get(0);
-            Object transformedValue = convertValueIfNecessary(node, fieldName, value);
+            final List<String> values = node.getArguments();
+            final List<Object> transformedValue = new ArrayList<>();
             final Path<Object> fieldPath = getFieldPath(finalProperty);
-            // in case the value of an rsql query e.g. type==application is an
-            // enum we need to
-            // handle it separately because JPA needs the correct java-type to
-            // build an
-            // expression. So String and numeric values JPA can do it by it's
-            // own but not for
-            // classes like enums. So we need to transform the given value
-            // string into the enum
-            // class.
-            final Class<? extends Object> javaType = fieldPath.getJavaType();
-            if (javaType != null && javaType.isEnum()) {
-                transformedValue = transformEnumValue(node, value, javaType);
+            for (final String value : values) {
+                transformedValue.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
             }
-            return mapToPredicate(node, fieldPath, value, transformedValue);
+
+            return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue);
         }
 
         private List<String> getExpectedFieldList() {
@@ -359,7 +350,21 @@ public final class RSQLUtility {
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value) {
+        private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
+                final Path<Object> fieldPath) {
+            // in case the value of an rsql query e.g. type==application is an
+            // enum we need to
+            // handle it separately because JPA needs the correct java-type to
+            // build an
+            // expression. So String and numeric values JPA can do it by it's
+            // own but not for
+            // classes like enums. So we need to transform the given value
+            // string into the enum
+            // class.
+            final Class<? extends Object> javaType = fieldPath.getJavaType();
+            if (javaType != null && javaType.isEnum()) {
+                return transformEnumValue(node, value, javaType);
+            }
             if (fieldName instanceof FieldValueConverter) {
                 final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
                 if (convertedValue == null) {
@@ -396,10 +401,12 @@ public final class RSQLUtility {
         }
 
         private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-                final String value, final Object transformedValue) {
+                final List<String> values, final List<Object> transformedValues) {
             // only 'equal' and 'notEqual' can handle transformed value like
             // enums. The JPA API
             // cannot handle object types for greaterThan etc methods.
+            final Object transformedValue = transformedValues.get(0);
+            final String value = values.get(0);
             final List<Predicate> singleList;
             switch (node.getOperator().getSymbol()) {
             case "=li=":
@@ -423,6 +430,12 @@ public final class RSQLUtility {
                 break;
             case "=le=":
                 singleList = toSingleList(cb.lessThanOrEqualTo(pathOfString(fieldPath), value));
+                break;
+            case "=in=":
+                singleList = toSingleList(fieldPath.in(transformedValues));
+                break;
+            case "=out=":
+                singleList = toSingleList(cb.not(fieldPath.in(transformedValues)));
                 break;
             default:
                 LOGGER.info("operator symbol {} is either not supported or not implemented");

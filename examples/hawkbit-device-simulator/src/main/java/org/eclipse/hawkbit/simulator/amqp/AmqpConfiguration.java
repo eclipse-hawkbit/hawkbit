@@ -48,7 +48,7 @@ public class AmqpConfiguration {
 
     /**
      * Create jackson message converter bean.
-     * 
+     *
      * @return the jackson message converter
      */
     @Bean
@@ -60,7 +60,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the receiver queue from sp. Receive messages from sp.
-     * 
+     *
      * @return the queue
      */
     @Bean
@@ -71,7 +71,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the recevier exchange. Sp send messages to this exchange.
-     * 
+     *
      * @return the exchange
      */
     @Bean
@@ -83,7 +83,7 @@ public class AmqpConfiguration {
      * Create the Binding
      * {@link AmqpConfiguration#receiverConnectorQueueFromSp()} to
      * {@link AmqpConfiguration#exchangeQueueToConnector()}.
-     * 
+     *
      * @return the binding and create the queue and exchange
      */
     @Bean
@@ -93,7 +93,7 @@ public class AmqpConfiguration {
 
     /**
      * Create dead letter queue.
-     * 
+     *
      * @return the queue
      */
     @Bean
@@ -103,7 +103,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the dead letter fanout exchange.
-     * 
+     *
      * @return the fanout exchange
      */
     @Bean
@@ -113,7 +113,7 @@ public class AmqpConfiguration {
 
     /**
      * Create the Binding deadLetterQueue to exchangeDeadLetter.
-     * 
+     *
      * @return the binding
      */
     @Bean
@@ -123,7 +123,7 @@ public class AmqpConfiguration {
 
     /**
      * Returns the Listener factory.
-     * 
+     *
      * @return the {@link SimpleMessageListenerContainer} that gets used receive
      *         AMQP messages
      */
@@ -136,7 +136,7 @@ public class AmqpConfiguration {
     }
 
     private Map<String, Object> getDeadLetterExchangeArgs() {
-        final Map<String, Object> args = new HashMap<String, Object>();
+        final Map<String, Object> args = new HashMap<>();
         args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
         return args;
     }

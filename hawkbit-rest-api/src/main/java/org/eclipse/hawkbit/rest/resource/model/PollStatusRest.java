@@ -8,37 +8,28 @@
  */
 package org.eclipse.hawkbit.rest.resource.model;
 
-import org.eclipse.hawkbit.rest.resource.model.doc.ApiModelProperties;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * A json annotated rest model for PollStatus to RESTful API representation.
- * 
+ *
  *
  *
  *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Target Poll Status")
 public class PollStatusRest {
 
-    @ApiModelProperty(value = ApiModelProperties.POLL_LAST_REQUEST_AT)
     @JsonProperty
     private Long lastRequestAt;
 
-    @ApiModelProperty(value = ApiModelProperties.POLL_NEXT_EXPECTED_REQUEST_AT)
     @JsonProperty
     private Long nextExpectedRequestAt;
 
-    @ApiModelProperty(value = ApiModelProperties.POLL_OVERDUE)
     @JsonProperty
     private boolean overdue;
 

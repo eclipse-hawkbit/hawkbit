@@ -59,6 +59,7 @@ public class DistributionSetType extends NamedEntity {
     private boolean deleted = false;
 
     public DistributionSetType() {
+        //default public constructor
     }
 
     /**
@@ -153,6 +154,21 @@ public class DistributionSetType extends NamedEntity {
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType} and defined as
+     * {@link DistributionSetTypeElement#isMandatory()}.
+     *
+     * @param softwareModuleType
+     *            search for by {@link SoftwareModuleType#getId()}
+     * @return <code>true</code> if found
+     */
+    public boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
+        return elements.stream().filter(element -> element.isMandatory())
+                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
+
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
      * {@link DistributionSetType} and NOT defined as
      * {@link DistributionSetTypeElement#isMandatory()}.
      *
@@ -163,6 +179,21 @@ public class DistributionSetType extends NamedEntity {
     public boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
         return elements.stream().filter(element -> !element.isMandatory())
                 .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
+
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType} and NOT defined as
+     * {@link DistributionSetTypeElement#isMandatory()}.
+     *
+     * @param softwareModuleTypeId
+     *            search by {@link SoftwareModuleType#getId()}
+     * @return <code>true</code> if found
+     */
+    public boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
+        return elements.stream().filter(element -> !element.isMandatory())
+                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
 
     }
 
@@ -274,7 +305,7 @@ public class DistributionSetType extends NamedEntity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

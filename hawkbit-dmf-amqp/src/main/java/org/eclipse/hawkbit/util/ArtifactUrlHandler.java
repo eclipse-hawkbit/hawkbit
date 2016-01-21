@@ -14,15 +14,14 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 /**
  * Interface declaration of the {@link ArtifactUrlHandler} which generates the
  * URLs to specific artifacts.
- * 
- *
  *
  */
+@FunctionalInterface
 public interface ArtifactUrlHandler {
 
     /**
      * Returns a generated URL for a given artifact for a specific protocol.
-     * 
+     *
      * @param controllerId
      *            the authentifacted controller id
      * @param localArtifact

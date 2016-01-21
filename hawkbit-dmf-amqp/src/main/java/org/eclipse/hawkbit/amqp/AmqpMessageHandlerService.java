@@ -71,9 +71,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.google.common.eventbus.EventBus;
 
 /**
- * 
+ *
  * {@link AmqpMessageHandlerService} handles all incoming AMQP messages.
- * 
+ *
  *
  *
  *
@@ -106,7 +106,7 @@ public class AmqpMessageHandlerService {
 
     /**
      * /** Method to handle all incoming amqp messages.
-     * 
+     *
      * @param message
      *            incoming message
      * @param type
@@ -199,7 +199,7 @@ public class AmqpMessageHandlerService {
         return rabbitTemplate.getMessageConverter().toMessage(authentificationResponse, messageProperties);
     }
 
-    private Artifact convertDbArtifact(final DbArtifact dbArtifact) {
+    private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
         final Artifact artifact = new Artifact();
         artifact.setSize(dbArtifact.getSize());
         final DbArtifactHash dbArtifactHash = dbArtifact.getHashes();
@@ -212,13 +212,13 @@ public class AmqpMessageHandlerService {
         throw new IllegalArgumentException(error);
     }
 
-    private void setSecurityContext(final Authentication authentication) {
+    private static void setSecurityContext(final Authentication authentication) {
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
         securityContextImpl.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
-    private void setTenantSecurityContext(final String tenantId) {
+    private static void setTenantSecurityContext(final String tenantId) {
         final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
                 UUID.randomUUID().toString(), "AMQP-Controller",
                 Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
@@ -237,7 +237,7 @@ public class AmqpMessageHandlerService {
 
     /**
      * Method to create a new target or to find the target if it already exists.
-     * 
+     *
      * @param targetID
      *            the ID of the target/thing
      * @param ip
@@ -274,7 +274,7 @@ public class AmqpMessageHandlerService {
 
     /**
      * Method to handle the different topics to an event.
-     * 
+     *
      * @param message
      *            the incoming event message.
      * @param topic
@@ -292,7 +292,7 @@ public class AmqpMessageHandlerService {
 
     /**
      * Method to update the action status of an action through the event.
-     * 
+     *
      * @param actionUpdateStatus
      *            the object form the ampq message
      */
@@ -330,6 +330,9 @@ public class AmqpMessageHandlerService {
         case RUNNING:
             actionStatus.setStatus(Status.RUNNING);
             break;
+        case CANCELED:
+            actionStatus.setStatus(Status.CANCELED);
+            break;
         case FINISHED:
             actionStatus.setStatus(Status.FINISHED);
             break;
@@ -339,19 +342,43 @@ public class AmqpMessageHandlerService {
         case WARNING:
             actionStatus.setStatus(Status.WARNING);
             break;
+        case CANCEL_REJECTED:
+            handleCancelRejected(message, action, actionStatus);
+            break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
-        final Action savedAction = controllerManagement.addUpdateActionStatus(actionStatus, action);
-        if (Status.FINISHED == savedAction.getStatus()) {
+        Action addUpdateActionStatus;
+
+        if (!actionStatus.getStatus().equals(Status.CANCELED)) {
+            addUpdateActionStatus = controllerManagement.addUpdateActionStatus(actionStatus, action);
+        } else {
+            addUpdateActionStatus = controllerManagement.addCancelActionStatus(actionStatus, action);
+        }
+
+        if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
+        }
+    }
+
+    private void handleCancelRejected(final Message message, final Action action, final ActionStatus actionStatus) {
+        if (action.isCancelingOrCanceled()) {
+
+            actionStatus.setStatus(Status.WARNING);
+
+            // cancel action rejected, write warning status message and fall
+            // back to running action status
+
+        } else {
+            logAndThrowMessageError(message,
+                    "Cancel Recjected message is not allowed, if action is on state: " + action.getStatus());
         }
     }
 
     /**
      * Is needed to convert a incoming message to is originally object type.
-     * 
+     *
      * @param message
      *            the message to convert.
      * @param clazz
@@ -367,14 +394,15 @@ public class AmqpMessageHandlerService {
 
     /**
      * Is needed to verify if an incoming message has the content type json.
-     * 
+     *
      * @param message
      *            the to verify
      * @param contentType
      *            the content type
      * @return true if the content type has json, false it not.
      */
-    private void checkContentTypeJson(final Message message) {
+
+    private static void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;

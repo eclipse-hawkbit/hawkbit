@@ -14,19 +14,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.rest.resource.model.system.CacheRest;
+import org.eclipse.hawkbit.rest.resource.model.system.SystemStatisticsRest;
 import org.eclipse.hawkbit.rest.resource.model.system.TenantConfigurationRest;
+import org.eclipse.hawkbit.rest.resource.model.system.TenantSystemUsageRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,14 +39,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * {@link SystemManagement} capabilities by REST.
- * 
+ *
  *
  *
  *
  */
 @RestController
 @RequestMapping(RestConstants.SYSTEM_ADMIN_MAPPING)
-@Transactional(readOnly = true)
 public class SystemManagementResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemManagementResource.class);
@@ -55,13 +58,12 @@ public class SystemManagementResource {
 
     /**
      * Deletes the tenant data of a given tenant. USE WITH CARE!
-     * 
+     *
      * @param tenant
      *            to delete
      * @return HttpStatus.OK
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/tenants/{tenant}")
-    @Transactional
     public ResponseEntity<Void> deleteTenant(@PathVariable final String tenant) {
         systemManagement.deleteTenant(tenant);
 
@@ -69,8 +71,40 @@ public class SystemManagementResource {
     }
 
     /**
+     * Collects and returns system usage statistics. It provides a system wide
+     * overview and tenant based stats.
+     *
+     * @return system usage statistics
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/usage", produces = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<SystemStatisticsRest> getSystemUsageStats() {
+        final SystemUsageReport report = systemManagement.getSystemUsageStatistics();
+
+        final SystemStatisticsRest result = new SystemStatisticsRest().setOverallActions(report.getOverallActions())
+                .setOverallArtifacts(report.getOverallArtifacts())
+                .setOverallArtifactVolumeInBytes(report.getOverallArtifactVolumeInBytes())
+                .setOverallTargets(report.getOverallTargets()).setOverallTenants(report.getTenants().size());
+
+        result.setTenantStats(report.getTenants().stream().map(tenant -> convertTenant(tenant))
+                .collect(Collectors.toList()));
+
+        return ResponseEntity.ok(result);
+    }
+
+    private static TenantSystemUsageRest convertTenant(final TenantUsage tenant) {
+        final TenantSystemUsageRest result = new TenantSystemUsageRest(tenant.getTenantName());
+        result.setActions(tenant.getActions());
+        result.setArtifacts(tenant.getArtifacts());
+        result.setOverallArtifactVolumeInBytes(tenant.getOverallArtifactVolumeInBytes());
+        result.setTargets(tenant.getTargets());
+
+        return result;
+    }
+
+    /**
      * Returns a list of all caches containing currently.
-     * 
+     *
      * @return a list of caches for all tenants
      */
     @RequestMapping(method = RequestMethod.GET, value = "/caches")
@@ -83,7 +117,7 @@ public class SystemManagementResource {
 
     /**
      * Invalidates all caches for all tenants.
-     * 
+     *
      * @return a list of cache names which has been invalidated
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/caches")
@@ -98,7 +132,7 @@ public class SystemManagementResource {
     /**
      * Adds or updates a configuration for a specific tenant to the tenant
      * configuration.
-     * 
+     *
      * @param configuration
      *            the configuration value to add or update
      * @param key

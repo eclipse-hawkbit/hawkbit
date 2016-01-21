@@ -91,7 +91,7 @@ public class AmqpControllerAuthentfication {
 
     /**
      * Performs authentication with the secruity token.
-     * 
+     *
      * @param secruityToken
      *            the authentication request object
      * @return the authentfication object
@@ -110,7 +110,7 @@ public class AmqpControllerAuthentfication {
 
     }
 
-    private PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthenficationFilter filter,
+    private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthenficationFilter filter,
             final TenantSecruityToken secruityToken) {
 
         if (!filter.isEnable(secruityToken)) {

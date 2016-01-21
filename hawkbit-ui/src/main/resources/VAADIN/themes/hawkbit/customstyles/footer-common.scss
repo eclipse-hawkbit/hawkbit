@@ -28,8 +28,6 @@
     .v-icon {
       color: $hawkbit-primary-color;
     }
-
-    width: round($action-button-width-scale * $v-unit-size);
     height: round($action-button-height-scale * $v-unit-size) !important;
     font-size: $v-font-size--small !important;
   }
@@ -45,7 +43,6 @@
 
   //Upload button style
   .action-button .v-button {
-    width: round($action-button-width-scale * $v-unit-size);
     height: round($action-button-height-scale * $v-unit-size) !important;
     font-size: $v-font-size--small !important;
   }
@@ -88,4 +85,35 @@
   .drop-to-delete-button:active {
     opacity: 1 !important;
   }
+  
+   
+  .footer-layout{
+   .app-loading {
+   	background-position: bottom;
+    background-repeat: no-repeat;
+   }
+   
+   .app-loading:before {
+   	  background: none;
+    height: 20px !important;
+    width: 20px !important;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0);
+    border-top-color: $hawkbit-primary-color;
+    border-right-color: $hawkbit-primary-color;
+    border-radius: 100%;
+    -webkit-animation: v-rotate-360 500ms infinite linear;
+    -moz-animation: v-rotate-360 500ms infinite linear;
+    -ms-animation: v-rotate-360 500ms infinite linear;
+    -o-animation: v-rotate-360 500ms infinite linear;
+    animation: v-rotate-360 500ms infinite linear;
+    pointer-events: none;
+    position: fixed;
+    margin-top: 12px;
+    margin-left: -10px;
+   }
+  }
+ 
 }
