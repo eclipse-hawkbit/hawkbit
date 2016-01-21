@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +21,15 @@ import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetTypeException;
+import org.eclipse.hawkbit.repository.exception.InvalidPollingTimeException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.repository.model.helper.DurationHelper;
+import org.eclipse.hawkbit.repository.specifications.DistributionSetTypeSpecification;
+import org.eclipse.hawkbit.rest.resource.model.system.SystemConfigurationRequestBodyPut;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -459,6 +465,31 @@ public class SystemManagement implements EnvironmentAware {
                     initialTenantCreation.toUpperCase());
         }
 
+    }
+
+    @Transactional
+    @Modifying
+    public void updateTenantConfiguration(SystemConfigurationRequestBodyPut systemConReq) {
+
+        DurationHelper dh = new DurationHelper();
+
+        TenantMetaData tenantMetaData = getTenantMetadata();
+
+        String ddstypeKey = systemConReq.getDefaultDistributionSetType();
+
+        if (distributionSetTypeRepository.findAll(DistributionSetTypeSpecification.byKey(ddstypeKey)).isEmpty()) {
+            throw new InvalidDistributionSetTypeException(
+                    String.format("The specified default distribution set type %s doe not exist.", ddstypeKey));
+        }
+
+        try {
+            tenantMetaData.setPollingOverdueTime(dh.formattedStringToDuration(systemConReq.getPollingOverdueTime()));
+            tenantMetaData.setPollingTime(dh.formattedStringToDuration(systemConReq.getPollingTime()));
+        } catch (DateTimeParseException ex) {
+            throw new InvalidPollingTimeException(ex);
+        }
+
+        updateTenantMetadata(tenantMetaData);
     }
 
 }

@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.rest.resource.model.system.AuthenticationConfigurationRest;
 import org.eclipse.hawkbit.rest.resource.model.system.CacheRest;
 import org.eclipse.hawkbit.rest.resource.model.system.SystemStatisticsRest;
-import org.eclipse.hawkbit.rest.resource.model.system.TenantConfigurationRest;
 import org.eclipse.hawkbit.rest.resource.model.system.TenantSystemUsageRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +141,7 @@ public class SystemManagementResource {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/conf/{key}")
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    public ResponseEntity<Void> addUpdateConfig(@RequestBody final TenantConfigurationRest configuration,
+    public ResponseEntity<Void> addUpdateConfig(@RequestBody final AuthenticationConfigurationRest configuration,
             @PathVariable final String key) {
         systemManagement.addOrUpdateConfiguration(new TenantConfiguration(key, configuration.getValue()));
         return ResponseEntity.ok().build();
