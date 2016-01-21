@@ -132,6 +132,9 @@ public class AmqpConfiguration {
         final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         containerFactory.setDefaultRequeueRejected(false);
         containerFactory.setConnectionFactory(connectionFactory);
+        containerFactory.setConcurrentConsumers(20);
+        containerFactory.setMaxConcurrentConsumers(20);
+        containerFactory.setPrefetchCount(20);
         return containerFactory;
     }
 
