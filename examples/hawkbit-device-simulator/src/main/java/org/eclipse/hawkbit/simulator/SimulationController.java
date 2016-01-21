@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,12 @@ public class SimulationController {
     @Autowired
     private SpSenderService spSenderService;
 
+    @Autowired
+    private DeviceSimulatorRepository repository;
+
+    @Autowired
+    private SimulatedDeviceFactory deviceFactory;
+
     /**
      * The start resource to start a device creation.
      * 
@@ -43,7 +50,9 @@ public class SimulationController {
             @RequestParam(value = "tenant", defaultValue = "DEFAULT") final String tenant) {
 
         for (int i = 0; i < amount; i++) {
-            spSenderService.createOrUpdateThing(tenant, name + i);
+            final String deviceId = name + i;
+            repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, Protocol.DMF_AMQP));
+            spSenderService.createOrUpdateThing(tenant, deviceId);
         }
 
         return "Updated " + amount + " DMF connected targets!";
