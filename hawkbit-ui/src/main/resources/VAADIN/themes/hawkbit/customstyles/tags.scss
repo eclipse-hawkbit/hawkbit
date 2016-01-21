@@ -1,0 +1,73 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+@mixin tags {
+
+  //Tag button style
+  .button-tag-no-border {
+    color: $tag-text-color !important;
+  }
+
+  .target-tag-clicked,
+  .distribution-tag-clicked,
+  .upload-type-clicked,
+  .distribution-set-type-clicked {
+    color: $tag-button-disabled-grey !important;
+  }
+
+  //Create distribution type popup - twin table style**/
+  .dist_type_twin-table {
+    margin-top: 2px;
+    border: 1px solid $twin-table-border-grey;
+
+    .v-table-cell-wrapper {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .v-table-header {
+      border-color: none !important;
+      background-color: $white-hex-color !important;
+      padding-left: 10px;
+      font-weight: 500;
+      color: $widget-caption-color;
+    }
+
+    .v-checkbox > input ~ label:before {
+      border: 1px solid $twin-table-border-grey;
+    }
+
+    .v-table-focus {
+      outline: none !important;
+    }
+
+    .v-table-table {
+      box-shadow: none;
+    }
+  }
+
+  //Distribution type create/update popup - color picker layout position adjustment
+  .color-picker-layout-ds-type {
+    margin-left: 90px;
+  }
+
+  //Distribution type create/update popup - select/unselect button
+  .arrow-button {
+    margin-left: 5px !important;
+    margin-right: 5px !important;
+  }
+  
+  .custom-filter-button{
+  	width:120px !important;
+  	overflow:hidden;
+  	text-overflow:ellipsis;
+  	text-align:left; 
+  }
+}

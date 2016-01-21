@@ -1,0 +1,209 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+@mixin colorpicker {
+
+  //Adjust slider posistion
+  .v-slider {
+    margin-top: -20px !important;
+    position: relative;
+  }
+
+  //Slider bar style
+  .v-slider-base {
+    background-color: #dfdfdf;
+    background-image: linear-gradient(to bottom, #dfdfdf 0%, #dfdfdf 100%);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05) inset, 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-sizing: border-box;
+    height: 6px;
+    margin: 16px 11px;
+    min-width: 74px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .v-slider-base:after {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #e61919;
+    background-image: linear-gradient(to bottom, #e81b1b 2%, #da1616 98%);
+    border-color: #d11e1e #d11e1e #c31c1c;
+    border-image: none;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 0 #e93838 inset, 0 -1px 0 #d71616 inset, 0 2px 3px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    content: "";
+    display: inline-block;
+    height: inherit;
+    margin-left: -100%;
+    min-width: 0;
+    vertical-align: top;
+    width: 100%;
+  }
+
+  .v-ie8 .v-slider-base:after {
+    left: -11px;
+  }
+
+  .v-slider-handle {
+    display: inline-block;
+    margin-top: -16px;
+    vertical-align: top;
+    width: 0.1px;
+  }
+
+  .v-slider-handle:before {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: white;
+    background-image: linear-gradient(to bottom, white 2%, #f4f4f4 98%);
+    border-color: #dfdfdf #dfdfdf #c3c3c3;
+    border-image: none;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 0 white inset, 0 -1px 0 #efefef inset, 0 2px 3px rgba(0, 0, 0, 0.05);
+    color: #303030;
+    height: 37px;
+    padding: 0 18px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .v-slider-handle:after {
+    border: 1px solid #e61919;
+    box-shadow: 0 0 0 2px rgba(230, 25, 25, 0.5);
+    opacity: 0;
+    transition: opacity 200ms ease 0s;
+  }
+
+  .v-ie8 .v-slider-handle:after {
+    visibility: hidden;
+  }
+
+  .v-slider-handle:before,
+  .v-slider-handle:after {
+    border-radius: 11px;
+    box-sizing: border-box;
+    content: "";
+    height: 22px;
+    margin-left: -11px;
+    margin-top: 8px;
+    padding: 0;
+    position: absolute;
+    width: 22px;
+    z-index: 1;
+  }
+
+  .v-slider-feedback {
+    background-color: rgba(51, 51, 51, 0.75);
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 14px;
+    max-width: 35em;
+    overflow: hidden !important;
+    padding: 5px 9px;
+  }
+
+  .v-slider-vertical {
+    height: 74px;
+    padding: 11px 0;
+  }
+
+  .v-slider-vertical .v-slider-base {
+    background-color: #dfdfdf;
+    background-image: linear-gradient(to right, #dfdfdf 0%, #dfdfdf 100%);
+    height: 100% !important;
+    margin: 0 16px;
+    min-height: 74px;
+    min-width: 0;
+    width: 6px;
+  }
+
+  .v-slider-vertical .v-slider-base:after {
+    background-color: #e61919;
+    background-image: linear-gradient(to right, #e81b1b 2%, #da1616 98%);
+    margin-left: 0;
+  }
+
+  .v-ie8 .v-slider-vertical .v-slider-base:after {
+    height: 130%;
+    left: 0;
+    top: 9px;
+  }
+
+  .v-slider-vertical .v-slider-handle {
+    display: block;
+    height: .1px;
+    width: 37px;
+  }
+
+  .v-slider-vertical .v-slider-handle:before,
+  .book-examples .v-slider-vertical .v-slider-handle:after {
+    height: 22px;
+    margin-left: -8px;
+    margin-top: -11px;
+    width: 22px;
+  }
+
+  .v-slider.v-slider-red:before {
+    background-color: $red-color;
+  }
+
+  .v-slider.v-slider-green:before {
+    background-color: $green-color;
+  }
+
+  .v-slider.v-slider-blue:before {
+    background-color: blue;
+  }
+
+  .v-slider.hue-slider:before {
+    background: url("slider_hue_bg.png") repeat scroll 0 0 rgba(0, 0, 0, 0);
+  }
+
+  .v-slider-red .v-slider-base:after {
+    background: none repeat scroll 0 0 $red-color;
+    border: medium none;
+    box-shadow: none;
+    top: -20px !important;
+  }
+
+  .v-slider-green .v-slider-base:after {
+    background: none repeat scroll 0 0 $green-color;
+    border: medium none;
+    box-shadow: none;
+    top: -20px !important;
+  }
+
+  .v-slider-blue .v-slider-base:after {
+    background: none repeat scroll 0 0 $blue-color;
+    border: medium none;
+    box-shadow: none;
+    top: -20px !important;
+  }
+
+  .v-caption-red {
+    padding-bottom: 0 !important;
+  }
+
+  .v-caption-green {
+    padding-bottom: 0 !important;
+  }
+
+  .v-caption-blue {
+    padding-bottom: 0 !important;
+  }
+}

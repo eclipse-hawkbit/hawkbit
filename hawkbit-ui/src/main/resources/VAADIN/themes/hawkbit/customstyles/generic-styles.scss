@@ -1,0 +1,107 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+
+$generic-text-font-size: $generic-text-font-scale * $v-font-size;
+
+@mixin button-icon-size {
+  height: 15px !important;
+  width: 15px !important;
+}
+
+@mixin space-btwn-tag-buttons {
+  .v-spacing {
+    width: 12px;
+    height: 6px;
+  }
+}
+
+@mixin sp-icon-style($sp-button-icon-color: $button-icon-color, $sp-button-size : $icon-font-size) {
+  height: 15px !important;
+  width: 15px !important;
+  color: $sp-button-icon-color;
+  font-size: $sp-button-size;
+}
+
+@mixin generic-styles {
+
+  //Generic text style used in table details,search text style ,combo text style etc
+  .text-style {
+    font: 300 $generic-text-font-size $app-font-family !important;
+  }
+
+  //Report widget max icon style
+  .icon-only {
+    @include sp-icon-style($sp-button-size : $icon-font-size);
+    margin-bottom: 12px !important;
+    margin-right: 6px !important;
+  }
+
+  .icon-only:focus:after {
+    border-color: none !important;
+    box-shadow: none !important;
+  }
+
+  //Buttons with no border
+  .button-no-border:focus:after {
+    border-color: none !important;
+    box-shadow: none !important;
+  }
+
+  //Custom text are height
+  .text-area-style {
+    height: 75px !important;
+  }
+
+  //Style to highlight the textfield on any validation error
+  .textfield-error {
+    color: $red-color;
+  }
+
+  //Style to highlight the combobox on any validation error
+  .v-filterselect-combobox-error .v-filterselect-input {
+    border-color: $red-color !important;
+  }
+
+  .v-table-row-drag-top td:first-child:before,
+  .v-table-row-drag-bottom td:first-child:after {
+    display: none !important;
+  }
+
+  .v-table-drag .v-table-body {
+    box-shadow: none;
+    border: 1px solid $widget-border-color;
+  }
+
+  //label to adjust to the layout size and show ellipses on text overflow
+  .label-style {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -icab-text-overflow: ellipsis;
+    -khtml-text-overflow: ellipsis;
+    -moz-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
+  }
+
+  .v-panel,
+  .v-textfield {
+    background: $widget-bg;
+  }
+
+  .v-table,
+  .v-table-table {
+    background: transparent;
+  }
+
+  .rootLayout {
+    overflow: auto !important;
+  }
+}

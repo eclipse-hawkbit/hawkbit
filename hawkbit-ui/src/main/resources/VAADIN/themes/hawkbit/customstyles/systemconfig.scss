@@ -1,0 +1,48 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+
+//View system config styles
+@mixin systemconfig {
+  .tenantconfig-root {
+    background-color: $widget-bg;
+    border: 1px solid $widget-border-color;
+
+    .config-panel {
+      border: 1px solid $widget-border-color;
+      box-shadow: none;
+      font-weight: 500;
+
+      .v-verticallayout {
+        padding-left: 10px;
+        padding-right: 5px;
+        padding-top: 5px;
+
+        .v-verticallayout {
+          padding-left: 0 !Important;
+          padding-right: 0 !Important;
+          padding-top: 0 !Important;
+        }
+      }
+
+      .config-panel-header {
+        color: $hawkbit-primary-color;
+        padding-bottom: 10px;
+        font-weight: 500;
+      }
+    }
+
+    .v-slot .v-link .v-icon {
+      position: absolute;
+      right: 13px;
+      bottom: 13px;
+      color: $button-icon-color;
+    }
+  }
+}

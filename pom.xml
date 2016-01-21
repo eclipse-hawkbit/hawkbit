@@ -1,0 +1,624 @@
+<!--
+
+    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>1.2.7.RELEASE</version>
+   </parent>
+
+   <groupId>org.eclipse.hawkbit</groupId>
+   <artifactId>hawkbit-parent</artifactId>
+   <version>0.1.0-SNAPSHOT</version>
+   <packaging>pom</packaging>
+   <name>hawkBit :: Parent</name>
+
+   <modules>
+      <module>hawkbit-dmf-api</module>
+      <module>hawkbit-rest-api</module>
+      <module>hawkbit-core</module>
+      <module>hawkbit-security-core</module>
+      <module>hawkbit-repository</module>
+      <module>hawkbit-dmf-amqp</module>
+      <module>hawkbit-security-integration</module>
+      <module>hawkbit-http-security</module>
+      <module>hawkbit-rest-resource</module>
+      <module>hawkbit-ui</module>
+      <module>hawkbit-artifact-repository-mongo</module>
+      <module>hawkbit-autoconfigure</module>
+      <module>hawkbit-cache-redis</module>
+      <module>hawkbit-test-report</module>
+      <module>examples</module>
+   </modules>
+
+
+   <scm>
+      <connection>scm:git:https://github.com/bsinno/hawkbit-update-server.git</connection>
+      <developerConnection>scm:git:https://github.com/bsinno/hawkbit-update-server.git</developerConnection>
+      <url>https://github.com/bsinno/hawkbit-update-server.git</url>
+   </scm>
+
+   <distributionManagement>
+      <snapshotRepository>
+         <id>sp-snapshots</id>
+         <uniqueVersion>false</uniqueVersion>
+         <url>https://repo.bosch-si.com/content/repositories/sp-snapshots</url>
+      </snapshotRepository>
+      <repository>
+         <id>sp-releases</id>
+         <url>https://repo.bosch-si.com/content/repositories/sp-releases</url>
+      </repository>
+   </distributionManagement>
+
+   <repositories>
+      <repository>
+         <id>vaadin-addons</id>
+         <url>http://maven.vaadin.com/vaadin-addons</url>
+      </repository>
+   </repositories>
+
+   <properties>
+      <spring.boot.version>1.2.7.RELEASE</spring.boot.version>
+
+      <!-- Spring boot overrides - START -->
+      <h2.version>1.4.186</h2.version>
+      <jackson.version>2.5.0</jackson.version>
+      <hibernate-validator.version>5.2.2.Final</hibernate-validator.version>
+      <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
+      <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
+      <mongodb.version>3.0.2</mongodb.version>
+      <!-- Spring boot overrides - END -->
+
+      <!-- Vaadin versions - START -->
+      <vaadin.spring.version>1.0.0</vaadin.spring.version>
+      <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
+      <vaadin.version>7.5.7</vaadin.version>
+      <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+      <!-- Vaadin versions - END -->
+
+      <!-- Misc -->
+      <fest-assert.version>1.4</fest-assert.version>
+      <org.easytesting.version>2.0M10</org.easytesting.version>
+      <java.version>1.8</java.version>
+      <allure.version>1.4.15</allure.version>
+      <eclipselink.version>2.6.0</eclipselink.version>
+      <org.powermock.version>1.5.4</org.powermock.version>
+      <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
+      <json-path.version>0.9.1</json-path.version>
+      <commons-lang3.version>3.4</commons-lang3.version>
+      <aspectj.version>1.8.5</aspectj.version>
+
+      <!-- Sonar -->
+      <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
+      <sonar.github.repository>bsinno/hawkbit-update-server</sonar.github.repository>
+      <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+      <!-- Jacoco version to use -->
+      <jacoco.version>0.7.2.201409121644</jacoco.version>
+      <!-- The Sonar Jacoco Listener for JUnit to extract coverage details
+         per test -->
+      <sonar-jacoco-listeners.version>1.4</sonar-jacoco-listeners.version>
+      <!-- Don't let Sonar execute tests. We will ask it to Maven -->
+      <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+      <!-- The system property jacoco.outputDir needs to be override on the
+         command line with an absolute path if you want to merge results from all
+         modules. Example in a Jenkisn build where ${WORKSPACE} is defined and your
+         project in the root directory of the workspace : mvn clean install -Prun-its,coverage
+         -Djacoco.outputDir=${WORKSPACE}/target Note that unfortunately using the
+         following does not work because of http://jira.codehaus.org/browse/SONAR-3427:
+         <jacoco.outputDir>${session.executionRootDirectory}/target/</jacoco.outputDir> -->
+      <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
+      <!-- Jacoco output file for UTs -->
+      <jacoco.out.ut.file>jacoco-ut.exec</jacoco.out.ut.file>
+      <!-- Tells Sonar where the Jacoco coverage result file is located for
+         Unit Tests -->
+      <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.ut.file}</sonar.jacoco.reportPath>
+      <!-- Jacoco output file for ITs -->
+      <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
+      <!-- Tells Sonar where the Jacoco coverage result file is located for
+         Integration Tests -->
+      <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
+   </properties>
+
+
+   <build>
+      <plugins>
+        <plugin>
+            <groupId>com.mycila</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <version>2.11</version>
+            <configuration>
+                <header>LICENCE_HEADER_TEMPLATE.txt</header>
+                <excludes>
+                    <exclude>**/README</exclude>
+                    <exclude>3rd-dependencies/**</exclude>
+                    <exclude>**/.git*</exclude>
+                    <exclude>.git*</exclude>
+                    <exclude>**/*.sql</exclude>
+                    <exclude>**/*.sql</exclude>
+                    <exclude>eclipse_codeformatter.xml</exclude>
+                </excludes>
+                <mapping>
+                    <scss>JAVADOC_STYLE</scss>
+                </mapping>
+            </configuration>
+        </plugin>
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>versions-maven-plugin</artifactId>
+         </plugin>
+         <plugin>
+            <artifactId>maven-scm-plugin</artifactId>
+            <version>1.9.4</version>
+            <configuration>
+               <tag>${project.version}</tag>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <executions>
+               <execution>
+                  <id>prepare-ut-agent</id>
+                  <phase>process-test-classes</phase>
+                  <goals>
+                     <goal>prepare-agent</goal>
+                  </goals>
+                  <configuration>
+                     <destFile>${sonar.jacoco.reportPath}</destFile>
+                     <propertyName>jacoco.agent.ut.arg</propertyName>
+                     <append>true</append>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>prepare-it-agent</id>
+                  <phase>pre-integration-test</phase>
+                  <goals>
+                     <goal>prepare-agent</goal>
+                  </goals>
+                  <configuration>
+                     <destFile>${sonar.jacoco.itReportPath}</destFile>
+                     <propertyName>jacoco.agent.it.arg</propertyName>
+                     <append>true</append>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <groupId>org.eclipse.m2e</groupId>
+               <artifactId>lifecycle-mapping</artifactId>
+               <version>1.0.0</version>
+               <configuration>
+                  <lifecycleMappingMetadata>
+                     <pluginExecutions>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>org.apache.maven.plugins</groupId>
+                              <artifactId>maven-dependency-plugin</artifactId>
+                              <versionRange>[2.8,)</versionRange>
+                              <goals>
+                                 <goal>copy-dependencies</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore />
+                           </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>com.vaadin</groupId>
+                              <artifactId>vaadin-maven-plugin</artifactId>
+                              <versionRange>[7.3.0,)</versionRange>
+                              <goals>
+                                 <goal>resources</goal>
+                                 <goal>update-widgetset</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore />
+                           </action>
+                        </pluginExecution>
+                     </pluginExecutions>
+                  </lifecycleMappingMetadata>
+               </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-surefire-plugin</artifactId>
+               <version>2.17</version>
+               <configuration>
+                  <reuseForks>true</reuseForks>
+                  <forkCount>1</forkCount>
+                  <argLine>
+                     ${jacoco.agent.ut.arg}
+                     -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                  </argLine>
+                  <properties>
+                     <property>
+                        <name>listener</name>
+                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                     </property>
+                  </properties>
+                  <includes>
+                     <include>**/*Tests.java</include>
+                     <include>**/*Test.java</include>
+                     <include>**/*IT.java</include>
+                  </includes>
+                  <excludes>
+                     <exclude>**/Abstract*.java</exclude>
+                  </excludes>
+               </configuration>
+               <dependencies>
+                  <dependency>
+                     <groupId>org.aspectj</groupId>
+                     <artifactId>aspectjweaver</artifactId>
+                     <version>${aspectj.version}</version>
+                  </dependency>
+               </dependencies>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-failsafe-plugin</artifactId>
+               <configuration>
+                  <reuseForks>true</reuseForks>
+                  <forkCount>3</forkCount>
+                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}
+                     -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"</argLine>
+                  <properties>
+                     <property>
+                        <name>listener</name>
+                        <value>ru.yandex.qatools.allure.junit.AllureRunListener</value>
+                     </property>
+                  </properties>
+               </configuration>
+               <dependencies>
+                  <dependency>
+                     <groupId>org.aspectj</groupId>
+                     <artifactId>aspectjweaver</artifactId>
+                     <version>${aspectj.version}</version>
+                  </dependency>
+               </dependencies>
+               <executions>
+                  <execution>
+                     <id>integration-test</id>
+                     <phase>integration-test</phase>
+                     <goals>
+                        <goal>integration-test</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-site-plugin</artifactId>
+               <configuration>
+                  <skip>true</skip>
+                  <skipDeploy>true</skipDeploy>
+               </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.jacoco</groupId>
+               <artifactId>jacoco-maven-plugin</artifactId>
+               <version>${jacoco.maven.version}</version>
+            </plugin>
+
+         </plugins>
+      </pluginManagement>
+   </build>
+
+   <dependencyManagement>
+      <dependencies>
+         <!-- Logging -->
+         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+         </dependency>
+         <!-- Vaadin -->
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot</artifactId>
+            <version>${vaadin.spring.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.spring.addons</groupId>
+            <artifactId>vaadin-spring-addon-eventbus</artifactId>
+            <version>${vaadin.spring.addon.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.spring.extensions</groupId>
+            <artifactId>vaadin-spring-ext-security</artifactId>
+            <version>${vaadin.spring.addon.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-server</artifactId>
+            <version>${vaadin.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-push</artifactId>
+            <version>${vaadin.version}</version>
+         </dependency>
+         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory).
+            For widgetset compilation, vaadin-client-compiler is automatically added
+            on the compilation classpath by vaadin-maven-plugin so normally there is
+            no need for an explicit dependency. -->
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-client-compiler</artifactId>
+            <version>${vaadin.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.eclipse.jetty</groupId>
+                  <artifactId>jetty-servlets</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.eclipse.jetty</groupId>
+                  <artifactId>jetty-annotations</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.eclipse.jetty</groupId>
+                  <artifactId>jetty-util</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-themes</artifactId>
+            <version>${vaadin.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
+            <artifactId>vaadin-lazyquerycontainer</artifactId>
+            <version>7.4.0.1</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>flexibleoptiongroup</artifactId>
+            <version>2.2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>tokenfield</artifactId>
+            <version>7.0.1</version>
+         </dependency>
+
+         <!-- Misc -->
+         <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>2.2.4</version>
+         </dependency>
+         <dependency>
+            <groupId>net.sf.corn</groupId>
+            <artifactId>corn-cps</artifactId>
+            <version>1.1.7</version>
+         </dependency>
+         <dependency>
+            <groupId>net._01001111</groupId>
+            <artifactId>jlorem</artifactId>
+            <version>1.1</version>
+         </dependency>
+         <!-- Swagger for generating REST APIs -->
+         <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.0.3</version>
+         </dependency>
+         <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.0</version>
+         </dependency>
+         <!-- Spring -->
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-logging</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+            <version>${spring.boot.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-logging</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-logging</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <version>${spring.boot.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cloud-connectors</artifactId>
+            <version>${spring.boot.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+            <version>${spring.boot.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <version>${spring.boot.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>provided</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.hibernate</groupId>
+                  <artifactId>hibernate-entitymanager</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-logging</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <!-- Override of classmate version, that is a hibernate validator
+            dependency. allow PB of CQ -->
+         <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>classmate</artifactId>
+            <version>1.3.0</version>
+         </dependency>
+         <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+            <version>${eclipselink.version}</version>
+         </dependency>
+         <!-- RSQL / FIQL parser -->
+         <dependency>
+            <groupId>cz.jirutka.rsql</groupId>
+            <artifactId>rsql-parser</artifactId>
+            <version>2.0.0</version>
+         </dependency>
+         <!-- JSON PATH, used to e.g. parse vcap services from environment -->
+         <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${json-path.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>junit</groupId>
+                  <artifactId>junit</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <!-- Spring boot overrides - START -->
+         <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+         </dependency>
+         <!-- Spring boot overrides - END -->
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-logging</artifactId>
+               </exclusion>
+            </exclusions>
+         </dependency>
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench</artifactId>
+            <version>4.0.3</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20141113</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>1.50.0</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <version>${fest-assert.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <version>${org.easytesting.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>ru.yandex.qatools.allure</groupId>
+            <artifactId>allure-junit-adaptor</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.18.1</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>pl.pragmatists</groupId>
+            <artifactId>JUnitParams</artifactId>
+            <version>${pl.pragmatists.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
+            <version>0.9.1</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>1.2.3</version>
+            <scope>test</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
+</project>

@@ -1,0 +1,35 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+@mixin table-header-common {
+
+  //Table header - filter text field style
+  .filter-box {
+    height: 21px !important;
+    transition: width .5s ease-in-out;
+    float: right;
+    border-radius: $v-border-radius;
+  }
+
+  .filter-box:focus:after {
+    box-shadow: none !important;
+    border-radius: $v-border-radius !important;
+  }
+
+  .filter-box-hide {
+    width: 0 !important;
+    padding: 0 !important;
+    border-width: 0 !important;
+  }
+
+  //Search rest icon color
+  .filter-reset-icon {
+    color: $red-color;
+  }
+}

@@ -1,0 +1,497 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.ui.common.table;
+
+import org.eclipse.hawkbit.ui.components.SPUIButton;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+
+import com.vaadin.event.dd.DropHandler;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.DragAndDropWrapper;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
+
+/**
+ * Parent class for table header.
+ * 
+ *
+ *
+ * 
+ */
+public abstract class AbstractTableHeader extends VerticalLayout {
+
+    private static final long serialVersionUID = 4881626370291837175L;
+
+    private Label headerCaption;
+
+    private TextField searchField;
+
+    private SPUIButton searchResetIcon;
+
+    private Button showFilterButtonLayout;
+
+    private Button addIcon;
+
+    private SPUIButton maxMinIcon;
+
+    private HorizontalLayout filterDroppedInfo;
+
+    private DragAndDropWrapper dropFilterLayout;
+
+    private Button bulkUploadIcon;
+
+    /**
+     * Initialze components.
+     */
+    protected void init() {
+        createComponents();
+        buildLayout();
+        restoreState();
+    }
+
+    private void createComponents() {
+        headerCaption = createHeaderCaption();
+        searchField = createSearchField();
+
+        searchResetIcon = createSearchResetIcon();
+
+        addIcon = createAddIcon();
+
+        bulkUploadIcon = createBulkUploadIcon();
+
+        showFilterButtonLayout = createShowFilterButtonLayout();
+        // Not visible by default.
+        showFilterButtonLayout.setVisible(false);
+
+        maxMinIcon = createMaxMinIcon();
+
+        final String onLoadSearchBoxValue = onLoadSearchBoxValue();
+
+        if (onLoadSearchBoxValue != null && onLoadSearchBoxValue.length() > 0) {
+            openSearchTextField();
+            searchField.setValue(onLoadSearchBoxValue);
+        }
+
+    }
+
+    private void restoreState() {
+
+        final String onLoadSearchBoxValue = onLoadSearchBoxValue();
+        if (HawkbitCommonUtil.trimAndNullIfEmpty(onLoadSearchBoxValue) != null) {
+            openSearchTextField();
+            searchField.setValue(onLoadSearchBoxValue);
+        }
+
+        if (onLoadIsTableMaximized()) {
+            /**
+             * If table is maximized display the minimize icon.
+             */
+            showMinIcon();
+            hideAddIcon();
+        }
+
+        if (onLoadIsShowFilterButtonDisplayed()) {
+            /**
+             * Show filter button will be displayed when filter button layout is
+             * closed.
+             */
+            setFilterButtonsIconVisible(true);
+        }
+
+    }
+
+    private void hideAddIcon() {
+        addIcon.setVisible(false);
+    }
+
+    private void showAddIcon() {
+        addIcon.setVisible(true);
+    }
+
+    private void buildLayout() {
+        final HorizontalLayout titleFilterIconsLayout = createHeaderFilterIconLayout();
+
+        titleFilterIconsLayout.addComponents(headerCaption, searchField, searchResetIcon, showFilterButtonLayout);
+        titleFilterIconsLayout.setComponentAlignment(headerCaption, Alignment.TOP_LEFT);
+        titleFilterIconsLayout.setComponentAlignment(searchField, Alignment.TOP_RIGHT);
+        titleFilterIconsLayout.setComponentAlignment(searchResetIcon, Alignment.TOP_RIGHT);
+        titleFilterIconsLayout.setComponentAlignment(showFilterButtonLayout, Alignment.TOP_RIGHT);
+        if (hasCreatePermission() && isAddNewItemAllowed()) {
+            titleFilterIconsLayout.addComponent(addIcon);
+            titleFilterIconsLayout.setComponentAlignment(addIcon, Alignment.TOP_RIGHT);
+        }
+        if (hasCreatePermission() && isBulkUploadAllowed()) {
+            titleFilterIconsLayout.addComponent(bulkUploadIcon);
+            titleFilterIconsLayout.setComponentAlignment(bulkUploadIcon, Alignment.TOP_RIGHT);
+        }
+        titleFilterIconsLayout.addComponent(maxMinIcon);
+        titleFilterIconsLayout.setComponentAlignment(maxMinIcon, Alignment.TOP_RIGHT);
+        titleFilterIconsLayout.setExpandRatio(headerCaption, 0.4f);
+        titleFilterIconsLayout.setExpandRatio(searchField, 0.6f);
+
+        addComponent(titleFilterIconsLayout);
+
+        final HorizontalLayout dropHintDropFilterLayout = new HorizontalLayout();
+        dropHintDropFilterLayout.addStyleName("filter-drop-hint-layout");
+        dropHintDropFilterLayout.setWidth(100, Unit.PERCENTAGE);
+        if (isDropFilterRequired()) {
+            filterDroppedInfo = new HorizontalLayout();
+            filterDroppedInfo.setImmediate(true);
+            filterDroppedInfo.setStyleName("target-dist-filter-info");
+            filterDroppedInfo.setHeightUndefined();
+            filterDroppedInfo.setSizeUndefined();
+            displayFilterDropedInfoOnLoad();
+            dropFilterLayout = new DragAndDropWrapper(filterDroppedInfo);
+            dropFilterLayout.setId(getDropFilterId());
+            dropFilterLayout.setDropHandler(getDropFilterHandler());
+
+            dropHintDropFilterLayout.addComponent(dropFilterLayout);
+            dropHintDropFilterLayout.setComponentAlignment(dropFilterLayout, Alignment.TOP_CENTER);
+            dropHintDropFilterLayout.setExpandRatio(dropFilterLayout, 1.0f);
+        }
+        addComponent(dropHintDropFilterLayout);
+        setComponentAlignment(dropHintDropFilterLayout, Alignment.MIDDLE_CENTER);
+        addStyleName("bordered-layout");
+        addStyleName("no-border-bottom");
+    }
+
+    /**
+     * to be overridden by concrete implementation.
+     */
+    protected void displayFilterDropedInfoOnLoad() {
+        filterDroppedInfo.removeAllComponents();
+    }
+
+    private Label createHeaderCaption() {
+        final Label captionLabel = SPUIComponentProvider.getLabel(getHeaderCaption(),
+                SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        return captionLabel;
+    }
+
+    private TextField createSearchField() {
+        final TextField textField = SPUIComponentProvider.getTextField("filter-box", "text-style filter-box-hide",
+                false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        textField.setId(getSearchBoxId());
+        textField.setWidth(100.0f, Unit.PERCENTAGE);
+        textField.addTextChangeListener(event -> searchBy(event.getText()));
+        textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        // 1 seconds timeout.
+        textField.setTextChangeTimeout(1000);
+        return textField;
+    }
+
+    private SPUIButton createSearchResetIcon() {
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getSearchRestIconId(), "", "", null,
+                false, FontAwesome.SEARCH, SPUIButtonStyleSmallNoBorder.class);
+        button.addClickListener(event -> onSearchResetClick());
+        button.setData(Boolean.FALSE);
+        return button;
+    }
+
+    private Button createAddIcon() {
+        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
+                SPUIButtonStyleSmallNoBorder.class);
+        button.addClickListener(event -> addNewItem(event));
+        return button;
+    }
+
+    private Button createBulkUploadIcon() {
+        final Button button = SPUIComponentProvider.getButton(getBulkUploadIconId(), "", "", null, false,
+                FontAwesome.UPLOAD, SPUIButtonStyleSmallNoBorder.class);
+        button.addClickListener(event -> bulkUpload(event));
+        return button;
+    }
+
+    private Button createShowFilterButtonLayout() {
+        final Button button = SPUIComponentProvider.getButton(getShowFilterButtonLayoutId(), null, null, null, false,
+                FontAwesome.TAGS, SPUIButtonStyleSmallNoBorder.class);
+        button.setVisible(false);
+        button.addClickListener(event -> showFilterButtonsIconClicked());
+        return button;
+    }
+
+    private SPUIButton createMaxMinIcon() {
+        final SPUIButton button = (SPUIButton) SPUIComponentProvider.getButton(getMaxMinIconId(), "", "", null, false,
+                FontAwesome.EXPAND, SPUIButtonStyleSmallNoBorder.class);
+        button.addClickListener(event -> maxMinButtonClicked());
+        return button;
+    }
+
+    private void onSearchResetClick() {
+        final Boolean flag = isSearchFieldOpen();
+        if (flag == null || Boolean.FALSE.equals(flag)) {
+            // Clicked on search Icon
+            openSearchTextField();
+        } else {
+            // Clicked on rest icon
+            closeSearchTextField();
+        }
+    }
+
+    protected Boolean isSearchFieldOpen() {
+        return (Boolean) searchResetIcon.getData();
+    }
+
+    private void openSearchTextField() {
+        searchResetIcon.addStyleName(SPUIDefinitions.FILTER_RESET_ICON);
+        searchResetIcon.togleIcon(FontAwesome.TIMES);
+        searchResetIcon.setData(Boolean.TRUE);
+        searchField.removeStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
+        searchField.focus();
+    }
+
+    private void closeSearchTextField() {
+        searchField.setValue("");
+        searchField.addStyleName(SPUIDefinitions.FILTER_BOX_HIDE);
+        searchResetIcon.removeStyleName(SPUIDefinitions.FILTER_RESET_ICON);
+        searchResetIcon.togleIcon(FontAwesome.SEARCH);
+        searchResetIcon.setData(Boolean.FALSE);
+        resetSearchText();
+    }
+
+    private void maxMinButtonClicked() {
+        final Boolean flag = (Boolean) maxMinIcon.getData();
+        if (flag == null || Boolean.FALSE.equals(flag)) {
+            // Clicked on max Icon
+            maximizedTableView();
+        } else {
+            // Clicked on min icon
+            minimizeTableView();
+        }
+    }
+
+    private void maximizedTableView() {
+        showMinIcon();
+        hideAddIcon();
+        maximizeTable();
+    }
+
+    private void minimizeTableView() {
+        showMaxIcon();
+        showAddIcon();
+        minimizeTable();
+    }
+
+    private void showMinIcon() {
+        maxMinIcon.togleIcon(FontAwesome.COMPRESS);
+        maxMinIcon.setData(Boolean.TRUE);
+    }
+
+    private void showMaxIcon() {
+        maxMinIcon.togleIcon(FontAwesome.EXPAND);
+        maxMinIcon.setData(Boolean.FALSE);
+    }
+
+    private HorizontalLayout createHeaderFilterIconLayout() {
+        final HorizontalLayout titleFilterIconsLayout = new HorizontalLayout();
+        titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
+        titleFilterIconsLayout.setSpacing(false);
+        titleFilterIconsLayout.setMargin(false);
+        titleFilterIconsLayout.setSizeFull();
+        return titleFilterIconsLayout;
+    }
+
+    private void showFilterButtonsIconClicked() {
+        /* Remove the show filter Buttons button */
+        setFilterButtonsIconVisible(false);
+        /* Show the filter buttons layout */
+        showFilterButtonsLayout();
+    }
+
+    protected void setFilterButtonsIconVisible(final boolean isVisible) {
+        showFilterButtonLayout.setVisible(isVisible);
+    }
+
+    protected HorizontalLayout getFilterDroppedInfo() {
+        return filterDroppedInfo;
+    }
+
+    /**
+     * Resets search text and closed search field when complex filters are
+     * applied.
+     */
+    protected void resetSearch() {
+        closeSearchTextField();
+    }
+
+    /**
+     * Once user switches to custom filters search functionality is re-enabled.
+     */
+    protected void disableSearch() {
+        searchResetIcon.setEnabled(false);
+    }
+
+    /**
+     * Once user switches to simple filters search functionality is re-enabled.
+     */
+    protected void reEnableSearch() {
+        searchResetIcon.setEnabled(true);
+    }
+
+    /**
+     * Get the title of the table.
+     * 
+     * @return title as String.
+     */
+    protected abstract String getHeaderCaption();
+
+    /**
+     * get Id of search text field.
+     * 
+     * @return Id of the text field.
+     */
+    protected abstract String getSearchBoxId();
+
+    /**
+     * Get search reset Icon Id.
+     * 
+     * @return Id of search reset icon.
+     */
+    protected abstract String getSearchRestIconId();
+
+    /**
+     * Get Id of add Icon.
+     * 
+     * @return String of add Icon.
+     */
+    protected abstract String getAddIconId();
+
+    /**
+     * Get Id of bulk upload Icon.
+     * 
+     * @return String of bulk upload Icon.
+     */
+    protected abstract String getBulkUploadIconId();
+
+    /**
+     * Get search box on load text value.
+     * 
+     * @return value of search box.
+     */
+    protected abstract String onLoadSearchBoxValue();
+
+    /**
+     * Get the Id value of the drop filter in the table header.
+     * 
+     * @return Id of the drop filter if filter is displayed, otherwise returns
+     *         null.
+     */
+    protected abstract String getDropFilterId();
+
+    /**
+     * Get style of the filter Icon.
+     * 
+     * @return style of the filter Icon
+     */
+    protected abstract String getFilterIconStyle();
+
+    /**
+     * Get the Id value of the drop filter wrapper in the table header.
+     * 
+     * @return Id of the drop filter if filter is displayed, otherwise returns
+     *         null.
+     */
+    protected abstract String getDropFilterWrapperId();
+
+    /**
+     * Check if logged in user has create permission..
+     * 
+     * @return true of user has create permission, otherwise return false.
+     */
+    protected abstract boolean hasCreatePermission();
+
+    /**
+     * Check if drop hits required to display and user has permissions for that.
+     * 
+     * @return true if drop hits should be displayed and user has permission,
+     *         otherwise false.
+     */
+    protected abstract boolean isDropHintRequired();
+
+    /**
+     * Check if drop filter is required.
+     * 
+     * @return true if drop filter is required to display, otherwise return
+     *         false.
+     */
+    protected abstract boolean isDropFilterRequired();
+
+    /**
+     * Get Id of the show filter buttons layout.
+     * 
+     * @return Id of the show filter buttons Icon.
+     */
+    protected abstract String getShowFilterButtonLayoutId();
+
+    /**
+     * Show the filter buttons layout logic. This method will be called when
+     * show filter buttons Icon is clicked displayed on the header.
+     */
+    protected abstract void showFilterButtonsLayout();
+
+    /**
+     * This method will be called when user resets the search text means on
+     * click of (X) icon.
+     */
+    protected abstract void resetSearchText();
+
+    /**
+     * Get the Id of min/max button for the table.
+     * 
+     * @return Id of min/max button.
+     */
+    protected abstract String getMaxMinIconId();
+
+    /**
+     * Called when table is maximized.
+     */
+    public abstract void maximizeTable();
+
+    /**
+     * Called when table is minimized.
+     */
+    public abstract void minimizeTable();
+
+    /**
+     * Get the max/min icon state on load.
+     * 
+     * @return true if table should be maximized.
+     */
+    public abstract Boolean onLoadIsTableMaximized();
+
+    protected abstract DropHandler getDropFilterHandler();
+
+    /**
+     * On load show filter button is displayed.
+     * 
+     * @return true if requires to delete, otherwise false.
+     */
+    public abstract Boolean onLoadIsShowFilterButtonDisplayed();
+
+    protected abstract void searchBy(String newSearchText);
+
+    protected abstract void addNewItem(final Button.ClickEvent event);
+
+    protected abstract void bulkUpload(final Button.ClickEvent event);
+
+    protected abstract Boolean isAddNewItemAllowed();
+
+    protected abstract Boolean isBulkUploadAllowed();
+
+}

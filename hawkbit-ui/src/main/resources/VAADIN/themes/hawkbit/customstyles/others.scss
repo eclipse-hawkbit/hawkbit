@@ -1,0 +1,216 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+@mixin others {
+
+  //Style to display the pending action count
+  .unread {
+    @include valo-badge-style;
+    position: absolute;
+    pointer-events: none;
+    display: block;
+    top: round($v-unit-size / -5);
+    right: round($v-unit-size / -5);
+    z-index: 1;
+    border-radius: $v-border-radius;
+    color: $widget-bg;
+  }
+
+  //Deployment view - Style of count message
+  .v-caption-count-msg-box {
+    text-align: center;
+    color: $info-message-color-grey;
+    font-weight: bold;
+    height: 10px;
+  }
+
+  //*Deployment view -Assigned and installed message*
+  .count-msg-box {
+    padding-left: 10px;
+    padding-top: 3px;
+    text-align: center;
+    color: $info-message-color-grey;
+    font-weight: italic;
+    font-size: 12px;
+  }
+
+  //Deployment view information message - Color of assigned count
+  .assigned-count-message {
+    color: $installed-row-color;
+  }
+
+  //Deployment view information message - Color of installed count
+  .installed-count-message {
+    color: $assigned-row-color;
+  }
+
+  //Create distribution twin table - Check box style
+  .dist-checkbox-style {
+    margin-left: 1px;
+    position: relative;
+    z-index: 1;
+  }
+
+  //Version displayed at bottom of menu *
+  .version-layout {
+    font-size: .8em !important;
+    text-align: center;
+  }
+
+  //Pin style - when pinned and when row is not selected
+  tr:not(.v-selected) .v-button-targetPinned:after {
+    content: '\f08d';
+    color: $hawkbit-primary-color;
+  }
+
+  //Pin style - when pinned and when row is selected
+  tr.v-selected .v-button-targetPinned:after {
+    content: '\f08d';
+    color: $widget-bg;
+  }
+
+  //Pin style - when hovered on pin and when row is not selected
+  tr:not(.v-selected) .v-button-targetStatusPinToggle:hover:after {
+    background-color: $hawkbit-primary-color;
+    color: $widget-bg !important;
+  }
+
+  //Pin style - when hovered on pin and when row is selected
+  tr.v-selected .v-button-targetStatusPinToggle:hover:after {
+    background-color: $widget-bg;
+    color: $hawkbit-primary-color !important;
+  }
+
+  .icon-only {
+    margin-bottom: 6px !important;
+  }
+
+  //Toggle between pin and status icon
+  .v-button-targetStatusPinToggle:after {
+    font-family: FontAwesome;
+  }
+
+  .statusIconRed {
+    color: $signal-red-color;
+  }
+
+  .v-button-statusIconRed:after {
+    content: "\f06a";
+  }
+
+  tr:not(.v-selected):hover .v-button-statusIconRed:after {
+    content: "\f08d";
+    color: $hawkbit-primary-color;
+  }
+
+  tr.v-selected:hover .v-button-statusIconRed:after {
+    content: "\f08d";
+    color: $widget-bg;
+  }
+
+  .statusIconBlue {
+    color: $status-unknown-color;
+  }
+
+  .v-button-statusIconBlue:after {
+    content: "\f059";
+  }
+
+  tr:not(.v-selected):hover .v-button-statusIconBlue:after {
+    content: "\f08d";
+    color: $hawkbit-primary-color;
+  }
+
+  tr.v-selected:hover .v-button-statusIconBlue:after {
+    content: "\f08d";
+    color: $widget-bg;
+  }
+
+  .statusIconYellow {
+    color: $signal-yellow-color;
+  }
+
+  .v-button-statusIconYellow:after {
+    content: "\f042";
+  }
+
+  tr:not(.v-selected):hover .v-button-statusIconYellow:after {
+    content: "\f08d";
+    color: $hawkbit-primary-color;
+  }
+
+  tr.v-selected:hover .v-button-statusIconYellow:after {
+    content: "\f08d";
+    color: $widget-bg;
+  }
+
+  .statusIconGreen {
+    color: $signal-green-color;
+  }
+
+  .v-button-statusIconGreen:after {
+    content: "\f058";
+  }
+
+  tr:not(.v-selected):hover .v-button-statusIconGreen:after {
+    content: "\f08d";
+    color: $hawkbit-primary-color;
+  }
+
+  tr.v-selected:hover .v-button-statusIconGreen:after {
+    content: "\f08d";
+    color: $widget-bg;
+  }
+
+  .statusIconLightBlue {
+    color: $bosch-color-light-blue;
+  }
+
+  .v-button-statusIconLightBlue:after {
+    content: "\f192";
+  }
+
+  tr:not(.v-selected):hover .v-button-statusIconLightBlue:after {
+    content: "\f08d";
+    color: $hawkbit-primary-color;
+  }
+
+  tr.v-selected:hover .v-button-statusIconLightBlue:after {
+    content: "\f08d";
+    color: $widget-bg;
+  }
+
+  .statusIconPending {
+    color: $hawkbit-primary-color;
+  }
+
+  .statusIconActive {
+    @include valo-spinner($size:16px,$speed:1200ms);
+    color: $hawkbit-primary-color;
+  }
+
+  .statusIconNeutral {
+    color: $hawkbit-primary-color;
+  }
+
+  // Disabled row style when distribution is incomplete
+  .v-table-row-incomplete-distribution {
+    color: $disabled-row-color-grey !important;
+  }
+
+  .v-link {
+    text-decoration: none;
+    padding-right: 10px;
+    font-weight: 300;
+  }
+  
+  .v-tooltip{
+  	max-width:43em;
+  }
+}

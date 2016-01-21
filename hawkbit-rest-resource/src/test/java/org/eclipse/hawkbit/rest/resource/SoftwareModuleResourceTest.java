@@ -1,0 +1,1008 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.rest.resource;
+
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.HashGeneratorUtils;
+import org.eclipse.hawkbit.MockMvcResultPrinter;
+import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.WithUser;
+import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
+import org.eclipse.hawkbit.rest.resource.model.ExceptionInfo;
+import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.jayway.jsonpath.JsonPath;
+
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+/**
+ * Tests for {@link SoftwareModuleResource} {@link RestController}.
+ *
+ *
+ *
+ */
+@Features("Component Tests - Management RESTful API")
+@Stories("Software Module Resource")
+// TODO: fully document tests -> @Description for long text and reasonable
+// method name as short text
+public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongoDB {
+
+    @Test
+    public void updateSoftwareModuleOnlyDescriptionAndVendorNameUntouched() throws Exception {
+        final String knownSWName = "name1";
+        final String knownSWVersion = "version1";
+        final String knownSWDescription = "description1";
+        final String knownSWVendor = "vendor1";
+
+        final String updateVendor = "newVendor1";
+        final String updateDescription = "newDescription1";
+
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        final SoftwareModule jvm = softwareManagement
+                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+        final SoftwareModule os = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+
+        SoftwareModule sm = new SoftwareModule(osType, knownSWName, knownSWVersion, knownSWDescription, knownSWVendor);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        assertThat(sm.getName()).isEqualTo(knownSWName);
+        assertThat(sm.getName()).isEqualTo(knownSWName);
+
+        final String body = new JSONObject().put("vendor", updateVendor).put("description", updateDescription)
+                .put("name", "nameShouldNotBeChanged").toString();
+
+        mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$id", equalTo(sm.getId().intValue())))
+                .andExpect(jsonPath("$vendor", equalTo(updateVendor)))
+                .andExpect(jsonPath("$description", equalTo(updateDescription)))
+                .andExpect(jsonPath("$name", equalTo(knownSWName))).andReturn();
+
+    }
+
+    /**
+     * Test method for
+     * {@link org.eclipse.hawkbit.rest.resource.SoftwareModuleResource#uploadArtifact(java.lang.Long, org.springframework.web.multipart.MultipartFile)}
+     * .
+     * 
+     * @throws Exception
+     *             if test fails
+     */
+    @Test
+    public void testUploadArtifact() throws Exception {
+        // prepare repo
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        // create test file
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final String md5sum = HashGeneratorUtils.generateMD5(random);
+        final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+
+        // upload
+        final MvcResult mvcResult = mvc
+                .perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$hashes.md5", equalTo(md5sum)))
+                .andExpect(jsonPath("$hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$providedFilename", equalTo("origFilename"))).andReturn();
+
+        // check rest of response compared to DB
+        final ArtifactRest artResult = ResourceUtility
+                .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
+        final Long artId = ((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()
+                .get(0)).getId();
+        assertThat(artResult.getArtifactId()).isEqualTo(artId);
+        assertThat(JsonPath.compile("$_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
+        assertThat(
+                JsonPath.compile("$_links.download.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId
+                                + "/download");
+
+        // check result in db...
+        // repo
+        assertThat(artifactRepository.findAll()).hasSize(1);
+
+        // binary
+        assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random),
+                artifactManagement
+                        .loadLocalArtifactBinary((LocalArtifact) softwareManagement
+                                .findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
+                .getFileInputStream()));
+
+        // hashes
+        assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getSha1Hash())
+                .isEqualTo(HashGeneratorUtils.generateSHA1(random));
+
+        assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getMd5Hash())
+                .isEqualTo(HashGeneratorUtils.generateMD5(random));
+
+        // metadata
+        assertThat(((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
+                .getFilename()).isEqualTo("origFilename");
+
+    }
+
+    @Test
+    public void testEmptyUploadArtifact() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final MockMultipartFile file = new MockMultipartFile("file", "orig", null, new byte[0]);
+
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testDuplicateUploadArtifact() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final String md5sum = HashGeneratorUtils.generateMD5(random);
+        final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+        final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
+
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$hashes.md5", equalTo(md5sum)))
+                .andExpect(jsonPath("$hashes.sha1", equalTo(sha1sum)))
+                .andExpect(jsonPath("$providedFilename", equalTo("orig"))).andExpect(status().isCreated());
+
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isConflict());
+    }
+
+    @Test
+    public void testUploadArtifactWithCustomName() throws Exception {
+        // prepare repo
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        // create test file
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+
+        // upload
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .param("filename", "customFilename").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$providedFilename", equalTo("customFilename"))).andExpect(status().isCreated());
+        ;
+
+        // check result in db...
+        // repo
+        assertThat(artifactRepository.findAll()).hasSize(1);
+
+        // hashes
+        assertThat(artifactManagement.findLocalArtifactByFilename("customFilename")).hasSize(1);
+    }
+
+    @Test
+    public void testUploadArtifactWithHashCheck() throws Exception {
+        // prepare repo
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        // create test file
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final String md5sum = HashGeneratorUtils.generateMD5(random);
+        final String sha1sum = HashGeneratorUtils.generateSHA1(random);
+        final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
+
+        // upload
+        // wrong sha1
+        MvcResult mvcResult = mvc
+                .perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                        .param("md5sum", md5sum).param("sha1sum", "afsdff"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
+
+        // check error result
+        ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH.getKey());
+
+        // wrong md5
+        mvcResult = mvc
+                .perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                        .param("md5sum", "sdfsdfs").param("sha1sum", sha1sum))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
+
+        // check error result
+        exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH.getKey());
+
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                .param("md5sum", md5sum).param("sha1sum", sha1sum)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated());
+
+        // check result...
+        // repo
+        assertThat(artifactRepository.findAll()).hasSize(1);
+
+        // binary
+        assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random),
+                artifactManagement
+                        .loadLocalArtifactBinary((LocalArtifact) softwareManagement
+                                .findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
+                .getFileInputStream()));
+
+        // hashes
+        assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getSha1Hash())
+                .isEqualTo(HashGeneratorUtils.generateSHA1(random));
+
+        assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getMd5Hash())
+                .isEqualTo(md5sum);
+
+        // metadata
+        assertThat(((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
+                .getFilename()).isEqualTo("origFilename");
+
+    }
+
+    /**
+     * Test method for
+     * {@link org.eclipse.hawkbit.rest.resource.SoftwareModuleResource#downloadArtifact(java.lang.Long, javax.servlet.http.HttpServletResponse)}
+     * .
+     * 
+     * @throws Exception
+     *             if test fails
+     */
+    @Test
+    public void testDownloadArtifact() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
+        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+                "file1", false);
+        final Artifact artifact2 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+                "file2", false);
+
+        final MvcResult result = mvc
+                .perform(
+                        get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact.getId()))
+                .andExpect(header().string("ETag", artifact.getSha1Hash())).andReturn();
+
+        assertTrue(Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+
+        final MvcResult result2 = mvc.perform(
+                get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact2.getId()))
+                .andExpect(header().string("ETag", artifact2.getSha1Hash())).andReturn();
+
+        assertTrue(Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
+        assertThat(artifactRepository.findAll()).hasSize(2);
+    }
+
+    @Test
+    public void testGetArtifact() throws Exception {
+        // check baseline
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+        assertThat(artifactRepository.findAll()).hasSize(0);
+
+        // prepare data for test
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+                "file1", false);
+
+        // perform test
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$id", equalTo(artifact.getId().intValue())))
+                .andExpect(jsonPath("$type", equalTo("local"))).andExpect(jsonPath("$size", equalTo(random.length)))
+                .andExpect(jsonPath("$hashes.md5", equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$providedFilename", equalTo("file1")))
+                .andExpect(jsonPath("$_links.download.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
+                                + artifact.getId() + "/download")))
+                .andExpect(jsonPath("$_links.self.href", equalTo(
+                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact.getId())));
+    }
+
+    @Test
+    public void testGetArtifacts() throws Exception {
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
+        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+                "file1", false);
+        final Artifact artifact2 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+                "file2", false);
+
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id", equalTo(artifact.getId().intValue())))
+                .andExpect(jsonPath("$[0].type", equalTo("local")))
+                .andExpect(jsonPath("$[0].size", equalTo(random.length)))
+                .andExpect(jsonPath("$[0].hashes.md5", equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$[0].providedFilename", equalTo("file1")))
+                .andExpect(jsonPath("$[0]._links.download.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
+                                + artifact.getId() + "/download")))
+                .andExpect(jsonPath("$[0]._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
+                                + artifact.getId())))
+                .andExpect(jsonPath("$[1].id", equalTo(artifact2.getId().intValue())))
+                .andExpect(jsonPath("$[1].type", equalTo("local")))
+                .andExpect(jsonPath("$[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
+                .andExpect(jsonPath("$[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
+                .andExpect(jsonPath("$[1].providedFilename", equalTo("file2")))
+                .andExpect(jsonPath("$[1]._links.download.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
+                                + artifact2.getId() + "/download")))
+                .andExpect(jsonPath("$[1]._links.self.href", equalTo(
+                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact2.getId())));
+    }
+
+    @Test
+    public void testInvalidRequestsOnArtifactResource() throws Exception {
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+        final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
+
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        // no artifact available
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/1234567/download", sm.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/1234567", sm.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        // SM does not exist
+        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        mvc.perform(get("/rest/v1/softwaremodules/1234567890/artifacts")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/1234567890/artifacts").file(file))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        // bad request - no content
+        mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+        // not allowed methods
+        mvc.perform(put("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
+
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void testInvalidRequestsOnSoftwaremodulesResource() throws Exception {
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final List<SoftwareModule> modules = new ArrayList<>();
+        modules.add(sm);
+
+        // SM does not exist
+        mvc.perform(get("/rest/v1/softwaremodules/12345678")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        mvc.perform(delete("/rest/v1/softwaremodules/12345678")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        // bad request - no content
+        mvc.perform(post("/rest/v1/softwaremodules").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+
+        // bad request - bad content
+        mvc.perform(post("/rest/v1/softwaremodules").content("sdfjsdlkjfskdjf".getBytes())
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        // unsupported media type
+        mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(modules))
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isUnsupportedMediaType());
+
+        // not allowed methods
+        mvc.perform(put("/rest/v1/softwaremodules")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
+
+        mvc.perform(delete("/rest/v1/softwaremodules")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
+
+    }
+
+    @Test
+    public void testGetSoftwareModulesWithoutAddtionalRequestParameters() throws Exception {
+        final int modules = 5;
+        createSoftwareModulesAlphabetical(modules);
+        mvc.perform(get(RestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(modules)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(modules)));
+    }
+
+    @Test
+    public void testGetSoftwareModulesWithPagingLimitRequestParameter() throws Exception {
+        final int modules = 5;
+        final int limitSize = 1;
+        createSoftwareModulesAlphabetical(modules);
+        mvc.perform(get(RestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
+                .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)));
+    }
+
+    @Test
+    public void testGetSoftwareModulesWithPagingLimitAndOffsetRequestParameter() throws Exception {
+        final int modules = 5;
+        final int offsetParam = 2;
+        final int expectedSize = modules - offsetParam;
+        createSoftwareModulesAlphabetical(modules);
+        mvc.perform(get(RestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
+                .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
+                .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(modules)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    public void testGetSoftwareModules() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+
+        SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
+        os = softwareManagement.createSoftwareModule(os);
+
+        SoftwareModule jvm = new SoftwareModule(runtimeType, "name1", "version1", "description1", "vendor1");
+        jvm = softwareManagement.createSoftwareModule(jvm);
+
+        SoftwareModule ah = new SoftwareModule(appType, "name1", "version1", "description1", "vendor1");
+        ah = softwareManagement.createSoftwareModule(ah);
+
+        mvc.perform(get("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].name", equalTo("name1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].version", equalTo("version1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].type", equalTo("os")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0].createdAt", equalTo(os.getCreatedAt())))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.type.href",
+                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + os.getId() + ")][0]._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].name", equalTo("name1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].version", equalTo("version1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].type", equalTo("runtime")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].createdBy", equalTo("uploadTester")))
+                .andExpect(
+                        jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0].createdAt", equalTo(jvm.getCreatedAt())))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.type.href",
+                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm.getId() + ")][0]._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].name", equalTo("name1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].version", equalTo("version1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].type", equalTo("application")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0].createdAt", equalTo(ah.getCreatedAt())))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.type.href",
+                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId())));
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+    }
+
+    @Test
+    public void testGetSoftwareModulesWithFilterParameters() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+
+        SoftwareModule os1 = new SoftwareModule(osType, "osName1", "1.0.0", "description1", "vendor1");
+        os1 = softwareManagement.createSoftwareModule(os1);
+
+        SoftwareModule jvm1 = new SoftwareModule(runtimeType, "runtimeName1", "2.0.0", "description1", "vendor1");
+        jvm1 = softwareManagement.createSoftwareModule(jvm1);
+
+        SoftwareModule ah1 = new SoftwareModule(appType, "appName1", "3.0.0", "description1", "vendor1");
+        ah1 = softwareManagement.createSoftwareModule(ah1);
+
+        SoftwareModule os2 = new SoftwareModule(osType, "osName2", "1.0.1", "description2", "vendor2");
+        os2 = softwareManagement.createSoftwareModule(os2);
+
+        SoftwareModule jvm2 = new SoftwareModule(runtimeType, "runtimeName2", "2.0.1", "description2", "vendor2");
+        jvm2 = softwareManagement.createSoftwareModule(jvm2);
+
+        SoftwareModule ah2 = new SoftwareModule(appType, "appName2", "3.0.1", "description2", "vendor2");
+        ah2 = softwareManagement.createSoftwareModule(ah2);
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(6);
+
+        // only by name, only one exists per name
+        mvc.perform(get("/rest/v1/softwaremodules?q=name==osName1").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].name", equalTo("osName1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].version", equalTo("1.0.0")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + os1.getId() + ")][0].type", equalTo("os")))
+                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)));
+
+        // by type, 2 software modules per type exists
+        mvc.perform(get("/rest/v1/softwaremodules?q=type==application").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].name", equalTo("appName1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].version", equalTo("3.0.0")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah1.getId() + ")][0].type", equalTo("application")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].name", equalTo("appName2")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].version", equalTo("3.0.1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].description", equalTo("description2")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].vendor", equalTo("vendor2")))
+                .andExpect(jsonPath("$content.[?(@.id==" + ah2.getId() + ")][0].type", equalTo("application")))
+                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+
+        // by type and version=2.0.0 -> only one result
+        mvc.perform(get("/rest/v1/softwaremodules?q=type==runtime;version==2.0.0").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].name", equalTo("runtimeName1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].version", equalTo("2.0.0")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)));
+
+        // by type and version range >=2.0.0 -> 2 result
+        mvc.perform(get("/rest/v1/softwaremodules?q=type==runtime;version=ge=2.0.0").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].name", equalTo("runtimeName1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].version", equalTo("2.0.0")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].description", equalTo("description1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm1.getId() + ")][0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].name", equalTo("runtimeName2")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].version", equalTo("2.0.1")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].description", equalTo("description2")))
+                .andExpect(jsonPath("$content.[?(@.id==" + jvm2.getId() + ")][0].vendor", equalTo("vendor2")))
+                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+    }
+
+    @Test
+    public void testGetSoftwareModulesWithSyntaxErrorFilterParameter() throws Exception {
+        mvc.perform(get("/rest/v1/softwaremodules?q=wrongFIQLSyntax").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")));
+    }
+
+    @Test
+    public void testGetSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
+        mvc.perform(get("/rest/v1/softwaremodules?q=wrongField==abc").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$errorCode", equalTo("hawkbit.server.error.rest.param.rsqlInvalidField")));
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Tests GET request on /rest/v1/softwaremodules/{smId}.")
+    public void getSoftareModule() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+
+        SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
+        os = softwareManagement.createSoftwareModule(os);
+
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}", os.getId()).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$name", equalTo("name1"))).andExpect(jsonPath("$version", equalTo("version1")))
+                .andExpect(jsonPath("$description", equalTo("description1")))
+                .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("os")))
+                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$createdAt", equalTo(os.getCreatedAt())))
+                .andExpect(jsonPath("$_links.type.href",
+                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + osType.getId())))
+                .andExpect(jsonPath("$_links.artifacts.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")));
+
+        SoftwareModule jvm = new SoftwareModule(runtimeType, "name1", "version1", "description1", "vendor1");
+        jvm = softwareManagement.createSoftwareModule(jvm);
+
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}", jvm.getId()).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$name", equalTo("name1"))).andExpect(jsonPath("$version", equalTo("version1")))
+                .andExpect(jsonPath("$description", equalTo("description1")))
+                .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("runtime")))
+                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$createdAt", equalTo(jvm.getCreatedAt())))
+                .andExpect(jsonPath("$_links.type.href",
+                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + runtimeType.getId())))
+                .andExpect(jsonPath("$_links.artifacts.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")));
+
+        SoftwareModule ah = new SoftwareModule(appType, "name1", "version1", "description1", "vendor1");
+        ah = softwareManagement.createSoftwareModule(ah);
+
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}", ah.getId()).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$name", equalTo("name1"))).andExpect(jsonPath("$version", equalTo("version1")))
+                .andExpect(jsonPath("$description", equalTo("description1")))
+                .andExpect(jsonPath("$vendor", equalTo("vendor1"))).andExpect(jsonPath("$type", equalTo("application")))
+                .andExpect(jsonPath("$createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$createdAt", equalTo(ah.getCreatedAt())))
+                .andExpect(jsonPath("$_links.type.href",
+                        equalTo("http://localhost/rest/v1/softwaremoduletypes/" + appType.getId())))
+                .andExpect(jsonPath("$_links.artifacts.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")));
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    public void createSoftwareModules() throws JSONException, Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
+
+        final SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
+        final SoftwareModule jvm = new SoftwareModule(runtimeType, "name2", "version1", "description1", "vendor1");
+        final SoftwareModule ah = new SoftwareModule(appType, "name3", "version1", "description1", "vendor1");
+
+        final List<SoftwareModule> modules = new ArrayList<>();
+        modules.add(os);
+        modules.add(jvm);
+        modules.add(ah);
+
+        final long current = System.currentTimeMillis();
+
+        final MvcResult mvcResult = mvc
+                .perform(post("/rest/v1/softwaremodules/").content(JsonBuilder.softwareModules(modules))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("[0].name", equalTo("name1")))
+                .andExpect(jsonPath("[0].version", equalTo("version1")))
+                .andExpect(jsonPath("[0].description", equalTo("description1")))
+                .andExpect(jsonPath("[0].vendor", equalTo("vendor1"))).andExpect(jsonPath("[0].type", equalTo("os")))
+                .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[1].name", equalTo("name2")))
+                .andExpect(jsonPath("[1].version", equalTo("version1")))
+                .andExpect(jsonPath("[1].description", equalTo("description1")))
+                .andExpect(jsonPath("[1].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("[1].type", equalTo("runtime")))
+                .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2].name", equalTo("name3")))
+                .andExpect(jsonPath("[2].version", equalTo("version1")))
+                .andExpect(jsonPath("[2].description", equalTo("description1")))
+                .andExpect(jsonPath("[2].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("[2].type", equalTo("application")))
+                .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2].createdAt", not(equalTo(0)))).andReturn();
+
+        final SoftwareModule osCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name1", "version1")
+                .get(0);
+        final SoftwareModule jvmCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name2", "version1")
+                .get(0);
+        final SoftwareModule ahCreated = softwareManagement.findSoftwareModuleByNameAndVersion("name3", "version1")
+                .get(0);
+
+        assertThat(
+                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
+        assertThat(JsonPath.compile("[0]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
+                .toString()).isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId() + "/artifacts");
+
+        assertThat(
+                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId());
+        assertThat(JsonPath.compile("[1]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
+                .toString()).isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId() + "/artifacts");
+
+        assertThat(
+                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId());
+        assertThat(JsonPath.compile("[2]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
+                .toString()).isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId() + "/artifacts");
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent().get(0).getName())
+                .isEqualTo(os.getName());
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent().get(0).getCreatedBy())
+                .isEqualTo("uploadTester");
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent().get(0).getCreatedAt())
+                .isGreaterThanOrEqualTo(current);
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, runtimeType).getContent().get(0).getName())
+                .isEqualTo(jvm.getName());
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, appType).getContent().get(0).getName())
+                .isEqualTo(ah.getName());
+    }
+
+    @Test
+    public void deleteUnassignedSoftwareModule() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
+        assertThat(artifactRepository.findAll()).isEmpty();
+
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
+        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
+                "file1", false);
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
+        assertThat(artifactRepository.findAll()).hasSize(1);
+        assertThat(softwareModuleRepository.findAll()).hasSize(1);
+
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
+        assertThat(softwareModuleRepository.findAll()).isEmpty();
+        assertThat(artifactRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    public void deleteAssignedSoftwareModule() throws Exception {
+        // check baseline
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
+        assertThat(artifactRepository.findAll()).isEmpty();
+
+        final DistributionSet ds1 = TestDataUtil.generateDistributionSet("a", softwareManagement,
+                distributionSetManagement);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
+        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+                ds1.findFirstModuleByType(appType).getId(), "file1", false);
+
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+        assertThat(artifactRepository.findAll()).hasSize(1);
+        assertThat(softwareModuleRepository.findAll()).hasSize(3);
+
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(runtimeType).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(osType).getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        // all 3 are now marked as deleted
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq).getNumber()).isEqualTo(0);
+        assertThat(softwareModuleRepository.findAll()).hasSize(3);
+        assertThat(artifactRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    public void testDeleteArtifact() throws Exception {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
+        assertThat(artifactRepository.findAll()).isEmpty();
+
+        // Create 1 SM
+        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        sm = softwareManagement.createSoftwareModule(sm);
+
+        final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
+
+        // Create 2 artifacts
+        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+                sm.getId(), "file1", false);
+        final LocalArtifact artifact2 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+                sm.getId(), "file2", false);
+
+        // check repo before delete
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
+
+        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()).hasSize(2);
+        assertThat(artifactRepository.findAll()).hasSize(2);
+
+        // delete
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        // check that only one artifact is still alive and still assigned
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
+        assertThat(artifactRepository.findAll()).hasSize(1);
+        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()).hasSize(1);
+
+    }
+
+    @Test
+    public void createMetadata() throws Exception {
+
+        final String knownKey1 = "knownKey1";
+        final String knownValue1 = "knownValue1";
+        final String knownKey2 = "knownKey1";
+        final String knownValue2 = "knownValue1";
+
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "name 1", "version 1", null, null));
+
+        final JSONArray jsonArray = new JSONArray();
+        jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
+        jsonArray.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
+
+        mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).contentType(MediaType.APPLICATION_JSON)
+                .content(jsonArray.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
+                .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
+                .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
+
+        final SoftwareModuleMetadata metaKey1 = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey1));
+        final SoftwareModuleMetadata metaKey2 = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey2));
+
+        assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
+        assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+    }
+
+    @Test
+    public void updateMetadata() throws Exception {
+        // prepare and create metadata for update
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+        final String updateValue = "valueForUpdate";
+
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "name 1", "version 1", null, null));
+        softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey, sm, knownValue));
+
+        final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
+
+        mvc.perform(put("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey)
+                .contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
+
+        final SoftwareModuleMetadata assertDS = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey));
+        assertThat(assertDS.getValue()).isEqualTo(updateValue);
+    }
+
+    @Test
+    public void deleteMetadata() throws Exception {
+        // prepare and create metadata for deletion
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "name 1", "version 1", null, null));
+        softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey, sm, knownValue));
+
+        mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        try {
+            softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey));
+            fail("expected EntityNotFoundException but didn't throw");
+        } catch (final EntityNotFoundException e) {
+            // ok as expected
+        }
+    }
+
+    @Test
+    public void searchSoftwareModuleMetadataRsql() throws Exception {
+        final int totalMetadata = 10;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final SoftwareModule sm = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "name 1", "version 1", null, null));
+
+        for (int index = 0; index < totalMetadata; index++) {
+            softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKeyPrefix + index,
+                    softwareManagement.findSoftwareModuleById(sm.getId()), knownValuePrefix + index));
+        }
+
+        final String rsqlSearchValue1 = "value==knownValue1";
+
+        mvc.perform(get("/rest/v1/softwaremodules/{swId}/metadata?q=" + rsqlSearchValue1, sm.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
+                .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
+    }
+
+    private void createSoftwareModulesAlphabetical(final int amount) {
+        char character = 'a';
+        for (int index = 0; index < amount; index++) {
+            final String str = String.valueOf(character);
+            final SoftwareModule softwareModule = new SoftwareModule(osType, str, str, str, str);
+
+            softwareManagement.createSoftwareModule(softwareModule);
+            character++;
+        }
+    }
+}

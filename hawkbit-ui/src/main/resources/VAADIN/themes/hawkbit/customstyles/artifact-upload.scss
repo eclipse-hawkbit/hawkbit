@@ -1,0 +1,115 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+
+@mixin upload-status-info-grid {
+  .upload-status-grid {
+    .v-grid-header th {
+      border-left: 1px solid $widget-border-color !important;
+    }
+
+    .v-grid-cell {
+      border: none !important;
+      cursor: move;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      -o-text-overflow: ellipsis;
+      -icab-text-overflow: ellipsis;
+      -khtml-text-overflow: ellipsis;
+      -moz-text-overflow: ellipsis;
+      -webkit-text-overflow: ellipsis;
+      font-size: $v-font-size--small !important;
+      box-shadow: none !important;
+    }
+
+    .v-grid-tablewrapper {
+      border-radius: 4px;
+    }
+  }
+}
+
+@mixin artifact-upload {
+  @include upload-status-info-grid;
+
+  //Upload status window style
+  .upload-info {
+    background: $widget-bg;
+
+    .v-window-header {
+      text-align: left;
+    }
+  }
+
+  //Footer buttons margins are adjusted in Upload confirmation popup and result popup
+  .confirmation-window-footer {
+    margin: 10px 0;
+  }
+
+  //Upload details pop-up - Style of error status displayed when upload validation fails
+  .validation-failed {
+    color: $red-color;
+  }
+
+  //Upload details pop up - Style of success status displayed after successful upload validation
+  .validation-success {
+    color: $signal-green-color;
+  }
+
+  .artifact-table {
+    //To avoid horizontal scroll bar in table
+    .v-table-body-wrapper.v-table-body > div:nth-child(1) > table > tbody td:last-child > div {
+      width: inherit !important;
+    }
+  }
+
+  //Upload drop area style
+  .upload-drop-area-layout-info {
+    // take care of updating maring-top in 'drop-icon' style when you change height of upload files drop area.
+    height: 178px !important;
+    border-radius: $v-border-radius;
+    border: 3px dashed $light-grey;
+    font-weight: 400;
+    background-color: $widget-bg;
+    line-height: 1;
+    text-align: center;
+  }
+
+  //Upload drop layout - Drop icon style
+  .drop-icon {
+    color: $light-grey;
+    font-size: 40px;
+    // drop down arrow icon not able to display with center alignment.
+    // Hence provide margin-top so that it appear at center.
+    margin-top: 45px;
+  }
+
+  //Upload confirmation popup and upload result popup style
+  .confirmation-popup {
+    border: 1px solid $grey-light;
+    border-radius: 4px;
+    margin-top: 5px;
+
+    // Text field for name,Md5 checksum,SHA1 checksum
+    .v-textfield {
+      width: 200px;
+    }
+  }
+
+  //Upload confirmation popup - Style of warning label displayed after file name validation
+  .warningLabel {
+    color: $grey-color;
+    padding-left: 8px;
+  }
+
+  //Upload confirmation popup - Style of error label displayed after file name validation
+  .redErrorLabel {
+    color: $red-color !important;
+  }
+}

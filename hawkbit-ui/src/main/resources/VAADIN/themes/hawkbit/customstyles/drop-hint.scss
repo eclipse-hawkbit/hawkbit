@@ -1,0 +1,44 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+@mixin drop-hint {
+
+  //Distribution tag table -Drop hint - Dashed border displayed
+  .show-filter-drop-hint {
+    border: 1px dashed $hawkbit-primary-color !important;
+  }
+
+  //Style to display drop hint on tables
+  .show-table-drop-hint {
+    .v-table-body {
+      border-style: dashed !important;
+      border-width: 1px !important;
+      border-color: $hawkbit-primary-color !important;
+    }
+  }
+
+  //Style for target table header drop hint
+  .show-table-header-drop-hint {
+    .filter-drop-hint-layout {
+      border-style: dashed;
+      border-width: 1px;
+      border-color: $hawkbit-primary-color;
+    }
+  }
+
+  //Border for delete button wrapper.Which will be displayed when deletable components are dragged
+  .delete-button-border {
+    border: 1px dashed transparent;
+  }
+
+  //Target table header - distribution filter text field style
+  .v-slot-filter-drop-hint-layout {
+    line-height: 21px;
+  }
+}

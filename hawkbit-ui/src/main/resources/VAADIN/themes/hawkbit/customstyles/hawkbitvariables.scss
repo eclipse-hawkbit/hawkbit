@@ -1,0 +1,129 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+//Standard colors
+$hawkbit-primary-color: #551f62;
+$hawkbit-primary-color-light: #551f62;
+
+//Application text font size.All widget text style are computed based on this
+$app-text-font-size: 16px;
+
+//Base font family for all text in the theme
+$app-font-family: "Open Sans", sans-serif;
+
+//Background color of the application.Used for calculating other component background colors
+$app-background-color: #fafafa;
+
+//Font color for individual selection overlay list items
+$app-selection-item-selection-color: #551f62;
+
+//Color of the focus outline/border for focusable elements
+$app-focus-color: #551f62;
+
+//Color for any selection highlights in the application
+$app-selection-color: #551f62;
+
+//Tag button caption color
+$tag-text-color: #551f62;
+
+//Tabsheet tab caption color
+$tab-sheet-caption-color: #551f62;
+
+//Table details widget text color
+$table-details-tab-font-color: #551f62;
+
+//All widgets background
+$widget-bg: #fff;
+
+//Widget border color
+$widget-border-color: #d4d4d4;
+
+//Widget header caption color
+$widget-caption-color: #551f62;
+
+//Text color of menu items and links in menu
+$menu-text-color: #a5a5a5;
+
+//Menu background color
+$valo-menu-background-color: #4b4b4b;
+
+//Size of menu icon when icon is displayed with menu description
+$menu-with-description-font-icon-size: 14px;
+
+//Menu title background color
+$menu-title-bg-color: #551f62;
+
+//Color of icons like add ,config,search etc
+$button-icon-color: #551f62;
+
+//Footer button background color
+$footer-button-background-color: #fff;
+
+//Color of assigned distribution,when target is selected
+$installed-row-color: $lighter-orange-color;
+
+//Color of installed distribution,when target is selected
+$assigned-row-color:  $dark-green-color;
+
+// Background color of accordion caption in confirmation popup
+$accordion-action-history-title-color: #551f62;
+
+//Success icon color on valid target filter query
+$success-icon-color: #ff0000;
+
+//Error icon color on invalid target filter query 
+$error-icon-color: #008000;
+
+
+//Font style of view caption
+$view-caption-font-style: 400 1.6em "Open Sans", sans-serif;
+
+//Footer button width scale
+$action-button-width-scale: 3;
+
+//Footer button height scale
+$action-button-height-scale:1.2;
+
+//Delete button width scale
+$delete-action-button-width-scale:4.8;
+
+//Detail tab - font scale
+$details-tab-font-scale: 1;
+
+//Detail tab caption - font scale
+$details-tab-caption-font-scale: .8;
+
+//Generic text style
+$generic-text-font-scale: .85;
+
+$status-unknown-color: #3085cb;
+$signal-green-color: #6eb553;
+$signal-yellow-color: #ff0;
+$signal-red-color: #f00;
+$signal-orange-color: #ffa500;
+
+$grey-light: #d5d5d5;
+$black-color: #000;
+$grey-color: #808080;
+$red-color: #f00;
+$green-color: #6eb553;
+$blue-color: #3085cb;
+
+$dark-green-color: #3dbc1a;
+$lighter-green-color: #00923a;
+$lighter-orange-color: #fe902a;
+$lighter-grey-color: #dbd7b6;
+$light-grey: #ccc;
+
+$info-message-color-grey: #b8b8b8;
+$discard-icon-color: #f7171f;
+$disabled-row-color-grey: #c8c8c8;
+$white-hex-color: #fff;
+$tag-border-green-color: #2c9720;
+$tag-button-disabled-grey:#c0c0c0;
+$twin-table-border-grey:#888;

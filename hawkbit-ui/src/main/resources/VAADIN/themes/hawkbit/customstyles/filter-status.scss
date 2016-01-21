@@ -1,0 +1,101 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+// scss-lint:disable ImportantRule, PropertySortOrder
+@mixin filter-status {
+
+  //Target status filter button colors
+  $unknown-color: $status-unknown-color;
+  $in-sync-color: $signal-green-color;
+  $pending-color: $signal-yellow-color;
+  $error-color: $signal-red-color;
+  $registered-color: $bosch-color-light-blue;
+
+  //Filter by status buttons group alignment
+  .target-status-filters {
+    @include space-btwn-tag-buttons;
+    margin-top: 6px;
+    overflow: auto !important;
+    border-top: 1px solid $widget-border-color;
+  }
+
+  .status-button-layout {
+    height: 40px !important;
+  }
+
+  //Filter Button applied with below styles based on the color
+  .unknownBtn {
+    background: $unknown-color;
+    border: solid 3px $unknown-color;
+  }
+
+  .unknownBtn:focus:after,
+  .unknownBtn:active:after {
+    border-color: $unknown-color;
+  }
+
+  .inSynchBtn {
+    background: $in-sync-color;
+    border: solid 3px $in-sync-color;
+  }
+
+  .inSynchBtn:focus:after,
+  .inSynchBtn:active:after {
+    border-color: $in-sync-color;
+  }
+
+  .pendingBtn {
+    background: $pending-color;
+    border: solid 3px $pending-color;
+  }
+
+  .pendingBtn:focus:after,
+  .pendingBtn:active:after {
+    border-color: $pending-color;
+  }
+
+  .errorBtn {
+    background: $error-color;
+    border: solid 3px $error-color;
+  }
+
+  .errorBtn:focus:after,
+  .errorBtn:active:after {
+    border-color: $error-color;
+  }
+
+  .registeredBtn {
+    background: $registered-color;
+    border: solid 3px $registered-color;
+  }
+
+  .registeredBtn:focus:after,
+  .registeredBtn:active:after {
+    border-color: $registered-color;
+  }
+
+  .btnClicked {
+    background: #ffffff;
+  }
+
+  //Generic style applied to all target status filter buttons
+  .targetStatusBtn {
+    width: 21px !important;
+    height: 21px !important;
+    box-shadow: 0;
+    color: transparent;
+    margin: 2px;
+    transition: background-color .5s ease;
+  }
+
+  .targetStatusBtn:focus:after,
+  .targetStatusBtn:active:after {
+    background-image: none;
+    box-shadow: none !important;
+  }
+}

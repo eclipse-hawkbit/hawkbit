@@ -1,0 +1,81 @@
+<!--
+
+    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.hawkbit</groupId>
+      <artifactId>hawkbit-parent</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+   </parent>
+   <artifactId>hawkbit-autoconfigure</artifactId>
+   <name>hawkBit :: Spring Boot Autoconfigure</name>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-core</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-cache-redis</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-dmf-amqp</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-ui</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-http-security</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-security-core</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-rest-resource</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>io.springfox</groupId>
+         <artifactId>springfox-swagger2</artifactId>
+         <optional>true</optional>
+      </dependency>
+        <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-context-support</artifactId>
+      </dependency>
+   </dependencies>
+</project>
