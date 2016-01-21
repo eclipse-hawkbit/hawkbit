@@ -1,8 +1,7 @@
 # hawkbit-update-server
-Build Status: [![Circle CI](https://circleci.com/gh/bsinno/hawkbit-update-server/tree/master.svg?style=svg&circle-token=507140469c35791e36af04f5b8816ec79be4c82c)](https://circleci.com/gh/bsinno/hawkbit-update-server/tree/master)
 
 [hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
- 
+
 
 # Compile
 ```
