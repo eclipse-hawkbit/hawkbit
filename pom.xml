@@ -49,18 +49,6 @@
       <url>https://github.com/eclipse/hawkbit.git</url>
    </scm>
 
-   <distributionManagement>
-         <snapshotRepository>
-            <id>sp-snapshots</id>
-            <uniqueVersion>false</uniqueVersion>
-            <url>https://repo.bosch-si.com/content/repositories/sp-snapshots</url>
-         </snapshotRepository>
-         <repository>
-            <id>sp-releases</id>
-            <url>https://repo.bosch-si.com/content/repositories/sp-releases</url>
-         </repository>
-      </distributionManagement>
-
    <repositories>
       <repository>
          <id>vaadin-addons</id>
