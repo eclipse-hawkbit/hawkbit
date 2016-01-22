@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -130,9 +132,33 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setId(rollout.getId());
             proxyRollout.setStatus(rollout.getStatus());
 
+            final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement.getRolloutDetailedStatus(rollout
+                    .getId());
+            proxyRollout.setRunningTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+                    RolloutTargetStatus.RUNNING));
+            proxyRollout.setErrorTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.ERROR));
+            proxyRollout.setCancelledTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+                    RolloutTargetStatus.CANCELLED));
+            proxyRollout.setFinishedTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+                    RolloutTargetStatus.FINISHED));
+            proxyRollout.setScheduledTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+                    RolloutTargetStatus.READY));
+            if (rolloutTargetsStatus.getStatusCountDetails().containsKey(
+                    RolloutTargetsStatusCount.RolloutTargetStatus.NOTSTARTED)) {
+                proxyRollout.setNotStartedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                        RolloutTargetStatus.NOTSTARTED));
+            }
             proxyRolloutList.add(proxyRollout);
         }
         return proxyRolloutList;
+    }
+
+    private Long getTargetsCountInStatus(final RolloutTargetsStatusCount rolloutTargetsStatus,
+            final RolloutTargetStatus status) {
+        if (rolloutTargetsStatus.getStatusCountDetails().containsKey(status)) {
+            return rolloutTargetsStatus.getStatusCountDetails().get(status);
+        }
+        return 0L;
     }
 
     /*

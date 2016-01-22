@@ -10,21 +10,19 @@ package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -104,6 +102,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             refreshTable();
         }
     }
+
     /**
      * EventListener method which is called when a list of events is published.
      * Event types should not be mixed up.
@@ -328,10 +327,42 @@ public class RolloutListTable extends AbstractSimpleTable {
         final DistributionBar bar = new DistributionBar(2);
         bar.setSizeFull();
         bar.setZeroSizedVisible(false);
-        final int i = 0;
-        final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement
-                .getRolloutDetailedStatus((Long) itemId);
-        return HawkbitCommonUtil.getRolloutProgressBar(bar, i, rolloutTargetsStatus);
+        final Item item = getItem(itemId);
+        final Long notStartedTargetsCount = getStatusCount("notStartedTargetsCount", item);
+        if (notStartedTargetsCount != null && notStartedTargetsCount == 0) {
+            setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(), 0, 0);
+            setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(), 0, 1);
+
+        } else {
+            bar.setNumberOfParts(6);
+            if (notStartedTargetsCount != null) {
+                setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(),
+                        notStartedTargetsCount.intValue(), 0);
+            } else {
+                setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(), 0, 0);
+            }
+            setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(),
+                    getStatusCount("scheduledTargetsCount", item).intValue(), 1);
+            setBarPartSize(bar, RolloutTargetStatus.RUNNING.toString().toLowerCase(),
+                    getStatusCount("runningTargetsCount", item).intValue(), 2);
+            setBarPartSize(bar, RolloutTargetStatus.ERROR.toString().toLowerCase(),
+                    getStatusCount("errorTargetsCount", item).intValue(), 3);
+            setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(),
+                    getStatusCount("finishedTargetsCount", item).intValue(), 4);
+            setBarPartSize(bar, RolloutTargetStatus.CANCELLED.toString().toLowerCase(),
+                    getStatusCount("cancelledTargetsCount", item).intValue(), 5);
+        }
+        return bar;
+    }
+
+    private Long getStatusCount(final String propertName, final Item item) {
+        return (Long) item.getItemProperty(propertName).getValue();
+    }
+
+    private void setBarPartSize(final DistributionBar bar, final String statusName, final int count, final int index) {
+        bar.setPartSize(index, count);
+        bar.setPartTooltip(index, statusName);
+        bar.setPartStyleName(index, "status-bar-part-" + statusName);
     }
 
     private Button getDeleteButton(final Object itemId) {
@@ -368,6 +399,7 @@ public class RolloutListTable extends AbstractSimpleTable {
         addPropertyChangeListener(itemId, statusLabel);
         return statusLabel;
     }
+
     private void addPropertyChangeListener(final Object itemId, final Label statusLabel) {
         final Property status = getContainerProperty(itemId, SPUILabelDefinitions.VAR_STATUS);
         final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
@@ -378,6 +410,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             }
         });
     }
+
     private String getRolloutStatusId(final Object itemId) {
         final String rolloutName = (String) getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         return new StringBuilder(SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID).append(".").append(rolloutName)
@@ -430,6 +463,7 @@ public class RolloutListTable extends AbstractSimpleTable {
         }
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
+
     private void onRolloutStatusChange(final List<RolloutStatusUpdateEvent> rolloutEvents) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         for (final RolloutStatusUpdateEvent rolloutStatusUpdateEvent : rolloutEvents) {
@@ -445,7 +479,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         final Item item = rolloutContainer.getItem(rollout.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
     }
-
 
     private void refreshTable() {
         final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();
