@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.rest.resource;
+package org.eclipse.hawkbit.repository.rsql;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -31,9 +31,6 @@ import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.rsql.RSQLParameterSyntaxException;
-import org.eclipse.hawkbit.repository.rsql.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -43,7 +40,7 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @RunWith(MockitoJUnitRunner.class)
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - RSQL filtering")
 @Stories("RSQL search utility")
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
