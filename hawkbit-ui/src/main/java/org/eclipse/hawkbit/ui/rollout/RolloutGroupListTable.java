@@ -14,8 +14,10 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.RolloutGroupStatusUpdateEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -38,6 +40,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -84,6 +87,37 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         if (event == RolloutEvent.SHOW_ROLLOUT_GROUPS) {
             ((LazyQueryContainer) getContainerDataSource()).refresh();
         }
+    }
+
+    /**
+     * EventListener method which is called when a list of events is published.
+     * Event types should not be mixed up.
+     *
+     * @param events
+     *            list of events
+     */
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public void onEvents(final List<?> events) {
+        final Object firstEvent = events.get(0);
+        if (RolloutGroupStatusUpdateEvent.class.isInstance(firstEvent)) {
+            onRolloutGroupStatusChange((List<RolloutGroupStatusUpdateEvent>) events);
+        }
+    }
+
+    private void onRolloutGroupStatusChange(final List<RolloutGroupStatusUpdateEvent> events) {
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        for (final RolloutGroupStatusUpdateEvent rolloutGroupStatusUpdateEvent : events) {
+            final RolloutGroup rolloutGroup = rolloutGroupStatusUpdateEvent.getEntity();
+            if (visibleItemIds.contains(rolloutGroup.getId())) {
+                updateVisibleItemOnEvent(rolloutGroup);
+            }
+        }
+    }
+
+    private void updateVisibleItemOnEvent(final RolloutGroup rolloutGroup) {
+        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+        final Item item = rolloutContainer.getItem(rolloutGroup.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rolloutGroup.getStatus());
     }
 
     @Override
@@ -164,15 +198,25 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
 
     private Label getStatusLabel(final Object itemId) {
         final Label statusLabel = new Label();
-        statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
         statusLabel.setHeightUndefined();
         statusLabel.setContentMode(ContentMode.HTML);
         setStatusIcon(itemId, statusLabel);
         statusLabel.setDescription(getDescription(itemId));
         statusLabel.setSizeUndefined();
+        addPropertyChangeListener(itemId, statusLabel);
         return statusLabel;
     }
 
+    private void addPropertyChangeListener(final Object itemId, final Label statusLabel) {
+        final Property status = getContainerProperty(itemId, SPUILabelDefinitions.VAR_STATUS);
+        final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
+        notifier.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                setStatusIcon(itemId, statusLabel);
+            }
+        });
+    }
     private String getDescription(final Object itemId) {
         final Item item = getItem(itemId);
         if (item != null) {
@@ -196,27 +240,28 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         switch (rolloutGroupStatus) {
         case FINISHED:
             statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-            statusLabel.addStyleName("statusIconGreen");
+            statusLabel.setStyleName("statusIconGreen");
             break;
         case SCHEDULED:
             statusLabel.setValue(FontAwesome.BULLSEYE.getHtml());
-            statusLabel.addStyleName("statusIconBlue");
+            statusLabel.setStyleName("statusIconBlue");
             break;
         case RUNNING:
             statusLabel.setValue(FontAwesome.ADJUST.getHtml());
-            statusLabel.addStyleName("statusIconYellow");
+            statusLabel.setStyleName("statusIconYellow");
             break;
         case READY:
             statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
-            statusLabel.addStyleName("statusIconLightBlue");
+            statusLabel.setStyleName("statusIconLightBlue");
             break;
         case ERROR:
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-            statusLabel.addStyleName("statusIconRed");
+            statusLabel.setStyleName("statusIconRed");
             break;
         default:
             break;
         }
+        statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
 
     private Button getRolloutNameLink(final Object itemId) {

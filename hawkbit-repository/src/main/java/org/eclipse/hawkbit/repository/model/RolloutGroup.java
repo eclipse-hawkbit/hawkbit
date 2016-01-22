@@ -21,6 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 /**
@@ -71,6 +72,9 @@ public class RolloutGroup extends NamedEntity {
 
     @Column(name = "error_action_exp", length = 512)
     private String errorActionExp = null;
+
+    @Transient
+    private boolean isNew = false;
 
     /**
      * @return the rollout
@@ -227,7 +231,20 @@ public class RolloutGroup extends NamedEntity {
     public String getSuccessActionExp() {
         return successActionExp;
     }
+    /**
+     * @return the isNew
+     */
+    public boolean isNew() {
+        return isNew;
+    }
 
+    /**
+     * @param isNew
+     *            the isNew to set
+     */
+    public void setNew(final boolean isNew) {
+        this.isNew = isNew;
+    }
     @Override
     public String toString() {
         return "RolloutGroup [rollout=" + rollout + ", status=" + status + ", rolloutTargetGroup=" + rolloutTargetGroup
