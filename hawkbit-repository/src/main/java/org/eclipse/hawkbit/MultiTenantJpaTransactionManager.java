@@ -11,6 +11,7 @@ package org.eclipse.hawkbit;
 import javax.persistence.EntityManager;
 import javax.transaction.Transaction;
 
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -45,8 +46,9 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
 
         if (!definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".findTenants")
                 && !definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".deleteTenant")
-                && !definition.getName()
-                        .startsWith(SystemManagement.class.getCanonicalName() + ".currentTenantKeyGenerator")) {
+                && !definition.getName().startsWith(
+                        SystemManagement.class.getCanonicalName() + ".currentTenantKeyGenerator")
+                && !definition.getName().startsWith(RolloutManagement.class.getCanonicalName() + ".rolloutScheduler")) {
 
             final String currentTenant = tenantAware.getCurrentTenant();
             if (currentTenant == null) {

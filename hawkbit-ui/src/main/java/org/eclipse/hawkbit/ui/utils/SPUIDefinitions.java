@@ -98,7 +98,12 @@ public final class SPUIDefinitions {
     public static final String ACTION_HIS_TBL_MSGS_HIDDEN = "Messages_Hidden";
 
     /**
-     * Action history status hidden column. This is using to generate status
+     * Action history layout - rollout name column.
+     */
+    public static final String ACTION_HIS_TBL_ROLLOUT_NAME = "Rollout name";
+
+    /**
+     * /** Action history status hidden column. This is using to generate status
      * icons under status coloumn.
      */
     public static final String ACTION_HIS_TBL_STATUS_HIDDEN = "Status_Hidden";
@@ -933,6 +938,11 @@ public final class SPUIDefinitions {
     public static final String BULK_UPLOD_DS_COMBO_STYLE = "bulk-upload-ds-combo";
 
     /**
+     * Bulk Targets upload window.
+     */
+    public static final String BULK_UPLOAD_WINDOW = "bulk-update-window";
+
+    /**
      * Filter by target filter query.
      */
     public static final String FILTER_BY_QUERY = "FilterByTargetFilterQueryText";
@@ -946,6 +956,70 @@ public final class SPUIDefinitions {
      * Sort order of column - created at in target table.
      */
     public static final Direction TARGET_TABLE_CREATE_AT_SORT_ORDER = Direction.ASC;
+
+    /**
+     * Rollout list view - header caption .
+     */
+    public static final String ROLLOUT_LIST_HEADER_CAPTION = "Rollouts";
+
+    /**
+     * Rollout status.
+     */
+    public static final String ROLLOUT_STATUS = "rollout-status";
+
+    /**
+     * Rollout group list view - header caption .
+     */
+    public static final String ROLLOUT_GROUP_LIST_HEADER_CAPTION = "Rollout Groups";
+
+    /**
+     * Rollout delete - column property name.
+     */
+    public static final String DELETE = "delete";
+
+    /**
+     * Rollout detail status - column property status.
+     */
+    public static final String DETAIL_STATUS = "detail-status";
+
+    /**
+     * Rollout name column property.
+     */
+    public static final String ROLLOUT_NAME = "rollout-name";
+    /**
+     * Rollout group name column property.
+     */
+    public static final String ROLLOUT_GROUP_NAME = "Name";
+
+    /**
+     * Rollout group started date column property.
+     */
+    public static final String ROLLOUT_GROUP_STARTED_DATE = "Started date";
+
+    /**
+     * Rollout group started date column property.
+     */
+    public static final String ROLLOUT_GROUP_ERROR_THRESHOLD = "errorConditionExp";
+
+    /**
+     * Rollout group started date column property.
+     */
+    public static final String ROLLOUT_GROUP_THRESHOLD = "successConditionExp";
+
+    /**
+     * Rollout group installed percentage column property.
+     */
+    public static final String ROLLOUT_GROUP_INSTALLED_PERCENTAGE = "finishedPercentage";
+
+    /**
+     * Rollout group status column property.
+     */
+    public static final String ROLLOUT_GROUP_STATUS = "Status";
+
+    /**
+     * Rollout action column property.
+     */
+    public static final String ROLLOUT_ACTION = "rollout-action";
 
     /**
      * /** Constructor.

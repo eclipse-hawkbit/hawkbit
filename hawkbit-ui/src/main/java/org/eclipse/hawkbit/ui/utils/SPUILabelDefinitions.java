@@ -465,6 +465,48 @@ public final class SPUILabelDefinitions {
     public static final int TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH = 1024;
 
     /**
+     * Status - column property.
+     */
+    public static final String VAR_STATUS = "status";
+
+    /**
+     * Target filter query - column property.
+     */
+    public static final String VAR_TARGETFILTERQUERY = "targetFilterQuery";
+
+    /**
+     * Distribution name and version - column property.
+     */
+    public static final String VAR_DIST_NAME_VERSION = "distributionSetNameVersion";
+
+    /**
+     * Number of groups in rollout- column property.
+     */
+    public static final String VAR_NUMBER_OF_GROUPS = "numberOfGroups";
+
+    /**
+     * Delete label.
+     */
+    public static final String DELETE = "Delete";
+    /**
+     * Rollout name link's description.
+     */
+    public static final String SHOW_ROLLOUT_GROUP_DETAILS = "show group details";
+    /**
+     * Rollout action button description.
+     */
+    public static final String ACTION = "Action";
+    /**
+     * Rollout pause button name.
+     */
+    public static final String PAUSE = "Pause";
+
+    /**
+     * Rollout resume button name.
+     */
+    public static final String RESUME = "Resume";
+
+    /**
      * Constructor.
      */
     private SPUILabelDefinitions() {

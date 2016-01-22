@@ -73,8 +73,8 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.Action;
@@ -215,13 +215,12 @@ public class TargetTable extends AbstractTable implements Handler {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final ManagementUIEvent managementUIEvent) {
-        UI.getCurrent().access(
-                () -> {
-                    if (managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG
-                            || managementUIEvent == ManagementUIEvent.ASSIGN_TARGET_TAG) {
-                        refreshFilter();
-                    }
-                });
+        UI.getCurrent().access(() -> {
+            if (managementUIEvent == ManagementUIEvent.UNASSIGN_TARGET_TAG
+                    || managementUIEvent == ManagementUIEvent.ASSIGN_TARGET_TAG) {
+                refreshFilter();
+            }
+        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -250,7 +249,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
      */
@@ -261,7 +260,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
      * )
@@ -276,8 +275,9 @@ public class TargetTable extends AbstractTable implements Handler {
         targetQF.setQueryConfiguration(queryConfig);
 
         // create lazy query container with lazy defination and query
-        final LazyQueryContainer targetTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_CONT_ID_NAME), targetQF);
+        final LazyQueryContainer targetTableContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_CONT_ID_NAME),
+                targetQF);
         targetTableContainer.getQueryView().getQueryDefinition().setMaxNestedPropertyDepth(PROPERTY_DEPT);
 
         return targetTableContainer;
@@ -285,7 +285,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties
      * (com.vaadin.data.Container )
      */
@@ -312,7 +312,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
      * addCustomGeneratedColumns ()
      */
@@ -326,7 +326,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
      * isFirstRowSelectedOnLoad ()
      */
@@ -338,7 +338,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
      */
     @Override
@@ -352,7 +352,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
      */
@@ -365,8 +365,8 @@ public class TargetTable extends AbstractTable implements Handler {
             final TargetIdName lastSelectedItem = getLastSelectedItem(values);
             managementUIState.setSelectedTargetIdName(values);
             managementUIState.setLastSelectedTargetIdName(lastSelectedItem);
-            final Target target = targetManagement.findTargetByControllerIDWithDetails(lastSelectedItem
-                    .getControllerId());
+            final Target target = targetManagement
+                    .findTargetByControllerIDWithDetails(lastSelectedItem.getControllerId());
             eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, target));
         } else {
             managementUIState.setSelectedTargetIdName(null);
@@ -377,7 +377,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
      */
@@ -388,7 +388,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
      * ()
      */
@@ -400,10 +400,10 @@ public class TargetTable extends AbstractTable implements Handler {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
             columnList
                     .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"),
+            columnList.add(
+                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
                     0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
-                    i18n.get("header.modifiedDate"), 0.1f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2f));
         } else {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.8f));
@@ -415,7 +415,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
      */
     @Override
@@ -622,7 +622,8 @@ public class TargetTable extends AbstractTable implements Handler {
     private void doAssignments(final DragAndDropEvent event) {
         if (event.getTransferable().getSourceComponent() instanceof Table) {
             dsToTargetAssignment(event);
-        } else if (event.getTransferable().getSourceComponent() instanceof DragAndDropWrapper && isNoTagAssigned(event)) {
+        } else if (event.getTransferable().getSourceComponent() instanceof DragAndDropWrapper
+                && isNoTagAssigned(event)) {
             tagAssignment(event);
         }
 
@@ -632,8 +633,8 @@ public class TargetTable extends AbstractTable implements Handler {
         final String tagName = ((DragAndDropWrapper) (event.getTransferable().getSourceComponent())).getData()
                 .toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(
+                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -684,8 +685,8 @@ public class TargetTable extends AbstractTable implements Handler {
 
     private Boolean validateTable(final Component compsource, final TableTransferable transferable) {
         final Table source = (Table) compsource;
-        if (!(source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID) || source.getId().startsWith(
-                SPUIDefinitions.TARGET_TAG_ID_PREFIXS))) {
+        if (!(source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)
+                || source.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS))) {
             notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
             return false;
         } else if (!permChecker.hasUpdateTargetPermission()) {
@@ -713,8 +714,8 @@ public class TargetTable extends AbstractTable implements Handler {
 
     private Boolean validateDragAndDropWrapper(final Component compsource) {
         final DragAndDropWrapper wrapperSource = (DragAndDropWrapper) compsource;
-        final String tagName = HawkbitCommonUtil
-                .removePrefix(compsource.getId(), SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+        final String tagName = HawkbitCommonUtil.removePrefix(compsource.getId(),
+                SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
         if (wrapperSource.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS)) {
             if ("NO TAG".equals(tagName)) {
                 notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
@@ -740,8 +741,9 @@ public class TargetTable extends AbstractTable implements Handler {
                 if (null != distributionNameId) {
                     if (managementUIState.getAssignedList().keySet().contains(targetId)
                             && managementUIState.getAssignedList().get(targetId).equals(distributionNameId)) {
-                        message = getPendingActionMessage(message, HawkbitCommonUtil.getDistributionNameAndVersion(
-                                distributionNameId.getName(), distributionNameId.getVersion()),
+                        message = getPendingActionMessage(message,
+                                HawkbitCommonUtil.getDistributionNameAndVersion(distributionNameId.getName(),
+                                        distributionNameId.getVersion()),
                                 targetId.getControllerId());
                     } else {
                         managementUIState.getAssignedList().put(targetId, distributionNameId);
@@ -807,13 +809,13 @@ public class TargetTable extends AbstractTable implements Handler {
              * registered for the target last query column. That listener will
              * update the latest query date for this target in the tooltip.
              */
-            item.getItemProperty(SPUILabelDefinitions.LAST_QUERY_DATE).setValue(
-                    updatedTarget.getTargetInfo().getLastTargetQuery());
+            item.getItemProperty(SPUILabelDefinitions.LAST_QUERY_DATE)
+                    .setValue(updatedTarget.getTargetInfo().getLastTargetQuery());
 
-            item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setValue(
-                    HawkbitCommonUtil.getIMUser(updatedTarget.getLastModifiedBy()));
-            item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setValue(
-                    SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
+            item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
+                    .setValue(HawkbitCommonUtil.getIMUser(updatedTarget.getLastModifiedBy()));
+            item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
+                    .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());
 
             /*
@@ -821,8 +823,8 @@ public class TargetTable extends AbstractTable implements Handler {
              * registered for the target update status. That listener will
              * update the new status icon showing for this target in the table.
              */
-            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(
-                    updatedTarget.getTargetInfo().getUpdateStatus());
+            item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS)
+                    .setValue(updatedTarget.getTargetInfo().getUpdateStatus());
         }
     }
 
@@ -852,9 +854,8 @@ public class TargetTable extends AbstractTable implements Handler {
     }
 
     private String getTargetTableStyle(final Long assignedDistributionSetId, final Long installedDistributionSetId) {
-        final Long distPinned = managementUIState.getTargetTableFilters().getPinnedDistId().isPresent() ? managementUIState
-                .getTargetTableFilters().getPinnedDistId().get()
-                : null;
+        final Long distPinned = managementUIState.getTargetTableFilters().getPinnedDistId().isPresent()
+                ? managementUIState.getTargetTableFilters().getPinnedDistId().get() : null;
 
         if (null != distPinned && distPinned.equals(installedDistributionSetId)) {
             return SPUIDefinitions.HIGHTLIGHT_GREEN;
@@ -873,10 +874,10 @@ public class TargetTable extends AbstractTable implements Handler {
     private String createTargetTableStyle(final Object itemId, final Object propertyId) {
         if (null == propertyId) {
             final Item item = getItem(itemId);
-            final Long assignedDistributionSetId = (Long) item.getItemProperty(
-                    SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID).getValue();
-            final Long installedDistributionSetId = (Long) item.getItemProperty(
-                    SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID).getValue();
+            final Long assignedDistributionSetId = (Long) item
+                    .getItemProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID).getValue();
+            final Long installedDistributionSetId = (Long) item
+                    .getItemProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID).getValue();
             return getTargetTableStyle(assignedDistributionSetId, installedDistributionSetId);
         }
         return null;
@@ -935,8 +936,8 @@ public class TargetTable extends AbstractTable implements Handler {
         final Item item = targetContainer.getItem(targetIdName);
         item.getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).setValue(targetInfo.getUpdateStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(target.getName());
-        item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP).setValue(
-                HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
+        item.getItemProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP)
+                .setValue(HawkbitCommonUtil.getPollStatusToolTip(targetInfo.getPollStatus(), i18n));
     }
 
     private boolean isLastSelectedTarget(final TargetIdName targetIdName) {
@@ -994,8 +995,8 @@ public class TargetTable extends AbstractTable implements Handler {
             filters.add(new TargetSearchTextFilter(target, targetTableFilters.getSearchText().get()));
         }
         filters.add(new TargetStatusFilter(targetTableFilters.getClickedStatusTargetTags()));
-        filters.add(new TargetTagFilter(target, targetTableFilters.getClickedTargetTags(), targetTableFilters
-                .isNoTagSelected()));
+        filters.add(new TargetTagFilter(target, targetTableFilters.getClickedTargetTags(),
+                targetTableFilters.isNoTagSelected()));
         filters.add(new CustomTargetFilter(targetTableFilters.getTargetFilterQuery()));
         return filters;
     }
@@ -1004,8 +1005,8 @@ public class TargetTable extends AbstractTable implements Handler {
      * Select all rows in the table.
      */
     public void selectAll() {
-        final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(), new Sort(
-                SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt"));
+        final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(),
+                new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt"));
         List<TargetIdName> targetIdList;
         // is custom filter selected
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
@@ -1017,9 +1018,8 @@ public class TargetTable extends AbstractTable implements Handler {
     }
 
     private List<TargetIdName> getTargetIdsBySimpleFilters(final PageRequest pageRequest) {
-        final Long filterByDistId = managementUIState.getTargetTableFilters().getDistributionSet().isPresent() ? managementUIState
-                .getTargetTableFilters().getDistributionSet().get().getId()
-                : null;
+        final Long filterByDistId = managementUIState.getTargetTableFilters().getDistributionSet().isPresent()
+                ? managementUIState.getTargetTableFilters().getDistributionSet().get().getId() : null;
         final List<TargetUpdateStatus> statusList = new ArrayList<TargetUpdateStatus>();
         if (isFilteredByStatus()) {
             statusList.addAll(managementUIState.getTargetTableFilters().getClickedStatusTargetTags());
@@ -1028,8 +1028,8 @@ public class TargetTable extends AbstractTable implements Handler {
         if (isFilteredByTags()) {
             tagList.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
         }
-        String searchText = managementUIState.getTargetTableFilters().getSearchText().isPresent() ? managementUIState
-                .getTargetTableFilters().getSearchText().get() : null;
+        String searchText = managementUIState.getTargetTableFilters().getSearchText().isPresent()
+                ? managementUIState.getTargetTableFilters().getSearchText().get() : null;
         if (!Strings.isNullOrEmpty(searchText)) {
             searchText = String.format("%%%s%%", searchText);
         }
@@ -1114,8 +1114,8 @@ public class TargetTable extends AbstractTable implements Handler {
             final Long pinnedDistId) {
         final long size;
         if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
-            size = targetManagement.countTargetByTargetFilterQuery(managementUIState.getTargetTableFilters()
-                    .getTargetFilterQuery().get());
+            size = targetManagement.countTargetByTargetFilterQuery(
+                    managementUIState.getTargetTableFilters().getTargetFilterQuery().get());
         } else if (!anyFilterSelected(status, pinnedDistId, noTagClicked, targetTags, searchText)) {
             size = totalTargetsCount;
         } else {
@@ -1154,5 +1154,4 @@ public class TargetTable extends AbstractTable implements Handler {
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
-
 }

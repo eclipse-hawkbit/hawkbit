@@ -53,7 +53,8 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 @Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
         @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
         @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
-@NamedEntityGraphs({ @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode("target") }) })
 @Entity
@@ -69,11 +70,11 @@ public class Action extends BaseEntity implements Comparable<Action> {
      * the {@link DistributionSet} which should be installed by this action.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds") )
+    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
     private DistributionSet distributionSet;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target") )
+    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
     private Target target;
 
     @Column(name = "active")
@@ -90,9 +91,16 @@ public class Action extends BaseEntity implements Comparable<Action> {
     private Status status;
 
     @CascadeOnDelete
-    @OneToMany(mappedBy = "action", targetEntity = ActionStatus.class, fetch = FetchType.LAZY, cascade = {
-            CascadeType.REMOVE })
+    @OneToMany(mappedBy = "action", targetEntity = ActionStatus.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
     private List<ActionStatus> actionStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rolltoutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
+    private RolloutGroup rolloutGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
+    private Rollout rollout;
 
     /**
      * Note: filled only in {@link Status#DOWNLOAD}.
@@ -219,6 +227,36 @@ public class Action extends BaseEntity implements Comparable<Action> {
      */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
+    }
+
+    /**
+     * @return the rolloutGroup
+     */
+    public RolloutGroup getRolloutGroup() {
+        return rolloutGroup;
+    }
+
+    /**
+     * @param rolloutGroup
+     *            the rolloutGroup to set
+     */
+    public void setRolloutGroup(final RolloutGroup rolloutGroup) {
+        this.rolloutGroup = rolloutGroup;
+    }
+
+    /**
+     * @return the rollout
+     */
+    public Rollout getRollout() {
+        return rollout;
+    }
+
+    /**
+     * @param rollout
+     *            the rollout to set
+     */
+    public void setRollout(final Rollout rollout) {
+        this.rollout = rollout;
     }
 
     @Override
@@ -379,7 +417,13 @@ public class Action extends BaseEntity implements Comparable<Action> {
         /**
          * Action needs download by this target which has now started.
          */
-        DOWNLOAD;
+        DOWNLOAD,
+
+        /**
+         * Action is in waiting state, e.g. the action is scheduled in a rollout
+         * but not yet activated.
+         */
+        SCHEDULED;
     }
 
     /**

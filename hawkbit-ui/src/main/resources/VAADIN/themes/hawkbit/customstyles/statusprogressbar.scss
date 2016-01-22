@@ -1,0 +1,64 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+@mixin statusprogressbar {
+  .alump-dbar {
+    .status-bar-part-ready {
+      background-color: $bosch-color-light-blue !important;
+    }
+
+    .status-bar-part-running {
+      background-color: $signal-yellow-color !important;
+    }
+
+    .status-bar-part-error {
+      background-color: $signal-red-color !important;
+    }
+
+    .status-bar-part-finished {
+      background-color: $signal-green-color!important;
+    }
+
+    .status-bar-part-cancelled {
+      background-color: $grey-light !important;
+    }
+
+    .status-bar-part-notstarted {
+      background-color: $grey-color !important;
+    }
+    
+    .alump-dbar-left {
+      padding: 3px 0px 3px 0px !important;
+    }
+
+    .alump-dbar-middle {
+      padding: 3px 0px 3px 0px !important;
+    }
+
+    .alump-dbar-right {
+      padding: 3px 0px 3px 0px !important;
+    }
+
+    .alump-dbar-only {
+      padding: 3px 0px 3px 0px !important;
+    }
+    
+  }
+
+  &.alump-dbar-tooltip {
+    background-color: rgba(27, 54, 73, 0.9);
+    border-radius: 3px;
+    color: white;
+    z-index: 100;
+    padding: 3px;
+    font-size: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  }
+}

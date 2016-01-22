@@ -12,7 +12,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,10 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Action} repository.
- *
- *
- *
- *
  *
  */
 @Transactional(readOnly = true)
@@ -187,6 +186,47 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     void setToInactive(@Param("keySet") List<Action> keySet, @Param("targetsIds") List<Long> targetsIds);
 
     /**
+     * Switches the status of actions from one specific status into another,
+     * only if the actions are in a specific status. This should be a atomar
+     * operation.
+     * 
+     * @param statusToSet
+     *            the new status the actions should get
+     * @param targetIds
+     *            the IDs of the targets of the actions which are affected
+     * @param active
+     *            the active flag of the actions which should be affected
+     * @param currentStatus
+     *            the current status of the actions which are affected
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Action a SET a.status = :statusToSet WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
+    void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
+            @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
+
+    /**
+     * Switches the status of actions from one specific status into another,
+     * only if the actions are in a specific status. This should be a atomar
+     * operation.
+     * 
+     * @param statusToSet
+     *            the new status the actions should get
+     * @param rollout
+     *            the rollout of the actions which are affected
+     * @param active
+     *            the active flag of the actions which should be affected
+     * @param currentStatus
+     *            the current status of the actions which are affected
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Action a SET a.status = :statusToSet WHERE a.rollout = :rollout AND a.active = :active AND a.status = :currentStatus")
+    void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("rollout") Rollout rollout,
+            @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
+
+    /**
+     * 
      * Retrieves all {@link Action}s which are active and referring to the given
      * target Ids and distribution set required migration step.
      *
@@ -234,7 +274,129 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      * 
      * @param distributionSet
      *            DistributionSet to count the {@link Action}s from
-     * @return the count of actions referring to the given target
+     * @return the count of actions referring to the given distributionSet
      */
     Long countByDistributionSet(DistributionSet distributionSet);
+
+    /**
+     * Counts all {@link Action}s referring to the given rollout.
+     * 
+     * @param rollout
+     *            the rollout to count the {@link Action}s from
+     * @return the count of actions referring to the given rollout
+     */
+    Long countByRollout(Rollout rollout);
+
+    /**
+     * Counts all actions referring to a given rollout and rolloutgroup which
+     * are currently not in the given status. An in-clause statement does not
+     * work with the spring-data, so this is specific usecase regarding to the
+     * rollout-management to find out actions which are not in specific states.
+     * 
+     * @param rollout
+     *            the rollout the actions are belong to
+     * @param rolloutGroup
+     *            the rolloutgroup the actions are belong to
+     * @param notStatus1
+     *            the status the action should not have
+     * @param notStatus2
+     *            the status the action should not have
+     * @param notStatus3
+     *            the status the action should not have
+     * @return the count of actions referring the rollout and rolloutgroup and
+     *         are not in given states
+     */
+    Long countByRolloutAndRolloutGroupAndStatusNotAndStatusNotAndStatusNot(Rollout rollout, RolloutGroup rolloutGroup,
+            Status notStatus1, Status notStatus2, Status notStatus3);
+
+    /**
+     * Counts all actions referring to a given rollout and rolloutgroup.
+     * 
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroup
+     *            the rolloutgroup the actions belong to
+     * @return the count of actions referring to a rollout and rolloutgroup
+     */
+    Long countByRolloutAndRolloutGroup(Rollout rollout, RolloutGroup rolloutGroup);
+
+    /**
+     * Counts all actions referring to a given rollout, rolloutgroup and status.
+     * 
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroup
+     *            the rolloutgroup the actions belong to
+     * @param status
+     *            the status the actions should have
+     * @return the count of actions referring to a rollout, rolloutgroup and are
+     *         in a given status
+     */
+    Long countByRolloutAndRolloutGroupAndStatus(Rollout rollout, RolloutGroup rolloutGroup, Action.Status status);
+
+    /**
+     * Retrieving all actions referring to a given rollout with a specific
+     * action as parent reference and a specific status.
+     * 
+     * Finding all actions of a specific rolloutgroup parent relation.
+     *
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroupParent
+     *            the parent rolloutgroup the actions should reference
+     * @param actionStatus
+     *            the status the actions have
+     * @return the actions referring a specific rollout and a specific parent
+     *         rolloutgroup in a specific status
+     */
+    List<Action> findByRolloutAndRolloutGroupParentAndStatus(Rollout rollout, RolloutGroup rolloutGroupParent,
+            Status actionStatus);
+
+    /**
+     * Retrieves all actions for a specific rollout and in a specific status.
+     * 
+     * @param rollout
+     *            the rollout the actions beglong to
+     * @param actionStatus
+     *            the status of the actions
+     * @return the actions referring a specific rollout an in a specific status
+     */
+    List<Action> findByRolloutAndStatus(Rollout rollout, Status actionStatus);
+
+    // Asha- starts here
+
+    /**
+     * Total list of targets for the rollout group.
+     * 
+     * @param group
+     * @param page
+     * @return the total list of targets for the rollout group
+     */
+    @Query("select a.target from Action a where a.rolloutGroup = ?1")
+    Page<Target> getTargetsForRolloutGroup(RolloutGroup group, Pageable page);
+
+    /**
+     * Get list of objects which has details of status and count of targets in
+     * each status in specified rollout.
+     * 
+     * @param rolloutId
+     *            id of {@link Rollout}
+     * @return list of objects with status and target count
+     */
+    @Query("SELECT a.status , COUNT(a.target) FROM Action a WHERE a.rollout.id = ?1 GROUP BY a.status")
+    List<Object[]> getStatusCountByRolloutId(Long rolloutId);
+
+    /**
+     * Get list of objects which has details of status and count of targets in
+     * each status in specified rollout group.
+     * 
+     * @param rolloutGroupId
+     *            id of {@link RolloutGroup}
+     * @return list of objects with status and target count
+     */
+    @Query("SELECT a.status , COUNT(a.target) FROM Action a WHERE a.rolloutGroup.id = ?1 GROUP BY a.status")
+    List<Object[]> getStatusCountByRolloutGroupId(Long rolloutGroupId);
+
+    // Asha-ends here
+
 }

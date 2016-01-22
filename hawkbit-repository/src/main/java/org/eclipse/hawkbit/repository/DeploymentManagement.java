@@ -46,6 +46,9 @@ import org.eclipse.hawkbit.repository.model.Action_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet_;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.Rollout_;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -230,7 +233,7 @@ public class DeploymentManagement {
                     DistributionSet.class.getSimpleName(), dsID));
         }
 
-        return assignDistributionSetToTargets(set, targets);
+        return assignDistributionSetToTargets(set, targets, null, null);
     }
 
     /**
@@ -239,8 +242,45 @@ public class DeploymentManagement {
      *
      * @param dsID
      *            the ID of the distribution set to assign
-     * @param targetsWithActionType
+     * @param targets
      *            a list of all targets and their action type
+     * @param rollout
+     *            the rollout for this assignment
+     * @param rolloutgroup
+     *            the rolloutgroup for this assignment
+     * @return the assignment result
+     *
+     * @throw IncompleteDistributionSetException if mandatory
+     *        {@link SoftwareModuleType} are not assigned as define by the
+     *        {@link DistributionSetType}.
+     */
+    @Modifying
+    @Transactional
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
+    public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
+            final List<TargetWithActionType> targets, final Rollout rollout, final RolloutGroup rolloutGroup) {
+        final DistributionSet set = distributoinSetRepository.findOne(dsID);
+        if (set == null) {
+            throw new EntityNotFoundException(String.format("no %s with id %d found",
+                    DistributionSet.class.getSimpleName(), dsID));
+        }
+
+        return assignDistributionSetToTargets(set, targets, rollout, rolloutGroup);
+    }
+
+    /**
+     * method assigns the {@link DistributionSet} to all {@link Target}s by
+     * their IDs with a specific {@link ActionType} and {@code forcetime}.
+     * 
+     * @param dsID
+     *            the ID of the distribution set to assign
+     * @param targets
+     *            a list of all targets and their action type
+     * @param rollout
+     *            the rollout for this assignment
+     * @param rolloutgroup
+     *            the rolloutgroup for this assignment
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -248,7 +288,8 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(@NotNull final DistributionSet set,
-            final List<TargetWithActionType> targetsWithActionType) {
+            final List<TargetWithActionType> targetsWithActionType, final Rollout rollout,
+            final RolloutGroup rolloutGroup) {
 
         if (!set.isComplete()) {
             throw new IncompleteDistributionSetException("Distribution set of type " + set.getType().getKey()
@@ -297,8 +338,10 @@ public class DeploymentManagement {
         final Set<Long> targetIdsCancellList = new HashSet<Long>();
         targetIds.forEach(ids -> targetIdsCancellList.addAll(overrideObsoleteUpdateActions(ids)));
 
-        // check for old assigments that needs cancelation
-        // final List<Long> canncelledTargetIds =
+        // cancel all scheduled actions which are in-active, these actions were
+        // not active before and the manual assignment which has been done
+        // cancels the
+        targetIds.forEach(tIds -> actionRepository.switchStatus(Status.CANCELED, tIds, false, Status.SCHEDULED));
 
         // set assigned distribution set and TargetUpdateStatus
         final String currentUser;
@@ -321,6 +364,8 @@ public class DeploymentManagement {
             tAction.setStatus(Status.RUNNING);
             tAction.setTarget(t);
             tAction.setDistributionSet(set);
+            tAction.setRollout(rollout);
+            tAction.setRolloutGroup(rolloutGroup);
             return tAction;
         }).collect(Collectors.toList())).stream()
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
@@ -352,7 +397,6 @@ public class DeploymentManagement {
         entityManager.detach(set);
 
         // send distribution set assignment event
-
         targets.stream()
                 .filter(t -> !!!targetIdsCancellList.contains(t.getId()))
                 .forEach(
@@ -385,7 +429,7 @@ public class DeploymentManagement {
 
     /**
      * Removes {@link UpdateAction}s that are no longer necessary and sends
-     * cancellations to the controller.
+     * cancelations to the controller.
      *
      * @param myTarget
      *            to override {@link UpdateAction}s
@@ -396,7 +440,7 @@ public class DeploymentManagement {
 
         // Figure out if there are potential target/action combinations that
         // need to be considered
-        // for cancellation
+        // for cancelation
         final List<Action> activeActions = actionRepository
                 .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetRequiredMigrationStep(targetsIds,
                         Action.Status.CANCELING);
@@ -405,9 +449,7 @@ public class DeploymentManagement {
             // document that the status has been retrieved
                 actionStatusRepository.save(new ActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                         "manual cancelation requested"));
-
                 cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
-
                 cancelledTargetIds.add(action.getTarget().getId());
             });
         actionRepository.save(activeActions);
@@ -419,7 +461,7 @@ public class DeploymentManagement {
             @NotEmpty final List<String> tIDs, final ActionType actionType, final long forcedTime) {
         return assignDistributionSetToTargets(set,
                 tIDs.stream().map(t -> new TargetWithActionType(t, actionType, forcedTime))
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()), null, null);
     }
 
     /**
@@ -482,7 +524,6 @@ public class DeploymentManagement {
             actionStatusRepository.save(new ActionStatus(myAction, Status.CANCELING, System.currentTimeMillis(),
                     "manual cancelation requested"));
             final Action saveAction = actionRepository.save(myAction);
-
             cancelAssignDistributionSetEvent(target, myAction.getId());
 
             return saveAction;
@@ -547,6 +588,109 @@ public class DeploymentManagement {
         successCancellation(mergedAction);
 
         return actionRepository.save(mergedAction);
+    }
+
+    /**
+     * Creates an action entry into the action repository. In case of existing
+     * scheduled actions the scheduled actions gets canceled. A scheduled action
+     * is created in-active.
+     * 
+     * @param targets
+     *            the targets to create scheduled actions for
+     * @param distributionSet
+     *            the distribution set for the actions
+     * @param actionType
+     *            the action type for the action
+     * @param forcedTime
+     *            the forcedTime of the action
+     * @param rollout
+     *            the rollout for this action
+     * @param rolloutGroup
+     *            the rolloutgroup for this action
+     */
+    @Modifying
+    @Transactional
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    public void createScheduledAction(final List<Target> targets, final DistributionSet distributionSet,
+            final ActionType actionType, final long forcedTime, final Rollout rollout, final RolloutGroup rolloutGroup) {
+        // cancel all current scheduled actions for this target. E.g. an action
+        // is already scheduled and a next action is created then cancel the
+        // current scheduled action to cancel. E.g. a new scheduled action is
+        // created.
+        final List<Long> targetIds = targets.stream().map(t -> t.getId()).collect(Collectors.toList());
+        actionRepository.switchStatus(Action.Status.CANCELED, targetIds, false, Action.Status.SCHEDULED);
+        targets.forEach(target -> {
+            final Action action = new Action();
+            action.setTarget(target);
+            action.setActive(false);
+            action.setDistributionSet(distributionSet);
+            action.setActionType(actionType);
+            action.setForcedTime(forcedTime);
+            action.setStatus(Status.SCHEDULED);
+            action.setRollout(rollout);
+            action.setRolloutGroup(rolloutGroup);
+            actionRepository.save(action);
+        });
+    }
+
+    /**
+     * Starting an action which is scheduled, e.g. in case of rollout a
+     * scheduled action must be started now.
+     * 
+     * @param action
+     *            the action to start now.
+     * @return the action which has been started
+     */
+    @Modifying
+    @Transactional
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    public Action startScheduledAction(@NotNull final Action action) {
+
+        final Action mergedAction = entityManager.merge(action);
+        final Target mergedTarget = entityManager.merge(action.getTarget());
+
+        // check if we need to override running update actions
+        final Set<Long> overrideObsoleteUpdateActions = overrideObsoleteUpdateActions(Collections.singletonList(action
+                .getTarget().getId()));
+
+        final boolean hasDistributionSetAlreadyAssigned = targetRepository
+                .count(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(
+                        Collections.singletonList(mergedTarget.getControllerId()), action.getDistributionSet().getId())) == 0;
+        if (hasDistributionSetAlreadyAssigned) {
+            // the target has already the distribution set assigned, we don't
+            // need to start the scheduled action, just finished it.
+            mergedAction.setStatus(Status.FINISHED);
+            mergedAction.setActive(false);
+            return actionRepository.save(mergedAction);
+        }
+
+        mergedAction.setActive(true);
+        mergedAction.setStatus(Status.RUNNING);
+        final Action savedAction = actionRepository.save(mergedAction);
+
+        final ActionStatus actionStatus = new ActionStatus();
+        actionStatus.setAction(action);
+        actionStatus.setOccurredAt(action.getCreatedAt());
+        actionStatus.setStatus(Status.RUNNING);
+        actionStatusRepository.save(actionStatus);
+
+        mergedTarget.setAssignedDistributionSet(action.getDistributionSet());
+        final TargetInfo targetInfo = mergedTarget.getTargetInfo();
+        targetInfo.setUpdateStatus(TargetUpdateStatus.PENDING);
+        targetRepository.save(mergedTarget);
+        targetInfoRepository.save(targetInfo);
+
+        // in case we canceled an action before for this target, then don't fire
+        // assignment event
+        if (overrideObsoleteUpdateActions.contains(savedAction.getId())) {
+            final List<SoftwareModule> softwareModules = softwareModuleRepository.findByAssignedTo(action
+                    .getDistributionSet());
+            // send distribution set assignment event
+
+            assignDistributionSetEvent(mergedAction.getTarget(), mergedAction.getId(), softwareModules);
+        }
+        return savedAction;
     }
 
     /**
@@ -616,13 +760,14 @@ public class DeploymentManagement {
         final Root<Action> actionRoot = query.from(Action.class);
         final ListJoin<Action, ActionStatus> actionStatusJoin = actionRoot.join(Action_.actionStatus, JoinType.LEFT);
         final Join<Action, DistributionSet> actionDsJoin = actionRoot.join(Action_.distributionSet);
+        final Join<Action, Rollout> actionRolloutJoin = actionRoot.join(Action_.rollout, JoinType.LEFT);
 
         final CriteriaQuery<ActionWithStatusCount> multiselect = query.distinct(true).multiselect(
                 actionRoot.get(Action_.id), actionRoot.get(Action_.actionType), actionRoot.get(Action_.active),
                 actionRoot.get(Action_.forcedTime), actionRoot.get(Action_.status), actionRoot.get(Action_.createdAt),
                 actionRoot.get(Action_.lastModifiedAt), actionDsJoin.get(DistributionSet_.id),
                 actionDsJoin.get(DistributionSet_.name), actionDsJoin.get(DistributionSet_.version),
-                cb.count(actionStatusJoin));
+                cb.count(actionStatusJoin), actionRolloutJoin.get(Rollout_.name));
         multiselect.where(cb.equal(actionRoot.get(Action_.target), target));
         multiselect.orderBy(cb.desc(actionRoot.get(Action_.id)));
         multiselect.groupBy(actionRoot.get(Action_.id));
@@ -660,11 +805,11 @@ public class DeploymentManagement {
      * Retrieves all {@link Action}s which are referring the given
      * {@link Target}.
      * 
-     * @param pageable
-     *            page parameters
      * @param foundTarget
-     *            the target to find assigned actions
-     * @return the found {@link Action}s
+     *            the target to find actions for
+     * @param pageable
+     *            the pageable request to limit, sort the actions
+     * @return a slice of actions found for a specific target
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Action> findActionsByTarget(final Target foundTarget, final Pageable pageable) {
@@ -828,5 +973,41 @@ public class DeploymentManagement {
             target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
         }
         targetManagement.updateTarget(target);
+    }
+
+    /**
+     * Retrieving all actions referring to a given rollout with a specific
+     * action as parent reference and a specific status.
+     * 
+     * Finding all actions of a specific rolloutgroup parent relation.
+     *
+     * @param rollout
+     *            the rollout the actions belong to
+     * @param rolloutGroupParent
+     *            the parent rolloutgroup the actions should reference
+     * @param actionStatus
+     *            the status the actions have
+     * @return the actions referring a specific rollout and a specific parent
+     *         rolloutgroup in a specific status
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    public List<Action> findActionsByRolloutGroupParentAndStatus(final Rollout rollout,
+            final RolloutGroup rolloutGroupParent, final Action.Status actionStatus) {
+        return actionRepository.findByRolloutAndRolloutGroupParentAndStatus(rollout, rolloutGroupParent, actionStatus);
+    }
+
+    /**
+     * Retrieves all actions for a specific rollout and in a specific status.
+     * 
+     * @param rollout
+     *            the rollout the actions beglong to
+     * @param actionStatus
+     *            the status of the actions
+     * @return the actions referring a specific rollout an in a specific status
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    public List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
+        return actionRepository.findByRolloutAndStatus(rollout, actionStatus);
     }
 }

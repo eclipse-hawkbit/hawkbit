@@ -20,6 +20,8 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
@@ -40,6 +42,7 @@ import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.alump.distributionbar.DistributionBar;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -105,6 +108,8 @@ public final class HawkbitCommonUtil {
     private static final String TARGET_TAG_DROP_REMOVE_SCRIPT = "var m = document.getElementById('show-filter-drop-hint'); if(m) { document.head.removeChild(m); } ";
     private static final String DELETE_DROP_CREATE_SCRIPT = "var q = document.getElementById('show-delete-drop-hint'); if(q) { } else { showDeleteDrop = document.createElement('style'); showDeleteDrop.id=\"show-delete-drop-hint\";  document.head.appendChild(showDeleteDrop); }";
     private static final String DELETE_TAG_DROP_REMOVE_SCRIPT = "var o = document.getElementById('show-delete-drop-hint'); if(o) { document.head.removeChild(o); } ";
+
+    private static final String STATUS_BAR_PART = "status-bar-part-";
 
     /**
      * Define empty string.
@@ -1127,6 +1132,44 @@ public final class HawkbitCommonUtil {
                 .append(" } .v-app .tag-color-preview:after{ border-color: none !important; box-shadow:none !important;} \"; ")
                 .append(PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT);
         return scriptBuilder.toString();
+    }
+
+    /**
+     * Returns the Rollout group progress bar
+     * 
+     * @param bar
+     *            rollout group distribution bar.
+     * @param i
+     *            index
+     * @param rolloutTargetsStatus
+     *            Rollout group target status.
+     * @return bar progress bar for the rollout group.
+     */
+    public static DistributionBar getRolloutProgressBar(final DistributionBar bar, int i,
+            final RolloutTargetsStatusCount rolloutTargetsStatus) {
+        final Map<RolloutTargetStatus, Long> statusCountDetails = rolloutTargetsStatus.getStatusCountDetails();
+        if (statusCountDetails.containsKey(RolloutTargetsStatusCount.RolloutTargetStatus.NOTSTARTED)
+                && statusCountDetails.get(RolloutTargetsStatusCount.RolloutTargetStatus.NOTSTARTED) == 0) {
+            final String readyStatus = RolloutTargetsStatusCount.RolloutTargetStatus.READY.toString().toLowerCase();
+            bar.setPartTooltip(i, readyStatus);
+            bar.setPartStyleName(i, STATUS_BAR_PART + readyStatus);
+            final String finishedStatus = RolloutTargetsStatusCount.RolloutTargetStatus.FINISHED.toString()
+                    .toLowerCase();
+            bar.setPartTooltip(i + 1, finishedStatus);
+            bar.setPartStyleName(i + 1, STATUS_BAR_PART + finishedStatus);
+        } else {
+            bar.setNumberOfParts(statusCountDetails.entrySet().size());
+            for (final Map.Entry<RolloutTargetsStatusCount.RolloutTargetStatus, Long> entry : statusCountDetails
+                    .entrySet()) {
+                if (entry.getValue() > 0) {
+                    bar.setPartSize(i, entry.getValue().intValue());
+                    bar.setPartTooltip(i, entry.getKey().toString().toLowerCase());
+                    bar.setPartStyleName(i, STATUS_BAR_PART + entry.getKey().toString().toLowerCase());
+                    i++;
+                }
+            }
+        }
+        return bar;
     }
 
     /**

@@ -97,6 +97,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTarFilter.setCreatedBy(HawkbitCommonUtil.getIMUser(tarFilterQuery.getCreatedBy()));
             proxyTarFilter.setModifiedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getLastModifiedAt()));
             proxyTarFilter.setLastModifiedBy(HawkbitCommonUtil.getIMUser(tarFilterQuery.getLastModifiedBy()));
+            proxyTarFilter.setQuery(tarFilterQuery.getQuery());
             proxyTargetFilter.add(proxyTarFilter);
         }
         return proxyTargetFilter;

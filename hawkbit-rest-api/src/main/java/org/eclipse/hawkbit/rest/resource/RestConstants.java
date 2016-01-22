@@ -155,6 +155,11 @@ public final class RestConstants {
     public static final String DISTRIBUTIONSET_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/distributionsets";
 
     /**
+     * The rollout URL mapping rest resource.
+     */
+    public static final String ROLLOUT_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/rollouts";
+
+    /**
      * The target URL mapping, href link for artifact download.
      */
     public static final String SOFTWAREMODULE_V1_ARTIFACT = "artifacts";

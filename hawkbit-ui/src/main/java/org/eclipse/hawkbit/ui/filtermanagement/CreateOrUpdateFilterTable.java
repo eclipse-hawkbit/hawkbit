@@ -185,7 +185,7 @@ public class CreateOrUpdateFilterTable extends Table {
         columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, i18n
                 .get("header.installed.ds"), 0.125F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.target.status"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
         return columnList;
     }
 

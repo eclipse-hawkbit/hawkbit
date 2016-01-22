@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -278,4 +279,25 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     @Query("UPDATE Target t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
     void setAssignedDistributionSet(@Param("set") DistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
+
+    List<Target> findByRolloutTargetGroupRolloutGroup(final RolloutGroup rolloutGroup);
+
+    /**
+     * Find count of all targets in a rollout.
+     * 
+     * @param rolloutId
+     *            id of rollout
+     * @return count of targets in rollout
+     */
+    Long countByRolloutTargetGroupRolloutGroupRolloutId(Long rolloutId);
+
+    /**
+     * Find count of all targets in a rolloutgroup.
+     * 
+     * @param rolloutGroupId
+     *            id of rolloutgroup
+     * @return count of targets in rolloutgroup
+     */
+    Long countByRolloutTargetGroupRolloutGroupId(Long rolloutGroupId);
+
 }

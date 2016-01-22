@@ -98,9 +98,9 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         // service
         final String currentTenant = SystemManagementHolder.getInstance().currentTenant();
         if (currentTenant == null) {
-            throw new TenantNotExistException(
-                    "Tenant " + TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant()
-                            + " does not exists, cannot create entity " + this.getClass() + " with id " + id);
+            throw new TenantNotExistException("Tenant "
+                    + TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant()
+                    + " does not exists, cannot create entity " + this.getClass() + " with id " + id);
         }
         setTenant(currentTenant.toUpperCase());
     }
