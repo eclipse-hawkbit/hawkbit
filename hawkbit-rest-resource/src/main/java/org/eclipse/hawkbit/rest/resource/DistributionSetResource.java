@@ -92,8 +92,6 @@ public class DistributionSetResource {
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private EntityManager entityManager;
 
     /**
      * Handles the GET request of retrieving all {@link DistributionSet}s within
@@ -130,7 +128,7 @@ public class DistributionSetResource {
         final Page<DistributionSet> findDsPage;
         if (rsqlParam != null) {
             findDsPage = distributionSetManagement.findDistributionSetsAll(
-                    RSQLUtility.parse(rsqlParam, DistributionSetFields.class, entityManager), pageable, false);
+                    RSQLUtility.parse(rsqlParam, DistributionSetFields.class), pageable, false);
         } else {
             findDsPage = distributionSetManagement.findDistributionSetsAll(pageable, false, null);
         }
@@ -281,7 +279,7 @@ public class DistributionSetResource {
         final Page<Target> targetsAssignedDS;
         if (rsqlParam != null) {
             targetsAssignedDS = targetManagement.findTargetByAssignedDistributionSet(distributionSetId,
-                    RSQLUtility.parse(rsqlParam, TargetFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
         } else {
             targetsAssignedDS = targetManagement.findTargetByAssignedDistributionSet(distributionSetId, pageable);
         }
@@ -331,7 +329,7 @@ public class DistributionSetResource {
         final Page<Target> targetsInstalledDS;
         if (rsqlParam != null) {
             targetsInstalledDS = targetManagement.findTargetByInstalledDistributionSet(distributionSetId,
-                    RSQLUtility.parse(rsqlParam, TargetFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
         } else {
             targetsInstalledDS = targetManagement.findTargetByInstalledDistributionSet(distributionSetId, pageable);
         }
@@ -410,7 +408,7 @@ public class DistributionSetResource {
 
         if (rsqlParam != null) {
             metaDataPage = distributionSetManagement.findDistributionSetMetadataByDistributionSetId(distributionSetId,
-                    RSQLUtility.parse(rsqlParam, DistributionSetMetadataFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, DistributionSetMetadataFields.class), pageable);
         } else {
             metaDataPage = distributionSetManagement.findDistributionSetMetadataByDistributionSetId(distributionSetId,
                     pageable);

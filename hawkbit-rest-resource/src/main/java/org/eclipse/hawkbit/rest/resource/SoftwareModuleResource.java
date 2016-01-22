@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.rest.resource;
 import java.io.IOException;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -74,9 +73,6 @@ public class SoftwareModuleResource {
 
     @Autowired
     private SoftwareManagement softwareManagement;
-
-    @Autowired
-    private EntityManager entityManager;
 
     /**
      * Handles POST request for artifact upload.
@@ -266,7 +262,7 @@ public class SoftwareModuleResource {
         Long countModulesAll;
         if (rsqlParam != null) {
             findModulesAll = softwareManagement.findSoftwareModulesByPredicate(
-                    RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class), pageable);
             countModulesAll = ((Page<SoftwareModule>) findModulesAll).getTotalElements();
         } else {
             findModulesAll = softwareManagement.findSoftwareModulesAll(pageable);
@@ -307,8 +303,8 @@ public class SoftwareModuleResource {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
+            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<SoftwareModulesRest> createSoftwareModules(
             @RequestBody final List<SoftwareModuleRequestBodyPost> softwareModules) {
         LOG.debug("creating {} softwareModules", softwareModules.size());
@@ -387,7 +383,8 @@ public class SoftwareModuleResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<MetadataRestPageList> getMetadata(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<MetadataRestPageList> getMetadata(
+            @PathVariable final Long softwareModuleId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -405,15 +402,13 @@ public class SoftwareModuleResource {
 
         if (rsqlParam != null) {
             metaDataPage = softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
-                    RSQLUtility.parse(rsqlParam, SoftwareModuleMetadataFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, SoftwareModuleMetadataFields.class), pageable);
         } else {
             metaDataPage = softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, pageable);
         }
 
-        return new ResponseEntity<>(
-                new MetadataRestPageList(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
-                        metaDataPage.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new MetadataRestPageList(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage
+                .getContent()), metaDataPage.getTotalElements()), HttpStatus.OK);
     }
 
     /**
@@ -426,8 +421,7 @@ public class SoftwareModuleResource {
      * @return status OK if get request is successful with the value of the meta
      *         data
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<MetadataRest> getMetadataValue(@PathVariable final Long softwareModuleId,
             @PathVariable final String metadataKey) {
         // check if distribution set exists otherwise throw exception
@@ -487,8 +481,8 @@ public class SoftwareModuleResource {
      *         the created meta data
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/metadata", consumes = {
-            MediaType.APPLICATION_JSON_VALUE,
-            "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE,
+            "application/hal+json" })
     public ResponseEntity<List<MetadataRest>> createMetadata(@PathVariable final Long softwareModuleId,
             @RequestBody final List<MetadataRest> metadataRest) {
         // check if software module exists otherwise throw exception immediately
@@ -501,8 +495,7 @@ public class SoftwareModuleResource {
 
     }
 
-    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,
-            final Long artifactId) {
+    private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId, final Long artifactId) {
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
         if (module == null) {
             throw new EntityNotFoundException("SoftwareModule with Id {" + softwareModuleId + "} does not exist");

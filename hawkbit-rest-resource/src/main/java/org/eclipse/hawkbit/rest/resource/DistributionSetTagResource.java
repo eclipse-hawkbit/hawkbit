@@ -60,8 +60,6 @@ public class DistributionSetTagResource {
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private EntityManager entityManager;
 
     /**
      * Handles the GET request of retrieving all DistributionSet tags.
@@ -103,7 +101,7 @@ public class DistributionSetTagResource {
 
         } else {
             final Page<DistributionSetTag> findTargetPage = tagManagement.findAllDistributionSetTags(
-                    RSQLUtility.parse(rsqlParam, TagFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, TagFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
 

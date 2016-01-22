@@ -205,8 +205,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Target> findTargetsAll(@NotNull final TargetFilterQuery targetFilterQuery,
             @NotNull final Pageable pageable) {
-        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, entityManager),
-                pageable);
+        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class), pageable);
     }
 
     /**
@@ -220,7 +219,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Target> findTargetsAll(@NotNull final String targetFilterQuery, @NotNull final Pageable pageable) {
-        return findTargetsAll(RSQLUtility.parse(targetFilterQuery, TargetFields.class, entityManager), pageable);
+        return findTargetsAll(RSQLUtility.parse(targetFilterQuery, TargetFields.class), pageable);
     }
 
     /**
@@ -351,9 +350,9 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     public Page<Target> findTargetByAssignedDistributionSet(@NotNull final Long distributionSetID,
             final Specification<Target> spec, @NotNull final Pageable pageReq) {
-        return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
-                TargetSpecifications.hasAssignedDistributionSet(distributionSetID).toPredicate(root, query, cb),
-                spec.toPredicate(root, query, cb)), pageReq);
+        return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(TargetSpecifications
+                .hasAssignedDistributionSet(distributionSetID).toPredicate(root, query, cb), spec.toPredicate(root,
+                query, cb)), pageReq);
     }
 
     /**
@@ -390,9 +389,9 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetId,
             final Specification<Target> spec, final Pageable pageable) {
-        return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
-                TargetSpecifications.hasInstalledDistributionSet(distributionSetId).toPredicate(root, query, cb),
-                spec.toPredicate(root, query, cb)), pageable);
+        return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(TargetSpecifications
+                .hasInstalledDistributionSet(distributionSetId).toPredicate(root, query, cb), spec.toPredicate(root,
+                query, cb)), pageable);
     }
 
     /**
@@ -487,8 +486,8 @@ public class TargetManagement {
             specList.add(TargetSpecifications.hasTargetUpdateStatus(status, fetch));
         }
         if (installedOrAssignedDistributionSetId != null) {
-            specList.add(
-                    TargetSpecifications.hasInstalledOrAssignedDistributionSet(installedOrAssignedDistributionSetId));
+            specList.add(TargetSpecifications
+                    .hasInstalledOrAssignedDistributionSet(installedOrAssignedDistributionSetId));
         }
         if (!Strings.isNullOrEmpty(searchText)) {
             specList.add(TargetSpecifications.likeNameOrDescriptionOrIp(searchText));
@@ -560,8 +559,8 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetTagAssigmentResult toggleTagAssignment(@NotEmpty final List<Target> targets,
             @NotNull final TargetTag tag) {
-        return toggleTagAssignment(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), tag.getName());
+        return toggleTagAssignment(targets.stream().map(target -> target.getControllerId())
+                .collect(Collectors.toList()), tag.getName());
     }
 
     /**
@@ -584,8 +583,8 @@ public class TargetManagement {
             @NotNull final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
         final List<Target> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName, targetIds);
-        final List<Target> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
+        final List<Target> allTargets = targetRepository.findAll(TargetSpecifications
+                .byControllerIdWithStatusAndTagsInJoin(targetIds));
 
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
@@ -741,20 +740,19 @@ public class TargetManagement {
         // select case expression to retrieve the case value as a column to be
         // able to order based on
         // this column, installed first,...
-        final Expression<Object> selectCase = cb.selectCase()
+        final Expression<Object> selectCase = cb
+                .selectCase()
                 .when(cb.equal(targetInfo.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
                         orderByDistributionId), 1)
                 .when(cb.equal(targetRoot.get(Target_.assignedDistributionSet).get(DistributionSet_.id),
-                        orderByDistributionId), 2)
-                .otherwise(100);
+                        orderByDistributionId), 2).otherwise(100);
         // multiselect statement order by the select case and controllerId
         query.distinct(true);
         // build the specifications and then to predicates necessary by the
         // given filters
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
                 buildSpecificationList(filterByStatus, filterBySearchText, filterByDistributionId,
-                        selectTargetWithNoTag, true, filterByTagNames),
-                targetRoot, query, cb);
+                        selectTargetWithNoTag, true, filterByTagNames), targetRoot, query, cb);
 
         // if we have some predicates then add it to the where clause of the
         // multiselect
@@ -828,8 +826,9 @@ public class TargetManagement {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<TargetIdName> query = cb.createQuery(TargetIdName.class);
         final Root<Target> targetRoot = query.from(Target.class);
-        return entityManager.createQuery(query.multiselect(targetRoot.get(Target_.id),
-                targetRoot.get(Target_.controllerId), targetRoot.get(Target_.name))).getResultList();
+        return entityManager.createQuery(
+                query.multiselect(targetRoot.get(Target_.id), targetRoot.get(Target_.controllerId),
+                        targetRoot.get(Target_.name))).getResultList();
 
     }
 
@@ -871,8 +870,7 @@ public class TargetManagement {
 
         final Predicate[] specificationsForMultiSelect = specificationsToPredicate(
                 buildSpecificationList(filterByStatus, filterBySearchText, filterByDistributionId,
-                        selectTargetWithNoTag, false, filterByTagNames),
-                targetRoot, multiselect, cb);
+                        selectTargetWithNoTag, false, filterByTagNames), targetRoot, multiselect, cb);
 
         // if we have some predicates then add it to the where clause of the
         // multiselect
@@ -905,8 +903,7 @@ public class TargetManagement {
                 targetRoot.get(Target_.controllerId), targetRoot.get(Target_.name),
                 targetRoot.get(pageRequest.getSort().iterator().next().getProperty()));
 
-        final Specification<Target> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                entityManager);
+        final Specification<Target> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         final List<Specification<Target>> specList = new ArrayList<>();
         specList.add(spec);
 
@@ -1003,17 +1000,16 @@ public class TargetManagement {
      *            to be created.
      * @return the created {@link Target}s
      *
-     * @throws {@link
-     *             EntityAlreadyExistsException} of one of the given targets
-     *             already exist.
+     * @throws {@link EntityAlreadyExistsException} of one of the given targets
+     *         already exist.
      */
     @Modifying
     @Transactional
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final List<Target> targets) {
-        if (targetRepository.countByControllerIdIn(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
+        if (targetRepository.countByControllerIdIn(targets.stream().map(target -> target.getControllerId())
+                .collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }
         final List<Target> savedTargets = new ArrayList<>();
@@ -1045,8 +1041,8 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final Collection<Target> targets,
             @NotNull final TargetUpdateStatus status, final long lastTargetQuery, final URI address) {
-        if (targetRepository.countByControllerIdIn(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
+        if (targetRepository.countByControllerIdIn(targets.stream().map(target -> target.getControllerId())
+                .collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }
         final List<Target> savedTargets = new ArrayList<>();
@@ -1080,8 +1076,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {
-        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                entityManager);
+        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         return targetRepository.count(specs);
     }
 
@@ -1094,7 +1089,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final String targetFilterQuery) {
-        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class, entityManager);
+        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
         return targetRepository.count(specs);
     }
 
