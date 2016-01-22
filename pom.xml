@@ -44,9 +44,9 @@
 
 
    <scm>
-      <connection>scm:git:https://github.com/eclipse/hawkbit.git</connection>
-      <developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</developerConnection>
-      <url>https://github.com/eclipse/hawkbit.git</url>
+      <connection>${release.scm.connection}</connection>
+      <developerConnection>${release.scm.developerConnection}</developerConnection>
+      <url>${release.scm.url}</url>
    </scm>
 
    <repositories>
@@ -86,6 +86,11 @@
       <json-path.version>0.9.1</json-path.version>
       <commons-lang3.version>3.4</commons-lang3.version>
       <aspectj.version>1.8.5</aspectj.version>
+
+      <!-- Release -->
+      <release.scm.connection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.connection>
+      <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
+      <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
 
       <!-- Sonar -->
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
