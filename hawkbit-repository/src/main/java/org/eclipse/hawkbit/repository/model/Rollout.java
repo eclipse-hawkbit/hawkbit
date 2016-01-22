@@ -23,6 +23,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -61,6 +62,10 @@ public class Rollout extends NamedEntity {
 
     @Column(name = "forced_time")
     private long forcedTime;
+    
+    @Transient
+    private boolean isNew = false;
+
 
     /**
      * @return the distributionSet
@@ -165,6 +170,20 @@ public class Rollout extends NamedEntity {
      */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
+    }
+    /**
+     * @return the isNew
+     */
+    public boolean isNew() {
+        return isNew;
+    }
+
+    /**
+     * @param isNew
+     *            the isNew to set
+     */
+    public void setNew(final boolean isNew) {
+        this.isNew = isNew;
     }
 
     @Override

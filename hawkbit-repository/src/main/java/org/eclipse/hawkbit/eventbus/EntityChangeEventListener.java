@@ -15,6 +15,8 @@ import javax.persistence.EntityManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.eclipse.hawkbit.eventbus.event.RolloutGroupStatusUpdateEvent;
+import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
@@ -26,6 +28,8 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.google.common.eventbus.EventBus;
 
@@ -144,4 +148,49 @@ public class EntityChangeEventListener {
     private boolean isTargetInfoNew(final Object targetInfo) {
         return ((TargetInfo) targetInfo).isNew();
     }
+    
+//    Rollout -changes start here
+    @Around("execution(* org.eclipse.hawkbit.repository.RolloutRepository.save(..))")
+    public Object rolloutUpdated(final ProceedingJoinPoint joinpoint) throws Throwable {
+        final boolean isNew = isRolloutNew(joinpoint.getArgs()[0]);
+        final Object result = joinpoint.proceed();
+        if (result instanceof Rollout) {
+            if (!isNew) {
+                notifyRolloutStatusChanged((Rollout) result);
+            }
+        }
+        return result;
+    }
+
+    private boolean isRolloutNew(final Object rollout) {
+        return ((Rollout) rollout).isNew();
+    }
+
+    private void notifyRolloutStatusChanged(final Rollout rollout) {
+        eventBus.post(new RolloutStatusUpdateEvent(rollout));
+    }
+
+    @Around("execution(* org.eclipse.hawkbit.repository.RolloutGroupRepository.save(..))")
+    public Object rolloutGroupUpdated(final ProceedingJoinPoint joinpoint) throws Throwable {
+        final boolean isNew = isRolloutGroupNew(joinpoint.getArgs()[0]);
+        final Object result = joinpoint.proceed();
+        if (result instanceof RolloutGroup) {
+            if (!isNew) {
+                notifyRolloutGroupStatusChanged((RolloutGroup) result);
+            }
+        }
+        return result;
+    }
+
+    private boolean isRolloutGroupNew(final Object rolloutGroup) {
+        return ((RolloutGroup) rolloutGroup).isNew();
+    }
+
+    private void notifyRolloutGroupStatusChanged(final RolloutGroup rolloutGroup) {
+        eventBus.post(new RolloutGroupStatusUpdateEvent(rolloutGroup));
+    }
+    
+//  Rollout -changes end here
+
+    
 }

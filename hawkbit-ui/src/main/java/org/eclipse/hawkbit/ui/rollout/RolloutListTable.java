@@ -9,15 +9,16 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -44,6 +45,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -100,6 +102,20 @@ public class RolloutListTable extends AbstractSimpleTable {
         if (event == RolloutEvent.FILTER_BY_TEXT || event == RolloutEvent.CREATE_ROLLOUT
                 || event == RolloutEvent.UPDATE_ROLLOUT || event == RolloutEvent.SHOW_ROLLOUTS) {
             refreshTable();
+        }
+    }
+    /**
+     * EventListener method which is called when a list of events is published.
+     * Event types should not be mixed up.
+     *
+     * @param events
+     *            list of events
+     */
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    public void onEvents(final List<?> events) {
+        final Object firstEvent = events.get(0);
+        if (RolloutStatusUpdateEvent.class.isInstance(firstEvent)) {
+            onRolloutStatusChange((List<RolloutStatusUpdateEvent>) events);
         }
     }
 
@@ -180,10 +196,6 @@ public class RolloutListTable extends AbstractSimpleTable {
 
     @Override
     protected void addCustomGeneratedColumns() {
-        final Map<String, Integer> hmRunningStatus = new HashMap<>();
-        hmRunningStatus.put("running", 700);
-        hmRunningStatus.put("retrieved", 100);
-        hmRunningStatus.put("downloaded", 200);
         addGeneratedColumn(SPUIDefinitions.ROLLOUT_NAME, (source, itemId, columnId) -> getRolloutNameLink(itemId));
         addGeneratedColumn(SPUIDefinitions.ROLLOUT_STATUS, (source, itemId, columnId) -> getStatusLabel(itemId));
         addGeneratedColumn(SPUIDefinitions.DELETE, (source, itemId, columnId) -> getDeleteButton(itemId));
@@ -258,15 +270,15 @@ public class RolloutListTable extends AbstractSimpleTable {
         if (contextMenuData.getAction() == ACTION.PAUSE) {
             rolloutManagement.pauseRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
-            refreshTable();
+            // refreshTable();
         } else if (contextMenuData.getAction() == ACTION.RESUME) {
             rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
-            refreshTable();
+            // refreshTable();
         } else if (contextMenuData.getAction() == ACTION.START) {
             rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
-            refreshTable();
+            // refreshTable();
         } else if (contextMenuData.getAction() == ACTION.UPDATE) {
             addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
             final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
@@ -276,7 +288,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         } else if (contextMenuData.getAction() == ACTION.CANCEL) {
             // TODO ass cancel logic here
         }
-
     }
 
     private void onAction(final ClickEvent event) {
@@ -348,16 +359,25 @@ public class RolloutListTable extends AbstractSimpleTable {
 
     private Label getStatusLabel(final Object itemId) {
         final Label statusLabel = new Label();
-        statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
         statusLabel.setHeightUndefined();
         statusLabel.setContentMode(ContentMode.HTML);
         statusLabel.setId(getRolloutStatusId(itemId));
         setStatusIcon(itemId, statusLabel);
         statusLabel.setDescription(getDescription(itemId));
         statusLabel.setSizeUndefined();
+        addPropertyChangeListener(itemId, statusLabel);
         return statusLabel;
     }
-
+    private void addPropertyChangeListener(final Object itemId, final Label statusLabel) {
+        final Property status = getContainerProperty(itemId, SPUILabelDefinitions.VAR_STATUS);
+        final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
+        notifier.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                setStatusIcon(itemId, statusLabel);
+            }
+        });
+    }
     private String getRolloutStatusId(final Object itemId) {
         final String rolloutName = (String) getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         return new StringBuilder(SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID).append(".").append(rolloutName)
@@ -387,28 +407,45 @@ public class RolloutListTable extends AbstractSimpleTable {
         switch (rolloutStatus) {
         case FINISHED:
             statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-            statusLabel.addStyleName("statusIconGreen");
+            statusLabel.setStyleName("statusIconGreen");
             break;
         case PAUSED:
             statusLabel.setValue(FontAwesome.PAUSE.getHtml());
-            statusLabel.addStyleName("statusIconBlue");
+            statusLabel.setStyleName("statusIconBlue");
             break;
         case RUNNING:
             statusLabel.setValue(FontAwesome.ADJUST.getHtml());
-            statusLabel.addStyleName("statusIconYellow");
+            statusLabel.setStyleName("statusIconYellow");
             break;
         case READY:
             statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
-            statusLabel.addStyleName("statusIconLightBlue");
+            statusLabel.setStyleName("statusIconLightBlue");
             break;
         case STOPPED:
             statusLabel.setValue(FontAwesome.STOP.getHtml());
-            statusLabel.addStyleName("statusIconRed");
+            statusLabel.setStyleName("statusIconRed");
             break;
         default:
             break;
         }
+        statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
+    private void onRolloutStatusChange(final List<RolloutStatusUpdateEvent> rolloutEvents) {
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        for (final RolloutStatusUpdateEvent rolloutStatusUpdateEvent : rolloutEvents) {
+            final Rollout rollout = rolloutStatusUpdateEvent.getEntity();
+            if (visibleItemIds.contains(rollout.getId())) {
+                updateVisibleItemOnEvent(rollout);
+            }
+        }
+    }
+
+    private void updateVisibleItemOnEvent(final Rollout rollout) {
+        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+        final Item item = rolloutContainer.getItem(rollout.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
+    }
+
 
     private void refreshTable() {
         final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();

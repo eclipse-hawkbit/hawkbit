@@ -235,6 +235,7 @@ public class RolloutManagement {
             throw new IllegalArgumentException("the amountGroup must not be greater than 500");
         }
 
+        rollout.setNew(true);
         final Rollout savedRollout = rolloutRepository.save(rollout);
         final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
         int pageIndex = 0;
@@ -253,7 +254,8 @@ public class RolloutManagement {
             group.setErrorConditionExp(conditions.getErrorConditionExp());
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
-
+            group.setNew(true);
+            
             final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
             lastSavedGroup = savedGroup;
             final Slice<Target> targetGroup = targetManagement.findTargetsAll(savedRollout.getTargetFilterQuery(),
@@ -307,6 +309,7 @@ public class RolloutManagement {
                 deploymentManagement.assignDistributionSet(distributionSet.getId(), targetsWithActionType, rollout,
                         rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
+                rolloutGroup.setNew(false);
                 rolloutGroupRepository.save(rolloutGroup);
             }
             // create only not active actions with status scheduled so they can
@@ -315,6 +318,7 @@ public class RolloutManagement {
                 deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
                         mergedRollout, rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
+                rolloutGroup.setNew(false);
                 rolloutGroupRepository.save(rolloutGroup);
             }
 
@@ -329,6 +333,7 @@ public class RolloutManagement {
         }
         // set rollout into running status
         mergedRollout.setStatus(RolloutStatus.RUNNING);
+        mergedRollout.setNew(false);
         rolloutRepository.save(mergedRollout);
     }
 
@@ -367,6 +372,7 @@ public class RolloutManagement {
         // periodically check for running rollouts will skip rollouts in pause
         // state.
         mergedRollout.setStatus(RolloutStatus.PAUSED);
+        mergedRollout.setNew(false);
         rolloutRepository.save(mergedRollout);
     }
 
@@ -392,6 +398,7 @@ public class RolloutManagement {
                     + rollout.getStatus().name().toLowerCase());
         }
         mergedRollout.setStatus(RolloutStatus.RUNNING);
+        mergedRollout.setNew(false);
         rolloutRepository.save(mergedRollout);
     }
 
@@ -480,6 +487,7 @@ public class RolloutManagement {
                             checkFinishCondition(rollout, rolloutGroup, finishedCondition);
                             if (isRolloutGroupComplete(rollout, rolloutGroup)) {
                                 rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
+                                rolloutGroup.setNew(false);
                                 rolloutGroupRepository.save(rolloutGroup);
                             }
 
@@ -491,6 +499,7 @@ public class RolloutManagement {
                 if (isRolloutComplete(rollout)) {
                     logger.info("Rollout {} is finished, setting finished status", rollout);
                     rollout.setStatus(RolloutStatus.FINISHED);
+                    rollout.setNew(false);
                     rolloutRepository.save(rollout);
                 }
             }
@@ -643,6 +652,7 @@ public class RolloutManagement {
     // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Rollout updateRollout(@NotNull final Rollout rollout) {
         Assert.notNull(rollout.getId());
+        rollout.setNew(false);
         return rolloutRepository.save(rollout);
     }
 
