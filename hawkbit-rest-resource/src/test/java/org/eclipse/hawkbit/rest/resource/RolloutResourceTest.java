@@ -158,8 +158,9 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
 
         // retrieve rollout groups from created rollout
-        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/groups", rollout.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$content", hasSize(4))).andExpect(jsonPath("$total", equalTo(4)))
                 .andExpect(jsonPath("$content[0].status", equalTo("ready")))
                 .andExpect(jsonPath("$content[1].status", equalTo("ready")))
@@ -306,7 +307,7 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
 
         // retrieve rollout groups from created rollout - 2 groups exists
         // (amountTargets / groupSize = 2)
-        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/groups?sort=ID:ASC", rollout.getId()))
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups?sort=ID:ASC", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)))
@@ -331,7 +332,7 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .get(0);
 
         // retrieve single rollout group with known ID
-        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/groups/{groupId}", rollout.getId(), firstGroup.getId()))
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("id", equalTo(firstGroup.getId().intValue())))

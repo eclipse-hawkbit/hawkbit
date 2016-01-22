@@ -270,7 +270,7 @@ public class RolloutResource {
      *         paged. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/groups", produces = {
+    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     public ResponseEntity<RolloutGroupPagedList> getRolloutGroups(
             @PathVariable("rolloutId") final Long rolloutId,
@@ -310,7 +310,7 @@ public class RolloutResource {
      * @return the OK response containing the {@link RolloutGroupResponseBody}
      * @throws EntityNotFoundException
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/groups/{groupId}", produces = {
+    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
     public ResponseEntity<RolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId) {
