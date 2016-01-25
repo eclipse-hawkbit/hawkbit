@@ -23,6 +23,12 @@ public class RolloutTargetsStatusCount {
 
     final Map<RolloutTargetStatus, Long> statusCountDetails = new HashMap<RolloutTargetsStatusCount.RolloutTargetStatus, Long>();
 
+    public RolloutTargetsStatusCount() {
+        for (final RolloutTargetStatus status : RolloutTargetStatus.values()) {
+            statusCountDetails.put(status, 0L);
+        }
+    }
+
     /**
      * @return the statusCountDetails
      */

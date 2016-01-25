@@ -46,7 +46,7 @@ public class ProxyRollout extends Rollout {
 
     private Long notStartedTargetsCount;
 
-    private Boolean isActionRecieved;
+    private Boolean isActionRecieved = Boolean.FALSE;
 
     /**
      * @return the distributionSetNameVersion

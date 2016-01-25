@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupStatusUpdateEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
@@ -22,14 +23,15 @@ import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 import com.google.common.eventbus.EventBus;
 
@@ -148,8 +150,8 @@ public class EntityChangeEventListener {
     private boolean isTargetInfoNew(final Object targetInfo) {
         return ((TargetInfo) targetInfo).isNew();
     }
-    
-//    Rollout -changes start here
+
+    // Rollout -changes start here
     @Around("execution(* org.eclipse.hawkbit.repository.RolloutRepository.save(..))")
     public Object rolloutUpdated(final ProceedingJoinPoint joinpoint) throws Throwable {
         final boolean isNew = isRolloutNew(joinpoint.getArgs()[0]);
@@ -189,8 +191,25 @@ public class EntityChangeEventListener {
     private void notifyRolloutGroupStatusChanged(final RolloutGroup rolloutGroup) {
         eventBus.post(new RolloutGroupStatusUpdateEvent(rolloutGroup));
     }
-    
-//  Rollout -changes end here
 
-    
+    @SuppressWarnings("unchecked")
+    @Around("execution(* org.eclipse.hawkbit.repository.ActionRepository.save(..))")
+    public Object actionCreated(final ProceedingJoinPoint joinpoint) throws Throwable {
+        final String currentTenant = tenantAware.getCurrentTenant();
+        final Object result = joinpoint.proceed();
+        final Object param = joinpoint.getArgs()[0];
+        if (param instanceof Action) {
+            final Action action = (Action) param;
+            if (action.getRollout() != null) {
+                notifyActionCreated(currentTenant, (Action) param);
+            }
+        }
+        return result;
+    }
+
+    private void notifyActionCreated(final String currentTenant, final Action action) {
+        afterCommit.afterCommit(() -> eventBus.post(new ActionCreatedEvent(action)));
+    }
+    // Rollout -changes end here
+
 }

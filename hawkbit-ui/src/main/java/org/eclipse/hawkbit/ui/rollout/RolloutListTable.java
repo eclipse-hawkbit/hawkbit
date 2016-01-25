@@ -9,20 +9,26 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -115,7 +121,53 @@ public class RolloutListTable extends AbstractSimpleTable {
         final Object firstEvent = events.get(0);
         if (RolloutStatusUpdateEvent.class.isInstance(firstEvent)) {
             onRolloutStatusChange((List<RolloutStatusUpdateEvent>) events);
+        } else if (ActionCreatedEvent.class.isInstance(firstEvent)) {
+            onActionCreation((List<ActionCreatedEvent>) events);
         }
+    }
+
+    private void onActionCreation(final List<ActionCreatedEvent> events) {
+        getPageLength();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        for (final ActionCreatedEvent event : events) {
+            if (visibleItemIds.contains(event.getEntity().getRollout().getId())) {
+                final Item item = getItem(event.getEntity().getRollout().getId());
+                final Action.Status actionstatus = event.getEntity().getStatus();
+                if (actionstatus == Status.RUNNING || actionstatus == Status.RETRIEVED
+                        || actionstatus == Status.WARNING || actionstatus == Status.DOWNLOAD) {
+                    increamentCountandSet("runningTargetsCount", item);
+                    decrementCountAndSet("scheduledTargetsCount", item);
+                } else if (actionstatus == Status.FINISHED) {
+                    increamentCountandSet("finishedTargetsCount", item);
+                    decrementCountAndSet("runningTargetsCount", item);
+                } else if (actionstatus == Status.ERROR) {
+                    // TODO check this
+                    increamentCountandSet("errorTargetsCount", item);
+                    decrementCountAndSet("runningTargetsCount", item);
+                } else if (actionstatus == Status.CANCELED || actionstatus == Status.CANCELING) {
+                    // TODO check this
+                    increamentCountandSet("cancelledTargetsCount", item);
+                    decrementCountAndSet("runningTargetsCount", item);
+                }
+                final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
+                item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
+            }
+        }
+    }
+
+    private void decrementCountAndSet(final String statusProperty, final Item item) {
+        Long count = (Long) item.getItemProperty(statusProperty).getValue();
+        if (count != null && count > 0) {
+            item.getItemProperty(statusProperty).setValue(--count);
+        }
+        if (count != null && count == 0 && statusProperty.equals("notStartedTargetsCount")) {
+            item.getItemProperty(statusProperty).setValue(null);
+        }
+    }
+
+    private void increamentCountandSet(final String statusProperty, final Item item) {
+        Long count = (Long) item.getItemProperty(statusProperty).getValue();
+        item.getItemProperty(statusProperty).setValue(++count);
     }
 
     @Override
@@ -277,7 +329,14 @@ public class RolloutListTable extends AbstractSimpleTable {
         } else if (contextMenuData.getAction() == ACTION.START) {
             rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
-            // refreshTable();
+            final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement
+                    .getRolloutDetailedStatus(contextMenuData.getRolloutId());
+            row.getItemProperty("scheduledTargetsCount").setValue(
+                    getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.READY));
+            row.getItemProperty("notStartedTargetsCount").setValue(
+                    getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.NOTSTARTED));
+            row.getItemProperty("runningTargetsCount").setValue(
+                    getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.RUNNING));
         } else if (contextMenuData.getAction() == ACTION.UPDATE) {
             addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
             final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
@@ -287,6 +346,14 @@ public class RolloutListTable extends AbstractSimpleTable {
         } else if (contextMenuData.getAction() == ACTION.CANCEL) {
             // TODO ass cancel logic here
         }
+    }
+
+    private Long getTargetsCountInStatus(final RolloutTargetsStatusCount rolloutTargetsStatus,
+            final RolloutTargetStatus status) {
+        if (rolloutTargetsStatus.getStatusCountDetails().containsKey(status)) {
+            return rolloutTargetsStatus.getStatusCountDetails().get(status);
+        }
+        return 0L;
     }
 
     private void onAction(final ClickEvent event) {
@@ -327,42 +394,86 @@ public class RolloutListTable extends AbstractSimpleTable {
         final DistributionBar bar = new DistributionBar(2);
         bar.setSizeFull();
         bar.setZeroSizedVisible(false);
+        initialiseProgressBar(bar, itemId);
+        addPropertyChangeListenerOnActionRecieved(itemId, bar);
+        return bar;
+    }
+
+    private void initialiseProgressBar(final DistributionBar bar, final Object itemId) {
         final Item item = getItem(itemId);
         final Long notStartedTargetsCount = getStatusCount("notStartedTargetsCount", item);
-        if (notStartedTargetsCount != null && notStartedTargetsCount == 0) {
-            setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(), 0, 0);
-            setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(), 0, 1);
+        final Long runningTargetsCount = getStatusCount("runningTargetsCount", item);
+        final Long scheduledTargetsCount = getStatusCount("scheduledTargetsCount", item);
+        final Long errorTargetsCount = getStatusCount("errorTargetsCount", item);
+        final Long finishedTargetsCount = getStatusCount("finishedTargetsCount", item);
+        final Long cancelledTargetsCount = getStatusCount("cancelledTargetsCount", item);
+        if (isNoTargetsInRollout(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
+                finishedTargetsCount, cancelledTargetsCount)) {
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(), 0, 0);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(), 0, 1);
 
         } else {
             bar.setNumberOfParts(6);
             if (notStartedTargetsCount != null) {
-                setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(),
+                HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(),
                         notStartedTargetsCount.intValue(), 0);
             } else {
-                setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(), 0, 0);
+                HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(), 0, 0);
             }
-            setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(),
-                    getStatusCount("scheduledTargetsCount", item).intValue(), 1);
-            setBarPartSize(bar, RolloutTargetStatus.RUNNING.toString().toLowerCase(),
-                    getStatusCount("runningTargetsCount", item).intValue(), 2);
-            setBarPartSize(bar, RolloutTargetStatus.ERROR.toString().toLowerCase(),
-                    getStatusCount("errorTargetsCount", item).intValue(), 3);
-            setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(),
-                    getStatusCount("finishedTargetsCount", item).intValue(), 4);
-            setBarPartSize(bar, RolloutTargetStatus.CANCELLED.toString().toLowerCase(),
-                    getStatusCount("cancelledTargetsCount", item).intValue(), 5);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(),
+                    scheduledTargetsCount.intValue(), 1);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.RUNNING.toString().toLowerCase(),
+                    runningTargetsCount.intValue(), 2);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.ERROR.toString().toLowerCase(),
+                    errorTargetsCount.intValue(), 3);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(),
+                    finishedTargetsCount.intValue(), 4);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.CANCELLED.toString().toLowerCase(),
+                    cancelledTargetsCount.intValue(), 5);
         }
-        return bar;
+    }
+
+    private boolean isNoTargetsInRollout(final Long... statusCount) {
+        if (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    private void setTargetCount(final DistributionBar bar, final Item item) {
+        final Long notStartedTargetsCount = getStatusCount("notStartedTargetsCount", item);
+        if (notStartedTargetsCount != null) {
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(),
+                    notStartedTargetsCount.intValue(), 0);
+        } else {
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(), 0, 0);
+        }
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(),
+                getStatusCount("scheduledTargetsCount", item).intValue(), 1);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.RUNNING.toString().toLowerCase(),
+                getStatusCount("runningTargetsCount", item).intValue(), 2);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.ERROR.toString().toLowerCase(),
+                getStatusCount("errorTargetsCount", item).intValue(), 3);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(),
+                getStatusCount("finishedTargetsCount", item).intValue(), 4);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.CANCELLED.toString().toLowerCase(),
+                getStatusCount("cancelledTargetsCount", item).intValue(), 5);
+    }
+
+    private void addPropertyChangeListenerOnActionRecieved(final Object itemId, final DistributionBar bar) {
+        final Property status = getContainerProperty(itemId, "isActionRecieved");
+        final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
+        notifier.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                setTargetCount(bar, getItem(itemId));
+            }
+        });
+
     }
 
     private Long getStatusCount(final String propertName, final Item item) {
         return (Long) item.getItemProperty(propertName).getValue();
-    }
-
-    private void setBarPartSize(final DistributionBar bar, final String statusName, final int count, final int index) {
-        bar.setPartSize(index, count);
-        bar.setPartTooltip(index, statusName);
-        bar.setPartStyleName(index, "status-bar-part-" + statusName);
     }
 
     private Button getDeleteButton(final Object itemId) {

@@ -134,20 +134,18 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
 
             final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement.getRolloutDetailedStatus(rollout
                     .getId());
-            proxyRollout.setRunningTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+            proxyRollout.setRunningTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
                     RolloutTargetStatus.RUNNING));
-            proxyRollout.setErrorTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.ERROR));
-            proxyRollout.setCancelledTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+            proxyRollout.setErrorTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.ERROR));
+            proxyRollout.setCancelledTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
                     RolloutTargetStatus.CANCELLED));
-            proxyRollout.setFinishedTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+            proxyRollout.setFinishedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
                     RolloutTargetStatus.FINISHED));
-            proxyRollout.setScheduledTargetsCount(getTargetsCountInStatus(rolloutTargetsStatus,
+            proxyRollout.setScheduledTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
                     RolloutTargetStatus.READY));
-            if (rolloutTargetsStatus.getStatusCountDetails().containsKey(
-                    RolloutTargetsStatusCount.RolloutTargetStatus.NOTSTARTED)) {
-                proxyRollout.setNotStartedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                        RolloutTargetStatus.NOTSTARTED));
-            }
+            proxyRollout.setNotStartedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.NOTSTARTED));
             proxyRolloutList.add(proxyRollout);
         }
         return proxyRolloutList;
