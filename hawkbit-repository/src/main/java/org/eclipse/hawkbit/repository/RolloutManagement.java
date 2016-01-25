@@ -746,7 +746,7 @@ public class RolloutManagement {
      * @return Page<Target> list of targets of a rollout group
      */
     public Page<Target> getRolloutGroupTargets(final RolloutGroup rolloutGroup, final Pageable page) {
-        if (rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
+        if (rolloutGroup != null && rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
