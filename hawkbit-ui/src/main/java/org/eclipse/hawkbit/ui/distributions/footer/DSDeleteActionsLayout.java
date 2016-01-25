@@ -541,14 +541,4 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         return getCurrentDistributionSetType() != null && getCurrentDistributionSetType().getName().equals(dsTypeName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
-     * hasReadPermission()
-     */
-    @Override
-    protected boolean hasReadPermission() {
-        return permChecker.hasReadDistributionPermission();
-    }
 }
