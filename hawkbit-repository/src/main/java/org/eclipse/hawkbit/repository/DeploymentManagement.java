@@ -422,8 +422,8 @@ public class DeploymentManagement {
         target.getTargetInfo().setUpdateStatus(TargetUpdateStatus.PENDING);
         afterCommit.afterCommit(() -> {
             eventBus.post(new TargetInfoUpdateEvent(target.getTargetInfo()));
-            eventBus.post(new TargetAssignDistributionSetEvent(target.getControllerId(), actionId, softwareModules,
-                    target.getTargetInfo().getAddress()));
+            eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(), target
+                    .getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress()));
         });
     }
 
@@ -543,8 +543,8 @@ public class DeploymentManagement {
      *            the action id of the assignment
      */
     private void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
-        afterCommit.afterCommit(() -> eventBus.post(new CancelTargetAssignmentEvent(target.getControllerId(), actionId,
-                target.getTargetInfo().getAddress())));
+        afterCommit.afterCommit(() -> eventBus.post(new CancelTargetAssignmentEvent(target.getOptLockRevision(), target
+                .getTenant(), target.getControllerId(), actionId, target.getTargetInfo().getAddress())));
     }
 
     /**
@@ -683,7 +683,7 @@ public class DeploymentManagement {
 
         // in case we canceled an action before for this target, then don't fire
         // assignment event
-        if (overrideObsoleteUpdateActions.contains(savedAction.getId())) {
+        if (!overrideObsoleteUpdateActions.contains(savedAction.getId())) {
             final List<SoftwareModule> softwareModules = softwareModuleRepository.findByAssignedTo(action
                     .getDistributionSet());
             // send distribution set assignment event
