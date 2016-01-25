@@ -107,6 +107,9 @@ final class RolloutMapper {
         body.setName(rolloutGroup.getName());
         body.setRolloutGroupId(rolloutGroup.getId());
         body.setStatus(rolloutGroup.getStatus().toString().toLowerCase());
+        body.add(linkTo(
+                methodOn(RolloutResource.class)
+                        .getRolloutGroup(rolloutGroup.getRollout().getId(), rolloutGroup.getId())).withRel("self"));
         return body;
     }
 

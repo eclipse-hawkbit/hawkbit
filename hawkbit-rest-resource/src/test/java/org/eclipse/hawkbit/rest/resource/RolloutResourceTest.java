@@ -17,6 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.MockMvcResultPrinter;
 import org.eclipse.hawkbit.TestDataUtil;
@@ -27,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -337,6 +340,82 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("id", equalTo(firstGroup.getId().intValue())))
                 .andExpect(jsonPath("status", equalTo("ready"))).andExpect(jsonPath("name", notNullValue()));
+    }
+
+    @Test
+    @Description("Testing that the targets of rollout group can be retrieved")
+    public void retrieveTargetsFromRolloutGroup() throws Exception {
+        // setup
+        final int amountTargets = 10;
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+
+        final RolloutGroup firstGroup = rolloutManagement
+                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+                .get(0);
+
+        // retrieve targets from the first rollout group with known ID
+        mvc.perform(
+                get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(), firstGroup.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
+    }
+
+    @Test
+    @Description("Testing that the targets of rollout group can be retrieved with rsql query param")
+    public void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
+        // setup
+        final int amountTargets = 10;
+        final List<Target> targets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets,
+                "rollout", "rollout"));
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+
+        final RolloutGroup firstGroup = rolloutManagement
+                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+                .get(0);
+
+        // retrieve targets from the first rollout group with known ID
+        mvc.perform(
+                get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(), firstGroup.getId())
+                        .param("q", "controllerId==" + targets.get(0).getControllerId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)));
+    }
+
+    @Test
+    @Description("Testing that the targets of rollout group can be retrieved after the rollout has been started")
+    public void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
+        // setup
+        final int amountTargets = 10;
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+
+        rolloutManagement.startRollout(rollout);
+
+        final RolloutGroup firstGroup = rolloutManagement
+                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+                .get(0);
+
+        // retrieve targets from the first rollout group with known ID
+        mvc.perform(
+                get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(), firstGroup.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
     }
 
     private void postRollout(final String name, final int groupSize, final long distributionSetId,

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetSta
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -35,8 +37,10 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroup_;
 import org.eclipse.hawkbit.repository.model.RolloutStatusCountItem;
 import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
+import org.eclipse.hawkbit.repository.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.Rollout_;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -255,7 +259,7 @@ public class RolloutManagement {
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
             group.setNew(true);
-            
+
             final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
             lastSavedGroup = savedGroup;
             final Slice<Target> targetGroup = targetManagement.findTargetsAll(savedRollout.getTargetFilterQuery(),
@@ -742,7 +746,53 @@ public class RolloutManagement {
      * @return Page<Target> list of targets of a rollout group
      */
     public Page<Target> getRolloutGroupTargets(final RolloutGroup rolloutGroup, final Pageable page) {
-        return actionRepository.getTargetsForRolloutGroup(rolloutGroup, page);
+        if (rolloutGroup != null && rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
+            // in case of status ready the action has not been created yet and
+            // the relation information between target and rollout-group is
+            // stored in the #TargetRolloutGroup.
+            return targetRepository.findByRolloutTargetGroupRolloutGroupId(rolloutGroup.getId(), page);
+        }
+        return targetRepository.findByActionsRolloutGroup(rolloutGroup, page);
+    }
+
+    /**
+     * Get targets of specified rollout group.
+     * 
+     * @param rolloutGroup
+     *            rollout group
+     * @param specification
+     *            the specification for filtering the targets of a rollout group
+     * @param page
+     *            the page request to sort and limit the result
+     * 
+     * @return Page<Target> list of targets of a rollout group
+     */
+    public Page<Target> findRolloutGroupTargets(final RolloutGroup rolloutGroup,
+            final Specification<Target> specification, final Pageable page) {
+        if (rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
+            // in case of status ready the action has not been created yet and
+            // the relation information between target and rollout-group is
+            // stored in the #TargetRolloutGroup.
+            return targetRepository.findAll(new Specification<Target>() {
+                @Override
+                public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query,
+                        final CriteriaBuilder cb) {
+                    final ListJoin<Target, RolloutTargetGroup> rolloutTargetJoin = root
+                            .join(Target_.rolloutTargetGroup);
+                    return cb.and(specification.toPredicate(root, query, cb),
+                            cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
+                }
+            }, page);
+        }
+
+        return targetRepository.findAll(new Specification<Target>() {
+            @Override
+            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
+                final ListJoin<Target, Action> actionsJoin = root.join(Target_.actions);
+                return cb.and(specification.toPredicate(root, query, cb),
+                        cb.equal(actionsJoin.get(Action_.rolloutGroup), rolloutGroup));
+            }
+        }, page);
     }
 
     private List<RolloutStatusCountItem<Object>> getStatusCountItemForRollout(final Long rolloutId) {

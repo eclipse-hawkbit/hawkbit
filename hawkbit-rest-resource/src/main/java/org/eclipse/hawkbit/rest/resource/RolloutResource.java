@@ -27,16 +27,20 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupResponseBody;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -317,6 +321,60 @@ public class RolloutResource {
         findRolloutOrThrowException(rolloutId);
         final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
         return ResponseEntity.ok(RolloutMapper.toResponseRolloutGroup(rolloutGroup));
+    }
+
+    /**
+     * Retrieves all targets related to a specific rollout group.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout
+     * @param groupId
+     *            the ID of the rollout group
+     * @param pagingOffsetParam
+     *            the offset of list of rollout groups for pagination, might not
+     *            be present in the rest request then default value will be
+     *            applied
+     * @param pagingLimitParam
+     *            the limit of the paged request, might not be present in the
+     *            rest request then default value will be applied
+     * @param sortParam
+     *            the sorting parameter in the request URL, syntax
+     *            {@code field:direction, field:direction}
+     * @param rsqlParam
+     *            the search parameter in the request URL, syntax
+     *            {@code q=name==abc}
+     * @return a paged list of targets related to a specific rollout and rollout
+     *         group.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}/targets", produces = {
+            MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
+    public ResponseEntity<TargetPagedList> getRolloutGroupTargets(
+            @PathVariable("rolloutId") final Long rolloutId,
+            @PathVariable("groupId") final Long groupId,
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+        findRolloutOrThrowException(rolloutId);
+        final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
+
+        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
+
+        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+
+        final Page<Target> rolloutGroupTargets;
+        if (rsqlParam != null) {
+            final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class,
+                    entityManager);
+            rolloutGroupTargets = rolloutManagement.findRolloutGroupTargets(rolloutGroup, rsqlSpecification, pageable);
+        } else {
+            final Page<Target> pageTargets = rolloutManagement.getRolloutGroupTargets(rolloutGroup, pageable);
+            rolloutGroupTargets = pageTargets;
+        }
+        final List<TargetRest> rest = TargetMapper.toResponse(rolloutGroupTargets.getContent());
+        return new ResponseEntity<>(new TargetPagedList(rest, rolloutGroupTargets.getTotalElements()), HttpStatus.OK);
     }
 
     private Rollout findRolloutOrThrowException(final Long rolloutId) {
