@@ -193,7 +193,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateDistributionPermission() || permChecker.hasUpdateTargetPermission();
+        return permChecker.hasUpdateTargetPermission() && permChecker.hasReadDistributionPermission();
     }
 
     /*
@@ -377,7 +377,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected boolean hasCountMessage() {
-        return true;
+        return permChecker.hasTargetReadPermission();
     }
 
     /*
@@ -588,10 +588,5 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             }
 
         }
-    }
-
-    @Override
-    protected boolean hasReadPermission() {
-        return permChecker.hasTargetReadPermission();
     }
 }
