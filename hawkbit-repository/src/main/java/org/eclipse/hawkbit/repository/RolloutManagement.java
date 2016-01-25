@@ -575,7 +575,7 @@ public class RolloutManagement {
                 rolloutGroup, rolloutGroup.getSuccessActionExp());
     }
 
-    // ////////Asha - changes starts here/////////////
+    // ////////Rollout - changes starts here/////////////
 
     /**
      * Counts all {@link Target}s in the repository.
@@ -833,6 +833,6 @@ public class RolloutManagement {
         rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.CANCELLED, cancelledItemCount);
     }
 
-    // ////////Asha - changes ends here/////////////
+    // ////////Rollout - changes ends here/////////////
 
 }
