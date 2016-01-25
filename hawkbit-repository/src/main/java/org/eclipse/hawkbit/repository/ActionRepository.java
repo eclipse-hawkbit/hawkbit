@@ -363,18 +363,6 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      */
     List<Action> findByRolloutAndStatus(Rollout rollout, Status actionStatus);
 
-    // Asha- starts here
-
-    /**
-     * Total list of targets for the rollout group.
-     * 
-     * @param group
-     * @param page
-     * @return the total list of targets for the rollout group
-     */
-    @Query("select a.target from Action a where a.rolloutGroup = ?1")
-    Page<Target> getTargetsForRolloutGroup(RolloutGroup group, Pageable page);
-
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout.
