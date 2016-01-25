@@ -28,8 +28,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
+import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
@@ -1148,8 +1148,7 @@ public final class HawkbitCommonUtil {
     public static DistributionBar getRolloutProgressBar(final DistributionBar bar, int i,
             final RolloutTargetsStatusCount rolloutTargetsStatus) {
         final Map<RolloutTargetStatus, Long> statusCountDetails = rolloutTargetsStatus.getStatusCountDetails();
-        if (statusCountDetails.containsKey(RolloutTargetsStatusCount.RolloutTargetStatus.NOTSTARTED)
-                && statusCountDetails.get(RolloutTargetsStatusCount.RolloutTargetStatus.NOTSTARTED) == 0) {
+        if (statusCountDetails.values().stream().filter(value -> value > 0).toArray().length == 0) {
             final String readyStatus = RolloutTargetsStatusCount.RolloutTargetStatus.READY.toString().toLowerCase();
             bar.setPartTooltip(i, readyStatus);
             bar.setPartStyleName(i, STATUS_BAR_PART + readyStatus);
@@ -1311,4 +1310,22 @@ public final class HawkbitCommonUtil {
         }
     }
 
+    /**
+     * Set status progress bar value.
+     * 
+     * @param bar
+     *            DistributionBar
+     * @param statusName
+     *            status name
+     * @param count
+     *            target counts in a status
+     * @param index
+     *            bar part index
+     */
+    public static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
+            final int index) {
+        bar.setPartSize(index, count);
+        bar.setPartTooltip(index, statusName);
+        bar.setPartStyleName(index, "status-bar-part-" + statusName);
+    }
 }
