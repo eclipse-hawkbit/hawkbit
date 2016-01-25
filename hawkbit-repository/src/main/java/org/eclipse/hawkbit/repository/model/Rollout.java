@@ -26,6 +26,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.hawkbit.cache.CacheField;
+import org.eclipse.hawkbit.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
@@ -51,7 +53,7 @@ public class Rollout extends NamedEntity {
     private DistributionSet distributionSet;
 
     @Column(name = "status")
-    private RolloutStatus status = RolloutStatus.READY;
+    private RolloutStatus status = RolloutStatus.CREATING;
 
     @Column(name = "last_check")
     private long lastCheck = 0L;
@@ -62,10 +64,17 @@ public class Rollout extends NamedEntity {
 
     @Column(name = "forced_time")
     private long forcedTime;
-    
+
     @Transient
     private boolean isNew = false;
 
+    @Transient
+    @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
+    private int rolloutGroupsTotal = 0;
+
+    @Transient
+    @CacheField(key = CacheKeys.ROLLOUT_GROUP_CREATED)
+    private int rolloutGroupsCreated = 0;
 
     /**
      * @return the distributionSet
@@ -171,6 +180,7 @@ public class Rollout extends NamedEntity {
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
     }
+
     /**
      * @return the isNew
      */
@@ -184,6 +194,36 @@ public class Rollout extends NamedEntity {
      */
     public void setNew(final boolean isNew) {
         this.isNew = isNew;
+    }
+
+    /**
+     * @return the rolloutGroupsTotal
+     */
+    public int getRolloutGroupsTotal() {
+        return rolloutGroupsTotal;
+    }
+
+    /**
+     * @param rolloutGroupsTotal
+     *            the rolloutGroupsTotal to set
+     */
+    public void setRolloutGroupsTotal(final int rolloutGroupsTotal) {
+        this.rolloutGroupsTotal = rolloutGroupsTotal;
+    }
+
+    /**
+     * @return the rolloutGroupsCreated
+     */
+    public int getRolloutGroupsCreated() {
+        return rolloutGroupsCreated;
+    }
+
+    /**
+     * @param rolloutGroupsCreated
+     *            the rolloutGroupsCreated to set
+     */
+    public void setRolloutGroupsCreated(final int rolloutGroupsCreated) {
+        this.rolloutGroupsCreated = rolloutGroupsCreated;
     }
 
     @Override
@@ -201,6 +241,11 @@ public class Rollout extends NamedEntity {
     public static enum RolloutStatus {
 
         /**
+         * Rollouts is beeing created.
+         */
+        CREATING,
+
+        /**
          * Rollout is ready to start.
          */
         READY,
@@ -209,6 +254,11 @@ public class Rollout extends NamedEntity {
          * Rollout is paused.
          */
         PAUSED,
+
+        /**
+         * Rollout is starting.
+         */
+        STARING,
 
         /**
          * Rollout is running.

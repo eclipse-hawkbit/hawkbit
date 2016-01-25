@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -20,6 +21,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.cache.CacheWriteNotify;
+import org.eclipse.hawkbit.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -49,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,9 +64,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * RolloutManagement to control rollouts e.g. like creating, starting, resuming
@@ -109,6 +121,19 @@ public class RolloutManagement {
 
     @Autowired
     private NoCountPagingRepository criteriaNoCountDao;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
+
+    @Autowired
+    private CacheWriteNotify cacheWriteNotify;
+
+    @Autowired
+    private EventBus eventBus;
+
+    @Autowired
+    @Qualifier("asyncExecutor")
+    private Executor executor;
 
     /**
      * Retrieves all rollouts.
@@ -232,16 +257,83 @@ public class RolloutManagement {
     @Modifying
     // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Rollout createRollout(final Rollout rollout, final int amountGroup, final RolloutGroupConditions conditions) {
+        verifyRolloutGroupParameter(amountGroup);
+        rollout.setNew(true);
+        final Rollout savedRollout = rolloutRepository.save(rollout);
+        final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
+        return createRolloutGroups(amountGroup, conditions, savedRollout, totalCount);
+    }
 
+    /**
+     * Persists a new rollout entity. The filter within the
+     * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets
+     * which are effected by this rollout to create. The creation of the rollout
+     * will be done synchronously and will be returned. The targets will then be
+     * split up into groups. The size of the groups can be defined in the
+     * {@code groupSize} parameter.
+     * 
+     * The creation of the rollout groups is executed asynchronously due it
+     * might take some time to split up the targets into groups. The creation of
+     * the {@link RolloutGroup} is published as event
+     * {@link RolloutGroupCreatedEvent}.
+     * 
+     * The rollout is in status {@link RolloutStatus#CREATING} until all rollout
+     * groups has been created and the targets are split up, then the rollout
+     * will change the status to {@link RolloutStatus#READY}.
+     * 
+     * The rollout is not started. Only the preparation of the rollout is done,
+     * persisting and creating all the necessary groups. The Rollout and the
+     * groups are persisted in {@link RolloutStatus#READY} and
+     * {@link RolloutGroupStatus#READY} so they can be started
+     * {@link #startRollout(Rollout)}.
+     * 
+     * @param rollout
+     *            the rollout to be created
+     * @param amountGroup
+     *            the number of groups should be created for the rollout and
+     *            split up the targets
+     * @param conditions
+     *            the rolloutgroup conditions and actions which should be
+     *            applied for each {@link RolloutGroup}
+     * @return the created rollout entity in state
+     *         {@link RolloutStatus#CREATING}
+     */
+    @Transactional
+    @Modifying
+    public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
+            final RolloutGroupConditions conditions) {
+        verifyRolloutGroupParameter(amountGroup);
+        rollout.setNew(true);
+        final Rollout savedRollout = rolloutRepository.save(rollout);
+        final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                def.setName("creatingRollout");
+                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                new TransactionTemplate(txManager, def).execute(new TransactionCallback<Void>() {
+                    @Override
+                    public Void doInTransaction(final TransactionStatus status) {
+                        createRolloutGroups(amountGroup, conditions, savedRollout, totalCount);
+                        return null;
+                    }
+                });
+            }
+        });
+        return savedRollout;
+    }
+
+    private void verifyRolloutGroupParameter(final int amountGroup) {
         if (amountGroup <= 0) {
             throw new IllegalArgumentException("the amountGroup must be greater than zero");
         } else if (amountGroup > 500) {
             throw new IllegalArgumentException("the amountGroup must not be greater than 500");
         }
+    }
 
-        rollout.setNew(true);
-        final Rollout savedRollout = rolloutRepository.save(rollout);
-        final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
+    private Rollout createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
+            final Rollout savedRollout, final Long totalCount) {
         int pageIndex = 0;
         int groupIndex = 0;
         final int groupSize = (int) Math.ceil(totalCount / amountGroup);
@@ -267,9 +359,12 @@ public class RolloutManagement {
             targetGroup.forEach(target -> {
                 rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target));
             });
+            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), amountGroup, groupIndex);
             pageIndex += groupSize;
         }
-        return savedRollout;
+
+        savedRollout.setStatus(RolloutStatus.READY);
+        return rolloutRepository.save(savedRollout);
     }
 
     /**
@@ -832,7 +927,4 @@ public class RolloutManagement {
         rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.RUNNING, runningItemsCount);
         rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.CANCELLED, cancelledItemCount);
     }
-
-    // ////////Asha - changes ends here/////////////
-
 }

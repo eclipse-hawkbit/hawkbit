@@ -457,7 +457,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         rolloutToCreate.setActionType(getActionType());
         rolloutToCreate.setForcedTime(getForcedTimeStamp());
 
-        rolloutToCreate = rolloutManagement.createRollout(rolloutToCreate, amountGroup, conditions);
+        rolloutToCreate = rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
         return rolloutToCreate;
     }
 
