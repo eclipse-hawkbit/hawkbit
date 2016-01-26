@@ -258,7 +258,6 @@ public class RolloutManagement {
     // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Rollout createRollout(final Rollout rollout, final int amountGroup, final RolloutGroupConditions conditions) {
         verifyRolloutGroupParameter(amountGroup);
-        rollout.setNew(true);
         final Rollout savedRollout = rolloutRepository.save(rollout);
         final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
         return createRolloutGroups(amountGroup, conditions, savedRollout, totalCount);
@@ -303,7 +302,6 @@ public class RolloutManagement {
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         verifyRolloutGroupParameter(amountGroup);
-        rollout.setNew(true);
         final Rollout savedRollout = rolloutRepository.save(rollout);
         final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
         executor.execute(new Runnable() {
@@ -481,7 +479,6 @@ public class RolloutManagement {
         }
         // set rollout into running status
         rollout.setStatus(RolloutStatus.RUNNING);
-        rollout.setNew(false);
         return rolloutRepository.save(rollout);
     }
 
@@ -520,7 +517,6 @@ public class RolloutManagement {
         // periodically check for running rollouts will skip rollouts in pause
         // state.
         mergedRollout.setStatus(RolloutStatus.PAUSED);
-        mergedRollout.setNew(false);
         rolloutRepository.save(mergedRollout);
     }
 
@@ -546,7 +542,6 @@ public class RolloutManagement {
                     + rollout.getStatus().name().toLowerCase());
         }
         mergedRollout.setStatus(RolloutStatus.RUNNING);
-        mergedRollout.setNew(false);
         rolloutRepository.save(mergedRollout);
     }
 
@@ -647,7 +642,6 @@ public class RolloutManagement {
                 if (isRolloutComplete(rollout)) {
                     logger.info("Rollout {} is finished, setting finished status", rollout);
                     rollout.setStatus(RolloutStatus.FINISHED);
-                    rollout.setNew(false);
                     rolloutRepository.save(rollout);
                 }
             }
@@ -800,7 +794,6 @@ public class RolloutManagement {
     // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Rollout updateRollout(@NotNull final Rollout rollout) {
         Assert.notNull(rollout.getId());
-        rollout.setNew(false);
         return rolloutRepository.save(rollout);
     }
 

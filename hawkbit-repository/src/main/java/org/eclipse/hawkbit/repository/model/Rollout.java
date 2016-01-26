@@ -66,9 +66,6 @@ public class Rollout extends NamedEntity {
     private long forcedTime;
 
     @Transient
-    private boolean isNew = false;
-
-    @Transient
     @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
     private int rolloutGroupsTotal = 0;
 
@@ -179,21 +176,6 @@ public class Rollout extends NamedEntity {
      */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
-    }
-
-    /**
-     * @return the isNew
-     */
-    public boolean isNew() {
-        return isNew;
-    }
-
-    /**
-     * @param isNew
-     *            the isNew to set
-     */
-    public void setNew(final boolean isNew) {
-        this.isNew = isNew;
     }
 
     /**

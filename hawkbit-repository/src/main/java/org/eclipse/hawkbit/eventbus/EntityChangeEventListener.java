@@ -16,14 +16,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupStatusUpdateEvent;
-import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -150,25 +148,6 @@ public class EntityChangeEventListener {
     }
 
     // Rollout -changes start here
-    @Around("execution(* org.eclipse.hawkbit.repository.RolloutRepository.save(..))")
-    public Object rolloutUpdated(final ProceedingJoinPoint joinpoint) throws Throwable {
-        final boolean isNew = isRolloutNew(joinpoint.getArgs()[0]);
-        final Object result = joinpoint.proceed();
-        if (result instanceof Rollout) {
-            if (!isNew) {
-                notifyRolloutStatusChanged((Rollout) result);
-            }
-        }
-        return result;
-    }
-
-    private boolean isRolloutNew(final Object rollout) {
-        return ((Rollout) rollout).isNew();
-    }
-
-    private void notifyRolloutStatusChanged(final Rollout rollout) {
-        eventBus.post(new RolloutStatusUpdateEvent(rollout));
-    }
 
     @Around("execution(* org.eclipse.hawkbit.repository.RolloutGroupRepository.save(..))")
     public Object rolloutGroupUpdated(final ProceedingJoinPoint joinpoint) throws Throwable {

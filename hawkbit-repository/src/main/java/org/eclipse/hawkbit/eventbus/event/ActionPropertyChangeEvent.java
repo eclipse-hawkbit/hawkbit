@@ -13,7 +13,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
- * Defines the {@link AbstractPropertyChangeEvent} of changing {@link Action}.
+ * Defines the {@link AbstractPropertyChangeEvent} of {@link Action}.
  */
 public class ActionPropertyChangeEvent extends AbstractPropertyChangeEvent<Action> {
     private static final long serialVersionUID = 181780358321768629L;

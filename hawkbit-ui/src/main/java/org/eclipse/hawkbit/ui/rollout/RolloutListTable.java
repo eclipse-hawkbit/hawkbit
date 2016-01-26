@@ -20,7 +20,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.eventbus.event.AbstractPropertyChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
+import org.eclipse.hawkbit.eventbus.event.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -123,8 +123,8 @@ public class RolloutListTable extends AbstractSimpleTable {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     public void onEvents(final List<?> events) {
         final Object firstEvent = events.get(0);
-        if (RolloutStatusUpdateEvent.class.isInstance(firstEvent)) {
-            onRolloutStatusChange((List<RolloutStatusUpdateEvent>) events);
+        if (RolloutPropertyChangeEvent.class.isInstance(firstEvent)) {
+            onRolloutStatusChange((List<RolloutPropertyChangeEvent>) events);
         } else if (ActionCreatedEvent.class.isInstance(firstEvent)) {
             onActionCreation((List<ActionCreatedEvent>) events);
         } else if (ActionPropertyChangeEvent.class.isInstance(firstEvent)) {
@@ -487,10 +487,10 @@ public class RolloutListTable extends AbstractSimpleTable {
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
 
-    private void onRolloutStatusChange(final List<RolloutStatusUpdateEvent> rolloutEvents) {
+    private void onRolloutStatusChange(final List<RolloutPropertyChangeEvent> rolloutEvents) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final RolloutStatusUpdateEvent rolloutStatusUpdateEvent : rolloutEvents) {
-            final Rollout rollout = rolloutStatusUpdateEvent.getEntity();
+        for (final RolloutPropertyChangeEvent event : rolloutEvents) {
+            final Rollout rollout = event.getEntity();
             if (visibleItemIds.contains(rollout.getId())) {
                 updateVisibleItemOnEvent(rollout);
             }

@@ -8,19 +8,24 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
+import java.util.Map;
+
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
- *
+ * Defines the {@link AbstractPropertyChangeEvent} of {@link Rollout}.
  */
-public class RolloutStatusUpdateEvent extends AbstractBaseEntityEvent<Rollout> {
+public class RolloutPropertyChangeEvent extends AbstractPropertyChangeEvent<Rollout> {
     private static final long serialVersionUID = 181780358321768629L;
 
     /**
+     * 
      * @param rollout
+     * @param changeSetValues
      */
-    public RolloutStatusUpdateEvent(final Rollout rollout) {
-        super(rollout);
+    public RolloutPropertyChangeEvent(final Rollout rollout,
+            final Map<String, AbstractPropertyChangeEvent<Rollout>.Values> changeSetValues) {
+        super(rollout, changeSetValues);
     }
 
 }
