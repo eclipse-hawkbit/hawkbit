@@ -90,6 +90,7 @@ public class RolloutListTable extends AbstractSimpleTable {
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -133,8 +134,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             if (visibleItemIds.contains(event.getEntity().getRollout().getId())) {
                 final Item item = getItem(event.getEntity().getRollout().getId());
                 final Action.Status actionstatus = event.getEntity().getStatus();
-                if (actionstatus == Status.RUNNING || actionstatus == Status.RETRIEVED
-                        || actionstatus == Status.WARNING || actionstatus == Status.DOWNLOAD) {
+                if (actionstatus == Status.RUNNING) {
                     increamentCountandSet("runningTargetsCount", item);
                     decrementCountAndSet("scheduledTargetsCount", item);
                 } else if (actionstatus == Status.FINISHED) {
@@ -327,7 +327,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
             // refreshTable();
         } else if (contextMenuData.getAction() == ACTION.START) {
-            rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
+            rolloutManagement.startRolloutAsync(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
             final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement
                     .getRolloutDetailedStatus(contextMenuData.getRolloutId());

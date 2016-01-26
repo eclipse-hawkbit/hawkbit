@@ -258,7 +258,7 @@ public class Rollout extends NamedEntity {
         /**
          * Rollout is starting.
          */
-        STARING,
+        STARTING,
 
         /**
          * Rollout is running.

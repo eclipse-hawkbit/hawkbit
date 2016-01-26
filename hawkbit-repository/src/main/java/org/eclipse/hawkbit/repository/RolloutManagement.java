@@ -370,7 +370,7 @@ public class RolloutManagement {
     /**
      * Starts a rollout which has been created. The rollout must be in
      * {@link RolloutStatus#READY} state. The according actions will be created
-     * or each affected target in the rollout. The actions of the first group
+     * for each affected target in the rollout. The actions of the first group
      * will be started immediately {@link RolloutGroupStatus#RUNNING} as the
      * other groups will be {@link RolloutGroupStatus#SCHEDULED} state.
      * 
@@ -387,16 +387,65 @@ public class RolloutManagement {
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    public void startRollout(final Rollout rollout) {
+    public Rollout startRollout(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
         if (mergedRollout.getStatus() != RolloutStatus.READY) {
             throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
-        final DistributionSet distributionSet = mergedRollout.getDistributionSet();
+        return doStartRollout(mergedRollout);
+    }
+
+    /**
+     * Starts a rollout asynchronously which has been created. The rollout must
+     * be in {@link RolloutStatus#READY} state. The according actions will be
+     * created asynchronously for each affected target in the rollout. The
+     * actions of the first group will be started immediately
+     * {@link RolloutGroupStatus#RUNNING} as the other groups will be
+     * {@link RolloutGroupStatus#SCHEDULED} state.
+     * 
+     * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
+     * 
+     * @param rollout
+     *            the rollout to be started
+     * 
+     * @throws RolloutIllegalStateException
+     *             if given rollout is not in {@link RolloutStatus#READY}. Only
+     *             ready rollouts can be started.
+     */
+    @Transactional
+    @Modifying
+    public Rollout startRolloutAsync(final Rollout rollout) {
+        final Rollout mergedRollout = entityManager.merge(rollout);
+        if (mergedRollout.getStatus() != RolloutStatus.READY) {
+            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
+                    + rollout.getStatus().name().toLowerCase());
+        }
+        mergedRollout.setStatus(RolloutStatus.STARTING);
+        final Rollout updatedRollout = rolloutRepository.save(mergedRollout);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                def.setName("startingRollout");
+                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                new TransactionTemplate(txManager, def).execute(new TransactionCallback<Void>() {
+                    @Override
+                    public Void doInTransaction(final TransactionStatus status) {
+                        doStartRollout(updatedRollout);
+                        return null;
+                    }
+                });
+            }
+        });
+        return updatedRollout;
+    }
+
+    private Rollout doStartRollout(final Rollout rollout) {
+        final DistributionSet distributionSet = rollout.getDistributionSet();
         final ActionType actionType = rollout.getActionType();
         final long forceTime = rollout.getForcedTime();
-        final List<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(mergedRollout);
+        final List<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout);
         for (int iGroup = 0; iGroup < rolloutGroups.size(); iGroup++) {
             final RolloutGroup rolloutGroup = rolloutGroups.get(iGroup);
             final List<Target> targetGroup = targetRepository.findByRolloutTargetGroupRolloutGroup(rolloutGroup);
@@ -415,7 +464,7 @@ public class RolloutManagement {
             // be activated later
             else {
                 deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
-                        mergedRollout, rolloutGroup);
+                        rollout, rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
                 rolloutGroup.setNew(false);
                 rolloutGroupRepository.save(rolloutGroup);
@@ -431,9 +480,9 @@ public class RolloutManagement {
                     .setParameter("rolloutGroup", rolloutGroup).executeUpdate();
         }
         // set rollout into running status
-        mergedRollout.setStatus(RolloutStatus.RUNNING);
-        mergedRollout.setNew(false);
-        rolloutRepository.save(mergedRollout);
+        rollout.setStatus(RolloutStatus.RUNNING);
+        rollout.setNew(false);
+        return rolloutRepository.save(rollout);
     }
 
     /**
@@ -927,7 +976,6 @@ public class RolloutManagement {
         rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.RUNNING, runningItemsCount);
         rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.CANCELLED, cancelledItemCount);
     }
-
 
     // ////////Rollout - changes ends here/////////////
 
