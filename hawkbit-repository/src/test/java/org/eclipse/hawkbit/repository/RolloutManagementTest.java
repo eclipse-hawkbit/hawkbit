@@ -11,9 +11,11 @@ package org.eclipse.hawkbit.repository;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -243,14 +245,14 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
         // finish running actions, 2 actions should be finished
-        assertThat(finishRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
+        assertThat(changeStatusForRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
 
         // calculate the rest of the groups and finish them
         for (int groupsLeft = amountGroups - 1; groupsLeft >= 1; groupsLeft--) {
             // next check and start next group
             rolloutManagement.checkRunningRollouts(0);
             // finish running actions, 2 actions should be finished
-            assertThat(finishRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
+            assertThat(changeStatusForRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
             assertThat(rolloutManagement.findRolloutById(createdRollout.getId()).getStatus()).isEqualTo(
                     RolloutStatus.RUNNING);
 
@@ -267,6 +269,159 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify that rollout itself is in finished state
         final Rollout findRolloutById = rolloutManagement.findRolloutById(createdRollout.getId());
         assertThat(findRolloutById.getStatus()).isEqualTo(RolloutStatus.FINISHED);
+    }
+
+    @Test
+    @Description("Verify that the targets have the right status during the rollout.")
+    public void countCorrectStatusForEachTargetDuringRollout() {
+
+        final int amountTargetsForRollout = 8;
+        final int amountOtherTargets = 15;
+        final int amountGroups = 4;
+        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+
+        // test that the 8 targets have not started
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(8), new Long(0), new Long(0), new Long(0),
+                new Long(0));
+
+        // start the rollout
+        rolloutManagement.startRollout(createdRollout);
+
+        // test that the 6 targets are ready and 2 are running
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(6), new Long(2), new Long(0),
+                new Long(0));
+
+        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test that the 4 targets are ready, 2 are finished and 2 are running
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(4), new Long(2), new Long(2),
+                new Long(0));
+
+        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test that the 2 targets are ready, 4 are finished and 2 are running
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(2), new Long(2), new Long(4),
+                new Long(0));
+
+        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test that the 0 targets are ready, 6 are finished and 2 are running
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(0), new Long(2), new Long(6),
+                new Long(0));
+
+        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test that the 0 targets are ready, 8 are finished and 0 are running
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(0), new Long(0), new Long(8),
+                new Long(0));
+
+    }
+
+    @Test
+    @Description("Verify that the targets have the right status during the rollout when an error emerges.")
+    public void countCorrectStatusForEachTargetDuringRolloutWithError() {
+
+        final int amountTargetsForRollout = 8;
+        final int amountOtherTargets = 15;
+        final int amountGroups = 4;
+        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+
+        // test that the 8 targets have not started
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(8), new Long(0), new Long(0), new Long(0),
+                new Long(0));
+
+        // start the rollout
+        rolloutManagement.startRollout(createdRollout);
+
+        // test that the 6 targets are ready and 2 are running
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(6), new Long(2), new Long(0),
+                new Long(0));
+
+        changeStatusForRunningActions(createdRollout, Status.ERROR);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test that the 6 targets are ready and 2 are error
+        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(6), new Long(0), new Long(0),
+                new Long(2));
+
+    }
+
+    @Test
+    @Description("Verify that the targets have the right status during the rollout when receiving the status of rollout groups.")
+    public void countCorrectStatusForEachTargetGroupDuringRollout() {
+        final int amountTargetsForRollout = 9;
+        final int amountOtherTargets = 15;
+        final int amountGroups = 4;
+        Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+
+        rolloutManagement.startRollout(createdRollout);
+        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // In this stage there should be 4 targets finished (Group 1 and 2), 2
+        // targets running (Group 3) and 2 targets ready (Group 4) and one 1
+        // target ready (Group 5)
+
+        createdRollout = rolloutManagement.findRolloutById(createdRollout.getId());
+        final List<RolloutGroup> rolloutGruops = createdRollout.getRolloutGroups();
+
+        validateRolloutGroupStatus(rolloutGruops.get(0), new Long(0), new Long(0), new Long(0), new Long(2),
+                new Long(0));
+        validateRolloutGroupStatus(rolloutGruops.get(1), new Long(0), new Long(0), new Long(0), new Long(2),
+                new Long(0));
+        validateRolloutGroupStatus(rolloutGruops.get(2), new Long(0), new Long(0), new Long(2), new Long(0),
+                new Long(0));
+        validateRolloutGroupStatus(rolloutGruops.get(3), new Long(0), new Long(2), new Long(0), new Long(0),
+                new Long(0));
+        validateRolloutGroupStatus(rolloutGruops.get(4), new Long(0), new Long(1), new Long(0), new Long(0),
+                new Long(0));
+
+    }
+
+    private void validateRolloutGroupStatus(final RolloutGroup rolloutGroup, final Long expectedCountNotstarted,
+            final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
+            final Long expectedCountError) {
+        final RolloutTargetsStatusCount rolloutTargetsStatusCount0 = rolloutManagement
+                .getRolloutGroupDetailedStatus(rolloutGroup.getId());
+        final Map<RolloutTargetStatus, Long> countStatus = rolloutTargetsStatusCount0.getStatusCountDetails();
+        validateStatus(countStatus, expectedCountNotstarted, expectedCountReady, expectedCountRunning,
+                expectedCountFinished, expectedCountError);
+    }
+
+    private void validateRolloutDetailedStatus(final Long rolloutId, final Long expectedCountNotstarted,
+            final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
+            final Long expectedCountError) {
+        final RolloutTargetsStatusCount rolloutTargetsStatusCount = rolloutManagement
+                .getRolloutDetailedStatus(rolloutId);
+        final Map<RolloutTargetStatus, Long> countStatus = rolloutTargetsStatusCount.getStatusCountDetails();
+
+        validateStatus(countStatus, expectedCountNotstarted, expectedCountReady, expectedCountRunning,
+                expectedCountFinished, expectedCountError);
+    }
+
+    private void validateStatus(final Map<RolloutTargetStatus, Long> countStatus, final Long expectedCountNotstarted,
+            final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
+            final Long expectedCountError) {
+        final Long countNotstarted = countStatus.get(RolloutTargetStatus.NOTSTARTED);
+        assertThat(countNotstarted).isEqualTo(expectedCountNotstarted);
+
+        final Long countReady = countStatus.get(RolloutTargetStatus.READY);
+        assertThat(countReady).isEqualTo(expectedCountReady);
+
+        final Long countRunning = countStatus.get(RolloutTargetStatus.RUNNING);
+        assertThat(countRunning).isEqualTo(expectedCountRunning);
+
+        final Long countFinished = countStatus.get(RolloutTargetStatus.FINISHED);
+        assertThat(countFinished).isEqualTo(expectedCountFinished);
+
+        final Long countError = countStatus.get(RolloutTargetStatus.ERROR);
+        assertThat(countError).isEqualTo(expectedCountError);
     }
 
     private Rollout createTestRollout(final int amountTargetsForRollout, final int amountOtherTargets,
@@ -302,7 +457,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         return rolloutManagement.createRollout(rolloutToCreate, groupSize, conditions);
     }
 
-    private int finishRunningActions(final Rollout rollout, final Status status) {
+    private int changeStatusForRunningActions(final Rollout rollout, final Status status) {
         // set both actions in error state so error condition is hit and error
         // action is executed
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
