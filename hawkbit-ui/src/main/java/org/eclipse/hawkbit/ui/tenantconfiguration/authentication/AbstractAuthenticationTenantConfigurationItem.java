@@ -66,7 +66,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      */
     @Override
     public boolean isConfigEnabled() {
-        boolean b = systemManagement.getConfigurationValue(configurationKey, Boolean.class);
+        final boolean b = systemManagement.getConfigurationValue(configurationKey, Boolean.class).getValue();
         return b;
     }
 

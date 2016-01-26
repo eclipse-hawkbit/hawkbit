@@ -39,7 +39,7 @@ public class SystemResource {
     public ResponseEntity<SystemConfigurationRest> updateSoftwareModuleType(
             @RequestBody final SystemConfigurationRequestBodyPut systemConReq) {
 
-        systemManagement.updateTenantConfiguration(systemConReq);
+        // systemManagement.updateTenantConfiguration(systemConReq);
 
         return new ResponseEntity<>(SystemMapper.toResponse(systemManagement), HttpStatus.OK);
     }

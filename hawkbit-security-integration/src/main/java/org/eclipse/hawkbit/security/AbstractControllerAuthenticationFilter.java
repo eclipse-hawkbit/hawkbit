@@ -54,7 +54,7 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
         @Override
         public Boolean run() {
             LOGGER.trace("retrieving configuration value for configuration key {}", getTenantConfigurationKey());
-            return systemManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class);
+            return systemManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue();
         }
 
     }

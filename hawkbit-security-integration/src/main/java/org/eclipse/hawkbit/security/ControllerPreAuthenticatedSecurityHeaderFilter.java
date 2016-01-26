@@ -143,7 +143,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         @Override
         public String run() {
             return systemManagement.getConfigurationValue(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class);
+                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue();
         }
     }
 }

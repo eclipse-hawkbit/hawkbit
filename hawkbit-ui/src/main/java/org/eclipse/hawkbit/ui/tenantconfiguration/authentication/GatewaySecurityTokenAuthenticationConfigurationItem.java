@@ -168,12 +168,12 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
     private String getSecurityTokenName() {
         return getSystemManagement().getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class);
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class).getValue();
     }
 
     private String getSecurityTokenKey() {
         return getSystemManagement().getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
     }
 
     @Override

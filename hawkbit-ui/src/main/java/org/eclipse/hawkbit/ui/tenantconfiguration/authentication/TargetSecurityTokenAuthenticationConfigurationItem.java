@@ -96,6 +96,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
     @Override
     public void undo() {
         configurationEnabledChange = false;
-        configurationEnabled = getSystemManagement().getConfigurationValue(getConfigurationKey(), Boolean.class);
+        configurationEnabled = getSystemManagement().getConfigurationValue(getConfigurationKey(), Boolean.class)
+                .getValue();
     }
 }

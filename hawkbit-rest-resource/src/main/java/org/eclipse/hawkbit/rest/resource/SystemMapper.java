@@ -3,7 +3,6 @@ package org.eclipse.hawkbit.rest.resource;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.model.helper.DurationHelper;
@@ -23,65 +22,25 @@ final public class SystemMapper {
 
     private static DurationHelper dh = new DurationHelper();
 
-    public static SystemConfigurationRest toResponse(SystemManagement systemManagement) {
+    public static SystemConfigurationRest toResponse(final SystemManagement systemManagement) {
 
-        TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
+        final SystemConfigurationRest sysconf = new SystemConfigurationRest();
 
-        SystemConfigurationRest sysconf = new SystemConfigurationRest();
+        final Map<String, Object> authconf = new HashMap<String, Object>();
 
-        sysconf.setDefaultDistributionSetType(tenantMetaData.getDefaultDsType().getKey());
-        sysconf.setCreatedAt(tenantMetaData.getCreatedAt());
-        sysconf.setCreatedBy(tenantMetaData.getCreatedBy());
-        sysconf.setLastModifiedAt(tenantMetaData.getLastModifiedAt());
-        sysconf.setLastModifiedBy(tenantMetaData.getLastModifiedBy());
-
-        sysconf.setPollingOverdueTime(dh.durationToFormattedString(tenantMetaData.getPollingOverdueTime()));
-        sysconf.setPollingTime(dh.durationToFormattedString(tenantMetaData.getPollingTime()));
-
-        Map<String, Object> authconf = new HashMap<String, Object>();
-
-        for (TenantConfigurationKey key : TenantConfigurationKey.values()) {
-            Object value;
-
-            switch (key) {
-            case AUTHENTICATION_MODE_HEADER_ENABLED:
-            case AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED:
-            case AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED:
-                value = systemManagement.getConfigurationValue(key, Boolean.class);
-                break;
-            case AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME:
-            case AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY:
-            case AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME:
-                value = systemManagement.getConfigurationValue(key, String.class);
-                break;
-            default:
-                LOG.warn("There is no data type specified for TenantConfigurationKey {}.", key.getKeyName());
-                value = systemManagement.getConfigurationValue(key, String.class);
-            }
+        for (final TenantConfigurationKey key : TenantConfigurationKey.values()) {
+            final Object value = systemManagement.getConfigurationValue(key);
             authconf.put(key.getKeyName(), value);
         }
-
         sysconf.setAuthenticationConfiguration(authconf);
 
         return sysconf;
     }
 
-    public static TenantMetaData fromRequest(SystemManagement systemManagement,
-            SystemConfigurationRequestBodyPut systemConReq, DistributionSetManagement distributionSetManagement) {
+    public static TenantMetaData fromRequest(final SystemManagement systemManagement,
+            final SystemConfigurationRequestBodyPut systemConReq) {
 
-        TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
-
-        String ddstypeKey = systemConReq.getDefaultDistributionSetType();
-
-        if (distributionSetManagement.findDistributionSetTypeByKey(ddstypeKey) == null) {
-            throw new IllegalArgumentException(
-                    String.format("The specified default distribution set type %s doe not exist.", ddstypeKey));
-        }
-
-        tenantMetaData.setPollingOverdueTime(dh.formattedStringToDuration(systemConReq.getPollingOverdueTime()));
-        tenantMetaData.setPollingTime(dh.formattedStringToDuration(systemConReq.getPollingTime()));
-
+        // TODO
         return null;
-
     }
 }

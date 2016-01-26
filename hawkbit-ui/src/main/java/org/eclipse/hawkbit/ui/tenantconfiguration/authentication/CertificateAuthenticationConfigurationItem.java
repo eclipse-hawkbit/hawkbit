@@ -153,13 +153,15 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         configurationEnabledChange = false;
         configurationCaRootAuthorityChanged = false;
 
-        configurationEnabled = getSystemManagement().getConfigurationValue(getConfigurationKey(), Boolean.class);
+        configurationEnabled = getSystemManagement().getConfigurationValue(getConfigurationKey(), Boolean.class)
+                .getValue();
         caRootAuthorityTextField.setValue(getCaRootAuthorityValue());
     }
 
     private String getCaRootAuthorityValue() {
         return getSystemManagement()
-                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class);
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class)
+                .getValue();
     }
 
     private void setDetailVisible(final boolean visible) {

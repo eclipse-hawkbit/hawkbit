@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,15 +20,11 @@ import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetTypeException;
-import org.eclipse.hawkbit.repository.exception.InvalidPollingTimeException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.repository.model.helper.DurationHelper;
-import org.eclipse.hawkbit.repository.specifications.DistributionSetTypeSpecification;
-import org.eclipse.hawkbit.rest.resource.model.system.SystemConfigurationRequestBodyPut;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -330,6 +325,8 @@ public class SystemManagement implements EnvironmentAware {
      * Retrieves a configuration value from the e.g. tenant overwritten
      * configuration values or in case the tenant does not a have a specific
      * configuration the global default value hold in the {@link Environment}.
+     * 
+     * @param <T>
      *
      * @param configurationKey
      *            the key of the configuration
@@ -345,15 +342,26 @@ public class SystemManagement implements EnvironmentAware {
      *             {@code propertyType}
      */
     @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    public <T> T getConfigurationValue(final TenantConfigurationKey configurationKey, final Class<T> propertyType) {
+    public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
+            final Class<T> propertyType) {
+
         final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
                 .findByKey(configurationKey.getKeyName());
+
         if (tenantConfiguration != null) {
-            return conversionService.convert(tenantConfiguration.getValue(), propertyType);
+            return TenantConfigurationValue.<T> builder().isGlobal(false).createdBy(tenantConfiguration.getCreatedBy())
+                    .createdAt(tenantConfiguration.getCreatedAt())
+                    .lastModifiedAt(tenantConfiguration.getLastModifiedAt())
+                    .lastModifiedBy(tenantConfiguration.getLastModifiedBy())
+                    .value(conversionService.convert(tenantConfiguration.getValue(), propertyType)).build();
+
         } else if (configurationKey.getDefaultKeyName() != null) {
-            final T defaultKeyNameValue = environment.getProperty(configurationKey.getDefaultKeyName(), propertyType);
-            return defaultKeyNameValue != null ? defaultKeyNameValue
-                    : conversionService.convert(configurationKey.getDefaultValue(), propertyType);
+            final T valueInProperties = environment.getProperty(configurationKey.getDefaultKeyName(), propertyType);
+
+            return TenantConfigurationValue.<T> builder().isGlobal(true).createdBy(null).createdAt(null)
+                    .lastModifiedAt(null).lastModifiedBy(null).value(valueInProperties != null ? valueInProperties
+                            : conversionService.convert(configurationKey.getDefaultValue(), propertyType))
+                    .build();
         }
         return null;
     }
@@ -467,29 +475,33 @@ public class SystemManagement implements EnvironmentAware {
 
     }
 
-    @Transactional
-    @Modifying
-    public void updateTenantConfiguration(SystemConfigurationRequestBodyPut systemConReq) {
-
-        DurationHelper dh = new DurationHelper();
-
-        TenantMetaData tenantMetaData = getTenantMetadata();
-
-        String ddstypeKey = systemConReq.getDefaultDistributionSetType();
-
-        if (distributionSetTypeRepository.findAll(DistributionSetTypeSpecification.byKey(ddstypeKey)).isEmpty()) {
-            throw new InvalidDistributionSetTypeException(
-                    String.format("The specified default distribution set type %s doe not exist.", ddstypeKey));
-        }
-
-        try {
-            tenantMetaData.setPollingOverdueTime(dh.formattedStringToDuration(systemConReq.getPollingOverdueTime()));
-            tenantMetaData.setPollingTime(dh.formattedStringToDuration(systemConReq.getPollingTime()));
-        } catch (DateTimeParseException ex) {
-            throw new InvalidPollingTimeException(ex);
-        }
-
-        updateTenantMetadata(tenantMetaData);
-    }
+    // @Transactional
+    // @Modifying
+    // public void updateTenantConfiguration(SystemConfigurationRequestBodyPut
+    // systemConReq) {
+    //
+    // DurationHelper dh = new DurationHelper();
+    //
+    // TenantMetaData tenantMetaData = getTenantMetadata();
+    //
+    // String ddstypeKey = systemConReq.getDefaultDistributionSetType();
+    //
+    // if
+    // (distributionSetTypeRepository.findAll(DistributionSetTypeSpecification.byKey(ddstypeKey)).isEmpty())
+    // {
+    // throw new InvalidDistributionSetTypeException(
+    // String.format("The specified default distribution set type %s doe not
+    // exist.", ddstypeKey));
+    // }
+    //
+    // try {
+    // tenantMetaData.setPollingOverdueTime(dh.formattedStringToDuration(systemConReq.getPollingOverdueTime()));
+    // tenantMetaData.setPollingTime(dh.formattedStringToDuration(systemConReq.getPollingTime()));
+    // } catch (DateTimeParseException ex) {
+    // throw new InvalidPollingTimeException(ex);
+    // }
+    //
+    // updateTenantMetadata(tenantMetaData);
+    // }
 
 }

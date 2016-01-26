@@ -85,7 +85,7 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
             LOGGER.trace("retrieving configuration value for configuration key {}",
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY);
             return systemManagement.getConfigurationValue(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
         }
     }
 

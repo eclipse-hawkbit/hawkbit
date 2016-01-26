@@ -159,7 +159,7 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(envPropertyDefault).isNotNull();
 
         // get the configuration from the system management
-        final String defaultConfigValue = systemManagement.getConfigurationValue(configKey, String.class);
+        final String defaultConfigValue = systemManagement.getConfigurationValue(configKey, String.class).getValue();
         assertThat(envPropertyDefault).isEqualTo(defaultConfigValue);
 
         // update the tenant specific configuration
@@ -169,7 +169,8 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
                 .addOrUpdateConfiguration(new TenantConfiguration(configKey.getKeyName(), newConfigurationValue));
 
         // verify that new configuration value is used
-        final String updatedConfigurationValue = systemManagement.getConfigurationValue(configKey, String.class);
+        final String updatedConfigurationValue = systemManagement.getConfigurationValue(configKey, String.class)
+                .getValue();
         assertThat(updatedConfigurationValue).isEqualTo(newConfigurationValue);
         assertThat(systemManagement.getTenantConfigurations()).hasSize(1);
     }
@@ -183,11 +184,11 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // add value first
         systemManagement.addOrUpdateConfiguration(new TenantConfiguration(configKey.getKeyName(), value1));
-        assertThat(systemManagement.getConfigurationValue(configKey, String.class)).isEqualTo(value1);
+        assertThat(systemManagement.getConfigurationValue(configKey, String.class).getValue()).isEqualTo(value1);
 
         // update to value second
         systemManagement.addOrUpdateConfiguration(new TenantConfiguration(configKey.getKeyName(), value2));
-        assertThat(systemManagement.getConfigurationValue(configKey, String.class)).isEqualTo(value2);
+        assertThat(systemManagement.getConfigurationValue(configKey, String.class).getValue()).isEqualTo(value2);
     }
 
     @Test
@@ -197,7 +198,7 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
         final Integer value1 = 123;
         systemManagement
                 .addOrUpdateConfiguration(new TenantConfiguration(configKey.getKeyName(), String.valueOf(value1)));
-        assertThat(systemManagement.getConfigurationValue(configKey, Integer.class)).isEqualTo(value1);
+        assertThat(systemManagement.getConfigurationValue(configKey, Integer.class).getValue()).isEqualTo(value1);
     }
 
     @Test(expected = ConversionFailedException.class)
@@ -219,7 +220,7 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // gateway token does not have default value so no configuration value
         // is should be available
-        final String defaultConfigValue = systemManagement.getConfigurationValue(configKey, String.class);
+        final String defaultConfigValue = systemManagement.getConfigurationValue(configKey, String.class).getValue();
         assertThat(defaultConfigValue).isNull();
 
         // update the tenant specific configuration
@@ -229,13 +230,14 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
                 .addOrUpdateConfiguration(new TenantConfiguration(configKey.getKeyName(), newConfigurationValue));
 
         // verify that new configuration value is used
-        final String updatedConfigurationValue = systemManagement.getConfigurationValue(configKey, String.class);
+        final String updatedConfigurationValue = systemManagement.getConfigurationValue(configKey, String.class)
+                .getValue();
         assertThat(updatedConfigurationValue).isEqualTo(newConfigurationValue);
 
         // delete the tenant specific configuration
         systemManagement.deleteConfiguration(configKey);
         // ensure that now gateway token is set again, because is deleted and
         // must be null now
-        assertThat(systemManagement.getConfigurationValue(configKey, String.class)).isNull();
+        assertThat(systemManagement.getConfigurationValue(configKey, String.class).getValue()).isNull();
     }
 }
