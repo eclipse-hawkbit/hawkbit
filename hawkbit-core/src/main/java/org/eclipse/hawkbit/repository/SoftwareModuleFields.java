@@ -36,16 +36,38 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     /**
      * The id field.
      */
-    ID("id");
+    ID("id"), 
+    /**
+     * The metadata.
+     */
+    METADATA("metadata", "key", "value");
 
     private final String fieldName;
+    private String keyFieldName;
+    private String valueFieldName;
 
     private SoftwareModuleFields(final String fieldName) {
+        this(fieldName, null, null);
+    }
+
+    private SoftwareModuleFields(final String fieldName, final String keyFieldName, final String valueFieldName) {
         this.fieldName = fieldName;
+        this.keyFieldName = keyFieldName;
+        this.valueFieldName = valueFieldName;
     }
 
     @Override
     public String getFieldName() {
         return fieldName;
+    }
+
+    @Override
+    public String getKeyFieldName() {
+        return keyFieldName;
+    }
+
+    @Override
+    public String getValueFieldName() {
+        return valueFieldName;
     }
 }

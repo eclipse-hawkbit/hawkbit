@@ -94,7 +94,7 @@ public class SoftwareModuleTypeResource {
         Long countModulesAll;
         if (rsqlParam != null) {
             findModuleTypessAll = softwareManagement.findSoftwareModuleTypesByPredicate(
-                    RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class), pageable);
             countModulesAll = ((Page<SoftwareModuleType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = softwareManagement.findSoftwareModuleTypesAll(pageable);

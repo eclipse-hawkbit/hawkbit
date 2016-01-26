@@ -62,9 +62,6 @@ public class DistributionSetTypeResource {
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private EntityManager entityManager;
-
     /**
      * Handles the GET request of retrieving all {@link DistributionSetType}s
      * within SP.
@@ -105,7 +102,7 @@ public class DistributionSetTypeResource {
         Long countModulesAll;
         if (rsqlParam != null) {
             findModuleTypessAll = distributionSetManagement.findDistributionSetTypesByPredicate(
-                    RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class), pageable);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(pageable);

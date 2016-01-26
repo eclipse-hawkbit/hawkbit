@@ -8,15 +8,22 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Describing the fields of the Target model which can be used in the REST API
  * e.g. for sorting etc.
  *
- *
- *
- *
  */
 public enum TargetFields implements FieldNameProvider {
+
+    /**
+     * The controllerId field.
+     */
+    ID("controllerId"),
+
     /**
      * The name field.
      */
@@ -37,12 +44,49 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The ip-address field.
      */
-    IPADDRESS("targetInfo.ipAddress");
+    IPADDRESS("targetInfo.address"),
+
+    /**
+     * The attribute map of target info.
+     */
+    ATTRIBUTE("targetInfo.controllerAttributes", true),
+
+    ASSIGNEDDS("assignedDistributionSet", "name", "version"),
+    /**
+     * The tags field.
+     */
+    TAG("tags.name");
 
     private final String fieldName;
+    private List<String> subEntityAttribues;
+    private boolean mapField;
 
     private TargetFields(final String fieldName) {
+        this(fieldName, false, Collections.emptyList());
+    }
+
+    private TargetFields(final String fieldName, final boolean isMapField) {
+        this(fieldName, isMapField, Collections.emptyList());
+    }
+
+    private TargetFields(final String fieldName, final String... subEntityAttribues) {
+        this(fieldName, false, Arrays.asList(subEntityAttribues));
+    }
+
+    private TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues) {
         this.fieldName = fieldName;
+        this.mapField = mapField;
+        this.subEntityAttribues = subEntityAttribues;
+    }
+
+    @Override
+    public List<String> getSubEntityAttributes() {
+        return subEntityAttribues;
+    }
+
+    @Override
+    public boolean isMap() {
+        return mapField;
     }
 
     @Override

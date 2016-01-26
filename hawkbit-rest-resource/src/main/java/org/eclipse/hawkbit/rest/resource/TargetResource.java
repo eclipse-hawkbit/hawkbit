@@ -135,7 +135,7 @@ public class TargetResource {
         final Long countTargetsAll;
         if (rsqlParam != null) {
             final Page<Target> findTargetPage = targetManagement.findTargetsAll(
-                    RSQLUtility.parse(rsqlParam, TargetFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
         } else {
@@ -284,7 +284,7 @@ public class TargetResource {
         final Slice<Action> activeActions;
         final Long totalActionCount;
         if (rsqlParam != null) {
-            final Specification<Action> parse = RSQLUtility.parse(rsqlParam, ActionFields.class, entityManager);
+            final Specification<Action> parse = RSQLUtility.parse(rsqlParam, ActionFields.class);
             activeActions = deploymentManagement.findActionsByTarget(parse, foundTarget, pageable);
             totalActionCount = deploymentManagement.countActionsByTarget(parse, foundTarget);
         } else {

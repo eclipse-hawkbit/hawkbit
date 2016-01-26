@@ -103,7 +103,7 @@ public class TargetTagResource {
 
         } else {
             final Page<TargetTag> findTargetPage = tagManagement.findAllTargetTags(
-                    RSQLUtility.parse(rsqlParam, TagFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, TagFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
 
