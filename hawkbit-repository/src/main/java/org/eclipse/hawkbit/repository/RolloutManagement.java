@@ -348,7 +348,6 @@ public class RolloutManagement {
             group.setErrorConditionExp(conditions.getErrorConditionExp());
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
-            group.setNew(true);
 
             final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
             lastSavedGroup = savedGroup;
@@ -455,7 +454,6 @@ public class RolloutManagement {
                 deploymentManagement.assignDistributionSet(distributionSet.getId(), targetsWithActionType, rollout,
                         rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
-                rolloutGroup.setNew(false);
                 rolloutGroupRepository.save(rolloutGroup);
             }
             // create only not active actions with status scheduled so they can
@@ -464,7 +462,6 @@ public class RolloutManagement {
                 deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
                         rollout, rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
-                rolloutGroup.setNew(false);
                 rolloutGroupRepository.save(rolloutGroup);
             }
 
@@ -630,7 +627,6 @@ public class RolloutManagement {
                             checkFinishCondition(rollout, rolloutGroup, finishedCondition);
                             if (isRolloutGroupComplete(rollout, rolloutGroup)) {
                                 rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
-                                rolloutGroup.setNew(false);
                                 rolloutGroupRepository.save(rolloutGroup);
                             }
 

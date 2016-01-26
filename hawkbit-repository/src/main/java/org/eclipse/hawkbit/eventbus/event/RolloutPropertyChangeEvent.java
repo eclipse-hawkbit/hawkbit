@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
  * Defines the {@link AbstractPropertyChangeEvent} of {@link Rollout}.
  */
 public class RolloutPropertyChangeEvent extends AbstractPropertyChangeEvent<Rollout> {
-    private static final long serialVersionUID = 181780358321768629L;
+    private static final long serialVersionUID = 1056221355466373514L;
 
     /**
      * 

@@ -14,7 +14,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.eventbus.event.RolloutGroupStatusUpdateEvent;
+import org.eclipse.hawkbit.eventbus.event.RolloutGroupPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -99,14 +99,14 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     public void onEvents(final List<?> events) {
         final Object firstEvent = events.get(0);
-        if (RolloutGroupStatusUpdateEvent.class.isInstance(firstEvent)) {
-            onRolloutGroupStatusChange((List<RolloutGroupStatusUpdateEvent>) events);
+        if (RolloutGroupPropertyChangeEvent.class.isInstance(firstEvent)) {
+            onRolloutGroupStatusChange((List<RolloutGroupPropertyChangeEvent>) events);
         }
     }
 
-    private void onRolloutGroupStatusChange(final List<RolloutGroupStatusUpdateEvent> events) {
+    private void onRolloutGroupStatusChange(final List<RolloutGroupPropertyChangeEvent> events) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final RolloutGroupStatusUpdateEvent rolloutGroupStatusUpdateEvent : events) {
+        for (final RolloutGroupPropertyChangeEvent rolloutGroupStatusUpdateEvent : events) {
             final RolloutGroup rolloutGroup = rolloutGroupStatusUpdateEvent.getEntity();
             if (visibleItemIds.contains(rolloutGroup.getId())) {
                 updateVisibleItemOnEvent(rolloutGroup);
@@ -217,6 +217,7 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
             }
         });
     }
+
     private String getDescription(final Object itemId) {
         final Item item = getItem(itemId);
         if (item != null) {
