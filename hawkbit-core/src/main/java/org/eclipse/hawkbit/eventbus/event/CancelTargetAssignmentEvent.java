@@ -17,9 +17,8 @@ import java.net.URI;
  *
  *
  */
-public class CancelTargetAssignmentEvent extends AbstractDistributedEvent {
+public class CancelTargetAssignmentEvent extends AbstractEvent {
 
-    private static final long serialVersionUID = 1L;
     private final String controllerId;
     private final Long actionId;
     private final URI targetAdress;
