@@ -65,7 +65,7 @@ public class GenerateDialog extends Window {
         final TextField tf2 = new TextField("amount", new ObjectProperty<Integer>(10));
         tf2.setIcon(FontAwesome.GEAR);
         tf2.setRequired(true);
-        tf2.addValidator(new RangeValidator<Integer>("Must be between 1 and 1000", Integer.class, 1, 1000));
+        tf2.addValidator(new RangeValidator<Integer>("Must be between 1 and 30000", Integer.class, 1, 30000));
 
         final TextField tf3 = new TextField("tenant", "default");
         tf3.setIcon(FontAwesome.USER);
