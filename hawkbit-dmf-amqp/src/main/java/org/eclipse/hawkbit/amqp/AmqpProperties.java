@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -24,6 +25,26 @@ public class AmqpProperties {
     private String deadLetterQueue = "dmf_connector_deadletter";
     private String deadLetterExchange = "dmf.connector.deadletter";
     private String receiverQueue = "dmf_receiver";
+    private boolean missingQueuesFatal = false;
+
+    /**
+     * Is missingQueuesFatal enabled
+     * 
+     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
+     * @return the missingQueuesFatal <true> enabled <false> disabled
+     */
+    public boolean isMissingQueuesFatal() {
+        return missingQueuesFatal;
+    }
+
+    /**
+     * @param missingQueuesFatal
+     *            the missingQueuesFatal to set.
+     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
+     */
+    public void setMissingQueuesFatal(final boolean missingQueuesFatal) {
+        this.missingQueuesFatal = missingQueuesFatal;
+    }
 
     /**
      * Returns the dead letter exchange.
