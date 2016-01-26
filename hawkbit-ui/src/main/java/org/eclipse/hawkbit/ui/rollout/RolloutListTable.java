@@ -10,15 +10,18 @@ package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.AbstractPropertyChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
+import org.eclipse.hawkbit.eventbus.event.ActionPropertyChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutStatusUpdateEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -123,51 +126,9 @@ public class RolloutListTable extends AbstractSimpleTable {
             onRolloutStatusChange((List<RolloutStatusUpdateEvent>) events);
         } else if (ActionCreatedEvent.class.isInstance(firstEvent)) {
             onActionCreation((List<ActionCreatedEvent>) events);
+        } else if (ActionPropertyChangeEvent.class.isInstance(firstEvent)) {
+            onActionPropertyChange((List<ActionPropertyChangeEvent>) events);
         }
-    }
-
-    private void onActionCreation(final List<ActionCreatedEvent> events) {
-        getPageLength();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final ActionCreatedEvent event : events) {
-            if (visibleItemIds.contains(event.getEntity().getRollout().getId())) {
-                final Item item = getItem(event.getEntity().getRollout().getId());
-                final Action.Status actionstatus = event.getEntity().getStatus();
-                if (actionstatus == Status.RUNNING || actionstatus == Status.RETRIEVED
-                        || actionstatus == Status.WARNING || actionstatus == Status.DOWNLOAD) {
-                    increamentCountandSet("runningTargetsCount", item);
-                    decrementCountAndSet("scheduledTargetsCount", item);
-                } else if (actionstatus == Status.FINISHED) {
-                    increamentCountandSet("finishedTargetsCount", item);
-                    decrementCountAndSet("runningTargetsCount", item);
-                } else if (actionstatus == Status.ERROR) {
-                    // TODO check this
-                    increamentCountandSet("errorTargetsCount", item);
-                    decrementCountAndSet("runningTargetsCount", item);
-                } else if (actionstatus == Status.CANCELED || actionstatus == Status.CANCELING) {
-                    // TODO check this
-                    increamentCountandSet("cancelledTargetsCount", item);
-                    decrementCountAndSet("runningTargetsCount", item);
-                }
-                final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
-                item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
-            }
-        }
-    }
-
-    private void decrementCountAndSet(final String statusProperty, final Item item) {
-        Long count = (Long) item.getItemProperty(statusProperty).getValue();
-        if (count != null && count > 0) {
-            item.getItemProperty(statusProperty).setValue(--count);
-        }
-        if (count != null && count == 0 && statusProperty.equals("notStartedTargetsCount")) {
-            item.getItemProperty(statusProperty).setValue(null);
-        }
-    }
-
-    private void increamentCountandSet(final String statusProperty, final Item item) {
-        Long count = (Long) item.getItemProperty(statusProperty).getValue();
-        item.getItemProperty(statusProperty).setValue(++count);
     }
 
     @Override
@@ -183,7 +144,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.3f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.1f));
         columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.2f));
-        columnList.add(new TableColumn(SPUIDefinitions.DELETE, i18n.get("header.delete"), 0.1f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_ACTION, i18n.get("upload.action"), 0.1f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2f));
@@ -249,13 +209,11 @@ public class RolloutListTable extends AbstractSimpleTable {
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUIDefinitions.ROLLOUT_NAME, (source, itemId, columnId) -> getRolloutNameLink(itemId));
         addGeneratedColumn(SPUIDefinitions.ROLLOUT_STATUS, (source, itemId, columnId) -> getStatusLabel(itemId));
-        addGeneratedColumn(SPUIDefinitions.DELETE, (source, itemId, columnId) -> getDeleteButton(itemId));
         addGeneratedColumn(SPUIDefinitions.DETAIL_STATUS, (source, itemId, columnId) -> getProgressBar(itemId));
         addGeneratedColumn(SPUIDefinitions.ROLLOUT_ACTION, (source, itemId, columnId) -> getActionButton(itemId));
 
         setColumnAlignment(SPUIDefinitions.ROLLOUT_STATUS, Align.CENTER);
         setColumnAlignment(SPUIDefinitions.DETAIL_STATUS, Align.CENTER);
-        setColumnAlignment(SPUIDefinitions.DELETE, Align.CENTER);
         setColumnAlignment(SPUIDefinitions.ROLLOUT_ACTION, Align.CENTER);
 
     }
@@ -293,13 +251,9 @@ public class RolloutListTable extends AbstractSimpleTable {
         if (rolloutStatus == RolloutStatus.READY) {
             final ContextMenuItem startItem = context.addItem("Start");
             startItem.setData(new ContextMenuData(rolloutId, ACTION.START));
-            final ContextMenuItem cancelItem = context.addItem("Cancel");
-            cancelItem.setData(new ContextMenuData(rolloutId, ACTION.CANCEL));
         } else if (rolloutStatus == RolloutStatus.RUNNING) {
             final ContextMenuItem pauseItem = context.addItem("Pause");
             pauseItem.setData(new ContextMenuData(rolloutId, ACTION.PAUSE));
-            final ContextMenuItem cancelItem = context.addItem("Cancel");
-            cancelItem.setData(new ContextMenuData(rolloutId, ACTION.CANCEL));
         } else if (rolloutStatus == RolloutStatus.PAUSED) {
             final ContextMenuItem resumeItem = context.addItem("Resume");
             resumeItem.setData(new ContextMenuData(rolloutId, ACTION.RESUME));
@@ -321,39 +275,19 @@ public class RolloutListTable extends AbstractSimpleTable {
         if (contextMenuData.getAction() == ACTION.PAUSE) {
             rolloutManagement.pauseRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
-            // refreshTable();
         } else if (contextMenuData.getAction() == ACTION.RESUME) {
             rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
-            // refreshTable();
         } else if (contextMenuData.getAction() == ACTION.START) {
             rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
-            final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement
-                    .getRolloutDetailedStatus(contextMenuData.getRolloutId());
-            row.getItemProperty("scheduledTargetsCount").setValue(
-                    getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.READY));
-            row.getItemProperty("notStartedTargetsCount").setValue(
-                    getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.NOTSTARTED));
-            row.getItemProperty("runningTargetsCount").setValue(
-                    getTargetsCountInStatus(rolloutTargetsStatus, RolloutTargetStatus.RUNNING));
         } else if (contextMenuData.getAction() == ACTION.UPDATE) {
             addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
             final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
             addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
             UI.getCurrent().addWindow(addTargetWindow);
             addTargetWindow.setVisible(Boolean.TRUE);
-        } else if (contextMenuData.getAction() == ACTION.CANCEL) {
-            // TODO ass cancel logic here
         }
-    }
-
-    private Long getTargetsCountInStatus(final RolloutTargetsStatusCount rolloutTargetsStatus,
-            final RolloutTargetStatus status) {
-        if (rolloutTargetsStatus.getStatusCountDetails().containsKey(status)) {
-            return rolloutTargetsStatus.getStatusCountDetails().get(status);
-        }
-        return 0L;
     }
 
     private void onAction(final ClickEvent event) {
@@ -369,11 +303,11 @@ public class RolloutListTable extends AbstractSimpleTable {
                 SPUILabelDefinitions.SHOW_ROLLOUT_GROUP_DETAILS, null, false, null, SPUIButtonStyleSmallNoBorder.class);
         updateIcon.setData(rolloutName);
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
-        updateIcon.addClickListener(event -> showRolloutGroups(event, itemId));
+        updateIcon.addClickListener(event -> showRolloutGroups(itemId));
         return updateIcon;
     }
 
-    private void showRolloutGroups(final ClickEvent event, final Object itemId) {
+    private void showRolloutGroups(final Object itemId) {
         rolloutUIState.setRolloutId((long) itemId);
         final String rolloutName = (String) getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         rolloutUIState.setRolloutName(rolloutName);
@@ -476,29 +410,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         return (Long) item.getItemProperty(propertName).getValue();
     }
 
-    private Button getDeleteButton(final Object itemId) {
-        final Item item = getContainerDataSource().getItem(itemId);
-        final String rolloutName = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final Button deleteIcon = SPUIComponentProvider.getButton(SPUIComponetIdProvider.ROLLOUT_DELETE_ICON + "-"
-                + rolloutName, "", SPUILabelDefinitions.DELETE, ValoTheme.BUTTON_TINY + " " + "redicon", true,
-                FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
-        deleteIcon.setData(itemId);
-        deleteIcon.addClickListener(event -> deleteRollout());
-
-        /**
-         * TODO Delete button is always enabled for all rollout status .Cross
-         * check if this is ok ? Or should delete be enabled for only for
-         * status.
-         */
-        return deleteIcon;
-    }
-
-    private void deleteRollout() {
-        /**
-         * TODO Add implementation
-         */
-    }
-
     private Label getStatusLabel(final Object itemId) {
         final Label statusLabel = new Label();
         statusLabel.setHeightUndefined();
@@ -596,8 +507,98 @@ public class RolloutListTable extends AbstractSimpleTable {
         container.refresh();
     }
 
+    private void onActionCreation(final List<ActionCreatedEvent> events) {
+        final Set<Long> rolloutsToBeRefreshed = new HashSet();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        for (final ActionCreatedEvent event : events) {
+            final Action action = event.getEntity();
+            final Long rolloutId = action.getRollout().getId();
+            final Status status = action.getStatus();
+            if (visibleItemIds.contains(rolloutId)) {
+                final Item item = getItem(rolloutId);
+                rolloutsToBeRefreshed.add(rolloutId);
+                incrementStatusCount(item, status);
+                decrementCountAndSet("notStartedTargetsCount", item);
+            }
+        }
+
+        for (final Long id : rolloutsToBeRefreshed) {
+            final Item item = getItem(id);
+            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
+            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
+        }
+    }
+
+    private void onActionPropertyChange(final List<ActionPropertyChangeEvent> events) {
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        final Set<Long> rolloutsToBeRefreshed = new HashSet();
+        for (final ActionPropertyChangeEvent event : events) {
+            final Action action = event.getEntity();
+            final Long rolloutId = action.getRollout().getId();
+            if (visibleItemIds.contains(rolloutId)) {
+                final Item item = getItem(rolloutId);
+                rolloutsToBeRefreshed.add(rolloutId);
+                final AbstractPropertyChangeEvent<Action>.Values changeSetWithValues = event.getChangeSet().get(
+                        "status");
+                if (null != changeSetWithValues) {
+                    final Action.Status oldValue = (Status) changeSetWithValues.getOldValue();
+                    final Action.Status newValue = (Status) changeSetWithValues.getNewValue();
+                    decrementStatusCount(item, oldValue);
+                    incrementStatusCount(item, newValue);
+                }
+            }
+        }
+
+        for (final Long id : rolloutsToBeRefreshed) {
+            final Item item = getItem(id);
+            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
+            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
+        }
+    }
+
+    private void decrementStatusCount(final Item item, final Action.Status oldValue) {
+        if (oldValue == Status.RUNNING || oldValue == Status.RETRIEVED || oldValue == Status.WARNING
+                || oldValue == Status.DOWNLOAD) {
+            decrementCountAndSet("runningTargetsCount", item);
+        } else if (oldValue == Status.ERROR) {
+            decrementCountAndSet("errorTargetsCount", item);
+        } else if (oldValue == Status.CANCELED || oldValue == Status.CANCELING) {
+            decrementCountAndSet("cancelledTargetsCount", item);
+        } else if (oldValue == Status.SCHEDULED) {
+            decrementCountAndSet("scheduledTargetsCount", item);
+        }
+    }
+
+    private void incrementStatusCount(final Item item, final Action.Status nwValue) {
+        if (nwValue == Status.RUNNING || nwValue == Status.RETRIEVED || nwValue == Status.WARNING
+                || nwValue == Status.DOWNLOAD) {
+            increamentCountandSet("runningTargetsCount", item);
+        } else if (nwValue == Status.ERROR) {
+            increamentCountandSet("errorTargetsCount", item);
+        } else if (nwValue == Status.CANCELED || nwValue == Status.CANCELING) {
+            increamentCountandSet("cancelledTargetsCount", item);
+        } else if (nwValue == Status.SCHEDULED) {
+            increamentCountandSet("scheduledTargetsCount", item);
+        } else if (nwValue == Status.FINISHED) {
+            increamentCountandSet("finishedTargetsCount", item);
+        }
+    }
+
+    private void decrementCountAndSet(final String statusProperty, final Item item) {
+        Long count = (Long) item.getItemProperty(statusProperty).getValue();
+        if (count > 0) {
+            final Long newValue = --count;
+            item.getItemProperty(statusProperty).setValue(newValue);
+        }
+    }
+
+    private void increamentCountandSet(final String statusProperty, final Item item) {
+        final Long count = ++((Long) item.getItemProperty(statusProperty).getValue());
+        item.getItemProperty(statusProperty).setValue(count);
+    }
+
     enum ACTION {
-        PAUSE, CANCEL, RESUME, START, UPDATE
+        PAUSE, RESUME, START, UPDATE
     }
 
     /**
