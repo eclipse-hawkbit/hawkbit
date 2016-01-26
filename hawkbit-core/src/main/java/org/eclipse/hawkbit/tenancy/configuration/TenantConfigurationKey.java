@@ -22,38 +22,53 @@ public enum TenantConfigurationKey {
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_HEADER_ENABLED("authentication.header.enabled",
-            "hawkbit.server.controller.security.authentication.header.enabled", Boolean.FALSE.toString()),
+            "hawkbit.server.controller.security.authentication.header.enabled", Boolean.class,
+            Boolean.FALSE.toString()),
     /**
     *
     */
     AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME("authentication.header.authority",
-            "hawkbit.server.controller.security.authentication.header.authority", Boolean.FALSE.toString()),
+            "hawkbit.server.controller.security.authentication.header.authority", Boolean.class,
+            Boolean.FALSE.toString()),
     /**
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED("authentication.targettoken.enabled",
-            "hawkbit.server.controller.security.authentication.targettoken.enabled", Boolean.FALSE.toString()),
+            "hawkbit.server.controller.security.authentication.targettoken.enabled", Boolean.class,
+            Boolean.FALSE.toString()),
 
     /**
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED("authentication.gatewaytoken.enabled",
-            "hawkbit.server.controller.security.authentication.gatewaytoken.enabled", Boolean.FALSE.toString()),
+            "hawkbit.server.controller.security.authentication.gatewaytoken.enabled", Boolean.class,
+            Boolean.FALSE.toString()),
     /**
      * string value which holds the name of the security token key.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME("authentication.gatewaytoken.name",
-            "hawkbit.server.controller.security.authentication.gatewaytoken.name", null),
+            "hawkbit.server.controller.security.authentication.gatewaytoken.name", String.class, null),
 
     /**
      * string value which holds the actual security-key of the gateway security
      * token.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY("authentication.gatewaytoken.key",
-            "hawkbit.server.controller.security.authentication.gatewaytoken.key", null);
+            "hawkbit.server.controller.security.authentication.gatewaytoken.key", String.class, null),
+
+    /**
+     * string value which holds the polling time interval in the format HH:mm:ss
+     */
+    POLLING_TIME_INTERVAL("pollingOverdueTime", "hawkbit.controller.pollingOverdueTime", String.class, null),
+
+    /**
+     * string value which holds the polling time interval in the format HH:mm:ss
+     */
+    POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null);
 
     private final String keyName;
     private final String defaultKeyName;
+    private final Class<?> dataType;
     private final String defaultValue;
 
     /**
@@ -62,10 +77,13 @@ public enum TenantConfigurationKey {
      * @param allowedValues
      *            the allowed values for this specific key
      */
-    private TenantConfigurationKey(final String key, final String defaultKeyName, final String defaultValue) {
+    private TenantConfigurationKey(final String key, final String defaultKeyName, final Class<?> dataType,
+            final String defaultValue) {
         this.keyName = key;
+        this.dataType = dataType;
         this.defaultKeyName = defaultKeyName;
         this.defaultValue = defaultValue;
+
     }
 
     /**
@@ -87,5 +105,13 @@ public enum TenantConfigurationKey {
      */
     public String getDefaultValue() {
         return defaultValue;
+    }
+
+    /**
+     * 
+     * @return the datatype of the tenant configuration value
+     */
+    public Class<?> getDataType() {
+        return dataType;
     }
 }
