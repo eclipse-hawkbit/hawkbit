@@ -4,20 +4,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
@@ -29,68 +21,41 @@ import com.vaadin.ui.Label;
  * duration in the DurationField or he can configure using the global duration
  * by changing the CheckBox.
  */
-@SpringComponent
-@ViewScope
-@Scope("prototype")
 public class DurationConfigField extends GridLayout implements ValueChangeListener, ConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
     private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
-    private CheckBox checkBox;
-    private DurationField durationField;
-
+    private final CheckBox checkBox = new CheckBox();
+    private final DurationField durationField = new DurationField();
     private Duration globalDuration;
+    private final Label labelCustomValue;
 
-    @Autowired
-    private I18N i18n;
-
-    /**
-     * sets i18n
-     * 
-     * @param i18n
-     */
-    public void setI18n(I18N i18n) {
-        this.i18n = i18n;
-    }
-
-    public DurationConfigField() {
+    private DurationConfigField() {
         super(3, 2);
-    }
-
-    /**
-     * Initialize Authentication Configuration layout.
-     */
-    @PostConstruct
-    public void init() {
 
         this.addStyleName("duration-config-field");
         this.setSpacing(true);
         this.setImmediate(true);
         this.setColumnExpandRatio(1, 1.0F);
-        // gridLayout.setSizeFull();
-
-        checkBox = new CheckBox();
 
         this.addComponent(checkBox, 0, 0);
         this.setComponentAlignment(checkBox, Alignment.MIDDLE_LEFT);
 
-        Label customValue = SPUIComponentProvider.getLabel(i18n.get("configuration.polling.custom.value"),
-                SPUILabelDefinitions.SP_LABEL_SIMPLE);
-        this.addComponent(customValue, 1, 0);
-        this.setComponentAlignment(customValue, Alignment.MIDDLE_LEFT);
-
-        durationField = new DurationField();
+        labelCustomValue = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        this.addComponent(labelCustomValue, 1, 0);
+        this.setComponentAlignment(labelCustomValue, Alignment.MIDDLE_LEFT);
 
         this.addComponent(durationField, 2, 0);
         this.setComponentAlignment(durationField, Alignment.MIDDLE_LEFT);
 
         checkBox.addValueChangeListener(this);
+        durationField.addValueChangeListener(this);
     }
 
     @Override
-    public void valueChange(ValueChangeEvent event) {
+    public void valueChange(final ValueChangeEvent event) {
         if (event.getProperty() == checkBox) {
             if (checkBox.getValue()) {
                 durationField.setEnabled(true);
@@ -103,35 +68,25 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
     }
 
     /**
-     * sets all mandatitory attributes for correct user interaction
-     * 
-     * @param caption
-     *            the caption of the field
+     * has to be called before using, see Builder Implementation.
      * 
      * @param tenantDuration
      *            tenant specific duration value
      * @param globalDuration
      *            duration value which is stored in the global configuration
      */
-    public void setInitValues(String caption, @NotNull Duration tenantDuration, @NotNull Duration globalDuration) {
-        this.setCaption(caption);
+    private void init(final Duration globalDuration, final Duration tenantDuration) {
         this.globalDuration = globalDuration;
-
         this.setValue(tenantDuration);
     }
 
-    /**
-     * sets the allowed range of the duration values
-     * 
-     * @param minimumDuration
-     *            minimum allowed duration value
-     * @param maximumDuration
-     *            maximum allowed duration value
-     */
-    public void setAllowedRange(Duration minimumDuration, Duration maximumDuration) {
+    private void setCheckboxLabel(final String label) {
+        labelCustomValue.setValue(label);
+    }
+
+    private void setAllowedRange(final Duration minimumDuration, final Duration maximumDuration) {
         durationField.setMinimumDuration(minimumDuration);
         durationField.setMaximumDuration(maximumDuration);
-
     }
 
     /**
@@ -141,7 +96,7 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
      *            duration which will be set in to the duration field, when
      *            {@code null} the global configuration will be used.
      */
-    public void setValue(Duration tenantDuration) {
+    public void setValue(final Duration tenantDuration) {
         if (tenantDuration == null) {
             // no tenant specific configuration
             checkBox.setValue(false);
@@ -178,4 +133,54 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
     public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);
     }
+
+    public static DurationConfigFieldBuilder builder() {
+        return new DurationConfigFieldBuilder();
+    }
+
+    public static class DurationConfigFieldBuilder {
+        private final DurationConfigField field;
+
+        private Duration globalDuration = null;
+        private Duration tenantDuration = null;
+
+        private DurationConfigFieldBuilder() {
+            field = new DurationConfigField();
+        };
+
+        public DurationConfigFieldBuilder checkBoxLabel(final String label) {
+            field.setCheckboxLabel(label);
+            return this;
+        }
+
+        public DurationConfigFieldBuilder globalDuration(final Duration globalDuration) {
+            this.globalDuration = globalDuration;
+            return this;
+        }
+
+        public DurationConfigFieldBuilder caption(final String caption) {
+            field.setCaption(caption);
+            return this;
+        }
+
+        public DurationConfigFieldBuilder range(final Duration minDuration, final Duration maxDuration) {
+            field.setAllowedRange(minDuration, maxDuration);
+            return this;
+        }
+
+        public DurationConfigFieldBuilder tenantDuration(final Duration tenantDuration) {
+            this.tenantDuration = tenantDuration;
+            return this;
+        }
+
+        public DurationConfigField build() {
+            if (globalDuration == null) {
+                throw new IllegalStateException(
+                        "Cannot build DurationConfigField without a value for global duration.");
+            }
+
+            field.init(globalDuration, tenantDuration);
+            return field;
+        }
+    };
 }

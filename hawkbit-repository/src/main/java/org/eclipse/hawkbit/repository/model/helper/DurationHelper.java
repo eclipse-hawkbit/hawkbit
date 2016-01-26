@@ -15,7 +15,7 @@ import java.time.temporal.TemporalAccessor;
 public class DurationHelper {
 
     /**
-     * Format of the String expected in configuration file and in the databse.
+     * Format of the String expected in configuration file and in the database.
      */
     public static final String DURATION_FORMAT = "HH:mm:ss";
 
@@ -27,7 +27,7 @@ public class DurationHelper {
      * @return String in the duration format, specified at
      *         {@link #DURATION_FORMAT}
      */
-    public String durationToFormattedString(Duration duration) {
+    public String durationToFormattedString(final Duration duration) {
         if (duration == null) {
             return null;
         }
@@ -44,7 +44,7 @@ public class DurationHelper {
      * @throws DateTimeParseException
      *             when String is in wrong format
      */
-    public Duration formattedStringToDuration(String formattedDuration) throws DateTimeParseException {
+    public Duration formattedStringToDuration(final String formattedDuration) throws DateTimeParseException {
         if (formattedDuration == null) {
             return null;
         }
@@ -64,7 +64,7 @@ public class DurationHelper {
      *            count of seconds
      * @return duration
      */
-    public Duration getDurationByTimeValues(long hours, long minutes, long seconds) {
+    public Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
     }
 }
