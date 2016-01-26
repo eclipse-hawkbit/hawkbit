@@ -10,6 +10,12 @@ Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im
 mvn install
 ```
 
+# Releases
+
+* We are currently working on the first formal release under the Eclipse banner: 0.1 (see [Release 0.1 branch](https://github.com/eclipse/hawkbit/tree/release-train-0.1))
+* The master branch contains future development towards 0.2
+
+
 ## Try out examples
 #### Standalone Test Application Server
 [Example Application](examples/hawkbit-example-app)
