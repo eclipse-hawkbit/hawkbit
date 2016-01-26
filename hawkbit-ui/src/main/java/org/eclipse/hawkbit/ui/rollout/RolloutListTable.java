@@ -93,6 +93,7 @@ public class RolloutListTable extends AbstractSimpleTable {
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -279,7 +280,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
         } else if (contextMenuData.getAction() == ACTION.START) {
-            rolloutManagement.startRollout(rolloutManagement.findRolloutByName(rolloutName));
+            rolloutManagement.startRolloutAsync(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
         } else if (contextMenuData.getAction() == ACTION.UPDATE) {
             addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
@@ -593,8 +594,9 @@ public class RolloutListTable extends AbstractSimpleTable {
     }
 
     private void increamentCountandSet(final String statusProperty, final Item item) {
-        final Long count = ++((Long) item.getItemProperty(statusProperty).getValue());
-        item.getItemProperty(statusProperty).setValue(count);
+        Long count = getStatusCount(statusProperty, item);
+        final Long newValue = ++count;
+        item.getItemProperty(statusProperty).setValue(newValue);
     }
 
     enum ACTION {
