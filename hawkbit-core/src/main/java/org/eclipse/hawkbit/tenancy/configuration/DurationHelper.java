@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.repository.model.helper;
+package org.eclipse.hawkbit.tenancy.configuration;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -36,7 +36,7 @@ public class DurationHelper {
     }
 
     /**
-     * Converts a formatted Sting into a Duration object.
+     * Converts a formatted String into a Duration object.
      * 
      * @param formattedDuration
      *            String in {@link #DURATION_FORMAT}
@@ -66,5 +66,23 @@ public class DurationHelper {
      */
     public Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+    }
+
+    public DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
+        return new DurationRangeValidator(min, max);
+    }
+
+    public static class DurationRangeValidator {
+        final Duration min;
+        final Duration max;
+
+        private DurationRangeValidator(final Duration min, final Duration max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public boolean isWithinRange(final Duration duration) {
+            return duration.compareTo(min) > 0 && duration.compareTo(max) < 0;
+        }
     }
 }
