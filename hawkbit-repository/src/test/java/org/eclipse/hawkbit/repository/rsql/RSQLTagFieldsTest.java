@@ -33,8 +33,8 @@ public class RSQLTagFieldsTest extends AbstractIntegrationTest {
         for (int i = 0; i < 5; i++) {
             final TargetTag targetTag = new TargetTag("" + i, "" + i, i % 2 == 0 ? "red" : "blue");
             tagManagement.createTargetTag(targetTag);
-            final DistributionSetTag distributionSetTag = new DistributionSetTag("" + i, "" + i, i % 2 == 0 ? "red"
-                    : "blue");
+            final DistributionSetTag distributionSetTag = new DistributionSetTag("" + i, "" + i,
+                    i % 2 == 0 ? "red" : "blue");
             tagManagement.createDistributionSetTag(distributionSetTag);
         }
     }
@@ -101,8 +101,8 @@ public class RSQLTagFieldsTest extends AbstractIntegrationTest {
 
     private void assertRSQLQueryDistributionSet(final String rsqlParam, final long expectedEntities) {
 
-        final Page<DistributionSetTag> findEnitity = tagManagement.findAllDistributionSetTags(
-                RSQLUtility.parse(rsqlParam, TagFields.class), new PageRequest(0, 100));
+        final Page<DistributionSetTag> findEnitity = tagManagement
+                .findAllDistributionSetTags(RSQLUtility.parse(rsqlParam, TagFields.class), new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);
@@ -110,8 +110,8 @@ public class RSQLTagFieldsTest extends AbstractIntegrationTest {
 
     private void assertRSQLQueryTarget(final String rsqlParam, final long expectedEntities) {
 
-        final Page<TargetTag> findEnitity = tagManagement.findAllTargetTags(
-                RSQLUtility.parse(rsqlParam, TagFields.class), new PageRequest(0, 100));
+        final Page<TargetTag> findEnitity = tagManagement
+                .findAllTargetTags(RSQLUtility.parse(rsqlParam, TagFields.class), new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

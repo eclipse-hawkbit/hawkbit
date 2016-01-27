@@ -162,8 +162,8 @@ public class RSQLTargetFieldTest extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<Target> findTargetPage = targetManagement.findTargetsAll(
-                RSQLUtility.parse(rsqlParam, TargetFields.class), new PageRequest(0, 100));
+        final Page<Target> findTargetPage = targetManagement
+                .findTargetsAll(RSQLUtility.parse(rsqlParam, TargetFields.class), new PageRequest(0, 100));
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);

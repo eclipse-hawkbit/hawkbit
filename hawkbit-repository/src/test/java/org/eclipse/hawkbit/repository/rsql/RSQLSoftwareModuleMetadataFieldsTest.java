@@ -32,9 +32,9 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractIntegrationTes
 
     @Before
     public void setupBeforeTest() {
-        final SoftwareModule softwareModule = softwareManagement.createSoftwareModule(new SoftwareModule(TestDataUtil
-                .findOrCreateSoftwareModuleType(softwareManagement, "application"), "application", "1.0.0", "Desc",
-                "vendor Limited, California"));
+        final SoftwareModule softwareModule = softwareManagement.createSoftwareModule(
+                new SoftwareModule(TestDataUtil.findOrCreateSoftwareModuleType(softwareManagement, "application"),
+                        "application", "1.0.0", "Desc", "vendor Limited, California"));
         softwareModuleId = softwareModule.getId();
 
         for (int i = 0; i < 5; i++) {

@@ -40,8 +40,8 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
         ds.getMetadata().add(new DistributionSetMetadata("metaKey", ds, "metaValue"));
         distributionSetManagement.updateDistributionSet(ds);
 
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSets("NewDS", 3, softwareManagement,
-                distributionSetManagement).get(0);
+        final DistributionSet ds2 = TestDataUtil
+                .generateDistributionSets("NewDS", 3, softwareManagement, distributionSetManagement).get(0);
 
         ds2.setDescription("DS2");
         ds2.getMetadata().add(new DistributionSetMetadata("metaKey", ds2, "value"));

@@ -36,8 +36,8 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractIntegrationTe
                 distributionSetManagement);
         distributionSetId = distributionSet.getId();
         for (int i = 0; i < 5; i++) {
-            final DistributionSetMetadata distributionSetMetadata = new DistributionSetMetadata("" + i,
-                    distributionSet, "" + i);
+            final DistributionSetMetadata distributionSetMetadata = new DistributionSetMetadata("" + i, distributionSet,
+                    "" + i);
             distributionSet.getMetadata().add(distributionSetMetadata);
         }
 

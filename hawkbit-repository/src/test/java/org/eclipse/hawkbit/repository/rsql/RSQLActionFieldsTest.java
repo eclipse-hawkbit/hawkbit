@@ -80,8 +80,8 @@ public class RSQLActionFieldsTest extends AbstractIntegrationTest {
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Specification<Action> parse = RSQLUtility.parse(rsqlParam, ActionFields.class);
-        final Slice<Action> findEnitity = deploymentManagement.findActionsByTarget(parse, target, new PageRequest(0,
-                100));
+        final Slice<Action> findEnitity = deploymentManagement.findActionsByTarget(parse, target,
+                new PageRequest(0, 100));
         final long countAllEntities = deploymentManagement.countActionsByTarget(parse, target);
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

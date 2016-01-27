@@ -30,13 +30,13 @@ public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
     @Before
     public void seuptBeforeTest() {
 
-        final SoftwareModule ah = softwareManagement.createSoftwareModule(new SoftwareModule(appType, "agent-hub",
-                "1.0.1", "agent-hub", ""));
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "agent-hub", ""));
         softwareManagement.createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", "aa", ""));
         softwareManagement.createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", "aa", ""));
 
-        final SoftwareModule ah2 = softwareManagement.createSoftwareModule(new SoftwareModule(appType, "agent-hub2",
-                "1.0.1", "agent-hub2", ""));
+        final SoftwareModule ah2 = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub2", "1.0.1", "agent-hub2", ""));
 
         final SoftwareModuleMetadata softwareModuleMetadata = new SoftwareModuleMetadata("metaKey", ah, "metaValue");
         softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata);
