@@ -17,16 +17,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SystemConfigurationRest {
 
     @JsonProperty
-    private Map<String, Object> configuration;
+    private Map<String, TenantConfigurationValueRest> configuration;
 
     /**
      * Sets the authentication configuration.
      *
-     * @param authenticationConfiguration
+     * @param configuration
      *            the authentication configuration
      */
-    public void setAuthenticationConfiguration(Map<String, Object> authenticationConfiguration) {
-        this.configuration = authenticationConfiguration;
+    public void setConfiguration(final Map<String, TenantConfigurationValueRest> configuration) {
+        this.configuration = configuration;
     }
 
     /**
@@ -34,7 +34,7 @@ public class SystemConfigurationRest {
      *
      * @return the authentication configuration
      */
-    public Map<String, Object> getAuthenticationConfiguration() {
+    public Map<String, TenantConfigurationValueRest> getConfiguration() {
         return this.configuration;
     }
 }

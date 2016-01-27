@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationTok
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
 import org.eclipse.hawkbit.security.DosFilter;
@@ -119,7 +120,7 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
         @Autowired
         private ControllerManagement controllerManagement;
         @Autowired
-        private SystemManagement systemManagement;
+        private TenantConfigurationManagement tenantConfigurationManagement;
         @Autowired
         private TenantAware tenantAware;
         @Autowired
@@ -133,19 +134,19 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
 
             final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
                     securityConfiguration.getRpCnHeader(), securityConfiguration.getRpSslIssuerHashHeader(),
-                    systemManagement, tenantAware);
+                    tenantConfigurationManagement, tenantAware);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
             securityHeaderFilter.setCheckForPrincipalChanges(true);
             securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
-                    systemManagement, tenantAware, controllerManagement);
+                    tenantConfigurationManagement, tenantAware, controllerManagement);
             securityTokenFilter.setAuthenticationManager(authenticationManager());
             securityTokenFilter.setCheckForPrincipalChanges(true);
             securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                    systemManagement, tenantAware);
+                    tenantConfigurationManagement, tenantAware);
             gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager());
             gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
             gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);

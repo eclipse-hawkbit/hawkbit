@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 
 /**
@@ -45,15 +45,17 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
      *            the controller management to retrieve the specific target
      *            security token to verify
      */
-    public HttpControllerPreAuthenticateSecurityTokenFilter(final SystemManagement systemManagement,
-            final TenantAware tenantAware, final ControllerManagement controllerManagement) {
-        super(systemManagement, tenantAware);
+    public HttpControllerPreAuthenticateSecurityTokenFilter(
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final ControllerManagement controllerManagement) {
+        super(tenantConfigurationManagement, tenantAware);
         this.controllerManagement = controllerManagement;
     }
 
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
-        return new ControllerPreAuthenticateSecurityTokenFilter(systemManagement, controllerManagement, tenantAware);
+        return new ControllerPreAuthenticateSecurityTokenFilter(tenantConfigurationManagement, controllerManagement,
+                tenantAware);
     }
 
 }

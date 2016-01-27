@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.TargetInfoRepository;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.TargetTagRepository;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -180,6 +181,10 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
+    
+    @Autowired
+    protected TenantConfigurationManagement tenantConfigurationManagement;
+
 
     @Autowired
     protected RolloutManagement rolloutManagement;

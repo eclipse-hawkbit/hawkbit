@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -46,9 +46,9 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
      *            the tenant aware service to get configuration for the specific
      *            tenant
      */
-    public ControllerPreAuthenticatedGatewaySecurityTokenFilter(final SystemManagement systemManagement,
-            final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+    public ControllerPreAuthenticatedGatewaySecurityTokenFilter(
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware) {
+        super(tenantConfigurationManagement, tenantAware);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
         public String run() {
             LOGGER.trace("retrieving configuration value for configuration key {}",
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY);
-            return systemManagement.getConfigurationValue(
+            return tenantConfigurationManagement.getConfigurationValue(
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
         }
     }

@@ -5,10 +5,10 @@ import java.time.Duration;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.repository.model.helper.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -40,7 +40,7 @@ public class PollingConfigurationView extends BaseConfigurationView
     private ControllerPollProperties controllerPollProperties;
 
     @Autowired
-    private transient SystemManagement systemManagement;
+    private transient TenantConfigurationManagement tenantConfigurationManagement;
 
     private DurationConfigField fieldPollTime = null;
     private DurationConfigField fieldPollingOverdueTime = null;
@@ -66,13 +66,13 @@ public class PollingConfigurationView extends BaseConfigurationView
         globalPollTime = durationHelper.formattedStringToDuration(controllerPollProperties.getPollingTime());
         globalOverdueTime = durationHelper.formattedStringToDuration(controllerPollProperties.getPollingOverdueTime());
 
-        final TenantConfigurationValue<String> pollTimeConfValue = systemManagement
+        final TenantConfigurationValue<String> pollTimeConfValue = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class);
         if (!pollTimeConfValue.isGlobal()) {
             tenantPollTime = durationHelper.formattedStringToDuration(pollTimeConfValue.getValue());
         }
 
-        final TenantConfigurationValue<String> overdueTimeConfValue = systemManagement
+        final TenantConfigurationValue<String> overdueTimeConfValue = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class);
         if (!overdueTimeConfValue.isGlobal()) {
             tenantOverdueTime = durationHelper.formattedStringToDuration(overdueTimeConfValue.getValue());
@@ -97,7 +97,7 @@ public class PollingConfigurationView extends BaseConfigurationView
 
         fieldPollingOverdueTime = DurationConfigField.builder().caption(i18n.get("configuration.polling.overduetime"))
                 .checkBoxLabel(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
-                .globalDuration(globalPollTime).tenantDuration(tenantOverdueTime).build();
+                .globalDuration(globalOverdueTime).tenantDuration(tenantOverdueTime).build();
         fieldPollingOverdueTime.addChangeListener(this);
         vLayout.addComponent(fieldPollingOverdueTime);
 
@@ -111,14 +111,14 @@ public class PollingConfigurationView extends BaseConfigurationView
 
         if (!compareDurations(tenantPollTime, fieldPollTime.getValue())) {
             tenantPollTime = fieldPollTime.getValue();
-            systemManagement.addOrUpdateConfiguration(
+            tenantConfigurationManagement.addOrUpdateConfiguration(
                     new TenantConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL.getKeyName(),
                             durationHelper.durationToFormattedString(tenantPollTime)));
         }
 
         if (!compareDurations(tenantOverdueTime, fieldPollingOverdueTime.getValue())) {
             tenantOverdueTime = fieldPollingOverdueTime.getValue();
-            systemManagement.addOrUpdateConfiguration(
+            tenantConfigurationManagement.addOrUpdateConfiguration(
                     new TenantConfiguration(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL.getKeyName(),
                             durationHelper.durationToFormattedString(tenantOverdueTime)));
         }

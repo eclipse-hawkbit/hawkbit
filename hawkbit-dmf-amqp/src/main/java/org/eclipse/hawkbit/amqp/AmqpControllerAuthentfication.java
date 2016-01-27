@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTokenFilter;
@@ -49,7 +49,7 @@ public class AmqpControllerAuthentfication {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private SystemManagement systemManagement;
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
     private TenantAware tenantAware;
@@ -74,16 +74,16 @@ public class AmqpControllerAuthentfication {
 
     private void addFilter() {
         final ControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new ControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                systemManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware);
         filterChain.add(gatewaySecurityTokenFilter);
 
         final ControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new ControllerPreAuthenticatedSecurityHeaderFilter(
-                secruityProperties.getRpCnHeader(), secruityProperties.getRpSslIssuerHashHeader(), systemManagement,
-                tenantAware);
+                secruityProperties.getRpCnHeader(), secruityProperties.getRpSslIssuerHashHeader(),
+                tenantConfigurationManagement, tenantAware);
         filterChain.add(securityHeaderFilter);
 
         final ControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new ControllerPreAuthenticateSecurityTokenFilter(
-                systemManagement, controllerManagement, tenantAware);
+                tenantConfigurationManagement, controllerManagement, tenantAware);
         filterChain.add(securityTokenFilter);
 
         filterChain.add(new CoapAnonymousPreAuthenticatedFilter());
@@ -141,8 +141,8 @@ public class AmqpControllerAuthentfication {
         this.secruityProperties = secruityProperties;
     }
 
-    public void setSystemManagement(final SystemManagement systemManagement) {
-        this.systemManagement = systemManagement;
+    public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     public void setTenantAware(final TenantAware tenantAware) {

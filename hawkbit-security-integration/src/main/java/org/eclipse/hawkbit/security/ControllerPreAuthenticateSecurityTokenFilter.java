@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -55,9 +55,10 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
      *            the tenant aware service to get configuration for the specific
      *            tenant
      */
-    public ControllerPreAuthenticateSecurityTokenFilter(final SystemManagement systemManagement,
+    public ControllerPreAuthenticateSecurityTokenFilter(
+            final TenantConfigurationManagement tenantConfigurationManagement,
             final ControllerManagement controllerManagement, final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+        super(tenantConfigurationManagement, tenantAware);
         this.controllerManagement = controllerManagement;
     }
 

@@ -1,7 +1,7 @@
 package org.eclipse.hawkbit.rest.resource;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.resource.model.system.SystemConfigurationRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.system.SystemConfigurationRest;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class SystemResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemResource.class);
 
     @Autowired
-    private SystemManagement systemManagement;
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
@@ -30,8 +30,7 @@ public class SystemResource {
     @RequestMapping(method = RequestMethod.GET, value = "/conf", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<SystemConfigurationRest> getSystemConfiguration() {
-
-        return new ResponseEntity<>(SystemMapper.toResponse(systemManagement), HttpStatus.OK);
+        return new ResponseEntity<>(SystemMapper.toResponse(tenantConfigurationManagement), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/conf", consumes = { "application/hal+json",
@@ -41,7 +40,7 @@ public class SystemResource {
 
         // systemManagement.updateTenantConfiguration(systemConReq);
 
-        return new ResponseEntity<>(SystemMapper.toResponse(systemManagement), HttpStatus.OK);
+        return new ResponseEntity<>(SystemMapper.toResponse(tenantConfigurationManagement), HttpStatus.OK);
     }
 
 }

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -26,13 +26,13 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractControllerAuthenticationFilter.class);
 
-    protected final SystemManagement systemManagement;
+    protected final TenantConfigurationManagement tenantConfigurationManagement;
     protected final TenantAware tenantAware;
     private final SecurityConfigurationKeyTenantRunner configurationKeyTenantRunner;
 
-    protected AbstractControllerAuthenticationFilter(final SystemManagement systemManagement,
+    protected AbstractControllerAuthenticationFilter(final TenantConfigurationManagement systemManagement,
             final TenantAware tenantAware) {
-        this.systemManagement = systemManagement;
+        this.tenantConfigurationManagement = systemManagement;
         this.tenantAware = tenantAware;
         this.configurationKeyTenantRunner = new SecurityConfigurationKeyTenantRunner();
     }
@@ -54,7 +54,8 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
         @Override
         public Boolean run() {
             LOGGER.trace("retrieving configuration value for configuration key {}", getTenantConfigurationKey());
-            return systemManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue();
+            return tenantConfigurationManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class)
+                    .getValue();
         }
 
     }

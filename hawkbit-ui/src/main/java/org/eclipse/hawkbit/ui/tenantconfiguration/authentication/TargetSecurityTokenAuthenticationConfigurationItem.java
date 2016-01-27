@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -44,8 +44,9 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
      *            the system management to retrie the configuration
      */
     @Autowired
-    public TargetSecurityTokenAuthenticationConfigurationItem(final SystemManagement systemManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, systemManagement);
+    public TargetSecurityTokenAuthenticationConfigurationItem(
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement);
     }
 
     /**
@@ -88,7 +89,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
     @Override
     public void save() {
         if (configurationEnabledChange) {
-            getSystemManagement().addOrUpdateConfiguration(
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
                     new TenantConfiguration(getConfigurationKey().getKeyName(), String.valueOf(configurationEnabled)));
         }
     }
@@ -96,7 +97,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
     @Override
     public void undo() {
         configurationEnabledChange = false;
-        configurationEnabled = getSystemManagement().getConfigurationValue(getConfigurationKey(), Boolean.class)
-                .getValue();
+        configurationEnabled = getTenantConfigurationManagement()
+                .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
     }
 }

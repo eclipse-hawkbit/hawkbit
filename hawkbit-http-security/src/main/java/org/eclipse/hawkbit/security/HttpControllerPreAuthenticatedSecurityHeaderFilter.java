@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 
 /**
@@ -44,9 +44,9 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
      *            tenant
      */
     public HttpControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
-            final String caAuthorityNameHeader, final SystemManagement systemManagement,
+            final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+        super(tenantConfigurationManagement, tenantAware);
         this.caCommonNameHeader = caCommonNameHeader;
         this.caAuthorityNameHeader = caAuthorityNameHeader;
     }
@@ -54,7 +54,7 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedSecurityHeaderFilter(caCommonNameHeader, caAuthorityNameHeader,
-                systemManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware);
     }
 
 }

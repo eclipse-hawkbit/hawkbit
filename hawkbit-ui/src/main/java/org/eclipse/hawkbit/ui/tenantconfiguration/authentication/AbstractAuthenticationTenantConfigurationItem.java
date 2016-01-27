@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -34,20 +34,21 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
     private static final long serialVersionUID = 1L;
 
     private final TenantConfigurationKey configurationKey;
-    private final transient SystemManagement systemManagement;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
 
     private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
     /**
      * @param configurationKey
      *            the key for this configuration
-     * @param systemManagement
-     *            the system management to retrive the configuration value
+     * @param tenantConfigurationManagement
+     *            the tenant configuration management to retrieve the
+     *            configuration value
      */
     public AbstractAuthenticationTenantConfigurationItem(final TenantConfigurationKey configurationKey,
-            final SystemManagement systemManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         this.configurationKey = configurationKey;
-        this.systemManagement = systemManagement;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     /**
@@ -66,15 +67,16 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      */
     @Override
     public boolean isConfigEnabled() {
-        final boolean b = systemManagement.getConfigurationValue(configurationKey, Boolean.class).getValue();
+        final boolean b = tenantConfigurationManagement.getConfigurationValue(configurationKey, Boolean.class)
+                .getValue();
         return b;
     }
 
     /**
      * @return the systemManagement
      */
-    protected SystemManagement getSystemManagement() {
-        return systemManagement;
+    protected TenantConfigurationManagement getTenantConfigurationManagement() {
+        return tenantConfigurationManagement;
     }
 
     /**

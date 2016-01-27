@@ -38,7 +38,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +121,9 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     // time
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
+
+    @Transient
+    private final DurationHelper durationHelper = new DurationHelper();
 
     /**
      * Constructor for {@link TargetStatus}.
@@ -316,8 +321,13 @@ public class TargetInfo implements Persistable<Long>, Serializable {
      */
     public PollStatus getPollStatus() {
         if (lastTargetQuery != null) {
-            final Duration pollTime = PollConfigurationHelper.getInstance().getPollTimeInterval();
-            final Duration overdueTime = PollConfigurationHelper.getInstance().getOverduePollTimeInterval();
+            final Duration pollTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement
+                    .getInstance().getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class)
+                    .getValue());
+            final Duration overdueTime = durationHelper
+                    .formattedStringToDuration(TenantConfigurationManagement.getInstance()
+                            .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                            .getValue());
             final LocalDateTime currentDate = LocalDateTime.now();
             final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
                     ZoneId.systemDefault());

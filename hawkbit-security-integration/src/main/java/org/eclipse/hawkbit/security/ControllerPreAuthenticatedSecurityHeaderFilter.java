@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -65,9 +65,9 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      *            tenant
      */
     public ControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
-            final String caAuthorityNameHeader, final SystemManagement systemManagement,
+            final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+        super(tenantConfigurationManagement, tenantAware);
         this.caCommonNameHeader = caCommonNameHeader;
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
     }
@@ -142,7 +142,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     private final class GetSecurityAuthorityNameTenantRunner implements TenantAware.TenantRunner<String> {
         @Override
         public String run() {
-            return systemManagement.getConfigurationValue(
+            return tenantConfigurationManagement.getConfigurationValue(
                     TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue();
         }
     }

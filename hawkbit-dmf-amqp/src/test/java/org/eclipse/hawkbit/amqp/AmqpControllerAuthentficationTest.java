@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityProperties;
@@ -56,7 +56,7 @@ public class AmqpControllerAuthentficationTest {
     private static String CONTROLLLER_ID = "123";
     private AmqpMessageHandlerService amqpMessageHandlerService;
     private MessageConverter messageConverter;
-    private SystemManagement systemManagement;
+    private TenantConfigurationManagement tenantConfigurationManagement;
     private AmqpControllerAuthentfication authenticationManager;
 
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_FALSE = TenantConfigurationValue
@@ -78,10 +78,10 @@ public class AmqpControllerAuthentficationTest {
         final SecurityProperties secruityProperties = mock(SecurityProperties.class);
         when(secruityProperties.getRpSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
         authenticationManager.setSecruityProperties(secruityProperties);
-        systemManagement = mock(SystemManagement.class);
-        authenticationManager.setSystemManagement(systemManagement);
+        tenantConfigurationManagement = mock(TenantConfigurationManagement.class);
+        authenticationManager.setTenantConfigurationManagement(tenantConfigurationManagement);
 
-        when(systemManagement.getConfigurationValue(any(), eq(Boolean.class))).thenReturn(CONFIG_VALUE_FALSE);
+        when(tenantConfigurationManagement.getConfigurationValue(any(), eq(Boolean.class))).thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
         when(controllerManagement.getSecurityTokenByControllerId(anyString())).thenReturn(CONTROLLLER_ID);
@@ -111,7 +111,7 @@ public class AmqpControllerAuthentficationTest {
     @Description("Tests authentication manager without wrong credential")
     public void testAuthenticationBadCredantialsWithWrongCredential() {
         final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
-        when(systemManagement.getConfigurationValue(
+        when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
         securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
@@ -128,7 +128,7 @@ public class AmqpControllerAuthentficationTest {
     @Description("Tests authentication successfull")
     public void testSuccessfullAuthentication() {
         final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
-        when(systemManagement.getConfigurationValue(
+        when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
         securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLLER_ID);
@@ -160,7 +160,7 @@ public class AmqpControllerAuthentficationTest {
     public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
         final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
-        when(systemManagement.getConfigurationValue(
+        when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
         securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
@@ -182,7 +182,7 @@ public class AmqpControllerAuthentficationTest {
     public void testSuccessfullMessageAuthentication() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
         final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
-        when(systemManagement.getConfigurationValue(
+        when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
         securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLLER_ID);

@@ -41,7 +41,7 @@ public class TenantConfigurationValue<T> {
      *
      * @return the last modified at
      */
-    public long getLastModifiedAt() {
+    public Long getLastModifiedAt() {
         return lastModifiedAt;
     }
 
@@ -59,7 +59,7 @@ public class TenantConfigurationValue<T> {
      *
      * @return the created at
      */
-    public long getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
