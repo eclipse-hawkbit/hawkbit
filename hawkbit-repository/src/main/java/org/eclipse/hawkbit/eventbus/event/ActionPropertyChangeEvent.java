@@ -8,19 +8,23 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
+import java.util.Map;
+
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
- * Defines the {@link AbstractBaseEntityEvent} of creating a new {@link Action}.
+ * Defines the {@link AbstractPropertyChangeEvent} of changing {@link Action}.
  */
-public class ActionCreatedEvent extends AbstractBaseEntityEvent<Action> {
+public class ActionPropertyChangeEvent extends AbstractPropertyChangeEvent<Action> {
     private static final long serialVersionUID = 181780358321768629L;
 
     /**
      * @param action
+     * @param changeSetValues
      */
-    public ActionCreatedEvent(final Action action) {
-        super(action);
+    public ActionPropertyChangeEvent(final Action action,
+            final Map<String, AbstractPropertyChangeEvent<Action>.Values> changeSetValues) {
+        super(action, changeSetValues);
     }
 
 }

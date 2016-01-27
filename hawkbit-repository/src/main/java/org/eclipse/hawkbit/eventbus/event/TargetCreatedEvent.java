@@ -14,8 +14,6 @@ import org.eclipse.hawkbit.repository.model.Target;
  * Defines the {@link AbstractBaseEntityEvent} of creating a new {@link Target}.
  *
  *
- *
- *
  */
 public class TargetCreatedEvent extends AbstractBaseEntityEvent<Target> {
 

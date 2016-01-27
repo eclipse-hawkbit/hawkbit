@@ -22,6 +22,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Version;
 
 import org.eclipse.hawkbit.eventbus.CacheFieldEntityListener;
+import org.eclipse.hawkbit.eventbus.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantAwareHolder;
@@ -45,7 +46,7 @@ import org.springframework.hateoas.Identifiable;
  */
 @MappedSuperclass
 @Access(AccessType.FIELD)
-@EntityListeners({ AuditingEntityListener.class, CacheFieldEntityListener.class })
+@EntityListeners({ AuditingEntityListener.class, CacheFieldEntityListener.class, EntityPropertyChangeListener.class })
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
 public abstract class BaseEntity implements Serializable, Identifiable<Long> {
