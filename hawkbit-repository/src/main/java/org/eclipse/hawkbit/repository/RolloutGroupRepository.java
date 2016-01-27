@@ -16,6 +16,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The repository interface for the {@link RolloutGroup} model.
@@ -83,8 +85,10 @@ public interface RolloutGroupRepository extends BaseEntityRepository<RolloutGrou
      * @return the count of rollout groups belonging to a rollout in specific
      *         status
      */
-    Long countByRolloutAndStatusOrStatus(Rollout rollout, RolloutGroupStatus rolloutGroupStatus1,
-            RolloutGroupStatus rolloutGroupStatus2);
+    @Query("SELECT COUNT(r.id) FROM RolloutGroup r WHERE r.rollout = :rollout and (r.status = :status1 or r.status = :status2)")
+    Long countByRolloutAndStatusOrStatus(@Param("rollout") Rollout rollout,
+            @Param("status1") RolloutGroupStatus rolloutGroupStatus1,
+            @Param("status2") RolloutGroupStatus rolloutGroupStatus2);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific parent in a specific
