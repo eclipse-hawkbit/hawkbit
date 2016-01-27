@@ -505,6 +505,35 @@ public final class SPUILabelDefinitions {
      * Rollout resume button name.
      */
     public static final String RESUME = "Resume";
+    /**
+     * Rollout and rollout group property - count of not started targets.
+     */
+    public static final String VAR_COUNT_TARGETS_NOT_STARTED = "notStartedTargetsCount";
+
+    /**
+     * Rollout and rollout group property - count of running targets.
+     */
+    public static final String VAR_COUNT_TARGETS_RUNNING = "runningTargetsCount";
+
+    /**
+     * Rollout and rollout group property - count of scheduled targets.
+     */
+    public static final String VAR_COUNT_TARGETS_SCHEDULED = "scheduledTargetsCount";
+
+    /**
+     * Rollout and rollout group property - count of targets in error.
+     */
+    public static final String VAR_COUNT_TARGETS_ERROR = "errorTargetsCount";
+
+    /**
+     * Rollout and rollout group property - count of finished targets.
+     */
+    public static final String VAR_COUNT_TARGETS_FINISHED = "finishedTargetsCount";
+
+    /**
+     * Rollout and rollout group property - count of targets cancelled targets.
+     */
+    public static final String VAR_COUNT_TARGETS_CANCELLED = "cancelledTargetsCount";
 
     /**
      * Constructor.

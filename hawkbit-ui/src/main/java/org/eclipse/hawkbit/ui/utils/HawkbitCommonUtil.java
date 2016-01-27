@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.utils;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -23,6 +24,8 @@ import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
 import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -1327,5 +1330,92 @@ public final class HawkbitCommonUtil {
         bar.setPartSize(index, count);
         bar.setPartTooltip(index, statusName);
         bar.setPartStyleName(index, "status-bar-part-" + statusName);
+    }
+
+    public static void initialiseProgressBar(final DistributionBar bar, final Item item) {
+        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
+        final Long runningTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
+        final Long scheduledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
+        final Long errorTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
+        final Long finishedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
+        final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
+        if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
+                finishedTargetsCount, cancelledTargetsCount)) {
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(), 0, 0);
+            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(), 0, 1);
+
+        } else {
+            bar.setNumberOfParts(6);
+            setProgressBarDetails(bar, item);
+        }
+    }
+
+    public static void setProgressBarDetails(final DistributionBar bar, final Item item) {
+        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(),
+                notStartedTargetsCount.intValue(), 0);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item).intValue(), 1);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.RUNNING.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item).intValue(), 2);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.ERROR.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item).intValue(), 3);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
+        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.CANCELLED.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
+    }
+
+    public static void decrementStatusCount(final Item item, final Action.Status oldValue) {
+        if (oldValue == Status.RUNNING || oldValue == Status.RETRIEVED || oldValue == Status.WARNING
+                || oldValue == Status.DOWNLOAD) {
+            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
+        } else if (oldValue == Status.ERROR) {
+            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
+        } else if (oldValue == Status.CANCELED || oldValue == Status.CANCELING) {
+            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
+        } else if (oldValue == Status.SCHEDULED) {
+            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
+        }
+    }
+
+    public static void incrementStatusCount(final Item item, final Action.Status nwValue) {
+        if (nwValue == Status.RUNNING || nwValue == Status.RETRIEVED || nwValue == Status.WARNING
+                || nwValue == Status.DOWNLOAD) {
+            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
+        } else if (nwValue == Status.ERROR) {
+            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
+        } else if (nwValue == Status.CANCELED || nwValue == Status.CANCELING) {
+            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
+        } else if (nwValue == Status.SCHEDULED) {
+            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
+        } else if (nwValue == Status.FINISHED) {
+            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
+        }
+    }
+
+    public static void decrementCountAndSet(final String statusProperty, final Item item) {
+        Long count = (Long) item.getItemProperty(statusProperty).getValue();
+        if (count > 0) {
+            final Long newValue = --count;
+            item.getItemProperty(statusProperty).setValue(newValue);
+        }
+    }
+
+    private static void increamentCountandSet(final String statusProperty, final Item item) {
+        Long count = getStatusCount(statusProperty, item);
+        final Long newValue = ++count;
+        item.getItemProperty(statusProperty).setValue(newValue);
+    }
+
+    private static boolean isNoTargets(final Long... statusCount) {
+        if (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    private static Long getStatusCount(final String propertName, final Item item) {
+        return (Long) item.getItemProperty(propertName).getValue();
     }
 }

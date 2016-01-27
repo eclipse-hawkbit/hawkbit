@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -109,6 +111,22 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             proxyRolloutGroup.setSuccessCondition(rolloutGroup.getSuccessCondition());
             proxyRolloutGroup.setSuccessConditionExp(rolloutGroup.getSuccessConditionExp());
             proxyRolloutGroup.setFinishedPercentage(calculateFinishedPercentage(rolloutGroup));
+
+            final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement
+                    .getRolloutGroupDetailedStatus(rolloutGroup.getId());
+            proxyRolloutGroup.setRunningTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.RUNNING));
+            proxyRolloutGroup.setErrorTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.ERROR));
+            proxyRolloutGroup.setCancelledTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.CANCELLED));
+            proxyRolloutGroup.setFinishedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.FINISHED));
+            proxyRolloutGroup.setScheduledTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.READY));
+            proxyRolloutGroup.setNotStartedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
+                    RolloutTargetStatus.NOTSTARTED));
+
             proxyRolloutGroupsList.add(proxyRolloutGroup);
         }
         return proxyRolloutGroupsList;
@@ -139,7 +157,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             break;
         }
 
-        return finishedPercentage+"";
+        return finishedPercentage + "";
 
     }
 

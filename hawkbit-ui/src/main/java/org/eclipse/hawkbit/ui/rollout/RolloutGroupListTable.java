@@ -9,14 +9,20 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.AbstractPropertyChangeEvent;
+import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
+import org.eclipse.hawkbit.eventbus.event.ActionPropertyChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupPropertyChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -101,6 +107,33 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         final Object firstEvent = events.get(0);
         if (RolloutGroupPropertyChangeEvent.class.isInstance(firstEvent)) {
             onRolloutGroupStatusChange((List<RolloutGroupPropertyChangeEvent>) events);
+        } else if (ActionPropertyChangeEvent.class.isInstance(firstEvent)) {
+            onActionPropertyChange((List<ActionPropertyChangeEvent>) events);
+        } else if (ActionCreatedEvent.class.isInstance(firstEvent)) {
+            onActionCreation((List<ActionCreatedEvent>) events);
+        }
+    }
+
+    private void onActionCreation(final List<ActionCreatedEvent> events) {
+        final Set<Long> rolloutsToBeRefreshed = new HashSet();
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        for (final ActionCreatedEvent event : events) {
+            final Action action = event.getEntity();
+            if (null != action.getRolloutGroup()) {
+                final Long rolloutGroupId = action.getRolloutGroup().getId();
+                final Status status = action.getStatus();
+                if (visibleItemIds.contains(rolloutGroupId)) {
+                    final Item item = getItem(rolloutGroupId);
+                    rolloutsToBeRefreshed.add(rolloutGroupId);
+                    HawkbitCommonUtil.incrementStatusCount(item, status);
+                    HawkbitCommonUtil.decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
+                }
+            }
+        }
+        for (final Long id : rolloutsToBeRefreshed) {
+            final Item item = getItem(id);
+            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
+            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
         }
     }
 
@@ -172,6 +205,19 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
                 false);
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null, false,
                 false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, Long.class, 0L,
+                false, false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, Long.class, 0L,
+                false, false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, Long.class, 0L,
+                false, false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, Long.class, 0L, false,
+                false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, Long.class, 0L,
+                false, false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, Long.class, 0L,
+                false, false);
+        rolloutTableContainer.addContainerProperty("isActionRecieved", Boolean.class, false, false, false);
 
     }
 
@@ -285,15 +331,54 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         final DistributionBar bar = new DistributionBar(2);
         bar.setSizeFull();
         bar.setZeroSizedVisible(false);
-        final int i = 0;
-        final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement
-                .getRolloutGroupDetailedStatus((Long) itemId);
-        return HawkbitCommonUtil.getRolloutProgressBar(bar, i, rolloutTargetsStatus);
+        HawkbitCommonUtil.initialiseProgressBar(bar, getItem(itemId));
+        addPropertyChangeListenerOnActionRecieved(itemId, bar);
+        return bar;
+    }
+
+    private void addPropertyChangeListenerOnActionRecieved(final Object itemId, final DistributionBar bar) {
+        final Property status = getContainerProperty(itemId, "isActionRecieved");
+        final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
+        notifier.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                HawkbitCommonUtil.setProgressBarDetails(bar, getItem(itemId));
+            }
+        });
     }
 
     private static String getDetailLinkId(final String rolloutGroupName) {
         return new StringBuilder(SPUIComponetIdProvider.ROLLOUT_GROUP_NAME_LINK_ID).append('.')
                 .append(rolloutGroupName).toString();
+    }
+
+    private void onActionPropertyChange(final List<ActionPropertyChangeEvent> events) {
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        final Set<Long> rolloutsToBeRefreshed = new HashSet();
+        for (final ActionPropertyChangeEvent event : events) {
+            final Action action = event.getEntity();
+            if (null != action.getRolloutGroup()) {
+                final Long rolloutGroupId = action.getRolloutGroup().getId();
+                if (visibleItemIds.contains(rolloutGroupId)) {
+                    final Item item = getItem(rolloutGroupId);
+                    rolloutsToBeRefreshed.add(rolloutGroupId);
+                    final AbstractPropertyChangeEvent<Action>.Values changeSetWithValues = event.getChangeSet().get(
+                            "status");
+                    if (null != changeSetWithValues) {
+                        final Action.Status oldValue = (Status) changeSetWithValues.getOldValue();
+                        final Action.Status newValue = (Status) changeSetWithValues.getNewValue();
+                        HawkbitCommonUtil.decrementStatusCount(item, oldValue);
+                        HawkbitCommonUtil.incrementStatusCount(item, newValue);
+                    }
+                }
+            }
+        }
+
+        for (final Long id : rolloutsToBeRefreshed) {
+            final Item item = getItem(id);
+            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
+            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
+        }
     }
 
     @Override
