@@ -21,19 +21,19 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.slf4j.Logger;
@@ -1148,21 +1148,20 @@ public final class HawkbitCommonUtil {
      *            Rollout group target status.
      * @return bar progress bar for the rollout group.
      */
-    public static DistributionBar getRolloutProgressBar(final DistributionBar bar, int i,
-            final RolloutTargetsStatusCount rolloutTargetsStatus) {
-        final Map<RolloutTargetStatus, Long> statusCountDetails = rolloutTargetsStatus.getStatusCountDetails();
-        if (statusCountDetails.values().stream().filter(value -> value > 0).toArray().length == 0) {
-            final String readyStatus = RolloutTargetsStatusCount.RolloutTargetStatus.READY.toString().toLowerCase();
+    public static DistributionBar getRolloutProgressBar(final DistributionBar bar, int i, final Rollout rollout) {
+        final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
+        if (totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED) != 0) {
+            final String readyStatus = TotalTargetCountStatus.Status.READY.toString().toLowerCase();
             bar.setPartTooltip(i, readyStatus);
             bar.setPartStyleName(i, STATUS_BAR_PART + readyStatus);
-            final String finishedStatus = RolloutTargetsStatusCount.RolloutTargetStatus.FINISHED.toString()
-                    .toLowerCase();
+            final String finishedStatus = TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase();
             bar.setPartTooltip(i + 1, finishedStatus);
             bar.setPartStyleName(i + 1, STATUS_BAR_PART + finishedStatus);
         } else {
-            bar.setNumberOfParts(statusCountDetails.entrySet().size());
-            for (final Map.Entry<RolloutTargetsStatusCount.RolloutTargetStatus, Long> entry : statusCountDetails
-                    .entrySet()) {
+            final Map<TotalTargetCountStatus.Status, Long> statusTotalCountMap = totalTargetCountStatus
+                    .getStatusTotalCountMap();
+            bar.setNumberOfParts(statusTotalCountMap.entrySet().size());
+            for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : statusTotalCountMap.entrySet()) {
                 if (entry.getValue() > 0) {
                     bar.setPartSize(i, entry.getValue().intValue());
                     bar.setPartTooltip(i, entry.getKey().toString().toLowerCase());
@@ -1341,8 +1340,9 @@ public final class HawkbitCommonUtil {
         final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
         if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
                 finishedTargetsCount, cancelledTargetsCount)) {
-            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(), 0, 0);
-            HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(), 0, 1);
+            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.READY.toString().toLowerCase(), 0, 0);
+            HawkbitCommonUtil
+                    .setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0, 1);
 
         } else {
             bar.setNumberOfParts(6);
@@ -1352,17 +1352,17 @@ public final class HawkbitCommonUtil {
 
     public static void setProgressBarDetails(final DistributionBar bar, final Item item) {
         final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.NOTSTARTED.toString().toLowerCase(),
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
                 notStartedTargetsCount.intValue(), 0);
-        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.READY.toString().toLowerCase(),
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.READY.toString().toLowerCase(),
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item).intValue(), 1);
-        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.RUNNING.toString().toLowerCase(),
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.RUNNING.toString().toLowerCase(),
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item).intValue(), 2);
-        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.ERROR.toString().toLowerCase(),
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.ERROR.toString().toLowerCase(),
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item).intValue(), 3);
-        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.FINISHED.toString().toLowerCase(),
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(),
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
-        HawkbitCommonUtil.setBarPartSize(bar, RolloutTargetStatus.CANCELLED.toString().toLowerCase(),
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.CANCELLED.toString().toLowerCase(),
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
     }
 

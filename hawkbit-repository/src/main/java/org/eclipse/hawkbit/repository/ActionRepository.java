@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -371,8 +372,19 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            id of {@link Rollout}
      * @return list of objects with status and target count
      */
-    @Query("SELECT a.status , COUNT(a.target) FROM Action a WHERE a.rollout.id = ?1 GROUP BY a.status")
-    List<Object[]> getStatusCountByRolloutId(Long rolloutId);
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.target)) FROM Action a WHERE a.rollout.id IN ?1 GROUP BY a.rollout.id,a.status")
+    List<TotalTargetCountActionStatus> getStatusCountByRolloutId(List<Long> rolloutId);
+
+    /**
+     * Get list of objects which has details of status and count of targets in
+     * each status in specified rollout.
+     * 
+     * @param rolloutId
+     *            id of {@link Rollout}
+     * @return list of objects with status and target count
+     */
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.target)) FROM Action a WHERE a.rollout.id = ?1 GROUP BY a.rollout.id,a.status")
+    List<TotalTargetCountActionStatus> getStatusCountByRolloutId(Long rolloutId);
 
     /**
      * Get list of objects which has details of status and count of targets in
@@ -382,8 +394,8 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            id of {@link RolloutGroup}
      * @return list of objects with status and target count
      */
-    @Query("SELECT a.status , COUNT(a.target) FROM Action a WHERE a.rolloutGroup.id = ?1 GROUP BY a.status")
-    List<Object[]> getStatusCountByRolloutGroupId(Long rolloutGroupId);
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target) FROM Action a WHERE a.rolloutGroup.id = ?1 GROUP BY a.rolloutGroup.id, a.status")
+    List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(Long rolloutGroupId);
 
     // Asha-ends here
 

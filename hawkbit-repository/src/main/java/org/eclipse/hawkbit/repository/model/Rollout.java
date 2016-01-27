@@ -73,6 +73,9 @@ public class Rollout extends NamedEntity {
     @CacheField(key = CacheKeys.ROLLOUT_GROUP_CREATED)
     private int rolloutGroupsCreated = 0;
 
+    @Transient
+    private TotalTargetCountStatus totalTargetCountStatus;
+
     /**
      * @return the distributionSet
      */
@@ -206,6 +209,21 @@ public class Rollout extends NamedEntity {
      */
     public void setRolloutGroupsCreated(final int rolloutGroupsCreated) {
         this.rolloutGroupsCreated = rolloutGroupsCreated;
+    }
+
+    /**
+     * @return the totalTargetCountStatus
+     */
+    public TotalTargetCountStatus getTotalTargetCountStatus() {
+        return totalTargetCountStatus;
+    }
+
+    /**
+     * @param totalTargetCountStatus
+     *            the totalTargetCountStatus to set
+     */
+    public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
+        this.totalTargetCountStatus = totalTargetCountStatus;
     }
 
     @Override

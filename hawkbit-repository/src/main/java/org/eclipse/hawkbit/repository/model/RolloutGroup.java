@@ -21,6 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 /**
@@ -71,6 +72,9 @@ public class RolloutGroup extends NamedEntity {
 
     @Column(name = "error_action_exp", length = 512)
     private String errorActionExp = null;
+
+    @Transient
+    private TotalTargetCountStatus totalTargetCountStatus;
 
     /**
      * @return the rollout
@@ -226,6 +230,21 @@ public class RolloutGroup extends NamedEntity {
      */
     public String getSuccessActionExp() {
         return successActionExp;
+    }
+
+    /**
+     * @return the totalTargetCountStatus
+     */
+    public TotalTargetCountStatus getTotalTargetCountStatus() {
+        return totalTargetCountStatus;
+    }
+
+    /**
+     * @param totalTargetCountStatus
+     *            the totalTargetCountStatus to set
+     */
+    public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
+        this.totalTargetCountStatus = totalTargetCountStatus;
     }
 
     @Override

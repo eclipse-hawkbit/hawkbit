@@ -13,21 +13,34 @@ package org.eclipse.hawkbit.repository.model;
  * status.
  * 
  */
+public class TotalTargetCountActionStatus {
 
-public class RolloutStatusCountItem<T extends Object> {
-
-    private final T status;
+    private final Action.Status status;
     private final Long count;
+    private Long id;
 
-    public RolloutStatusCountItem(final T status, final Long count) {
+    public TotalTargetCountActionStatus(final Long id, final Action.Status status, final Long count) {
+        this.status = status;
+        this.count = count;
+        this.id = id;
+    }
+
+    public TotalTargetCountActionStatus(final Action.Status status, final Long count) {
         this.status = status;
         this.count = count;
     }
 
     /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
      * @return the status
      */
-    public T getStatus() {
+    public Action.Status getStatus() {
         return status;
     }
 
