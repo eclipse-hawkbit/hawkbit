@@ -172,8 +172,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         targetFilterQuery.setVisible(false);
         targetFilterQueryCombo.setVisible(true);
         actionTypeOptionGroupLayout.selectDefaultOption();
-        errorThreshold.setValue("0");
-        triggerThreshold.setValue("100");
         totalTargetsCount = 0L;
         rolloutForEdit = null;
     }
@@ -195,11 +193,22 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.setSizeUndefined();
 
+        mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(), noOfGroups,
+                getTriggerThresoldLayout(), getErrorThresoldLayout(), description, actionTypeOptionGroupLayout,
+                getSaveStartOptionLayout(), getSaveDiscardButtonLayout());
+
+        setCompositionRoot(mainLayout);
+    }
+
+    private HorizontalLayout getErrorThresoldLayout() {
         final HorizontalLayout errorThresoldLayout = new HorizontalLayout();
         errorThresoldLayout.setSizeFull();
         errorThresoldLayout.addComponents(errorThreshold, errorThresholdOptionGroup);
         errorThresoldLayout.setExpandRatio(errorThreshold, 1.0f);
+        return errorThresoldLayout;
+    }
 
+    private HorizontalLayout getTargetFilterLayout() {
         final HorizontalLayout targetFilterLayout = new HorizontalLayout();
         targetFilterLayout.setSizeFull();
         targetFilterLayout.addComponents(targetFilterQueryCombo, targetFilterQuery, totalTargetsLabel);
@@ -207,14 +216,22 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         targetFilterLayout.setExpandRatio(targetFilterQuery, 0.70f);
         targetFilterLayout.setExpandRatio(totalTargetsLabel, 0.29f);
         targetFilterLayout.setComponentAlignment(totalTargetsLabel, Alignment.MIDDLE_CENTER);
+        return targetFilterLayout;
+    }
 
-        mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, targetFilterLayout, noOfGroups,
-                triggerThreshold, errorThresoldLayout, description, actionTypeOptionGroupLayout,
-                getSaveStartOptionLayout(), getSaveDiscardButtonLayout());
-        // mainLayout.setComponentAlignment(totalTargetsLabel,
-        // Alignment.MIDDLE_CENTER);
+    private HorizontalLayout getTriggerThresoldLayout() {
+        final HorizontalLayout triggerThresholdLayout = new HorizontalLayout();
+        triggerThresholdLayout.setSizeFull();
+        triggerThresholdLayout.addComponents(triggerThreshold, getPercentHintLabel());
+        triggerThresholdLayout.setExpandRatio(triggerThreshold, 1.0f);
+        return triggerThresholdLayout;
+    }
 
-        setCompositionRoot(mainLayout);
+    private Label getPercentHintLabel() {
+        final Label percentSymbol = new Label("%");
+        percentSymbol.addStyleName(ValoTheme.LABEL_TINY + " " + ValoTheme.LABEL_BOLD);
+        percentSymbol.setSizeUndefined();
+        return percentSymbol;
     }
 
     private HorizontalLayout getSaveStartOptionLayout() {
