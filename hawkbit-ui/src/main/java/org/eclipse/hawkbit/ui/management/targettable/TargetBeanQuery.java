@@ -151,8 +151,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
             prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo()
-                    .getPollStatus(), getI18N()));
+            prxyTarget.setPollStatusToolTip(
+                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
             proxyTargetBeans.add(prxyTarget);
         }
         return proxyTargetBeans;

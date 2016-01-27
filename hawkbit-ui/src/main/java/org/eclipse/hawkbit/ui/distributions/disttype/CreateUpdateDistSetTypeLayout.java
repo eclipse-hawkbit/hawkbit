@@ -178,19 +178,19 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
         madatoryLabel = getMandatoryLabel();
 
-        typeName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " "
-                + SPUIDefinitions.DIST_SET_TYPE_NAME, true, "", i18n.get("textfield.name"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        typeName = SPUIComponentProvider.getTextField("",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_NAME, true, "",
+                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeName.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME);
 
-        typeKey = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " "
-                + SPUIDefinitions.DIST_SET_TYPE_KEY, true, "", i18n.get("textfield.key"), true,
-                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        typeKey = SPUIComponentProvider.getTextField("",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY, true, "", i18n.get("textfield.key"),
+                true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
 
-        typeDesc = SPUIComponentProvider.getTextArea("", ValoTheme.TEXTFIELD_TINY + " "
-                + SPUIDefinitions.DIST_SET_TYPE_DESC, false, "", i18n.get("textfield.description"),
-                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        typeDesc = SPUIComponentProvider.getTextArea("",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC, false, "",
+                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
         typeDesc.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC);
         typeDesc.setImmediate(true);
@@ -492,12 +492,10 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             Item saveTblitem;
             saveTblitem = sourceTablecontainer.addItem(selectedId);
             selectedTable.getContainerDataSource().getItem(selectedId).getItemProperty(DIST_TYPE_NAME);
-            saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(
-                    selectedTable.getContainerDataSource().getItem(selectedId).getItemProperty(DIST_TYPE_NAME)
-                            .getValue());
-            saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(
-                    selectedTable.getContainerDataSource().getItem(selectedId).getItemProperty(DIST_TYPE_DESCRIPTION)
-                            .getValue());
+            saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(selectedTable.getContainerDataSource()
+                    .getItem(selectedId).getItemProperty(DIST_TYPE_NAME).getValue());
+            saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(selectedTable.getContainerDataSource()
+                    .getItem(selectedId).getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
         }
     }
 
@@ -533,9 +531,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             final double greenColorValue = color.getGreen();
             greenSlider.setValue(new Double(greenColorValue));
         } catch (final ValueOutOfBoundsException e) {
-            LOG.error(
-                    "Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
-                            + color.getBlue(), e);
+            LOG.error("Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
+                    + color.getBlue(), e);
         }
     }
 
@@ -621,8 +618,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
     private Boolean checkIsDuplicate(final DistributionSetType existingDistType) {
         if (existingDistType != null) {
-            uiNotification.displayValidationError(i18n.get("message.tag.duplicate.check",
-                    new Object[] { existingDistType.getName() }));
+            uiNotification.displayValidationError(
+                    i18n.get("message.tag.duplicate.check", new Object[] { existingDistType.getName() }));
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
@@ -630,8 +627,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
     private Boolean checkIsDuplicateByKey(final DistributionSetType existingDistType) {
         if (existingDistType != null) {
-            uiNotification.displayValidationError(i18n.get("message.type.key.duplicate.check",
-                    new Object[] { existingDistType.getKey() }));
+            uiNotification.displayValidationError(
+                    i18n.get("message.type.key.duplicate.check", new Object[] { existingDistType.getKey() }));
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
@@ -681,7 +678,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             newDistType = distributionSetManagement.createDistributionSetType(newDistType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
             closeWindow();
-            eventBus.publish(this, new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
+            eventBus.publish(this,
+                    new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
 
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
@@ -724,11 +722,11 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             }
             updateDistSetType.setColour(getColorPickedSting());
             distributionSetManagement.updateDistributionSetType(updateDistSetType);
-            uiNotification.displaySuccess(i18n.get("message.update.success",
-                    new Object[] { updateDistSetType.getName() }));
+            uiNotification
+                    .displaySuccess(i18n.get("message.update.success", new Object[] { updateDistSetType.getName() }));
             closeWindow();
-            eventBus.publish(this, new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE,
-                    updateDistSetType));
+            eventBus.publish(this,
+                    new DistributionSetTypeEvent(DistributionSetTypeEnum.UPDATE_DIST_SET_TYPE, updateDistSetType));
 
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
@@ -995,9 +993,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
      * @return
      */
     private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
-        final LazyQueryContainer disttypeContainer = HawkbitCommonUtil
-                .createLazyQueryContainer(new BeanQueryFactory<DistributionSetTypeBeanQuery>(
-                        DistributionSetTypeBeanQuery.class));
+        final LazyQueryContainer disttypeContainer = HawkbitCommonUtil.createLazyQueryContainer(
+                new BeanQueryFactory<DistributionSetTypeBeanQuery>(DistributionSetTypeBeanQuery.class));
         disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
 
         return disttypeContainer;
@@ -1049,8 +1046,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
                 selectedTable.setEnabled(true);
                 saveDistSetType.setEnabled(true);
             } else {
-                uiNotification.displayValidationError(selectedTypeTag.getName() + "  "
-                        + i18n.get("message.error.dist.set.type.update"));
+                uiNotification.displayValidationError(
+                        selectedTypeTag.getName() + "  " + i18n.get("message.error.dist.set.type.update"));
                 distTypeSelectLayout.setEnabled(false);
                 selectedTable.setEnabled(false);
                 saveDistSetType.setEnabled(false);

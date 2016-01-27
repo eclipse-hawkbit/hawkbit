@@ -201,14 +201,16 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
     private void buildPasswordField() {
         password = new PasswordField(i18n.get("label.login.password"));
         password.setIcon(FontAwesome.LOCK);
-        password.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
+        password.addStyleName(
+                ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         password.setId("login-password");
     }
 
     private void buildUserField() {
         username = new TextField(i18n.get("label.login.username"));
         username.setIcon(FontAwesome.USER);
-        username.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
+        username.addStyleName(
+                ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
         username.setId("login-username");
     }
 
@@ -216,8 +218,8 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
         if (multiTenancyIndicator.isMultiTenancySupported()) {
             tenant = new TextField(i18n.get("label.login.tenant"));
             tenant.setIcon(FontAwesome.DATABASE);
-            tenant.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " "
-                    + LOGIN_TEXTFIELD);
+            tenant.addStyleName(
+                    ValoTheme.TEXTFIELD_INLINE_ICON + " " + ValoTheme.TEXTFIELD_SMALL + " " + LOGIN_TEXTFIELD);
             tenant.addStyleName("uppercase");
             tenant.setId("login-tenant");
         }

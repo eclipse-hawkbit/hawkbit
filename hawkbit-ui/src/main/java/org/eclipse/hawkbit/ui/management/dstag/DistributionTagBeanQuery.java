@@ -56,8 +56,8 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
 
     @Override
     public int size() {
-        firstPageDsTag = getTagManagement().findAllDistributionSetTags(
-                new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+        firstPageDsTag = getTagManagement()
+                .findAllDistributionSetTags(new OffsetBasedPageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         long size = firstPageDsTag.getTotalElements();
         if (size > Integer.MAX_VALUE) {
             size = Integer.MAX_VALUE;
@@ -79,8 +79,8 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
         if (startIndex == 0 && firstPageDsTag != null) {
             dsTagBeans = firstPageDsTag;
         } else {
-            dsTagBeans = getTagManagement().findAllDistributionSetTags(
-                    new OffsetBasedPageRequest(startIndex, count, sort));
+            dsTagBeans = getTagManagement()
+                    .findAllDistributionSetTags(new OffsetBasedPageRequest(startIndex, count, sort));
         }
         for (final DistributionSetTag tag : dsTagBeans) {
             final ProxyTag proxyTargetTag = new ProxyTag();

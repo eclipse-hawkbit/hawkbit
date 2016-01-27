@@ -52,8 +52,8 @@ public interface UserAuthenticationFilter {
      *             servlet exception
      */
 
-    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-            ServletException;
+    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException;
 
     /**
      * @see Filter#destroy()

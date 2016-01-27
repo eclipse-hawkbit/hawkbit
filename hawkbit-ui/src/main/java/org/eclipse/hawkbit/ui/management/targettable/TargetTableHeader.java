@@ -141,9 +141,8 @@ public class TargetTableHeader extends AbstractTableHeader {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent event) {
         if (TargetComponentEvent.BULK_TARGET_CREATED == event.getTargetComponentEvent()) {
-            this.getUI().access(
-                    () -> targetBulkUpdateWindow.setProgressBarValue(managementUIState.getTargetTableFilters()
-                            .getBulkUpload().getProgressBarCurrentValue()));
+            this.getUI().access(() -> targetBulkUpdateWindow.setProgressBarValue(
+                    managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue()));
         } else if (TargetComponentEvent.BULK_UPLOAD_COMPLETED == event.getTargetComponentEvent()) {
             this.getUI().access(() -> targetBulkUpdateWindow.onUploadCompletion());
         } else if (TargetComponentEvent.BULK_TARGET_UPLOAD_STARTED == event.getTargetComponentEvent()) {
@@ -264,8 +263,8 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private String getSearchText() {
-        return managementUIState.getTargetTableFilters().getSearchText().isPresent() ? managementUIState
-                .getTargetTableFilters().getSearchText().get() : null;
+        return managementUIState.getTargetTableFilters().getSearchText().isPresent()
+                ? managementUIState.getTargetTableFilters().getSearchText().get() : null;
     }
 
     @Override
@@ -395,8 +394,8 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(transferable
-                .getSourceComponent());
+        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil
+                .getSelectedDSDetails(transferable.getSourceComponent());
         final Set<DistributionSetIdName> distributionIdSet = new HashSet<DistributionSetIdName>();
         if (!distSelected.contains(transferable.getData("itemId"))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));

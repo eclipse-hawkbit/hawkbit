@@ -110,7 +110,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
     void onEvent(final DistributionTableEvent event) {
         if (event.getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MINIMIZED) {
             minimizeDistTable();
-        } else if (event.getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MAXIMIZED) {
+        } else if (event
+                .getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MAXIMIZED) {
             maximizeDistTable();
         }
     }

@@ -160,9 +160,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     void onEvent(final TargetTableEvent event) {
         if (!managementUIState.isTargetTableMaximized()) {
             if (TargetComponentEvent.BULK_TARGET_CREATED == event.getTargetComponentEvent()) {
-                this.getUI().access(
-                        () -> setUploadStatusButtonCaption(managementUIState.getTargetTableFilters().getBulkUpload()
-                                .getFailedUploadCount()
+                this.getUI()
+                        .access(() -> setUploadStatusButtonCaption(managementUIState.getTargetTableFilters()
+                                .getBulkUpload().getFailedUploadCount()
                                 + managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount()));
             } else if (TargetComponentEvent.BULK_UPLOAD_COMPLETED == event.getTargetComponentEvent()) {
                 this.getUI().access(() -> updateUploadBtnIconToComplete());
@@ -581,7 +581,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (failedCount != 0 || successCount != 0) {
             setUploadStatusButtonCaption(failedCount + successCount);
             enableBulkUploadStatusButton();
-            if (Math.abs(managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue() - 1) < 0.00001) {
+            if (Math.abs(managementUIState.getTargetTableFilters().getBulkUpload().getProgressBarCurrentValue()
+                    - 1) < 0.00001) {
                 updateUploadBtnIconToComplete();
             } else {
                 updateUploadBtnIconToProgressIndicator();

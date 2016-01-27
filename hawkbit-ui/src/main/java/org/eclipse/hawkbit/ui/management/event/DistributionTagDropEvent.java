@@ -90,8 +90,8 @@ public class DistributionTagDropEvent implements DropHandler {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON)) {
-            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(
+                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -176,8 +176,8 @@ public class DistributionTagDropEvent implements DropHandler {
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
         final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(
-                distributionList, distTagName);
+        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
+                distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {

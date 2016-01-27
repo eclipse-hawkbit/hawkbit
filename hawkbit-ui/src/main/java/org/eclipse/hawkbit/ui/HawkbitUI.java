@@ -125,8 +125,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         if (userContext != null && userContext.getAuthentication() != null) {
             final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
             if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
-                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant().equalsIgnoreCase(
-                        event.getTenant());
+                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
+                        .equalsIgnoreCase(event.getTenant());
             }
         }
         return false;
@@ -176,8 +176,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         contentVerticalLayout.setStyleName("main-content");
         contentVerticalLayout.setExpandRatio(content, 1.0F);
         setContent(rootLayout);
-        final Resource resource = context.getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme()
-                + "/layouts/footer.html");
+        final Resource resource = context
+                .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
         try {
             final CustomLayout customLayout = new CustomLayout(resource.getInputStream());
             customLayout.setSizeUndefined();

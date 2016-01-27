@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.rest.resource;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SoftwareManagement;

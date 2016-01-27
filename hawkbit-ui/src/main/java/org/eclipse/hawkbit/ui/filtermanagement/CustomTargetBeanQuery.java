@@ -99,11 +99,11 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
         Slice<Target> targetBeans;
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (!Strings.isNullOrEmpty(filterQuery)) {
-            targetBeans = targetManagement.findTargetsAll(filterQuery, new PageRequest(startIndex
-                    / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = targetManagement.findTargetsAll(filterQuery,
+                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
-            targetBeans = targetManagement.findTargetsAll(new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE,
-                    SPUIDefinitions.PAGE_SIZE, sort));
+            targetBeans = targetManagement.findTargetsAll(
+                    new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         }
 
         for (final Target targ : targetBeans) {
@@ -135,8 +135,8 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
             prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo()
-                    .getPollStatus(), getI18N()));
+            prxyTarget.setPollStatusToolTip(
+                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
             proxyTargetBeans.add(prxyTarget);
         }
         return proxyTargetBeans;

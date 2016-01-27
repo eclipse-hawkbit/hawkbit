@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.exception;
  *
  *
  *
- *         Generic Custom Exception to wrap the Runtime and checked exception
+ * Generic Custom Exception to wrap the Runtime and checked exception
  *
  */
 

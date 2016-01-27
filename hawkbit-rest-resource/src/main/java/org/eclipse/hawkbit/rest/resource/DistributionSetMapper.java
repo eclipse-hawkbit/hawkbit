@@ -57,8 +57,8 @@ public final class DistributionSetMapper {
         final DistributionSetType module = distributionSetManagement
                 .findDistributionSetTypeByKey(distributionSetTypekey);
         if (module == null) {
-            throw new EntityNotFoundException("DistributionSetType with key {" + distributionSetTypekey
-                    + "} does not exist");
+            throw new EntityNotFoundException(
+                    "DistributionSetType with key {" + distributionSetTypekey + "} does not exist");
         }
         return module;
     }
@@ -108,18 +108,18 @@ public final class DistributionSetMapper {
         }
 
         if (dsRest.getApplication() != null) {
-            result.addModule(findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(),
-                    softwareManagement));
+            result.addModule(
+                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getApplication().getId(), softwareManagement));
         }
 
         if (dsRest.getRuntime() != null) {
-            result.addModule(findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
+            result.addModule(
+                    findSoftwareModuleWithExceptionIfNotFound(dsRest.getRuntime().getId(), softwareManagement));
         }
 
         if (dsRest.getModules() != null) {
-            dsRest.getModules().forEach(
-                    module -> result.addModule(findSoftwareModuleWithExceptionIfNotFound(module.getId(),
-                            softwareManagement)));
+            dsRest.getModules().forEach(module -> result
+                    .addModule(findSoftwareModuleWithExceptionIfNotFound(module.getId(), softwareManagement)));
         }
 
         return result;
@@ -163,23 +163,22 @@ public final class DistributionSetMapper {
         response.setComplete(distributionSet.isComplete());
         response.setType(distributionSet.getType().getKey());
 
-        distributionSet.getModules().forEach(
-                module -> response.getModules().add(SoftwareModuleMapper.toResponse(module)));
+        distributionSet.getModules()
+                .forEach(module -> response.getModules().add(SoftwareModuleMapper.toResponse(module)));
 
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
-        response.add(linkTo(methodOn(DistributionSetResource.class).getDistributionSet(response.getDsId())).withRel(
-                "self"));
+        response.add(
+                linkTo(methodOn(DistributionSetResource.class).getDistributionSet(response.getDsId())).withRel("self"));
 
         response.add(linkTo(
                 methodOn(DistributionSetTypeResource.class).getDistributionSetType(distributionSet.getType().getId()))
-                .withRel("type"));
+                        .withRel("type"));
 
-        response.add(linkTo(
-                methodOn(DistributionSetResource.class).getMetadata(response.getDsId(),
-                        Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
-                        Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null)).withRel(
-                "metadata"));
+        response.add(linkTo(methodOn(DistributionSetResource.class).getMetadata(response.getDsId(),
+                Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
+                Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null))
+                        .withRel("metadata"));
 
         return response;
     }

@@ -10,10 +10,18 @@ Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im
 mvn install
 ```
 
-# Releases
+# Run and use
 
-* We are currently working on the first formal release under the Eclipse banner: 0.1 (see [Release 0.1 branch](https://github.com/eclipse/hawkbit/tree/release-train-0.1))
-* The master branch contains future development towards 0.2
+We are not providing an off the shelf production ready hawkBit server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based server that is empowered by hawkBit.
+
+# Releases and Roadmap
+
+* We are currently working on the first formal release under the Eclipse banner: 0.1 (see [Release 0.1 branch](https://github.com/eclipse/hawkbit/tree/release-train-0.1)).
+* The master branch contains future development towards 0.2. We are currently focusing on:
+  * Rollout Management for large scale rollouts.
+  * Clustering capabilities for the update server.
+  * Upgrade of Spring Boot and Vaadin.
+  * And of course tones of usability improvements and bug fixes.
 
 
 ## Try out examples

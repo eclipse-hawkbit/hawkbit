@@ -59,7 +59,7 @@ public class DistributionSetType extends NamedEntity {
     private boolean deleted = false;
 
     public DistributionSetType() {
-        //default public constructor
+        // default public constructor
     }
 
     /**
