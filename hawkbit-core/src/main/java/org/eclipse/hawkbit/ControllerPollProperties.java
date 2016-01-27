@@ -13,6 +13,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Defines the polling time for the controllers in HH:MM:SS notation.
  * 
+ *
+ *
  */
 
 @ConfigurationProperties(prefix = "hawkbit.controller")
@@ -54,4 +56,5 @@ public class ControllerPollProperties {
     public void setMinPollingTime(String minPollingTime) {
         this.minPollingTime = minPollingTime;
     }
+
 }
