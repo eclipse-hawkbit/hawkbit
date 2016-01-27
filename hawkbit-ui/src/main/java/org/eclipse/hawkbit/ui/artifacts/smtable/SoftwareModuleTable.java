@@ -100,15 +100,14 @@ public class SoftwareModuleTable extends AbstractTable {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SMFilterEvent filterEvent) {
-        UI.getCurrent().access(
-                () -> {
+        UI.getCurrent().access(() -> {
 
-                    if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
-                            || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
-                            || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
-                        refreshFilter();
-                    }
-                });
+            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
+                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
+                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
+                refreshFilter();
+            }
+        });
     }
 
     /*
@@ -139,8 +138,8 @@ public class SoftwareModuleTable extends AbstractTable {
                 BaseSwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        final LazyQueryContainer container = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        final LazyQueryContainer container = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
         return container;
     }
 
@@ -207,8 +206,8 @@ public class SoftwareModuleTable extends AbstractTable {
                 final SoftwareModule baseSoftwareModule = softwareManagement.findSoftwareModuleById(value);
                 artifactUploadState.setSelectedBaseSoftwareModule(baseSoftwareModule);
                 artifactUploadState.setSelectedSoftwareModules(values);
-                eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE,
-                        baseSoftwareModule));
+                eventBus.publish(this,
+                        new SoftwareModuleEvent(SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE, baseSoftwareModule));
             }
         } else {
             artifactUploadState.setSelectedBaseSwModuleId(null);
@@ -256,10 +255,10 @@ public class SoftwareModuleTable extends AbstractTable {
         item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(swModule.getVendor());
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).setValue(swModule.getCreatedBy());
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setValue(swModule.getLastModifiedBy());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE).setValue(
-                SPDateTimeUtil.getFormattedDate(swModule.getCreatedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setValue(
-                SPDateTimeUtil.getFormattedDate(swModule.getLastModifiedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
+                .setValue(SPDateTimeUtil.getFormattedDate(swModule.getCreatedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
+                .setValue(SPDateTimeUtil.getFormattedDate(swModule.getLastModifiedAt()));
         if (!artifactUploadState.getSelectedSoftwareModules().isEmpty()) {
             artifactUploadState.getSelectedSoftwareModules().stream().forEach(swmNameId -> unselect(swmNameId));
         }
@@ -283,10 +282,10 @@ public class SoftwareModuleTable extends AbstractTable {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
             columnList
                     .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"),
+            columnList.add(
+                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
                     0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
-                    i18n.get("header.modifiedDate"), 0.1F));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
         } else {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.8F));

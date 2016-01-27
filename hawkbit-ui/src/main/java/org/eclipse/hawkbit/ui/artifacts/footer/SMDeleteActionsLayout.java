@@ -201,13 +201,13 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
         if (sourceComponent.getId().startsWith(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX)) {
 
-            final String swModuleTypeName = sourceComponent.getId().replace(
-                    SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
+            final String swModuleTypeName = sourceComponent.getId()
+                    .replace(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
             if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
                     && artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
                             .equalsIgnoreCase(swModuleTypeName)) {
-                notification.displayValidationError(i18n.get("message.swmodule.type.check.delete",
-                        new Object[] { swModuleTypeName }));
+                notification.displayValidationError(
+                        i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
             } else {
                 deleteSWModuleType(swModuleTypeName);
                 updateSWActionCount();

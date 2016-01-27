@@ -190,8 +190,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         saveDistribution.addClickListener(event -> saveDistribution());
 
         /* close button */
-        discardDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "",
-                true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        discardDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "", true,
+                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         discardDistribution.addClickListener(event -> discardDistribution());
     }
 
@@ -206,8 +206,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
                 DistributionSetTypeBeanQuery.class);
         dtQF.setQueryConfiguration(queryConfig);
 
-        final LazyQueryContainer disttypeContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_NAME), dtQF);
+        final LazyQueryContainer disttypeContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.DIST_TYPE_SIZE, SPUILabelDefinitions.VAR_NAME), dtQF);
 
         disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
 
@@ -219,8 +219,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
-        final TenantMetaData tenantMetaData = tenantMetaDataRepository.findByTenantIgnoreCase(systemManagement
-                .currentTenant());
+        final TenantMetaData tenantMetaData = tenantMetaDataRepository
+                .findByTenantIgnoreCase(systemManagement.currentTenant());
         return tenantMetaData.getDefaultDsType();
     }
 
@@ -259,12 +259,12 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
                 notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                         new Object[] { currentDS.getName(), currentDS.getVersion() }));
                 // update table row+details layout
-                eventBus.publish(this, new DistributionTableEvent(DistributionComponentEvent.EDIT_DISTRIBUTION,
-                        currentDS));
+                eventBus.publish(this,
+                        new DistributionTableEvent(DistributionComponentEvent.EDIT_DISTRIBUTION, currentDS));
             } catch (final EntityAlreadyExistsException entityAlreadyExistsException) {
                 LOG.error("Update distribution failed {}", entityAlreadyExistsException);
-                notificationMessage.displayValidationError(i18n.get("message.distribution.no.update",
-                        currentDS.getName() + ":" + currentDS.getVersion()));
+                notificationMessage.displayValidationError(
+                        i18n.get("message.distribution.no.update", currentDS.getName() + ":" + currentDS.getVersion()));
             }
             closeThisWindow();
         }
@@ -361,8 +361,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         if (existingDs != null && (!editDistribution || editDistribution && !existingDs.getId().equals(editDistId))) {
             distNameTextField.addStyleName("v-textfield-error");
             distVersionTextField.addStyleName("v-textfield-error");
-            notificationMessage.displayValidationError(i18n.get("message.duplicate.dist",
-                    new Object[] { existingDs.getName(), existingDs.getVersion() }));
+            notificationMessage.displayValidationError(
+                    i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
 
             return false;
         } else {

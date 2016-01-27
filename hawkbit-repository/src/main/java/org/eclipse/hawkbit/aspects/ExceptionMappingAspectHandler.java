@@ -96,8 +96,8 @@ public class ExceptionMappingAspectHandler implements Ordered {
 
         if (translatedAccessException == null && ex instanceof TransactionSystemException) {
             final TransactionSystemException systemException = (TransactionSystemException) ex;
-            translatedAccessException = translateEclipseLinkExceptionIfPossible((Exception) systemException
-                    .getOriginalException());
+            translatedAccessException = translateEclipseLinkExceptionIfPossible(
+                    (Exception) systemException.getOriginalException());
         }
 
         if (translatedAccessException == null) {

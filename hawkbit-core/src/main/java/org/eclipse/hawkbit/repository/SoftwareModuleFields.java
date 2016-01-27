@@ -36,7 +36,7 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     /**
      * The id field.
      */
-    ID("id"), 
+    ID("id"),
     /**
      * The metadata.
      */

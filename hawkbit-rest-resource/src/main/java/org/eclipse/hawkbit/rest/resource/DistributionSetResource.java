@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
@@ -91,7 +89,6 @@ public class DistributionSetResource {
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
-
 
     /**
      * Handles the GET request of retrieving all {@link DistributionSet}s within

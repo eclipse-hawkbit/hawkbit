@@ -242,8 +242,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final Map<String, Object> queryConfiguration = new HashMap<>();
 
         final List<String> list = new ArrayList<>();
-        queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG, managementUIState.getDistributionTableFilters()
-                .isNoTagSelected());
+        queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG,
+                managementUIState.getDistributionTableFilters().isNoTagSelected());
 
         if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
             list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
@@ -253,8 +253,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distributionContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
+        final LazyQueryContainer distributionContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
+                distributionQF);
 
         return distributionContainer;
 

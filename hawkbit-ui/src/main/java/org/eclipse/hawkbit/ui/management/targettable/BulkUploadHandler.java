@@ -66,8 +66,8 @@ import com.vaadin.ui.Upload.SucceededListener;
  *
  *
  */
-public class BulkUploadHandler extends CustomComponent implements SucceededListener, FailedListener, Receiver,
-        StartedListener {
+public class BulkUploadHandler extends CustomComponent
+        implements SucceededListener, FailedListener, Receiver, StartedListener {
 
     /**
      * *
@@ -215,8 +215,8 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
                 try {
                     LOG.info("Bulk file upload started");
                     final double totalFileSize = getTotalNumberOfLines();
-                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(tempFile),
-                            Charset.defaultCharset()));
+                    reader = new BufferedReader(
+                            new InputStreamReader(new FileInputStream(tempFile), Charset.defaultCharset()));
                     /**
                      * Once control is in upload succeeded method automatically
                      * upload button is re-enabled. To disable the button firing
@@ -431,8 +431,9 @@ public class BulkUploadHandler extends CustomComponent implements SucceededListe
             if (tagManagement.findTargetTagById(tagData.getId()) == null) {
                 deletedTags.add(tagData.getName());
             } else {
-                targetManagement.toggleTagAssignment(managementUIState.getTargetTableFilters().getBulkUpload()
-                        .getTargetsCreated(), tagData.getName());
+                targetManagement.toggleTagAssignment(
+                        managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated(),
+                        tagData.getName());
             }
         }
         if (!deletedTags.isEmpty()) {

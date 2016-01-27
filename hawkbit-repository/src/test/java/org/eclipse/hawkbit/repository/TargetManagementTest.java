@@ -44,11 +44,11 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 
+import com.google.common.collect.Iterables;
+
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
-
-import com.google.common.collect.Iterables;
 
 @Features("Component Tests - Repository")
 @Stories("Target Management")
@@ -158,8 +158,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         final Action action = result.getActions().get(0);
         action.setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(new ActionStatus(action, Status.FINISHED,
-                System.currentTimeMillis(), "message"), action);
+        controllerManagament.addUpdateActionStatus(
+                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
         deploymentManagement.assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.findTargetByControllerIDWithDetails("4711");
@@ -341,8 +341,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         targetManagement.deleteTargets(deletedTargetIDs);
 
         allFound = targetManagement.findTargetsAll(new PageRequest(0, 200)).getContent();
-        assertEquals(firstSaved.spliterator().getExactSizeIfKnown() - nr2Del, allFound.spliterator()
-                .getExactSizeIfKnown());
+        assertEquals(firstSaved.spliterator().getExactSizeIfKnown() - nr2Del,
+                allFound.spliterator().getExactSizeIfKnown());
 
         // verify that all undeleted are still found
         assertThat(allFound).doesNotContain(deletedTargets);
@@ -351,8 +351,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Stores target attributes and verfies existence in the repository.")
     public void savingTargetControllerAttributes() {
-        Iterable<Target> ts = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(100, "myCtrlID",
-                "first description"));
+        Iterable<Target> ts = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(100, "myCtrlID", "first description"));
 
         final Map<String, String> attribs = new HashMap<String, String>();
         attribs.put("a.b.c", "abc");
@@ -438,8 +438,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
                 final Target tNoAttrib = targetManagement.findTargetByControllerID(tNoAttribl.getControllerId());
 
                 if (tNoAttrib.getControllerId().equals(target.getControllerId())) {
-                    assertThat(target.getTargetInfo().getControllerAttributes().keySet().toArray()).doesNotContain(
-                            attribs2Del.toArray());
+                    assertThat(target.getTargetInfo().getControllerAttributes().keySet().toArray())
+                            .doesNotContain(attribs2Del.toArray());
                     continue restTarget_;
                 }
             }
@@ -452,14 +452,14 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         Target t1 = TestDataUtil.buildTargetFixture("id-1", "blablub");
         final int noT2Tags = 4;
         final int noT1Tags = 3;
-        final List<TargetTag> t1Tags = tagManagement.createTargetTags(TestDataUtil.buildTargetTagFixtures(noT1Tags,
-                "tag1"));
+        final List<TargetTag> t1Tags = tagManagement
+                .createTargetTags(TestDataUtil.buildTargetTagFixtures(noT1Tags, "tag1"));
         t1.getTags().addAll(t1Tags);
         t1 = targetManagement.createTarget(t1);
 
         Target t2 = TestDataUtil.buildTargetFixture("id-2", "blablub");
-        final List<TargetTag> t2Tags = tagManagement.createTargetTags(TestDataUtil.buildTargetTagFixtures(noT2Tags,
-                "tag2"));
+        final List<TargetTag> t2Tags = tagManagement
+                .createTargetTags(TestDataUtil.buildTargetTagFixtures(noT2Tags, "tag2"));
         t2.getTags().addAll(t2Tags);
         t2 = targetManagement.createTarget(t2);
 
@@ -475,18 +475,18 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Tests the assigment of tags to multiple targets.")
     public void targetTagBulkAssignments() {
-        final List<Target> tagATargets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(10,
-                "tagATargets", "first description"));
-        final List<Target> tagBTargets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(10,
-                "tagBTargets", "first description"));
-        final List<Target> tagCTargets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(10,
-                "tagCTargets", "first description"));
+        final List<Target> tagATargets = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagATargets", "first description"));
+        final List<Target> tagBTargets = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagBTargets", "first description"));
+        final List<Target> tagCTargets = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagCTargets", "first description"));
 
-        final List<Target> tagABTargets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(10,
-                "tagABTargets", "first description"));
+        final List<Target> tagABTargets = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagABTargets", "first description"));
 
-        final List<Target> tagABCTargets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(10,
-                "tagABCTargets", "first description"));
+        final List<Target> tagABCTargets = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagABCTargets", "first description"));
 
         final TargetTag tagA = tagManagement.createTargetTag(new TargetTag("A"));
         final TargetTag tagB = tagManagement.createTargetTag(new TargetTag("B"));
@@ -534,12 +534,12 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         checkTargetHasNotTags(tagCTargets, tagA, tagB);
 
         // check again target lists refreshed from DB
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "A")).isEqualTo(
-                targetWithTagA.size());
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "B")).isEqualTo(
-                targetWithTagB.size());
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "C")).isEqualTo(
-                targetWithTagC.size());
+        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "A"))
+                .isEqualTo(targetWithTagA.size());
+        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "B"))
+                .isEqualTo(targetWithTagB.size());
+        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "C"))
+                .isEqualTo(targetWithTagC.size());
     }
 
     @Test
@@ -549,21 +549,21 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final TargetTag targTagB = tagManagement.createTargetTag(new TargetTag("Targ-B-Tag"));
         final TargetTag targTagC = tagManagement.createTargetTag(new TargetTag("Targ-C-Tag"));
 
-        final List<Target> targAs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A",
-                "first description"));
-        final List<Target> targBs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(20, "target-id-B",
-                "first description"));
-        final List<Target> targCs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(15, "target-id-C",
-                "first description"));
+        final List<Target> targAs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
+        final List<Target> targBs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(20, "target-id-B", "first description"));
+        final List<Target> targCs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(15, "target-id-C", "first description"));
 
-        final List<Target> targABs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(12,
-                "target-id-AB", "first description"));
-        final List<Target> targACs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(13,
-                "target-id-AC", "first description"));
-        final List<Target> targBCs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(7, "target-id-BC",
-                "first description"));
-        final List<Target> targABCs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(17,
-                "target-id-ABC", "first description"));
+        final List<Target> targABs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(12, "target-id-AB", "first description"));
+        final List<Target> targACs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(13, "target-id-AC", "first description"));
+        final List<Target> targBCs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(7, "target-id-BC", "first description"));
+        final List<Target> targABCs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(17, "target-id-ABC", "first description"));
 
         targetManagement.toggleTagAssignment(targAs, targTagA);
         targetManagement.toggleTagAssignment(targABs, targTagA);
@@ -610,29 +610,27 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     public void findTargetsByControllerIDsWithTags() {
         final TargetTag targTagA = tagManagement.createTargetTag(new TargetTag("Targ-A-Tag"));
 
-        final List<Target> targAs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A",
-                "first description"));
+        final List<Target> targAs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
 
         targetManagement.toggleTagAssignment(targAs, targTagA);
 
-        assertThat(
-                targetManagement.findTargetsByControllerIDsWithTags(targAs.stream()
-                        .map(target -> target.getControllerId()).collect(Collectors.toList()))).hasSize(25);
+        assertThat(targetManagement.findTargetsByControllerIDsWithTags(
+                targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()))).hasSize(25);
 
         // no lazy loading exception and tag correctly assigned
-        assertThat(
-                targetManagement
-                        .findTargetsByControllerIDsWithTags(
-                                targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()))
-                        .stream().map(target -> target.getTags().contains(targTagA)).collect(Collectors.toList()))
-                .containsOnly(true);
+        assertThat(targetManagement
+                .findTargetsByControllerIDsWithTags(
+                        targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()))
+                .stream().map(target -> target.getTags().contains(targTagA)).collect(Collectors.toList()))
+                        .containsOnly(true);
     }
 
     @Test
     @Description("Test the optimized quere for retrieving all ID/name pairs of targets.")
     public void findAllTargetIdNamePaiss() {
-        final List<Target> targAs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A",
-                "first description"));
+        final List<Target> targAs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
         final String[] createdTargetIds = targAs.stream().map(t -> t.getControllerId())
                 .toArray(size -> new String[size]);
 
@@ -648,15 +646,15 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     public void findTargetsWithNoTag() {
 
         final TargetTag targTagA = tagManagement.createTargetTag(new TargetTag("Targ-A-Tag"));
-        final List<Target> targAs = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A",
-                "first description"));
+        final List<Target> targAs = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
         targetManagement.toggleTagAssignment(targAs, targTagA);
 
         targetManagement.createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-B", "first description"));
 
         final String[] tagNames = null;
-        final List<Target> targetsListWithNoTag = targetManagement.findTargetByFilters(new PageRequest(0, 500), null,
-                null, null, Boolean.TRUE, tagNames).getContent();
+        final List<Target> targetsListWithNoTag = targetManagement
+                .findTargetByFilters(new PageRequest(0, 500), null, null, null, Boolean.TRUE, tagNames).getContent();
 
         // Total targets
         assertEquals(50, targetManagement.findAllTargetIds().size());
