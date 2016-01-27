@@ -59,7 +59,7 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
     }
 
     /**
-     * Closes mongo client when destroyd.
+     * Closes mongo client when destroyed.
      */
     @PreDestroy
     public void close() {
@@ -74,22 +74,13 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
     public Mongo mongo() throws UnknownHostException {
         final MongoClientURI uri = new MongoClientURI(properties.getUri(), createBuilderOutOfOptions(options));
 
-        try {
-            if (properties.getPort() != null) {
-                LOG.debug("Create mongo by properties (host: {}, port: {})", uri.getHosts().get(0),
-                        properties.getPort());
-                this.mongoConnection = new MongoClient(
-                        Arrays.asList(new ServerAddress(uri.getHosts().get(0), properties.getPort())),
-                        uri.getOptions());
-            } else {
-                LOG.debug("Create mongo by URI : {}", uri);
-                this.mongoConnection = new MongoClient(uri);
-            }
-        } finally {
-            if (this.mongoConnection != null) {
-                this.mongoConnection.close();
-            }
-
+        if (properties.getPort() != null) {
+            LOG.debug("Create mongo by properties (host: {}, port: {})", uri.getHosts().get(0), properties.getPort());
+            this.mongoConnection = new MongoClient(
+                    Arrays.asList(new ServerAddress(uri.getHosts().get(0), properties.getPort())), uri.getOptions());
+        } else {
+            LOG.debug("Create mongo by URI : {}", uri);
+            this.mongoConnection = new MongoClient(uri);
         }
 
         return this.mongoConnection;
