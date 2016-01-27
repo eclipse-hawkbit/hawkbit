@@ -19,9 +19,6 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
  */
 public class AbstractPropertyChangeEvent<E extends BaseEntity> extends AbstractBaseEntityEvent<E> {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -3671601415138242311L;
     private final transient Map<String, Values> changeSet;
 
