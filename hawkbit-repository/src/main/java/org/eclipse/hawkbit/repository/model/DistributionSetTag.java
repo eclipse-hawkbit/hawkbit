@@ -28,8 +28,9 @@ import javax.persistence.UniqueConstraint;
  *
  */
 @Entity
-@Table(name = "sp_distributionset_tag", indexes = { @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-        "name", "tenant" }, name = "uk_ds_tag"))
+@Table(name = "sp_distributionset_tag", indexes = {
+        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
+                "name", "tenant" }, name = "uk_ds_tag") )
 public class DistributionSetTag extends Tag {
     private static final long serialVersionUID = 1L;
 

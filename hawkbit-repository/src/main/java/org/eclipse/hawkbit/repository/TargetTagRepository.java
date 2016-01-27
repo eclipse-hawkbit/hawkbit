@@ -22,11 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TargetTagRepository extends BaseEntityRepository<TargetTag, Long>, JpaSpecificationExecutor<TargetTag> {
+public interface TargetTagRepository
+        extends BaseEntityRepository<TargetTag, Long>, JpaSpecificationExecutor<TargetTag> {
 
     /**
      * deletes the {@link TargetTag}s with the given tag names.
-     * 
+     *
      * @param tagNames
      *            to be deleted
      * @return 1 if tag was deleted
@@ -37,7 +38,7 @@ public interface TargetTagRepository extends BaseEntityRepository<TargetTag, Lon
 
     /**
      * find {@link TargetTag} by its name.
-     * 
+     *
      * @param tagName
      *            to filter on
      * @return the {@link TargetTag} if found, otherwise null

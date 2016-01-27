@@ -211,14 +211,13 @@ public class SoftwareModuleDetailsTable extends Table {
 
     private void unassignSW(final ClickEvent event, final DistributionSet distributionSet,
             final Set<SoftwareModule> alreadyAssignedSwModules) {
-        final SoftwareModule unAssignedSw = getSoftwareModule(
-                (Label) getContainerDataSource().getItem(event.getButton().getId()).getItemProperty(SOFT_MODULE)
-                        .getValue(), alreadyAssignedSwModules);
+        final SoftwareModule unAssignedSw = getSoftwareModule((Label) getContainerDataSource()
+                .getItem(event.getButton().getId()).getItemProperty(SOFT_MODULE).getValue(), alreadyAssignedSwModules);
         final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
                 unAssignedSw);
         manageDistUIState.setLastSelectedDistribution(newDistributionSet.getDistributionSetIdName());
-        eventBus.publish(this, new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE,
-                newDistributionSet));
+        eventBus.publish(this,
+                new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE, newDistributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
         uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
     }
@@ -251,8 +250,8 @@ public class SoftwareModuleDetailsTable extends Table {
     }
 
     private Label createMandatoryLabel(final boolean mandatory) {
-        final Label mandatoryLable = mandatory ? HawkbitCommonUtil.getFormatedLabel(" * ") : HawkbitCommonUtil
-                .getFormatedLabel("  ");
+        final Label mandatoryLable = mandatory ? HawkbitCommonUtil.getFormatedLabel(" * ")
+                : HawkbitCommonUtil.getFormatedLabel("  ");
         if (mandatory) {
             mandatoryLable.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         }

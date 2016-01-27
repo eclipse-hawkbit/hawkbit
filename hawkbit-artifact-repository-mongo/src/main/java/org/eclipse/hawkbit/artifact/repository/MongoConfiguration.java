@@ -92,7 +92,7 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
      *
      * Based on MongoProperties#builder method.
      */
-    private Builder createBuilderOutOfOptions(final MongoClientOptions options) {
+    private static Builder createBuilderOutOfOptions(final MongoClientOptions options) {
         final Builder builder = MongoClientOptions.builder();
         if (options != null) {
             builder.alwaysUseMBeans(options.isAlwaysUseMBeans());
@@ -108,8 +108,8 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
             builder.socketFactory(options.getSocketFactory());
             builder.socketKeepAlive(options.isSocketKeepAlive());
             builder.socketTimeout(options.getSocketTimeout());
-            builder.threadsAllowedToBlockForConnectionMultiplier(options
-                    .getThreadsAllowedToBlockForConnectionMultiplier());
+            builder.threadsAllowedToBlockForConnectionMultiplier(
+                    options.getThreadsAllowedToBlockForConnectionMultiplier());
             builder.writeConcern(options.getWriteConcern());
         }
         return builder;

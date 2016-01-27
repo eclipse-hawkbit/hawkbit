@@ -9,6 +9,7 @@ Please read this if you intend to contribute to the project.
 * Java files:
   * we follow the standard eclipse IDE (built in) code formatter with the following changes:
     * Tab policy: spaces only: 4
+  * We recommend using at least Eclipse [Mars](https://www.eclipse.org/mars/) IDE release. It seems that the Java code formatter line break handling has been changed between [Luna](https://www.eclipse.org/luna/) and Mars.
 * XML files:
   * we follow the standard eclipse IDE XML formatter with the following changes:
     * Indent using spaces only: 3
@@ -36,7 +37,7 @@ If you don’t, you need to [register](https://dev.eclipse.org/site_login/create
 
 * Add your github username in your Eclipse Foundation account settings. Log in it to Eclipse and go to account settings.
 
-* "Sign-off" your commits (NOTE! This is only necessary if contributing to the vertx-core project)
+* "Sign-off" your commits
 
 Every commit you make in your patch or pull request MUST be "signed off".
 

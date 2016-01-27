@@ -156,8 +156,8 @@ public final class RSQLUtility {
      * @param <T>
      *            the entity type referenced by the root
      */
-    private static final class JpqQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T> implements
-            RSQLVisitor<List<Predicate>, String> {
+    private static final class JpqQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T>
+            implements RSQLVisitor<List<Predicate>, String> {
         public static final Character LIKE_WILDCARD = '*';
 
         private final Root<T> root;
@@ -239,9 +239,11 @@ public final class RSQLUtility {
             }
         }
 
-        private RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final ComparisonNode node) {
-            return new RSQLParameterUnsupportedFieldException("The given search parameter field {" + node.getSelector()
-                    + "} does not exist, must be one of the following fields {" + getExpectedFieldList() + "}",
+        private RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
+                final ComparisonNode node) {
+            return new RSQLParameterUnsupportedFieldException(
+                    "The given search parameter field {" + node.getSelector()
+                            + "} does not exist, must be one of the following fields {" + getExpectedFieldList() + "}",
                     new Exception());
         }
 
@@ -271,10 +273,10 @@ public final class RSQLUtility {
                 fieldName = getFieldEnumByName(node);
             } catch (final IllegalArgumentException e) {
                 throw new RSQLParameterUnsupportedFieldException("The given search parameter field {"
-                        + node.getSelector()
-                        + "} does not exist, must be one of the following fields {"
+                        + node.getSelector() + "} does not exist, must be one of the following fields {"
                         + Arrays.stream(enumType.getEnumConstants()).map(v -> v.name().toLowerCase())
-                                .collect(Collectors.toList()) + "}", e);
+                                .collect(Collectors.toList())
+                        + "}", e);
 
             }
             final String finalProperty = getAndValidatePropertyFieldName(fieldName, node);
@@ -302,20 +304,15 @@ public final class RSQLUtility {
                         return enumFieldName;
                     }).collect(Collectors.toList());
 
-            final List<String> expectedSubFieldList = Arrays
-                    .stream(enumType.getEnumConstants())
-                    .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty())
-                    .flatMap(
-                            enumField -> {
-                                final List<String> subEntity = enumField
-                                        .getSubEntityAttributes()
-                                        .stream()
-                                        .map(fieldName -> enumField.name().toLowerCase()
-                                                + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
-                                        .collect(Collectors.toList());
+            final List<String> expectedSubFieldList = Arrays.stream(enumType.getEnumConstants())
+                    .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
+                        final List<String> subEntity = enumField.getSubEntityAttributes().stream()
+                                .map(fieldName -> enumField.name().toLowerCase()
+                                        + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
+                                .collect(Collectors.toList());
 
-                                return subEntity.stream();
-                            }).collect(Collectors.toList());
+                        return subEntity.stream();
+                    }).collect(Collectors.toList());
             expectedFieldList.addAll(expectedSubFieldList);
             return expectedFieldList;
         }
@@ -373,11 +370,10 @@ public final class RSQLUtility {
                         javaType);
                 LOGGER.debug("value cannot be transformed to an enum", e);
 
-                throw new RSQLParameterUnsupportedFieldException("field {"
-                        + node.getSelector()
-                        + "} must be one of the following values {"
-                        + Arrays.stream(tmpEnumType.getEnumConstants()).map(v -> v.name().toLowerCase())
-                                .collect(Collectors.toList()) + "}", e);
+                throw new RSQLParameterUnsupportedFieldException("field {" + node.getSelector()
+                        + "} must be one of the following values {" + Arrays.stream(tmpEnumType.getEnumConstants())
+                                .map(v -> v.name().toLowerCase()).collect(Collectors.toList())
+                        + "}", e);
             }
         }
 
@@ -442,7 +438,8 @@ public final class RSQLUtility {
             return fieldPath.get(enumField.getValueFieldName());
         }
 
-        private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath, final A enumField) {
+        private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
+                final A enumField) {
             if (!enumField.isMap()) {
                 return null;
             }

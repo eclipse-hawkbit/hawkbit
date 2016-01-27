@@ -166,9 +166,8 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Override
     protected boolean isClickedByDefault(final Long buttonId) {
         final TargetTag newTagClickedObj = tagMgmtService.findTargetTagById(buttonId);
-        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null
-                && managementUIState.getTargetTableFilters().getClickedTargetTags()
-                        .contains(newTagClickedObj.getName());
+        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null && managementUIState
+                .getTargetTableFilters().getClickedTargetTags().contains(newTagClickedObj.getName());
     }
 
     @Override
@@ -223,8 +222,8 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.TARGET_TAG_BUTTON)) {
-            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(
+                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
             return false;
         }
         return true;

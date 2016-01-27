@@ -151,12 +151,13 @@ public class CountMessageLabel extends Label {
             filterMesgBuf.append(getStatusMsg(targFilParams.getClickedStatusTargetTags(), status));
             filterMesgBuf
                     .append(getTagsMsg(targFilParams.isNoTagSelected(), targFilParams.getClickedTargetTags(), tags));
-            filterMesgBuf.append(getSerachMsg(targFilParams.getSearchText().isPresent() ? targFilParams.getSearchText()
-                    .get() : null, text));
-            filterMesgBuf.append(getDistMsg(targFilParams.getDistributionSet().isPresent() ? targFilParams
-                    .getDistributionSet().get() : null, dists));
-            filterMesgBuf.append(getCustomFilterMsg(targFilParams.getTargetFilterQuery().isPresent() ? targFilParams
-                    .getTargetFilterQuery().get() : null, custom));
+            filterMesgBuf.append(getSerachMsg(
+                    targFilParams.getSearchText().isPresent() ? targFilParams.getSearchText().get() : null, text));
+            filterMesgBuf.append(getDistMsg(
+                    targFilParams.getDistributionSet().isPresent() ? targFilParams.getDistributionSet().get() : null,
+                    dists));
+            filterMesgBuf.append(getCustomFilterMsg(targFilParams.getTargetFilterQuery().isPresent()
+                    ? targFilParams.getTargetFilterQuery().get() : null, custom));
             final String filterMesageChk = filterMesgBuf.toString().trim();
             String filterMesage = filterMesageChk;
             if (filterMesage.endsWith(",")) {
@@ -237,8 +238,8 @@ public class CountMessageLabel extends Label {
      * @return String as msg.
      */
     private static String getTagsMsg(final Boolean noTargetTagSelected, final List<String> tags, final String param) {
-        return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue()) ? HawkbitCommonUtil.SP_STRING_SPACE
-                : param;
+        return tags.isEmpty() && (noTargetTagSelected == null || !noTargetTagSelected.booleanValue())
+                ? HawkbitCommonUtil.SP_STRING_SPACE : param;
     }
 
     /**

@@ -20,7 +20,7 @@
 
    <groupId>org.eclipse.hawkbit</groupId>
    <artifactId>hawkbit-parent</artifactId>
-   <version>0.1.0-SNAPSHOT</version>
+   <version>0.2.0-SNAPSHOT</version>
    <packaging>pom</packaging>
    <name>hawkBit :: Parent</name>
 
@@ -44,9 +44,9 @@
 
 
    <scm>
-      <connection>scm:git:https://github.com/eclipse/hawkbit.git</connection>
-      <developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</developerConnection>
-      <url>https://github.com/eclipse/hawkbit.git</url>
+      <connection>${release.scm.connection}</connection>
+      <developerConnection>${release.scm.developerConnection}</developerConnection>
+      <url>${release.scm.url}</url>
    </scm>
 
    <repositories>
@@ -87,33 +87,38 @@
       <commons-lang3.version>3.4</commons-lang3.version>
       <aspectj.version>1.8.5</aspectj.version>
 
+      <!-- Release -->
+      <release.scm.connection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.connection>
+      <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
+      <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
+
       <!-- Sonar -->
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
       <sonar.github.repository>bsinno/hawkbit-update-server</sonar.github.repository>
       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
       <!-- Jacoco version to use -->
       <jacoco.version>0.7.2.201409121644</jacoco.version>
-      <!-- The Sonar Jacoco Listener for JUnit to extract coverage details
+      <!-- The Sonar Jacoco Listener for JUnit to extract coverage details 
          per test -->
       <sonar-jacoco-listeners.version>1.4</sonar-jacoco-listeners.version>
       <!-- Don't let Sonar execute tests. We will ask it to Maven -->
       <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-      <!-- The system property jacoco.outputDir needs to be override on the
-         command line with an absolute path if you want to merge results from all
-         modules. Example in a Jenkisn build where ${WORKSPACE} is defined and your
-         project in the root directory of the workspace : mvn clean install -Prun-its,coverage
-         -Djacoco.outputDir=${WORKSPACE}/target Note that unfortunately using the
-         following does not work because of http://jira.codehaus.org/browse/SONAR-3427:
+      <!-- The system property jacoco.outputDir needs to be override on the 
+         command line with an absolute path if you want to merge results from all 
+         modules. Example in a Jenkisn build where ${WORKSPACE} is defined and your 
+         project in the root directory of the workspace : mvn clean install -Prun-its,coverage 
+         -Djacoco.outputDir=${WORKSPACE}/target Note that unfortunately using the 
+         following does not work because of http://jira.codehaus.org/browse/SONAR-3427: 
          <jacoco.outputDir>${session.executionRootDirectory}/target/</jacoco.outputDir> -->
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
       <!-- Jacoco output file for UTs -->
       <jacoco.out.ut.file>jacoco-ut.exec</jacoco.out.ut.file>
-      <!-- Tells Sonar where the Jacoco coverage result file is located for
+      <!-- Tells Sonar where the Jacoco coverage result file is located for 
          Unit Tests -->
       <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.ut.file}</sonar.jacoco.reportPath>
       <!-- Jacoco output file for ITs -->
       <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
-      <!-- Tells Sonar where the Jacoco coverage result file is located for
+      <!-- Tells Sonar where the Jacoco coverage result file is located for 
          Integration Tests -->
       <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
       <guava.version>19.0</guava.version>
@@ -122,26 +127,26 @@
 
    <build>
       <plugins>
-        <plugin>
+         <plugin>
             <groupId>com.mycila</groupId>
             <artifactId>license-maven-plugin</artifactId>
             <version>2.11</version>
             <configuration>
-                <header>LICENCE_HEADER_TEMPLATE.txt</header>
-                <excludes>
-                    <exclude>**/README</exclude>
-                    <exclude>3rd-dependencies/**</exclude>
-                    <exclude>**/.git*</exclude>
-                    <exclude>.git*</exclude>
-                    <exclude>**/*.sql</exclude>
-                    <exclude>**/*.sql</exclude>
-                    <exclude>eclipse_codeformatter.xml</exclude>
-                </excludes>
-                <mapping>
-                    <scss>JAVADOC_STYLE</scss>
-                </mapping>
+               <header>LICENCE_HEADER_TEMPLATE.txt</header>
+               <excludes>
+                  <exclude>**/README</exclude>
+                  <exclude>3rd-dependencies/**</exclude>
+                  <exclude>**/.git*</exclude>
+                  <exclude>.git*</exclude>
+                  <exclude>**/*.sql</exclude>
+                  <exclude>**/*.sql</exclude>
+                  <exclude>eclipse_codeformatter.xml</exclude>
+               </excludes>
+               <mapping>
+                  <scss>JAVADOC_STYLE</scss>
+               </mapping>
             </configuration>
-        </plugin>
+         </plugin>
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>versions-maven-plugin</artifactId>
@@ -181,6 +186,18 @@
                      <propertyName>jacoco.agent.it.arg</propertyName>
                      <append>true</append>
                   </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                     <goal>jar</goal>
+                  </goals>
                </execution>
             </executions>
          </plugin>
@@ -343,9 +360,10 @@
             <artifactId>vaadin-push</artifactId>
             <version>${vaadin.version}</version>
          </dependency>
-         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory). For widgetset compilation,
-            vaadin-client-compiler is automatically added on the compilation classpath by vaadin-maven-plugin so normally there is no
-            need for an explicit dependency. -->
+         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory). 
+            For widgetset compilation, vaadin-client-compiler is automatically added 
+            on the compilation classpath by vaadin-maven-plugin so normally there is 
+            no need for an explicit dependency. -->
          <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-client-compiler</artifactId>
@@ -483,7 +501,8 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Override of classmate version, that is a hibernate validator dependency. allow PB of CQ -->
+         <!-- Override of classmate version, that is a hibernate validator 
+            dependency. allow PB of CQ -->
          <dependency>
             <groupId>com.fasterxml</groupId>
             <artifactId>classmate</artifactId>

@@ -163,9 +163,10 @@ public class RootController implements EnvironmentAware {
                     System.currentTimeMillis(), IpUtil.getClientIpFromRequest(request, requestHeader));
         }
 
-        return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
-                controllerManagement.findActionByTargetAndActive(target), controllerPollProperties.getPollingTime(),
-                tenantAware), HttpStatus.OK);
+        return new ResponseEntity<>(
+                DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
+                        controllerPollProperties.getPollingTime(), tenantAware),
+                HttpStatus.OK);
     }
 
     /**
@@ -220,8 +221,8 @@ public class RootController implements EnvironmentAware {
 
     private Action checkAndLogDownload(final HttpServletRequest request, final Target target,
             final SoftwareModule module) {
-        final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(
-                target.getControllerId(), module);
+        final Action action = controllerManagement
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module);
         final String range = request.getHeader("Range");
 
         final ActionStatus statusMessage = new ActionStatus();
@@ -274,8 +275,8 @@ public class RootController implements EnvironmentAware {
         }
 
         try {
-            DataConversionHelper.writeMD5FileResponse(fileName, response, module.getLocalArtifactByFilename(fileName)
-                    .get());
+            DataConversionHelper.writeMD5FileResponse(fileName, response,
+                    module.getLocalArtifactByFilename(fileName).get());
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -301,7 +302,8 @@ public class RootController implements EnvironmentAware {
      *            the HTTP request injected by spring
      * @return the response
      */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION
+            + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DeploymentBase> getControllerBasedeploymentAction(
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
@@ -323,8 +325,8 @@ public class RootController implements EnvironmentAware {
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
-            final DeploymentBase base = new DeploymentBase(Long.toString(action.getId()), new Deployment(handlingType,
-                    handlingType, chunks));
+            final DeploymentBase base = new DeploymentBase(Long.toString(action.getId()),
+                    new Deployment(handlingType, handlingType, chunks));
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", targetid, base);
 
@@ -388,8 +390,8 @@ public class RootController implements EnvironmentAware {
 
     }
 
-    private ActionStatus generateUpdateStatus(final ActionFeedback feedback, final String targetid,
-            final Long actionid, final Action action) {
+    private ActionStatus generateUpdateStatus(final ActionFeedback feedback, final String targetid, final Long actionid,
+            final Action action) {
 
         final ActionStatus actionStatus = new ActionStatus();
         actionStatus.setAction(action);
@@ -430,8 +432,8 @@ public class RootController implements EnvironmentAware {
 
     private static void handleDefaultUpdateStatus(final ActionFeedback feedback, final String targetid,
             final Long actionid, final ActionStatus actionStatus) {
-        LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.",
-                actionid, targetid, feedback.getStatus().getExecution());
+        LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.", actionid,
+                targetid, feedback.getStatus().getExecution());
         actionStatus.setStatus(Status.RUNNING);
         // MECS-400: we should not use the unstructed message list for
         // the server comment on the status.
@@ -463,7 +465,8 @@ public class RootController implements EnvironmentAware {
      *
      * @return status of the request
      */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{targetid}/"
+            + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final ConfigData configData,
             @PathVariable final String targetid, final HttpServletRequest request) {
         controllerManagement.updateLastTargetQuery(targetid, IpUtil.getClientIpFromRequest(request, requestHeader));
@@ -485,7 +488,8 @@ public class RootController implements EnvironmentAware {
      *
      * @return the {@link Cancel} response
      */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION
+            + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Cancel> getControllerCancelAction(@PathVariable @NotEmpty final String targetid,
             @PathVariable @NotEmpty final Long actionId, final HttpServletRequest request) {
         LOG.debug("getControllerCancelAction({})", targetid);
@@ -500,8 +504,8 @@ public class RootController implements EnvironmentAware {
         }
 
         if (action.isCancelingOrCanceled()) {
-            final Cancel cancel = new Cancel(String.valueOf(action.getId()), new CancelActionToStop(
-                    String.valueOf(action.getId())));
+            final Cancel cancel = new Cancel(String.valueOf(action.getId()),
+                    new CancelActionToStop(String.valueOf(action.getId())));
 
             LOG.debug("Found an active CancelAction for target {}. returning cancel: {}", targetid, cancel);
 
@@ -553,8 +557,8 @@ public class RootController implements EnvironmentAware {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        controllerManagement.addCancelActionStatus(
-                generateActionCancelStatus(feedback, target, feedback.getId(), action), action);
+        controllerManagement
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), action), action);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

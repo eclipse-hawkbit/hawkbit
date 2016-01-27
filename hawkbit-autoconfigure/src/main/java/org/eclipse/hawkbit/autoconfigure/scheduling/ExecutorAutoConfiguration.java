@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.autoconfigure.scheduling;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -46,19 +45,15 @@ public class ExecutorAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Executor asyncExecutor() {
-        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<Runnable>(
+        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
                 asyncConfigurerProperties.getQueuesize());
-        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-                asyncConfigurerProperties.getCorethreads(), asyncConfigurerProperties.getMaxthreads(),
-                asyncConfigurerProperties.getIdletimeout(), TimeUnit.MILLISECONDS, blockingQueue,
+        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
+                asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
+                TimeUnit.MILLISECONDS, blockingQueue,
                 new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build());
-        threadPoolExecutor.setRejectedExecutionHandler(new RejectedExecutionHandler() {
-            @Override
-            public void rejectedExecution(final Runnable r, final java.util.concurrent.ThreadPoolExecutor executor) {
-                LOGGER.warn("Reject runnable for centralExecutorService, reached limit of queue size {}", executor
-                        .getQueue().size());
-            }
-        });
+        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> LOGGER.warn(
+                "Reject runnable for centralExecutorService, reached limit of queue size {}",
+                executor.getQueue().size()));
         return new DelegatingSecurityContextExecutor(threadPoolExecutor);
     }
 

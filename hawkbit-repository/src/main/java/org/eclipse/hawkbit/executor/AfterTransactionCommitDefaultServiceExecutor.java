@@ -23,8 +23,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * successful spring transaction commit.The class is thread safe.
  */
 @Service
-public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSynchronizationAdapter implements
-        AfterTransactionCommitExecutor {
+public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSynchronizationAdapter
+        implements AfterTransactionCommitExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AfterTransactionCommitDefaultServiceExecutor.class);
     private static final ThreadLocal<List<Runnable>> THREAD_LOCAL_RUNNABLES = new ThreadLocal<>();
 

@@ -100,7 +100,8 @@ public class TargetFilterQueryButtons extends Table {
     }
 
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final BeanQueryFactory<TargetFilterBeanQuery> queryFactory = new BeanQueryFactory<>(TargetFilterBeanQuery.class);
+        final BeanQueryFactory<TargetFilterBeanQuery> queryFactory = new BeanQueryFactory<>(
+                TargetFilterBeanQuery.class);
         final Map<String, Object> queryConfig = new HashMap<>();
         queryFactory.setQueryConfiguration(queryConfig);
         return new LazyQueryContainer(new LazyQueryDefinition(true, 20, "id"), queryFactory);
@@ -145,8 +146,8 @@ public class TargetFilterQueryButtons extends Table {
     }
 
     private Button createFilterButton(final Long id, final String name, final Object itemId) {
-        final Button button = SPUIComponentProvider
-                .getButton("", name, name, "", false, null, SPUITagButtonStyle.class);
+        final Button button = SPUIComponentProvider.getButton("", name, name, "", false, null,
+                SPUITagButtonStyle.class);
         button.addStyleName("custom-filter-button");
         button.setId(name);
         if (id != null) {

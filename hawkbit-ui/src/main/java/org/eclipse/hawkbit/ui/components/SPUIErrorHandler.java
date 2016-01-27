@@ -57,9 +57,9 @@ public class SPUIErrorHandler extends DefaultErrorHandler {
         }
         final Component errorOrgin = findAbstractComponent(event);
         if (null != errorOrgin && errorOrgin.getUI() != null) {
-            notification
-                    .showNotification(style.toString(), i18n.get("caption.error"), i18n.get("message.error.temp",
-                            new Object[] { exceptionName }), false, errorOrgin.getUI().getPage());
+            notification.showNotification(style.toString(), i18n.get("caption.error"),
+                    i18n.get("message.error.temp", new Object[] { exceptionName }), false,
+                    errorOrgin.getUI().getPage());
         }
     }
 }
