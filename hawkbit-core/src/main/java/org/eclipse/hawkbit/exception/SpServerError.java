@@ -67,18 +67,6 @@ public enum SpServerError {
             "The given sort parameter direction does not exist"),
 
     /**
-     * 
-     */
-    SP_REST_CONFIG_POLLING_TIME_WRONG_FOMRATTED("hawkbit.server.error.rest.param.invalidFormat",
-            "The given overdue polling time or polling time parameter are not formatted correctly."),
-
-    /**
-     * 
-     */
-    SP_REST_CONFIG_INVALID_DS_TYPE("hawkbit.server.error.rest.param.invalidFormat",
-            "The given default distribution set type does not exist."),
-
-    /**
     *
     */
     SP_REST_BODY_NOT_READABLE("hawkbit.server.error.rest.body.notReadable",
