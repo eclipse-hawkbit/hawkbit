@@ -360,10 +360,13 @@ public class RolloutManagement {
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
 
-            final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
-            lastSavedGroup = savedGroup;
             final Slice<Target> targetGroup = targetManagement.findTargetsAll(savedRollout.getTargetFilterQuery(),
                     new OffsetBasedPageRequest(pageIndex, groupSize, new Sort(Direction.ASC, "id")));
+            group.setTotalTargets(targetGroup.getSize());
+
+            final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
+            lastSavedGroup = savedGroup;
+
             targetGroup.forEach(target -> {
                 rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target));
             });
@@ -815,7 +818,7 @@ public class RolloutManagement {
      */
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
-    public Page<Rollout> findAllWithDetailedStatus(final Pageable page) {
+    public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable page) {
         // TODO add test case
         final Page<Rollout> rollouts = findAll(page);
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
@@ -830,6 +833,25 @@ public class RolloutManagement {
         }
 
         return rollouts;
+
+    }
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Pageable page) {
+        // TODO add test case
+        final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findAll(page);
+        final List<Long> rolloutIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
+                .collect(Collectors.toList());
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
+                rolloutIds);
+
+        for (final RolloutGroup rolloutGroup : rolloutGroups) {
+            final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                    allStatesForRollout.get(rolloutGroup.getId()), rolloutGroup.getTotalTargets());
+            rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
+        }
+
+        return rolloutGroups;
 
     }
 
@@ -877,6 +899,15 @@ public class RolloutManagement {
 
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
         final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutId(rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
+                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+        return result;
+    }
+
+    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRolloutGroup(
+            final List<Long> rolloutGroupIds) {
+        final List<TotalTargetCountActionStatus> resultList = actionRepository
+                .getStatusCountByRolloutGroupId(rolloutGroupIds);
         final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
                 .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
         return result;
