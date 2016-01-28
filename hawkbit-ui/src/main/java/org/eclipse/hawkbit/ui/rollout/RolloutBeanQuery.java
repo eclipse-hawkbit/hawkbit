@@ -13,11 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -103,7 +102,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
     protected List<ProxyRollout> loadBeans(final int startIndex, final int count) {
         final Slice<Rollout> rolloutBeans;
         if (Strings.isNullOrEmpty(searchText)) {
-            rolloutBeans = getRolloutManagement().findAll(
+            rolloutBeans = getRolloutManagement().findAllWithDetailedStatus(
                     new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
             rolloutBeans = getRolloutManagement().findRolloutByFilters(
@@ -132,31 +131,23 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setId(rollout.getId());
             proxyRollout.setStatus(rollout.getStatus());
 
-            final RolloutTargetsStatusCount rolloutTargetsStatus = rolloutManagement.getRolloutDetailedStatus(rollout
-                    .getId());
-            proxyRollout.setRunningTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                    RolloutTargetStatus.RUNNING));
-            proxyRollout.setErrorTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                    RolloutTargetStatus.ERROR));
-            proxyRollout.setCancelledTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                    RolloutTargetStatus.CANCELLED));
-            proxyRollout.setFinishedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                    RolloutTargetStatus.FINISHED));
-            proxyRollout.setScheduledTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                    RolloutTargetStatus.READY));
-            proxyRollout.setNotStartedTargetsCount(rolloutTargetsStatus.getStatusCountDetails().get(
-                    RolloutTargetStatus.NOTSTARTED));
+            final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
+
+            proxyRollout.setRunningTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            proxyRollout.setErrorTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            proxyRollout.setCancelledTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            proxyRollout.setFinishedTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            proxyRollout.setScheduledTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
+            proxyRollout.setNotStartedTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
             proxyRolloutList.add(proxyRollout);
         }
         return proxyRolloutList;
-    }
-
-    private Long getTargetsCountInStatus(final RolloutTargetsStatusCount rolloutTargetsStatus,
-            final RolloutTargetStatus status) {
-        if (rolloutTargetsStatus.getStatusCountDetails().containsKey(status)) {
-            return rolloutTargetsStatus.getStatusCountDetails().get(status);
-        }
-        return 0L;
     }
 
     /*

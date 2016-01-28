@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -24,7 +24,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -38,12 +37,13 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup_;
-import org.eclipse.hawkbit.repository.model.RolloutStatusCountItem;
 import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.Rollout_;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.Target_;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -797,52 +797,79 @@ public class RolloutManagement {
     /**
      * Get count of targets in different status in rollout.
      * 
+     * @param page
+     *            the page request to sort and limit the result
+     * @return a list of rollouts with details of targets count for different
+     *         statuses
+     *
+     */
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    public Page<Rollout> findAllWithDetailedStatus(final Pageable page) {
+        // TODO add test case
+        final Page<Rollout> rollouts = findAll(page);
+        final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
+                .collect(Collectors.toList());
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
+
+        for (final Rollout rollout : rollouts) {
+            final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                    allStatesForRollout.get(rollout.getId()),
+                    targetRepository.countByRolloutTargetGroupRolloutGroupRolloutId(rollout.getId()));
+            rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+        }
+
+        return rollouts;
+
+    }
+
+    /**
+     * Get count of targets in different status in rollout.
+     *
      * @param rolloutId
      *            rollout id
-     * @return RolloutTargetsStatus details of targets count for different
-     *         statuses
-     * 
+     * @return rollout details of targets count for different statuses
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
-    public RolloutTargetsStatusCount getRolloutDetailedStatus(final Long rolloutId) {
+    public Rollout getRolloutDetailedStatus(final Long rolloutId) {
         // TODO add test case
-
-        final RolloutTargetsStatusCount rolloutTargetsStatus = new RolloutTargetsStatusCount();
-        final List<RolloutStatusCountItem<Object>> list = getStatusCountItemForRollout(rolloutId);
-        populateRolloutTargetStatuscount(rolloutTargetsStatus, list);
-
-        final Object[] statusWithCountList = rolloutTargetsStatus.getStatusCountDetails().values().stream()
-                .filter(x -> x > 0).toArray();
-        if (statusWithCountList.length == 0) {
-            rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.NOTSTARTED,
-                    targetRepository.countByRolloutTargetGroupRolloutGroupRolloutId(rolloutId));
-        }
-        return rolloutTargetsStatus;
+        final Rollout rollout = findRolloutById(rolloutId);
+        final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
+                .getStatusCountByRolloutId(rolloutId);
+        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
+                targetRepository.countByRolloutTargetGroupRolloutGroupRolloutId(rolloutId));
+        rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+        return rollout;
     }
 
     /**
      * Get count of targets in different status in rollout group.
-     * 
+     *
      * @param rolloutGroupId
      *            rollout group id
-     * @return RolloutTargetsStatusCount details of targets count for different
-     *         statuses
+     * @return rolloutGroup with details of targets count for different statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
-    public RolloutTargetsStatusCount getRolloutGroupDetailedStatus(final Long rolloutGroupId) {
+    public RolloutGroup getRolloutGroupDetailedStatus(final Long rolloutGroupId) {
         // TODO add test case
+        final RolloutGroup rolloutGroup = findRolloutGroupById(rolloutGroupId);
+        final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
+                .getStatusCountByRolloutGroupId(rolloutGroupId);
 
-        final RolloutTargetsStatusCount rolloutTargetsStatus = new RolloutTargetsStatusCount();
-        final List<RolloutStatusCountItem<Object>> list = getStatusCountItemForRolloutGroup(rolloutGroupId);
-        populateRolloutTargetStatuscount(rolloutTargetsStatus, list);
-        final Object[] statusWithCountList = rolloutTargetsStatus.getStatusCountDetails().values().stream()
-                .filter(x -> x > 0).toArray();
-        if (statusWithCountList.length == 0) {
-            rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.NOTSTARTED,
-                    targetRepository.countByRolloutTargetGroupRolloutGroupId(rolloutGroupId));
-        }
-        return rolloutTargetsStatus;
+        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
+                targetRepository.countByRolloutTargetGroupRolloutGroupId(rolloutGroupId));
+        rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
 
+        return rolloutGroup;
+
+    }
+
+    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
+        final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutId(rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream().collect(
+                Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+        return result;
     }
 
     /***
@@ -927,44 +954,6 @@ public class RolloutManagement {
                         cb.equal(actionsJoin.get(Action_.rolloutGroup), rolloutGroup));
             }
         }, page);
-    }
-
-    private List<RolloutStatusCountItem<Object>> getStatusCountItemForRollout(final Long rolloutId) {
-        final List<Object[]> resultList = actionRepository.getStatusCountByRolloutId(rolloutId);
-        final List<RolloutStatusCountItem<Object>> reportItems = resultList.stream()
-                .map(r -> new RolloutStatusCountItem<>(r[0], ((Number) r[1]).longValue())).collect(Collectors.toList());
-
-        return reportItems;
-    }
-
-    private List<RolloutStatusCountItem<Object>> getStatusCountItemForRolloutGroup(final Long rolloutId) {
-        final List<Object[]> resultList = actionRepository.getStatusCountByRolloutGroupId(rolloutId);
-        final List<RolloutStatusCountItem<Object>> reportItems = resultList.stream()
-                .map(r -> new RolloutStatusCountItem<>(r[0], ((Number) r[1]).longValue())).collect(Collectors.toList());
-
-        return reportItems;
-    }
-
-    private void populateRolloutTargetStatuscount(final RolloutTargetsStatusCount rolloutTargetsStatus,
-            final List<RolloutStatusCountItem<Object>> list) {
-        Long cancelledItemCount = 0L;
-        Long runningItemsCount = 0L;
-        for (final RolloutStatusCountItem<Object> item : list) {
-            if (item.getStatus().equals(Action.Status.SCHEDULED)) {
-                rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.READY, item.getCount());
-            } else if (item.getStatus().equals(Action.Status.ERROR)) {
-                rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.ERROR, item.getCount());
-            } else if (item.getStatus().equals(Action.Status.FINISHED)) {
-                rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.FINISHED, item.getCount());
-            } else if (Arrays.asList(Action.Status.RETRIEVED, Action.Status.RUNNING, Action.Status.WARNING,
-                    Action.Status.DOWNLOAD).contains(item.getStatus())) {
-                runningItemsCount = runningItemsCount + item.getCount();
-            } else if (Arrays.asList(Action.Status.CANCELED, Action.Status.CANCELING).contains(item.getStatus())) {
-                cancelledItemCount = cancelledItemCount + item.getCount();
-            }
-        }
-        rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.RUNNING, runningItemsCount);
-        rolloutTargetsStatus.getStatusCountDetails().put(RolloutTargetStatus.CANCELLED, cancelledItemCount);
     }
 
     // ////////Rollout - changes ends here/////////////

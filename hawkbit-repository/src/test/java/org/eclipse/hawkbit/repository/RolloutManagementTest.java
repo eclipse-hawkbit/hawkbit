@@ -11,11 +11,9 @@ package org.eclipse.hawkbit.repository;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
-import org.eclipse.hawkbit.repository.RolloutTargetsStatusCount.RolloutTargetStatus;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -29,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -387,40 +386,38 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     private void validateRolloutGroupStatus(final RolloutGroup rolloutGroup, final Long expectedCountNotstarted,
             final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
             final Long expectedCountError) {
-        final RolloutTargetsStatusCount rolloutTargetsStatusCount0 = rolloutManagement
-                .getRolloutGroupDetailedStatus(rolloutGroup.getId());
-        final Map<RolloutTargetStatus, Long> countStatus = rolloutTargetsStatusCount0.getStatusCountDetails();
-        validateStatus(countStatus, expectedCountNotstarted, expectedCountReady, expectedCountRunning,
-                expectedCountFinished, expectedCountError);
+        final RolloutGroup rolloutGroupWithDetail = rolloutManagement.getRolloutGroupDetailedStatus(rolloutGroup
+                .getId());
+        validateStatus(rolloutGroupWithDetail.getTotalTargetCountStatus(), expectedCountNotstarted, expectedCountReady,
+                expectedCountRunning, expectedCountFinished, expectedCountError);
     }
 
     private void validateRolloutDetailedStatus(final Long rolloutId, final Long expectedCountNotstarted,
             final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
             final Long expectedCountError) {
-        final RolloutTargetsStatusCount rolloutTargetsStatusCount = rolloutManagement
-                .getRolloutDetailedStatus(rolloutId);
-        final Map<RolloutTargetStatus, Long> countStatus = rolloutTargetsStatusCount.getStatusCountDetails();
+        final Rollout rolloutWithDetail = rolloutManagement.getRolloutDetailedStatus(rolloutId);
 
-        validateStatus(countStatus, expectedCountNotstarted, expectedCountReady, expectedCountRunning,
-                expectedCountFinished, expectedCountError);
+        validateStatus(rolloutWithDetail.getTotalTargetCountStatus(), expectedCountNotstarted, expectedCountReady,
+                expectedCountRunning, expectedCountFinished, expectedCountError);
     }
 
-    private void validateStatus(final Map<RolloutTargetStatus, Long> countStatus, final Long expectedCountNotstarted,
-            final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
-            final Long expectedCountError) {
-        final Long countNotstarted = countStatus.get(RolloutTargetStatus.NOTSTARTED);
+    private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
+            final Long expectedCountNotstarted, final Long expectedCountReady, final Long expectedCountRunning,
+            final Long expectedCountFinished, final Long expectedCountError) {
+        final Long countNotstarted = totalTargetCountStatus
+                .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED);
         assertThat(countNotstarted).isEqualTo(expectedCountNotstarted);
 
-        final Long countReady = countStatus.get(RolloutTargetStatus.READY);
+        final Long countReady = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY);
         assertThat(countReady).isEqualTo(expectedCountReady);
 
-        final Long countRunning = countStatus.get(RolloutTargetStatus.RUNNING);
+        final Long countRunning = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING);
         assertThat(countRunning).isEqualTo(expectedCountRunning);
 
-        final Long countFinished = countStatus.get(RolloutTargetStatus.FINISHED);
+        final Long countFinished = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED);
         assertThat(countFinished).isEqualTo(expectedCountFinished);
 
-        final Long countError = countStatus.get(RolloutTargetStatus.ERROR);
+        final Long countError = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR);
         assertThat(countError).isEqualTo(expectedCountError);
     }
 
