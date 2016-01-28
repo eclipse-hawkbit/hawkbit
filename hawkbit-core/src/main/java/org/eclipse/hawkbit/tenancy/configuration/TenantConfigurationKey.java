@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration;
 
+import java.util.Arrays;
+
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationBooleanValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationPollingDurationValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
@@ -18,9 +20,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * An enum which defines the tenant specific configurations which can be
  * configured for each tenant seperately.
- *
- *
- *
  *
  */
 public enum TenantConfigurationKey {
@@ -149,5 +148,11 @@ public enum TenantConfigurationKey {
         } finally {
             context.getAutowireCapableBeanFactory().destroyBean(createBean);
         }
+    }
+
+    public static TenantConfigurationKey fromKeyName(final String keyName) {
+
+        return Arrays.stream(TenantConfigurationKey.values()).filter(conf -> conf.getKeyName().equals(keyName))
+                .findFirst().get();
     }
 }

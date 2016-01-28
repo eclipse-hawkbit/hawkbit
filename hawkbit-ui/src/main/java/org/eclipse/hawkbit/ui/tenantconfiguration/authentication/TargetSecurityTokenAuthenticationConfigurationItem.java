@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,8 +88,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
     @Override
     public void save() {
         if (configurationEnabledChange) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(
-                    new TenantConfiguration(getConfigurationKey().getKeyName(), String.valueOf(configurationEnabled)));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
         }
     }
 

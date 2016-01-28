@@ -1,13 +1,12 @@
 package org.eclipse.hawkbit.repository;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -25,6 +24,9 @@ public class TenantConfigurationManagement implements EnvironmentAware {
 
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private final ConfigurableConversionService conversionService = new DefaultConversionService();
 
@@ -58,6 +60,11 @@ public class TenantConfigurationManagement implements EnvironmentAware {
     public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
             final Class<T> propertyType) {
 
+        if (configurationKey.getDataType() != propertyType) {
+            throw new IllegalAccessError(String.format("The key %s does not handle values in the type %s.",
+                    configurationKey.getKeyName(), propertyType));
+        }
+
         final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
                 .findByKey(configurationKey.getKeyName());
 
@@ -90,14 +97,17 @@ public class TenantConfigurationManagement implements EnvironmentAware {
     @CacheEvict(value = "tenantConfiguration", key = "#tenantConf.getKey()")
     @Transactional
     @Modifying
-    public TenantConfiguration addOrUpdateConfiguration(final TenantConfiguration tenantConf) {
-        TenantConfiguration tenantConfiguration = tenantConfigurationRepository.findByKey(tenantConf.getKey());
+    public void addOrUpdateConfiguration(final TenantConfigurationKey tenantConfkey, final Object value) {
+
+        tenantConfkey.validate(applicationContext, value);
+
+        TenantConfiguration tenantConfiguration = tenantConfigurationRepository.findByKey(tenantConfkey.getKeyName());
         if (tenantConfiguration != null) {
-            tenantConfiguration.setValue(tenantConf.getValue());
+            tenantConfiguration.setValue(value.toString());
         } else {
-            tenantConfiguration = new TenantConfiguration(tenantConf.getKey(), tenantConf.getValue());
+            tenantConfiguration = new TenantConfiguration(tenantConfkey.getKeyName(), value.toString());
         }
-        return tenantConfigurationRepository.save(tenantConfiguration);
+        tenantConfigurationRepository.save(tenantConfiguration);
     }
 
     /**
@@ -113,10 +123,11 @@ public class TenantConfigurationManagement implements EnvironmentAware {
         tenantConfigurationRepository.deleteByKey(configurationKey.getKeyName());
     }
 
-    @Transactional
-    public List<TenantConfiguration> getTenantConfigurations() {
-        return tenantConfigurationRepository.findAll();
-    }
+    // @Transactional
+    // public List<TenantConfiguration> getTenantConfigurations() {
+    //
+    // return tenantConfigurationRepository.findAll();
+    // }
 
     @Override
     public void setEnvironment(final Environment environment) {

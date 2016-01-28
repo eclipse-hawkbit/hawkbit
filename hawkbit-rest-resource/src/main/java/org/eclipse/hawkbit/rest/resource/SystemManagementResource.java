@@ -18,11 +18,11 @@ import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.rest.resource.model.system.CacheRest;
 import org.eclipse.hawkbit.rest.resource.model.system.SystemStatisticsRest;
 import org.eclipse.hawkbit.rest.resource.model.system.TenantConfigurationRest;
 import org.eclipse.hawkbit.rest.resource.model.system.TenantSystemUsageRest;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +147,20 @@ public class SystemManagementResource {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     public ResponseEntity<Void> addUpdateConfig(@RequestBody final TenantConfigurationRest configuration,
             @PathVariable final String key) {
-        tenantConfigurationManagement.addOrUpdateConfiguration(new TenantConfiguration(key, configuration.getValue()));
+
+        // TODO Quick and dirty to stay compatible, but these rest interface
+        // won't be necessary in future
+
+        Object value;
+        if (configuration.getValue().equals(Boolean.TRUE)) {
+            value = true;
+        } else if (configuration.getValue().equals(Boolean.FALSE)) {
+            value = false;
+        } else {
+            value = configuration.getValue();
+        }
+
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.fromKeyName(key), value);
         return ResponseEntity.ok().build();
     }
 

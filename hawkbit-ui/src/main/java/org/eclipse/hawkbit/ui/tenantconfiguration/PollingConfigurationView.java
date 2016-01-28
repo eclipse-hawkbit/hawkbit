@@ -6,7 +6,6 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -111,16 +110,14 @@ public class PollingConfigurationView extends BaseConfigurationView
 
         if (!compareDurations(tenantPollTime, fieldPollTime.getValue())) {
             tenantPollTime = fieldPollTime.getValue();
-            tenantConfigurationManagement.addOrUpdateConfiguration(
-                    new TenantConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL.getKeyName(),
-                            durationHelper.durationToFormattedString(tenantPollTime)));
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                    durationHelper.durationToFormattedString(tenantPollTime));
         }
 
         if (!compareDurations(tenantOverdueTime, fieldPollingOverdueTime.getValue())) {
             tenantOverdueTime = fieldPollingOverdueTime.getValue();
-            tenantConfigurationManagement.addOrUpdateConfiguration(
-                    new TenantConfiguration(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL.getKeyName(),
-                            durationHelper.durationToFormattedString(tenantOverdueTime)));
+            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL,
+                    durationHelper.durationToFormattedString(tenantOverdueTime));
         }
     }
 

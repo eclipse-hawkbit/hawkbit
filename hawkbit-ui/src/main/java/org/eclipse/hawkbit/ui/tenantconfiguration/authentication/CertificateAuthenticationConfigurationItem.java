@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -134,13 +133,12 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
     @Override
     public void save() {
         if (configurationEnabledChange) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(
-                    new TenantConfiguration(getConfigurationKey().getKeyName(), String.valueOf(configurationEnabled)));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
         }
         if (configurationCaRootAuthorityChanged) {
             final String value = caRootAuthorityTextField.getValue() != null ? caRootAuthorityTextField.getValue() : "";
-            getTenantConfigurationManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME.getKeyName(), value));
+            getTenantConfigurationManagement()
+                    .addOrUpdateConfiguration(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, value);
         }
     }
 

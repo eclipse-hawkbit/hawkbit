@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -189,20 +188,19 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     @Override
     public void save() {
         if (configurationEnabledChange) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED.getKeyName(),
-                    String.valueOf(configurationEnabled)));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, configurationEnabled);
         }
 
         if (keyNameChanged) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME.getKeyName(),
-                    gatewayTokenNameTextField.getValue()));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME,
+                    gatewayTokenNameTextField.getValue());
         }
         if (keyChanged) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY.getKeyName(),
-                    gatewayTokenkeyLabel.getValue()));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                    gatewayTokenkeyLabel.getValue());
         }
     }
 
