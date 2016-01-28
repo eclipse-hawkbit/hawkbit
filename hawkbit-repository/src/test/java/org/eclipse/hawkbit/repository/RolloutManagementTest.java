@@ -10,7 +10,10 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
@@ -27,6 +30,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +60,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
         // verify the split of the target and targetGroup
         final Page<RolloutGroup> rolloutGroups = rolloutManagement.findRolloutGroupsByRollout(createdRollout.getId(),
@@ -71,7 +77,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
@@ -103,7 +110,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
@@ -143,7 +151,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
@@ -186,7 +195,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
@@ -239,19 +249,20 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
         // finish running actions, 2 actions should be finished
-        assertThat(changeStatusForRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
+        assertThat(changeStatusForAllRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
 
         // calculate the rest of the groups and finish them
         for (int groupsLeft = amountGroups - 1; groupsLeft >= 1; groupsLeft--) {
             // next check and start next group
             rolloutManagement.checkRunningRollouts(0);
             // finish running actions, 2 actions should be finished
-            assertThat(changeStatusForRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
+            assertThat(changeStatusForAllRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
             assertThat(rolloutManagement.findRolloutById(createdRollout.getId()).getStatus()).isEqualTo(
                     RolloutStatus.RUNNING);
 
@@ -274,49 +285,73 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     @Description("Verify that the targets have the right status during the rollout.")
     public void countCorrectStatusForEachTargetDuringRollout() {
 
+        // setup
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
         final int amountGroups = 4;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
-        // test that the 8 targets have not started
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(8), new Long(0), new Long(0), new Long(0),
-                new Long(0));
+        // verify
+        // targets have not started
+        Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.NOTSTARTED, 8L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        // start the rollout
+        // test 1
         rolloutManagement.startRollout(createdRollout);
 
-        // test that the 6 targets are ready and 2 are running
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(6), new Long(2), new Long(0),
-                new Long(0));
+        // verify
+        // 6 targets are ready and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.READY, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        // test 2
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        // test that the 4 targets are ready, 2 are finished and 2 are running
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(4), new Long(2), new Long(2),
-                new Long(0));
+        // verify
+        // 4 targets are ready, 2 are finished and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.READY, 4L);
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 2L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        // test 3
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        // test that the 2 targets are ready, 4 are finished and 2 are running
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(2), new Long(2), new Long(4),
-                new Long(0));
+        // verify
+        // 2 targets are ready, 4 are finished and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.READY, 2L);
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 4L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        // test 4
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        // test that the 0 targets are ready, 6 are finished and 2 are running
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(0), new Long(2), new Long(6),
-                new Long(0));
+        // verify
+        // 0 targets are ready, 6 are finished and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        // test 5
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        // test that the 0 targets are ready, 8 are finished and 0 are running
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(0), new Long(0), new Long(8),
-                new Long(0));
+        // verify
+        // 0 targets are ready, 8 are finished and 0 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.FINISHED, 8L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
     }
 
@@ -324,105 +359,344 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     @Description("Verify that the targets have the right status during the rollout when an error emerges.")
     public void countCorrectStatusForEachTargetDuringRolloutWithError() {
 
+        // setup
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
         final int amountGroups = 4;
-        final Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, "50", "80");
 
-        // test that the 8 targets have not started
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(8), new Long(0), new Long(0), new Long(0),
-                new Long(0));
+        // verify
+        // 8 targets have not started
+        Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.NOTSTARTED, 8L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        // start the rollout
+        // test
         rolloutManagement.startRollout(createdRollout);
 
-        // test that the 6 targets are ready and 2 are running
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(6), new Long(2), new Long(0),
-                new Long(0));
+        // verify
+        // 6 targets are ready and 2 are running
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.READY, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
-        changeStatusForRunningActions(createdRollout, Status.ERROR);
+        // test
+        changeStatusForAllRunningActions(createdRollout, Status.ERROR);
         rolloutManagement.checkRunningRollouts(0);
 
-        // test that the 6 targets are ready and 2 are error
-        validateRolloutDetailedStatus(createdRollout.getId(), new Long(0), new Long(6), new Long(0), new Long(0),
-                new Long(2));
-
+        // verify
+        // 6 targets are ready and 2 are error
+        validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.READY, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.ERROR, 2L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
     }
 
     @Test
     @Description("Verify that the targets have the right status during the rollout when receiving the status of rollout groups.")
     public void countCorrectStatusForEachTargetGroupDuringRollout() {
+
+        // setup
         final int amountTargetsForRollout = 9;
         final int amountOtherTargets = 15;
         final int amountGroups = 4;
-        Rollout createdRollout = createTestRollout(amountTargetsForRollout, amountOtherTargets, amountGroups);
+        Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80");
 
+        // test
         rolloutManagement.startRollout(createdRollout);
-        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
-        changeStatusForRunningActions(createdRollout, Status.FINISHED);
+        changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        // In this stage there should be 4 targets finished (Group 1 and 2), 2
-        // targets running (Group 3) and 2 targets ready (Group 4) and one 1
-        // target ready (Group 5)
-
+        // Verify
+        // 4 targets finished (Group 1 and 2), 2 targets running (Group 3) and 2
+        // targets ready (Group 4) and one 1 target ready (Group 5)
         createdRollout = rolloutManagement.findRolloutById(createdRollout.getId());
         final List<RolloutGroup> rolloutGruops = createdRollout.getRolloutGroups();
+        Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 2L);
+        validateRolloutGroupActionStatus(rolloutGruops.get(0), expectedTargetCountStatus);
+        validateRolloutGroupActionStatus(rolloutGruops.get(1), expectedTargetCountStatus);
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validateRolloutGroupActionStatus(rolloutGruops.get(2), expectedTargetCountStatus);
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 2L);
+        validateRolloutGroupActionStatus(rolloutGruops.get(3), expectedTargetCountStatus);
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 1L);
+        validateRolloutGroupActionStatus(rolloutGruops.get(4), expectedTargetCountStatus);
+    }
 
-        validateRolloutGroupStatus(rolloutGruops.get(0), new Long(0), new Long(0), new Long(0), new Long(2),
-                new Long(0));
-        validateRolloutGroupStatus(rolloutGruops.get(1), new Long(0), new Long(0), new Long(0), new Long(2),
-                new Long(0));
-        validateRolloutGroupStatus(rolloutGruops.get(2), new Long(0), new Long(0), new Long(2), new Long(0),
-                new Long(0));
-        validateRolloutGroupStatus(rolloutGruops.get(3), new Long(0), new Long(2), new Long(0), new Long(0),
-                new Long(0));
-        validateRolloutGroupStatus(rolloutGruops.get(4), new Long(0), new Long(1), new Long(0), new Long(0),
-                new Long(0));
+    @Test
+    @Description("Verify that target actions of rollout get canceled when a manuel distribution sets assignment is done.")
+    public void targetsOfRolloutGetsManuelDsAssignment() {
+
+        // setup
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80");
+        final DistributionSet ds = createdRollout.getDistributionSet();
+
+        // test case 1
+        rolloutManagement.startRollout(createdRollout);
+        createdRollout = rolloutManagement.findRolloutById(createdRollout.getId());
+
+        // Verify
+        // 5 are running
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
+                Status.RUNNING);
+        assertThat(runningActions.size()).isEqualTo(5);
+        // 5 targets in the group and the DS has been assigned
+        final List<RolloutGroup> rolloutGroups = createdRollout.getRolloutGroups();
+        final Page<Target> targets = rolloutManagement.getRolloutGroupTargets(rolloutGroups.get(0),
+                new OffsetBasedPageRequest(0, 20, new Sort(Direction.ASC, "id")));
+        final List<Target> targetList = targets.getContent();
+        assertThat(targetList.size()).isEqualTo(5);
+        for (final Target t : targetList) {
+            final DistributionSet assignedDs = t.getAssignedDistributionSet();
+            assertThat(assignedDs.getId()).isEqualTo(ds.getId());
+        }
+
+        // test case 2
+        // add the target that will get canceled
+        final List<Target> targetToCancel = new ArrayList<Target>();
+        targetToCancel.add(targetList.get(0));
+        targetToCancel.add(targetList.get(1));
+        targetToCancel.add(targetList.get(2));
+        final DistributionSet dsForCancelTest = TestDataUtil.generateDistributionSet("dsForTest", softwareManagement,
+                distributionSetManagement);
+        deploymentManagement.assignDistributionSet(dsForCancelTest, targetToCancel);
+
+        // verify
+        // 3 targets are canceled, 2 are still running and 5 are ready
+        final Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
+        validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
+        validationMap.put(TotalTargetCountStatus.Status.CANCELLED, 3L);
+        validationMap.put(TotalTargetCountStatus.Status.READY, 5L);
+        validateRolloutActionStatus(createdRollout.getId(), validationMap);
+    }
+
+    @Test
+    @Description("Verify that target actions of a rollout get cancelled when another rollout with same targets gets started.")
+    public void targetsOfRolloutGetDistributionSetAssignmentByOtherRollout() {
+
+        final int amountTargetsForRollout = 15;
+        final int amountOtherTargets = 5;
+        final int amountGroups = 3;
+        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80");
+        rolloutManagement.startRollout(rolloutOne);
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+
+        final DistributionSet dsForRolloutTwo = TestDataUtil.generateDistributionSet("dsForRolloutTwo",
+                softwareManagement, distributionSetManagement);
+
+        // same Filter = same targets
+        final Rollout rolloutTwo = createRolloutWithVariables("rolloutTwo", "This is the description for rollout two",
+                1, "controllerId==rollout-*", dsForRolloutTwo, "50", "80");
+        changeStatusForAllRunningActions(rolloutOne, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // Verify that 5 targets are finished, 5 are running and 5 are ready.
+        Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        validateRolloutActionStatus(rolloutOne.getId(), expectedTargetCountStatus);
+
+        rolloutManagement.startRollout(rolloutTwo);
+
+        // Verify that 5 targets are finished and 10 are cancelled.
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.CANCELLED, 10L);
+        validateRolloutActionStatus(rolloutOne.getId(), expectedTargetCountStatus);
 
     }
 
-    private void validateRolloutGroupStatus(final RolloutGroup rolloutGroup, final Long expectedCountNotstarted,
-            final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
-            final Long expectedCountError) {
+    @Test
+    @Description("Verify that error status of DistributionSet installation during rollout can get rerun with second rollout so that all targets have some DistributionSet installed at the end.")
+    public void startSecondRolloutAfterFristRolloutEndenWithErrors() {
+
+        // setup 1
+        final int amountTargetsForRollout = 15;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 3;
+        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80");
+        final DistributionSet distributionSet = rolloutOne.getDistributionSet();
+        rolloutManagement.startRollout(rolloutOne);
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+
+        // test case 1
+        // Group one
+        changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+        // Group two
+        changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+        // Group three
+        changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // verify
+        // 9 targets are finished and 6 have error
+        Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 9L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 6L);
+        validateRolloutActionStatus(rolloutOne.getId(), expectedTargetCountStatus);
+        // rollout is finished
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+        assertThat(rolloutOne.getStatus()).isEqualTo(RolloutStatus.FINISHED);
+
+        // setup 2
+        Rollout rolloutTwo = createRolloutWithVariables("rolloutTwo", "This is the description for rollout two", 1,
+                "controllerId==rollout-*", distributionSet, "50", "80");
+
+        // test case 2
+        rolloutManagement.startRollout(rolloutTwo);
+        rolloutTwo = rolloutManagement.findRolloutById(rolloutTwo.getId());
+
+        // Verify
+        // 6 error targets are know running
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        validateRolloutActionStatus(rolloutTwo.getId(), expectedTargetCountStatus);
+
+        changeStatusForAllRunningActions(rolloutTwo, Status.FINISHED);
+        final Page<Target> targetPage = targetManagement.findTargetByUpdateStatus(pageReq, TargetUpdateStatus.IN_SYNC);
+        final List<Target> targetList = targetPage.getContent();
+
+        // 15 targets in finished/IN_SYNC status and same DS assigned
+        assertThat(targetList.size()).isEqualTo(amountTargetsForRollout);
+        for (final Target t : targetList) {
+            final DistributionSet ds = t.getAssignedDistributionSet();
+            assertThat(ds).isEqualTo(distributionSet);
+        }
+    }
+
+    @Test
+    @Description("Verify that the rollout moves to the next group when the success condition was achieved and the error condition was not exceeded.")
+    public void successConditionAchievedAndErrorConditionNotExceeded() {
+
+        // setup
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, successCondition, errorCondition);
+
+        // test
+        rolloutManagement.startRollout(rolloutOne);
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+        changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // verify: 40% error but 60% finished -> should move to next group
+        final List<RolloutGroup> rolloutGruops = rolloutOne.getRolloutGroups();
+        final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
+        validateRolloutGroupActionStatus(rolloutGruops.get(1), expectedTargetCountStatus);
+
+    }
+
+    @Test
+    @Description("Verify that the rollout does not move to the next group when the sucess condition was not achieved.")
+    public void successConditionNotAchieved() {
+
+        // setup
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        final String successCondition = "80";
+        final String errorCondition = "90";
+        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, successCondition, errorCondition);
+
+        // test
+        rolloutManagement.startRollout(rolloutOne);
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+        changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // verify: 40% error and 60% finished -> should not move to next group
+        // because successCondition 80%
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+        final List<RolloutGroup> rolloutGruops = rolloutOne.getRolloutGroups();
+        final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        validateRolloutGroupActionStatus(rolloutGruops.get(1), expectedTargetCountStatus);
+    }
+
+    @Test
+    @Description("Verify that the rollout pauses when the error condition was exceeded.")
+    public void errorConditionExceeded() {
+
+        // setup
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "20";
+        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, successCondition, errorCondition);
+
+        // test
+        rolloutManagement.startRollout(rolloutOne);
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+        changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // verify: 40% error -> should pause because errorCondition is 20%
+        rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
+        assertThat(RolloutStatus.PAUSED).isEqualTo(rolloutOne.getStatus());
+    }
+
+    @Test
+    @Description("...")
+    public void errorConditionNotFulfilled() {
+
+    }
+
+    private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
+            final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
         final RolloutGroup rolloutGroupWithDetail = rolloutManagement.getRolloutGroupDetailedStatus(rolloutGroup
                 .getId());
-        validateStatus(rolloutGroupWithDetail.getTotalTargetCountStatus(), expectedCountNotstarted, expectedCountReady,
-                expectedCountRunning, expectedCountFinished, expectedCountError);
+        validateStatus(rolloutGroupWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
     }
 
-    private void validateRolloutDetailedStatus(final Long rolloutId, final Long expectedCountNotstarted,
-            final Long expectedCountReady, final Long expectedCountRunning, final Long expectedCountFinished,
-            final Long expectedCountError) {
+    private void validateRolloutActionStatus(final Long rolloutId,
+            final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
         final Rollout rolloutWithDetail = rolloutManagement.getRolloutDetailedStatus(rolloutId);
-
-        validateStatus(rolloutWithDetail.getTotalTargetCountStatus(), expectedCountNotstarted, expectedCountReady,
-                expectedCountRunning, expectedCountFinished, expectedCountError);
+        validateStatus(rolloutWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
     }
 
     private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
-            final Long expectedCountNotstarted, final Long expectedCountReady, final Long expectedCountRunning,
-            final Long expectedCountFinished, final Long expectedCountError) {
-        final Long countNotstarted = totalTargetCountStatus
-                .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED);
-        assertThat(countNotstarted).isEqualTo(expectedCountNotstarted);
-
-        final Long countReady = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY);
-        assertThat(countReady).isEqualTo(expectedCountReady);
-
-        final Long countRunning = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING);
-        assertThat(countRunning).isEqualTo(expectedCountRunning);
-
-        final Long countFinished = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED);
-        assertThat(countFinished).isEqualTo(expectedCountFinished);
-
-        final Long countError = totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR);
-        assertThat(countError).isEqualTo(expectedCountError);
+            final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
+        for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
+            final Long countReady = totalTargetCountStatus.getTotalCountByStatus(entry.getKey());
+            assertThat(countReady).isEqualTo(entry.getValue());
+        }
     }
 
-    private Rollout createTestRollout(final int amountTargetsForRollout, final int amountOtherTargets,
-            final int groupSize) {
+    private Rollout createTestRolloutWithDistributionSet(final int amountTargetsForRollout,
+            final int amountOtherTargets, final int groupSize, final String successCondition,
+            final String errorCondition) {
         // setup - distribution set
         final SoftwareModule ah = softwareManagement.createSoftwareModule(new SoftwareModule(appType, "agent-hub",
                 "1.0.1", null, ""));
@@ -438,23 +712,29 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
                 .createTargets(TestDataUtil.buildTargetFixtures(amountTargetsForRollout, "rollout-", "rollout"));
         targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountOtherTargets, "others-", "rollout"));
 
-        // setup - variables
         final String filterQuery = "controllerId==rollout-*";
-        final RolloutGroupConditions conditions = new RolloutGroup.RolloutGroupConditionBuilder()
-                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50")
-                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
-                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+        return createRolloutWithVariables("test-rollout-name-1", "test-rollout-description-1", groupSize, filterQuery,
+                rolloutDS, successCondition, errorCondition);
+    }
 
+    private Rollout createRolloutWithVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition) {
+        // setup - variables
+        final RolloutGroupConditions conditions = new RolloutGroup.RolloutGroupConditionBuilder()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
         // creating rollout
         final Rollout rolloutToCreate = new Rollout();
-        rolloutToCreate.setName("test-rollout-name-1");
-        rolloutToCreate.setDescription("test-rollout-description-1");
+        rolloutToCreate.setName(rolloutName);
+        rolloutToCreate.setDescription(rolloutDescription);
         rolloutToCreate.setTargetFilterQuery(filterQuery);
-        rolloutToCreate.setDistributionSet(rolloutDS);
+        rolloutToCreate.setDistributionSet(distributionSet);
         return rolloutManagement.createRollout(rolloutToCreate, groupSize, conditions);
     }
 
-    private int changeStatusForRunningActions(final Rollout rollout, final Status status) {
+    private int changeStatusForAllRunningActions(final Rollout rollout, final Status status) {
         // set both actions in error state so error condition is hit and error
         // action is executed
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
@@ -467,4 +747,33 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         }
         return runningActions.size();
     }
+
+    /**
+     * Changes the status for a certain amount of targets.
+     * 
+     * @param rollout
+     * @param status
+     * @param amountOfTargetsToGetChanged
+     * @return
+     */
+    private int changeStatusForRunningActions(final Rollout rollout, final Status status,
+            final int amountOfTargetsToGetChanged) {
+        final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
+        for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
+            controllerManagament.addUpdateActionStatus(
+                    new ActionStatus(runningActions.get(i), status, System.currentTimeMillis(), ""),
+                    runningActions.get(i));
+        }
+        return runningActions.size();
+    }
+
+    private Map<TotalTargetCountStatus.Status, Long> createInitStatusMap() {
+        final Map<TotalTargetCountStatus.Status, Long> map = new HashMap<TotalTargetCountStatus.Status, Long>();
+        for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
+            map.put(status, 0L);
+        }
+        return map;
+    }
+
 }
