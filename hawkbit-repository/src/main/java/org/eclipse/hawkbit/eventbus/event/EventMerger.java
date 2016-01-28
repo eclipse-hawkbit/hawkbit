@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.hawkbit.eventbus.EventSubscriber;
-import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,12 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 /**
+ * Collects and merges fine grained events to more generic events and push them
+ * in a fixed delay on the events bus. This helps for code which are not
+ * interested in all fine grained events, e.g. UI code. The UI code is not
+ * interested in handling the flood of events, so collecting the events and
+ * merge them to one event together and post them in a fixed interval is easier
+ * to consume e.g. for push notifcations on UI.
  * 
  * @author Michael Hirsch
  *
@@ -36,6 +41,9 @@ public class EventMerger {
     @Autowired
     private EventBus eventBus;
 
+    /**
+     * Checks if there are events to publish in the fixed interval.
+     */
     @Scheduled(initialDelay = 10000, fixedDelay = 2000)
     public void rolloutEventScheduler() {
         final Iterator<RolloutEventKey> rolloutIterator = rolloutEvents.iterator();
@@ -53,6 +61,13 @@ public class EventMerger {
         }
     }
 
+    /**
+     * Called by the event bus to retrieve all necessary events to collect and
+     * merge.
+     * 
+     * @param event
+     *            the event on the event bus
+     */
     @Subscribe
     public void onEvent(final Event event) {
         Long rolloutId = null;
@@ -88,6 +103,12 @@ public class EventMerger {
         }
     }
 
+    /**
+     * The rollout key in the concurrent set to be hold.
+     * 
+     * @author Michael Hirsch
+     *
+     */
     private static final class RolloutEventKey {
         private final Long rolloutId;
         private final String tenant;
