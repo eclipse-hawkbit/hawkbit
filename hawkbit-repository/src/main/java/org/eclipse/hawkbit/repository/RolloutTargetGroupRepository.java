@@ -17,6 +17,6 @@ import org.springframework.data.repository.CrudRepository;
  *
  *
  */
-public interface RolloutTargetGroupRepository extends CrudRepository<RolloutTargetGroup, RolloutTargetGroupId>,
-        JpaSpecificationExecutor<RolloutTargetGroup> {
+public interface RolloutTargetGroupRepository
+        extends CrudRepository<RolloutTargetGroup, RolloutTargetGroupId>, JpaSpecificationExecutor<RolloutTargetGroup> {
 }
