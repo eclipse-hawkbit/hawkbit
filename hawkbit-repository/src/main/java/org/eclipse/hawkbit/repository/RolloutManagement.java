@@ -775,7 +775,9 @@ public class RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Slice<Rollout> findRolloutByFilters(final Pageable pageable, @NotEmpty final String searchText) {
         final Specification<Rollout> specs = likeNameOrDescription(searchText);
-        return criteriaNoCountDao.findAll(specs, pageable, Rollout.class);
+        final Slice<Rollout> findAll = criteriaNoCountDao.findAll(specs, pageable, Rollout.class);
+        setRolloutStatusDetails(findAll);
+        return findAll;
     }
 
     /**
@@ -822,6 +824,12 @@ public class RolloutManagement {
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable page) {
         // TODO add test case
         final Page<Rollout> rollouts = findAll(page);
+        setRolloutStatusDetails(rollouts);
+        return rollouts;
+
+    }
+
+    private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
@@ -832,9 +840,6 @@ public class RolloutManagement {
                     allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
             rollout.setTotalTargetCountStatus(totalTargetCountStatus);
         }
-
-        return rollouts;
-
     }
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
