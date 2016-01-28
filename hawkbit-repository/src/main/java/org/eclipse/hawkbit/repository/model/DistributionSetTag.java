@@ -71,7 +71,7 @@ public class DistributionSetTag extends Tag {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -84,11 +84,11 @@ public class DistributionSetTag extends Tag {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final Object obj) { // NOSONAR - as this is generated
         if (this == obj) {
             return true;
         }

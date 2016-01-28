@@ -20,10 +20,11 @@ import feign.RequestLine;
 /**
  * Client binding for the Distribution resource of the management API.
  */
+@FunctionalInterface
 public interface DistributionSetResource {
 
     /**
-     * Creates a list of distrbution sets.
+     * Creates a list of distribution sets.
      *
      * @param sets
      *            the request body java bean containing the necessary attributes
