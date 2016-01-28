@@ -667,6 +667,82 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         assertThat(RolloutStatus.PAUSED).isEqualTo(rolloutOne.getStatus());
     }
 
+    @Test
+    @Description("")
+    public void testFindAllWithDetailedStatus() {
+
+        // TODO Name hat Buchstanden ABC und und anfrage ist sortert.
+
+        final int amountTargetsForRollout = 12;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        final Rollout rolloutOne = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80", "RolloutOne", "firstRollout");
+        rolloutManagement.startRollout(rolloutOne);
+
+        final int amountTargetsForRollout2 = 10;
+        final int amountOtherTargets2 = 0;
+        final int amountGroups2 = 2;
+        final Rollout rolloutTwo = createRolloutWithContainedTargets(amountTargetsForRollout2, amountOtherTargets2,
+                amountGroups2, "50", "80", "RolloutTwo", "secondRollout");
+        rolloutManagement.startRollout(rolloutTwo);
+        changeStatusForAllRunningActions(rolloutTwo, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        final int amountTargetsForRollout3 = 10;
+        final int amountOtherTargets3 = 0;
+        final int amountGroups3 = 2;
+        final Rollout rolloutThree = createRolloutWithContainedTargets(amountTargetsForRollout3, amountOtherTargets3,
+                amountGroups3, "50", "80", "RolloutThree", "thirdRollout");
+        rolloutManagement.startRollout(rolloutThree);
+        changeStatusForAllRunningActions(rolloutThree, Status.ERROR);
+        rolloutManagement.checkRunningRollouts(0);
+
+        final int amountTargetsForRollout4 = 15;
+        final int amountOtherTargets4 = 0;
+        final int amountGroups4 = 3;
+        final Rollout rolloutFour = createRolloutWithContainedTargets(amountTargetsForRollout4, amountOtherTargets4,
+                amountGroups4, "50", "80", "RolloutFour", "FourthRollout");
+        rolloutManagement.startRollout(rolloutFour);
+
+        changeStatusForRunningActions(rolloutFour, Status.ERROR, 1);
+        rolloutManagement.checkRunningRollouts(0);
+        changeStatusForAllRunningActions(rolloutFour, Status.FINISHED);
+        rolloutManagement.checkRunningRollouts(0);
+
+        final Page<Rollout> rolloutPage = rolloutManagement.findAllWithDetailedStatus(pageReq);
+        final List<Rollout> rolloutList = rolloutPage.getContent();
+
+        // validate rollout 1 -> 6 running and 6 ready
+        Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 6L);
+        validateRolloutActionStatus(rolloutList.get(0).getId(), expectedTargetCountStatus);
+
+        // validate rollout 2 -> 6 running and 6 ready
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        validateRolloutActionStatus(rolloutList.get(1).getId(), expectedTargetCountStatus);
+
+        // validate rollout 3 -> 6 running and 6 ready
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 6L);
+        validateRolloutActionStatus(rolloutList.get(2).getId(), expectedTargetCountStatus);
+
+        // validate rollout 4 -> 6 running and 6 ready
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 1L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        validateRolloutActionStatus(rolloutList.get(3).getId(), expectedTargetCountStatus);
+
+        final Rollout r = rolloutList.get(0);
+        System.out.println(r.getDescription());
+
+    }
+
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
             final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
         final RolloutGroup rolloutGroupWithDetail = rolloutManagement.getRolloutGroupDetailedStatus(rolloutGroup
@@ -709,6 +785,17 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final String filterQuery = "controllerId==rollout-*";
         return createRolloutWithVariables("test-rollout-name-1", "test-rollout-description-1", groupSize, filterQuery,
                 rolloutDS, successCondition, errorCondition);
+    }
+
+    private Rollout createRolloutWithContainedTargets(final int amountTargetsForRollout, final int amountOtherTargets,
+            final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
+            final String targetPrefixName) {
+        final DistributionSet dsForRolloutTwo = TestDataUtil.generateDistributionSet("dsFor" + rolloutName,
+                softwareManagement, distributionSetManagement);
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsForRollout,
+                targetPrefixName + "-", targetPrefixName));
+        return createRolloutWithVariables(rolloutName, rolloutName + "description", groupSize, "controllerId=="
+                + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition);
     }
 
     private Rollout createRolloutWithVariables(final String rolloutName, final String rolloutDescription,
