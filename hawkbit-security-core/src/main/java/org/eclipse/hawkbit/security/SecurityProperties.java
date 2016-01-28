@@ -31,7 +31,7 @@ public class SecurityProperties {
     @Value("${hawkbit.server.controller.security.rp.trustedIPs:#{null}}")
     private List<String> rpTrustedIPs;
 
-    @Value("${hawkbit.server.controller.security.authentication.anonymous.enabled:false}")
+    @Value("${hawkbit.server.controller.security.authentication.anonymous.enabled}")
     private Boolean anonymousEnabled;
 
     public String getRpCnHeader() {
