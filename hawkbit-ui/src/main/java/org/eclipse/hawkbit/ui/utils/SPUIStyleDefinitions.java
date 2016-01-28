@@ -232,6 +232,11 @@ public final class SPUIStyleDefinitions {
     public static final String BULK_UPLOAD_PROGRESS_INDICATOR_STYLE = "app-loading";
 
     /**
+     * Target filter search progress indicator style.
+     */
+    public static final String TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE = "target-filter-search-layout";
+
+    /**
      * Constructor.
      */
     private SPUIStyleDefinitions() {

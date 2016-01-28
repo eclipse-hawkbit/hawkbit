@@ -63,6 +63,9 @@ public class CreateOrUpdateFilterTable extends Table {
     @Autowired
     private FilterManagementUIState filterManagementUIState;
 
+    @Autowired
+    private CreateOrUpdateFilterHeader createOrUpdateFilterHeader;
+
     private LazyQueryContainer container;
 
     private static final int PROPERTY_DEPT = 3;
@@ -93,6 +96,7 @@ public class CreateOrUpdateFilterTable extends Table {
                 || custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
             populateTableData();
+            // createOrUpdateFilterHeader.updateTargetFilterStatusToComplete();
         }
     }
 
@@ -232,6 +236,10 @@ public class CreateOrUpdateFilterTable extends Table {
 
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.STATUS_ICON, (source, itemId, columnId) -> getStatusIcon(itemId));
+    }
+
+    protected void onValueChange() {
+        createOrUpdateFilterHeader.updateTargetFilterStatusToComplete();
     }
 
 }

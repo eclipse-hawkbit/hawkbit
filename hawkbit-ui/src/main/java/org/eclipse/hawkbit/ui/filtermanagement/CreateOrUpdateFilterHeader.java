@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
@@ -37,10 +38,12 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -109,6 +112,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private BlurListener nameTextFieldBlusListner;
 
     private LayoutClickListener nameLayoutClickListner;
+
+    private Button targetFilterStatusButton;
 
     /**
      * Initialize the Campaign Status History Header.
@@ -195,9 +200,23 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         validationIcon = createStatusIcon();
         saveButton = createSaveButton();
 
+        targetFilterStatusButton = createTargetFilterStatusButton();
+
         helpLink = DocumentationPageLink.TARGET_FILTER_VIEW.getLink();
 
         closeIcon = createSearchResetIcon();
+    }
+
+    private Button createTargetFilterStatusButton() {
+        targetFilterStatusButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.TARGET_FILTER_STATUS_BUTTON,
+                "", "", "", false, null, SPUIButtonStyleSmall.class);
+        targetFilterStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        targetFilterStatusButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        targetFilterStatusButton.setWidth("100px");
+        targetFilterStatusButton.setHtmlContentAllowed(true);
+        targetFilterStatusButton.setVisible(false);
+        targetFilterStatusButton.setImmediate(true);
+        return targetFilterStatusButton;
     }
 
     /**
@@ -280,7 +299,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.setSizeUndefined();
         iconLayout.setSpacing(false);
-        iconLayout.addComponents(helpLink, saveButton);
+        iconLayout.setStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
+        iconLayout.addComponents(helpLink, saveButton, targetFilterStatusButton);
+        iconLayout.setComponentAlignment(targetFilterStatusButton, Alignment.MIDDLE_CENTER);
 
         final HorizontalLayout queryLayout = new HorizontalLayout();
         queryLayout.setSizeUndefined();
@@ -310,6 +331,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         queryTextField.addTextChangeListener(new TextChangeListener() {
             @Override
             public void textChange(final TextChangeEvent event) {
+                enableTargetFilterStatusButton();
+                updateTargetFilterStatusToProgressIndicator();
                 onQueryChange(event.getText());
                 eventBus.publish(this, CustomFilterUIEvent.FILTER_TARGET_BY_QUERY);
             }
@@ -393,6 +416,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         textField.setWidth(900.0F, Unit.PIXELS);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         textField.setTextChangeTimeout(1000);
+
+        textField.addShortcutListener(new AbstractField.FocusShortcut(textField, KeyCode.ENTER));
         return textField;
     }
 
@@ -491,6 +516,22 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             return false;
         }
         return true;
+    }
+
+    protected void enableTargetFilterStatusButton() {
+        targetFilterStatusButton.setVisible(true);
+
+    }
+
+    protected void updateTargetFilterStatusToComplete() {
+        targetFilterStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        targetFilterStatusButton.setVisible(false);
+
+    }
+
+    protected void updateTargetFilterStatusToProgressIndicator() {
+        targetFilterStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        targetFilterStatusButton.setIcon(null);
     }
 
 }
