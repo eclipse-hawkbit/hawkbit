@@ -110,7 +110,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
     void onEvent(final DistributionTableEvent event) {
         if (event.getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MINIMIZED) {
             minimizeDistTable();
-        } else if (event.getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MAXIMIZED) {
+        } else if (event
+                .getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MAXIMIZED) {
             maximizeDistTable();
         }
     }
@@ -206,11 +207,16 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
     }
 
     private Boolean showFooterLayout() {
-        if ((permChecker.hasDeleteDistributionPermission() || permChecker.hasDeleteTargetPermission())
-                || (permChecker.hasReadDistributionPermission() && permChecker.hasUpdateTargetPermission())) {
+        if (permChecker.hasTargetReadPermission()
+                || (permChecker.hasDeleteDistributionPermission() || permChecker.hasDeleteTargetPermission())
+                || hasDeploymentPermission()) {
             return true;
         }
         return false;
+    }
+
+    private boolean hasDeploymentPermission() {
+        return permChecker.hasReadDistributionPermission() && permChecker.hasUpdateTargetPermission();
     }
 
     private void displayTargetWidgetsOnly() {

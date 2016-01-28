@@ -119,16 +119,15 @@ public class SwModuleTable extends AbstractTable {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SMFilterEvent filterEvent) {
-        UI.getCurrent().access(
-                () -> {
+        UI.getCurrent().access(() -> {
 
-                    if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
-                            || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
-                            || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
-                        refreshFilter();
-                        styleTableOnDistSelection();
-                    }
-                });
+            if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
+                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
+                    || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
+                refreshFilter();
+                styleTableOnDistSelection();
+            }
+        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -192,8 +191,8 @@ public class SwModuleTable extends AbstractTable {
                 SwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        final LazyQueryContainer container = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        final LazyQueryContainer container = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
         return container;
     }
 
@@ -215,8 +214,8 @@ public class SwModuleTable extends AbstractTable {
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null, false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false, true);
-        lazyContainer
-                .addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null, false, true);
+        lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null, false,
+                true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_COLOR, String.class, null, false, true);
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_SOFT_TYPE_ID, Long.class, null, false, true);
     }
@@ -291,8 +290,8 @@ public class SwModuleTable extends AbstractTable {
                 manageDistUIState.setSelectedBaseSwModuleId(value);
                 final SoftwareModule baseSoftwareModule = softwareManagement.findSoftwareModuleById(value);
                 manageDistUIState.setSelectedSoftwareModules(values);
-                eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE,
-                        baseSoftwareModule));
+                eventBus.publish(this,
+                        new SoftwareModuleEvent(SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE, baseSoftwareModule));
             }
         } else {
             manageDistUIState.setSelectedBaseSwModuleId(null);
@@ -318,10 +317,10 @@ public class SwModuleTable extends AbstractTable {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
             columnList
                     .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"),
+            columnList.add(
+                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
                     0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
-                    i18n.get("header.modifiedDate"), 0.1F));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
         } else {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.7F));
@@ -380,9 +379,9 @@ public class SwModuleTable extends AbstractTable {
 
     private void addTypeStyle(final Long tagId, final String color) {
         final JavaScript javaScript = UI.getCurrent().getPage().getJavaScript();
-        UI.getCurrent().access(
-                () -> javaScript.execute(HawkbitCommonUtil
-                        .getScriptSMHighlightWithColor(".v-table-row-distribution-upload-type-" + tagId
+        UI.getCurrent()
+                .access(() -> javaScript.execute(
+                        HawkbitCommonUtil.getScriptSMHighlightWithColor(".v-table-row-distribution-upload-type-" + tagId
                                 + "{background-color:" + color + " !important;background-image:none !important }")));
     }
 
@@ -444,10 +443,10 @@ public class SwModuleTable extends AbstractTable {
         item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(swModule.getVendor());
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).setValue(swModule.getCreatedBy());
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setValue(swModule.getLastModifiedBy());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE).setValue(
-                SPDateTimeUtil.getFormattedDate(swModule.getCreatedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setValue(
-                SPDateTimeUtil.getFormattedDate(swModule.getLastModifiedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
+                .setValue(SPDateTimeUtil.getFormattedDate(swModule.getCreatedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
+                .setValue(SPDateTimeUtil.getFormattedDate(swModule.getLastModifiedAt()));
 
         item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(swModule.getType().getColour());
         if (!manageDistUIState.getSelectedSoftwareModules().isEmpty()) {

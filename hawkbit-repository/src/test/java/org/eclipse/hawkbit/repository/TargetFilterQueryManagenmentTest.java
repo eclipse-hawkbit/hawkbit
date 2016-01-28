@@ -73,8 +73,8 @@ public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
         final String newQuery = "status==UNKNOWN";
         targetFilterQuery.setQuery(newQuery);
         targetFilterQueryManagement.updateTargetFilterQuery(targetFilterQuery);
-        assertEquals("Returns updated target filter query", newQuery, targetFilterQueryManagement
-                .findTargetFilterQueryByName(filterName).getQuery());
+        assertEquals("Returns updated target filter query", newQuery,
+                targetFilterQueryManagement.findTargetFilterQueryByName(filterName).getQuery());
 
     }
 

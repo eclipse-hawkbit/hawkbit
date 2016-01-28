@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.rest.resource;
 import java.io.IOException;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -74,9 +73,6 @@ public class SoftwareModuleResource {
 
     @Autowired
     private SoftwareManagement softwareManagement;
-
-    @Autowired
-    private EntityManager entityManager;
 
     /**
      * Handles POST request for artifact upload.
@@ -265,8 +261,8 @@ public class SoftwareModuleResource {
         final Slice<SoftwareModule> findModulesAll;
         Long countModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = softwareManagement.findSoftwareModulesByPredicate(
-                    RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class, entityManager), pageable);
+            findModulesAll = softwareManagement
+                    .findSoftwareModulesByPredicate(RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class), pageable);
             countModulesAll = ((Page<SoftwareModule>) findModulesAll).getTotalElements();
         } else {
             findModulesAll = softwareManagement.findSoftwareModulesAll(pageable);
@@ -405,7 +401,7 @@ public class SoftwareModuleResource {
 
         if (rsqlParam != null) {
             metaDataPage = softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
-                    RSQLUtility.parse(rsqlParam, SoftwareModuleMetadataFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, SoftwareModuleMetadataFields.class), pageable);
         } else {
             metaDataPage = softwareManagement.findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, pageable);
         }

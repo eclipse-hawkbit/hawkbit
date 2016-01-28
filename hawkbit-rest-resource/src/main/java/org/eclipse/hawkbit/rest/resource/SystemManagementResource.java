@@ -86,8 +86,8 @@ public class SystemManagementResource {
                 .setOverallArtifactVolumeInBytes(report.getOverallArtifactVolumeInBytes())
                 .setOverallTargets(report.getOverallTargets()).setOverallTenants(report.getTenants().size());
 
-        result.setTenantStats(report.getTenants().stream().map(tenant -> convertTenant(tenant))
-                .collect(Collectors.toList()));
+        result.setTenantStats(
+                report.getTenants().stream().map(tenant -> convertTenant(tenant)).collect(Collectors.toList()));
 
         return ResponseEntity.ok(result);
     }

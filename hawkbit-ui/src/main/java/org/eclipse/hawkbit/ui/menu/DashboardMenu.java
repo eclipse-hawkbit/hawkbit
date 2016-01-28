@@ -206,15 +206,15 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
                 && (((UserPrincipal) user).getFirstname() != null || ((UserPrincipal) user).getLastname() != null)) {
             settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
                     + concateFNameLName(((UserPrincipal) user).getFirstname(), ((UserPrincipal) user).getLastname()));
-            settingsItem.setDescription(((UserPrincipal) user).getFirstname() + " / "
-                    + ((UserPrincipal) user).getLastname());
+            settingsItem.setDescription(
+                    ((UserPrincipal) user).getFirstname() + " / " + ((UserPrincipal) user).getLastname());
         } else if (user instanceof UserPrincipal) {
             if (((UserPrincipal) user).getLoginname().length() > 10) {
                 settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
                         + ((UserPrincipal) user).getLoginname().substring(0, 10) + "..");
             } else {
-                settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
-                        + ((UserPrincipal) user).getLoginname());
+                settingsItem.setText(
+                        trimTanent(((UserPrincipal) user).getTenant()) + "\n" + ((UserPrincipal) user).getLoginname());
             }
             settingsItem.setDescription(((UserPrincipal) user).getLoginname());
         } else if (user != null) {

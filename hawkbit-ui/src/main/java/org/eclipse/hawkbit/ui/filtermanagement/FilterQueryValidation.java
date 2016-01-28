@@ -106,8 +106,8 @@ public final class FilterQueryValidation {
     public static List<String> processExpectedTokens(final List<Integer> expectedTokens) {
         final List<String> expectToken = new ArrayList<>();
         if (expectedTokens.size() == 2 && expectedTokens.contains(9) && expectedTokens.contains(4)) {
-            final List<String> expectedFieldList = Arrays.stream(TargetFields.values())
-                    .map(v -> v.name().toLowerCase()).collect(Collectors.toList());
+            final List<String> expectedFieldList = Arrays.stream(TargetFields.values()).map(v -> v.name().toLowerCase())
+                    .collect(Collectors.toList());
             expectToken.addAll(expectedFieldList);
             expectToken.add("assignedds.name");
             expectToken.add("assignedds.version");

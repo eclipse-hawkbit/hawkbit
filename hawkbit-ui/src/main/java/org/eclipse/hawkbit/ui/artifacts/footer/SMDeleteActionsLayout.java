@@ -150,7 +150,12 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected boolean hasUpdatePermission() {
-        return permChecker.hasUpdateDistributionPermission();
+        /**
+         * Footer layout should be displayed only when software modeule has
+         * delete permission.So update permission need not be checked in this
+         * case.
+         */
+        return false;
     }
 
     /*
@@ -196,13 +201,13 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
         if (sourceComponent.getId().startsWith(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX)) {
 
-            final String swModuleTypeName = sourceComponent.getId().replace(
-                    SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
+            final String swModuleTypeName = sourceComponent.getId()
+                    .replace(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
             if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
                     && artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
                             .equalsIgnoreCase(swModuleTypeName)) {
-                notification.displayValidationError(i18n.get("message.swmodule.type.check.delete",
-                        new Object[] { swModuleTypeName }));
+                notification.displayValidationError(
+                        i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
             } else {
                 deleteSWModuleType(swModuleTypeName);
                 updateSWActionCount();
@@ -359,17 +364,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         /**
          * Bulk upload not supported .No implementation required.
          */
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
-     * hasReadPermission()
-     */
-    @Override
-    protected boolean hasReadPermission() {
-        return permChecker.hasReadDistributionPermission();
     }
 
 }

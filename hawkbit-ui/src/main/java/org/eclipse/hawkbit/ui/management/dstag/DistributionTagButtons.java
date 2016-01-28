@@ -131,9 +131,8 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<DistributionTagBeanQuery>(
                 DistributionTagBeanQuery.class);
         tagQF.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer tagContainer = HawkbitCommonUtil
-                .createDSLazyQueryContainer(new BeanQueryFactory<DistributionTagBeanQuery>(
-                        DistributionTagBeanQuery.class));
+        final LazyQueryContainer tagContainer = HawkbitCommonUtil.createDSLazyQueryContainer(
+                new BeanQueryFactory<DistributionTagBeanQuery>(DistributionTagBeanQuery.class));
         return tagContainer;
 
     }

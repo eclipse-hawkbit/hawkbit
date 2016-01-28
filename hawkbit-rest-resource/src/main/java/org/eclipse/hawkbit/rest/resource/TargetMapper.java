@@ -54,13 +54,12 @@ final public class TargetMapper {
                 .withRel(RestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET));
         response.add(linkTo(methodOn(TargetResource.class).getInstalledDistributionSet(response.getControllerId()))
                 .withRel(RestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET));
-        response.add(linkTo(methodOn(TargetResource.class).getAttributes(response.getControllerId())).withRel(
-                RestConstants.TARGET_V1_ATTRIBUTES));
-        response.add(linkTo(
-                methodOn(TargetResource.class).getActionHistory(response.getControllerId(), 0,
-                        RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                        ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null)).withRel(
-                RestConstants.TARGET_V1_ACTIONS));
+        response.add(linkTo(methodOn(TargetResource.class).getAttributes(response.getControllerId()))
+                .withRel(RestConstants.TARGET_V1_ATTRIBUTES));
+        response.add(linkTo(methodOn(TargetResource.class).getActionHistory(response.getControllerId(), 0,
+                RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
+                ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null))
+                        .withRel(RestConstants.TARGET_V1_ACTIONS));
     }
 
     /**
@@ -75,10 +74,10 @@ final public class TargetMapper {
         final PollStatus pollStatus = target.getTargetInfo().getPollStatus();
         if (pollStatus != null) {
             final PollStatusRest pollStatusRest = new PollStatusRest();
-            pollStatusRest.setLastRequestAt(Date.from(
-                    pollStatus.getLastPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
-            pollStatusRest.setNextExpectedRequestAt(Date.from(
-                    pollStatus.getNextPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
+            pollStatusRest.setLastRequestAt(
+                    Date.from(pollStatus.getLastPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
+            pollStatusRest.setNextExpectedRequestAt(
+                    Date.from(pollStatus.getNextPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
             pollStatusRest.setOverdue(pollStatus.isOverdue());
             targetRest.setPollStatus(pollStatusRest);
         }

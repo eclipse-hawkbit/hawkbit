@@ -154,8 +154,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     private void showUnsavedAssignment() {
         Item item;
         final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = manageDistUIState.getAssignedList();
-        final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState
-                .getLastSelectedDistribution().get().getId() : null;
+        final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent()
+                ? manageDistUIState.getLastSelectedDistribution().get().getId() : null;
         Set<SoftwareModuleIdName> softwareModuleIdNameList = null;
 
         for (final Map.Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
@@ -174,20 +174,18 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
                             .append("<I>");
 
                 } else {
-                    assignedSWModule.put(
-                            softwareModule.getType().getName(),
-                            new StringBuilder()
-                                    .append("<I>")
-                                    .append(getUnsavedAssigedSwModule(softwareModule.getName(),
-                                            softwareModule.getVersion())).append("<I>"));
+                    assignedSWModule.put(softwareModule.getType().getName(),
+                            new StringBuilder().append("<I>").append(
+                                    getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
+                            .append("<I>"));
                 }
 
             }
             for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
                 item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
-                    item.getItemProperty(SOFT_MODULE).setValue(
-                            HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
+                    item.getItemProperty(SOFT_MODULE)
+                            .setValue(HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
                     assignSoftModuleButton(item, entry);
 
                 }
@@ -200,10 +198,9 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
      * @param entry
      */
     private void assignSoftModuleButton(final Item item, final Map.Entry<String, StringBuilder> entry) {
-        if (permissionChecker.hasUpdateDistributionPermission()
-                && distributionSetManagement
-                        .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
-                        .getAssignedTargets().isEmpty()) {
+        if (permissionChecker.hasUpdateDistributionPermission() && distributionSetManagement
+                .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
+                .getAssignedTargets().isEmpty()) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(entry.getKey(), "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
             reassignSoftModule.setEnabled(false);
@@ -237,25 +234,20 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
              * same type is dropped, then override with previous one.
              */
             if (module.getType().getMaxAssignments() == 1) {
-                assignedSWModule.put(
-                        module.getType().getName(),
-                        new StringBuilder().append("<I>")
-                                .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion()))
-                                .append("</I>"));
+                assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
+                        .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
             }
 
         } else {
-            assignedSWModule.put(
-                    module.getType().getName(),
-                    new StringBuilder().append("<I>")
-                            .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
+            assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
+                    .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
         }
 
         for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
             final Item item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
             if (item != null) {
-                item.getItemProperty(SOFT_MODULE).setValue(
-                        HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
+                item.getItemProperty(SOFT_MODULE)
+                        .setValue(HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
                 assignSoftModuleButton(item, entry);
 
             }
@@ -313,9 +305,9 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
-                    i18n.get("checkbox.dist.migration.required"),
-                    isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(
+                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
+                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
         }
     }
 
@@ -445,7 +437,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE
-                || distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
+                || distributionTableEvent
+                        .getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
             assignedSWModule.clear();
             ui.access(() -> {
                 /**
@@ -474,8 +467,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
                         .getDistributionSetIdName();
                 if (distIdName.getId().equals(selectedDsModule.getId())
                         && distIdName.getName().equals(selectedDsModule.getName())) {
-                    selectedDsModule = distributionSetManagement.findDistributionSetByIdWithDetails(selectedDsModule
-                            .getId());
+                    selectedDsModule = distributionSetManagement
+                            .findDistributionSetByIdWithDetails(selectedDsModule.getId());
                     populteModule(selectedDsModule);
                 }
             });
@@ -484,7 +477,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
-        if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
+        if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
+                || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
                 && selectedDsModule != null) {
             assignedSWModule.clear();
             selectedDsModule = distributionSetManagement.findDistributionSetByIdWithDetails(selectedDsModule.getId());

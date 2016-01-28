@@ -19,27 +19,26 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TargetFilterQueryRepository extends
-		BaseEntityRepository<TargetFilterQuery, Long>,
-		JpaSpecificationExecutor<TargetFilterQuery> {
+public interface TargetFilterQueryRepository
+        extends BaseEntityRepository<TargetFilterQuery, Long>, JpaSpecificationExecutor<TargetFilterQuery> {
 
-	/**
-	 * Find customer target filter by name
-	 * 
-	 * @param name
-	 * @return custom target filter
-	 */
-	TargetFilterQuery findByName(final String name);
+    /**
+     * Find customer target filter by name
+     * 
+     * @param name
+     * @return custom target filter
+     */
+    TargetFilterQuery findByName(final String name);
 
-	/**
-	 * Find list of all custom target filters.
-	 */
-	@Override
-	Page<TargetFilterQuery> findAll();
+    /**
+     * Find list of all custom target filters.
+     */
+    @Override
+    Page<TargetFilterQuery> findAll();
 
-	@Override
-	@Modifying
-	@Transactional
-	<S extends TargetFilterQuery> S save(S entity);
+    @Override
+    @Modifying
+    @Transactional
+    <S extends TargetFilterQuery> S save(S entity);
 
 }

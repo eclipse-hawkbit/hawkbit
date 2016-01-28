@@ -22,6 +22,5 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public enum ActionStatus {
 
-
     DOWNLOAD, RETRIEVED, RUNNING, FINISHED, ERROR, WARNING, CANCELED, CANCEL_REJECTED;
 }

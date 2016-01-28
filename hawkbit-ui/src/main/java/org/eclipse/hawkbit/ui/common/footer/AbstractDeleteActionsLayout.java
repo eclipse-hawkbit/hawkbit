@@ -54,7 +54,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      * Initialize.
      */
     protected void init() {
-        if (hasReadPermission() || hasDeletePermission() || hasUpdatePermission() || hasBulkUploadPermission()) {
+        if (hasCountMessage() || hasDeletePermission() || hasUpdatePermission() || hasBulkUploadPermission()) {
             createComponents();
             buildLayout();
             reload();
@@ -98,13 +98,16 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             hLayout.addComponent(bulkUploadStatusButton);
             hLayout.setComponentAlignment(bulkUploadStatusButton, Alignment.BOTTOM_LEFT);
         }
-        addComponent(dropHintLayout);
-        addComponent(hLayout);
-        setComponentAlignment(dropHintLayout, Alignment.BOTTOM_CENTER);
-        setComponentAlignment(hLayout, Alignment.BOTTOM_CENTER);
+        if (dropHintLayout.getComponentCount() > 0) {
+            addComponent(dropHintLayout);
+            setComponentAlignment(dropHintLayout, Alignment.BOTTOM_CENTER);
+        }
+        if (hLayout.getComponentCount() > 0) {
+            addComponent(hLayout);
+            setComponentAlignment(hLayout, Alignment.BOTTOM_CENTER);
+        }
         setStyleName("footer-layout");
         setWidth("100%");
-
     }
 
     private DragAndDropWrapper createDeleteWrapperLayout() {
@@ -155,21 +158,29 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     protected void setUploadStatusButtonCaption(final Long count) {
-        bulkUploadStatusButton.setCaption("<div class='unread'>" + count + "</div>");
+        if (null != bulkUploadStatusButton) {
+            bulkUploadStatusButton.setCaption("<div class='unread'>" + count + "</div>");
+        }
     }
 
     protected void enableBulkUploadStatusButton() {
-        bulkUploadStatusButton.setVisible(true);
+        if (null != bulkUploadStatusButton) {
+            bulkUploadStatusButton.setVisible(true);
+        }
     }
 
     protected void updateUploadBtnIconToComplete() {
-        bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
-        bulkUploadStatusButton.setIcon(FontAwesome.UPLOAD);
+        if (null != bulkUploadStatusButton) {
+            bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+            bulkUploadStatusButton.setIcon(FontAwesome.UPLOAD);
+        }
     }
 
     protected void updateUploadBtnIconToProgressIndicator() {
-        bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
-        bulkUploadStatusButton.setIcon(null);
+        if (null != bulkUploadStatusButton) {
+            bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+            bulkUploadStatusButton.setIcon(null);
+        }
     }
 
     protected void actionButtonClicked() {
@@ -217,10 +228,12 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      *            new count value.
      */
     protected void updateActionsCount(final int newCount) {
-        if (newCount > 0) {
-            noActionBtn.setCaption(getActionsButtonLabel() + "<div class='unread'>" + newCount + "</div>");
-        } else {
-            noActionBtn.setCaption(getNoActionsButtonLabel());
+        if (noActionBtn != null) {
+            if (newCount > 0) {
+                noActionBtn.setCaption(getActionsButtonLabel() + "<div class='unread'>" + newCount + "</div>");
+            } else {
+                noActionBtn.setCaption(getNoActionsButtonLabel());
+            }
         }
     }
 
@@ -243,8 +256,10 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     protected void hideBulkUploadStatusButton() {
-        bulkUploadStatusButton.setCaption(null);
-        bulkUploadStatusButton.setVisible(false);
+        if (null != bulkUploadStatusButton) {
+            bulkUploadStatusButton.setCaption(null);
+            bulkUploadStatusButton.setVisible(false);
+        }
     }
 
     /**
@@ -357,7 +372,5 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     protected abstract boolean hasBulkUploadPermission();
 
     protected abstract void showBulkUploadWindow();
-
-    protected abstract boolean hasReadPermission();
 
 }

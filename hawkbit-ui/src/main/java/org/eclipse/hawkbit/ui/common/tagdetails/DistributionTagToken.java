@@ -131,8 +131,8 @@ public class DistributionTagToken extends AbstractTagToken {
     private DistributionSetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
         final Set<Long> distributionList = new HashSet<Long>();
         distributionList.add(selectedDS.getId());
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(
-                distributionList, tagNameSelected);
+        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
+                tagNameSelected);
         uinotification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(tagNameSelected, result, i18n));
         return result;
     }
