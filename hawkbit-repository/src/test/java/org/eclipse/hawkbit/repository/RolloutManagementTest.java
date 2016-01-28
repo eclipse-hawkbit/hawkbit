@@ -742,14 +742,6 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         return runningActions.size();
     }
 
-    /**
-     * Changes the status for a certain amount of targets.
-     * 
-     * @param rollout
-     * @param status
-     * @param amountOfTargetsToGetChanged
-     * @return
-     */
     private int changeStatusForRunningActions(final Rollout rollout, final Status status,
             final int amountOfTargetsToGetChanged) {
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
