@@ -76,7 +76,7 @@ public class EventMerger {
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
             rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
-            rolloutGroupId = getRolloutGroupId(((ActionPropertyChangeEvent) event).getEntity().getRolloutGroup());
+            rolloutGroupId = getRolloutGroupId(((ActionCreatedEvent) event).getEntity().getRolloutGroup());
         } else if (event instanceof ActionPropertyChangeEvent) {
             rolloutId = getRolloutId(((ActionPropertyChangeEvent) event).getEntity().getRollout());
             rolloutGroupId = getRolloutGroupId(((ActionPropertyChangeEvent) event).getEntity().getRolloutGroup());
