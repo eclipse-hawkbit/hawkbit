@@ -19,6 +19,7 @@
         status integer,
         parent_id bigint,
         rollout bigint,
+        total_targets bigint,
         primary key (id)
     );
 	
@@ -39,6 +40,7 @@
         target_filter varchar(1024),
 		action_type varchar(255) not null,
         forced_time bigint,
+        total_targets bigint,
         primary key (id)
     );
 	

@@ -29,14 +29,15 @@ import javax.persistence.UniqueConstraint;
  *
  */
 @Entity
-@Table(name = "sp_rolloutgroup", indexes = { @Index(name = "sp_idx_rolloutgroup_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-        "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
+@Table(name = "sp_rolloutgroup", indexes = {
+        @Index(name = "sp_idx_rolloutgroup_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
+                "name", "rollout", "tenant" }, name = "uk_rolloutgroup") )
 public class RolloutGroup extends NamedEntity {
 
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout") )
     private Rollout rollout;
 
     @Column(name = "status")
@@ -72,6 +73,9 @@ public class RolloutGroup extends NamedEntity {
 
     @Column(name = "error_action_exp", length = 512)
     private String errorActionExp = null;
+
+    @Column(name = "total_targets")
+    private long totalTargets;
 
     @Transient
     private TotalTargetCountStatus totalTargetCountStatus;
@@ -233,9 +237,27 @@ public class RolloutGroup extends NamedEntity {
     }
 
     /**
+     * @return the totalTargets
+     */
+    public long getTotalTargets() {
+        return totalTargets;
+    }
+
+    /**
+     * @param totalTargets
+     *            the totalTargets to set
+     */
+    public void setTotalTargets(final long totalTargets) {
+        this.totalTargets = totalTargets;
+    }
+
+    /**
      * @return the totalTargetCountStatus
      */
     public TotalTargetCountStatus getTotalTargetCountStatus() {
+        if (totalTargetCountStatus == null) {
+            this.totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+        }
         return totalTargetCountStatus;
     }
 

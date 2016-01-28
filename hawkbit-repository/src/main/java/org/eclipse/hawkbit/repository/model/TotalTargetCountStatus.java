@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class TotalTargetCountStatus {
     private final Map<Status, Long> statusTotalCountMap = new HashMap<Status, Long>();
 
     /**
+     * Create
      * 
      * @param targetCountActionStatus
      * @param totalTargets
@@ -38,6 +40,14 @@ public class TotalTargetCountStatus {
         if (!mapActionStatusToTotalTargetCountStatus(targetCountActionStatus)) {
             statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargets);
         }
+    }
+
+    /**
+     * 
+     * @param totalTargets
+     */
+    public TotalTargetCountStatus(final Long totalTargets) {
+        this(Collections.emptyList(), totalTargets);
     }
 
     /**
