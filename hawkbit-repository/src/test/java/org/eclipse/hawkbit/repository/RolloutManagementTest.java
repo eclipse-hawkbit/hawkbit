@@ -667,12 +667,6 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         assertThat(RolloutStatus.PAUSED).isEqualTo(rolloutOne.getStatus());
     }
 
-    @Test
-    @Description("...")
-    public void errorConditionNotFulfilled() {
-
-    }
-
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
             final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
         final RolloutGroup rolloutGroupWithDetail = rolloutManagement.getRolloutGroupDetailedStatus(rolloutGroup
