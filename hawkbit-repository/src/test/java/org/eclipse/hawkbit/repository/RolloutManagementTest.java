@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -668,8 +669,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("")
-    public void testFindAllWithDetailedStatus() {
+    @Description("Verify that all rollouts are returns with expected target statuses.")
+    public void findAllRolloutsWithDetailedStatus() {
 
         // setup
         final int amountTargetsForRollout = 12;
@@ -738,6 +739,151 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
         validateRolloutActionStatus(rolloutList.get(3).getId(), expectedTargetCountStatus);
+    }
+
+    @Test
+    @Description("Verify the count of existing rollouts.")
+    public void rightCountForAllRollouts() {
+        // setup
+        final int amountTargetsForRollout = 6;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        for (int i = 1; i <= 10; i++) {
+            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
+                    "Rollout" + i, "Rollout" + i);
+        }
+        // test
+        final Long count = rolloutManagement.countRolloutsAll();
+
+        // verify
+        assertThat(count).isEqualTo(10L);
+    }
+
+    @Test
+    @Description("Verify the count of filtered existing rollouts.")
+    public void countRolloutsAllByFilters() {
+
+        // setup
+        final int amountTargetsForRollout = 6;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        for (int i = 1; i <= 5; i++) {
+            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
+                    "Rollout" + i, "Rollout" + i);
+        }
+        for (int i = 1; i <= 5; i++) {
+            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
+                    "SomethingElse" + i, "SomethingElse" + i);
+        }
+
+        // test
+        final Long count = rolloutManagement.countRolloutsAllByFilters("Rollout%");
+
+        // verify
+        assertThat(count).isEqualTo(5L);
+
+    }
+
+    @Test
+    @Description("Verify that the filtering and soring ascending for rollout is working correctly.")
+    public void findRolloutByFilters() {
+
+        // setup
+        final int amountTargetsForRollout = 6;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        for (int i = 1; i <= 5; i++) {
+            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
+                    "Rollout" + i, "Rollout" + i);
+        }
+        for (int i = 1; i <= 8; i++) {
+            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
+                    "SomethingElse" + i, "SomethingElse" + i);
+        }
+
+        // TODO Change method name in rolloutManagement
+        // test
+        final Slice<Rollout> rollout = rolloutManagement.findRolloutByFilters(new OffsetBasedPageRequest(0, 100,
+                new Sort(Direction.ASC, "name")), "Rollout%");
+
+        // verify
+        final List<Rollout> rolloutList = rollout.getContent();
+        assertThat(rolloutList.size()).isEqualTo(5);
+        int i = 1;
+        for (final Rollout r : rolloutList) {
+            assertThat(r.getName()).isEqualTo("Rollout" + i);
+            i++;
+        }
+    }
+
+    @Test
+    @Description("Verify that the expected rollout is found by name.")
+    public void findRolloutByName() {
+
+        // setup
+        final int amountTargetsForRollout = 12;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        final String rolloutName = "Rollout137";
+        final Rollout rolloutCreated = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80", rolloutName, "RolloutA");
+
+        // test
+        final Rollout rolloutFound = rolloutManagement.findRolloutByName(rolloutName);
+
+        // verify
+        assertThat(rolloutCreated).isEqualTo(rolloutFound);
+
+    }
+
+    @Test
+    @Description("Verify that the percent count is acting like aspected when targets move to the status finished or error.")
+    public void getFinishedPercentForRunningGroup() {
+
+        // setup
+        final int amountTargetsForRollout = 10;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 2;
+        final String rolloutName = "MyRollout";
+        Rollout myRollout = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80", rolloutName, rolloutName);
+        rolloutManagement.startRollout(myRollout);
+        changeStatusForRunningActions(myRollout, Status.FINISHED, 2);
+        rolloutManagement.checkRunningRollouts(0);
+        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+
+        // test
+        float percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout, myRollout.getRolloutGroups()
+                .get(0));
+
+        // verify
+        assertThat(percent).isEqualTo(40);
+
+        changeStatusForRunningActions(myRollout, Status.FINISHED, 3);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test
+        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout, myRollout.getRolloutGroups().get(0));
+
+        // verify
+        assertThat(percent).isEqualTo(100);
+
+        changeStatusForRunningActions(myRollout, Status.FINISHED, 4);
+        changeStatusForAllRunningActions(myRollout, Status.ERROR);
+        rolloutManagement.checkRunningRollouts(0);
+
+        // test
+        percent = rolloutManagement.getFinishedPercentForRunningGroup(myRollout, myRollout.getRolloutGroups().get(1));
+
+        // verify
+        assertThat(percent).isEqualTo(80);
+    }
+
+    @Test
+    @Description("")
+    public void findRolloutGroupTargets() {
+
+        // TODO test missing
     }
 
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
