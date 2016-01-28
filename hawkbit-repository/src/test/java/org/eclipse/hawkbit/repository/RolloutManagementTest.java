@@ -671,76 +671,73 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     @Description("")
     public void testFindAllWithDetailedStatus() {
 
-        // TODO Name hat Buchstanden ABC und und anfrage ist sortert.
-
+        // setup
         final int amountTargetsForRollout = 12;
         final int amountOtherTargets = 0;
         final int amountGroups = 2;
-        final Rollout rolloutOne = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80", "RolloutOne", "firstRollout");
-        rolloutManagement.startRollout(rolloutOne);
+        final Rollout rolloutA = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80", "RolloutA", "RolloutA");
+        rolloutManagement.startRollout(rolloutA);
 
         final int amountTargetsForRollout2 = 10;
         final int amountOtherTargets2 = 0;
         final int amountGroups2 = 2;
-        final Rollout rolloutTwo = createRolloutWithContainedTargets(amountTargetsForRollout2, amountOtherTargets2,
-                amountGroups2, "50", "80", "RolloutTwo", "secondRollout");
-        rolloutManagement.startRollout(rolloutTwo);
-        changeStatusForAllRunningActions(rolloutTwo, Status.FINISHED);
+        final Rollout rolloutB = createRolloutWithContainedTargets(amountTargetsForRollout2, amountOtherTargets2,
+                amountGroups2, "50", "80", "RolloutB", "RolloutB");
+        rolloutManagement.startRollout(rolloutB);
+        changeStatusForAllRunningActions(rolloutB, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
         final int amountTargetsForRollout3 = 10;
         final int amountOtherTargets3 = 0;
         final int amountGroups3 = 2;
-        final Rollout rolloutThree = createRolloutWithContainedTargets(amountTargetsForRollout3, amountOtherTargets3,
-                amountGroups3, "50", "80", "RolloutThree", "thirdRollout");
-        rolloutManagement.startRollout(rolloutThree);
-        changeStatusForAllRunningActions(rolloutThree, Status.ERROR);
+        final Rollout rolloutC = createRolloutWithContainedTargets(amountTargetsForRollout3, amountOtherTargets3,
+                amountGroups3, "50", "80", "RolloutC", "RolloutC");
+        rolloutManagement.startRollout(rolloutC);
+        changeStatusForAllRunningActions(rolloutC, Status.ERROR);
         rolloutManagement.checkRunningRollouts(0);
 
         final int amountTargetsForRollout4 = 15;
         final int amountOtherTargets4 = 0;
         final int amountGroups4 = 3;
-        final Rollout rolloutFour = createRolloutWithContainedTargets(amountTargetsForRollout4, amountOtherTargets4,
-                amountGroups4, "50", "80", "RolloutFour", "FourthRollout");
-        rolloutManagement.startRollout(rolloutFour);
-
-        changeStatusForRunningActions(rolloutFour, Status.ERROR, 1);
+        final Rollout rolloutD = createRolloutWithContainedTargets(amountTargetsForRollout4, amountOtherTargets4,
+                amountGroups4, "50", "80", "RolloutD", "RolloutD");
+        rolloutManagement.startRollout(rolloutD);
+        changeStatusForRunningActions(rolloutD, Status.ERROR, 1);
         rolloutManagement.checkRunningRollouts(0);
-        changeStatusForAllRunningActions(rolloutFour, Status.FINISHED);
+        changeStatusForAllRunningActions(rolloutD, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        final Page<Rollout> rolloutPage = rolloutManagement.findAllWithDetailedStatus(pageReq);
+        // test
+        final Page<Rollout> rolloutPage = rolloutManagement.findAllWithDetailedStatus(new OffsetBasedPageRequest(0,
+                100, new Sort(Direction.ASC, "name")));
         final List<Rollout> rolloutList = rolloutPage.getContent();
 
-        // validate rollout 1 -> 6 running and 6 ready
+        // validate rolloutA -> 6 running and 6 ready
         Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 6L);
         validateRolloutActionStatus(rolloutList.get(0).getId(), expectedTargetCountStatus);
 
-        // validate rollout 2 -> 6 running and 6 ready
+        // validate rolloutB -> 5 running and 5 finished
         expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 6L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
         validateRolloutActionStatus(rolloutList.get(1).getId(), expectedTargetCountStatus);
 
-        // validate rollout 3 -> 6 running and 6 ready
+        // validate rolloutC -> 5 running and 5 error
         expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 6L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
         validateRolloutActionStatus(rolloutList.get(2).getId(), expectedTargetCountStatus);
 
-        // validate rollout 4 -> 6 running and 6 ready
+        // validate rolloutD -> 1, error, 4 finished, 5 running and 5 ready
         expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 1L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 4L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
         validateRolloutActionStatus(rolloutList.get(3).getId(), expectedTargetCountStatus);
-
-        final Rollout r = rolloutList.get(0);
-        System.out.println(r.getDescription());
-
     }
 
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
