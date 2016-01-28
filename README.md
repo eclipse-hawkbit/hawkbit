@@ -12,7 +12,7 @@ mvn install
 
 # Run and use
 
-We are not providing an off the shelf production ready hawkBit server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based server that is empowered by hawkBit.
+We are not providing an off the shelf production ready hawkBit server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit.
 
 # Releases and Roadmap
 
@@ -20,8 +20,8 @@ We are not providing an off the shelf production ready hawkBit server. However, 
 * The master branch contains future development towards 0.2. We are currently focusing on:
   * Rollout Management for large scale rollouts.
   * Clustering capabilities for the update server.
-  * Upgrade of Spring Boot and Vaadin.
-  * And of course tones of usability improvements and bug fixes.
+  * Upgrade of Spring Boot and Vaadin depedencies.
+  * And of course tons of usability improvements and bug fixes.
 
 
 ## Try out examples
@@ -42,7 +42,7 @@ We are not providing an off the shelf production ready hawkBit server. However, 
 `hawkbit-http-security` : implementation for security filters for HTTP.    
 `hawkbit-rest-api` : API classes for the REST Management API.  
 `hawkbit-rest-resource` : HTTP REST endpoints for the Management and the Direct Device API.  
-`hawkbit-rest-resource` : Vaadin UI.  
+`hawkbit-ui` : Vaadin UI.  
 `hawkbit-cache-redis` : spring cache manager configuration and implementation with redis, distributed cache and distributed events.
 
 
