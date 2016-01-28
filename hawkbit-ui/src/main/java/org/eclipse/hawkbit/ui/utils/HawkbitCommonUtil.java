@@ -1331,8 +1331,8 @@ public final class HawkbitCommonUtil {
         if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
                 finishedTargetsCount, cancelledTargetsCount)) {
             HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.READY.toString().toLowerCase(), 0, 0);
-            HawkbitCommonUtil
-                    .setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0, 1);
+            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
+                    1);
 
         } else {
             bar.setNumberOfParts(6);
@@ -1341,6 +1341,7 @@ public final class HawkbitCommonUtil {
     }
 
     public static void setProgressBarDetails(final DistributionBar bar, final Item item) {
+        bar.setNumberOfParts(6);
         final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
         HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
                 notStartedTargetsCount.intValue(), 0);

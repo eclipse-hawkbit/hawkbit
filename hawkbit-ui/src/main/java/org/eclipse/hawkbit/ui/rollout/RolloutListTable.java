@@ -9,22 +9,16 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.eventbus.event.AbstractPropertyChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
-import org.eclipse.hawkbit.eventbus.event.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.RolloutPropertyChangeEvent;
+import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -112,21 +106,34 @@ public class RolloutListTable extends AbstractSimpleTable {
     }
 
     /**
-     * EventListener method which is called when a list of events is published.
-     * Event types should not be mixed up.
-     *
-     * @param events
-     *            list of events
+     * Handles the RolloutChangeEvent to refresh the item in the table.
+     * 
+     * @param rolloutChangeEvent
+     *            the event which contains the rollout which has been changed
      */
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvents(final List<?> events) {
-        final Object firstEvent = events.get(0);
-        if (RolloutPropertyChangeEvent.class.isInstance(firstEvent)) {
-            onRolloutStatusChange((List<RolloutPropertyChangeEvent>) events);
-        } else if (ActionCreatedEvent.class.isInstance(firstEvent)) {
-            onActionCreation((List<ActionCreatedEvent>) events);
-        } else if (ActionPropertyChangeEvent.class.isInstance(firstEvent)) {
-            onActionPropertyChange((List<ActionPropertyChangeEvent>) events);
+    public void onEvent(final RolloutChangeEvent rolloutChangeEvent) {
+        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
+        if (visibleItemIds.contains(rolloutChangeEvent.getRolloutId())) {
+            final Rollout rollout = rolloutManagement.getRolloutDetailedStatus(rolloutChangeEvent.getRolloutId());
+            final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
+            final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+            final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
+            item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
+            item.getItemProperty("isActionRecieved")
+                    .setValue(!(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
     }
 
@@ -135,10 +142,10 @@ public class RolloutListTable extends AbstractSimpleTable {
         final List<TableColumn> columnList = new ArrayList<TableColumn>();
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_NAME, i18n.get("header.name"), 0.25f));
 
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"),
-                0.25f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"),
-                0.2f));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"), 0.25f));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"), 0.2f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.3f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.1f));
@@ -157,8 +164,8 @@ public class RolloutListTable extends AbstractSimpleTable {
     protected Container createContainer() {
         final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<RolloutBeanQuery>(
                 RolloutBeanQuery.class);
-        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
+        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
         return rolloutTableContainer;
 
     }
@@ -355,10 +362,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         });
     }
 
-    private Long getStatusCount(final String propertName, final Item item) {
-        return (Long) item.getItemProperty(propertName).getValue();
-    }
-
     private Label getStatusLabel(final Object itemId) {
         final Label statusLabel = new Label();
         statusLabel.setHeightUndefined();
@@ -435,77 +438,9 @@ public class RolloutListTable extends AbstractSimpleTable {
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
 
-    private void onRolloutStatusChange(final List<RolloutPropertyChangeEvent> rolloutEvents) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final RolloutPropertyChangeEvent event : rolloutEvents) {
-            final Rollout rollout = event.getEntity();
-            if (visibleItemIds.contains(rollout.getId())) {
-                updateVisibleItemOnEvent(rollout);
-            }
-        }
-    }
-
-    private void updateVisibleItemOnEvent(final Rollout rollout) {
-        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
-        final Item item = rolloutContainer.getItem(rollout.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
-    }
-
     private void refreshTable() {
         final LazyQueryContainer container = (LazyQueryContainer) getContainerDataSource();
         container.refresh();
-    }
-
-    private void onActionCreation(final List<ActionCreatedEvent> events) {
-        final Set<Long> rolloutsToBeRefreshed = new HashSet();
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final ActionCreatedEvent event : events) {
-            final Action action = event.getEntity();
-            if (null != action.getRollout()) {
-                final Long rolloutId = action.getRollout().getId();
-                final Status status = action.getStatus();
-                if (visibleItemIds.contains(rolloutId)) {
-                    final Item item = getItem(rolloutId);
-                    rolloutsToBeRefreshed.add(rolloutId);
-                    HawkbitCommonUtil.incrementStatusCount(item, status);
-                    HawkbitCommonUtil.decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-                }
-            }
-        }
-        for (final Long id : rolloutsToBeRefreshed) {
-            final Item item = getItem(id);
-            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
-            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
-        }
-    }
-
-    private void onActionPropertyChange(final List<ActionPropertyChangeEvent> events) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        final Set<Long> rolloutsToBeRefreshed = new HashSet();
-        for (final ActionPropertyChangeEvent event : events) {
-            final Action action = event.getEntity();
-            if (null != action.getRollout()) {
-                final Long rolloutId = action.getRollout().getId();
-                if (visibleItemIds.contains(rolloutId)) {
-                    final Item item = getItem(rolloutId);
-                    rolloutsToBeRefreshed.add(rolloutId);
-                    final AbstractPropertyChangeEvent<Action>.Values changeSetWithValues = event.getChangeSet().get(
-                            "status");
-                    if (null != changeSetWithValues) {
-                        final Action.Status oldValue = (Status) changeSetWithValues.getOldValue();
-                        final Action.Status newValue = (Status) changeSetWithValues.getNewValue();
-                        HawkbitCommonUtil.decrementStatusCount(item, oldValue);
-                        HawkbitCommonUtil.incrementStatusCount(item, newValue);
-                    }
-                }
-            }
-        }
-
-        for (final Long id : rolloutsToBeRefreshed) {
-            final Item item = getItem(id);
-            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
-            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
-        }
     }
 
     enum ACTION {

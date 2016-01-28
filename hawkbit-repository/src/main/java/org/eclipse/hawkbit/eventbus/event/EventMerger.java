@@ -54,10 +54,10 @@ public class EventMerger {
             rolloutIterator.remove();
         }
 
-        final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutEvents.iterator();
+        final Iterator<RolloutEventKey> rolloutGroupIterator = rolloutGroupEvents.iterator();
         while (rolloutGroupIterator.hasNext()) {
             final RolloutEventKey eventKey = rolloutGroupIterator.next();
-            eventBus.post(new RolloutGroupChangeEvent(1, eventKey.tenant, eventKey.rolloutId));
+            eventBus.post(new RolloutGroupChangeEvent(1, eventKey.tenant, eventKey.rolloutId, eventKey.rolloutGroupId));
             rolloutGroupIterator.remove();
         }
     }
@@ -76,8 +76,10 @@ public class EventMerger {
         Long rolloutGroupId = null;
         if (event instanceof ActionCreatedEvent) {
             rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
+            rolloutGroupId = getRolloutGroupId(((ActionPropertyChangeEvent) event).getEntity().getRolloutGroup());
         } else if (event instanceof ActionPropertyChangeEvent) {
             rolloutId = getRolloutId(((ActionPropertyChangeEvent) event).getEntity().getRollout());
+            rolloutGroupId = getRolloutGroupId(((ActionPropertyChangeEvent) event).getEntity().getRolloutGroup());
         } else if (event instanceof RolloutPropertyChangeEvent) {
             rolloutId = ((RolloutPropertyChangeEvent) event).getEntity().getId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
@@ -95,6 +97,13 @@ public class EventMerger {
                 rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
             }
         }
+    }
+
+    private Long getRolloutGroupId(final RolloutGroup rolloutGroup) {
+        if (rolloutGroup != null) {
+            return rolloutGroup.getId();
+        }
+        return null;
     }
 
     private Long getRolloutId(final Rollout rollout) {
