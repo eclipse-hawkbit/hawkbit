@@ -10,16 +10,46 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
 
+/**
+ * Combined unique key of the table {@link RolloutTargetGroup}.
+ * 
+ * @author Michael Hirsch
+ *
+ */
 public class RolloutTargetGroupId implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private Long rolloutGroup;
     private Long target;
 
+    /**
+     * default constructor necessary for JPA.
+     */
     public RolloutTargetGroupId() {
-
+        // default constructor necessary for JPA, empty.
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param rolloutGroup
+     *            the rollout group for this key
+     * @param target
+     *            the target for this key
+     */
     public RolloutTargetGroupId(final RolloutGroup rolloutGroup, final Target target) {
         this.rolloutGroup = rolloutGroup.getId();
         this.target = target.getId();
+    }
+
+    public Long getRolloutGroup() {
+        return rolloutGroup;
+    }
+
+    public Long getTarget() {
+        return target;
     }
 }

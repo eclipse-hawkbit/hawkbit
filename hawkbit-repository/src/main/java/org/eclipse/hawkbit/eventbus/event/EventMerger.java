@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -69,22 +70,14 @@ public class EventMerger {
      *            the event on the event bus
      */
     @Subscribe
+    @AllowConcurrentEvents
     public void onEvent(final Event event) {
         Long rolloutId = null;
         Long rolloutGroupId = null;
-
         if (event instanceof ActionCreatedEvent) {
-            final Rollout rollout = ((ActionCreatedEvent) event).getEntity().getRollout();
-            if (rollout != null) {
-                rolloutId = rollout.getId();
-            }
+            rolloutId = getRolloutId(((ActionCreatedEvent) event).getEntity().getRollout());
         } else if (event instanceof ActionPropertyChangeEvent) {
-            final Rollout rollout = ((ActionPropertyChangeEvent) event).getEntity().getRollout();
-            if (rollout != null) {
-                rolloutId = rollout.getId();
-            }
-        } else if (event instanceof RolloutPropertyChangeEvent) {
-            rolloutId = ((RolloutPropertyChangeEvent) event).getEntity().getId();
+            rolloutId = getRolloutId(((ActionPropertyChangeEvent) event).getEntity().getRollout());
         } else if (event instanceof RolloutPropertyChangeEvent) {
             rolloutId = ((RolloutPropertyChangeEvent) event).getEntity().getId();
         } else if (event instanceof RolloutGroupCreatedEvent) {
@@ -96,11 +89,19 @@ public class EventMerger {
             rolloutGroupId = rolloutGroup.getId();
         }
 
-        if (rolloutId != null && rolloutGroupId != null) {
-            rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
-        } else if (rolloutId != null) {
+        if (rolloutId != null) {
             rolloutEvents.add(new RolloutEventKey(rolloutId, event.getTenant()));
+            if (rolloutGroupId != null) {
+                rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
+            }
         }
+    }
+
+    private Long getRolloutId(final Rollout rollout) {
+        if (rollout != null) {
+            return rollout.getId();
+        }
+        return null;
     }
 
     /**
