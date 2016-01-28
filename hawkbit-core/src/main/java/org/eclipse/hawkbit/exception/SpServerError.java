@@ -180,6 +180,12 @@ public enum SpServerError {
     /**
      * 
      */
+    SP_CONFIGURATION_VALUE_INVALID("hawkbit.server.error.configValueInvalid",
+            "The given configuration value is invalid.");
+            
+    /**
+     * 
+     */
     SP_ROLLOUT_ILLEGAL_STATE("hawkbit.server.error.rollout.illegalstate",
             "The rollout is currently in the wrong state for the current operation");
 

@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration;
 
-import org.eclipse.hawkbit.tenancy.configuration.validator.BooleanValidator;
-import org.eclipse.hawkbit.tenancy.configuration.validator.PollTimeValidator;
-import org.eclipse.hawkbit.tenancy.configuration.validator.StringValidator;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationBooleanValidator;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationPollingDurationValidator;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidator;
+import org.eclipse.hawkbit.tenancy.configuration.validator.exceptions.TenantConfigurationValidatorException;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -29,32 +30,32 @@ public enum TenantConfigurationKey {
      */
     AUTHENTICATION_MODE_HEADER_ENABLED("authentication.header.enabled",
             "hawkbit.server.controller.security.authentication.header.enabled", Boolean.class, Boolean.FALSE.toString(),
-            BooleanValidator.class),
+            TenantConfigurationBooleanValidator.class),
     /**
     *
     */
     AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME("authentication.header.authority",
             "hawkbit.server.controller.security.authentication.header.authority", Boolean.class,
-            Boolean.FALSE.toString(), BooleanValidator.class),
+            Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
     /**
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED("authentication.targettoken.enabled",
             "hawkbit.server.controller.security.authentication.targettoken.enabled", Boolean.class,
-            Boolean.FALSE.toString(), BooleanValidator.class),
+            Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
 
     /**
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED("authentication.gatewaytoken.enabled",
             "hawkbit.server.controller.security.authentication.gatewaytoken.enabled", Boolean.class,
-            Boolean.FALSE.toString(), BooleanValidator.class),
+            Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
     /**
      * string value which holds the name of the security token key.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME("authentication.gatewaytoken.name",
             "hawkbit.server.controller.security.authentication.gatewaytoken.name", String.class, null,
-            StringValidator.class),
+            TenantConfigurationStringValidator.class),
 
     /**
      * string value which holds the actual security-key of the gateway security
@@ -62,19 +63,19 @@ public enum TenantConfigurationKey {
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY("authentication.gatewaytoken.key",
             "hawkbit.server.controller.security.authentication.gatewaytoken.key", String.class, null,
-            StringValidator.class),
+            TenantConfigurationStringValidator.class),
 
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
     POLLING_TIME_INTERVAL("pollingOverdueTime", "hawkbit.controller.pollingOverdueTime", String.class, null,
-            PollTimeValidator.class),
+            TenantConfigurationPollingDurationValidator.class),
 
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
     POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null,
-            PollTimeValidator.class);
+            TenantConfigurationPollingDurationValidator.class);
 
     private final String keyName;
     private final String defaultKeyName;
@@ -127,11 +128,26 @@ public enum TenantConfigurationKey {
         return dataType;
     }
 
-    public boolean validate(final ApplicationContext context, final Object value) {
+    /**
+     * validates if a object matches the allowed data format of the
+     * corresponding key
+     * 
+     * @param context
+     *            application context
+     * @param value
+     *            which will be validated
+     * @throws TenantConfigurationValidatorException
+     *             is thrown when object is invalid.
+     */
+    public void validate(final ApplicationContext context, final Object value)
+            throws TenantConfigurationValidatorException {
         final TenantConfigurationValidator createBean = context.getAutowireCapableBeanFactory().createBean(validator);
-        final boolean isValid = createBean.validate(value);
-        context.getAutowireCapableBeanFactory().destroyBean(createBean);
-        return isValid;
+        try {
+            createBean.validate(value);
+        } catch (final TenantConfigurationValidatorException ex) {
+            throw ex;
+        } finally {
+            context.getAutowireCapableBeanFactory().destroyBean(createBean);
+        }
     }
-
 }
