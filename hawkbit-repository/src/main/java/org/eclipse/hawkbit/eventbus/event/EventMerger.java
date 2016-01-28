@@ -89,10 +89,11 @@ public class EventMerger {
             rolloutGroupId = rolloutGroup.getId();
         }
 
-        if (rolloutId != null && rolloutGroupId != null) {
-            rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
-        } else if (rolloutId != null) {
+        if (rolloutId != null) {
             rolloutEvents.add(new RolloutEventKey(rolloutId, event.getTenant()));
+            if (rolloutGroupId != null) {
+                rolloutGroupEvents.add(new RolloutEventKey(rolloutId, rolloutGroupId, event.getTenant()));
+            }
         }
     }
 
