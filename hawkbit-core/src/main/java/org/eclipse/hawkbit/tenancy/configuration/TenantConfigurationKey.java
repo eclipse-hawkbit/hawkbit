@@ -9,12 +9,13 @@
 package org.eclipse.hawkbit.tenancy.configuration;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationBooleanValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationPollingDurationValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidator;
-import org.eclipse.hawkbit.tenancy.configuration.validator.exceptions.TenantConfigurationValidatorException;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -121,7 +122,8 @@ public enum TenantConfigurationKey {
 
     /**
      * 
-     * @return the datatype of the tenant configuration value
+     * @return the data type of the tenant configuration value. (e.g.
+     *         Integer.class, String.class)
      */
     public Class<?> getDataType() {
         return dataType;
@@ -150,9 +152,21 @@ public enum TenantConfigurationKey {
         }
     }
 
-    public static TenantConfigurationKey fromKeyName(final String keyName) {
+    /**
+     * @param keyName
+     *            name of the TenantConfigurationKey
+     * @return the TenantConfigurationKey with the name keyName
+     * @throws InvalidTenantConfigurationKeyException
+     *             if there is no TenantConfigurationKey with the name keyName
+     */
+    public static TenantConfigurationKey fromKeyName(final String keyName)
+            throws InvalidTenantConfigurationKeyException {
 
-        return Arrays.stream(TenantConfigurationKey.values()).filter(conf -> conf.getKeyName().equals(keyName))
-                .findFirst().get();
+        try {
+            return Arrays.stream(TenantConfigurationKey.values()).filter(conf -> conf.getKeyName().equals(keyName))
+                    .findFirst().get();
+        } catch (final NoSuchElementException e) {
+            throw new InvalidTenantConfigurationKeyException("The given configuration key name does not exist.");
+        }
     }
 }

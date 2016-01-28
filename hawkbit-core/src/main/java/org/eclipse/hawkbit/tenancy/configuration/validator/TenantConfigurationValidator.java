@@ -1,7 +1,5 @@
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
-import org.eclipse.hawkbit.tenancy.configuration.validator.exceptions.TenantConfigurationValidatorException;
-
 /**
  * base interface for clases which can validate tenant configuration values.
  *

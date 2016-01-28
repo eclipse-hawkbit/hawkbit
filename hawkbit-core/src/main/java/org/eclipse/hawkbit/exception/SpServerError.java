@@ -181,7 +181,11 @@ public enum SpServerError {
      * 
      */
     SP_CONFIGURATION_VALUE_INVALID("hawkbit.server.error.configValueInvalid",
-            "The given configuration value is invalid.");
+            "The given configuration value is invalid."),
+    /**
+     * 
+     */
+    SP_CONFIGURATION_KEY_INVALID("hawkbit.server.error.configKeyInvalid", "The given configuration key is invalid.");
             
     /**
      * 

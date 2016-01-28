@@ -148,8 +148,8 @@ public class SystemManagementResource {
     public ResponseEntity<Void> addUpdateConfig(@RequestBody final TenantConfigurationRest configuration,
             @PathVariable final String key) {
 
-        // TODO Quick and dirty to stay compatible, but these rest interface
-        // won't be necessary in future
+        // TODO Quick and dirty solution to stay compatible, but these rest
+        // interface won't be necessary in future
 
         Object value;
         if (configuration.getValue().equals(Boolean.TRUE)) {

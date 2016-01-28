@@ -11,8 +11,10 @@ import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.eclipse.hawkbit.tenancy.configuration.validator.exceptions.TenantConfigurationValidatorException;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
+import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.core.convert.ConversionFailedException;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -84,7 +86,7 @@ public class TenantConfigurationManagementTest extends AbstractIntegrationTestWi
                 .isEqualTo(value2);
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test(expected = ConversionFailedException.class)
     @Description("Tests that the get configuration throws exception in case the value cannot be automatically converted from String to Boolean")
     public void wrongTenantConfigurationValueTypeThrowsException() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
@@ -179,10 +181,16 @@ public class TenantConfigurationManagementTest extends AbstractIntegrationTestWi
         assertThat(duration).isEqualTo(durationHelper.formattedStringToDuration(storedDurationString));
     }
 
-    @Test(expected = IllegalAccessError.class)
+    @Test
     @Description("Request a config value in a wrong Value")
     public void requestConfigValueWithWrongType() {
-        tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, Object.class);
+        try {
+            tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                    Object.class);
+            Assert.fail("");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
     @Test

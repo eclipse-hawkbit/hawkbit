@@ -62,8 +62,10 @@ public class PollingConfigurationView extends BaseConfigurationView
 
         minDuration = durationHelper.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
         maxDuration = durationHelper.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
-        globalPollTime = durationHelper.formattedStringToDuration(controllerPollProperties.getPollingTime());
-        globalOverdueTime = durationHelper.formattedStringToDuration(controllerPollProperties.getPollingOverdueTime());
+        globalPollTime = durationHelper.formattedStringToDuration(tenantConfigurationManagement
+                .getGlobalConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class));
+        globalOverdueTime = durationHelper.formattedStringToDuration(tenantConfigurationManagement
+                .getGlobalConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class));
 
         final TenantConfigurationValue<String> pollTimeConfValue = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class);

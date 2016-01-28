@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class TenantConfigurationRest {
 
     private String key;
-    private String value;
+    private Object value;
 
     /**
      * @return the key
@@ -41,7 +41,7 @@ public class TenantConfigurationRest {
     /**
      * @return the value
      */
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -49,7 +49,7 @@ public class TenantConfigurationRest {
      * @param value
      *            the value to set
      */
-    public void setValue(final String value) {
+    public void setValue(final Object value) {
         this.value = value;
     }
 }

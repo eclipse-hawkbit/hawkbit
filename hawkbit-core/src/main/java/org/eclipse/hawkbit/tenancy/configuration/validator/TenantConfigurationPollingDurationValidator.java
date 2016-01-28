@@ -5,7 +5,6 @@ import java.time.format.DateTimeParseException;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.validator.exceptions.TenantConfigurationValidatorException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

@@ -1,22 +1,22 @@
-package org.eclipse.hawkbit.tenancy.configuration.validator.exceptions;
+package org.eclipse.hawkbit.tenancy.configuration;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.SpServerRtException;
 
 /**
- * Exception which is thrown, when the validation of the configuration value has
- * not been successful.
+ * The {@link #InvalidTenantConfigurationKeyException} is thrown when an invalid
+ * configuration key is used.
  *
  */
-public class TenantConfigurationValidatorException extends SpServerRtException {
+public class InvalidTenantConfigurationKeyException extends SpServerRtException {
 
     private static final long serialVersionUID = 1L;
-    private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_VALUE_INVALID;
+    private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_KEY_INVALID;
 
     /**
      * Default constructor.
      */
-    public TenantConfigurationValidatorException() {
+    public InvalidTenantConfigurationKeyException() {
         super(THIS_ERROR);
     }
 
@@ -26,7 +26,7 @@ public class TenantConfigurationValidatorException extends SpServerRtException {
      * @param cause
      *            of the exception
      */
-    public TenantConfigurationValidatorException(final Throwable cause) {
+    public InvalidTenantConfigurationKeyException(final Throwable cause) {
         super(THIS_ERROR, cause);
     }
 
@@ -38,7 +38,7 @@ public class TenantConfigurationValidatorException extends SpServerRtException {
      * @param cause
      *            of the exception
      */
-    public TenantConfigurationValidatorException(final String message, final Throwable cause) {
+    public InvalidTenantConfigurationKeyException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
     }
 
@@ -48,7 +48,7 @@ public class TenantConfigurationValidatorException extends SpServerRtException {
      * @param message
      *            of the exception
      */
-    public TenantConfigurationValidatorException(final String message) {
+    public InvalidTenantConfigurationKeyException(final String message) {
         super(message, THIS_ERROR);
     }
 
