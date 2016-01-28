@@ -81,13 +81,15 @@ public class CacheWriteNotify {
      *            the revision of the event
      * @param rolloutId
      *            the ID of the rollout the group has been created
+     * @param rolloutGroupId
+     *            the ID of the rollout group which has been created
      * @param totalRolloutGroup
      *            the total number of rollout groups for this rollout
      * @param createdRolloutGroup
      *            the number of already created groups of the rollout
      */
-    public void rolloutGroupCreated(final long revision, final Long rolloutId, final int totalRolloutGroup,
-            final int createdRolloutGroup) {
+    public void rolloutGroupCreated(final long revision, final Long rolloutId, final Long rolloutGroupId,
+            final int totalRolloutGroup, final int createdRolloutGroup) {
 
         final Cache cache = cacheManager.getCache(Rollout.class.getName());
         final String cacheKeyGroupTotal = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
@@ -103,7 +105,7 @@ public class CacheWriteNotify {
             cache.evict(cacheKeyGroupTotal);
             cache.evict(cacheKeyGroupCreated);
         }
-        eventBus.post(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId,
+        eventBus.post(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId, rolloutGroupId,
                 totalRolloutGroup, createdRolloutGroup));
     }
 

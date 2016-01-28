@@ -19,6 +19,7 @@ public class RolloutGroupCreatedEvent extends AbstractDistributedEvent {
 
     private static final long serialVersionUID = 1L;
     private final Long rolloutId;
+    private final Long rolloutGroupId;
     private final int totalRolloutGroup;
     private final int createdRolloutGroup;
 
@@ -37,9 +38,10 @@ public class RolloutGroupCreatedEvent extends AbstractDistributedEvent {
      *            the number of already created groups of the rollout
      */
     public RolloutGroupCreatedEvent(final String tenant, final long revision, final Long rolloutId,
-            final int totalRolloutGroup, final int createdRolloutGroup) {
+            final Long rolloutGroupId, final int totalRolloutGroup, final int createdRolloutGroup) {
         super(revision, tenant);
         this.rolloutId = rolloutId;
+        this.rolloutGroupId = rolloutGroupId;
         this.totalRolloutGroup = totalRolloutGroup;
         this.createdRolloutGroup = createdRolloutGroup;
 
@@ -55,5 +57,9 @@ public class RolloutGroupCreatedEvent extends AbstractDistributedEvent {
 
     public int getCreatedRolloutGroup() {
         return createdRolloutGroup;
+    }
+
+    public Long getRolloutGroupId() {
+        return rolloutGroupId;
     }
 }

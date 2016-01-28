@@ -356,7 +356,8 @@ public class RolloutManagement {
             targetGroup.forEach(target -> {
                 rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target));
             });
-            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), amountGroup, groupIndex);
+            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(), amountGroup,
+                    groupIndex);
             pageIndex += groupSize;
         }
 
