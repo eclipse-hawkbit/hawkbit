@@ -209,7 +209,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
      * springframework.core.env. Environment)
      */
