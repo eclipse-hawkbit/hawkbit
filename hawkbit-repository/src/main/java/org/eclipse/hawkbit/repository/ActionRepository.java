@@ -397,6 +397,17 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM Action a WHERE a.rolloutGroup.id = ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(Long rolloutGroupId);
 
+    /**
+     * Get list of objects which has details of status and count of targets in
+     * each status in specified rollout group.
+     * 
+     * @param rolloutGroupId
+     *            id of {@link RolloutGroup}
+     * @return list of objects with status and target count
+     */
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM Action a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
+    List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupIds);
+
     // Asha-ends here
 
 }
