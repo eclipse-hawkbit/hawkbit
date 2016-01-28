@@ -841,10 +841,10 @@ public class RolloutManagement {
     public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Pageable page) {
         // TODO add test case
         final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findAll(page);
-        final List<Long> rolloutIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
+        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
-                rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
+                rolloutGroupIds);
 
         for (final RolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
