@@ -256,7 +256,8 @@ public class RolloutManagement {
     @Transactional
     @Modifying
     // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
-    public Rollout createRollout(final Rollout rollout, final int amountGroup, final RolloutGroupConditions conditions) {
+    public Rollout createRollout(final Rollout rollout, final int amountGroup,
+            final RolloutGroupConditions conditions) {
         verifyRolloutGroupParameter(amountGroup);
         final Rollout savedRollout = rolloutRepository.save(rollout);
         final Long totalCount = targetManagement.countTargetByTargetFilterQuery(savedRollout.getTargetFilterQuery());
@@ -460,8 +461,8 @@ public class RolloutManagement {
             // create only not active actions with status scheduled so they can
             // be activated later
             else {
-                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
-                        rollout, rolloutGroup);
+                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime, rollout,
+                        rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
                 rolloutGroupRepository.save(rolloutGroup);
             }
@@ -647,11 +648,11 @@ public class RolloutManagement {
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
         try {
-            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class).eval(
-                    rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
+            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class)
+                    .eval(rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
         } catch (final BeansException e) {
-            logger.error("Something bad happend when accessing the error action bean {}", rolloutGroup.getErrorAction()
-                    .getBeanName(), e);
+            logger.error("Something bad happend when accessing the error action bean {}",
+                    rolloutGroup.getErrorAction().getBeanName(), e);
         }
     }
 
@@ -688,9 +689,9 @@ public class RolloutManagement {
             final RolloutGroupSuccessCondition finishCondition) {
         logger.trace("Checking finish condition {} on rolloutgroup {}", finishCondition, rolloutGroup);
         try {
-            final boolean isFinished = context.getBean(finishCondition.getBeanName(),
-                    RolloutGroupConditionEvaluator.class).eval(rollout, rolloutGroup,
-                    rolloutGroup.getSuccessConditionExp());
+            final boolean isFinished = context
+                    .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
+                    .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
                 logger.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
@@ -810,7 +811,8 @@ public class RolloutManagement {
         final Page<Rollout> rollouts = findAll(page);
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
+                rolloutIds);
 
         for (final Rollout rollout : rollouts) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
@@ -843,6 +845,25 @@ public class RolloutManagement {
         return rollout;
     }
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Pageable page) {
+        // TODO add test case
+        final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findAll(page);
+        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
+                .collect(Collectors.toList());
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
+                rolloutGroupIds);
+
+        for (final RolloutGroup rollout : rolloutGroups) {
+            final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                    allStatesForRollout.get(rollout.getId()), 0L);
+            rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+        }
+
+        return rolloutGroups;
+
+    }
+
     /**
      * Get count of targets in different status in rollout group.
      *
@@ -865,10 +886,19 @@ public class RolloutManagement {
 
     }
 
+    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRolloutGroup(
+            final List<Long> rolloutGroupIds) {
+        final List<TotalTargetCountActionStatus> resultList = actionRepository
+                .getStatusCountByRolloutGroupId(rolloutGroupIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
+                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+        return result;
+    }
+
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
         final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutId(rolloutIds);
-        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream().collect(
-                Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
+                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
         return result;
     }
 
@@ -948,7 +978,8 @@ public class RolloutManagement {
 
         return targetRepository.findAll(new Specification<Target>() {
             @Override
-            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
+            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query,
+                    final CriteriaBuilder cb) {
                 final ListJoin<Target, Action> actionsJoin = root.join(Target_.actions);
                 return cb.and(specification.toPredicate(root, query, cb),
                         cb.equal(actionsJoin.get(Action_.rolloutGroup), rolloutGroup));
