@@ -18,10 +18,6 @@ package org.eclipse.hawkbit.repository;
 public enum ActionStatusFields implements FieldNameProvider {
 
     /**
-     * The type field.
-     */
-    TYPE("type"),
-    /**
      * The id field.
      */
     ID("id");

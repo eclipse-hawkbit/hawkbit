@@ -205,8 +205,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Target> findTargetsAll(@NotNull final TargetFilterQuery targetFilterQuery,
             @NotNull final Pageable pageable) {
-        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, entityManager),
-                pageable);
+        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class), pageable);
     }
 
     /**
@@ -220,7 +219,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Target> findTargetsAll(@NotNull final String targetFilterQuery, @NotNull final Pageable pageable) {
-        return findTargetsAll(RSQLUtility.parse(targetFilterQuery, TargetFields.class, entityManager), pageable);
+        return findTargetsAll(RSQLUtility.parse(targetFilterQuery, TargetFields.class), pageable);
     }
 
     /**
@@ -624,8 +623,8 @@ public class TargetManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public List<Target> assignTag(@NotEmpty final Collection<String> targetIds, @NotNull final TargetTag tag) {
-        final List<Target> allTargets = targetRepository.findAll(TargetSpecifications
-                .byControllerIdWithStatusAndTagsInJoin(targetIds));
+        final List<Target> allTargets = targetRepository
+                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
 
         allTargets.forEach(target -> target.getTags().add(tag));
         final List<Target> save = targetRepository.save(allTargets);
@@ -679,8 +678,8 @@ public class TargetManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Target unAssignTag(@NotNull final String controllerID, @NotNull final TargetTag targetTag) {
-        final List<Target> allTargets = targetRepository.findAll(TargetSpecifications
-                .byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID)));
+        final List<Target> allTargets = targetRepository
+                .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID)));
         final List<Target> unAssignTag = unAssignTag(allTargets, targetTag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
     }
@@ -905,8 +904,7 @@ public class TargetManagement {
                 targetRoot.get(Target_.controllerId), targetRoot.get(Target_.name),
                 targetRoot.get(pageRequest.getSort().iterator().next().getProperty()));
 
-        final Specification<Target> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                entityManager);
+        final Specification<Target> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         final List<Specification<Target>> specList = new ArrayList<>();
         specList.add(spec);
 
@@ -1080,8 +1078,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {
-        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                entityManager);
+        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         return targetRepository.count(specs);
     }
 
@@ -1094,7 +1091,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final String targetFilterQuery) {
-        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class, entityManager);
+        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
         return targetRepository.count(specs);
     }
 

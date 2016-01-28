@@ -24,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface DistributionSetTagRepository extends BaseEntityRepository<DistributionSetTag, Long>,
-        JpaSpecificationExecutor<DistributionSetTag> {
+public interface DistributionSetTagRepository
+        extends BaseEntityRepository<DistributionSetTag, Long>, JpaSpecificationExecutor<DistributionSetTag> {
     /**
      * deletes the {@link DistributionSet} with the given name.
      * 

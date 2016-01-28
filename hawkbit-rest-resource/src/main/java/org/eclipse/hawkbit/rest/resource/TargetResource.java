@@ -134,8 +134,8 @@ public class TargetResource {
         final Slice<Target> findTargetsAll;
         final Long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<Target> findTargetPage = targetManagement.findTargetsAll(
-                    RSQLUtility.parse(rsqlParam, TargetFields.class, entityManager), pageable);
+            final Page<Target> findTargetPage = targetManagement
+                    .findTargetsAll(RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
         } else {
@@ -159,8 +159,8 @@ public class TargetResource {
      *         entities. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<TargetsRest> createTargets(@RequestBody final List<TargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
         final Iterable<Target> createdTargets = targetManagement.createTargets(TargetMapper.fromRequest(targets));
@@ -267,8 +267,7 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionPagedList> getActionHistory(
-            @PathVariable final String targetId,
+    public ResponseEntity<ActionPagedList> getActionHistory(@PathVariable final String targetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -284,7 +283,7 @@ public class TargetResource {
         final Slice<Action> activeActions;
         final Long totalActionCount;
         if (rsqlParam != null) {
-            final Specification<Action> parse = RSQLUtility.parse(rsqlParam, ActionFields.class, entityManager);
+            final Specification<Action> parse = RSQLUtility.parse(rsqlParam, ActionFields.class);
             activeActions = deploymentManagement.findActionsByTarget(parse, foundTarget, pageable);
             totalActionCount = deploymentManagement.countActionsByTarget(parse, foundTarget);
         } else {
@@ -292,8 +291,9 @@ public class TargetResource {
             totalActionCount = deploymentManagement.countActionsByTarget(foundTarget);
         }
 
-        return new ResponseEntity<>(new ActionPagedList(TargetMapper.toResponse(targetId, activeActions.getContent()),
-                totalActionCount), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ActionPagedList(TargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount),
+                HttpStatus.OK);
     }
 
     /**
@@ -308,7 +308,8 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionRest> getAction(@PathVariable final String targetId, @PathVariable final Long actionId) {
+    public ResponseEntity<ActionRest> getAction(@PathVariable final String targetId,
+            @PathVariable final Long actionId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -322,17 +323,16 @@ public class TargetResource {
         if (!action.isCancelingOrCanceled()) {
             result.add(linkTo(
                     methodOn(DistributionSetResource.class).getDistributionSet(action.getDistributionSet().getId()))
-                    .withRel("distributionset"));
+                            .withRel("distributionset"));
         } else if (action.isCancelingOrCanceled()) {
-            result.add(linkTo(methodOn(TargetResource.class).getAction(targetId, action.getId())).withRel(
-                    RestConstants.TARGET_V1_CANCELED_ACTION));
+            result.add(linkTo(methodOn(TargetResource.class).getAction(targetId, action.getId()))
+                    .withRel(RestConstants.TARGET_V1_CANCELED_ACTION));
         }
 
-        result.add(linkTo(
-                methodOn(TargetResource.class).getActionStatusList(targetId, action.getId(), 0,
-                        RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                        ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC)).withRel(
-                RestConstants.TARGET_V1_ACTION_STATUS));
+        result.add(linkTo(methodOn(TargetResource.class).getActionStatusList(targetId, action.getId(), 0,
+                RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
+                ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
+                        .withRel(RestConstants.TARGET_V1_ACTION_STATUS));
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -394,8 +394,7 @@ public class TargetResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}/status", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionStatusPagedList> getActionStatusList(
-            @PathVariable final String targetId,
+    public ResponseEntity<ActionStatusPagedList> getActionStatusList(@PathVariable final String targetId,
             @PathVariable final Long actionId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -416,8 +415,10 @@ public class TargetResource {
         final Page<ActionStatus> statusList = deploymentManagement.findActionStatusMessagesByActionInDescOrder(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action, true);
 
-        return new ResponseEntity<>(new ActionStatusPagedList(TargetMapper.toActionStatusRestResponse(action,
-                statusList.getContent()), statusList.getTotalElements()), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ActionStatusPagedList(TargetMapper.toActionStatusRestResponse(action, statusList.getContent()),
+                        statusList.getTotalElements()),
+                HttpStatus.OK);
 
     }
 
@@ -436,8 +437,8 @@ public class TargetResource {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<DistributionSetRest> getAssignedDistributionSet(@PathVariable final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
-        final DistributionSetRest distributionSetRest = DistributionSetMapper.toResponse(findTarget
-                .getAssignedDistributionSet());
+        final DistributionSetRest distributionSetRest = DistributionSetMapper
+                .toResponse(findTarget.getAssignedDistributionSet());
         final HttpStatus retStatus;
         if (distributionSetRest == null) {
             retStatus = HttpStatus.NO_CONTENT;
@@ -466,8 +467,8 @@ public class TargetResource {
             @RequestBody final DistributionSetAssigmentRest dsId) {
 
         findTargetWithExceptionIfNotFound(targetId);
-        final ActionType type = (dsId.getType() != null) ? RestResourceConversionHelper.convertActionType(dsId
-                .getType()) : ActionType.FORCED;
+        final ActionType type = (dsId.getType() != null)
+                ? RestResourceConversionHelper.convertActionType(dsId.getType()) : ActionType.FORCED;
         final Iterator<Target> changed = deploymentManagement
                 .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedTargets()
                 .iterator();
@@ -496,8 +497,8 @@ public class TargetResource {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<DistributionSetRest> getInstalledDistributionSet(@PathVariable final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
-        final DistributionSetRest distributionSetRest = DistributionSetMapper.toResponse(findTarget.getTargetInfo()
-                .getInstalledDistributionSet());
+        final DistributionSetRest distributionSetRest = DistributionSetMapper
+                .toResponse(findTarget.getTargetInfo().getInstalledDistributionSet());
         final HttpStatus retStatus;
         if (distributionSetRest == null) {
             retStatus = HttpStatus.NO_CONTENT;

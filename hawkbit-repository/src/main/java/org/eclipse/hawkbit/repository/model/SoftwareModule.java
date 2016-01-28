@@ -257,7 +257,7 @@ public class SoftwareModule extends NamedVersionedEntity {
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + this.getClass().getName().hashCode();
@@ -270,7 +270,7 @@ public class SoftwareModule extends NamedVersionedEntity {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final Object obj) { // NOSONAR - as this is generated
         if (this == obj) {
             return true;
         }

@@ -72,7 +72,7 @@ public class CustomFile implements Serializable {
 
     /**
      * Initialize details.
-     * 
+     *
      * @param fileName
      *            uploaded file name
      * @param baseSoftwareModuleName
@@ -138,7 +138,7 @@ public class CustomFile implements Serializable {
     }
 
     /**
-     * 
+     *
      * @return the isValid
      */
     public Boolean getIsValid() {
@@ -170,11 +170,11 @@ public class CustomFile implements Serializable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
         int result = 1;
         result = prime * result + (fileName == null ? 0 : fileName.hashCode());
@@ -183,7 +183,7 @@ public class CustomFile implements Serializable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

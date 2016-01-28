@@ -267,8 +267,8 @@ public class TagManagement {
 
         final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
 
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware
-                .getCurrentTenant(), save)));
+        afterCommit.afterCommit(
+                () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
         return save;
     }
 
@@ -292,8 +292,8 @@ public class TagManagement {
             }
         }
         final List<DistributionSetTag> save = distributionSetTagRepository.save(distributionSetTags);
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware
-                .getCurrentTenant(), save)));
+        afterCommit.afterCommit(
+                () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
 
         return save;
     }

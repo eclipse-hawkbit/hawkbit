@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.rest.resource;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -62,9 +60,6 @@ public class DistributionSetTypeResource {
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private EntityManager entityManager;
-
     /**
      * Handles the GET request of retrieving all {@link DistributionSetType}s
      * within SP.
@@ -105,7 +100,7 @@ public class DistributionSetTypeResource {
         Long countModulesAll;
         if (rsqlParam != null) {
             findModuleTypessAll = distributionSetManagement.findDistributionSetTypesByPredicate(
-                    RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class), pageable);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(pageable);

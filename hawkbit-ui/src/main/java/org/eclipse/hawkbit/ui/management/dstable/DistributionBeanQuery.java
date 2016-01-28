@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,8 +36,6 @@ import com.google.common.base.Strings;
  * Simple implementation of generics bean query which dynamically loads a batch
  * of beans.
  *
- *
- *
  */
 public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
@@ -55,7 +50,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
     /**
      * Bean query for retrieving beans/objects of type.
-     * 
+     *
      * @param definition
      *            query definition
      * @param queryConfig
@@ -84,15 +79,17 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
             for (int distId = 1; distId < sortPropertyIds.length; distId++) {
-                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[distId]));
+                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC,
+                        (String) sortPropertyIds[distId]));
             }
         }
     }
 
     /**
      * Load all the Distribution set.
-     * 
-     * @parm startIndex as page start
+     *
+     * @param startIndex
+     *            as page start
      * @param count
      *            as total data
      */
@@ -112,8 +109,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     pinnedControllerId);
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            distBeans = getDistributionSetManagement().findDistributionSetsAll(
-                    new OffsetBasedPageRequest(startIndex, count, sort), false, true);
+            distBeans = getDistributionSetManagement()
+                    .findDistributionSetsAll(new OffsetBasedPageRequest(startIndex, count, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
@@ -134,8 +131,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             proxyDistribution.setDescription(distributionSet.getDescription());
             proxyDistribution.setCreatedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getCreatedBy()));
             proxyDistribution.setModifiedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getLastModifiedBy()));
-            proxyDistribution.setNameVersion(HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(),
-                    distributionSet.getVersion()));
+            proxyDistribution.setNameVersion(
+                    HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
             proxyDistributions.add(proxyDistribution);
         }
         return proxyDistributions;
@@ -154,8 +151,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     pinnedControllerId);
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsAll(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
+            firstPageDistributionSets = getDistributionSetManagement()
+                    .findDistributionSetsAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
@@ -190,17 +187,6 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
         }
         return distributionSetManagement;
-    }
-
-    private void writeObject(final ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeObject(firstPageDistributionSets);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        firstPageDistributionSets = (Page<DistributionSet>) in.readObject();
     }
 
 }

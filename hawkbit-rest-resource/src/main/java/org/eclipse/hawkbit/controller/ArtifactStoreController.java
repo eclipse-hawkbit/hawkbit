@@ -138,13 +138,11 @@ public class ArtifactStoreController implements EnvironmentAware {
 
     private Action checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
             final LocalArtifact artifact) {
-        final Target target = controllerManagement.updateLastTargetQuery(
-                targetid,
-                IpUtil.getClientIpFromRequest(request,
-                        environment.getProperty("security.rp.remote_ip_header", String.class, "X-Forwarded-For")));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil.getClientIpFromRequest(
+                request, environment.getProperty("security.rp.remote_ip_header", String.class, "X-Forwarded-For")));
 
-        final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(
-                target.getControllerId(), artifact.getSoftwareModule());
+        final Action action = controllerManagement
+                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());
         final String range = request.getHeader("Range");
 
         final ActionStatus actionStatus = new ActionStatus();

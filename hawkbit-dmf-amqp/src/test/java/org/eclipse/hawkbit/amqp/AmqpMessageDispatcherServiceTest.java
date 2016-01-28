@@ -155,8 +155,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
                 1L, "default", CONTROLLER_ID, 1l, IpUtil.createAmqpUri("mytest"));
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(cancelTargetAssignmentDistributionSetEvent.getTargetAdress()
-                .getHost());
+        final Message sendMessage = createArgumentCapture(
+                cancelTargetAssignmentDistributionSetEvent.getTargetAdress().getHost());
         assertCancelMessage(sendMessage);
 
     }
@@ -200,8 +200,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
 
     @SuppressWarnings("unchecked")
     private <T> T convertMessage(final Message message, final Class<T> clazz) {
-        message.getMessageProperties().getHeaders()
-                .put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
+        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
+                clazz.getTypeName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 

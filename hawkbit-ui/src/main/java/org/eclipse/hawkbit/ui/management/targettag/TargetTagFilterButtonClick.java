@@ -55,8 +55,8 @@ public class TargetTagFilterButtonClick extends AbstractFilterMultiButtonClick i
                 eventBus.publish(this, TargetFilterEvent.FILTER_BY_TAG);
             }
         } else {
-            if (null != managementUIState.getTargetTableFilters().getClickedTargetTags()
-                    && managementUIState.getTargetTableFilters().getClickedTargetTags().contains(clickedButton.getId())) {
+            if (null != managementUIState.getTargetTableFilters().getClickedTargetTags() && managementUIState
+                    .getTargetTableFilters().getClickedTargetTags().contains(clickedButton.getId())) {
                 managementUIState.getTargetTableFilters().getClickedTargetTags().remove(clickedButton.getId());
                 eventBus.publish(this, TargetFilterEvent.FILTER_BY_TAG);
             }

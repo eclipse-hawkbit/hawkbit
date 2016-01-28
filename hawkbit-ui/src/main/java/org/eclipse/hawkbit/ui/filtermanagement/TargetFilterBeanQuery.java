@@ -113,11 +113,11 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
     @Override
     public int size() {
         if (Strings.isNullOrEmpty(searchText)) {
-            firstPageTargetFilter = getTargetFilterQueryManagement().findAllTargetFilterQuery(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+            firstPageTargetFilter = getTargetFilterQueryManagement()
+                    .findAllTargetFilterQuery(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
         } else {
-            firstPageTargetFilter = getTargetFilterQueryManagement().findTargetFilterQueryByFilters(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
+            firstPageTargetFilter = getTargetFilterQueryManagement()
+                    .findTargetFilterQueryByFilters(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), searchText);
         }
         final long size = firstPageTargetFilter.getTotalElements();
 

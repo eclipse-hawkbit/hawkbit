@@ -28,8 +28,9 @@ import javax.persistence.UniqueConstraint;
  *
  */
 @Entity
-@Table(name = "sp_distributionset_tag", indexes = { @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-        "name", "tenant" }, name = "uk_ds_tag"))
+@Table(name = "sp_distributionset_tag", indexes = {
+        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
+                "name", "tenant" }, name = "uk_ds_tag") )
 public class DistributionSetTag extends Tag {
     private static final long serialVersionUID = 1L;
 
@@ -70,7 +71,7 @@ public class DistributionSetTag extends Tag {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -83,11 +84,11 @@ public class DistributionSetTag extends Tag {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final Object obj) { // NOSONAR - as this is generated
         if (this == obj) {
             return true;
         }

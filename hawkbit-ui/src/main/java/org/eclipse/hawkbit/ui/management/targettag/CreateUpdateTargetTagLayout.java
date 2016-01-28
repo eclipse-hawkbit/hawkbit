@@ -155,8 +155,8 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     private Boolean checkIsDuplicate(final TargetTag existingTag) {
         if (existingTag != null) {
-            uiNotification.displayValidationError(i18n.get("message.tag.duplicate.check",
-                    new Object[] { existingTag.getName() }));
+            uiNotification.displayValidationError(
+                    i18n.get("message.tag.duplicate.check", new Object[] { existingTag.getName() }));
             return Boolean.TRUE;
         }
         return Boolean.FALSE;

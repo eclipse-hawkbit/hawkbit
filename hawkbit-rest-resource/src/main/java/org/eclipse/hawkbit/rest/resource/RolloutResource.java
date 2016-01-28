@@ -107,8 +107,8 @@ public class RolloutResource {
 
         final Page<Rollout> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = rolloutManagement.findAllByPredicate(
-                    RSQLUtility.parse(rsqlParam, RolloutFields.class, entityManager), pageable);
+            findModulesAll = rolloutManagement.findAllByPredicate(RSQLUtility.parse(rsqlParam, RolloutFields.class),
+                    pageable);
         } else {
             findModulesAll = rolloutManagement.findAll(pageable);
         }
@@ -144,13 +144,13 @@ public class RolloutResource {
      *         response.
      * @throws EntityNotFoundException
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<RolloutResponseBody> create(@RequestBody final RolloutRestRequestBody rolloutRequestBody) {
 
         // first check the given RSQL query if it's well formed, otherwise and
         // exception is thrown
-        RSQLUtility.parse(rolloutRequestBody.getTargetFilterQuery(), TargetFields.class, entityManager);
+        RSQLUtility.parse(rolloutRequestBody.getTargetFilterQuery(), TargetFields.class);
 
         final DistributionSet distributionSet = findDistributionSetOrThrowException(rolloutRequestBody);
 
@@ -190,14 +190,14 @@ public class RolloutResource {
                 .errorAction(errorAction, errorActionExpr).build();
         final Rollout rollout = rolloutManagement.createRollout(
                 RolloutMapper.fromRequest(rolloutRequestBody, distributionSet,
-                        rolloutRequestBody.getTargetFilterQuery()), rolloutRequestBody.getAmountGroups(),
-                rolloutGroupConditions);
+                        rolloutRequestBody.getTargetFilterQuery()),
+                rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
         return ResponseEntity.status(HttpStatus.CREATED).body(RolloutMapper.toResponseRollout(rollout));
     }
 
     /**
      * Handles the POST request for starting a rollout.
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout to be started.
      * @return OK response (200) if rollout could be started. In case of any
@@ -216,7 +216,7 @@ public class RolloutResource {
 
     /**
      * Handles the POST request for pausing a rollout.
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout to be paused.
      * @return OK response (200) if rollout could be paused. In case of any
@@ -235,7 +235,7 @@ public class RolloutResource {
 
     /**
      * Handles the POST request for resuming a rollout.
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout to be resumed.
      * @return OK response (200) if rollout could be resumed. In case of any
@@ -276,8 +276,7 @@ public class RolloutResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<RolloutGroupPagedList> getRolloutGroups(
-            @PathVariable("rolloutId") final Long rolloutId,
+    public ResponseEntity<RolloutGroupPagedList> getRolloutGroups(@PathVariable("rolloutId") final Long rolloutId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -293,20 +292,20 @@ public class RolloutResource {
         final Page<RolloutGroup> findRolloutGroupsAll;
         if (rsqlParam != null) {
             findRolloutGroupsAll = rolloutManagement.findRolloutGroupsByPredicate(rolloutId,
-                    RSQLUtility.parse(rsqlParam, RolloutGroupFields.class, entityManager), pageable);
+                    RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), pageable);
         } else {
             findRolloutGroupsAll = rolloutManagement.findRolloutGroupsByRollout(rolloutId, pageable);
         }
 
-        final List<RolloutGroupResponseBody> rest = RolloutMapper.toResponseRolloutGroup(findRolloutGroupsAll
-                .getContent());
+        final List<RolloutGroupResponseBody> rest = RolloutMapper
+                .toResponseRolloutGroup(findRolloutGroupsAll.getContent());
         return new ResponseEntity<>(new RolloutGroupPagedList(rest, findRolloutGroupsAll.getTotalElements()),
                 HttpStatus.OK);
     }
 
     /**
      * Handles the GET request for retrieving a single rollout group.
-     * 
+     *
      * @param rolloutId
      *            the rolloutId to retrieve the group from
      * @param groupId
@@ -325,7 +324,7 @@ public class RolloutResource {
 
     /**
      * Retrieves all targets related to a specific rollout group.
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout
      * @param groupId
@@ -348,8 +347,7 @@ public class RolloutResource {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}/targets", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<TargetPagedList> getRolloutGroupTargets(
-            @PathVariable("rolloutId") final Long rolloutId,
+    public ResponseEntity<TargetPagedList> getRolloutGroupTargets(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -366,8 +364,7 @@ public class RolloutResource {
 
         final Page<Target> rolloutGroupTargets;
         if (rsqlParam != null) {
-            final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class,
-                    entityManager);
+            final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
             rolloutGroupTargets = rolloutManagement.findRolloutGroupTargets(rolloutGroup, rsqlSpecification, pageable);
         } else {
             final Page<Target> pageTargets = rolloutManagement.getRolloutGroupTargets(rolloutGroup, pageable);
@@ -394,11 +391,11 @@ public class RolloutResource {
     }
 
     private DistributionSet findDistributionSetOrThrowException(final RolloutRestRequestBody rolloutRequestBody) {
-        final DistributionSet ds = distributionSetManagement.findDistributionSetById(rolloutRequestBody
-                .getDistributionSetId());
+        final DistributionSet ds = distributionSetManagement
+                .findDistributionSetById(rolloutRequestBody.getDistributionSetId());
         if (ds == null) {
-            throw new EntityNotFoundException("DistributionSet with Id {" + rolloutRequestBody.getDistributionSetId()
-                    + "} does not exist");
+            throw new EntityNotFoundException(
+                    "DistributionSet with Id {" + rolloutRequestBody.getDistributionSetId() + "} does not exist");
         }
         return ds;
     }

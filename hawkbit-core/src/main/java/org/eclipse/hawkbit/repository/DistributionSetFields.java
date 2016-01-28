@@ -36,16 +36,50 @@ public enum DistributionSetFields implements FieldNameProvider {
     /**
      * The id field.
      */
-    ID("id");
+    ID("id"),
+
+    /**
+     * The tags field.
+     */
+    TAG("tags.name"),
+
+    /**
+     * The sw type key field.
+     */
+    TYPE("type.key"),
+
+    /**
+     * The metadata.
+     */
+    METADATA("metadata", "key", "value");
 
     private final String fieldName;
+    private String keyFieldName;
+    private String valueFieldName;
 
     private DistributionSetFields(final String fieldName) {
+        this(fieldName, null, null);
+    }
+
+    private DistributionSetFields(final String fieldName, final String keyFieldName, final String valueFieldName) {
         this.fieldName = fieldName;
+        this.keyFieldName = keyFieldName;
+        this.valueFieldName = valueFieldName;
+    }
+
+    @Override
+    public String getValueFieldName() {
+        return valueFieldName;
+    }
+
+    @Override
+    public String getKeyFieldName() {
+        return keyFieldName;
     }
 
     @Override
     public String getFieldName() {
         return fieldName;
     }
+
 }

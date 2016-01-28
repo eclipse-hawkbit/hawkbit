@@ -55,8 +55,8 @@ final class TagMapper {
 
         response.add(linkTo(methodOn(TargetTagResource.class).getTargetTag(targetTag.getId())).withRel("self"));
 
-        response.add(linkTo(methodOn(TargetTagResource.class).getAssignedTargets(targetTag.getId())).withRel(
-                "assignedTargets"));
+        response.add(linkTo(methodOn(TargetTagResource.class).getAssignedTargets(targetTag.getId()))
+                .withRel("assignedTargets"));
 
         return response;
     }
@@ -83,13 +83,13 @@ final class TagMapper {
 
         mapTag(response, distributionSetTag);
 
-        response.add(linkTo(
-                methodOn(DistributionSetTagResource.class).getDistributionSetTag(distributionSetTag.getId())).withRel(
-                "self"));
+        response.add(
+                linkTo(methodOn(DistributionSetTagResource.class).getDistributionSetTag(distributionSetTag.getId()))
+                        .withRel("self"));
 
         response.add(linkTo(
                 methodOn(DistributionSetTagResource.class).getAssignedDistributionSets(distributionSetTag.getId()))
-                .withRel("assignedDistributionSets"));
+                        .withRel("assignedDistributionSets"));
 
         return response;
     }
@@ -97,8 +97,8 @@ final class TagMapper {
     static List<TargetTag> mapTargeTagFromRequest(final Iterable<TagRequestBodyPut> tags) {
         final List<TargetTag> mappedList = new ArrayList<>();
         for (final TagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(new TargetTag(targetTagRest.getName(), targetTagRest.getDescription(), targetTagRest
-                    .getColour()));
+            mappedList.add(
+                    new TargetTag(targetTagRest.getName(), targetTagRest.getDescription(), targetTagRest.getColour()));
         }
         return mappedList;
     }

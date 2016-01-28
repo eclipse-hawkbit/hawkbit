@@ -23,9 +23,9 @@ import com.vaadin.ui.components.colorpicker.ColorPickerPreview;
  *
  *
  *
- *         Tag ColorPicker Preview field CssLayout cannot be removed because of
- *         the deep inheritance issue, since protected method fireEvent() of the
- *         superclass of CssLayout is used in textChange() overridden method
+ * Tag ColorPicker Preview field CssLayout cannot be removed because of the deep
+ * inheritance issue, since protected method fireEvent() of the superclass of
+ * CssLayout is used in textChange() overridden method
  *
  *
  */

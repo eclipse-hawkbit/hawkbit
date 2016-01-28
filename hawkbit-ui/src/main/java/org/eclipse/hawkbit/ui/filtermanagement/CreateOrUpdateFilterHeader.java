@@ -343,9 +343,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void enableDisableSaveButton(final boolean validationFailed, final String query) {
-        if (validationFailed
-                || (isNameAndQueryEmpty(nameTextField.getValue(), query) || (query.equals(oldFilterQuery) && nameTextField
-                        .getValue().equals(oldFilterName)))) {
+        if (validationFailed || (isNameAndQueryEmpty(nameTextField.getValue(), query)
+                || (query.equals(oldFilterQuery) && nameTextField.getValue().equals(oldFilterName)))) {
             saveButton.setEnabled(false);
         } else {
             if (hasSavePermission()) {
@@ -444,8 +443,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         targetFilterQuery.setName(nameTextField.getValue());
         targetFilterQuery.setQuery(queryTextField.getValue());
         targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
-        notification.displaySuccess(i18n.get("message.create.filter.success",
-                new Object[] { targetFilterQuery.getName() }));
+        notification.displaySuccess(
+                i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
     }
 

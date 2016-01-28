@@ -95,7 +95,8 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE
-                || distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
+                || distributionTableEvent
+                        .getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
             ui.access(() -> {
                 /**
                  * distributionTableEvent.getDistributionSet() is null when
@@ -175,8 +176,8 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
      */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
-        return !(managementUIState.getSelectedDsIdName().isPresent() && managementUIState.getSelectedDsIdName().get()
-                .isEmpty());
+        return !(managementUIState.getSelectedDsIdName().isPresent()
+                && managementUIState.getSelectedDsIdName().get().isEmpty());
     }
 
     /*
@@ -289,9 +290,9 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
-                    i18n.get("checkbox.dist.migration.required"),
-                    isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(
+                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
+                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
         }
     }
 

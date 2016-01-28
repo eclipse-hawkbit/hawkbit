@@ -102,8 +102,8 @@ public class TargetTagResource {
             countTargetsAll = tagManagement.countTargetTags();
 
         } else {
-            final Page<TargetTag> findTargetPage = tagManagement.findAllTargetTags(
-                    RSQLUtility.parse(rsqlParam, TagFields.class, entityManager), pageable);
+            final Page<TargetTag> findTargetPage = tagManagement
+                    .findAllTargetTags(RSQLUtility.parse(rsqlParam, TagFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
 
@@ -140,8 +140,8 @@ public class TargetTagResource {
      *         with status code 201 - Created. The Response Body are the created
      *         target tags but without ResponseBody.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<TagsRest> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = tagManagement
@@ -233,8 +233,8 @@ public class TargetTagResource {
         LOG.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        final TargetTagAssigmentResult assigmentResult = targetManagement.toggleTagAssignment(
-                findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
+        final TargetTagAssigmentResult assigmentResult = targetManagement
+                .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
 
         final TargetTagAssigmentResultRest tagAssigmentResultRest = new TargetTagAssigmentResultRest();
         tagAssigmentResultRest.setAssignedTargets(TargetMapper.toResponse(assigmentResult.getAssignedTargets()));
@@ -259,8 +259,8 @@ public class TargetTagResource {
             @RequestBody final List<AssignedTargetRequestBody> assignedTargetRequestBodies) {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        final List<Target> assignedTarget = targetManagement.assignTag(
-                findTargetControllerIds(assignedTargetRequestBodies), targetTag);
+        final List<Target> assignedTarget = targetManagement
+                .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTag);
         return new ResponseEntity<>(TargetMapper.toResponseWithLinksAndPollStatus(assignedTarget), HttpStatus.OK);
     }
 

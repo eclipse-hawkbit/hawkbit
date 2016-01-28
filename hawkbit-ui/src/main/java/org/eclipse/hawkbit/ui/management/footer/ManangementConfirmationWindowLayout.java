@@ -155,20 +155,18 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmnetTab.getTable().setContainerDataSource(getAssignmentsTableContainer());
 
         // Add the discard action column
-        assignmnetTab.getTable().addGeneratedColumn(
-                DISCARD_CHANGES,
-                (source, itemId, columnId) -> {
-                    final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
-                    style.append(' ');
-                    style.append(SPUIStyleDefinitions.REDICON);
-                    final Button deleteIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                            style.toString(), true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
-                    deleteIcon.setData(itemId);
-                    deleteIcon.setImmediate(true);
-                    deleteIcon.addClickListener(event -> discardAssignment(
-                            (TargetIdName) ((Button) event.getComponent()).getData(), assignmnetTab));
-                    return deleteIcon;
-                });
+        assignmnetTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
+            final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
+            style.append(' ');
+            style.append(SPUIStyleDefinitions.REDICON);
+            final Button deleteIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
+                    style.toString(), true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
+            deleteIcon.setData(itemId);
+            deleteIcon.setImmediate(true);
+            deleteIcon.addClickListener(event -> discardAssignment(
+                    (TargetIdName) ((Button) event.getComponent()).getData(), assignmnetTab));
+            return deleteIcon;
+        });
 
         // set the visible columns
         final List<Object> visibleColumnIds = new ArrayList<>();
@@ -203,8 +201,9 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
         final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
-                .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED) ? actionTypeOptionGroupLayout
-                .getForcedTimeDateField().getValue().getTime() : Action.NO_FORCE_TIME;
+                .getActionTypeOptionGroup().getValue()) == ActionTypeOption.AUTO_FORCED)
+                        ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
+                        : Action.NO_FORCE_TIME;
 
         final Map<Long, ArrayList<TargetIdName>> saveAssignedList = new HashMap<Long, ArrayList<TargetIdName>>();
 
@@ -320,9 +319,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
             saveTblitem.getItemProperty(TARGET_NAME).setValue(entry.getKey().getName());
 
-            saveTblitem.getItemProperty(DISTRIBUTION_NAME).setValue(
-                    HawkbitCommonUtil.getDistributionNameAndVersion(entry.getValue().getName(), entry.getValue()
-                            .getVersion()));
+            saveTblitem.getItemProperty(DISTRIBUTION_NAME).setValue(HawkbitCommonUtil
+                    .getDistributionNameAndVersion(entry.getValue().getName(), entry.getValue().getVersion()));
 
             saveTblitem.getItemProperty(TARGET_ID).setValue(entry.getKey().getControllerId());
             saveTblitem.getItemProperty(DIST_ID).setValue(entry.getValue().getId());
@@ -346,18 +344,16 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         tab.getTable().setContainerDataSource(getTargetModuleTableContainer());
 
         /* Add the discard action column */
-        tab.getTable().addGeneratedColumn(
-                DISCARD_CHANGES,
-                (source, itemId, columnId) -> {
-                    final Button deletestargetIcon = SPUIComponentProvider.getButton("", "",
-                            SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON,
-                            true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
-                    deletestargetIcon.setData(itemId);
-                    deletestargetIcon.setImmediate(true);
-                    deletestargetIcon.addClickListener(event -> discardTargetDelete(
-                            (TargetIdName) ((Button) event.getComponent()).getData(), itemId, tab));
-                    return deletestargetIcon;
-                });
+        tab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
+            final Button deletestargetIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
+                    ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
+                    SPUIButtonStyleSmallNoBorder.class);
+            deletestargetIcon.setData(itemId);
+            deletestargetIcon.setImmediate(true);
+            deletestargetIcon.addClickListener(event -> discardTargetDelete(
+                    (TargetIdName) ((Button) event.getComponent()).getData(), itemId, tab));
+            return deletestargetIcon;
+        });
 
         /* set the visible columns */
         final List<Object> visibleColumnIds = new ArrayList<>();
@@ -393,18 +389,16 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         tab.getTable().setContainerDataSource(getDSModuleTableContainer());
 
         /* Add the discard action column */
-        tab.getTable().addGeneratedColumn(
-                DISCARD_CHANGES,
-                (source, itemId, columnId) -> {
-                    final Button deletesDsIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                            ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
-                            SPUIButtonStyleSmallNoBorder.class);
-                    deletesDsIcon.setData(itemId);
-                    deletesDsIcon.setImmediate(true);
-                    deletesDsIcon.addClickListener(event -> discardDSDelete(
-                            (DistributionSetIdName) ((Button) event.getComponent()).getData(), itemId, tab));
-                    return deletesDsIcon;
-                });
+        tab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
+            final Button deletesDsIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
+                    ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
+                    SPUIButtonStyleSmallNoBorder.class);
+            deletesDsIcon.setData(itemId);
+            deletesDsIcon.setImmediate(true);
+            deletesDsIcon.addClickListener(event -> discardDSDelete(
+                    (DistributionSetIdName) ((Button) event.getComponent()).getData(), itemId, tab));
+            return deletesDsIcon;
+        });
 
         /* set the visible columns */
         final List<Object> visibleColumnIds = new ArrayList<>();

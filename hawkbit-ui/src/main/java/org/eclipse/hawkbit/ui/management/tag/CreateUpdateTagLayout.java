@@ -288,15 +288,16 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
             if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTagNw)) {
                 if (null != tagNameComboBox.getValue()) {
 
-                    final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue()
-                            .toString());
+                    final TargetTag targetTagSelected = tagManagement
+                            .findTargetTag(tagNameComboBox.getValue().toString());
                     if (null != targetTagSelected) {
-                        selectedColor = targetTagSelected.getColour() != null ? rgbToColorConverter(targetTagSelected
-                                .getColour()) : rgbToColorConverter(DEFAULT_COLOR);
+                        selectedColor = targetTagSelected.getColour() != null
+                                ? rgbToColorConverter(targetTagSelected.getColour())
+                                : rgbToColorConverter(DEFAULT_COLOR);
                     } else {
 
-                        final DistributionSetTag distTag = tagManagement.findDistributionSetTag(tagNameComboBox
-                                .getValue().toString());
+                        final DistributionSetTag distTag = tagManagement
+                                .findDistributionSetTag(tagNameComboBox.getValue().toString());
                         selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
                                 : rgbToColorConverter(DEFAULT_COLOR);
                     }
@@ -470,9 +471,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
             final double greenColorValue = color.getGreen();
             greenSlider.setValue(new Double(greenColorValue));
         } catch (final ValueOutOfBoundsException e) {
-            LOG.error(
-                    "Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
-                            + color.getBlue(), e);
+            LOG.error("Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
+                    + color.getBlue(), e);
         }
     }
 

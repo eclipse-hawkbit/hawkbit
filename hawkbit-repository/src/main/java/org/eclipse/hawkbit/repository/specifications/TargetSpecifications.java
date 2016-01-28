@@ -77,7 +77,8 @@ public final class TargetSpecifications {
      *
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> byControllerIdWithStatusAndAssignedInJoin(final Collection<String> controllerIDs) {
+    public static Specification<Target> byControllerIdWithStatusAndAssignedInJoin(
+            final Collection<String> controllerIDs) {
         final Specification<Target> spec = new Specification<Target>() {
             @Override
             public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
@@ -162,10 +163,11 @@ public final class TargetSpecifications {
             public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
                 final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
-                final Predicate predicate = cb.or(cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet)
-                        .get(DistributionSet_.id), distributionId), cb.equal(
-                        targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(DistributionSet_.id),
-                        distributionId));
+                final Predicate predicate = cb.or(
+                        cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
+                                distributionId),
+                        cb.equal(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet)
+                                .get(DistributionSet_.id), distributionId));
                 return predicate;
             }
         };
@@ -189,12 +191,10 @@ public final class TargetSpecifications {
             @Override
             public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                final Predicate predicate = cb.and(
-                        targetRoot.get(Target_.controllerId).in(tIDs),
-                        cb.or(cb.notEqual(
-                                targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(
-                                        DistributionSet_.id), distributionId),
-                                cb.isNull(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet))));
+                final Predicate predicate = cb.and(targetRoot.get(Target_.controllerId).in(tIDs),
+                        cb.or(cb.notEqual(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet)
+                                .get(DistributionSet_.id), distributionId),
+                        cb.isNull(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet))));
                 return predicate;
             }
         };

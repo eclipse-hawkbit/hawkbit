@@ -271,7 +271,7 @@ public class Action extends BaseEntity implements Comparable<Action> {
      * checks if the {@link #forcedTime} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
-     * 
+     *
      * @param hitTimeMillis
      *            the milliseconds, mostly the
      *            {@link System#currentTimeMillis()}
@@ -312,7 +312,7 @@ public class Action extends BaseEntity implements Comparable<Action> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -322,11 +322,11 @@ public class Action extends BaseEntity implements Comparable<Action> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((actionType == null) ? 0 : actionType.hashCode());
@@ -339,12 +339,12 @@ public class Action extends BaseEntity implements Comparable<Action> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
-                                              // code
+
         if (this == obj) {
             return true;
         }
@@ -428,7 +428,7 @@ public class Action extends BaseEntity implements Comparable<Action> {
 
     /**
      * The action type for this action relation.
-     * 
+     *
      *
      *
      *

@@ -151,9 +151,10 @@ public final class DistributionSetSpecification {
             @Override
             public Predicate toPredicate(final Root<DistributionSet> targetRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                final Predicate predicate = cb.or(
-                        cb.like(cb.lower(targetRoot.<String> get(DistributionSet_.name)), subString.toLowerCase()),
-                        cb.like(cb.lower(targetRoot.<String> get(DistributionSet_.version)), subString.toLowerCase()),
+                final Predicate predicate = cb
+                        .or(cb.like(cb.lower(targetRoot.<String> get(DistributionSet_.name)), subString.toLowerCase()),
+                                cb.like(cb.lower(targetRoot.<String> get(DistributionSet_.version)),
+                                        subString.toLowerCase()),
                         cb.like(cb.lower(targetRoot.<String> get(DistributionSet_.description)),
                                 subString.toLowerCase()));
                 return predicate;
@@ -215,7 +216,8 @@ public final class DistributionSetSpecification {
      *            to be filtered on
      * @return the {@link Specification}
      */
-    public static Specification<DistributionSet> equalsNameAndVersionIgnoreCase(final String name, final String version) {
+    public static Specification<DistributionSet> equalsNameAndVersionIgnoreCase(final String name,
+            final String version) {
         final Specification<DistributionSet> spec = new Specification<DistributionSet>() {
             @Override
             public Predicate toPredicate(final Root<DistributionSet> targetRoot, final CriteriaQuery<?> query,
@@ -265,8 +267,8 @@ public final class DistributionSetSpecification {
             @Override
             public Predicate toPredicate(final Root<DistributionSet> dsRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                final ListJoin<DistributionSet, TargetInfo> installedTargetJoin = dsRoot.join(
-                        DistributionSet_.installedAtTargets, JoinType.INNER);
+                final ListJoin<DistributionSet, TargetInfo> installedTargetJoin = dsRoot
+                        .join(DistributionSet_.installedAtTargets, JoinType.INNER);
                 final Join<TargetInfo, Target> targetJoin = installedTargetJoin.join(TargetInfo_.target);
                 return cb.equal(targetJoin.get(Target_.controllerId), installedTargetId);
             }
@@ -287,8 +289,8 @@ public final class DistributionSetSpecification {
             @Override
             public Predicate toPredicate(final Root<DistributionSet> dsRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                final ListJoin<DistributionSet, Target> assignedTargetJoin = dsRoot.join(
-                        DistributionSet_.assignedToTargets, JoinType.INNER);
+                final ListJoin<DistributionSet, Target> assignedTargetJoin = dsRoot
+                        .join(DistributionSet_.assignedToTargets, JoinType.INNER);
                 return cb.equal(assignedTargetJoin.get(Target_.controllerId), assignedTargetId);
             }
         };

@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.rest.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -60,9 +58,6 @@ public class DistributionSetTagResource {
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
-    @Autowired
-    private EntityManager entityManager;
-
     /**
      * Handles the GET request of retrieving all DistributionSet tags.
      *
@@ -102,8 +97,8 @@ public class DistributionSetTagResource {
             countTargetsAll = tagManagement.countTargetTags();
 
         } else {
-            final Page<DistributionSetTag> findTargetPage = tagManagement.findAllDistributionSetTags(
-                    RSQLUtility.parse(rsqlParam, TagFields.class, entityManager), pageable);
+            final Page<DistributionSetTag> findTargetPage = tagManagement
+                    .findAllDistributionSetTags(RSQLUtility.parse(rsqlParam, TagFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
 
@@ -141,13 +136,13 @@ public class DistributionSetTagResource {
      *         with status code 201 - Created. The Response Body are the created
      *         distribution set tags but without ResponseBody.
      */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE }, produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<TagsRest> createDistributionSetTags(@RequestBody final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} ds tags", tags.size());
 
-        final List<DistributionSetTag> createdTags = tagManagement.createDistributionSetTags(TagMapper
-                .mapDistributionSetTagFromRequest(tags));
+        final List<DistributionSetTag> createdTags = tagManagement
+                .createDistributionSetTags(TagMapper.mapDistributionSetTagFromRequest(tags));
 
         return new ResponseEntity<>(TagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
@@ -247,14 +242,14 @@ public class DistributionSetTagResource {
 
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
-        final DistributionSetTagAssigmentResult assigmentResult = distributionSetManagement.toggleTagAssignment(
-                findDistributionSetIds(assignedDSRequestBodies), tag.getName());
+        final DistributionSetTagAssigmentResult assigmentResult = distributionSetManagement
+                .toggleTagAssignment(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
 
         final DistributionSetTagAssigmentResultRest tagAssigmentResultRest = new DistributionSetTagAssigmentResultRest();
-        tagAssigmentResultRest.setAssignedDistributionSets(DistributionSetMapper
-                .toResponseDistributionSets(assigmentResult.getAssignedDs()));
-        tagAssigmentResultRest.setUnassignedDistributionSets(DistributionSetMapper
-                .toResponseDistributionSets(assigmentResult.getUnassignedDs()));
+        tagAssigmentResultRest.setAssignedDistributionSets(
+                DistributionSetMapper.toResponseDistributionSets(assigmentResult.getAssignedDs()));
+        tagAssigmentResultRest.setUnassignedDistributionSets(
+                DistributionSetMapper.toResponseDistributionSets(assigmentResult.getUnassignedDs()));
 
         LOG.debug("Toggled assignedDS {} and unassignedDS{}", assigmentResult.getAssigned(),
                 assigmentResult.getUnassigned());
@@ -281,8 +276,8 @@ public class DistributionSetTagResource {
         LOG.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
-        final List<DistributionSet> assignedDs = distributionSetManagement.assignTag(
-                findDistributionSetIds(assignedDSRequestBodies), tag);
+        final List<DistributionSet> assignedDs = distributionSetManagement
+                .assignTag(findDistributionSetIds(assignedDSRequestBodies), tag);
         LOG.debug("Assignd DistributionSet {}", assignedDs.size());
         return new ResponseEntity<>(DistributionSetMapper.toResponseDistributionSets(assignedDs), HttpStatus.OK);
     }

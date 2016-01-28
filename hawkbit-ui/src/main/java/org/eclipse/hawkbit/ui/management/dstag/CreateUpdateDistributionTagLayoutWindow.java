@@ -280,8 +280,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
 
     private Boolean checkIsDuplicate(final DistributionSetTag existingDistTag) {
         if (existingDistTag != null) {
-            uiNotification.displayValidationError(i18n.get("message.tag.duplicate.check",
-                    new Object[] { existingDistTag.getName() }));
+            uiNotification.displayValidationError(
+                    i18n.get("message.tag.duplicate.check", new Object[] { existingDistTag.getName() }));
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
