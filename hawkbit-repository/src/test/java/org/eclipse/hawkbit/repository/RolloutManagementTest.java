@@ -715,54 +715,36 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         changeStatusForAllRunningActions(rolloutD, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
-        // TODO have to fix
-        // test
-        // final Page<Rollout> rolloutPage =
-        // rolloutManagement.findAllWithDetailedStatus(new
-        // OffsetBasedPageRequest(0,
-        // 100, new Sort(Direction.ASC, "name")));
-        // final List<Rollout> rolloutList = rolloutPage.getContent();
-        //
-        // // validate rolloutA -> 6 running and 6 ready
-        // Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus =
-        // createInitStatusMap();
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING,
-        // 6L);
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY,
-        // 6L);
-        // validateRolloutActionStatus(rolloutList.get(0).getId(),
-        // expectedTargetCountStatus);
-        //
-        // // validate rolloutB -> 5 running and 5 finished
-        // expectedTargetCountStatus = createInitStatusMap();
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED,
-        // 5L);
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING,
-        // 5L);
-        // validateRolloutActionStatus(rolloutList.get(1).getId(),
-        // expectedTargetCountStatus);
-        //
-        // // validate rolloutC -> 5 running and 5 error
-        // expectedTargetCountStatus = createInitStatusMap();
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR,
-        // 5L);
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY,
-        // 5L);
-        // validateRolloutActionStatus(rolloutList.get(2).getId(),
-        // expectedTargetCountStatus);
-        //
-        // // validate rolloutD -> 1, error, 4 finished, 5 running and 5 ready
-        // expectedTargetCountStatus = createInitStatusMap();
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR,
-        // 1L);
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED,
-        // 4L);
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING,
-        // 5L);
-        // expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY,
-        // 5L);
-        // validateRolloutActionStatus(rolloutList.get(3).getId(),
-        // expectedTargetCountStatus);
+        // Test
+        final Page<Rollout> rolloutPage = rolloutManagement
+                .findAllRolloutsWithDetailedStatus(new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")));
+        final List<Rollout> rolloutList = rolloutPage.getContent();
+
+        // validate rolloutA -> 6 running and 6 ready
+        Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 6L);
+        validateRolloutActionStatus(rolloutList.get(0).getId(), expectedTargetCountStatus);
+
+        // validate rolloutB -> 5 running and 5 finished
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
+        validateRolloutActionStatus(rolloutList.get(1).getId(), expectedTargetCountStatus);
+
+        // validate rolloutC -> 5 running and 5 error
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        validateRolloutActionStatus(rolloutList.get(2).getId(), expectedTargetCountStatus);
+
+        // validate rolloutD -> 1, error, 4 finished, 5 running and 5 ready
+        expectedTargetCountStatus = createInitStatusMap();
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 1L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 4L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        validateRolloutActionStatus(rolloutList.get(3).getId(), expectedTargetCountStatus);
     }
 
     @Test
