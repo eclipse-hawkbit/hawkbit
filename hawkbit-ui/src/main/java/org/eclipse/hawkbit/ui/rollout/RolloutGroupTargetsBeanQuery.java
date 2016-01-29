@@ -48,8 +48,6 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     private final RolloutGroup rolloutGroup;
 
-    private final Long rolloutId;
-
     private transient I18N i18N;
 
     /**
@@ -71,7 +69,6 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
         rolloutGroup = getRolloutUIState().getRolloutGroup().isPresent() ? getRolloutUIState().getRolloutGroup().get()
                 : null;
-        rolloutId = getRolloutUIState().getRolloutId().isPresent() ? getRolloutUIState().getRolloutId().get() : null;
 
     }
 
@@ -85,17 +82,13 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         List<TargetWithActionStatus> rolloutGroupTargetsList = new ArrayList<TargetWithActionStatus>();
         if (startIndex == 0 && firstPageTargetSets != null) {
             rolloutGroupTargetsList = firstPageTargetSets.getContent();
-        } else if (null != rolloutGroup && null != rolloutId) {
+        } else if (null != rolloutGroup) {
             rolloutGroupTargetsList = getRolloutManagement().findAllTargetsWithActionStatusByRolloutGroupId(
                     new PageRequest(startIndex / count, count), rolloutGroup).getContent();
         }
         return getProxyRolloutGroupTargetsList(rolloutGroupTargetsList);
     }
 
-    /**
-     * @param rolloutGroupTargets
-     * @return
-     */
     private List<ProxyTarget> getProxyRolloutGroupTargetsList(final List<TargetWithActionStatus> rolloutGroupTargets) {
         final List<ProxyTarget> proxyTargetBeans = new ArrayList<ProxyTarget>();
         for (final TargetWithActionStatus targetWithActionStatus : rolloutGroupTargets) {

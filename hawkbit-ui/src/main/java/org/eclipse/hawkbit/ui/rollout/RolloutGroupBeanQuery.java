@@ -43,7 +43,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     private transient RolloutUIState rolloutUIState;
 
-    private final long rolloutId;
+    private final Long rolloutId;
 
     /**
      * Parametric Constructor.
@@ -61,7 +61,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
-        rolloutId = getRolloutUIState().getRolloutId();
+        rolloutId = getRolloutUIState().getRolloutId().isPresent() ? getRolloutUIState().getRolloutId().get() : null;
 
         if (HawkbitCommonUtil.checkBolArray(sortStates)) {
             // Initalize Sor
@@ -109,18 +109,18 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
             final TotalTargetCountStatus totalTargetCountActionStatus = rolloutGroup.getTotalTargetCountStatus();
 
-            proxyRolloutGroup.setRunningTargetsCount(
-                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            proxyRolloutGroup.setErrorTargetsCount(
-                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            proxyRolloutGroup.setCancelledTargetsCount(
-                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            proxyRolloutGroup.setFinishedTargetsCount(
-                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            proxyRolloutGroup.setScheduledTargetsCount(
-                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
-            proxyRolloutGroup.setNotStartedTargetsCount(
-                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            proxyRolloutGroup.setRunningTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            proxyRolloutGroup.setErrorTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            proxyRolloutGroup.setCancelledTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            proxyRolloutGroup.setFinishedTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            proxyRolloutGroup.setScheduledTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
+            proxyRolloutGroup.setNotStartedTargetsCount(totalTargetCountActionStatus
+                    .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
 
             proxyRolloutGroupsList.add(proxyRolloutGroup);
         }
@@ -165,9 +165,12 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     @Override
     public int size() {
-        firstPageRolloutGroupSets = getRolloutManagement().findRolloutGroupsByRollout(rolloutId,
-                new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
-        final long size = firstPageRolloutGroupSets.getTotalElements();
+        long size = 0;
+        if (null != rolloutId) {
+            firstPageRolloutGroupSets = getRolloutManagement().findRolloutGroupsByRollout(rolloutId,
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
+            size = firstPageRolloutGroupSets.getTotalElements();
+        }
         if (size > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;
         }
