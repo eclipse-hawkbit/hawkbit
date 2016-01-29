@@ -96,6 +96,8 @@
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+      <sonar.links.homepage>https://projects.eclipse.org/projects/iot.hawkbit</sonar.links.homepage>
+      <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <!-- Jacoco version to use -->
       <jacoco.version>0.7.2.201409121644</jacoco.version>
       <!-- The Sonar Jacoco Listener for JUnit to extract coverage details
