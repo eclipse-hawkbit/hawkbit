@@ -9,22 +9,16 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.eventbus.event.AbstractPropertyChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.ActionCreatedEvent;
-import org.eclipse.hawkbit.eventbus.event.ActionPropertyChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.RolloutGroupPropertyChangeEvent;
+import org.eclipse.hawkbit.eventbus.event.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -77,6 +71,7 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -96,54 +91,36 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     }
 
     /**
-     * EventListener method which is called when a list of events is published.
-     * Event types should not be mixed up.
-     *
-     * @param events
-     *            list of events
+     * Handles the RolloutGroupChangeEvent to refresh the item in the table.
+     * 
+     * @param rolloutChangeEvent
+     *            the event which contains the rollout group which has been
+     *            changed
      */
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    public void onEvents(final List<?> events) {
-        final Object firstEvent = events.get(0);
-        if (RolloutGroupPropertyChangeEvent.class.isInstance(firstEvent)) {
-            onRolloutGroupStatusChange((List<RolloutGroupPropertyChangeEvent>) events);
-        } else if (ActionPropertyChangeEvent.class.isInstance(firstEvent)) {
-            onActionPropertyChange((List<ActionPropertyChangeEvent>) events);
-        } else if (ActionCreatedEvent.class.isInstance(firstEvent)) {
-            onActionCreation((List<ActionCreatedEvent>) events);
-        }
-    }
-
-    private void onActionCreation(final List<ActionCreatedEvent> events) {
-        final Set<Long> rolloutsToBeRefreshed = new HashSet();
+    public void onEvent(final RolloutGroupChangeEvent rolloutGroupChangeEvent) {
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final ActionCreatedEvent event : events) {
-            final Action action = event.getEntity();
-            if (null != action.getRolloutGroup()) {
-                final Long rolloutGroupId = action.getRolloutGroup().getId();
-                final Status status = action.getStatus();
-                if (visibleItemIds.contains(rolloutGroupId)) {
-                    final Item item = getItem(rolloutGroupId);
-                    rolloutsToBeRefreshed.add(rolloutGroupId);
-                    HawkbitCommonUtil.incrementStatusCount(item, status);
-                    HawkbitCommonUtil.decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
-                }
-            }
-        }
-        for (final Long id : rolloutsToBeRefreshed) {
-            final Item item = getItem(id);
-            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
-            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
-        }
-    }
-
-    private void onRolloutGroupStatusChange(final List<RolloutGroupPropertyChangeEvent> events) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        for (final RolloutGroupPropertyChangeEvent rolloutGroupStatusUpdateEvent : events) {
-            final RolloutGroup rolloutGroup = rolloutGroupStatusUpdateEvent.getEntity();
-            if (visibleItemIds.contains(rolloutGroup.getId())) {
-                updateVisibleItemOnEvent(rolloutGroup);
-            }
+        if (visibleItemIds.contains(rolloutGroupChangeEvent.getRolloutGroupId())) {
+            final RolloutGroup rolloutGroup = rolloutManagement
+                    .getRolloutGroupDetailedStatus(rolloutGroupChangeEvent.getRolloutGroupId());
+            final TotalTargetCountStatus totalTargetCountStatus = rolloutGroup.getTotalTargetCountStatus();
+            final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+            final Item item = rolloutContainer.getItem(rolloutGroup.getId());
+            item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rolloutGroup.getStatus());
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED)
+                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
+            item.getItemProperty("isActionRecieved")
+                    .setValue(!(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
     }
 
@@ -157,14 +134,14 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<TableColumn>();
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_NAME, i18n.get("header.name"), 0.1f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n
-                .get("header.rolloutgroup.started.date"), 0.2f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, i18n
-                .get("header.rolloutgroup.threshold.error"), 0.15f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_THRESHOLD, i18n
-                .get("header.rolloutgroup.threshold"), 0.15f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE, i18n
-                .get("header.rolloutgroup.installed.percentage"), 0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE,
+                i18n.get("header.rolloutgroup.started.date"), 0.2f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD,
+                i18n.get("header.rolloutgroup.threshold.error"), 0.15f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_THRESHOLD,
+                i18n.get("header.rolloutgroup.threshold"), 0.15f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE,
+                i18n.get("header.rolloutgroup.installed.percentage"), 0.15f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_STATUS, i18n.get("header.status"), 0.1f));
         columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.15f));
 
@@ -175,8 +152,8 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     protected Container createContainer() {
         final BeanQueryFactory<RolloutGroupBeanQuery> rolloutQf = new BeanQueryFactory<RolloutGroupBeanQuery>(
                 RolloutGroupBeanQuery.class);
-        final LazyQueryContainer rolloutGroupTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
+        final LazyQueryContainer rolloutGroupTableContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
         return rolloutGroupTableContainer;
     }
 
@@ -235,7 +212,8 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
 
     @Override
     protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUIDefinitions.ROLLOUT_GROUP_NAME, (source, itemId, columnId) -> getRolloutNameLink(itemId));
+        addGeneratedColumn(SPUIDefinitions.ROLLOUT_GROUP_NAME,
+                (source, itemId, columnId) -> getRolloutNameLink(itemId));
         addGeneratedColumn(SPUIDefinitions.ROLLOUT_GROUP_STATUS, (source, itemId, columnId) -> getStatusLabel(itemId));
         addGeneratedColumn(SPUIDefinitions.DETAIL_STATUS, (source, itemId, columnId) -> getProgressBar(itemId));
         setColumnAlignment(SPUIDefinitions.ROLLOUT_GROUP_STATUS, Align.CENTER);
@@ -267,8 +245,8 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     private String getDescription(final Object itemId) {
         final Item item = getItem(itemId);
         if (item != null) {
-            final RolloutGroupStatus rolloutGroupStatus = (RolloutGroupStatus) item.getItemProperty(
-                    SPUILabelDefinitions.VAR_STATUS).getValue();
+            final RolloutGroupStatus rolloutGroupStatus = (RolloutGroupStatus) item
+                    .getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
             return rolloutGroupStatus.toString().toLowerCase();
         }
         return null;
@@ -277,8 +255,8 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     private void setStatusIcon(final Object itemId, final Label statusLabel) {
         final Item item = getItem(itemId);
         if (item != null) {
-            final RolloutGroupStatus rolloutGroupStatus = (RolloutGroupStatus) item.getItemProperty(
-                    SPUILabelDefinitions.VAR_STATUS).getValue();
+            final RolloutGroupStatus rolloutGroupStatus = (RolloutGroupStatus) item
+                    .getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
             setRolloutStatusIcon(rolloutGroupStatus, statusLabel);
         }
     }
@@ -348,37 +326,8 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     }
 
     private static String getDetailLinkId(final String rolloutGroupName) {
-        return new StringBuilder(SPUIComponetIdProvider.ROLLOUT_GROUP_NAME_LINK_ID).append('.')
-                .append(rolloutGroupName).toString();
-    }
-
-    private void onActionPropertyChange(final List<ActionPropertyChangeEvent> events) {
-        final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
-        final Set<Long> rolloutsToBeRefreshed = new HashSet();
-        for (final ActionPropertyChangeEvent event : events) {
-            final Action action = event.getEntity();
-            if (null != action.getRolloutGroup()) {
-                final Long rolloutGroupId = action.getRolloutGroup().getId();
-                if (visibleItemIds.contains(rolloutGroupId)) {
-                    final Item item = getItem(rolloutGroupId);
-                    rolloutsToBeRefreshed.add(rolloutGroupId);
-                    final AbstractPropertyChangeEvent<Action>.Values changeSetWithValues = event.getChangeSet().get(
-                            "status");
-                    if (null != changeSetWithValues) {
-                        final Action.Status oldValue = (Status) changeSetWithValues.getOldValue();
-                        final Action.Status newValue = (Status) changeSetWithValues.getNewValue();
-                        HawkbitCommonUtil.decrementStatusCount(item, oldValue);
-                        HawkbitCommonUtil.incrementStatusCount(item, newValue);
-                    }
-                }
-            }
-        }
-
-        for (final Long id : rolloutsToBeRefreshed) {
-            final Item item = getItem(id);
-            final Boolean isActionRecieved = (Boolean) item.getItemProperty("isActionRecieved").getValue();
-            item.getItemProperty("isActionRecieved").setValue(!isActionRecieved);
-        }
+        return new StringBuilder(SPUIComponetIdProvider.ROLLOUT_GROUP_NAME_LINK_ID).append('.').append(rolloutGroupName)
+                .toString();
     }
 
     @Override

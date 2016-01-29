@@ -35,21 +35,22 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  *
  */
 @Entity
-@Table(name = "sp_rollout", indexes = { @Index(name = "sp_idx_rollout_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-        "name", "tenant" }, name = "uk_rollout"))
+@Table(name = "sp_rollout", indexes = {
+        @Index(name = "sp_idx_rollout_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
+                "name", "tenant" }, name = "uk_rollout") )
 public class Rollout extends NamedEntity {
 
     private static final long serialVersionUID = 1L;
 
     @OneToMany(cascade = { CascadeType.ALL }, targetEntity = RolloutGroup.class)
-    @JoinColumn(name = "rollout", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_rolloutgroup"))
+    @JoinColumn(name = "rollout", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_rolloutgroup") )
     private List<RolloutGroup> rolloutGroups;
 
     @Column(name = "target_filter", length = 1024, nullable = false)
     private String targetFilterQuery;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
+    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds") )
     private DistributionSet distributionSet;
 
     @Column(name = "status")
@@ -64,6 +65,9 @@ public class Rollout extends NamedEntity {
 
     @Column(name = "forced_time")
     private long forcedTime;
+
+    @Column(name = "total_targets")
+    private long totalTargets;
 
     @Transient
     @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
@@ -182,6 +186,21 @@ public class Rollout extends NamedEntity {
     }
 
     /**
+     * @return the totalTargets
+     */
+    public long getTotalTargets() {
+        return totalTargets;
+    }
+
+    /**
+     * @param totalTargets
+     *            the totalTargets to set
+     */
+    public void setTotalTargets(final long totalTargets) {
+        this.totalTargets = totalTargets;
+    }
+
+    /**
      * @return the rolloutGroupsTotal
      */
     public int getRolloutGroupsTotal() {
@@ -215,6 +234,9 @@ public class Rollout extends NamedEntity {
      * @return the totalTargetCountStatus
      */
     public TotalTargetCountStatus getTotalTargetCountStatus() {
+        if (totalTargetCountStatus == null) {
+            this.totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+        }
         return totalTargetCountStatus;
     }
 

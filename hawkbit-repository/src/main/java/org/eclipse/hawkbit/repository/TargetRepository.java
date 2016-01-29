@@ -284,15 +284,6 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     List<Target> findByRolloutTargetGroupRolloutGroup(final RolloutGroup rolloutGroup);
 
     /**
-     * Find count of all targets in a rollout.
-     * 
-     * @param rolloutId
-     *            id of rollout
-     * @return count of targets in rollout
-     */
-    Long countByRolloutTargetGroupRolloutGroupRolloutId(Long rolloutId);
-
-    /**
      * Find count of all targets in a rolloutgroup.
      * 
      * @param rolloutGroupId

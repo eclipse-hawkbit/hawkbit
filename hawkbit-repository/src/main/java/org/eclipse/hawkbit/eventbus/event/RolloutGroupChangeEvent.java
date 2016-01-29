@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
-import org.eclipse.hawkbit.eventbus.event.AbstractEvent;
-
 /**
  * Event declaration for the UI to notify the UI that a rollout has been
  * changed.
@@ -20,6 +18,7 @@ import org.eclipse.hawkbit.eventbus.event.AbstractEvent;
 public class RolloutGroupChangeEvent extends AbstractEvent {
 
     private final Long rolloutId;
+    private final Long rolloutGroupId;
 
     /**
      * @param revision
@@ -28,13 +27,21 @@ public class RolloutGroupChangeEvent extends AbstractEvent {
      *            the tenant of the event
      * @param rolloutId
      *            the ID of the rollout which has been changed
+     * @param rolloutGroupId
+     *            the ID of the rollout group which has been changed
      */
-    public RolloutGroupChangeEvent(final long revision, final String tenant, final Long rolloutId) {
+    public RolloutGroupChangeEvent(final long revision, final String tenant, final Long rolloutId,
+            final Long rolloutGroupId) {
         super(revision, tenant);
         this.rolloutId = rolloutId;
+        this.rolloutGroupId = rolloutGroupId;
     }
 
     public Long getRolloutId() {
         return rolloutId;
+    }
+
+    public Long getRolloutGroupId() {
+        return rolloutGroupId;
     }
 }

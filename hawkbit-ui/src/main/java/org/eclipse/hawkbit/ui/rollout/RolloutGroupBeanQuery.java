@@ -81,13 +81,9 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     @Override
     protected List<ProxyRolloutGroup> loadBeans(final int startIndex, final int count) {
-        Page<RolloutGroup> rolloutGroupBeans;
-        if (startIndex == 0 && firstPageRolloutGroupSets != null) {
-            rolloutGroupBeans = firstPageRolloutGroupSets;
-        } else {
-            rolloutGroupBeans = getRolloutManagement().findRolloutGroupsByRollout(rolloutId,
-                    new PageRequest(startIndex / count, count));
-        }
+        final Page<RolloutGroup> rolloutGroupBeans = getRolloutManagement()
+                .findAllRolloutGroupsWithDetailedStatusByRolloutId(rolloutId,
+                        new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         return getProxyRolloutGroupList(rolloutGroupBeans);
     }
 
@@ -113,18 +109,18 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
             final TotalTargetCountStatus totalTargetCountActionStatus = rolloutGroup.getTotalTargetCountStatus();
 
-            proxyRolloutGroup.setRunningTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            proxyRolloutGroup.setErrorTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            proxyRolloutGroup.setCancelledTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            proxyRolloutGroup.setFinishedTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            proxyRolloutGroup.setScheduledTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
-            proxyRolloutGroup.setNotStartedTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            proxyRolloutGroup.setRunningTargetsCount(
+                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            proxyRolloutGroup.setErrorTargetsCount(
+                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            proxyRolloutGroup.setCancelledTargetsCount(
+                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            proxyRolloutGroup.setFinishedTargetsCount(
+                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            proxyRolloutGroup.setScheduledTargetsCount(
+                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
+            proxyRolloutGroup.setNotStartedTargetsCount(
+                    totalTargetCountActionStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
 
             proxyRolloutGroupsList.add(proxyRolloutGroup);
         }
