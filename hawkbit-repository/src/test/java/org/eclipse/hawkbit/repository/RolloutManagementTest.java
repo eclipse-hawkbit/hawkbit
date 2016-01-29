@@ -311,7 +311,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify
         // 6 targets are ready and 2 are running
         validationMap = createInitStatusMap();
-        validationMap.put(TotalTargetCountStatus.Status.READY, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 6L);
         validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
@@ -322,7 +322,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify
         // 4 targets are ready, 2 are finished and 2 are running
         validationMap = createInitStatusMap();
-        validationMap.put(TotalTargetCountStatus.Status.READY, 4L);
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 4L);
         validationMap.put(TotalTargetCountStatus.Status.FINISHED, 2L);
         validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
@@ -334,7 +334,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify
         // 2 targets are ready, 4 are finished and 2 are running
         validationMap = createInitStatusMap();
-        validationMap.put(TotalTargetCountStatus.Status.READY, 2L);
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 2L);
         validationMap.put(TotalTargetCountStatus.Status.FINISHED, 4L);
         validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
@@ -385,7 +385,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify
         // 6 targets are ready and 2 are running
         validationMap = createInitStatusMap();
-        validationMap.put(TotalTargetCountStatus.Status.READY, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 6L);
         validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
 
@@ -396,7 +396,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify
         // 6 targets are ready and 2 are error
         validationMap = createInitStatusMap();
-        validationMap.put(TotalTargetCountStatus.Status.READY, 6L);
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 6L);
         validationMap.put(TotalTargetCountStatus.Status.ERROR, 2L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
     }
@@ -432,10 +432,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 2L);
         validateRolloutGroupActionStatus(rolloutGruops.get(2), expectedTargetCountStatus);
         expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 2L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 2L);
         validateRolloutGroupActionStatus(rolloutGruops.get(3), expectedTargetCountStatus);
         expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 1L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 1L);
         validateRolloutGroupActionStatus(rolloutGruops.get(4), expectedTargetCountStatus);
     }
 
@@ -486,7 +486,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
         validationMap.put(TotalTargetCountStatus.Status.RUNNING, 2L);
         validationMap.put(TotalTargetCountStatus.Status.CANCELLED, 3L);
-        validationMap.put(TotalTargetCountStatus.Status.READY, 5L);
+        validationMap.put(TotalTargetCountStatus.Status.SCHEDULED, 5L);
         validateRolloutActionStatus(createdRollout.getId(), validationMap);
     }
 
@@ -515,7 +515,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 5L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 5L);
         validateRolloutActionStatus(rolloutOne.getId(), expectedTargetCountStatus);
 
         rolloutManagement.startRollout(rolloutTwo);
@@ -645,7 +645,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
         final List<RolloutGroup> rolloutGruops = rolloutOne.getRolloutGroups();
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 5L);
         validateRolloutGroupActionStatus(rolloutGruops.get(1), expectedTargetCountStatus);
     }
 
@@ -723,7 +723,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // validate rolloutA -> 6 running and 6 ready
         Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 6L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 6L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 6L);
         validateRolloutActionStatus(rolloutList.get(0).getId(), expectedTargetCountStatus);
 
         // validate rolloutB -> 5 running and 5 finished
@@ -735,7 +735,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // validate rolloutC -> 5 running and 5 error
         expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 5L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 5L);
         validateRolloutActionStatus(rolloutList.get(2).getId(), expectedTargetCountStatus);
 
         // validate rolloutD -> 1, error, 4 finished, 5 running and 5 ready
@@ -743,7 +743,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.ERROR, 1L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 4L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 5L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.READY, 5L);
+        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 5L);
         validateRolloutActionStatus(rolloutList.get(3).getId(), expectedTargetCountStatus);
     }
 
@@ -949,7 +949,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
             final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
         for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
-            final Long countReady = totalTargetCountStatus.getTotalCountByStatus(entry.getKey());
+            final Long countReady = totalTargetCountStatus.getTotalTargetCountByStatus(entry.getKey());
             assertThat(countReady).isEqualTo(entry.getValue());
         }
     }
