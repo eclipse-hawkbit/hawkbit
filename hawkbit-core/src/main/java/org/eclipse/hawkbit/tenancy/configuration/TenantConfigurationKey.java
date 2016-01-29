@@ -35,8 +35,8 @@ public enum TenantConfigurationKey {
     *
     */
     AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME("authentication.header.authority",
-            "hawkbit.server.controller.security.authentication.header.authority", Boolean.class,
-            Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
+            "hawkbit.server.controller.security.authentication.header.authority", String.class,
+            Boolean.FALSE.toString(), TenantConfigurationStringValidator.class),
     /**
      * boolean value {@code true} {@code false}.
      */
