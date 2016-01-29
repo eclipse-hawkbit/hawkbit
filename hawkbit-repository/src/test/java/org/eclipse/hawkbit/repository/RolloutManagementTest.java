@@ -15,6 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -40,6 +45,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -880,10 +886,51 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("")
+    @Description("Verify that the expected targets are returned for the rollout groups.")
     public void findRolloutGroupTargets() {
 
-        // TODO test missing
+        // setup
+        final int amountTargetsForRollout = 15;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 3;
+        final String rolloutName = "MyRollout";
+        Rollout myRollout = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
+                amountGroups, "50", "80", rolloutName, rolloutName);
+        rolloutManagement.startRollout(myRollout);
+        myRollout = rolloutManagement.findRolloutById(myRollout.getId());
+        final List<RolloutGroup> rolloutGroups = myRollout.getRolloutGroups();
+
+        final Specification<Target> specification = new Specification<Target>() {
+            @Override
+            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
+                // TODO criteria anpassen
+                return cb.conjunction();
+            }
+        };
+
+        // test group 1
+        Page<Target> targetPage = rolloutManagement.findRolloutGroupTargets(rolloutGroups.get(0), specification,
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")));
+        final List<Target> targetlistGroup1 = targetPage.getContent();
+
+        // TODO change --> verify in a different way
+        // verify
+        assertThat(targetlistGroup1.size()).isEqualTo(5);
+        int i = 0;
+        for (final Target t : targetlistGroup1) {
+            assertThat(t.getName()).as("MyRollout--0000" + i);
+            i++;
+        }
+
+        targetPage = rolloutManagement.findRolloutGroupTargets(rolloutGroups.get(1), specification,
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")));
+        final List<Target> targetlistGroup2 = targetPage.getContent();
+        assertThat(targetlistGroup2.size()).isEqualTo(5);
+        for (final Target t : targetlistGroup1) {
+            assertThat(t.getName()).as("MyRollout--0000" + i);
+            i++;
+        }
+
     }
 
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
@@ -962,7 +1009,6 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // set both actions in error state so error condition is hit and error
         // action is executed
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
-
         // finish actions with error
         for (final Action action : runningActions) {
             action.setStatus(status);
