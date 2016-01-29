@@ -94,31 +94,31 @@
 
       <!-- Sonar -->
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
-      <sonar.github.repository>bsinno/hawkbit-update-server</sonar.github.repository>
+      <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
       <!-- Jacoco version to use -->
       <jacoco.version>0.7.2.201409121644</jacoco.version>
-      <!-- The Sonar Jacoco Listener for JUnit to extract coverage details 
+      <!-- The Sonar Jacoco Listener for JUnit to extract coverage details
          per test -->
       <sonar-jacoco-listeners.version>1.4</sonar-jacoco-listeners.version>
       <!-- Don't let Sonar execute tests. We will ask it to Maven -->
       <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-      <!-- The system property jacoco.outputDir needs to be override on the 
-         command line with an absolute path if you want to merge results from all 
-         modules. Example in a Jenkisn build where ${WORKSPACE} is defined and your 
-         project in the root directory of the workspace : mvn clean install -Prun-its,coverage 
-         -Djacoco.outputDir=${WORKSPACE}/target Note that unfortunately using the 
-         following does not work because of http://jira.codehaus.org/browse/SONAR-3427: 
+      <!-- The system property jacoco.outputDir needs to be override on the
+         command line with an absolute path if you want to merge results from all
+         modules. Example in a Jenkisn build where ${WORKSPACE} is defined and your
+         project in the root directory of the workspace : mvn clean install -Prun-its,coverage
+         -Djacoco.outputDir=${WORKSPACE}/target Note that unfortunately using the
+         following does not work because of http://jira.codehaus.org/browse/SONAR-3427:
          <jacoco.outputDir>${session.executionRootDirectory}/target/</jacoco.outputDir> -->
       <jacoco.outputDir>${project.basedir}/../target/</jacoco.outputDir>
       <!-- Jacoco output file for UTs -->
       <jacoco.out.ut.file>jacoco-ut.exec</jacoco.out.ut.file>
-      <!-- Tells Sonar where the Jacoco coverage result file is located for 
+      <!-- Tells Sonar where the Jacoco coverage result file is located for
          Unit Tests -->
       <sonar.jacoco.reportPath>${jacoco.outputDir}/${jacoco.out.ut.file}</sonar.jacoco.reportPath>
       <!-- Jacoco output file for ITs -->
       <jacoco.out.it.file>jacoco-it.exec</jacoco.out.it.file>
-      <!-- Tells Sonar where the Jacoco coverage result file is located for 
+      <!-- Tells Sonar where the Jacoco coverage result file is located for
          Integration Tests -->
       <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
       <guava.version>19.0</guava.version>
@@ -360,9 +360,9 @@
             <artifactId>vaadin-push</artifactId>
             <version>${vaadin.version}</version>
          </dependency>
-         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory). 
-            For widgetset compilation, vaadin-client-compiler is automatically added 
-            on the compilation classpath by vaadin-maven-plugin so normally there is 
+         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory).
+            For widgetset compilation, vaadin-client-compiler is automatically added
+            on the compilation classpath by vaadin-maven-plugin so normally there is
             no need for an explicit dependency. -->
          <dependency>
             <groupId>com.vaadin</groupId>
@@ -501,7 +501,7 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Override of classmate version, that is a hibernate validator 
+         <!-- Override of classmate version, that is a hibernate validator
             dependency. allow PB of CQ -->
          <dependency>
             <groupId>com.fasterxml</groupId>
