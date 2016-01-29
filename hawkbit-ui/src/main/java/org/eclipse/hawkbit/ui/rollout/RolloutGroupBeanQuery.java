@@ -81,8 +81,9 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     @Override
     protected List<ProxyRolloutGroup> loadBeans(final int startIndex, final int count) {
-        final Page<RolloutGroup> rolloutGroupBeans = getRolloutManagement().findAllRolloutGroupsWithDetailedStatus(
-                new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+        final Page<RolloutGroup> rolloutGroupBeans = getRolloutManagement()
+                .findAllRolloutGroupsWithDetailedStatusByRolloutId(rolloutId,
+                        new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         return getProxyRolloutGroupList(rolloutGroupBeans);
     }
 

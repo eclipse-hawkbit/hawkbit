@@ -111,7 +111,7 @@ public class TotalTargetCountStatus {
         }
         statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
         statusTotalCountMap.put(Status.CANCELLED, cancelledItemCount);
-        return runningItemsCount + cancelledItemCount != 0;
+        return runningItemsCount + cancelledItemCount == 0;
     }
 
 }

@@ -843,9 +843,10 @@ public class RolloutManagement {
     }
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
-    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Pageable page) {
+    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatusByRolloutId(final Long rolloutId,
+            final Pageable page) {
         // TODO add test case
-        final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findAll(page);
+        final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, page);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
