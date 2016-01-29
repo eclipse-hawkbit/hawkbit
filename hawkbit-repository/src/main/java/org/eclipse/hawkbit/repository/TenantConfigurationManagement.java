@@ -1,5 +1,6 @@
 package org.eclipse.hawkbit.repository;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -14,6 +15,7 @@ import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -69,7 +71,9 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
+
     @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
             final Class<T> propertyType) throws TenantConfigurationValidatorException {
 
@@ -116,6 +120,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public TenantConfigurationValue<?> getConfigurationValue(final TenantConfigurationKey configurationKey)
             throws TenantConfigurationValidatorException {
         return getConfigurationValue(configurationKey, configurationKey.getDataType());
@@ -142,6 +147,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             {@code propertyType}
      */
     @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public <T> T getGlobalConfigurationValue(final TenantConfigurationKey configurationKey, final Class<T> propertyType)
             throws TenantConfigurationValidatorException {
 
@@ -178,6 +184,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
     @Transactional
     @Modifying
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public <T> TenantConfigurationValue<T> addOrUpdateConfiguration(final TenantConfigurationKey configurationKey,
             final T value) {
 
@@ -223,6 +230,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
     @Transactional
     @Modifying
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public void deleteConfiguration(final TenantConfigurationKey configurationKey) {
         tenantConfigurationRepository.deleteByKey(configurationKey.getKeyName());
     }
