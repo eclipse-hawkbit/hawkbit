@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.Rollout_;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -54,7 +55,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -86,7 +89,6 @@ import com.google.common.eventbus.EventBus;
 @EnableScheduling
 @Transactional(readOnly = true)
 public class RolloutManagement {
-
     private static final Logger logger = LoggerFactory.getLogger(RolloutManagement.class);
 
     @Autowired
@@ -860,7 +862,6 @@ public class RolloutManagement {
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
                 targetRepository.countByRolloutTargetGroupRolloutGroupId(rolloutGroupId));
         rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
-
         return rolloutGroup;
 
     }
@@ -897,23 +898,33 @@ public class RolloutManagement {
     }
 
     /**
-     * Get targets of specified rollout group.
      * 
+     * Find all targets with action status by rollout group id.
+     * 
+     * @param pageRequest
+     *            the page request to sort and limit the result
      * @param rolloutGroup
      *            rollout group
-     * @param page
-     *            * the page request to sort and limit the result
-     * 
-     * @return Page<Target> list of targets of a rollout group
+     * @return {@link TargetWithActionStatus} target with action status
      */
-    public Page<Target> getRolloutGroupTargets(final RolloutGroup rolloutGroup, final Pageable page) {
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    public Page<TargetWithActionStatus> findAllTargetsWithActionStatusByRolloutGroupId(final PageRequest pageRequest,
+            @NotNull final RolloutGroup rolloutGroup) {
         if (rolloutGroup != null && rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
-            return targetRepository.findByRolloutTargetGroupRolloutGroupId(rolloutGroup.getId(), page);
+            final Page<Target> targetPage = targetRepository.findByRolloutTargetGroupRolloutGroupId(pageRequest,
+                    rolloutGroup.getId());
+            final Page<TargetWithActionStatus> page = targetPage.map(new Converter<Target, TargetWithActionStatus>() {
+                @Override
+                public TargetWithActionStatus convert(final Target source) {
+                    return new TargetWithActionStatus(source);
+                }
+            });
+            return page;
         }
-        return targetRepository.findByActionsRolloutGroup(rolloutGroup, page);
+        return targetRepository.findTargetsWithActionStatusByRolloutGroupId(pageRequest, rolloutGroup.getId());
     }
 
     /**

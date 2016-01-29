@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.components;
 import java.net.URI;
 import java.security.SecureRandom;
 
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -52,6 +53,8 @@ public class ProxyTarget extends Target {
     private String lastModifiedDate;
 
     private String modifiedByUser;
+
+    private Status status;
 
     /**
      * @param controllerId
@@ -296,5 +299,20 @@ public class ProxyTarget extends Target {
      */
     public void setPollStatusToolTip(final String pollStatusToolTip) {
         this.pollStatusToolTip = pollStatusToolTip;
+    }
+
+    /**
+     * @return the status
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(final Status status) {
+        this.status = status;
     }
 }
