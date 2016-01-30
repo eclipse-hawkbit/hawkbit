@@ -26,7 +26,7 @@ import com.vaadin.server.Resource;
  * 
  */
 @Component
-@Order(300)
+@Order(400)
 public class DistributionsViewMenuItem implements DashboardMenuItem {
 
     private static final long serialVersionUID = -4048522766974227222L;

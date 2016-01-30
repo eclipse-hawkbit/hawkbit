@@ -42,6 +42,8 @@ public class ProxyRolloutGroup extends RolloutGroup {
 
     private Boolean isActionRecieved = Boolean.FALSE;
 
+    private String totalTargetsCount;
+
     /**
      * @return the createdDate
      */
@@ -220,6 +222,21 @@ public class ProxyRolloutGroup extends RolloutGroup {
      */
     public void setIsActionRecieved(final Boolean isActionRecieved) {
         this.isActionRecieved = isActionRecieved;
+    }
+
+    /**
+     * @return the totalTargetsCount
+     */
+    public String getTotalTargetsCount() {
+        return totalTargetsCount;
+    }
+
+    /**
+     * @param totalTargetsCount
+     *            the totalTargetsCount to set
+     */
+    public void setTotalTargetsCount(final String totalTargetsCount) {
+        this.totalTargetsCount = totalTargetsCount;
     }
 
 }

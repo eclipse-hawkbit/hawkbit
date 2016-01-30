@@ -122,6 +122,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             proxyRolloutGroup.setNotStartedTargetsCount(totalTargetCountActionStatus
                     .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
 
+            proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
+
             proxyRolloutGroupsList.add(proxyRolloutGroup);
         }
         return proxyRolloutGroupsList;

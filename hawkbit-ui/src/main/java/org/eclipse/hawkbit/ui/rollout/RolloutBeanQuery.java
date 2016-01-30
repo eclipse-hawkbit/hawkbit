@@ -146,6 +146,9 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setNotStartedTargetsCount(totalTargetCountActionStatus
                     .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
             proxyRolloutList.add(proxyRollout);
+
+            proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
+
         }
         return proxyRolloutList;
     }
