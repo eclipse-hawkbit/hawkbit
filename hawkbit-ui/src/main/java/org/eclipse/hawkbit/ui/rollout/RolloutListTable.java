@@ -120,20 +120,20 @@ public class RolloutListTable extends AbstractSimpleTable {
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
             item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING).setValue(
-                    totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR).setValue(
-                    totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED).setValue(
-                    totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED).setValue(
-                    totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED).setValue(
-                    totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED).setValue(
-                    totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
-            item.getItemProperty("isActionRecieved").setValue(
-                    !(Boolean) item.getItemProperty("isActionRecieved").getValue());
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING)
+                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR)
+                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED)
+                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED)
+                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED)
+                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED)
+                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
+            item.getItemProperty("isActionRecieved")
+                    .setValue(!(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
     }
 

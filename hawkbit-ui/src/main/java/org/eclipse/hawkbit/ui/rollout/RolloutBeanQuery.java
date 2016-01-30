@@ -134,17 +134,17 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
 
             proxyRollout.setRunningTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
             proxyRollout.setErrorTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
             proxyRollout.setCancelledTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
             proxyRollout.setFinishedTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
             proxyRollout.setScheduledTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
             proxyRollout.setNotStartedTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
             proxyRolloutList.add(proxyRollout);
 
             proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));

@@ -109,18 +109,18 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
             final TotalTargetCountStatus totalTargetCountActionStatus = rolloutGroup.getTotalTargetCountStatus();
 
-            proxyRolloutGroup.setRunningTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            proxyRolloutGroup.setErrorTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            proxyRolloutGroup.setCancelledTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            proxyRolloutGroup.setFinishedTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            proxyRolloutGroup.setScheduledTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
-            proxyRolloutGroup.setNotStartedTargetsCount(totalTargetCountActionStatus
-                    .getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            proxyRolloutGroup.setRunningTargetsCount(
+                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            proxyRolloutGroup.setErrorTargetsCount(
+                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            proxyRolloutGroup.setCancelledTargetsCount(
+                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            proxyRolloutGroup.setFinishedTargetsCount(
+                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            proxyRolloutGroup.setScheduledTargetsCount(
+                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
+            proxyRolloutGroup.setNotStartedTargetsCount(
+                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
 
             proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
 
