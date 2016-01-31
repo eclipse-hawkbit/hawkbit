@@ -120,20 +120,20 @@ public class RolloutListTable extends AbstractSimpleTable {
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
             item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
-            item.getItemProperty("isActionRecieved")
-                    .setValue(!(Boolean) item.getItemProperty("isActionRecieved").getValue());
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
+            item.getItemProperty("isActionRecieved").setValue(
+                    !(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
     }
 
@@ -427,8 +427,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             statusLabel.setStyleName("statusIconBlue");
             break;
         case RUNNING:
-            statusLabel.setValue(FontAwesome.ADJUST.getHtml());
-            statusLabel.setStyleName("statusIconYellow");
+            statusLabel.setStyleName("yellowSpinner");
             break;
         case READY:
             statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
@@ -437,6 +436,12 @@ public class RolloutListTable extends AbstractSimpleTable {
         case STOPPED:
             statusLabel.setValue(FontAwesome.STOP.getHtml());
             statusLabel.setStyleName("statusIconRed");
+            break;
+        case CREATING:
+            statusLabel.setStyleName("greySpinner");
+            break;
+        case STARTING:
+            statusLabel.setStyleName("blueSpinner");
             break;
         default:
             break;
