@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.Rollout_;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -54,7 +55,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -86,7 +89,6 @@ import com.google.common.eventbus.EventBus;
 @EnableScheduling
 @Transactional(readOnly = true)
 public class RolloutManagement {
-
     private static final Logger logger = LoggerFactory.getLogger(RolloutManagement.class);
 
     @Autowired
@@ -256,8 +258,7 @@ public class RolloutManagement {
     @Transactional
     @Modifying
     // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
-    public Rollout createRollout(final Rollout rollout, final int amountGroup,
-            final RolloutGroupConditions conditions) {
+    public Rollout createRollout(final Rollout rollout, final int amountGroup, final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
         return createRolloutGroups(amountGroup, conditions, savedRollout);
     }
@@ -475,8 +476,8 @@ public class RolloutManagement {
             // create only not active actions with status scheduled so they can
             // be activated later
             else {
-                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime, rollout,
-                        rolloutGroup);
+                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
+                        rollout, rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
                 rolloutGroupRepository.save(rolloutGroup);
             }
@@ -662,11 +663,11 @@ public class RolloutManagement {
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
         try {
-            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class)
-                    .eval(rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
+            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class).eval(
+                    rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
         } catch (final BeansException e) {
-            logger.error("Something bad happend when accessing the error action bean {}",
-                    rolloutGroup.getErrorAction().getBeanName(), e);
+            logger.error("Something bad happend when accessing the error action bean {}", rolloutGroup.getErrorAction()
+                    .getBeanName(), e);
         }
     }
 
@@ -703,9 +704,9 @@ public class RolloutManagement {
             final RolloutGroupSuccessCondition finishCondition) {
         logger.trace("Checking finish condition {} on rolloutgroup {}", finishCondition, rolloutGroup);
         try {
-            final boolean isFinished = context
-                    .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
-                    .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
+            final boolean isFinished = context.getBean(finishCondition.getBeanName(),
+                    RolloutGroupConditionEvaluator.class).eval(rollout, rolloutGroup,
+                    rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
                 logger.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
@@ -833,8 +834,7 @@ public class RolloutManagement {
     private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
-                rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
 
         for (final Rollout rollout : rollouts) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
@@ -850,8 +850,7 @@ public class RolloutManagement {
         final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, page);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
-                rolloutGroupIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(rolloutGroupIds);
 
         for (final RolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
@@ -900,15 +899,14 @@ public class RolloutManagement {
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
                 targetRepository.countByRolloutTargetGroupRolloutGroupId(rolloutGroupId));
         rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
-
         return rolloutGroup;
 
     }
 
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
         final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutId(rolloutIds);
-        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
-                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream().collect(
+                Collectors.groupingBy(TotalTargetCountActionStatus::getId));
         return result;
     }
 
@@ -916,8 +914,8 @@ public class RolloutManagement {
             final List<Long> rolloutGroupIds) {
         final List<TotalTargetCountActionStatus> resultList = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupIds);
-        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
-                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
+        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream().collect(
+                Collectors.groupingBy(TotalTargetCountActionStatus::getId));
         return result;
     }
 
@@ -946,23 +944,33 @@ public class RolloutManagement {
     }
 
     /**
-     * Get targets of specified rollout group.
      * 
+     * Find all targets with action status by rollout group id.
+     * 
+     * @param pageRequest
+     *            the page request to sort and limit the result
      * @param rolloutGroup
      *            rollout group
-     * @param page
-     *            * the page request to sort and limit the result
-     * 
-     * @return Page<Target> list of targets of a rollout group
+     * @return {@link TargetWithActionStatus} target with action status
      */
-    public Page<Target> getRolloutGroupTargets(final RolloutGroup rolloutGroup, final Pageable page) {
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    public Page<TargetWithActionStatus> findAllTargetsWithActionStatusByRolloutGroupId(final PageRequest pageRequest,
+            @NotNull final RolloutGroup rolloutGroup) {
         if (rolloutGroup != null && rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
-            return targetRepository.findByRolloutTargetGroupRolloutGroupId(rolloutGroup.getId(), page);
+            final Page<Target> targetPage = targetRepository.findByRolloutTargetGroupRolloutGroupId(pageRequest,
+                    rolloutGroup.getId());
+            final Page<TargetWithActionStatus> page = targetPage.map(new Converter<Target, TargetWithActionStatus>() {
+                @Override
+                public TargetWithActionStatus convert(final Target source) {
+                    return new TargetWithActionStatus(source);
+                }
+            });
+            return page;
         }
-        return targetRepository.findByActionsRolloutGroup(rolloutGroup, page);
+        return targetRepository.findTargetsWithActionStatusByRolloutGroupId(pageRequest, rolloutGroup.getId());
     }
 
     /**
@@ -997,8 +1005,7 @@ public class RolloutManagement {
 
         return targetRepository.findAll(new Specification<Target>() {
             @Override
-            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
+            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
                 final ListJoin<Target, Action> actionsJoin = root.join(Target_.actions);
                 return cb.and(specification.toPredicate(root, query, cb),
                         cb.equal(actionsJoin.get(Action_.rolloutGroup), rolloutGroup));

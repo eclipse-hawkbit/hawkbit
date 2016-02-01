@@ -47,6 +47,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.spring.events.EventBus;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -113,6 +114,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private TextField noOfGroups;
 
+    private Label groupSize;
+
     private TextField triggerThreshold;
 
     private TextField errorThreshold;
@@ -169,6 +172,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         populateTargetFilterQuery();
         setDefaultSaveStartGroupOption();
         totalTargetsLabel.setVisible(false);
+        groupSize.setVisible(false);
         targetFilterQuery.setVisible(false);
         targetFilterQueryCombo.setVisible(true);
         actionTypeOptionGroupLayout.selectDefaultOption();
@@ -193,11 +197,20 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.setSizeUndefined();
 
-        mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(), noOfGroups,
-                getTriggerThresoldLayout(), getErrorThresoldLayout(), description, actionTypeOptionGroupLayout,
-                getSaveStartOptionLayout(), getSaveDiscardButtonLayout());
+        mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(),
+                getGroupDetailsLayout(), getTriggerThresoldLayout(), getErrorThresoldLayout(), description,
+                actionTypeOptionGroupLayout, getSaveStartOptionLayout(), getSaveDiscardButtonLayout());
 
         setCompositionRoot(mainLayout);
+    }
+
+    private HorizontalLayout getGroupDetailsLayout() {
+        final HorizontalLayout groupLayout = new HorizontalLayout();
+        groupLayout.setSizeFull();
+        groupLayout.addComponents(noOfGroups, groupSize);
+        groupLayout.setExpandRatio(noOfGroups, 1.0f);
+        groupLayout.setComponentAlignment(groupSize, Alignment.MIDDLE_LEFT);
+        return groupLayout;
     }
 
     private HorizontalLayout getErrorThresoldLayout() {
@@ -215,7 +228,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         targetFilterLayout.setExpandRatio(targetFilterQueryCombo, 0.71f);
         targetFilterLayout.setExpandRatio(targetFilterQuery, 0.70f);
         targetFilterLayout.setExpandRatio(totalTargetsLabel, 0.29f);
-        targetFilterLayout.setComponentAlignment(totalTargetsLabel, Alignment.MIDDLE_CENTER);
+        targetFilterLayout.setComponentAlignment(totalTargetsLabel, Alignment.MIDDLE_LEFT);
         return targetFilterLayout;
     }
 
@@ -262,6 +275,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         populateTargetFilterQuery();
 
         noOfGroups = createNoOfGroupsField();
+        groupSize = createGroupSizeLabel();
         triggerThreshold = createTriggerThresold();
         errorThreshold = createErrorThresold();
         description = createDescription();
@@ -278,6 +292,15 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         linkToHelp = DocumentationPageLink.DEPLOYMENT_VIEW.getLink();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
+    }
+
+    private Label createGroupSizeLabel() {
+        final Label groupSizeLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        groupSizeLabel.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
+        groupSizeLabel.setImmediate(true);
+        groupSizeLabel.setVisible(false);
+        groupSizeLabel.setSizeUndefined();
+        return groupSizeLabel;
     }
 
     private TextArea createTargetFilterQuery() {
@@ -338,15 +361,23 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private void onTargetFilterChange() {
         final String filterQueryString = getTargetFilterQuery();
-        if (filterQueryString != null) {
+        if (!Strings.isNullOrEmpty(filterQueryString)) {
             totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(filterQueryString);
             totalTargetsLabel.setValue(getTotalTargetMessage());
             totalTargetsLabel.setVisible(true);
+        } else {
+            totalTargetsCount = 0L;
+            totalTargetsLabel.setVisible(false);
         }
+        onGroupNumberChange();
     }
 
     private String getTotalTargetMessage() {
         return new StringBuilder(i18n.get("label.target.filter.count")).append(totalTargetsCount).toString();
+    }
+
+    private String getTargetPerGroupMessage(final String value) {
+        return new StringBuilder(i18n.get("label.target.per.group")).append(value).toString();
     }
 
     private void populateTargetFilterQuery() {
@@ -610,7 +641,17 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         noOfGroupsField.addValidator(new GroupNumberValidator());
         noOfGroupsField.setSizeFull();
         noOfGroupsField.setMaxLength(3);
+        noOfGroupsField.addValueChangeListener(evevt -> onGroupNumberChange());
         return noOfGroupsField;
+    }
+
+    private void onGroupNumberChange() {
+        if (noOfGroups.isValid() && !Strings.isNullOrEmpty(noOfGroups.getValue())) {
+            groupSize.setValue(getTargetPerGroupMessage(String.valueOf(getGroupSize())));
+            groupSize.setVisible(true);
+        } else {
+            groupSize.setVisible(false);
+        }
     }
 
     private ComboBox createDistributionSetCombo() {
@@ -671,8 +712,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
                             .get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
                     new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get("message.enter.number")).validate(value);
-                    final int groupSize = (int) Math.ceil((double) totalTargetsCount
-                            / Double.parseDouble(noOfGroups.getValue()));
+                    final int groupSize = getGroupSize();
                     new IntegerRangeValidator(i18n.get("message.rollout.field.value.range", 0, groupSize), 0, groupSize)
                             .validate(Integer.parseInt(value.toString()));
                 }
@@ -680,6 +720,12 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
                 throw ex;
             }
         }
+
+    }
+
+    private int getGroupSize() {
+        final int groupSize = (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
+        return groupSize;
     }
 
     class ThresoldFieldValidator implements Validator {

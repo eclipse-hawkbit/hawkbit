@@ -25,7 +25,7 @@ public class RolloutUIState {
 
     private String searchText;
 
-    private long rolloutId;
+    private Long rolloutId;
 
     private String rolloutName;
 
@@ -59,8 +59,8 @@ public class RolloutUIState {
     /**
      * @return the rolloutId
      */
-    public long getRolloutId() {
-        return rolloutId;
+    public Optional<Long> getRolloutId() {
+        return rolloutId != null ? Optional.of(rolloutId) : Optional.empty();
     }
 
     /**
@@ -145,7 +145,8 @@ public class RolloutUIState {
     public void setRolloutName(final String rolloutName) {
         this.rolloutName = rolloutName;
     }
- /**
+
+    /**
      * @return the rolloutGroupTargetsTruncated
      */
     public Long getRolloutGroupTargetsTruncated() {

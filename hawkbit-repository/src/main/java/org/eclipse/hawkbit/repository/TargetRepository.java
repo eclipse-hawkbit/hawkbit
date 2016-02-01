@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -292,27 +293,27 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     Long countByRolloutTargetGroupRolloutGroupId(Long rolloutGroupId);
 
     /**
-     * Finds all targets related to a target rollout group stored for a specific
-     * rollout.
      * 
+     * Finds all targets of a rollout group.
+     * 
+     * @param page
+     *            the page request parameter
      * @param rolloutGroupId
      *            the ID of the rollout group
-     * @param page
-     *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByRolloutTargetGroupRolloutGroupId(final Long rolloutGroupId, Pageable page);
+    Page<Target> findByRolloutTargetGroupRolloutGroupId(Pageable page, final Long rolloutGroupId);
 
     /**
-     * Finds all targets related to a target rollout group stored for a specific
-     * rollout.
+     * Find all targets with action status for a specific group.
      * 
-     * @param rolloutGroup
-     *            the rollout group the targets should belong to
-     * @param page
+     * @param pageable
      *            the page request parameter
-     * @return a page of all targets related to a rollout group
+     * @param rolloutGroupId
+     *            the ID of the rollout group
+     * @return targets with action status
      */
-    Page<Target> findByActionsRolloutGroup(RolloutGroup rolloutGroup, Pageable page);
-
+    @Query("select DISTINCT NEW org.eclipse.hawkbit.repository.model.TargetWithActionStatus(a.target,a.status) from Action a inner join fetch a.target t where  a.rolloutGroup.id = :rolloutGroupId")
+    Page<TargetWithActionStatus> findTargetsWithActionStatusByRolloutGroupId(final Pageable pageable,
+            @Param("rolloutGroupId") Long rolloutGroupId);
 }

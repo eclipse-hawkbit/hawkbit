@@ -198,6 +198,18 @@
   .statusIconNeutral {
     color: $hawkbit-primary-color;
   }
+  
+
+   .greySpinner{
+	 @include valo-spinner($size: $v-font-size--small,$color: $grey-color);
+  } 
+  	
+  	.yellowSpinner{
+	  @include valo-spinner($size: $v-font-size--small,$color: $signal-yellow-color);
+  } 
+  	.blueSpinner{
+	  @include valo-spinner($size: $v-font-size--small,$color: $bosch-color-light-blue);
+  } 
 
   // Disabled row style when distribution is incomplete
   .v-table-row-incomplete-distribution {

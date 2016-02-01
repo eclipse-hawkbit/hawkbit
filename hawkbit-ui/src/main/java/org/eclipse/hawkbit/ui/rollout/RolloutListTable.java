@@ -120,20 +120,20 @@ public class RolloutListTable extends AbstractSimpleTable {
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
             item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING)
-                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR)
-                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED)
-                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED)
-                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED)
-                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED)
-                    .setValue(totalTargetCountStatus.getTotalCountByStatus(TotalTargetCountStatus.Status.READY));
-            item.getItemProperty("isActionRecieved")
-                    .setValue(!(Boolean) item.getItemProperty("isActionRecieved").getValue());
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
+            item.getItemProperty("isActionRecieved").setValue(
+                    !(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
     }
 
@@ -142,14 +142,17 @@ public class RolloutListTable extends AbstractSimpleTable {
         final List<TableColumn> columnList = new ArrayList<TableColumn>();
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_NAME, i18n.get("header.name"), 0.25f));
 
-        columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"), 0.25f));
-        columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"), 0.2f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"),
+                0.2f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"),
+                0.2f));
 
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.3f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.1f));
-        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.2f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.15f));
+        columnList
+                .add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.13f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.07f));
+        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.3f));
+
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_ACTION, i18n.get("upload.action"), 0.1f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2f));
@@ -164,8 +167,8 @@ public class RolloutListTable extends AbstractSimpleTable {
     protected Container createContainer() {
         final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<RolloutBeanQuery>(
                 RolloutBeanQuery.class);
-        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
+        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
+                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
         return rolloutTableContainer;
 
     }
@@ -209,6 +212,9 @@ public class RolloutListTable extends AbstractSimpleTable {
                 false, false);
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, Long.class, 0L,
                 false, false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS, String.class, "0", false,
+                false);
+
     }
 
     @Override
@@ -421,8 +427,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             statusLabel.setStyleName("statusIconBlue");
             break;
         case RUNNING:
-            statusLabel.setValue(FontAwesome.ADJUST.getHtml());
-            statusLabel.setStyleName("statusIconYellow");
+            statusLabel.setStyleName("yellowSpinner");
             break;
         case READY:
             statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
@@ -431,6 +436,12 @@ public class RolloutListTable extends AbstractSimpleTable {
         case STOPPED:
             statusLabel.setValue(FontAwesome.STOP.getHtml());
             statusLabel.setStyleName("statusIconRed");
+            break;
+        case CREATING:
+            statusLabel.setStyleName("greySpinner");
+            break;
+        case STARTING:
+            statusLabel.setStyleName("blueSpinner");
             break;
         default:
             break;

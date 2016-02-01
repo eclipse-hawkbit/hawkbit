@@ -20,10 +20,6 @@ public class ProxyRollout extends Rollout {
 
     private String distributionSetNameVersion;
 
-    // TODO currently not used .Cross check if target filter query to be
-    // displayed
-    private String targetFilterQueryName;
-
     private String createdDate;
 
     private String modifiedDate;
@@ -48,6 +44,8 @@ public class ProxyRollout extends Rollout {
 
     private Boolean isActionRecieved = Boolean.FALSE;
 
+    private String totalTargetsCount;
+
     /**
      * @return the distributionSetNameVersion
      */
@@ -61,21 +59,6 @@ public class ProxyRollout extends Rollout {
      */
     public void setDistributionSetNameVersion(final String distributionSetNameVersion) {
         this.distributionSetNameVersion = distributionSetNameVersion;
-    }
-
-    /**
-     * @return the targetFilterQueryName
-     */
-    public String getTargetFilterQueryName() {
-        return targetFilterQueryName;
-    }
-
-    /**
-     * @param targetFilterQueryName
-     *            the targetFilterQueryName to set
-     */
-    public void setTargetFilterQueryName(final String targetFilterQueryName) {
-        this.targetFilterQueryName = targetFilterQueryName;
     }
 
     /**
@@ -258,4 +241,18 @@ public class ProxyRollout extends Rollout {
         this.notStartedTargetsCount = notStartedTargetsCount;
     }
 
+    /**
+     * @return the totalTargetsCount
+     */
+    public String getTotalTargetsCount() {
+        return totalTargetsCount;
+    }
+
+    /**
+     * @param totalTargetsCount
+     *            the totalTargetsCount to set
+     */
+    public void setTotalTargetsCount(final String totalTargetsCount) {
+        this.totalTargetsCount = totalTargetsCount;
+    }
 }

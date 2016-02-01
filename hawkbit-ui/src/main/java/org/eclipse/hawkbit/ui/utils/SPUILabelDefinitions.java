@@ -536,6 +536,11 @@ public final class SPUILabelDefinitions {
     public static final String VAR_COUNT_TARGETS_CANCELLED = "cancelledTargetsCount";
 
     /**
+     * Total target coulmn property name.
+     */
+    public static final String VAR_TOTAL_TARGETS = "totalTargetsCount";
+
+    /**
      * Constructor.
      */
     private SPUILabelDefinitions() {

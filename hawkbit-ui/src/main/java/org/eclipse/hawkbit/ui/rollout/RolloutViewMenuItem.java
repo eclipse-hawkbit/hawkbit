@@ -26,8 +26,7 @@ import com.vaadin.server.Resource;
  *
  */
 @Component
-// TODO change the order
-@Order(800)
+@Order(200)
 public class RolloutViewMenuItem implements DashboardMenuItem {
 
     private static final long serialVersionUID = 6112540239655168995L;

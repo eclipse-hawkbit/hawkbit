@@ -15,6 +15,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -107,8 +108,12 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
                 false, false);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false,
                 true);
+        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, Status.class,
+                Status.RETRIEVED, false, false);
+
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS,
                 TargetUpdateStatus.class, TargetUpdateStatus.UNKNOWN, false, false);
+
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID,
                 Long.class, null, false, false);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID,
@@ -167,49 +172,48 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
         statusLabel.setHeightUndefined();
         statusLabel.setContentMode(ContentMode.HTML);
         setStatusIcon(itemId, statusLabel);
-        statusLabel.setDescription(getDescription(itemId));
         statusLabel.setSizeUndefined();
         return statusLabel;
     }
 
-    private String getDescription(final Object itemId) {
-        final Item item = getItem(itemId);
-        if (item != null) {
-            final TargetUpdateStatus rolloutGroupStatus = (TargetUpdateStatus) item.getItemProperty(
-                    SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
-            return rolloutGroupStatus.toString().toLowerCase();
-        }
-        return null;
+    private String getDescription(final Status status, final Object itemId) {
+        return status.toString().toLowerCase();
     }
 
     private void setStatusIcon(final Object itemId, final Label statusLabel) {
         final Item item = getItem(itemId);
         if (item != null) {
-            final TargetUpdateStatus targetUpdateStatus = (TargetUpdateStatus) item.getItemProperty(
-                    SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
-            setRolloutStatusIcon(targetUpdateStatus, statusLabel);
+            final Status status = (Status) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
+            if (null != status) {
+                setRolloutStatusIcon(status, statusLabel);
+                statusLabel.setDescription(getDescription(status, itemId));
+            }
         }
     }
 
-    private void setRolloutStatusIcon(final TargetUpdateStatus targetUpdateStatus, final Label statusLabel) {
+    private void setRolloutStatusIcon(final Status targetUpdateStatus, final Label statusLabel) {
         switch (targetUpdateStatus) {
         case ERROR:
             statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
             statusLabel.addStyleName("statusIconRed");
             break;
-        case UNKNOWN:
+        case SCHEDULED:
             statusLabel.setValue(FontAwesome.QUESTION_CIRCLE.getHtml());
             statusLabel.addStyleName("statusIconBlue");
             break;
-        case IN_SYNC:
+        case FINISHED:
             statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
             statusLabel.addStyleName("statusIconGreen");
             break;
-        case PENDING:
+        case RUNNING:
+        case RETRIEVED:
+        case WARNING:
+        case DOWNLOAD:
             statusLabel.setValue(FontAwesome.ADJUST.getHtml());
             statusLabel.addStyleName("statusIconYellow");
             break;
-        case REGISTERED:
+        case CANCELED:
+        case CANCELING:
             statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
             statusLabel.addStyleName("statusIconLightBlue");
             break;
@@ -217,5 +221,4 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
             break;
         }
     }
-
 }
