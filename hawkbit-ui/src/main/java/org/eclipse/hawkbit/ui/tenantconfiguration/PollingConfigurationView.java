@@ -112,14 +112,21 @@ public class PollingConfigurationView extends BaseConfigurationView
 
         if (!compareDurations(tenantPollTime, fieldPollTime.getValue())) {
             tenantPollTime = fieldPollTime.getValue();
-            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
-                    durationHelper.durationToFormattedString(tenantPollTime));
+            saveDurationConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, tenantPollTime);
         }
 
         if (!compareDurations(tenantOverdueTime, fieldPollingOverdueTime.getValue())) {
             tenantOverdueTime = fieldPollingOverdueTime.getValue();
-            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL,
-                    durationHelper.durationToFormattedString(tenantOverdueTime));
+            saveDurationConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, tenantOverdueTime);
+        }
+    }
+
+    private void saveDurationConfigurationValue(final TenantConfigurationKey key, final Duration duration) {
+        if (duration == null) {
+            tenantConfigurationManagement.deleteConfiguration(key);
+        } else {
+            tenantConfigurationManagement.addOrUpdateConfiguration(key,
+                    durationHelper.durationToFormattedString(duration));
         }
     }
 
