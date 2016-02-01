@@ -12,11 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ListJoin;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -34,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -106,16 +101,21 @@ public class RolloutGroupManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Page<RolloutGroup> findRolloutGroupsByPredicate(final Long rolloutId,
             final Specification<RolloutGroup> specification, final Pageable page) {
-        return rolloutGroupRepository.findAll(new Specification<RolloutGroup>() {
-            @Override
-            public Predicate toPredicate(final Root<RolloutGroup> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                return cb.and(cb.equal(root.get(RolloutGroup_.rollout), rolloutId),
-                        specification.toPredicate(root, query, cb));
-            }
-        }, page);
+        return rolloutGroupRepository.findAll((root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get(RolloutGroup_.rollout), rolloutId),
+                specification.toPredicate(root, query, criteriaBuilder)), page);
     }
 
+    /**
+     * Retrieves a page of {@link RolloutGroup}s filtered by a given
+     * {@link Rollout} with the detailed status.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout to filter the {@link RolloutGroup}s
+     * @param page
+     *            the page request to sort and limit the result
+     * @return a page of found {@link RolloutGroup}s
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable page) {
         final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, page);
@@ -157,9 +157,7 @@ public class RolloutGroupManagement {
             final List<Long> rolloutGroupIds) {
         final List<TotalTargetCountActionStatus> resultList = actionRepository
                 .getStatusCountByRolloutGroupId(rolloutGroupIds);
-        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
-                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
-        return result;
+        return resultList.stream().collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
     }
 
     /**
@@ -174,33 +172,25 @@ public class RolloutGroupManagement {
      * 
      * @return Page<Target> list of targets of a rollout group
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Page<Target> findRolloutGroupTargets(final RolloutGroup rolloutGroup,
             final Specification<Target> specification, final Pageable page) {
-        if (rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
+        if (isRolloutStatusReady(rolloutGroup)) {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
-            return targetRepository.findAll(new Specification<Target>() {
-                @Override
-                public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query,
-                        final CriteriaBuilder cb) {
-                    final ListJoin<Target, RolloutTargetGroup> rolloutTargetJoin = root
-                            .join(Target_.rolloutTargetGroup);
-                    return cb.and(specification.toPredicate(root, query, cb),
-                            cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
-                }
-            }, page);
+            return targetRepository.findAll((root, query, criteriaBuilder) -> {
+                final ListJoin<Target, RolloutTargetGroup> rolloutTargetJoin = root.join(Target_.rolloutTargetGroup);
+                return criteriaBuilder.and(specification.toPredicate(root, query, criteriaBuilder),
+                        criteriaBuilder.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
+            } , page);
         }
 
-        return targetRepository.findAll(new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final ListJoin<Target, Action> actionsJoin = root.join(Target_.actions);
-                return cb.and(specification.toPredicate(root, query, cb),
-                        cb.equal(actionsJoin.get(Action_.rolloutGroup), rolloutGroup));
-            }
-        }, page);
+        return targetRepository.findAll((root, query, criteriaBuilder) -> {
+            final ListJoin<Target, Action> actionsJoin = root.join(Target_.actions);
+            return criteriaBuilder.and(specification.toPredicate(root, query, criteriaBuilder),
+                    criteriaBuilder.equal(actionsJoin.get(Action_.rolloutGroup), rolloutGroup));
+        } , page);
     }
 
     /**
@@ -209,18 +199,23 @@ public class RolloutGroupManagement {
      * @param rolloutGroup
      *            rollout group
      * @param page
-     *            * the page request to sort and limit the result
+     *            the page request to sort and limit the result
      * 
      * @return Page<Target> list of targets of a rollout group
      */
-    public Page<Target> findRolloutGroupTargets(final RolloutGroup rolloutGroup, final Pageable page) {
-        if (rolloutGroup != null && rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    public Page<Target> findRolloutGroupTargets(@NotNull final RolloutGroup rolloutGroup, final Pageable page) {
+        if (isRolloutStatusReady(rolloutGroup)) {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
             return targetRepository.findByRolloutTargetGroupRolloutGroupId(rolloutGroup.getId(), page);
         }
         return targetRepository.findByActionsRolloutGroup(rolloutGroup, page);
+    }
+
+    private boolean isRolloutStatusReady(final RolloutGroup rolloutGroup) {
+        return rolloutGroup != null && RolloutStatus.READY.equals(rolloutGroup.getRollout().getStatus());
     }
 
     /**
@@ -236,19 +231,13 @@ public class RolloutGroupManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Page<TargetWithActionStatus> findAllTargetsWithActionStatus(final PageRequest pageRequest,
             @NotNull final RolloutGroup rolloutGroup) {
-        if (rolloutGroup != null && rolloutGroup.getRollout().getStatus() == RolloutStatus.READY) {
+        if (isRolloutStatusReady(rolloutGroup)) {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
             final Page<Target> targetPage = targetRepository
                     .findByRolloutTargetGroupRolloutGroupId(rolloutGroup.getId(), pageRequest);
-            final Page<TargetWithActionStatus> page = targetPage.map(new Converter<Target, TargetWithActionStatus>() {
-                @Override
-                public TargetWithActionStatus convert(final Target source) {
-                    return new TargetWithActionStatus(source);
-                }
-            });
-            return page;
+            return targetPage.map(source -> new TargetWithActionStatus(source));
         }
         return targetRepository.findTargetsWithActionStatusByRolloutGroupId(pageRequest, rolloutGroup.getId());
     }

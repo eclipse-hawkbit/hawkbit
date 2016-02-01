@@ -14,10 +14,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
@@ -60,10 +56,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -78,7 +72,7 @@ import org.springframework.validation.annotation.Validated;
 @EnableScheduling
 @Transactional(readOnly = true)
 public class RolloutManagement {
-    private static final Logger logger = LoggerFactory.getLogger(RolloutManagement.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);
 
     @Autowired
     private EntityManager entityManager;
@@ -232,35 +226,23 @@ public class RolloutManagement {
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                def.setName("creatingRollout");
-                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-                new TransactionTemplate(txManager, def).execute(new TransactionCallback<Void>() {
-                    @Override
-                    public Void doInTransaction(final TransactionStatus status) {
-                        createRolloutGroups(amountGroup, conditions, savedRollout);
-                        return null;
-                    }
-                });
-            }
+        executor.execute(() -> {
+            final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            def.setName("creatingRollout");
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            new TransactionTemplate(txManager, def).execute(status -> {
+                createRolloutGroups(amountGroup, conditions, savedRollout);
+                return null;
+            });
         });
         return savedRollout;
     }
 
-    /**
-     * @param rollout
-     * @param amountGroup
-     * @return
-     */
     private Rollout createRollout(final Rollout rollout, final int amountGroup) {
         verifyRolloutGroupParameter(amountGroup);
         final Long totalTargets = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
         rollout.setTotalTargets(totalTargets.longValue());
-        final Rollout savedRollout = rolloutRepository.save(rollout);
-        return savedRollout;
+        return rolloutRepository.save(rollout);
     }
 
     private void verifyRolloutGroupParameter(final int amountGroup) {
@@ -299,9 +281,8 @@ public class RolloutManagement {
 
             lastSavedGroup = savedGroup;
 
-            targetGroup.forEach(target -> {
-                rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target));
-            });
+            targetGroup
+                    .forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target)));
             cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(), amountGroup,
                     groupIndex);
             pageIndex += groupSize;
@@ -333,10 +314,7 @@ public class RolloutManagement {
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public Rollout startRollout(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
-        if (mergedRollout.getStatus() != RolloutStatus.READY) {
-            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
-                    + rollout.getStatus().name().toLowerCase());
-        }
+        checkIfRolloutCanStarted(rollout, mergedRollout);
         return doStartRollout(mergedRollout);
     }
 
@@ -361,28 +339,20 @@ public class RolloutManagement {
     @Modifying
     public Rollout startRolloutAsync(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
-        if (mergedRollout.getStatus() != RolloutStatus.READY) {
-            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
-                    + rollout.getStatus().name().toLowerCase());
-        }
+        checkIfRolloutCanStarted(rollout, mergedRollout);
         mergedRollout.setStatus(RolloutStatus.STARTING);
         final Rollout updatedRollout = rolloutRepository.save(mergedRollout);
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                def.setName("startingRollout");
-                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-                new TransactionTemplate(txManager, def).execute(new TransactionCallback<Void>() {
-                    @Override
-                    public Void doInTransaction(final TransactionStatus status) {
-                        doStartRollout(updatedRollout);
-                        return null;
-                    }
-                });
-            }
+        executor.execute(() -> {
+            final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            def.setName("startingRollout");
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            new TransactionTemplate(txManager, def).execute(status -> {
+                doStartRollout(updatedRollout);
+                return null;
+            });
         });
         return updatedRollout;
+
     }
 
     private Rollout doStartRollout(final Rollout rollout) {
@@ -401,29 +371,28 @@ public class RolloutManagement {
                 deploymentManagement.assignDistributionSet(distributionSet.getId(), targetsWithActionType, rollout,
                         rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.RUNNING);
-                rolloutGroupRepository.save(rolloutGroup);
-            }
-            // create only not active actions with status scheduled so they can
-            // be activated later
-            else {
+            } else {
+                // create only not active actions with status scheduled so they
+                // can be activated later
                 deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime, rollout,
                         rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
-                rolloutGroupRepository.save(rolloutGroup);
             }
-
-            // clean up the target group table because we don't need the
-            // information anymore. We've created the necessary action entries
-            // already.
-            // need to do via entity manager, otherwise an extra select
-            // statement will be executed and single delete statements for each
-            // targetGroup is executed, because of a combined unique ID.
-            entityManager.createQuery("DELETE from RolloutTargetGroup r where r.rolloutGroup=:rolloutGroup")
-                    .setParameter("rolloutGroup", rolloutGroup).executeUpdate();
+            rolloutGroupRepository.save(rolloutGroup);
+            cleanupRolloutTargetGroupTable(rolloutGroup);
         }
-        // set rollout into running status
         rollout.setStatus(RolloutStatus.RUNNING);
         return rolloutRepository.save(rollout);
+    }
+
+    private void cleanupRolloutTargetGroupTable(final RolloutGroup rolloutGroup) {
+        // clean up the target group table because we don't need the
+        // information anymore. We've created the necessary action entries
+        // already. need to do via entity manager, otherwise an extra select
+        // statement will be executed and single delete statements for each
+        // targetGroup is executed, because of a combined unique ID.
+        entityManager.createQuery("DELETE from RolloutTargetGroup r where r.rolloutGroup=:rolloutGroup")
+                .setParameter("rolloutGroup", rolloutGroup).executeUpdate();
     }
 
     /**
@@ -481,7 +450,7 @@ public class RolloutManagement {
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public void resumeRollout(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
-        if (mergedRollout.getStatus() != RolloutStatus.PAUSED) {
+        if (!(RolloutStatus.PAUSED.equals(mergedRollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
@@ -527,68 +496,69 @@ public class RolloutManagement {
 
         if (updated == 0) {
             // nothing to check, maybe another instance already checked in
-            // between.
-            logger.info("No rolloutcheck necessary for current scheduled check {}, next check at {}", lastCheck,
-                    (lastCheck + delayBetweenChecks));
+            // between
+            LOGGER.info("No rolloutcheck necessary for current scheduled check {}, next check at {}", lastCheck,
+                    lastCheck + delayBetweenChecks);
+            return;
         }
-        // Only check the running rollouts in case no one else already checked
-        // e.g. another instance.
-        else {
-            final List<Rollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
-                    RolloutStatus.RUNNING);
-            logger.info("Found {} running rollouts to check", rolloutsToCheck.size());
 
-            for (final Rollout rollout : rolloutsToCheck) {
-                logger.debug("Checking rollout {}", rollout);
-                final List<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutAndStatus(rollout,
-                        RolloutGroupStatus.RUNNING);
+        final List<Rollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
+                RolloutStatus.RUNNING);
+        LOGGER.info("Found {} running rollouts to check", rolloutsToCheck.size());
 
-                if (rolloutGroups.isEmpty()) {
-                    // no running rollouts, probably there was an error
-                    // somewhere at the latest group. And the latest group has
-                    // been switched from running into error state. So we need
-                    // to find the latest group which
-                    final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository
-                            .findByRolloutAndStatusNotOrderByIdDesc(rollout, RolloutGroupStatus.SCHEDULED);
-                    if (!latestRolloutGroup.isEmpty()) {
-                        executeRolloutGroupSuccessAction(rollout, latestRolloutGroup.get(0));
-                    }
-                } else {
-                    logger.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroups.size());
-                    for (final RolloutGroup rolloutGroup : rolloutGroups) {
-                        // error state check, do we need to stop the whole
-                        // rollout
-                        // because of error?
-                        final RolloutGroupErrorCondition errorCondition = rolloutGroup.getErrorCondition();
-                        final boolean isError = checkErrorState(rollout, rolloutGroup, errorCondition);
-                        if (isError) {
-                            logger.info("Rollout {} {} has error, calling error action", rollout.getName(),
-                                    rollout.getId());
-                            callErrorAction(rollout, rolloutGroup);
-                        } else {
-                            // not in error so check finished state, do we need
-                            // to
-                            // start
-                            // the next group?
-                            final RolloutGroupSuccessCondition finishedCondition = rolloutGroup.getSuccessCondition();
-                            checkFinishCondition(rollout, rolloutGroup, finishedCondition);
-                            if (isRolloutGroupComplete(rollout, rolloutGroup)) {
-                                rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
-                                rolloutGroupRepository.save(rolloutGroup);
-                            }
+        for (final Rollout rollout : rolloutsToCheck) {
+            LOGGER.debug("Checking rollout {}", rollout);
+            final List<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutAndStatus(rollout,
+                    RolloutGroupStatus.RUNNING);
 
-                        }
+            if (rolloutGroups.isEmpty()) {
+                // no running rollouts, probably there was an error
+                // somewhere at the latest group. And the latest group has
+                // been switched from running into error state. So we need
+                // to find the latest group which
+                executeLatestRolloutGroup(rollout);
+            } else {
+                LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroups.size());
+                executeRolloutGroups(rollout, rolloutGroups);
+            }
 
-                    }
-                }
+            if (isRolloutComplete(rollout)) {
+                LOGGER.info("Rollout {} is finished, setting finished status", rollout);
+                rollout.setStatus(RolloutStatus.FINISHED);
+                rolloutRepository.save(rollout);
+            }
+        }
+    }
 
-                if (isRolloutComplete(rollout)) {
-                    logger.info("Rollout {} is finished, setting finished status", rollout);
-                    rollout.setStatus(RolloutStatus.FINISHED);
-                    rolloutRepository.save(rollout);
+    private void executeRolloutGroups(final Rollout rollout, final List<RolloutGroup> rolloutGroups) {
+        for (final RolloutGroup rolloutGroup : rolloutGroups) {
+            // error state check, do we need to stop the whole
+            // rollout because of error?
+            final RolloutGroupErrorCondition errorCondition = rolloutGroup.getErrorCondition();
+            final boolean isError = checkErrorState(rollout, rolloutGroup, errorCondition);
+            if (isError) {
+                LOGGER.info("Rollout {} {} has error, calling error action", rollout.getName(), rollout.getId());
+                callErrorAction(rollout, rolloutGroup);
+            } else {
+                // not in error so check finished state, do we need to
+                // start the next group?
+                final RolloutGroupSuccessCondition finishedCondition = rolloutGroup.getSuccessCondition();
+                checkFinishCondition(rollout, rolloutGroup, finishedCondition);
+                if (isRolloutGroupComplete(rollout, rolloutGroup)) {
+                    rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
+                    rolloutGroupRepository.save(rolloutGroup);
                 }
             }
         }
+    }
+
+    private void executeLatestRolloutGroup(final Rollout rollout) {
+        final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository
+                .findByRolloutAndStatusNotOrderByIdDesc(rollout, RolloutGroupStatus.SCHEDULED);
+        if (latestRolloutGroup.isEmpty()) {
+            return;
+        }
+        executeRolloutGroupSuccessAction(rollout, latestRolloutGroup.get(0));
     }
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
@@ -596,7 +566,7 @@ public class RolloutManagement {
             context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class)
                     .eval(rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
         } catch (final BeansException e) {
-            logger.error("Something bad happend when accessing the error action bean {}",
+            LOGGER.error("Something bad happend when accessing the error action bean {}",
                     rolloutGroup.getErrorAction().getBeanName(), e);
         }
     }
@@ -624,7 +594,7 @@ public class RolloutManagement {
             return context.getBean(errorCondition.getBeanName(), RolloutGroupConditionEvaluator.class).eval(rollout,
                     rolloutGroup, rolloutGroup.getErrorConditionExp());
         } catch (final BeansException e) {
-            logger.error("Something bad happend when accessing the error condition bean {}",
+            LOGGER.error("Something bad happend when accessing the error condition bean {}",
                     errorCondition.getBeanName(), e);
             return false;
         }
@@ -632,20 +602,20 @@ public class RolloutManagement {
 
     private boolean checkFinishCondition(final Rollout rollout, final RolloutGroup rolloutGroup,
             final RolloutGroupSuccessCondition finishCondition) {
-        logger.trace("Checking finish condition {} on rolloutgroup {}", finishCondition, rolloutGroup);
+        LOGGER.trace("Checking finish condition {} on rolloutgroup {}", finishCondition, rolloutGroup);
         try {
             final boolean isFinished = context
                     .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
                     .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
-                logger.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
+                LOGGER.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
             } else {
-                logger.debug("Rolloutgroup {} is still running", rolloutGroup);
+                LOGGER.debug("Rolloutgroup {} is still running", rolloutGroup);
             }
             return isFinished;
         } catch (final BeansException e) {
-            logger.error("Something bad happend when accessing the finish condition bean {}",
+            LOGGER.error("Something bad happend when accessing the finish condition bean {}",
                     finishCondition.getBeanName(), e);
             return false;
         }
@@ -655,8 +625,6 @@ public class RolloutManagement {
         context.getBean(rolloutGroup.getSuccessAction().getBeanName(), RolloutGroupActionEvaluator.class).eval(rollout,
                 rolloutGroup, rolloutGroup.getSuccessActionExp());
     }
-
-    // ////////Rollout - changes starts here/////////////
 
     /**
      * Counts all {@link Target}s in the repository.
@@ -681,17 +649,13 @@ public class RolloutManagement {
     }
 
     private static Specification<Rollout> likeNameOrDescription(final String searchText) {
-        final Specification<Rollout> spec = new Specification<Rollout>() {
-            @Override
-            public Predicate toPredicate(final Root<Rollout> rolloutRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final String searchTextToLower = searchText.toLowerCase();
-                final Predicate predicate = cb.or(cb.like(cb.lower(rolloutRoot.get(Rollout_.name)), searchTextToLower),
-                        cb.like(cb.lower(rolloutRoot.get(Rollout_.description)), searchTextToLower));
-                return predicate;
-            }
+        return (rolloutRoot, query, criteriaBuilder) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.name)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.description)),
+                            searchTextToLower));
         };
-        return spec;
     }
 
     /**
@@ -751,10 +715,8 @@ public class RolloutManagement {
      *         statuses
      *
      */
-
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable page) {
-        // TODO add test case
         final Page<Rollout> rollouts = findAll(page);
         setRolloutStatusDetails(rollouts);
         return rollouts;
@@ -782,9 +744,7 @@ public class RolloutManagement {
 
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rolloutIds) {
         final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutId(rolloutIds);
-        final Map<Long, List<TotalTargetCountActionStatus>> result = resultList.stream()
-                .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
-        return result;
+        return resultList.stream().collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
     }
 
     private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
@@ -797,6 +757,13 @@ public class RolloutManagement {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                     allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
             rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+        }
+    }
+
+    private void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
+        if (!(RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
+            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
+                    + rollout.getStatus().name().toLowerCase());
         }
     }
 

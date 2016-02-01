@@ -546,7 +546,6 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     @Description("Verify that error status of DistributionSet installation during rollout can get rerun with second rollout so that all targets have some DistributionSet installed at the end.")
     public void startSecondRolloutAfterFristRolloutEndenWithErrors() {
 
-        // setup 1
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
@@ -570,7 +569,6 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
         rolloutManagement.checkRunningRollouts(0);
 
-        // verify
         // 9 targets are finished and 6 have error
         Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 9L);
