@@ -260,7 +260,8 @@ public class RolloutListTable extends AbstractSimpleTable {
                 SPUIButtonStyleSmallNoBorder.class);
         actionButton.setData(itemId);
         actionButton.setHtmlContentAllowed(true);
-        if (rolloutStatus == RolloutStatus.FINISHED) {
+        if (rolloutStatus == RolloutStatus.FINISHED || rolloutStatus == RolloutStatus.STARTING
+                || rolloutStatus == RolloutStatus.CREATING) {
             actionButton.setEnabled(false);
         }
         actionButton.addClickListener(event -> onAction(event));
@@ -272,6 +273,7 @@ public class RolloutListTable extends AbstractSimpleTable {
         final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();
         final ContextMenu context = new ContextMenu();
+        context.addItemClickListener(event -> menuItemClicked(event));
         if (rolloutStatus == RolloutStatus.READY) {
             final ContextMenuItem startItem = context.addItem("Start");
             startItem.setData(new ContextMenuData(rolloutId, ACTION.START));
@@ -281,12 +283,11 @@ public class RolloutListTable extends AbstractSimpleTable {
         } else if (rolloutStatus == RolloutStatus.PAUSED) {
             final ContextMenuItem resumeItem = context.addItem("Resume");
             resumeItem.setData(new ContextMenuData(rolloutId, ACTION.RESUME));
+        } else if (rolloutStatus == RolloutStatus.STARTING || rolloutStatus == RolloutStatus.CREATING) {
+            return context;
         }
-
         final ContextMenuItem cancelItem = context.addItem("Update");
         cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
-        context.addItemClickListener(event -> menuItemClicked(event));
-
         return context;
     }
 
@@ -427,6 +428,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             statusLabel.setStyleName("statusIconBlue");
             break;
         case RUNNING:
+            statusLabel.setValue(null);
             statusLabel.setStyleName("yellowSpinner");
             break;
         case READY:
@@ -438,9 +440,11 @@ public class RolloutListTable extends AbstractSimpleTable {
             statusLabel.setStyleName("statusIconRed");
             break;
         case CREATING:
+            statusLabel.setValue(null);
             statusLabel.setStyleName("greySpinner");
             break;
         case STARTING:
+            statusLabel.setValue(null);
             statusLabel.setStyleName("blueSpinner");
             break;
         default:

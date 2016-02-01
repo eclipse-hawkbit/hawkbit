@@ -724,8 +724,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private int getGroupSize() {
-        final int groupSize = (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
-        return groupSize;
+        return (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
     }
 
     class ThresoldFieldValidator implements Validator {
