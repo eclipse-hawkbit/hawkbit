@@ -49,5 +49,12 @@
 	.rollout-target-count-message{
   		color: $info-message-color-grey;
 	}
+	
+	.rollout-table{
+		.v-table-cell-wrapper {
+      		cursor: default;
+      }
+	}
+	
 }
    

@@ -346,7 +346,7 @@ public class RolloutManagement {
         int pageIndex = 0;
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
-        final int groupSize = (int) Math.ceil(totalCount / amountGroup);
+        final int groupSize = (int) Math.ceil((double) totalCount / (double) amountGroup);
         RolloutGroup lastSavedGroup = null;
         while (pageIndex < totalCount) {
             groupIndex++;

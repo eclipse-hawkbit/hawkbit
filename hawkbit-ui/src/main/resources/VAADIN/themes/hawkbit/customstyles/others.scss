@@ -202,27 +202,30 @@
 
    .greySpinner{
 	 @include valo-spinner($size: $v-font-size--small,$color: $grey-color);
-  } 
+	 pointer-events: auto !important;
+   } 
   	
   	.yellowSpinner{
 	  @include valo-spinner($size: $v-font-size--small,$color: $signal-yellow-color);
-  } 
+	  pointer-events: auto !important;
+   } 
   	.blueSpinner{
 	  @include valo-spinner($size: $v-font-size--small,$color: $bosch-color-light-blue);
-  } 
+	  pointer-events: auto !important;
+   } 
 
   // Disabled row style when distribution is incomplete
-  .v-table-row-incomplete-distribution {
-    color: $disabled-row-color-grey !important;
-  }
+   .v-table-row-incomplete-distribution {
+     color: $disabled-row-color-grey !important;
+   }
 
-  .v-link {
-    text-decoration: none;
-    padding-right: 10px;
-    font-weight: 300;
-  }
+   .v-link {
+     text-decoration: none;
+     padding-right: 10px;
+     font-weight: 300;
+   }
   
-  .v-tooltip{
-  	max-width:43em;
-  }
+   .v-tooltip{
+  	 max-width:43em;
+   }
 }

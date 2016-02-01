@@ -30,7 +30,7 @@ public abstract class AbstractSimpleTable extends Table {
      * Initialize the components.
      */
     protected void init() {
-        addStyleName("sp-table");
+        addStyleName("sp-table rollout-table");
         setSizeFull();
         setImmediate(true);
         setHeight(100.0f, Unit.PERCENTAGE);
