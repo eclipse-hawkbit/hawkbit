@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -40,6 +41,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     private transient Page<RolloutGroup> firstPageRolloutGroupSets = null;
 
     private transient RolloutManagement rolloutManagement;
+
+    private transient RolloutGroupManagement rolloutGroupManagement;
 
     private transient RolloutUIState rolloutUIState;
 
@@ -81,9 +84,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     @Override
     protected List<ProxyRolloutGroup> loadBeans(final int startIndex, final int count) {
-        final Page<RolloutGroup> rolloutGroupBeans = getRolloutManagement()
-                .findAllRolloutGroupsWithDetailedStatusByRolloutId(rolloutId,
-                        new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+        final Page<RolloutGroup> rolloutGroupBeans = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(
+                rolloutId, new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         return getProxyRolloutGroupList(rolloutGroupBeans);
     }
 
@@ -169,7 +171,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     public int size() {
         long size = 0;
         if (null != rolloutId) {
-            firstPageRolloutGroupSets = getRolloutManagement().findRolloutGroupsByRollout(rolloutId,
+            firstPageRolloutGroupSets = getRolloutGroupManagement().findRolloutGroupsByRolloutId(rolloutId,
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
             size = firstPageRolloutGroupSets.getTotalElements();
         }
@@ -188,6 +190,16 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             rolloutManagement = SpringContextHelper.getBean(RolloutManagement.class);
         }
         return rolloutManagement;
+    }
+
+    /**
+     * @return the rolloutManagement
+     */
+    public RolloutGroupManagement getRolloutGroupManagement() {
+        if (null == rolloutGroupManagement) {
+            rolloutGroupManagement = SpringContextHelper.getBean(RolloutGroupManagement.class);
+        }
+        return rolloutGroupManagement;
     }
 
     /**
