@@ -360,11 +360,12 @@ public class RolloutManagement {
             group.setErrorAction(conditions.getErrorAction());
             group.setErrorActionExp(conditions.getErrorActionExp());
 
+            final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
+
             final Slice<Target> targetGroup = targetManagement.findTargetsAll(savedRollout.getTargetFilterQuery(),
                     new OffsetBasedPageRequest(pageIndex, groupSize, new Sort(Direction.ASC, "id")));
-            group.setTotalTargets(targetGroup.getSize());
+            savedGroup.setTotalTargets(targetGroup.getContent().size());
 
-            final RolloutGroup savedGroup = rolloutGroupRepository.save(group);
             lastSavedGroup = savedGroup;
 
             targetGroup.forEach(target -> {
