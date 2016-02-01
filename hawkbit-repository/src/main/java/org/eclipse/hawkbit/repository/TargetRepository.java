@@ -284,25 +284,28 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     List<Target> findByRolloutTargetGroupRolloutGroup(final RolloutGroup rolloutGroup);
 
     /**
-     * Find count of all targets in a rolloutgroup.
-     * 
-     * @param rolloutGroupId
-     *            id of rolloutgroup
-     * @return count of targets in rolloutgroup
-     */
-    Long countByRolloutTargetGroupRolloutGroupId(Long rolloutGroupId);
-
-    /**
      * 
      * Finds all targets of a rollout group.
      * 
-     * @param page
-     *            the page request parameter
      * @param rolloutGroupId
      *            the ID of the rollout group
+     * @param page
+     *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByRolloutTargetGroupRolloutGroupId(Pageable page, final Long rolloutGroupId);
+    Page<Target> findByRolloutTargetGroupRolloutGroupId(final Long rolloutGroupId, Pageable page);
+
+    /**
+     * Finds all targets related to a target rollout group stored for a specific
+     * rollout.
+     * 
+     * @param rolloutGroup
+     *            the rollout group the targets should belong to
+     * @param page
+     *            the page request parameter
+     * @return a page of all targets related to a rollout group
+     */
+    Page<Target> findByActionsRolloutGroup(RolloutGroup rolloutGroup, Pageable page);
 
     /**
      * Find all targets with action status for a specific group.

@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.MockMvcResultPrinter;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -50,12 +51,14 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
     @Autowired
     private RolloutManagement rolloutManagement;
 
+    @Autowired
+    private RolloutGroupManagement rolloutGroupManagement;
+
     @Test
     @Description("Testing that creating rollout with wrong body returns bad request")
     public void createRolloutWithInvalidBodyReturnsBadRequest() throws Exception {
-        mvc.perform(
-                post("/rest/v1/rollouts").content("invalid body").contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+        mvc.perform(post("/rest/v1/rollouts").content("invalid body").contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.body.notReadable")));
     }
@@ -66,19 +69,17 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
     public void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
-        mvc.perform(
-                post("/rest/v1/rollouts")
-                        .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
     }
 
     @Test
     @Description("Testing that creating rollout with not exisiting distribution set returns not found")
     public void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
-        mvc.perform(
-                post("/rest/v1/rollouts").content(JsonBuilder.rollout("name", "desc", 10, 1234, "name==test", null))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("name", "desc", 10, 1234, "name==test", null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound()).andReturn();
     }
 
@@ -87,10 +88,9 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
     public void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
-        mvc.perform(
-                post("/rest/v1/rollouts")
-                        .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name=test", null))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name=test", null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")))
                 .andReturn();
@@ -330,8 +330,8 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutManagement
-                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
 
         // retrieve single rollout group with known ID
@@ -354,14 +354,13 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutManagement
-                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
 
         // retrieve targets from the first rollout group with known ID
-        mvc.perform(
-                get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(), firstGroup.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(),
+                firstGroup.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
     }
@@ -371,16 +370,16 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
     public void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
         final int amountTargets = 10;
-        final List<Target> targets = targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets,
-                "rollout", "rollout"));
+        final List<Target> targets = targetManagement
+                .createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutManagement
-                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
 
         // retrieve targets from the first rollout group with known ID
@@ -406,26 +405,22 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
 
         rolloutManagement.startRollout(rollout);
 
-        final RolloutGroup firstGroup = rolloutManagement
-                .findRolloutGroupsByRollout(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findRolloutGroupsByRolloutId(rollout.getId(), new PageRequest(0, 1, Direction.ASC, "id")).getContent()
                 .get(0);
 
         // retrieve targets from the first rollout group with known ID
-        mvc.perform(
-                get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(), firstGroup.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}/targets", rollout.getId(),
+                firstGroup.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
     }
 
     private void postRollout(final String name, final int groupSize, final long distributionSetId,
             final String targetFilterQuery) throws Exception {
-        mvc.perform(
-                post("/rest/v1/rollouts")
-                        .content(
-                                JsonBuilder
-                                        .rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery, null))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery, null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
     }
 

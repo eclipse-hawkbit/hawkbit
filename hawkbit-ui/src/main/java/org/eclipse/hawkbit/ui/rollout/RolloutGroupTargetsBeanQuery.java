@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -43,6 +44,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     private transient Page<TargetWithActionStatus> firstPageTargetSets = null;
 
     private transient RolloutManagement rolloutManagement;
+
+    private transient RolloutGroupManagement rolloutGroupManagement;
 
     private transient RolloutUIState rolloutUIState;
 
@@ -83,8 +86,9 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         if (startIndex == 0 && firstPageTargetSets != null) {
             rolloutGroupTargetsList = firstPageTargetSets.getContent();
         } else if (null != rolloutGroup) {
-            rolloutGroupTargetsList = getRolloutManagement().findAllTargetsWithActionStatusByRolloutGroupId(
-                    new PageRequest(startIndex / count, count), rolloutGroup).getContent();
+            rolloutGroupTargetsList = getRolloutGroupManagement()
+                    .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), rolloutGroup)
+                    .getContent();
         }
         return getProxyRolloutGroupTargetsList(rolloutGroupTargetsList);
     }
@@ -111,8 +115,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             }
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
             prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo()
-                    .getPollStatus(), getI18N()));
+            prxyTarget.setPollStatusToolTip(
+                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
             prxyTarget.setId(targ.getId());
             proxyTargetBeans.add(prxyTarget);
 
@@ -131,8 +135,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     public int size() {
         long size = 0;
         if (null != rolloutGroup) {
-            firstPageTargetSets = getRolloutManagement().findAllTargetsWithActionStatusByRolloutGroupId(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
+            firstPageTargetSets = getRolloutGroupManagement()
+                    .findAllTargetsWithActionStatus(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
             size = firstPageTargetSets.getTotalElements();
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
@@ -152,6 +156,16 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             rolloutManagement = SpringContextHelper.getBean(RolloutManagement.class);
         }
         return rolloutManagement;
+    }
+
+    /**
+     * @return the rolloutManagement
+     */
+    public RolloutGroupManagement getRolloutGroupManagement() {
+        if (null == rolloutGroupManagement) {
+            rolloutGroupManagement = SpringContextHelper.getBean(RolloutGroupManagement.class);
+        }
+        return rolloutGroupManagement;
     }
 
     /**

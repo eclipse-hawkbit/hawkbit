@@ -10,14 +10,12 @@ package org.eclipse.hawkbit.rest.resource;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -65,13 +63,10 @@ public class RolloutResource {
     private RolloutManagement rolloutManagement;
 
     @Autowired
-    private TargetFilterQueryManagement targetFilterQueryManagement;
+    private RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
-
-    @Autowired
-    private EntityManager entityManager;
 
     /**
      * Handles the GET request of retrieving all rollouts.
@@ -291,10 +286,10 @@ public class RolloutResource {
 
         final Page<RolloutGroup> findRolloutGroupsAll;
         if (rsqlParam != null) {
-            findRolloutGroupsAll = rolloutManagement.findRolloutGroupsByPredicate(rolloutId,
+            findRolloutGroupsAll = rolloutGroupManagement.findRolloutGroupsByPredicate(rolloutId,
                     RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), pageable);
         } else {
-            findRolloutGroupsAll = rolloutManagement.findRolloutGroupsByRollout(rolloutId, pageable);
+            findRolloutGroupsAll = rolloutGroupManagement.findRolloutGroupsByRolloutId(rolloutId, pageable);
         }
 
         final List<RolloutGroupResponseBody> rest = RolloutMapper
@@ -365,9 +360,10 @@ public class RolloutResource {
         final Page<Target> rolloutGroupTargets;
         if (rsqlParam != null) {
             final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
-            rolloutGroupTargets = rolloutManagement.findRolloutGroupTargets(rolloutGroup, rsqlSpecification, pageable);
+            rolloutGroupTargets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup, rsqlSpecification,
+                    pageable);
         } else {
-            final Page<Target> pageTargets = rolloutManagement.getRolloutGroupTargets(rolloutGroup, pageable);
+            final Page<Target> pageTargets = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup, pageable);
             rolloutGroupTargets = pageTargets;
         }
         final List<TargetRest> rest = TargetMapper.toResponse(rolloutGroupTargets.getContent());
@@ -383,7 +379,7 @@ public class RolloutResource {
     }
 
     private RolloutGroup findRolloutGroupOrThrowException(final Long rolloutGroupId) {
-        final RolloutGroup rolloutGroup = rolloutManagement.findRolloutGroupById(rolloutGroupId);
+        final RolloutGroup rolloutGroup = rolloutGroupManagement.findRolloutGroupById(rolloutGroupId);
         if (rolloutGroup == null) {
             throw new EntityNotFoundException("Group with Id {" + rolloutGroupId + "} does not exist");
         }
