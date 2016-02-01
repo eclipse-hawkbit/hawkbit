@@ -29,7 +29,7 @@ import javax.persistence.Table;
 public class RolloutTargetGroup {
 
     @Id
-    @ManyToOne(targetEntity = RolloutGroup.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = RolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "rolloutGroup_Id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group") )
     private RolloutGroup rolloutGroup;
 
