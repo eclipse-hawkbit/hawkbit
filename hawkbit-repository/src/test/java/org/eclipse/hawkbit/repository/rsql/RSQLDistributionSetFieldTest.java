@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.rsql;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
@@ -94,7 +95,12 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     @Description("Test filter distribution set by complete property")
     public void testFilterByAttribute() {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 4);
-        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
+        try {
+            assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
+            fail();
+        } catch (final RSQLParameterSyntaxException e) {
+            // excepted
+        }
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 0);
     }
