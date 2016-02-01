@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TenantConfigurationValueRequest {
 
-    @JsonProperty
+    @JsonProperty(required = true)
     private Object value;
 
     /**
@@ -24,7 +24,7 @@ public class TenantConfigurationValueRequest {
     }
 
     /**
-     * Sets teh TenantConfigurationValueRequest
+     * Sets the TenantConfigurationValueRequest
      * 
      * @param value
      */

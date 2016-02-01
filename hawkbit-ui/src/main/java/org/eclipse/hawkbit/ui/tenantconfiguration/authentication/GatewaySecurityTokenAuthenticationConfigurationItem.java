@@ -61,8 +61,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     private VerticalLayout detailLayout;
 
     /**
-     * @param configurationKey
-     * @param systemManagement
+     * @param tenantConfigurationManagement
      */
     @Autowired
     public GatewaySecurityTokenAuthenticationConfigurationItem(

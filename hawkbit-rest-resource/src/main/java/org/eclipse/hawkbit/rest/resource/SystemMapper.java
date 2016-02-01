@@ -1,5 +1,8 @@
 package org.eclipse.hawkbit.rest.resource;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +33,7 @@ final public class SystemMapper {
 
         for (final TenantConfigurationKey key : TenantConfigurationKey.values()) {
             configurationMap.put(key.getKeyName(),
-                    toResponse(tenantConfigurationManagement.getConfigurationValue(key)));
+                    toResponse(key.getKeyName(), tenantConfigurationManagement.getConfigurationValue(key)));
         }
 
         return configurationMap;
@@ -44,7 +47,8 @@ final public class SystemMapper {
      *            configuration value as repository model
      * @return configuration value as RESTful model
      */
-    public static TenantConfigurationValueRest toResponse(final TenantConfigurationValue<?> repoConfValue) {
+    public static TenantConfigurationValueRest toResponse(final String key,
+            final TenantConfigurationValue<?> repoConfValue) {
         final TenantConfigurationValueRest restConfValue = new TenantConfigurationValueRest();
 
         restConfValue.setValue(repoConfValue.getValue());
@@ -53,6 +57,8 @@ final public class SystemMapper {
         restConfValue.setCreatedBy(repoConfValue.getCreatedBy());
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
+
+        restConfValue.add(linkTo(methodOn(SystemResource.class).getConfigurationValue(key)).withRel("self"));
 
         return restConfValue;
     }

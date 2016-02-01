@@ -1,9 +1,21 @@
 package org.eclipse.hawkbit.rest.resource.model.system;
 
-public class TenantConfigurationValueRest {
+import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TenantConfigurationValueRest extends ResourceSupport {
+
+    @JsonInclude(Include.ALWAYS)
     private Object value = null;
+
+    @JsonInclude(Include.ALWAYS)
     private boolean isGlobal = true;
+
     private Long lastModifiedAt = null;
     private String lastModifiedBy = null;
     private Long createdAt = null;
