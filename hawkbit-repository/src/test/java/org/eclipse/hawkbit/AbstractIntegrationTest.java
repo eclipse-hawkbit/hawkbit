@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.ExternalArtifactRepository;
 import org.eclipse.hawkbit.repository.LocalArtifactRepository;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataRepository;
@@ -182,6 +183,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Autowired
     protected RolloutManagement rolloutManagement;
 
+    @Autowired
+    protected RolloutGroupManagement rolloutGroupManagement;
+
     protected MockMvc mvc;
 
     @Autowired
@@ -224,15 +228,12 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Before
     public void before() throws Exception {
-        mvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .addFilter(
-                        new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
-                                "X-Forwarded-For"))
-                .addFilter(
-                        new ExcludePathAwareShallowETagFilter(
-                                "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
-                                "/*/controller/artifacts/**")).build();
+        mvc = MockMvcBuilders.webAppContextSetup(context)
+                .addFilter(new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
+                        "X-Forwarded-For"))
+                .addFilter(new ExcludePathAwareShallowETagFilter(
+                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"))
+                .build();
 
         standardDsType = securityRule.runAsPrivileged(() -> systemManagement.getTenantMetadata().getDefaultDsType());
 
