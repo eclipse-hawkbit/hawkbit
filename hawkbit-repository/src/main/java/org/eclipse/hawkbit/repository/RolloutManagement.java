@@ -253,12 +253,32 @@ public class RolloutManagement {
         }
     }
 
+    /**
+     * Method for creating rollout groups and calculating group sizes. Group
+     * sizes are calculated by dividing the total count of targets through the
+     * amount of given groups. In same cases this will lead to less rollout
+     * groups than given by client.
+     * 
+     * @param amountGroup
+     *            the amount of groups
+     * @param conditions
+     *            the rollout group conditions
+     * @param savedRollout
+     *            the rollout
+     * @return the rollout with created groups
+     */
     private Rollout createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
             final Rollout savedRollout) {
         int pageIndex = 0;
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
         final int groupSize = (int) Math.ceil((double) totalCount / (double) amountGroup);
+        // validate if the amount of groups that will be created are the amount
+        // of groups that the client what's to have created.
+        int amountGroupValidated = amountGroup;
+        if ((Math.ceil((double) totalCount / (double) groupSize)) != amountGroup) {
+            amountGroupValidated--;
+        }
         RolloutGroup lastSavedGroup = null;
         while (pageIndex < totalCount) {
             groupIndex++;
@@ -283,8 +303,8 @@ public class RolloutManagement {
 
             targetGroup
                     .forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target)));
-            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(), amountGroup,
-                    groupIndex);
+            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(),
+                    amountGroupValidated, groupIndex);
             pageIndex += groupSize;
         }
 

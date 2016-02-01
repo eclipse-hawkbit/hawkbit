@@ -582,7 +582,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private boolean duplicateCheck() {
         if (rolloutManagement.findRolloutByName(getRolloutName()) != null) {
-            uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check"));
+            uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check",new Object[] { getRolloutName() }));
             return false;
         }
         return true;

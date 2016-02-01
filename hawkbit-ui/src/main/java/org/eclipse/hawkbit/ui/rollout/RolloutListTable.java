@@ -253,19 +253,37 @@ public class RolloutListTable extends AbstractSimpleTable {
     private Button getActionButton(final Object itemId) {
         final Item row = getItem(itemId);
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
-                .getValue();
         final Button actionButton = SPUIComponentProvider.getButton(getActionButtonId(rolloutName), "",
                 SPUILabelDefinitions.ACTION, ValoTheme.BUTTON_TINY + " ", true, FontAwesome.CIRCLE_O,
                 SPUIButtonStyleSmallNoBorder.class);
         actionButton.setData(itemId);
         actionButton.setHtmlContentAllowed(true);
+        actionButton.addClickListener(event -> onAction(event));
+        addStatusPropertyChangeListener(itemId, actionButton);
+        return actionButton;
+    }
+
+    private void enableDisableActions(final RolloutStatus rolloutStatus, final Button actionButton) {
         if (rolloutStatus == RolloutStatus.FINISHED || rolloutStatus == RolloutStatus.STARTING
                 || rolloutStatus == RolloutStatus.CREATING) {
             actionButton.setEnabled(false);
+        } else {
+            actionButton.setEnabled(true);
         }
-        actionButton.addClickListener(event -> onAction(event));
-        return actionButton;
+    }
+
+    private void addStatusPropertyChangeListener(final Object itemId, final Button actionButton) {
+        final Property status = getContainerProperty(itemId, SPUILabelDefinitions.VAR_STATUS);
+        final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
+        notifier.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
+                final Item row = getItem(itemId);
+                final RolloutStatus rolloutStatus = (RolloutStatus) row
+                        .getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
+                enableDisableActions(rolloutStatus, actionButton);
+            }
+        });
     }
 
     private ContextMenu createContextMenu(final Long rolloutId) {
@@ -375,7 +393,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         statusLabel.setContentMode(ContentMode.HTML);
         statusLabel.setId(getRolloutStatusId(itemId));
         setStatusIcon(itemId, statusLabel);
-        statusLabel.setDescription(getDescription(itemId));
         statusLabel.setSizeUndefined();
         addPropertyChangeListener(itemId, statusLabel);
         return statusLabel;
@@ -450,6 +467,7 @@ public class RolloutListTable extends AbstractSimpleTable {
         default:
             break;
         }
+        statusLabel.setDescription(rolloutStatus.toString().toLowerCase());
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
 
