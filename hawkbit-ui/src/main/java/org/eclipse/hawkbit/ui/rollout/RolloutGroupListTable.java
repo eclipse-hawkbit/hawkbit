@@ -143,19 +143,20 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<TableColumn>();
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_NAME, i18n.get("header.name"), 0.1f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n
-                .get("header.rolloutgroup.started.date"), 0.13f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, i18n
-                .get("header.rolloutgroup.threshold.error"), 0.125f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_THRESHOLD, i18n
-                .get("header.rolloutgroup.threshold"), 0.125f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_STATUS, i18n.get("header.status"), 0.1f));
+        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.42f));
+        columnList
+                .add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.08f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE, i18n
                 .get("header.rolloutgroup.installed.percentage"), 0.1f));
-        columnList
-                .add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.12f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_STATUS, i18n.get("header.status"), 0.1f));
-        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.2f));
-
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, i18n
+                .get("header.rolloutgroup.threshold.error"), 0.1f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_THRESHOLD, i18n
+                .get("header.rolloutgroup.threshold"), 0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.15f));
         return columnList;
     }
 
@@ -354,10 +355,10 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
 
     @Override
     protected void setCollapsiblecolumns() {
-        /**
-         * No implementation required.
-         */
-
+        setColumnCollapsed(SPUILabelDefinitions.VAR_CREATED_DATE, true);
+        setColumnCollapsed(SPUILabelDefinitions.VAR_MODIFIED_DATE, true);
+        setColumnCollapsed(SPUILabelDefinitions.VAR_CREATED_USER, true);
+        setColumnCollapsed(SPUILabelDefinitions.VAR_MODIFIED_BY, true);
     }
 
 }
