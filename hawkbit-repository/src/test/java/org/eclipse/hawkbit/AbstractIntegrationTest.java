@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.ExternalArtifactRepository;
 import org.eclipse.hawkbit.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataRepository;
@@ -185,6 +186,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected RolloutGroupManagement rolloutGroupManagement;
+
+    @Autowired
+    protected RolloutGroupRepository rolloutGroupRepository;
 
     protected MockMvc mvc;
 
