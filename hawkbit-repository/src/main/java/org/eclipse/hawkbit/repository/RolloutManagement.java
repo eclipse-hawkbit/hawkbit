@@ -122,7 +122,7 @@ public class RolloutManagement {
      * because of database interruption, failures or even application crash.
      * !This is not cluster aware!
      */
-    private static final Set<Long> creatingRollouts = ConcurrentHashMap.newKeySet();
+    private static final Set<String> creatingRollouts = ConcurrentHashMap.newKeySet();
 
     /*
      * set which stores the rollouts which are asynchronously starting. This is
@@ -130,7 +130,7 @@ public class RolloutManagement {
      * because of database interruption, failures or even application crash.
      * !This is not cluster aware!
      */
-    private static final Set<Long> startingRollouts = ConcurrentHashMap.newKeySet();
+    private static final Set<String> startingRollouts = ConcurrentHashMap.newKeySet();
 
     /**
      * Retrieves all rollouts.
@@ -199,8 +199,7 @@ public class RolloutManagement {
     @Transactional
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    public Rollout createRollout(final Rollout rollout, final int amountGroup,
-            final RolloutGroupConditions conditions) {
+    public Rollout createRollout(final Rollout rollout, final int amountGroup, final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
         createRolloutGroups(amountGroup, conditions, savedRollout);
         return savedRollout;
@@ -246,7 +245,7 @@ public class RolloutManagement {
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
-        creatingRollouts.add(savedRollout.getId());
+        creatingRollouts.add(savedRollout.getName());
         executor.execute(() -> {
             try {
                 final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -257,7 +256,7 @@ public class RolloutManagement {
                     return null;
                 });
             } finally {
-                creatingRollouts.remove(savedRollout.getId());
+                creatingRollouts.remove(savedRollout.getName());
             }
         });
         return savedRollout;
@@ -335,6 +334,7 @@ public class RolloutManagement {
         }
 
         savedRollout.setStatus(RolloutStatus.READY);
+        rolloutRepository.save(savedRollout);
     }
 
     /**
@@ -389,7 +389,7 @@ public class RolloutManagement {
         checkIfRolloutCanStarted(rollout, mergedRollout);
         mergedRollout.setStatus(RolloutStatus.STARTING);
         final Rollout updatedRollout = rolloutRepository.save(mergedRollout);
-        startingRollouts.add(updatedRollout.getId());
+        startingRollouts.add(updatedRollout.getName());
         executor.execute(() -> {
             try {
                 final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -400,7 +400,7 @@ public class RolloutManagement {
                     return null;
                 });
             } finally {
-                startingRollouts.remove(updatedRollout.getId());
+                startingRollouts.remove(updatedRollout.getName());
             }
         });
         return updatedRollout;
@@ -426,8 +426,8 @@ public class RolloutManagement {
             } else {
                 // create only not active actions with status scheduled so they
                 // can be activated later
-                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime, rollout,
-                        rolloutGroup);
+                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
+                        rollout, rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
             }
             rolloutGroupRepository.save(rolloutGroup);
@@ -581,24 +581,30 @@ public class RolloutManagement {
      */
     private void verifyStuckedRollouts() {
         final List<Rollout> rolloutsInCreatingState = rolloutRepository.findByStatus(RolloutStatus.CREATING);
-        rolloutsInCreatingState.stream().filter(rollout -> !creatingRollouts.contains(rollout.getId()))
-                .forEach(rollout -> {
-                    LOGGER.warn(
-                            "Determined error during rollout creation of rollout {}, stucking in creating state, setting to status",
-                            rollout, RolloutStatus.ERROR_CREATING);
-                    rollout.setStatus(RolloutStatus.ERROR_CREATING);
-                    rolloutRepository.save(rollout);
-                });
+        rolloutsInCreatingState
+                .stream()
+                .filter(rollout -> !creatingRollouts.contains(rollout.getName()))
+                .forEach(
+                        rollout -> {
+                            LOGGER.warn(
+                                    "Determined error during rollout creation of rollout {}, stucking in creating state, setting to status",
+                                    rollout, RolloutStatus.ERROR_CREATING);
+                            rollout.setStatus(RolloutStatus.ERROR_CREATING);
+                            rolloutRepository.save(rollout);
+                        });
 
         final List<Rollout> rolloutsInStartingState = rolloutRepository.findByStatus(RolloutStatus.STARTING);
-        rolloutsInStartingState.stream().filter(rollout -> !startingRollouts.contains(rollout.getId()))
-                .forEach(rollout -> {
-                    LOGGER.warn(
-                            "Determined error during rollout starting of rollout {}, stucking in starting state, setting to status",
-                            rollout, RolloutStatus.ERROR_STARTING);
-                    rollout.setStatus(RolloutStatus.ERROR_STARTING);
-                    rolloutRepository.save(rollout);
-                });
+        rolloutsInStartingState
+                .stream()
+                .filter(rollout -> !startingRollouts.contains(rollout.getName()))
+                .forEach(
+                        rollout -> {
+                            LOGGER.warn(
+                                    "Determined error during rollout starting of rollout {}, stucking in starting state, setting to status",
+                                    rollout, RolloutStatus.ERROR_STARTING);
+                            rollout.setStatus(RolloutStatus.ERROR_STARTING);
+                            rolloutRepository.save(rollout);
+                        });
 
     }
 
@@ -625,8 +631,8 @@ public class RolloutManagement {
     }
 
     private void executeLatestRolloutGroup(final Rollout rollout) {
-        final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository
-                .findByRolloutAndStatusNotOrderByIdDesc(rollout, RolloutGroupStatus.SCHEDULED);
+        final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository.findByRolloutAndStatusNotOrderByIdDesc(
+                rollout, RolloutGroupStatus.SCHEDULED);
         if (latestRolloutGroup.isEmpty()) {
             return;
         }
@@ -635,11 +641,11 @@ public class RolloutManagement {
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
         try {
-            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class)
-                    .eval(rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
+            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class).eval(
+                    rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
         } catch (final BeansException e) {
-            LOGGER.error("Something bad happend when accessing the error action bean {}",
-                    rolloutGroup.getErrorAction().getBeanName(), e);
+            LOGGER.error("Something bad happend when accessing the error action bean {}", rolloutGroup.getErrorAction()
+                    .getBeanName(), e);
         }
     }
 
@@ -676,9 +682,9 @@ public class RolloutManagement {
             final RolloutGroupSuccessCondition finishCondition) {
         LOGGER.trace("Checking finish condition {} on rolloutgroup {}", finishCondition, rolloutGroup);
         try {
-            final boolean isFinished = context
-                    .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
-                    .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
+            final boolean isFinished = context.getBean(finishCondition.getBeanName(),
+                    RolloutGroupConditionEvaluator.class).eval(rollout, rolloutGroup,
+                    rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
                 LOGGER.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
@@ -723,10 +729,9 @@ public class RolloutManagement {
     private static Specification<Rollout> likeNameOrDescription(final String searchText) {
         return (rolloutRoot, query, criteriaBuilder) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.name)), searchTextToLower),
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.description)),
-                            searchTextToLower));
+            return criteriaBuilder.or(criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.name)),
+                    searchTextToLower), criteriaBuilder.like(
+                    criteriaBuilder.lower(rolloutRoot.get(Rollout_.description)), searchTextToLower));
         };
     }
 
@@ -822,8 +827,7 @@ public class RolloutManagement {
     private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
-                rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
 
         for (final Rollout rollout : rollouts) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
