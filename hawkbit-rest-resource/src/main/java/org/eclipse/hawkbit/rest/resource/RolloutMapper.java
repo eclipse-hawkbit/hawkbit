@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutCondition.Condition;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutErrorAction.ErrorAction;
@@ -62,6 +63,13 @@ final class RolloutMapper {
         body.setTargetFilterQuery(rollout.getTargetFilterQuery());
         body.setDistributionSetId(rollout.getDistributionSet().getId());
         body.setStatus(rollout.getStatus().toString().toLowerCase());
+        body.setTotalTargets(rollout.getTotalTargets());
+
+        for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
+            body.getTotalTargetsPerStatus().put(status.name().toLowerCase(),
+                    rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
+        }
+
         body.add(linkTo(methodOn(RolloutResource.class).getRollout(rollout.getId())).withRel("self"));
         body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), false)).withRel("start"));
         body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), true)).withRel("startAsync"));

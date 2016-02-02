@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.rollout;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -30,6 +33,12 @@ public class RolloutResponseBody extends NamedEntityRest {
 
     @JsonProperty(required = true)
     private String status;
+
+    @JsonProperty(required = true)
+    private Long totalTargets;
+
+    @JsonProperty(required = true)
+    private final Map<String, Long> totalTargetsPerStatus = new HashMap<>();
 
     /**
      * @return the status
@@ -89,5 +98,27 @@ public class RolloutResponseBody extends NamedEntityRest {
      */
     public void setDistributionSetId(final Long distributionSetId) {
         this.distributionSetId = distributionSetId;
+    }
+
+    /**
+     * @param totalTargets
+     *            the totalTargets to set
+     */
+    public void setTotalTargets(final Long totalTargets) {
+        this.totalTargets = totalTargets;
+    }
+
+    /**
+     * @return the totalTargets
+     */
+    public Long getTotalTargets() {
+        return totalTargets;
+    }
+
+    /**
+     * @return the totalTargetsPerStatus
+     */
+    public Map<String, Long> getTotalTargetsPerStatus() {
+        return totalTargetsPerStatus;
     }
 }
