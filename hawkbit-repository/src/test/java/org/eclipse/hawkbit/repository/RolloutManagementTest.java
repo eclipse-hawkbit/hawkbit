@@ -15,11 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -38,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -51,6 +47,8 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
+ * Junit tests for RolloutManagment
+ * 
  * @author Michael Hirsch
  *
  */
@@ -70,8 +68,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // verify the split of the target and targetGroup
         final Page<RolloutGroup> rolloutGroups = rolloutGroupManagement
@@ -87,8 +87,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // start the rollout
         rolloutManagement.startRollout(createdRollout);
@@ -119,8 +121,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(createdRollout);
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
@@ -157,8 +161,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(createdRollout);
         // set both actions in error state so error condition is hit and error
@@ -199,8 +205,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
         rolloutManagement.startRollout(createdRollout);
         // set both actions in error state so error condition is hit and error
         // action is executed
@@ -249,8 +257,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
         rolloutManagement.startRollout(createdRollout);
         // finish running actions, 2 actions should be finished
         assertThat(changeStatusForAllRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
@@ -287,8 +297,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
         final int amountGroups = 4;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // targets have not started
         Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
@@ -344,8 +356,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
         final int amountGroups = 4;
-        final Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // 8 targets have not started
         Map<TotalTargetCountStatus.Status, Long> validationMap = createInitStatusMap();
@@ -375,8 +389,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 9;
         final int amountOtherTargets = 15;
         final int amountGroups = 4;
-        Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(createdRollout);
         changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
@@ -405,8 +421,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 0;
         final int amountGroups = 2;
-        Rollout createdRollout = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
         final DistributionSet ds = createdRollout.getDistributionSet();
 
         rolloutManagement.startRollout(createdRollout);
@@ -449,16 +467,18 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 5;
         final int amountGroups = 3;
-        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
         rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
 
         final DistributionSet dsForRolloutTwo = TestDataUtil.generateDistributionSet("dsForRolloutTwo",
                 softwareManagement, distributionSetManagement);
 
-        final Rollout rolloutTwo = createRolloutWithVariables("rolloutTwo", "This is the description for rollout two",
-                1, "controllerId==rollout-*", dsForRolloutTwo, "50", "80");
+        final Rollout rolloutTwo = createRolloutByVariables("rolloutTwo", "This is the description for rollout two", 1,
+                "controllerId==rollout-*", dsForRolloutTwo, "50", "80");
         changeStatusForAllRunningActions(rolloutOne, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
         // Verify that 5 targets are finished, 5 are running and 5 are ready.
@@ -485,8 +505,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
-        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80");
+        final String successCondition = "50";
+        final String errorCondition = "80";
+        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
         final DistributionSet distributionSet = rolloutOne.getDistributionSet();
         rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
@@ -510,7 +532,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         assertThat(rolloutOne.getStatus()).isEqualTo(RolloutStatus.FINISHED);
 
         final int amountGroupsForRolloutTwo = 1;
-        Rollout rolloutTwo = createRolloutWithVariables("rolloutTwo", "This is the description for rollout two",
+        Rollout rolloutTwo = createRolloutByVariables("rolloutTwo", "This is the description for rollout two",
                 amountGroupsForRolloutTwo, "controllerId==rollout-*", distributionSet, "50", "80");
 
         rolloutManagement.startRollout(rolloutTwo);
@@ -540,8 +562,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
@@ -565,8 +587,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "80";
         final String errorCondition = "90";
-        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
@@ -591,8 +613,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "20";
-        Rollout rolloutOne = createTestRolloutWithDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, successCondition, errorCondition);
+        Rollout rolloutOne = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
@@ -605,39 +627,37 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verify that all rollouts are returns with expected target statuses.")
+    @Description("Verify that all rollouts are return with expected target statuses.")
     public void findAllRolloutsWithDetailedStatus() {
 
         final int amountTargetsForRollout = 12;
-        final int amountOtherTargets = 0;
         final int amountGroups = 2;
-        final Rollout rolloutA = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80", "RolloutA", "RolloutA");
+        final String successCondition = "50";
+        final String errorCondition = "20";
+        final Rollout rolloutA = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups,
+                successCondition, errorCondition, "RolloutA", "RolloutA");
         rolloutManagement.startRollout(rolloutA);
 
         final int amountTargetsForRollout2 = 10;
-        final int amountOtherTargets2 = 0;
         final int amountGroups2 = 2;
-        final Rollout rolloutB = createRolloutWithContainedTargets(amountTargetsForRollout2, amountOtherTargets2,
-                amountGroups2, "50", "80", "RolloutB", "RolloutB");
+        final Rollout rolloutB = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout2, amountGroups2,
+                successCondition, errorCondition, "RolloutB", "RolloutB");
         rolloutManagement.startRollout(rolloutB);
         changeStatusForAllRunningActions(rolloutB, Status.FINISHED);
         rolloutManagement.checkRunningRollouts(0);
 
         final int amountTargetsForRollout3 = 10;
-        final int amountOtherTargets3 = 0;
         final int amountGroups3 = 2;
-        final Rollout rolloutC = createRolloutWithContainedTargets(amountTargetsForRollout3, amountOtherTargets3,
-                amountGroups3, "50", "80", "RolloutC", "RolloutC");
+        final Rollout rolloutC = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout3, amountGroups3,
+                successCondition, errorCondition, "RolloutC", "RolloutC");
         rolloutManagement.startRollout(rolloutC);
         changeStatusForAllRunningActions(rolloutC, Status.ERROR);
         rolloutManagement.checkRunningRollouts(0);
 
         final int amountTargetsForRollout4 = 15;
-        final int amountOtherTargets4 = 0;
         final int amountGroups4 = 3;
-        final Rollout rolloutD = createRolloutWithContainedTargets(amountTargetsForRollout4, amountOtherTargets4,
-                amountGroups4, "50", "80", "RolloutD", "RolloutD");
+        final Rollout rolloutD = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout4, amountGroups4,
+                successCondition, errorCondition, "RolloutD", "RolloutD");
         rolloutManagement.startRollout(rolloutD);
         changeStatusForRunningActions(rolloutD, Status.ERROR, 1);
         rolloutManagement.checkRunningRollouts(0);
@@ -680,11 +700,13 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     public void rightCountForAllRollouts() {
 
         final int amountTargetsForRollout = 6;
-        final int amountOtherTargets = 0;
+        ;
         final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "80";
         for (int i = 1; i <= 10; i++) {
-            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
-                    "Rollout" + i, "Rollout" + i);
+            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
+                    errorCondition, "Rollout" + i, "Rollout" + i);
         }
         final Long count = rolloutManagement.countRolloutsAll();
         assertThat(count).isEqualTo(10L);
@@ -695,15 +717,16 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     public void countRolloutsAllByFilters() {
 
         final int amountTargetsForRollout = 6;
-        final int amountOtherTargets = 0;
         final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "80";
         for (int i = 1; i <= 5; i++) {
-            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
-                    "Rollout" + i, "Rollout" + i);
+            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
+                    errorCondition, "Rollout" + i, "Rollout" + i);
         }
         for (int i = 1; i <= 5; i++) {
-            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
-                    "SomethingElse" + i, "SomethingElse" + i);
+            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
+                    errorCondition, "SomethingElse" + i, "SomethingElse" + i);
         }
 
         final Long count = rolloutManagement.countRolloutsAllByFilters("Rollout%");
@@ -716,15 +739,16 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     public void findRolloutByFilters() {
 
         final int amountTargetsForRollout = 6;
-        final int amountOtherTargets = 0;
         final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "80";
         for (int i = 1; i <= 5; i++) {
-            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
-                    "Rollout" + i, "Rollout" + i);
+            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
+                    errorCondition, "Rollout" + i, "Rollout" + i);
         }
         for (int i = 1; i <= 8; i++) {
-            createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups, "50", "80",
-                    "SomethingElse" + i, "SomethingElse" + i);
+            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
+                    errorCondition, "SomethingElse" + i, "SomethingElse" + i);
         }
 
         final Slice<Rollout> rollout = rolloutManagement
@@ -743,11 +767,12 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     public void findRolloutByName() {
 
         final int amountTargetsForRollout = 12;
-        final int amountOtherTargets = 0;
         final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "80";
         final String rolloutName = "Rollout137";
-        final Rollout rolloutCreated = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets,
-                amountGroups, "50", "80", rolloutName, "RolloutA");
+        final Rollout rolloutCreated = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountGroups, successCondition, errorCondition, rolloutName, "RolloutA");
 
         final Rollout rolloutFound = rolloutManagement.findRolloutByName(rolloutName);
         assertThat(rolloutCreated).isEqualTo(rolloutFound);
@@ -759,11 +784,12 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     public void getFinishedPercentForRunningGroup() {
 
         final int amountTargetsForRollout = 10;
-        final int amountOtherTargets = 0;
         final int amountGroups = 2;
+        final String successCondition = "50";
+        final String errorCondition = "80";
         final String rolloutName = "MyRollout";
-        Rollout myRollout = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups,
-                "50", "80", rolloutName, rolloutName);
+        Rollout myRollout = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups,
+                successCondition, errorCondition, rolloutName, rolloutName);
         rolloutManagement.startRollout(myRollout);
         changeStatusForRunningActions(myRollout, Status.FINISHED, 2);
         rolloutManagement.checkRunningRollouts(0);
@@ -788,56 +814,50 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verify that the expected targets are returned for the rollout groups.")
-    public void findRolloutGroupTargets() {
+    @Description("Verify that the expected targets in the expected order are returned for the rollout groups.")
+    public void findRolloutGroupTargetsWithRsqlParam() {
 
         final int amountTargetsForRollout = 15;
-        final int amountOtherTargets = 0;
         final int amountGroups = 3;
+        final int amountOtherTargets = 15;
+        final String successCondition = "50";
+        final String errorCondition = "80";
         final String rolloutName = "MyRollout";
-        Rollout myRollout = createRolloutWithContainedTargets(amountTargetsForRollout, amountOtherTargets, amountGroups,
-                "50", "80", rolloutName, rolloutName);
+        Rollout myRollout = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups,
+                successCondition, errorCondition, rolloutName, rolloutName);
+
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountOtherTargets, "others-", "rollout"));
+
+        final String rsqlParam = "controllerId==*MyRoll*";
+        final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
+
         rolloutManagement.startRollout(myRollout);
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
         final List<RolloutGroup> rolloutGroups = myRollout.getRolloutGroups();
 
-        final Specification<Target> specification = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                // TODO criteria anpassen
-                return cb.conjunction();
-            }
-        };
-
-        // test group 1
-        Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0), specification,
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")));
+        Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0),
+                rsqlSpecification, new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
         final List<Target> targetlistGroup1 = targetPage.getContent();
-
-        // TODO change --> verify in a different way
-        // verify
         assertThat(targetlistGroup1.size()).isEqualTo(5);
-        int i = 0;
-        for (final Target t : targetlistGroup1) {
-            assertThat(t.getName()).as("MyRollout--0000" + i);
-            i++;
-        }
+        assertThat(targetlistGroup1.get(0).getControllerId()).isEqualTo("MyRollout--00000");
 
-        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1), specification,
-                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "name")));
+        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1), rsqlSpecification,
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.DESC, "controllerId")));
         final List<Target> targetlistGroup2 = targetPage.getContent();
         assertThat(targetlistGroup2.size()).isEqualTo(5);
-        for (final Target t : targetlistGroup1) {
-            assertThat(t.getName()).as("MyRollout--0000" + i);
-            i++;
-        }
+        assertThat(targetlistGroup2.get(0).getControllerId()).isEqualTo("MyRollout--00009");
+
+        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(2), rsqlSpecification,
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
+        final List<Target> targetlistGroup3 = targetPage.getContent();
+        assertThat(targetlistGroup3.size()).isEqualTo(5);
+        assertThat(targetlistGroup3.get(0).getControllerId()).isEqualTo("MyRollout--00010");
 
     }
 
     @Test
-    @Description("Verify the start and the creation of a rollout in asynchronous mode.")
-    public void startTheRolloutInAsync() {
+    @Description("Verify the creation and the start of a rollout in asynchronous mode.")
+    public void createAndStartRolloutInAsync() {
 
         final int amountTargetsForRollout = 500;
         final int amountGroups = 5;
@@ -853,10 +873,9 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-
         Rollout myRollout = new Rollout();
         myRollout.setName(rolloutName);
-        myRollout.setDescription("fgdfg");
+        myRollout.setDescription("This is a test description for the rollout");
         myRollout.setTargetFilterQuery("controllerId==" + targetPrefixName + "-*");
         myRollout.setDistributionSet(distributionSet);
 
@@ -925,7 +944,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         }
     }
 
-    private Rollout createTestRolloutWithDistributionSet(final int amountTargetsForRollout,
+    private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int amountOtherTargets, final int groupSize, final String successCondition,
             final String errorCondition) {
         final SoftwareModule ah = softwareManagement
@@ -936,28 +955,26 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
                 .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
         final DistributionSet rolloutDS = distributionSetManagement.createDistributionSet(
                 TestDataUtil.buildDistributionSet("rolloutDS", "0.0.0", standardDsType, os, jvm, ah));
-
         targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(amountTargetsForRollout, "rollout-", "rollout"));
         targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountOtherTargets, "others-", "rollout"));
-
         final String filterQuery = "controllerId==rollout-*";
-        return createRolloutWithVariables("test-rollout-name-1", "test-rollout-description-1", groupSize, filterQuery,
+        return createRolloutByVariables("test-rollout-name-1", "test-rollout-description-1", groupSize, filterQuery,
                 rolloutDS, successCondition, errorCondition);
     }
 
-    private Rollout createRolloutWithContainedTargets(final int amountTargetsForRollout, final int amountOtherTargets,
+    private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
             final String targetPrefixName) {
         final DistributionSet dsForRolloutTwo = TestDataUtil.generateDistributionSet("dsFor" + rolloutName,
                 softwareManagement, distributionSetManagement);
         targetManagement.createTargets(
                 TestDataUtil.buildTargetFixtures(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
-        return createRolloutWithVariables(rolloutName, rolloutName + "description", groupSize,
+        return createRolloutByVariables(rolloutName, rolloutName + "description", groupSize,
                 "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition);
     }
 
-    private Rollout createRolloutWithVariables(final String rolloutName, final String rolloutDescription,
+    private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
         final RolloutGroupConditions conditions = new RolloutGroup.RolloutGroupConditionBuilder()
