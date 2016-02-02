@@ -834,6 +834,23 @@ public final class SPUIComponetIdProvider {
     public static final String ROLLOUT_TARGET_FILTER_QUERY_FIELD = "rollout.target.filter.query.field.id";
 
     /**
+     * Rollout group header caption.
+     */
+    public static final String ROLLOUT_GROUP_HEADER_CAPTION = "rollout.group.header.caption";
+    /**
+     * Rollout group target header caption.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_HEADER_CAPTION = "rollout.group.header.target.caption";
+    /**
+     * Rollout group close id.
+     */
+    public static final String ROLLOUT_GROUP_CLOSE = "rollout.group.close";
+    /**
+     * Rollout group targets count message label.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
+
+    /**
      * /* Private Constructor.
      */
     private SPUIComponetIdProvider() {
