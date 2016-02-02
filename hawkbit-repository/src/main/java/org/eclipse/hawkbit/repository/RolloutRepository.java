@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The repository interface for the {@link Rollout} model.
  */
+@Transactional(readOnly = true)
 public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, JpaSpecificationExecutor<Rollout> {
 
     /**
@@ -57,8 +58,6 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      */
     List<Rollout> findByLastCheckAndStatus(long lastCheck, RolloutStatus status);
 
-    // ////////Asha - changes starts here/////////////
-
     /**
      * Retrieves all {@link Rollout} for a specific {@code name}
      * 
@@ -77,6 +76,12 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      */
     Rollout findByName(String name);
 
-    // ////////Asha - changes ends here/////////////
-
+    /**
+     * Retrieves all {@link Rollout} for a specific status.
+     * 
+     * @param status
+     *            the status of the rollouts to retrieve
+     * @return a list of {@link Rollout} having the given status
+     */
+    List<Rollout> findByStatus(final RolloutStatus status);
 }

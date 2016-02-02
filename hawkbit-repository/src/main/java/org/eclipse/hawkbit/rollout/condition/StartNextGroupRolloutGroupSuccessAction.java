@@ -9,11 +9,9 @@
 package org.eclipse.hawkbit.rollout.condition;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupRepository;
-import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -33,9 +31,6 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
     private static final Logger logger = LoggerFactory.getLogger(StartNextGroupRolloutGroupSuccessAction.class);
 
     @Autowired
-    private RolloutManagement rolloutManagement;
-
-    @Autowired
     private RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired
@@ -51,12 +46,9 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
 
     @Override
     public void eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-        systemSecurityContext.runAsSystem(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                startNextGroup(rollout, rolloutGroup);
-                return null;
-            }
+        systemSecurityContext.runAsSystem(() -> {
+            startNextGroup(rollout, rolloutGroup);
+            return null;
         });
     }
 
@@ -66,8 +58,8 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
         // started.
         final List<Action> rolloutGroupActions = deploymentManagement.findActionsByRolloutGroupParentAndStatus(rollout,
                 rolloutGroup, Action.Status.SCHEDULED);
-        logger.debug("{} Next actions to start for rollout {} and parent group {}", rolloutGroupActions.size(),
-                rollout, rolloutGroup);
+        logger.debug("{} Next actions to start for rollout {} and parent group {}", rolloutGroupActions.size(), rollout,
+                rolloutGroup);
         rolloutGroupActions.forEach(action -> deploymentManagement.startScheduledAction(action));
         if (!rolloutGroupActions.isEmpty()) {
             // get all next scheduled groups based on the found actions and set
@@ -84,15 +76,15 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
             // e.g. if targets has been deleted after the group has been
             // scheduled. If the group is empty now, we just finish the group if
             // there are not actions available for this group.
-            final List<RolloutGroup> findByRolloutGroupParent = rolloutGroupRepository.findByParentAndStatus(
-                    rolloutGroup, RolloutGroupStatus.SCHEDULED);
+            final List<RolloutGroup> findByRolloutGroupParent = rolloutGroupRepository
+                    .findByParentAndStatus(rolloutGroup, RolloutGroupStatus.SCHEDULED);
             findByRolloutGroupParent.forEach(nextGroup -> {
                 logger.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
                 nextGroup.setStatus(RolloutGroupStatus.FINISHED);
                 rolloutGroupRepository.save(nextGroup);
                 // find the next group to set in running state
-                    startNextGroup(rollout, nextGroup);
-                });
+                startNextGroup(rollout, nextGroup);
+            });
         }
     }
 }
