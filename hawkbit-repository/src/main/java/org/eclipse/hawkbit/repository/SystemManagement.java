@@ -236,18 +236,18 @@ public class SystemManagement implements EnvironmentAware {
     public void deleteTenant(@NotNull final String tenant) {
         cacheManager.evictCaches(tenant);
         cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
-       tenantAware.runAsTenant(tenant, () -> {
+        tenantAware.runAsTenant(tenant, () -> {
             entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant.toUpperCase());
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenantIgnoreCase(tenant);
             targetRepository.deleteByTenantIgnoreCase(tenant);
-			rolloutGroupRepository.deleteByTenantIgnoreCase(tenant);
+            actionRepository.deleteByTenantIgnoreCase(tenant);
+            rolloutGroupRepository.deleteByTenantIgnoreCase(tenant);
             rolloutRepository.deleteByTenantIgnoreCase(tenant);
             artifactRepository.deleteByTenantIgnoreCase(tenant);
             externalArtifactRepository.deleteByTenantIgnoreCase(tenant);
             externalArtifactProviderRepository.deleteByTenantIgnoreCase(tenant);
             targetTagRepository.deleteByTenantIgnoreCase(tenant);
-            actionRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetTypeRepository.deleteByTenantIgnoreCase(tenant);
@@ -294,8 +294,8 @@ public class SystemManagement implements EnvironmentAware {
     public String currentTenant() {
         final String initialTenantCreation = createInitialTenant.get();
         if (initialTenantCreation == null) {
-            final TenantMetaData findByTenant = tenantMetaDataRepository.findByTenantIgnoreCase(tenantAware
-                    .getCurrentTenant());
+            final TenantMetaData findByTenant = tenantMetaDataRepository
+                    .findByTenantIgnoreCase(tenantAware.getCurrentTenant());
             return findByTenant != null ? findByTenant.getTenant() : null;
         }
         return initialTenantCreation;
@@ -340,14 +340,14 @@ public class SystemManagement implements EnvironmentAware {
      */
     @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
     public <T> T getConfigurationValue(final TenantConfigurationKey configurationKey, final Class<T> propertyType) {
-        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository.findByKey(configurationKey
-                .getKeyName());
+        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
+                .findByKey(configurationKey.getKeyName());
         if (tenantConfiguration != null) {
             return conversionService.convert(tenantConfiguration.getValue(), propertyType);
         } else if (configurationKey.getDefaultKeyName() != null) {
             final T defaultKeyNameValue = environment.getProperty(configurationKey.getDefaultKeyName(), propertyType);
-            return defaultKeyNameValue != null ? defaultKeyNameValue : conversionService.convert(
-                    configurationKey.getDefaultValue(), propertyType);
+            return defaultKeyNameValue != null ? defaultKeyNameValue
+                    : conversionService.convert(configurationKey.getDefaultValue(), propertyType);
         }
         return null;
     }
@@ -407,22 +407,24 @@ public class SystemManagement implements EnvironmentAware {
         // Edge Controller Linux standard setup
         final SoftwareModuleType eclApp = softwareModuleTypeRepository.save(new SoftwareModuleType("application",
                 "ECL Application", "Edge Controller Linux base application type", 1));
-        final SoftwareModuleType eclOs = softwareModuleTypeRepository.save(new SoftwareModuleType("os", "ECL OS",
-                "Edge Controller Linux operation system image type", 1));
-        final SoftwareModuleType eclJvm = softwareModuleTypeRepository.save(new SoftwareModuleType("runtime",
-                "ECL JVM", "Edge Controller Linux java virtual machine type.", 1));
+        final SoftwareModuleType eclOs = softwareModuleTypeRepository
+                .save(new SoftwareModuleType("os", "ECL OS", "Edge Controller Linux operation system image type", 1));
+        final SoftwareModuleType eclJvm = softwareModuleTypeRepository.save(
+                new SoftwareModuleType("runtime", "ECL JVM", "Edge Controller Linux java virtual machine type.", 1));
 
-        distributionSetTypeRepository.save(new DistributionSetType("ecl_os", "OS only",
-                "Standard Edge Controller Linux distribution set type.").addMandatoryModuleType(eclOs));
+        distributionSetTypeRepository.save(
+                new DistributionSetType("ecl_os", "OS only", "Standard Edge Controller Linux distribution set type.")
+                        .addMandatoryModuleType(eclOs));
 
         distributionSetTypeRepository.save(new DistributionSetType("ecl_os_app", "OS with optional app",
                 "Standard Edge Controller Linux distribution set type. OS only.").addMandatoryModuleType(eclOs)
-                .addOptionalModuleType(eclApp));
+                        .addOptionalModuleType(eclApp));
 
-        final DistributionSetType defaultType = distributionSetTypeRepository.save(new DistributionSetType(
-                "ecl_os_app_jvm", "OS with optional app and jvm",
-                "Standard Edge Controller Linux distribution set type. OS with optional application.")
-                .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp).addOptionalModuleType(eclJvm));
+        final DistributionSetType defaultType = distributionSetTypeRepository
+                .save(new DistributionSetType("ecl_os_app_jvm", "OS with optional app and jvm",
+                        "Standard Edge Controller Linux distribution set type. OS with optional application.")
+                                .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp)
+                                .addOptionalModuleType(eclJvm));
 
         return defaultType;
     }
@@ -450,8 +452,8 @@ public class SystemManagement implements EnvironmentAware {
         public Object generate(final Object target, final Method method, final Object... params) {
             final String initialTenantCreation = createInitialTenant.get();
             if (initialTenantCreation == null) {
-                return SimpleKeyGenerator.generateKey(tenantAware.getCurrentTenant().toUpperCase(), tenantAware
-                        .getCurrentTenant().toUpperCase());
+                return SimpleKeyGenerator.generateKey(tenantAware.getCurrentTenant().toUpperCase(),
+                        tenantAware.getCurrentTenant().toUpperCase());
             }
             return SimpleKeyGenerator.generateKey(initialTenantCreation.toUpperCase(),
                     initialTenantCreation.toUpperCase());
