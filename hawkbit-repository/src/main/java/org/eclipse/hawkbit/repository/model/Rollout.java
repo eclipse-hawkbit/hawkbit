@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -42,7 +41,7 @@ public class Rollout extends NamedEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(cascade = { CascadeType.ALL }, targetEntity = RolloutGroup.class)
+    @OneToMany(targetEntity = RolloutGroup.class)
     @JoinColumn(name = "rollout", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_rolloutgroup") )
     private List<RolloutGroup> rolloutGroups;
 
@@ -283,18 +282,30 @@ public class Rollout extends NamedEntity {
         STARTING,
 
         /**
+         * Rollout is stopped.
+         */
+        STOPPED,
+
+        /**
          * Rollout is running.
          */
         RUNNING,
 
         /**
-         * Rollout is running.
-         */
-        STOPPED,
-
-        /**
          * Rollout is finished.
          */
-        FINISHED;
+        FINISHED,
+
+        /**
+         * Rollout could not created due errors, might be database problem due
+         * asynchronous creating.
+         */
+        ERROR_CREATING,
+
+        /**
+         * Rollout could not started due errors, might be database problem due
+         * asynchronous starting.
+         */
+        ERROR_STARTING;
     }
 }

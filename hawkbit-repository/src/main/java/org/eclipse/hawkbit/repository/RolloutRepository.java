@@ -76,4 +76,12 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      */
     Rollout findByName(String name);
 
+    /**
+     * Retrieves all {@link Rollout} for a specific status.
+     * 
+     * @param status
+     *            the status of the rollouts to retrieve
+     * @return a list of {@link Rollout} having the given status
+     */
+    List<Rollout> findByStatus(final RolloutStatus status);
 }

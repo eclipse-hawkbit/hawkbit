@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -113,6 +115,22 @@ public class RolloutManagement {
     @Autowired
     @Qualifier("asyncExecutor")
     private Executor executor;
+
+    /*
+     * set which stores the rollouts which are asynchronously creating. This is
+     * necessary to verify rollouts which maybe stuck during creationg e.g.
+     * because of database interruption, failures or even application crash.
+     * !This is not cluster aware!
+     */
+    private static final Set<Long> creatingRollouts = ConcurrentHashMap.newKeySet();
+
+    /*
+     * set which stores the rollouts which are asynchronously starting. This is
+     * necessary to verify rollouts which maybe stuck during starting e.g.
+     * because of database interruption, failures or even application crash.
+     * !This is not cluster aware!
+     */
+    private static final Set<Long> startingRollouts = ConcurrentHashMap.newKeySet();
 
     /**
      * Retrieves all rollouts.
@@ -228,14 +246,19 @@ public class RolloutManagement {
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
+        creatingRollouts.add(savedRollout.getId());
         executor.execute(() -> {
-            final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            def.setName("creatingRollout");
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            new TransactionTemplate(txManager, def).execute(status -> {
-                createRolloutGroups(amountGroup, conditions, savedRollout);
-                return null;
-            });
+            try {
+                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                def.setName("creatingRollout");
+                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                new TransactionTemplate(txManager, def).execute(status -> {
+                    createRolloutGroups(amountGroup, conditions, savedRollout);
+                    return null;
+                });
+            } finally {
+                creatingRollouts.remove(savedRollout.getId());
+            }
         });
         return savedRollout;
     }
@@ -365,14 +388,19 @@ public class RolloutManagement {
         checkIfRolloutCanStarted(rollout, mergedRollout);
         mergedRollout.setStatus(RolloutStatus.STARTING);
         final Rollout updatedRollout = rolloutRepository.save(mergedRollout);
+        startingRollouts.add(updatedRollout.getId());
         executor.execute(() -> {
-            final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            def.setName("startingRollout");
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            new TransactionTemplate(txManager, def).execute(status -> {
-                doStartRollout(updatedRollout);
-                return null;
-            });
+            try {
+                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                def.setName("startingRollout");
+                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                new TransactionTemplate(txManager, def).execute(status -> {
+                    doStartRollout(updatedRollout);
+                    return null;
+                });
+            } finally {
+                startingRollouts.remove(updatedRollout.getId());
+            }
         });
         return updatedRollout;
 
@@ -503,6 +531,7 @@ public class RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public void checkRunningRollouts(final long delayBetweenChecks) {
+        verifyStuckedRollouts();
         final long lastCheck = System.currentTimeMillis();
         final int updated = rolloutRepository.updateLastCheck(lastCheck, delayBetweenChecks, RolloutStatus.RUNNING);
 
@@ -540,6 +569,36 @@ public class RolloutManagement {
                 rolloutRepository.save(rollout);
             }
         }
+    }
+
+    /**
+     * Verifies and handles stucked rollouts in asynchronous creation or
+     * starting state. If rollouts are created or started asynchronously it
+     * might be that they keep in state {@link RolloutStatus#CREATING} or
+     * {@link RolloutStatus#STARTING} due database or application interruption.
+     * In case this happens, set the rollout to error state.
+     */
+    private void verifyStuckedRollouts() {
+        final List<Rollout> rolloutsInCreatingState = rolloutRepository.findByStatus(RolloutStatus.CREATING);
+        rolloutsInCreatingState.stream().filter(rollout -> !creatingRollouts.contains(rollout.getId()))
+                .forEach(rollout -> {
+                    LOGGER.warn(
+                            "Determined error during rollout creation of rollout {}, stucking in creating state, setting to status",
+                            rollout, RolloutStatus.ERROR_CREATING);
+                    rollout.setStatus(RolloutStatus.ERROR_CREATING);
+                    rolloutRepository.save(rollout);
+                });
+
+        final List<Rollout> rolloutsInStartingState = rolloutRepository.findByStatus(RolloutStatus.STARTING);
+        rolloutsInStartingState.stream().filter(rollout -> !startingRollouts.contains(rollout.getId()))
+                .forEach(rollout -> {
+                    LOGGER.warn(
+                            "Determined error during rollout starting of rollout {}, stucking in starting state, setting to status",
+                            rollout, RolloutStatus.ERROR_STARTING);
+                    rollout.setStatus(RolloutStatus.ERROR_STARTING);
+                    rolloutRepository.save(rollout);
+                });
+
     }
 
     private void executeRolloutGroups(final Rollout rollout, final List<RolloutGroup> rolloutGroups) {
