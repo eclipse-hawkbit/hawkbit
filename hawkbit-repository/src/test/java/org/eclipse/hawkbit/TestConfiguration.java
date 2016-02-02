@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.repository.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
@@ -90,6 +91,11 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     public EventBus eventBus() {
         return new AsyncEventBus(asyncExecutor());
+    }
+
+    @Bean
+    public EventBusHolder eventBusHolder() {
+        return EventBusHolder.getInstance();
     }
 
     @Bean
