@@ -20,9 +20,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.resource.model.system.CacheRest;
 import org.eclipse.hawkbit.rest.resource.model.system.SystemStatisticsRest;
-import org.eclipse.hawkbit.rest.resource.model.system.TenantConfigurationRest;
 import org.eclipse.hawkbit.rest.resource.model.system.TenantSystemUsageRest;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -131,37 +128,6 @@ public class SystemManagementResource {
         LOGGER.info("Invalidating caches {}", cacheNames);
         cacheNames.forEach(cacheName -> cacheManager.getCache(cacheName).clear());
         return ResponseEntity.ok(cacheNames);
-    }
-
-    /**
-     * Adds or updates a configuration for a specific tenant to the tenant
-     * configuration.
-     *
-     * @param configuration
-     *            the configuration value to add or update
-     * @param key
-     *            the key of the configuration to add or update
-     * @return the response entity with status OK.
-     */
-    @RequestMapping(method = RequestMethod.PUT, value = "/conf/{key}")
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    public ResponseEntity<Void> addUpdateConfig(@RequestBody final TenantConfigurationRest configuration,
-            @PathVariable final String key) {
-
-        // TODO Quick and dirty solution to stay compatible, but these rest
-        // interface won't be necessary in future
-
-        Object value;
-        if (configuration.getValue().equals(Boolean.TRUE)) {
-            value = true;
-        } else if (configuration.getValue().equals(Boolean.FALSE)) {
-            value = false;
-        } else {
-            value = configuration.getValue();
-        }
-
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.fromKeyName(key), value);
-        return ResponseEntity.ok().build();
     }
 
     private CacheRest cacheRest(final Cache cache) {
