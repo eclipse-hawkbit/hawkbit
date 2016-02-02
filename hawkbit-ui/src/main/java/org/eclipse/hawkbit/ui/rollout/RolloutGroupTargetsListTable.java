@@ -214,8 +214,8 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
             break;
         case CANCELED:
         case CANCELING:
-            statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
-            statusLabel.addStyleName("statusIconLightBlue");
+            statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
+            statusLabel.addStyleName("statusIconPending");
             break;
         default:
             break;

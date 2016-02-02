@@ -834,6 +834,20 @@ public final class SPUIComponetIdProvider {
     public static final String ROLLOUT_TARGET_FILTER_QUERY_FIELD = "rollout.target.filter.query.field.id";
 
     /**
+     * Rollout group view- close button id.
+     */
+    public static final String ROLLOUT_GROUP_CLOSE_BUTTON_ID = "rollout.group.close.id";
+
+    /**
+     * Rollout target view- close button id.
+     */
+    public static final String ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID = "rollout.group.target.close.id";
+    /**
+     * Rollout status progress bar id.
+     */
+    public static final String ROLLOUT_PROGRESS_BAR = "rollout.status.progress.bar.id";
+
+    /**
      * /* Private Constructor.
      */
     private SPUIComponetIdProvider() {

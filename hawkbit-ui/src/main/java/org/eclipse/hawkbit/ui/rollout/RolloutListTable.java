@@ -122,8 +122,8 @@ public class RolloutListTable extends AbstractSimpleTable {
             item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING).setValue(
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR)
-                    .setValue(totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR).setValue(
+                    totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED).setValue(
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED).setValue(
@@ -132,8 +132,8 @@ public class RolloutListTable extends AbstractSimpleTable {
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED).setValue(
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
-            item.getItemProperty("isActionRecieved")
-                    .setValue(!(Boolean) item.getItemProperty("isActionRecieved").getValue());
+            item.getItemProperty("isActionRecieved").setValue(
+                    !(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
     }
 
@@ -142,10 +142,10 @@ public class RolloutListTable extends AbstractSimpleTable {
         final List<TableColumn> columnList = new ArrayList<TableColumn>();
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_NAME, i18n.get("header.name"), 0.25f));
 
-        columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"), 0.2f));
-        columnList.add(
-                new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"), 0.2f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"),
+                0.2f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"),
+                0.2f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.15f));
         columnList
@@ -167,8 +167,8 @@ public class RolloutListTable extends AbstractSimpleTable {
     protected Container createContainer() {
         final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<RolloutBeanQuery>(
                 RolloutBeanQuery.class);
-        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
+        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
+                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
         return rolloutTableContainer;
 
     }
@@ -369,6 +369,7 @@ public class RolloutListTable extends AbstractSimpleTable {
 
     private DistributionBar getProgressBar(final Object itemId) {
         final DistributionBar bar = new DistributionBar(2);
+        bar.setId(SPUIComponetIdProvider.ROLLOUT_PROGRESS_BAR);
         bar.setSizeFull();
         bar.setZeroSizedVisible(false);
         HawkbitCommonUtil.initialiseProgressBar(bar, getItem(itemId));

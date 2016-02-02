@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -76,14 +77,14 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected void resetSearchText() {
- /**
+        /**
          * No implementation required.
          */
     }
 
     @Override
     protected String getSearchBoxId() {
-    /**
+        /**
          * No implementation required.
          */
         return null;
@@ -91,7 +92,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getSearchRestIconId() {
-    /**
+        /**
          * No implementation required.
          */
         return null;
@@ -99,7 +100,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected void searchBy(final String newSearchText) {
-    /**
+        /**
          * No implementation required.
          */
 
@@ -107,7 +108,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getAddIconId() {
-    /**
+        /**
          * No implementation required.
          */
         return null;
@@ -115,7 +116,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-/**
+        /**
          * No implementation required.
          */
     }
@@ -134,7 +135,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getCloseButtonId() {
-        return null;
+        return SPUIComponetIdProvider.ROLLOUT_GROUP_CLOSE_BUTTON_ID;
     }
 
     @Override
