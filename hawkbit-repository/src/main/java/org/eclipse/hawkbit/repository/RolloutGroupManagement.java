@@ -75,7 +75,7 @@ public class RolloutGroupManagement {
      * @return the found {@link RolloutGroup} by its ID or {@code null} if it
      *         does not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public RolloutGroup findRolloutGroupById(final Long rolloutGroupId) {
         return rolloutGroupRepository.findOne(rolloutGroupId);
     }
@@ -90,7 +90,7 @@ public class RolloutGroupManagement {
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<RolloutGroup> findRolloutGroupsByRolloutId(final Long rolloutId, final Pageable page) {
         return rolloutGroupRepository.findByRolloutId(rolloutId, page);
     }
@@ -108,7 +108,7 @@ public class RolloutGroupManagement {
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<RolloutGroup> findRolloutGroupsByPredicate(final Long rolloutId,
             final Specification<RolloutGroup> specification, final Pageable page) {
         return rolloutGroupRepository.findAll((root, query, criteriaBuilder) -> criteriaBuilder.and(
@@ -126,7 +126,7 @@ public class RolloutGroupManagement {
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable page) {
         final Page<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, page);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
@@ -150,7 +150,7 @@ public class RolloutGroupManagement {
      *            rollout group id
      * @return rolloutGroup with details of targets count for different statuses
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public RolloutGroup findRolloutGroupWithDetailedStatus(final Long rolloutGroupId) {
         final RolloutGroup rolloutGroup = findRolloutGroupById(rolloutGroupId);
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
@@ -182,7 +182,7 @@ public class RolloutGroupManagement {
      * 
      * @return Page<Target> list of targets of a rollout group
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<Target> findRolloutGroupTargets(final RolloutGroup rolloutGroup,
             final Specification<Target> specification, final Pageable page) {
         return targetRepository.findAll((root, query, criteriaBuilder) -> {
@@ -202,7 +202,7 @@ public class RolloutGroupManagement {
      * 
      * @return Page<Target> list of targets of a rollout group
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<Target> findRolloutGroupTargets(@NotNull final RolloutGroup rolloutGroup, final Pageable page) {
         if (isRolloutStatusReady(rolloutGroup)) {
             // in case of status ready the action has not been created yet and
@@ -231,7 +231,7 @@ public class RolloutGroupManagement {
      *            rollout group
      * @return {@link TargetWithActionStatus} target with action status
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<TargetWithActionStatus> findAllTargetsWithActionStatus(final PageRequest pageRequest,
             @NotNull final RolloutGroup rolloutGroup) {
 
