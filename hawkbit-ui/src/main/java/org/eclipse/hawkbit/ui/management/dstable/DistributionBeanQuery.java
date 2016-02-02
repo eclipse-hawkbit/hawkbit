@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,8 +36,6 @@ import com.google.common.base.Strings;
  * Simple implementation of generics bean query which dynamically loads a batch
  * of beans.
  *
- *
- *
  */
 public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
@@ -55,7 +50,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
     /**
      * Bean query for retrieving beans/objects of type.
-     * 
+     *
      * @param definition
      *            query definition
      * @param queryConfig
@@ -92,8 +87,9 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
     /**
      * Load all the Distribution set.
-     * 
-     * @parm startIndex as page start
+     *
+     * @param startIndex
+     *            as page start
      * @param count
      *            as total data
      */
@@ -191,17 +187,6 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
         }
         return distributionSetManagement;
-    }
-
-    private void writeObject(final ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeObject(firstPageDistributionSets);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        firstPageDistributionSets = (Page<DistributionSet>) in.readObject();
     }
 
 }
