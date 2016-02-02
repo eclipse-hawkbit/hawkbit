@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -151,22 +152,21 @@ public class RolloutListTable extends AbstractSimpleTable {
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<TableColumn>();
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_NAME, i18n.get("header.name"), 0.25f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_NAME, i18n.get("header.name"), 0.225f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"),
-                0.2f));
+                0.225f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.07f));
-        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.45f));
+        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.58f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"),
-                0.2f));
-        columnList
-                .add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.13f));
+                0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.1f));
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_ACTION, i18n.get("upload.action"), 0.1f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.2f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.2f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.2f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1f));
         return columnList;
     }
 
@@ -274,8 +274,9 @@ public class RolloutListTable extends AbstractSimpleTable {
     }
 
     private void enableDisableActions(final RolloutStatus rolloutStatus, final Button actionButton) {
-        if (rolloutStatus == RolloutStatus.FINISHED || rolloutStatus == RolloutStatus.STARTING
-                || rolloutStatus == RolloutStatus.CREATING) {
+        final RolloutStatus[] statusList = new RolloutStatus[] { RolloutStatus.FINISHED, RolloutStatus.STARTING,
+                RolloutStatus.CREATING, RolloutStatus.ERROR_CREATING, RolloutStatus.ERROR_STARTING };
+        if (Arrays.asList(statusList).contains(rolloutStatus)) {
             actionButton.setEnabled(false);
         } else {
             actionButton.setEnabled(true);
