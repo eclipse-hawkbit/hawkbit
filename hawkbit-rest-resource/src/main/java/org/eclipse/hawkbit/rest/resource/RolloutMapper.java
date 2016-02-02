@@ -34,11 +34,12 @@ import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupResponse
  * A mapper which maps repository model to RESTful model representation and
  * back.
  *
- * @author Kai Zimmermann
- * @since 0.4.0
  *
  */
 final class RolloutMapper {
+
+    private static final String NOT_SUPPORTED = " is not supported";
+
     private RolloutMapper() {
         // Utility class
     }
@@ -62,14 +63,14 @@ final class RolloutMapper {
         body.setDistributionSetId(rollout.getDistributionSet().getId());
         body.setStatus(rollout.getStatus().toString().toLowerCase());
         body.add(linkTo(methodOn(RolloutResource.class).getRollout(rollout.getId())).withRel("self"));
-        body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId())).withRel("start"));
+        body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), false)).withRel("start"));
+        body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), true)).withRel("startAsync"));
         body.add(linkTo(methodOn(RolloutResource.class).pause(rollout.getId())).withRel("pause"));
+        // 2 mal pause?
         body.add(linkTo(methodOn(RolloutResource.class).resume(rollout.getId())).withRel("pause"));
-        body.add(linkTo(
-                methodOn(RolloutResource.class).getRolloutGroups(rollout.getId(),
-                        Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
-                        Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null)).withRel(
-                "groups"));
+        body.add(linkTo(methodOn(RolloutResource.class).getRolloutGroups(rollout.getId(),
+                Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
+                Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null)).withRel("groups"));
         return body;
     }
 
@@ -107,54 +108,48 @@ final class RolloutMapper {
         body.setName(rolloutGroup.getName());
         body.setRolloutGroupId(rolloutGroup.getId());
         body.setStatus(rolloutGroup.getStatus().toString().toLowerCase());
-        body.add(linkTo(
-                methodOn(RolloutResource.class)
-                        .getRolloutGroup(rolloutGroup.getRollout().getId(), rolloutGroup.getId())).withRel("self"));
+        body.add(linkTo(methodOn(RolloutResource.class).getRolloutGroup(rolloutGroup.getRollout().getId(),
+                rolloutGroup.getId())).withRel("self"));
         return body;
     }
 
     static RolloutGroupErrorCondition mapErrorCondition(final Condition condition) {
-        switch (condition) {
-        case THRESHOLD:
+        if (Condition.THRESHOLD.equals(condition)) {
             return RolloutGroupErrorCondition.THRESHOLD;
-        default:
-            throw new IllegalArgumentException("Condition " + condition + " is not supported");
         }
+        throw new IllegalArgumentException(createIllegalArgumentLiteral(condition));
     }
 
     static RolloutGroupSuccessCondition mapFinishCondition(final Condition condition) {
-        switch (condition) {
-        case THRESHOLD:
+        if (Condition.THRESHOLD.equals(condition)) {
             return RolloutGroupSuccessCondition.THRESHOLD;
-        default:
-            throw new IllegalArgumentException("Condition " + condition + " is not supported");
         }
+        throw new IllegalArgumentException(createIllegalArgumentLiteral(condition));
     }
 
     static Condition map(final RolloutGroupSuccessCondition rolloutCondition) {
-        switch (rolloutCondition) {
-        case THRESHOLD:
+        if (RolloutGroupSuccessCondition.THRESHOLD.equals(rolloutCondition)) {
             return Condition.THRESHOLD;
-        default:
-            throw new IllegalArgumentException("Condition " + rolloutCondition + " is not supported");
         }
+        throw new IllegalArgumentException("Rollout group condition " + rolloutCondition + NOT_SUPPORTED);
     }
 
     static RolloutGroupErrorAction map(final ErrorAction action) {
-        switch (action) {
-        case PAUSE:
+        if (ErrorAction.PAUSE.equals(action)) {
             return RolloutGroupErrorAction.PAUSE;
-        default:
-            throw new IllegalArgumentException("Error Action " + action + " is not supported");
         }
+        throw new IllegalArgumentException("Error Action " + action + NOT_SUPPORTED);
     }
 
     static RolloutGroupSuccessAction map(final SuccessAction action) {
-        switch (action) {
-        case NEXTGROUP:
+        if (SuccessAction.NEXTGROUP.equals(action)) {
             return RolloutGroupSuccessAction.NEXTGROUP;
-        default:
-            throw new IllegalArgumentException("Success Action " + action + " is not supported");
         }
+        throw new IllegalArgumentException("Success Action " + action + NOT_SUPPORTED);
     }
+
+    private static String createIllegalArgumentLiteral(final Condition condition) {
+        return "Condition " + condition + NOT_SUPPORTED;
+    }
+
 }

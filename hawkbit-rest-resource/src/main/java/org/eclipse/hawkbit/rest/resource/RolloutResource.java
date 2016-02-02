@@ -203,9 +203,14 @@ public class RolloutResource {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/start", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId,
+            @RequestParam(value = RestConstants.REQUEST_PARAMETER_ASYNC) final boolean startAsync) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
-        rolloutManagement.startRollout(rollout);
+        if (startAsync) {
+            rolloutManagement.startRolloutAsync(rollout);
+        } else {
+            rolloutManagement.startRollout(rollout);
+        }
         return ResponseEntity.ok().build();
     }
 
