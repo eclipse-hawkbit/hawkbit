@@ -197,8 +197,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
         mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(),
                 getGroupDetailsLayout(), getTriggerThresoldLayout(), getErrorThresoldLayout(), description,
-                actionTypeOptionGroupLayout, getSaveDiscardButtonLayout());
-
+                actionTypeOptionGroupLayout, linkToHelp, getSaveDiscardButtonLayout());
+        mainLayout.setComponentAlignment(linkToHelp, Alignment.BOTTOM_RIGHT);
         setCompositionRoot(mainLayout);
     }
 
@@ -278,7 +278,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         totalTargetsLabel = createTotalTargetsLabel();
         targetFilterQuery = createTargetFilterQuery();
 
-        linkToHelp = DocumentationPageLink.DEPLOYMENT_VIEW.getLink();
+        linkToHelp = DocumentationPageLink.ROLLOUT_VIEW.getLink();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
     }
@@ -569,17 +569,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
             return false;
         }
         return true;
-    }
-
-    private OptionGroup createSaveStartOptionGroup() {
-        final OptionGroup saveStartOptions = new OptionGroup();
-        for (final SAVESTARTOPTIONS option : SAVESTARTOPTIONS.values()) {
-            saveStartOptions.addItem(option.getValue());
-        }
-        saveStartOptions.setId(SPUIComponetIdProvider.ROLLOUT_SAVESTARTOPTION_ID);
-        saveStartOptions.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-        saveStartOptions.addStyleName(SPUIStyleDefinitions.ROLLOUT_OPTION_GROUP);
-        return saveStartOptions;
     }
 
     private void setDefaultSaveStartGroupOption() {
