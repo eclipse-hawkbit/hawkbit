@@ -253,12 +253,32 @@ public class RolloutManagement {
         }
     }
 
+    /**
+     * Method for creating rollout groups and calculating group sizes. Group
+     * sizes are calculated by dividing the total count of targets through the
+     * amount of given groups. In same cases this will lead to less rollout
+     * groups than given by client.
+     * 
+     * @param amountGroup
+     *            the amount of groups
+     * @param conditions
+     *            the rollout group conditions
+     * @param savedRollout
+     *            the rollout
+     * @return the rollout with created groups
+     */
     private Rollout createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
             final Rollout savedRollout) {
         int pageIndex = 0;
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
         final int groupSize = (int) Math.ceil((double) totalCount / (double) amountGroup);
+        // validate if the amount of groups that will be created are the amount
+        // of groups that the client what's to have created.
+        int amountGroupValidated = amountGroup;
+        if ((Math.ceil((double) totalCount / (double) groupSize)) != amountGroup) {
+            amountGroupValidated--;
+        }
         RolloutGroup lastSavedGroup = null;
         while (pageIndex < totalCount) {
             groupIndex++;
@@ -283,8 +303,8 @@ public class RolloutManagement {
 
             targetGroup
                     .forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(savedGroup, target)));
-            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(), amountGroup,
-                    groupIndex);
+            cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(),
+                    amountGroupValidated, groupIndex);
             pageIndex += groupSize;
         }
 
@@ -379,20 +399,9 @@ public class RolloutManagement {
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
             }
             rolloutGroupRepository.save(rolloutGroup);
-            cleanupRolloutTargetGroupTable(rolloutGroup);
         }
         rollout.setStatus(RolloutStatus.RUNNING);
         return rolloutRepository.save(rollout);
-    }
-
-    private void cleanupRolloutTargetGroupTable(final RolloutGroup rolloutGroup) {
-        // clean up the target group table because we don't need the
-        // information anymore. We've created the necessary action entries
-        // already. need to do via entity manager, otherwise an extra select
-        // statement will be executed and single delete statements for each
-        // targetGroup is executed, because of a combined unique ID.
-        entityManager.createQuery("DELETE from RolloutTargetGroup r where r.rolloutGroup=:rolloutGroup")
-                .setParameter("rolloutGroup", rolloutGroup).executeUpdate();
     }
 
     /**

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -43,7 +44,7 @@ public class RolloutGroup extends NamedEntity {
     @Column(name = "status")
     private RolloutGroupStatus status = RolloutGroupStatus.READY;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "rolloutGroup_Id", insertable = false, updatable = false)
     private final List<RolloutTargetGroup> rolloutTargetGroup = new ArrayList<>();
 
