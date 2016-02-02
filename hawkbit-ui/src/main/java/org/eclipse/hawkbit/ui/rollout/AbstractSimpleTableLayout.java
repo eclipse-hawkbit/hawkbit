@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -70,6 +72,8 @@ public abstract class AbstractSimpleTableLayout extends VerticalLayout {
      */
     private HorizontalLayout createCountMessageComponent() {
         final HorizontalLayout rolloutGroupTargetsCountLayout = new HorizontalLayout();
+        final Label countMessageLabel = getCountMessageLabel();
+        countMessageLabel.setId(SPUIComponetIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
         rolloutGroupTargetsCountLayout.addComponent(getCountMessageLabel());
         rolloutGroupTargetsCountLayout.setStyleName("footer-layout");
         rolloutGroupTargetsCountLayout.setWidth("100%");

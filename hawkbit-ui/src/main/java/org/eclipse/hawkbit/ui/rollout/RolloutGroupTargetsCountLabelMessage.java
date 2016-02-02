@@ -111,6 +111,9 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
         if (totalTargetTableEnteries > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
             message.append(i18n.get("label.filter.shown"));
             message.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
+        } else {
+            message.append(i18n.get("label.filter.shown"));
+            message.append(rolloutGroupTargetsListTable.size());
         }
         message.append(HawkbitCommonUtil.SP_STRING_SPACE);
         setCaption(message.toString());

@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -134,7 +135,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getCloseButtonId() {
-        return null;
+        return SPUIComponetIdProvider.ROLLOUT_GROUP_CLOSE;
     }
 
     @Override
@@ -167,7 +168,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
         headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
-
+        headerCaption.setId(SPUIComponetIdProvider.ROLLOUT_GROUP_HEADER_CAPTION);
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
