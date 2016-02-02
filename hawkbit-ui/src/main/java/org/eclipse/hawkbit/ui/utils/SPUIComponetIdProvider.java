@@ -834,11 +834,6 @@ public final class SPUIComponetIdProvider {
     public static final String ROLLOUT_TARGET_FILTER_QUERY_FIELD = "rollout.target.filter.query.field.id";
 
     /**
-     * Rollout group view- close button id.
-     */
-    public static final String ROLLOUT_GROUP_CLOSE_BUTTON_ID = "rollout.group.close.id";
-
-    /**
      * Rollout target view- close button id.
      */
     public static final String ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID = "rollout.group.target.close.id";
@@ -846,6 +841,22 @@ public final class SPUIComponetIdProvider {
      * Rollout status progress bar id.
      */
     public static final String ROLLOUT_PROGRESS_BAR = "rollout.status.progress.bar.id";
+    /**
+     * Rollout group header caption.
+     */
+    public static final String ROLLOUT_GROUP_HEADER_CAPTION = "rollout.group.header.caption";
+    /**
+     * Rollout group target header caption.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_HEADER_CAPTION = "rollout.group.header.target.caption";
+    /**
+     * Rollout group close id.
+     */
+    public static final String ROLLOUT_GROUP_CLOSE = "rollout.group.close.id";
+    /**
+     * Rollout group targets count message label.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
 
     /**
      * /* Private Constructor.

@@ -135,7 +135,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getCloseButtonId() {
-        return SPUIComponetIdProvider.ROLLOUT_GROUP_CLOSE_BUTTON_ID;
+        return SPUIComponetIdProvider.ROLLOUT_GROUP_CLOSE;
     }
 
     @Override
@@ -168,7 +168,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
         headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
-
+        headerCaption.setId(SPUIComponetIdProvider.ROLLOUT_GROUP_HEADER_CAPTION);
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");

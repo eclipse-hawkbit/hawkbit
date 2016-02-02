@@ -275,8 +275,8 @@ public final class SpPermission {
          * context contains the anoynmous role or the controller specific role
          * {@link SpPermission#CONTROLLER_ROLE}.
          */
-        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '"
-                + CONTROLLER_ROLE + "')";
+        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE
+                + "')";
 
         /**
          * Spring security eval hasAnyRole expression to check if the spring
@@ -295,9 +295,19 @@ public final class SpPermission {
 
         /**
          * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT}.
+         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
+         * {@link SpPermission#READ_TARGET}.
          */
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX;
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
+         * {@link SpPermission#UPDATE_TARGET}.
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX;
 
         private SpringEvalExpressions() {
             // utility class

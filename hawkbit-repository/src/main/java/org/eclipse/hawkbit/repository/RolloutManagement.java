@@ -121,7 +121,7 @@ public class RolloutManagement {
      *            the page request to sort and limit the result
      * @return a page of found rollouts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<Rollout> findAll(final Pageable page) {
         return rolloutRepository.findAll(page);
     }
@@ -135,7 +135,7 @@ public class RolloutManagement {
      *            the page request to sort and limit the result
      * @return a page of found rollouts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<Rollout> findAllByPredicate(final Specification<Rollout> specification, final Pageable page) {
         return rolloutRepository.findAll(specification, page);
     }
@@ -148,7 +148,7 @@ public class RolloutManagement {
      * @return the founded rollout or {@code null} if rollout with given ID does
      *         not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Rollout findRolloutById(final Long rolloutId) {
         return rolloutRepository.findOne(rolloutId);
     }
@@ -180,7 +180,7 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
-    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout createRollout(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
@@ -223,6 +223,7 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
@@ -330,7 +331,7 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public Rollout startRollout(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
@@ -357,6 +358,8 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
     public Rollout startRolloutAsync(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
         checkIfRolloutCanStarted(rollout, mergedRollout);
@@ -425,7 +428,7 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public void pauseRollout(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
@@ -455,7 +458,7 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public void resumeRollout(final Rollout rollout) {
         final Rollout mergedRollout = entityManager.merge(rollout);
@@ -497,7 +500,7 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public void checkRunningRollouts(final long delayBetweenChecks) {
         final long lastCheck = System.currentTimeMillis();
@@ -640,7 +643,7 @@ public class RolloutManagement {
      *
      * @return number of targets
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Long countRolloutsAll() {
         return rolloutRepository.count();
     }
@@ -652,7 +655,7 @@ public class RolloutManagement {
      *            name or description
      * @return total count rollouts for specified filter text.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Long countRolloutsAllByFilters(final String searchText) {
         return rolloutRepository.count(likeNameOrDescription(searchText));
     }
@@ -677,7 +680,7 @@ public class RolloutManagement {
      * @return the founded rollout or {@code null} if rollout with given ID does
      *         not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Slice<Rollout> findRolloutByFilters(final Pageable pageable, @NotEmpty final String searchText) {
         final Specification<Rollout> specs = likeNameOrDescription(searchText);
         final Slice<Rollout> findAll = criteriaNoCountDao.findAll(specs, pageable, Rollout.class);
@@ -693,7 +696,7 @@ public class RolloutManagement {
      * @return the founded rollout or {@code null} if rollout with given name
      *         does not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Rollout findRolloutByName(final String rolloutName) {
         return rolloutRepository.findByName(rolloutName);
     }
@@ -709,7 +712,7 @@ public class RolloutManagement {
     @NotNull
     @Transactional
     @Modifying
-    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout updateRollout(@NotNull final Rollout rollout) {
         Assert.notNull(rollout.getId());
         return rolloutRepository.save(rollout);
@@ -724,7 +727,7 @@ public class RolloutManagement {
      *         statuses
      *
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable page) {
         final Page<Rollout> rollouts = findAll(page);
         setRolloutStatusDetails(rollouts);
@@ -740,7 +743,7 @@ public class RolloutManagement {
      * @return rollout details of targets count for different statuses
      *
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     public Rollout findRolloutWithDetailedStatus(final Long rolloutId) {
         final Rollout rollout = findRolloutById(rolloutId);
         final List<TotalTargetCountActionStatus> rolloutStatusCountItems = actionRepository
