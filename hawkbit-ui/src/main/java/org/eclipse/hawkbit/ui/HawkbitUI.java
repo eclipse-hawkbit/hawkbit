@@ -210,7 +210,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         navigator.addView(EMPTY_VIEW, new Navigator.EmptyView());
         // set locale is required for I18N class also, to get the locale from
         // cookie
-        final String locale = getLocaleId(SPUIDefinitions.AVAILABLE_LOCALES);
+        final String locale = getLocaleId(SPUIDefinitions.getAvailableLocales());
         setLocale(new Locale(locale));
 
         UI.getCurrent().setErrorHandler(new SPUIErrorHandler());
