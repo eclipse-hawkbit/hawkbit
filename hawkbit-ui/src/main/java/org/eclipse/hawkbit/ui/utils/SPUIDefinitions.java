@@ -26,7 +26,7 @@ public final class SPUIDefinitions {
     /**
      * Available locales.
      */
-    public static final Set<String> AVAILABLE_LOCALES = Stream.of("en", "de").collect(Collectors.toSet());
+    private static final Set<String> AVAILABLE_LOCALES = Stream.of("en", "de").collect(Collectors.toSet());
 
     /**
      * Default locale.
@@ -952,5 +952,14 @@ public final class SPUIDefinitions {
      */
     private SPUIDefinitions() {
 
+    }
+
+    /**
+     * Get the locales
+     * 
+     * @return the availableLocales
+     */
+    public static Set<String> getAvailableLocales() {
+        return AVAILABLE_LOCALES;
     }
 }
