@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -16,7 +18,9 @@ import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -37,6 +41,11 @@ public class RolloutTargetGroup {
     @ManyToOne(targetEntity = Target.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "target_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target") )
     private Target target;
+
+    @OneToMany(targetEntity = Action.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @JoinColumns(value = { @JoinColumn(name = "rolltoutgroup", referencedColumnName = "rolloutGroup_Id"),
+            @JoinColumn(name = "target", referencedColumnName = "target_id") })
+    private List<Action> actions;
 
     /**
      * default constructor for JPA.

@@ -399,20 +399,9 @@ public class RolloutManagement {
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
             }
             rolloutGroupRepository.save(rolloutGroup);
-            cleanupRolloutTargetGroupTable(rolloutGroup);
         }
         rollout.setStatus(RolloutStatus.RUNNING);
         return rolloutRepository.save(rollout);
-    }
-
-    private void cleanupRolloutTargetGroupTable(final RolloutGroup rolloutGroup) {
-        // clean up the target group table because we don't need the
-        // information anymore. We've created the necessary action entries
-        // already. need to do via entity manager, otherwise an extra select
-        // statement will be executed and single delete statements for each
-        // targetGroup is executed, because of a combined unique ID.
-        entityManager.createQuery("DELETE from RolloutTargetGroup r where r.rolloutGroup=:rolloutGroup")
-                .setParameter("rolloutGroup", rolloutGroup).executeUpdate();
     }
 
     /**
