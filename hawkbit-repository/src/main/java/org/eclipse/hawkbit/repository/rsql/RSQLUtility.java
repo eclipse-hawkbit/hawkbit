@@ -78,6 +78,7 @@ public final class RSQLUtility {
      * private constructor due utility class.
      */
     private RSQLUtility() {
+
     }
 
     /**
@@ -164,13 +165,14 @@ public final class RSQLUtility {
         private final Root<T> root;
         private final CriteriaBuilder cb;
         private final Class<A> enumType;
+
         private final SimpleTypeConverter simpleTypeConverter;
 
         private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType) {
             this.root = root;
             this.cb = cb;
             this.enumType = enumType;
-            this.simpleTypeConverter = new SimpleTypeConverter();
+            simpleTypeConverter = new SimpleTypeConverter();
         }
 
         @Override
@@ -328,7 +330,6 @@ public final class RSQLUtility {
             return Enum.valueOf(enumType, enumName.toUpperCase());
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
                 final Path<Object> fieldPath) {
             // in case the value of an rsql query e.g. type==application is an
@@ -345,20 +346,38 @@ public final class RSQLUtility {
                 return transformEnumValue(node, value, javaType);
             }
             if (fieldName instanceof FieldValueConverter) {
-                final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
-                if (convertedValue == null) {
-                    throw new RSQLParameterUnsupportedFieldException("field {" + node.getSelector()
-                            + "} must be one of the following values {"
-                            + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}", null);
-                } else {
-                    return convertedValue;
-                }
+                return convertFieldConverterValue(node, fieldName, value);
             }
 
+            if (Boolean.TYPE.equals(javaType)) {
+                return convertBooleanValue(node, value, javaType);
+            }
+
+            return value;
+        }
+
+        private Object convertBooleanValue(final ComparisonNode node, final String value,
+                final Class<? extends Object> javaType) {
             try {
                 return simpleTypeConverter.convertIfNecessary(value, javaType);
             } catch (final TypeMismatchException e) {
-                throw new RSQLParameterSyntaxException();
+                throw new RSQLParameterSyntaxException(
+                        "The value of the given search parameter field {" + node.getSelector()
+                                + "} is not well formed. Only a boolean (true or false) value will be expected {",
+                        e);
+            }
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        private Object convertFieldConverterValue(final ComparisonNode node, final A fieldName, final String value) {
+            final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
+            if (convertedValue == null) {
+                throw new RSQLParameterUnsupportedFieldException(
+                        "field {" + node.getSelector() + "} must be one of the following values {"
+                                + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}",
+                        null);
+            } else {
+                return convertedValue;
             }
         }
 
@@ -397,38 +416,32 @@ public final class RSQLUtility {
                 singleList.add(mapPredicate);
             }
 
-            final Path<Object> mappedFieldPath = getMapValueFieldPath(enumField, fieldPath);
-
-            addPredicateByOperator(node, fieldPath, transformedValues, transformedValue, value, singleList,
-                    mappedFieldPath);
+            addOperatorPredicate(node, getMapValueFieldPath(enumField, fieldPath), transformedValues, transformedValue,
+                    value, singleList);
             return Collections.unmodifiableList(singleList);
         }
 
-        private void addPredicateByOperator(final ComparisonNode node, final Path<Object> fieldPath,
+        private void addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final List<Object> transformedValues, final Object transformedValue, final String value,
-                final List<Predicate> singleList, final Path<Object> mappedFieldPath) {
+                final List<Predicate> singleList) {
             switch (node.getOperator().getSymbol()) {
-            case "=li=":
-                singleList.add(
-                        cb.like(cb.upper(pathOfString(mappedFieldPath)), transformedValue.toString().toUpperCase()));
-                break;
             case "==":
-                singleList.add(getEqualToPredicate(transformedValue, mappedFieldPath));
+                singleList.add(getEqualToPredicate(transformedValue, fieldPath));
                 break;
             case "!=":
-                singleList.add(cb.notEqual(mappedFieldPath, transformedValue));
+                singleList.add(getNotEqualToPredicate(transformedValue, fieldPath));
                 break;
             case "=gt=":
-                singleList.add(cb.greaterThan(pathOfString(mappedFieldPath), value));
+                singleList.add(cb.greaterThan(pathOfString(fieldPath), value));
                 break;
             case "=ge=":
-                singleList.add(cb.greaterThanOrEqualTo(pathOfString(mappedFieldPath), value));
+                singleList.add(cb.greaterThanOrEqualTo(pathOfString(fieldPath), value));
                 break;
             case "=lt=":
-                singleList.add(cb.lessThan(pathOfString(mappedFieldPath), value));
+                singleList.add(cb.lessThan(pathOfString(fieldPath), value));
                 break;
             case "=le=":
-                singleList.add(cb.lessThanOrEqualTo(pathOfString(mappedFieldPath), value));
+                singleList.add(cb.lessThanOrEqualTo(pathOfString(fieldPath), value));
                 break;
             case "=in=":
                 singleList.add(fieldPath.in(transformedValues));
@@ -464,10 +477,22 @@ public final class RSQLUtility {
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {
-                final String preFormattedValue = ((String) transformedValue).replace(LIKE_WILDCARD, '%');
+                final String preFormattedValue = escapeValueToSQL((String) transformedValue);
                 return cb.like(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
             }
             return cb.equal(fieldPath, transformedValue);
+        }
+
+        private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
+            if (transformedValue instanceof String) {
+                final String preFormattedValue = escapeValueToSQL((String) transformedValue);
+                return cb.notLike(cb.upper(pathOfString(fieldPath)), preFormattedValue.toUpperCase());
+            }
+            return cb.notEqual(fieldPath, transformedValue);
+        }
+
+        private String escapeValueToSQL(final String transformedValue) {
+            return transformedValue.replace("%", "\\%").replace(LIKE_WILDCARD, '%');
         }
 
         @SuppressWarnings("unchecked")

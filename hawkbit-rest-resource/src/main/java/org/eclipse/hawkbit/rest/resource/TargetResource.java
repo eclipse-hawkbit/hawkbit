@@ -15,8 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -75,9 +73,6 @@ public class TargetResource {
 
     @Autowired
     private DeploymentManagement deploymentManagement;
-
-    @Autowired
-    private EntityManager entityManager;
 
     /**
      * Handles the GET request of retrieving a single target within SP.
