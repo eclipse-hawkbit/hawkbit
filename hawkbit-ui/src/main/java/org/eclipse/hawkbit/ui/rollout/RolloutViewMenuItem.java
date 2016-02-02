@@ -53,7 +53,6 @@ public class RolloutViewMenuItem implements DashboardMenuItem {
 
     @Override
     public List<String> getPermissions() {
-        // TODO : cross check if this the only check to be done
         return Arrays.asList(SpPermission.ROLLOUT_MANAGEMENT);
     }
 }

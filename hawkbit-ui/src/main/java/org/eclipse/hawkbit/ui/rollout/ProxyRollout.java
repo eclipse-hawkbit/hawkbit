@@ -28,7 +28,7 @@ public class ProxyRollout extends Rollout {
 
     private String lastModifiedBy;
 
-    private Integer numberOfGroups;
+    private Long numberOfGroups;
 
     private Long runningTargetsCount;
 
@@ -64,7 +64,7 @@ public class ProxyRollout extends Rollout {
     /**
      * @return the numberOfGroups
      */
-    public int getNumberOfGroups() {
+    public Long getNumberOfGroups() {
         return numberOfGroups;
     }
 
@@ -72,7 +72,7 @@ public class ProxyRollout extends Rollout {
      * @param numberOfGroups
      *            the numberOfGroups to set
      */
-    public void setNumberOfGroups(final Integer numberOfGroups) {
+    public void setNumberOfGroups(final Long numberOfGroups) {
         this.numberOfGroups = numberOfGroups;
     }
 

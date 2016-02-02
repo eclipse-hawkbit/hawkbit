@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -70,7 +71,6 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
         }
     }
 
-
     private void setCaptionDetails() {
         RolloutGroup rolloutGroup;
         if (rolloutUiState.getRolloutGroup().isPresent()) {
@@ -84,7 +84,7 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected void resetSearchText() {
-    /**
+        /**
          * No implementation required.
          */
     }
@@ -135,8 +135,7 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getCloseButtonId() {
-
-        return null;
+        return SPUIComponetIdProvider.ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID;
     }
 
     @Override

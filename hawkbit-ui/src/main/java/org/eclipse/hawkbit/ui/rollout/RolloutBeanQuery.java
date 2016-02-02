@@ -122,7 +122,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setDistributionSetNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
                     distributionSet.getName(), distributionSet.getVersion()));
             proxyRollout.setDistributionSet(distributionSet);
-            proxyRollout.setNumberOfGroups(rollout.getRolloutGroups().size());
+            proxyRollout.setNumberOfGroups(Long.valueOf(rollout.getRolloutGroups().size()));
             proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
             proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
             proxyRollout.setCreatedBy(HawkbitCommonUtil.getIMUser(rollout.getCreatedBy()));

@@ -126,8 +126,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private Button discardRolllout;
 
-    private OptionGroup saveStartOptionGroup;
-
     private OptionGroup errorThresholdOptionGroup;
 
     private Link linkToHelp;
@@ -199,7 +197,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
         mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(),
                 getGroupDetailsLayout(), getTriggerThresoldLayout(), getErrorThresoldLayout(), description,
-                actionTypeOptionGroupLayout, getSaveStartOptionLayout(), getSaveDiscardButtonLayout());
+                actionTypeOptionGroupLayout, getSaveDiscardButtonLayout());
 
         setCompositionRoot(mainLayout);
     }
@@ -247,14 +245,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         return percentSymbol;
     }
 
-    private HorizontalLayout getSaveStartOptionLayout() {
-        final HorizontalLayout layout = new HorizontalLayout(saveStartOptionGroup, linkToHelp);
-        layout.setSizeFull();
-        layout.setComponentAlignment(saveStartOptionGroup, Alignment.MIDDLE_LEFT);
-        layout.setComponentAlignment(linkToHelp, Alignment.MIDDLE_RIGHT);
-        return layout;
-    }
-
     private HorizontalLayout getSaveDiscardButtonLayout() {
         final HorizontalLayout buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
@@ -279,7 +269,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         triggerThreshold = createTriggerThresold();
         errorThreshold = createErrorThresold();
         description = createDescription();
-        saveStartOptionGroup = createSaveStartOptionGroup();
         errorThresholdOptionGroup = createErrorThresholdOptionGroup();
         setDefaultSaveStartGroupOption();
         saveRollout = createSaveButton();
@@ -442,10 +431,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
             final Rollout updatedRollout = rolloutManagement.updateRollout(rolloutForEdit);
             uiNotification
                     .displaySuccess(i18n.get("message.update.success", new Object[] { updatedRollout.getName() }));
-            if (rolloutForEdit.getStatus() == RolloutStatus.READY
-                    && saveStartOptionGroup.getValue().equals(SAVESTARTOPTIONS.START.getValue())) {
-                rolloutManagement.startRollout(updatedRollout);
-            }
             closeThisWindow();
             eventBus.publish(this, RolloutEvent.UPDATE_ROLLOUT);
         }
@@ -475,9 +460,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     private void createRollout() {
         if (mandatoryCheck() && validateFields() && duplicateCheck()) {
             final Rollout rolloutToCreate = saveRollout();
-            if (saveStartOptionGroup.getValue().equals(SAVESTARTOPTIONS.START.getValue())) {
-                rolloutManagement.startRollout(rolloutToCreate);
-            }
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { rolloutToCreate.getName() }));
             eventBus.publish(this, RolloutEvent.CREATE_ROLLOUT);
             closeThisWindow();
@@ -582,7 +564,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private boolean duplicateCheck() {
         if (rolloutManagement.findRolloutByName(getRolloutName()) != null) {
-            uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check",new Object[] { getRolloutName() }));
+            uiNotification.displayValidationError(i18n.get("message.rollout.duplicate.check",
+                    new Object[] { getRolloutName() }));
             return false;
         }
         return true;
@@ -600,7 +583,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private void setDefaultSaveStartGroupOption() {
-        saveStartOptionGroup.setValue(SAVESTARTOPTIONS.SAVE.getValue());
         errorThresholdOptionGroup.setValue(ERRORTHRESOLDOPTIONS.PERCENT.getValue());
     }
 
@@ -773,9 +755,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         distributionSet.setValue(rolloutForEdit.getDistributionSet().getDistributionSetIdName());
         final List<RolloutGroup> rolloutGroups = rolloutForEdit.getRolloutGroups();
         setThresoldValues(rolloutGroups);
-        if (rolloutForEdit.getStatus() != RolloutStatus.READY) {
-            saveStartOptionGroup.setValue(SAVESTARTOPTIONS.START.getValue());
-        }
         setActionType(rolloutForEdit);
         if (rolloutForEdit.getStatus() != RolloutStatus.READY) {
             disableRequiredFieldsOnEdit();
@@ -796,7 +775,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         errorThreshold.setEnabled(false);
         triggerThreshold.setEnabled(false);
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().setEnabled(false);
-        saveStartOptionGroup.setEnabled(false);
         errorThresholdOptionGroup.setEnabled(false);
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.DISABLE_ACTION_TYPE_LAYOUT);
     }
@@ -807,7 +785,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         triggerThreshold.setEnabled(true);
         actionTypeOptionGroupLayout.getActionTypeOptionGroup().setEnabled(true);
         actionTypeOptionGroupLayout.removeStyleName(SPUIStyleDefinitions.DISABLE_ACTION_TYPE_LAYOUT);
-        saveStartOptionGroup.setEnabled(true);
         noOfGroups.setEnabled(true);
         targetFilterQueryCombo.setEnabled(true);
         errorThresholdOptionGroup.setEnabled(true);

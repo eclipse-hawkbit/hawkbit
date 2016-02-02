@@ -108,7 +108,7 @@ public class RolloutListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected boolean hasCreatePermission() {
-        return permissionChecker.hasRolloutPermission();
+        return permissionChecker.hasRolloutCreatePermission();
     }
 
     @Override

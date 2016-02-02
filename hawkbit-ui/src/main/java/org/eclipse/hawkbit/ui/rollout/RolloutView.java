@@ -91,7 +91,7 @@ public class RolloutView extends VerticalLayout implements View {
     }
 
     private void buildLayout() {
-        if (permChecker.hasRolloutPermission() && rolloutUIState.isShowRollOuts()) {
+        if (permChecker.hasRolloutReadPermission() && rolloutUIState.isShowRollOuts()) {
             rolloutListView.setVisible(true);
             if (rolloutGroupsListView.isVisible()) {
                 rolloutGroupsListView.setVisible(false);
@@ -101,7 +101,7 @@ public class RolloutView extends VerticalLayout implements View {
             }
             addComponent(rolloutListView);
             setExpandRatio(rolloutListView, 1.0f);
-        } else if (permChecker.hasRolloutPermission() && rolloutUIState.isShowRolloutGroups()) {
+        } else if (permChecker.hasRolloutReadPermission() && rolloutUIState.isShowRolloutGroups()) {
             rolloutGroupsListView.setVisible(true);
             if (rolloutListView.isVisible()) {
                 rolloutListView.setVisible(false);
@@ -111,7 +111,7 @@ public class RolloutView extends VerticalLayout implements View {
             }
             addComponent(rolloutGroupsListView);
             setExpandRatio(rolloutGroupsListView, 1.0f);
-        } else if (permChecker.hasRolloutPermission() && rolloutUIState.isShowRolloutGroupTargets()) {
+        } else if (permChecker.hasRolloutTargetsReadPermission() && rolloutUIState.isShowRolloutGroupTargets()) {
             rolloutGroupTargetsListView.setVisible(true);
             if (rolloutListView.isVisible()) {
                 rolloutListView.setVisible(false);

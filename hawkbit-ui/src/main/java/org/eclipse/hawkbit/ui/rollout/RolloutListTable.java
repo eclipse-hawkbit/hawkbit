@@ -16,6 +16,7 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -85,6 +86,9 @@ public class RolloutListTable extends AbstractSimpleTable {
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
+    @Autowired
+    private transient SpPermissionChecker permissionChecker;
+
     @Override
     @PostConstruct
     protected void init() {
@@ -120,6 +124,7 @@ public class RolloutListTable extends AbstractSimpleTable {
             final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
             item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
+
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING).setValue(
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR).setValue(
@@ -134,6 +139,12 @@ public class RolloutListTable extends AbstractSimpleTable {
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
             item.getItemProperty("isActionRecieved").setValue(
                     !(Boolean) item.getItemProperty("isActionRecieved").getValue());
+
+            final Long groupCount = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue();
+            if (null != rollout.getRolloutGroups() && groupCount != rollout.getRolloutGroups().size()) {
+                item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(
+                        Long.valueOf(rollout.getRolloutGroups().size()));
+            }
         }
     }
 
@@ -191,8 +202,8 @@ public class RolloutListTable extends AbstractSimpleTable {
                 false);
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null, false,
                 false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, Integer.class, null,
-                false, false);
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, Integer.class, 0, false,
+                false);
 
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, Long.class, 0L,
                 false, false);
@@ -255,6 +266,10 @@ public class RolloutListTable extends AbstractSimpleTable {
         actionButton.setHtmlContentAllowed(true);
         actionButton.addClickListener(event -> onAction(event));
         addStatusPropertyChangeListener(itemId, actionButton);
+
+        final RolloutStatus RolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
+                .getValue();
+        enableDisableActions(RolloutStatus, actionButton);
         return actionButton;
     }
 
@@ -299,8 +314,10 @@ public class RolloutListTable extends AbstractSimpleTable {
         } else if (rolloutStatus == RolloutStatus.STARTING || rolloutStatus == RolloutStatus.CREATING) {
             return context;
         }
-        final ContextMenuItem cancelItem = context.addItem("Update");
-        cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
+        if (permissionChecker.hasRolloutUpdatePermission()) {
+            final ContextMenuItem cancelItem = context.addItem("Update");
+            cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
+        }
         return context;
     }
 

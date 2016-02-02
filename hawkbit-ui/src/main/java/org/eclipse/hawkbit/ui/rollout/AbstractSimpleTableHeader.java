@@ -86,7 +86,6 @@ public abstract class AbstractSimpleTableHeader extends VerticalLayout {
             titleFilterIconsLayout.setComponentAlignment(closeButton, Alignment.TOP_RIGHT);
         }
 
-        // TODO romve hard coding
         titleFilterIconsLayout.setHeight("40px");
         addComponent(titleFilterIconsLayout);
         addStyleName("bordered-layout");
