@@ -180,11 +180,11 @@ public class RolloutManagement {
      */
     @Transactional
     @Modifying
-    // @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT)
     public Rollout createRollout(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
-        return createRolloutGroups(amountGroup, conditions, savedRollout);
+        createRolloutGroups(amountGroup, conditions, savedRollout);
+        return savedRollout;
     }
 
     /**
@@ -267,7 +267,7 @@ public class RolloutManagement {
      *            the rollout
      * @return the rollout with created groups
      */
-    private Rollout createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
+    private void createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
             final Rollout savedRollout) {
         int pageIndex = 0;
         int groupIndex = 0;
@@ -309,7 +309,6 @@ public class RolloutManagement {
         }
 
         savedRollout.setStatus(RolloutStatus.READY);
-        return rolloutRepository.save(savedRollout);
     }
 
     /**
