@@ -23,6 +23,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties
 public class SecurityProperties {
 
+    /**
+     * Inner class for reverse proxy configuration.
+     */
     @Component
     @ConfigurationProperties("hawkbit.server.controller.security.rp")
     public static class RpProperties {
@@ -77,24 +80,27 @@ public class SecurityProperties {
 
     }
 
+    /**
+     * Inner class for anonymous enable configuration.
+     */
     @Component
-    @ConfigurationProperties("hawkbit.server.controller.security.authentication")
-    public static class AuthenticationsProperties {
-        private Boolean anonymousEnabled = Boolean.FALSE;
+    @ConfigurationProperties("hawkbit.server.controller.security.authentication.anonymous")
+    public static class AnoymousAuthenticationProperties {
+        private Boolean enabled = Boolean.FALSE;
 
         /**
-         * @param anonymousEnabled
-         *            the anonymousEnabled to set
+         * @param enabled
+         *            the enabled to set
          */
-        public void setAnonymousEnabled(final Boolean anonymousEnabled) {
-            this.anonymousEnabled = anonymousEnabled;
+        public void setEnabled(final Boolean enabled) {
+            this.enabled = enabled;
         }
 
         /**
-         * @return the anonymousEnabled
+         * @return the enabled
          */
-        public Boolean getAnonymousEnabled() {
-            return anonymousEnabled;
+        public Boolean getEnabled() {
+            return enabled;
         }
 
     }
@@ -103,7 +109,7 @@ public class SecurityProperties {
     private RpProperties rppProperties;
 
     @Autowired
-    private AuthenticationsProperties authenticationsProperties;
+    private AnoymousAuthenticationProperties authenticationsProperties;
 
     public String getRpCnHeader() {
         return rppProperties.getCnHeader();
@@ -118,7 +124,7 @@ public class SecurityProperties {
     }
 
     public Boolean getAnonymousEnabled() {
-        return authenticationsProperties.getAnonymousEnabled();
+        return authenticationsProperties.getEnabled();
     }
 
 }
