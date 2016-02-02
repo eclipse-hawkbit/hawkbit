@@ -154,8 +154,11 @@ public class RolloutManagement {
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    public Page<Rollout> findAllByPredicate(final Specification<Rollout> specification, final Pageable page) {
-        return rolloutRepository.findAll(specification, page);
+    public Page<Rollout> findAllWithDetailedStatusByPredicate(final Specification<Rollout> specification,
+            final Pageable page) {
+        final Page<Rollout> findAll = rolloutRepository.findAll(specification, page);
+        setRolloutStatusDetails(findAll);
+        return findAll;
     }
 
     /**

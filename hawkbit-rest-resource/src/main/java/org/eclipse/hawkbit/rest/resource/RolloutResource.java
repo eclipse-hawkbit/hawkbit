@@ -100,8 +100,8 @@ public class RolloutResource {
 
         final Page<Rollout> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = rolloutManagement.findAllByPredicate(RSQLUtility.parse(rsqlParam, RolloutFields.class),
-                    pageable);
+            findModulesAll = rolloutManagement
+                    .findAllWithDetailedStatusByPredicate(RSQLUtility.parse(rsqlParam, RolloutFields.class), pageable);
         } else {
             findModulesAll = rolloutManagement.findAll(pageable);
         }
@@ -375,7 +375,7 @@ public class RolloutResource {
     }
 
     private Rollout findRolloutOrThrowException(final Long rolloutId) {
-        final Rollout rollout = rolloutManagement.findRolloutById(rolloutId);
+        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutId);
         if (rollout == null) {
             throw new EntityNotFoundException("Rollout with Id {" + rolloutId + "} does not exist");
         }

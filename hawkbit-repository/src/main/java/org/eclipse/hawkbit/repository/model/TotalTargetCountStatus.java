@@ -27,7 +27,7 @@ public class TotalTargetCountStatus {
         SCHEDULED, RUNNING, ERROR, FINISHED, CANCELLED, NOTSTARTED
     }
 
-    private final Map<Status, Long> statusTotalCountMap = new HashMap<Status, Long>();
+    private final Map<Status, Long> statusTotalCountMap = new HashMap<>();
     private final Long totalTargetCount;
 
     /**
