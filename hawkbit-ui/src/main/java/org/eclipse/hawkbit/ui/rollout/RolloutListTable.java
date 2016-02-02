@@ -438,6 +438,7 @@ public class RolloutListTable extends AbstractSimpleTable {
     }
 
     private void setRolloutStatusIcon(final RolloutStatus rolloutStatus, final Label statusLabel) {
+        statusLabel.setDescription(rolloutStatus.toString().toLowerCase());
         switch (rolloutStatus) {
         case FINISHED:
             statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
@@ -467,10 +468,19 @@ public class RolloutListTable extends AbstractSimpleTable {
             statusLabel.setValue(null);
             statusLabel.setStyleName("blueSpinner");
             break;
+        case ERROR_CREATING:
+            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+            statusLabel.setStyleName("statusIconRed");
+            statusLabel.setDescription(i18n.get("message.error.creating.rollout"));
+            break;
+        case ERROR_STARTING:
+            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+            statusLabel.setStyleName("statusIconRed");
+            statusLabel.setDescription(i18n.get("message.error.starting.rollout"));
+            break;
         default:
             break;
         }
-        statusLabel.setDescription(rolloutStatus.toString().toLowerCase());
         statusLabel.addStyleName(ValoTheme.LABEL_SMALL);
     }
 
