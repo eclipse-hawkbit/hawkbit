@@ -66,8 +66,7 @@ final class RolloutMapper {
         body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), false)).withRel("start"));
         body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), true)).withRel("startAsync"));
         body.add(linkTo(methodOn(RolloutResource.class).pause(rollout.getId())).withRel("pause"));
-        // 2 mal pause?
-        body.add(linkTo(methodOn(RolloutResource.class).resume(rollout.getId())).withRel("pause"));
+        body.add(linkTo(methodOn(RolloutResource.class).resume(rollout.getId())).withRel("resume"));
         body.add(linkTo(methodOn(RolloutResource.class).getRolloutGroups(rollout.getId(),
                 Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
                 Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null)).withRel("groups"));

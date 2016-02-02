@@ -42,7 +42,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +54,6 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
-@Transactional(readOnly = true)
 @RequestMapping(RestConstants.ROLLOUT_V1_REQUEST_MAPPING)
 public class RolloutResource {
 
@@ -187,6 +185,7 @@ public class RolloutResource {
                 RolloutMapper.fromRequest(rolloutRequestBody, distributionSet,
                         rolloutRequestBody.getTargetFilterQuery()),
                 rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(RolloutMapper.toResponseRollout(rollout));
     }
 
