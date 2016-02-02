@@ -84,8 +84,9 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     @Override
     protected List<ProxyRolloutGroup> loadBeans(final int startIndex, final int count) {
-        final Page<RolloutGroup> rolloutGroupBeans = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(
-                rolloutId, new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
+        final Page<RolloutGroup> rolloutGroupBeans = getRolloutGroupManagement()
+                .findAllRolloutGroupsWithDetailedStatus(rolloutId,
+                        new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
         return getProxyRolloutGroupList(rolloutGroupBeans);
     }
 
@@ -111,18 +112,18 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
             final TotalTargetCountStatus totalTargetCountActionStatus = rolloutGroup.getTotalTargetCountStatus();
 
-            proxyRolloutGroup.setRunningTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            proxyRolloutGroup.setErrorTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            proxyRolloutGroup.setCancelledTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            proxyRolloutGroup.setFinishedTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            proxyRolloutGroup.setScheduledTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
-            proxyRolloutGroup.setNotStartedTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
+            proxyRolloutGroup.setRunningTargetsCount(totalTargetCountActionStatus
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
+            proxyRolloutGroup.setErrorTargetsCount(totalTargetCountActionStatus
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
+            proxyRolloutGroup.setCancelledTargetsCount(totalTargetCountActionStatus
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
+            proxyRolloutGroup.setFinishedTargetsCount(totalTargetCountActionStatus
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
+            proxyRolloutGroup.setScheduledTargetsCount(totalTargetCountActionStatus
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
+            proxyRolloutGroup.setNotStartedTargetsCount(totalTargetCountActionStatus
+                    .getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
 
             proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
 
@@ -135,36 +136,29 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         float finishedPercentage = 0;
         switch (rolloutGroup.getStatus()) {
         case READY:
-            finishedPercentage = 0.0F;
-            break;
         case SCHEDULED:
+        case ERROR:
             finishedPercentage = 0.0F;
             break;
         case FINISHED:
             finishedPercentage = 100.0F;
             break;
-
         case RUNNING:
             finishedPercentage = getRolloutManagement().getFinishedPercentForRunningGroup(rolloutGroup.getRollout(),
                     rolloutGroup);
             break;
-
-        case ERROR:
-            finishedPercentage = 0.0F;
-            break;
         default:
             break;
         }
-
-        return finishedPercentage + "";
-
+        return String.valueOf(finishedPercentage);
     }
 
     @Override
     protected void saveBeans(final List<ProxyRolloutGroup> arg0, final List<ProxyRolloutGroup> arg1,
             final List<ProxyRolloutGroup> arg2) {
-        // TODO Auto-generated method stub
-
+        /**
+         * CRUD operations be done through repository methods.
+         */
     }
 
     @Override

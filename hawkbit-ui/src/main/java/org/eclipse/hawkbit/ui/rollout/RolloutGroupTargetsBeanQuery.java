@@ -179,11 +179,4 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         return rolloutUIState;
     }
 
-    private I18N getI18N() {
-        if (i18N == null) {
-            i18N = SpringContextHelper.getBean(I18N.class);
-        }
-        return i18N;
-    }
-
 }

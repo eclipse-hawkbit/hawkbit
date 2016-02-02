@@ -83,6 +83,10 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = 2999293468801479916L;
 
+    private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
+
+    private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
+
     @Autowired
     private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
@@ -114,7 +118,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private TextField noOfGroups;
 
-    private Label groupSize;
+    private Label groupSizeLabel;
 
     private TextField triggerThreshold;
 
@@ -170,7 +174,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         populateTargetFilterQuery();
         setDefaultSaveStartGroupOption();
         totalTargetsLabel.setVisible(false);
-        groupSize.setVisible(false);
+        groupSizeLabel.setVisible(false);
         targetFilterQuery.setVisible(false);
         targetFilterQueryCombo.setVisible(true);
         actionTypeOptionGroupLayout.selectDefaultOption();
@@ -205,9 +209,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     private HorizontalLayout getGroupDetailsLayout() {
         final HorizontalLayout groupLayout = new HorizontalLayout();
         groupLayout.setSizeFull();
-        groupLayout.addComponents(noOfGroups, groupSize);
+        groupLayout.addComponents(noOfGroups, groupSizeLabel);
         groupLayout.setExpandRatio(noOfGroups, 1.0f);
-        groupLayout.setComponentAlignment(groupSize, Alignment.MIDDLE_LEFT);
+        groupLayout.setComponentAlignment(groupSizeLabel, Alignment.MIDDLE_LEFT);
         return groupLayout;
     }
 
@@ -265,7 +269,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         populateTargetFilterQuery();
 
         noOfGroups = createNoOfGroupsField();
-        groupSize = createGroupSizeLabel();
+        groupSizeLabel = createGroupSizeLabel();
         triggerThreshold = createTriggerThresold();
         errorThreshold = createErrorThresold();
         description = createDescription();
@@ -618,10 +622,10 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private void onGroupNumberChange() {
         if (noOfGroups.isValid() && !Strings.isNullOrEmpty(noOfGroups.getValue())) {
-            groupSize.setValue(getTargetPerGroupMessage(String.valueOf(getGroupSize())));
-            groupSize.setVisible(true);
+            groupSizeLabel.setValue(getTargetPerGroupMessage(String.valueOf(getGroupSize())));
+            groupSizeLabel.setVisible(true);
         } else {
-            groupSize.setVisible(false);
+            groupSizeLabel.setVisible(false);
         }
     }
 
@@ -682,9 +686,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
                     uiNotification.displayValidationError(i18n
                             .get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
-                    new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get("message.enter.number")).validate(value);
+                    new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
                     final int groupSize = getGroupSize();
-                    new IntegerRangeValidator(i18n.get("message.rollout.field.value.range", 0, groupSize), 0, groupSize)
+                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
                             .validate(Integer.parseInt(value.toString()));
                 }
             } catch (final InvalidValueException ex) {
@@ -704,9 +708,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         @Override
         public void validate(final Object value) throws InvalidValueException {
             try {
-                new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get("message.enter.number")).validate(value);
-                new IntegerRangeValidator(i18n.get("message.rollout.field.value.range", 0, 100), 0, 100)
-                        .validate(Integer.parseInt(value.toString()));
+                new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100).validate(Integer
+                        .parseInt(value.toString()));
             } catch (final InvalidValueException ex) {
                 throw ex;
             }
@@ -719,9 +723,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         @Override
         public void validate(final Object value) throws InvalidValueException {
             try {
-                new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get("message.enter.number")).validate(value);
-                new IntegerRangeValidator(i18n.get("message.rollout.field.value.range", 0, 500), 0, 500)
-                        .validate(Integer.parseInt(value.toString()));
+                new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500).validate(Integer
+                        .parseInt(value.toString()));
             } catch (final InvalidValueException ex) {
                 throw ex;
             }

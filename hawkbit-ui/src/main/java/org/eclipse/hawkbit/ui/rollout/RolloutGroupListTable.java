@@ -16,7 +16,6 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
@@ -69,9 +68,6 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
-    private transient RolloutManagement rolloutManagement;
-
-    @Autowired
     private transient RolloutGroupManagement rolloutGroupManagement;
 
     @Autowired
@@ -100,11 +96,13 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
     }
 
     /**
+     * 
      * Handles the RolloutGroupChangeEvent to refresh the item in the table.
      * 
-     * @param rolloutChangeEvent
+     * 
+     * @param rolloutGroupChangeEvent
      *            the event which contains the rollout group which has been
-     *            changed
+     *            change
      */
     @EventBusListenerMethod(scope = EventScope.SESSION)
     public void onEvent(final RolloutGroupChangeEvent rolloutGroupChangeEvent) {
@@ -131,12 +129,6 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
             item.getItemProperty("isActionRecieved").setValue(
                     !(Boolean) item.getItemProperty("isActionRecieved").getValue());
         }
-    }
-
-    private void updateVisibleItemOnEvent(final RolloutGroup rolloutGroup) {
-        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
-        final Item item = rolloutContainer.getItem(rolloutGroup.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rolloutGroup.getStatus());
     }
 
     @Override

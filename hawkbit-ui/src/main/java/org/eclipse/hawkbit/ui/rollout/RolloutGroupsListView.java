@@ -32,9 +32,6 @@ public class RolloutGroupsListView extends AbstractSimpleTableLayout {
     @Autowired
     private RolloutGroupListTable rolloutGroupListTable;
 
-    @Autowired
-    private RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
-
     @PostConstruct
     protected void init() {
         super.init(rolloutGroupListHeader, rolloutGroupListTable);
