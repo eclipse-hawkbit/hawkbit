@@ -9,15 +9,17 @@
 package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
+import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -55,6 +57,9 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    private transient RolloutUIState rolloutUIState;
 
     @PostConstruct
     protected void init() {
@@ -114,16 +119,8 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS,
                 TargetUpdateStatus.class, TargetUpdateStatus.UNKNOWN, false, false);
 
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_ID,
-                Long.class, null, false, false);
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID,
-                Long.class, null, false, false);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
                 String.class, "", false, true);
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
-                String.class, "", false, true);
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null,
-                false, false);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_BY, String.class, null,
                 false, true);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class,
@@ -132,11 +129,8 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
                 null, false, true);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
                 String.class, null, false, true);
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP,
-                String.class, null, false, true);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false,
                 true);
-
     }
 
     @Override
@@ -176,17 +170,29 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
         return statusLabel;
     }
 
-    private String getDescription(final Status status, final Object itemId) {
-        return status.toString().toLowerCase();
-    }
-
     private void setStatusIcon(final Object itemId, final Label statusLabel) {
         final Item item = getItem(itemId);
+        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent() ? rolloutUIState
+                .getRolloutGroup().get() : null;
         if (item != null) {
             final Status status = (Status) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
-            if (null != status) {
+            if (status == null) {
+                if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
+                    statusLabel.setValue(FontAwesome.DOT_CIRCLE_O.getHtml());
+                    statusLabel.addStyleName("statusIconLightBlue");
+                    statusLabel.setDescription(RolloutGroupStatus.READY.toString().toLowerCase());
+                } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
+                    statusLabel.setValue(FontAwesome.MINUS_CIRCLE.getHtml());
+                    statusLabel.addStyleName("statusIconBlue");
+
+                    final String dsNameVersion = (String) item.getItemProperty(
+                            SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).getValue();
+                    statusLabel.setDescription(i18n
+                            .get("message.dist.already.assigned", new Object[] { dsNameVersion }));
+                }
+            } else {
                 setRolloutStatusIcon(status, statusLabel);
-                statusLabel.setDescription(getDescription(status, itemId));
+                statusLabel.setDescription(status.toString().toLowerCase());
             }
         }
     }
@@ -198,7 +204,7 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
             statusLabel.addStyleName("statusIconRed");
             break;
         case SCHEDULED:
-            statusLabel.setValue(FontAwesome.QUESTION_CIRCLE.getHtml());
+            statusLabel.setValue(FontAwesome.BULLSEYE.getHtml());
             statusLabel.addStyleName("statusIconBlue");
             break;
         case FINISHED:

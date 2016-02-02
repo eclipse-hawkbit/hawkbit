@@ -144,22 +144,18 @@ public class RolloutListTable extends AbstractSimpleTable {
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"),
                 0.2f));
+        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.07f));
+        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.45f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, i18n.get("header.numberofgroups"),
                 0.2f));
-
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.15f));
         columnList
                 .add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.13f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_STATUS, i18n.get("header.status"), 0.07f));
-        columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.3f));
-
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_ACTION, i18n.get("upload.action"), 0.1f));
-
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.2f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.2f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.2f));
-
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.15f));
         return columnList;
     }
 
@@ -184,8 +180,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, String.class, null,
                 false, false);
 
-        // TODO display filter query name
-        // TODO display started date
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TARGETFILTERQUERY, String.class, null,
                 false, false);
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
@@ -248,6 +242,7 @@ public class RolloutListTable extends AbstractSimpleTable {
         setColumnCollapsed(SPUILabelDefinitions.VAR_MODIFIED_DATE, true);
         setColumnCollapsed(SPUILabelDefinitions.VAR_CREATED_USER, true);
         setColumnCollapsed(SPUILabelDefinitions.VAR_MODIFIED_BY, true);
+        setColumnCollapsed(SPUILabelDefinitions.VAR_DESC, true);
     }
 
     private Button getActionButton(final Object itemId) {
@@ -414,16 +409,6 @@ public class RolloutListTable extends AbstractSimpleTable {
         final String rolloutName = (String) getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         return new StringBuilder(SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID).append(".").append(rolloutName)
                 .toString();
-    }
-
-    private String getDescription(final Object itemId) {
-        final Item item = getItem(itemId);
-        if (item != null) {
-            final RolloutStatus rolloutStatus = (RolloutStatus) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
-                    .getValue();
-            return rolloutStatus.toString().toLowerCase();
-        }
-        return null;
     }
 
     private void setStatusIcon(final Object itemId, final Label statusLabel) {

@@ -21,8 +21,6 @@ public class TargetWithActionStatus {
 
     private Status status = null;;
 
-    private TargetUpdateStatus targetUpdateStatus = null;
-
     public TargetWithActionStatus(final Target target) {
         this.target = target;
     }
@@ -30,11 +28,6 @@ public class TargetWithActionStatus {
     public TargetWithActionStatus(final Target target, final Status status) {
         this.status = status;
         this.target = target;
-    }
-
-    public TargetWithActionStatus(final Target target, final TargetUpdateStatus targetUpdateStatus) {
-        this.target = target;
-        this.targetUpdateStatus = targetUpdateStatus;
     }
 
     /**
@@ -65,21 +58,6 @@ public class TargetWithActionStatus {
      */
     public void setStatus(final Status status) {
         this.status = status;
-    }
-
-    /**
-     * @return the targetUpdateStatus
-     */
-    public TargetUpdateStatus getTargetUpdateStatus() {
-        return targetUpdateStatus;
-    }
-
-    /**
-     * @param targetUpdateStatus
-     *            the targetUpdateStatus to set
-     */
-    public void setTargetUpdateStatus(final TargetUpdateStatus targetUpdateStatus) {
-        this.targetUpdateStatus = targetUpdateStatus;
     }
 
 }

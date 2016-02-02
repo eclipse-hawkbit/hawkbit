@@ -86,9 +86,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         if (startIndex == 0 && firstPageTargetSets != null) {
             rolloutGroupTargetsList = firstPageTargetSets.getContent();
         } else if (null != rolloutGroup) {
-            rolloutGroupTargetsList = getRolloutGroupManagement()
-                    .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), rolloutGroup)
-                    .getContent();
+            rolloutGroupTargetsList = getRolloutGroupManagement().findAllTargetsWithActionStatus(
+                    new PageRequest(startIndex / count, count), rolloutGroup).getContent();
         }
         return getProxyRolloutGroupTargetsList(rolloutGroupTargetsList);
     }
@@ -115,9 +114,11 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             }
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
             prxyTarget.setTargetInfo(targ.getTargetInfo());
-            prxyTarget.setPollStatusToolTip(
-                    HawkbitCommonUtil.getPollStatusToolTip(prxyTarget.getTargetInfo().getPollStatus(), getI18N()));
             prxyTarget.setId(targ.getId());
+            if (targ.getAssignedDistributionSet() != null) {
+                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(targ
+                        .getAssignedDistributionSet().getName(), targ.getAssignedDistributionSet().getVersion()));
+            }
             proxyTargetBeans.add(prxyTarget);
 
         }
@@ -135,8 +136,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     public int size() {
         long size = 0;
         if (null != rolloutGroup) {
-            firstPageTargetSets = getRolloutGroupManagement()
-                    .findAllTargetsWithActionStatus(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
+            firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
             size = firstPageTargetSets.getTotalElements();
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);
