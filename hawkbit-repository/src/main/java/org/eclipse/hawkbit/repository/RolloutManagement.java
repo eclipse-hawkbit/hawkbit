@@ -301,7 +301,8 @@ public class RolloutManagement {
         // validate if the amount of groups that will be created are the amount
         // of groups that the client what's to have created.
         int amountGroupValidated = amountGroup;
-        if ((Math.ceil((double) totalCount / (double) groupSize)) != amountGroup) {
+        final int amountGroupCreation = (int) (Math.ceil((double) totalCount / (double) groupSize));
+        if (amountGroupCreation == (amountGroup - 1)) {
             amountGroupValidated--;
         }
         RolloutGroup lastSavedGroup = null;
