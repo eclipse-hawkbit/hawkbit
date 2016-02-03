@@ -8,9 +8,13 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,18 +47,37 @@ public class SimulationController {
      * @param tenant
      *            the tenant to create the device to
      * @return a response string that devices has been created
+     * @throws MalformedURLException
      */
     @RequestMapping("/start")
-    String start(@RequestParam(value = "name", defaultValue = "dmfSimulated") final String name,
+    ResponseEntity<String> start(@RequestParam(value = "name", defaultValue = "simulated") final String name,
             @RequestParam(value = "amount", defaultValue = "20") final int amount,
-            @RequestParam(value = "tenant", defaultValue = "DEFAULT") final String tenant) {
+            @RequestParam(value = "tenant", defaultValue = "DEFAULT") final String tenant,
+            @RequestParam(value = "api", defaultValue = "dmf") final String api,
+            @RequestParam(value = "endpoint", defaultValue = "http://localhost:8080") final String endpoint,
+            @RequestParam(value = "polldelay", defaultValue = "30") final int pollDelay,
+            @RequestParam(value = "gatewaytoken", defaultValue = "") final String gatewayToken)
+                    throws MalformedURLException {
+
+        final Protocol protocol;
+        switch (api.toLowerCase()) {
+        case "dmf":
+            protocol = Protocol.DMF_AMQP;
+            break;
+        case "ddi":
+            protocol = Protocol.DDI_HTTP;
+            break;
+        default:
+            return ResponseEntity.badRequest().body("query param api only allows value of 'dmf' or 'ddi'");
+        }
 
         for (int i = 0; i < amount; i++) {
             final String deviceId = name + i;
-            repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, Protocol.DMF_AMQP));
+            repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, protocol, pollDelay, new URL(endpoint),
+                    gatewayToken));
             spSenderService.createOrUpdateThing(tenant, deviceId);
         }
 
-        return "Updated " + amount + " DMF connected targets!";
+        return ResponseEntity.ok("Updated " + amount + " DMF connected targets!");
     }
 }
