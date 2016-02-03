@@ -22,11 +22,8 @@ import java.util.TimeZone;
 
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -111,8 +108,6 @@ public final class HawkbitCommonUtil {
     private static final String TARGET_TAG_DROP_REMOVE_SCRIPT = "var m = document.getElementById('show-filter-drop-hint'); if(m) { document.head.removeChild(m); } ";
     private static final String DELETE_DROP_CREATE_SCRIPT = "var q = document.getElementById('show-delete-drop-hint'); if(q) { } else { showDeleteDrop = document.createElement('style'); showDeleteDrop.id=\"show-delete-drop-hint\";  document.head.appendChild(showDeleteDrop); }";
     private static final String DELETE_TAG_DROP_REMOVE_SCRIPT = "var o = document.getElementById('show-delete-drop-hint'); if(o) { document.head.removeChild(o); } ";
-
-    private static final String STATUS_BAR_PART = "status-bar-part-";
 
     /**
      * Define empty string.
@@ -440,10 +435,12 @@ public final class HawkbitCommonUtil {
     public static String getPollStatusToolTip(final PollStatus pollStatus, final I18N i18N) {
         if (pollStatus != null && pollStatus.getLastPollDate() != null && pollStatus.isOverdue()) {
             final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
-            return "Overdue for " + SPDateTimeUtil.getDurationFormattedString(
-                    pollStatus.getOverdueDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant().toEpochMilli(),
-                    pollStatus.getCurrentDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant().toEpochMilli(),
-                    i18N);
+            return "Overdue for "
+                    + SPDateTimeUtil.getDurationFormattedString(
+                            pollStatus.getOverdueDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()
+                                    .toEpochMilli(),
+                            pollStatus.getCurrentDate().atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()
+                                    .toEpochMilli(), i18N);
         }
         return null;
     }
@@ -485,8 +482,8 @@ public final class HawkbitCommonUtil {
      * @return extra height required to increase.
      */
     public static float findRequiredExtraHeight(final float newBrowserHeight) {
-        return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT : 0;
+        return newBrowserHeight > SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT ? newBrowserHeight
+                - SPUIDefinitions.REQ_MIN_BROWSER_HEIGHT : 0;
     }
 
     /**
@@ -497,8 +494,8 @@ public final class HawkbitCommonUtil {
      * @return float heigth of software module table
      */
     public static float findRequiredSwModuleExtraHeight(final float newBrowserHeight) {
-        return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT
-                ? newBrowserHeight - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT : 0;
+        return newBrowserHeight > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT ? newBrowserHeight
+                - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_HEIGHT : 0;
     }
 
     /**
@@ -509,8 +506,8 @@ public final class HawkbitCommonUtil {
      * @return float width of software module table
      */
     public static float findRequiredSwModuleExtraWidth(final float newBrowserWidth) {
-        return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH : 0;
+        return newBrowserWidth > SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH ? newBrowserWidth
+                - SPUIDefinitions.REQ_MIN_UPLOAD_BROWSER_WIDTH : 0;
     }
 
     /**
@@ -572,8 +569,8 @@ public final class HawkbitCommonUtil {
      * @return extra width required to be increased.
      */
     public static float findExtraWidth(final float newBrowserWidth) {
-        return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH
-                ? newBrowserWidth - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH : 0;
+        return newBrowserWidth > SPUIDefinitions.REQ_MIN_BROWSER_WIDTH ? newBrowserWidth
+                - SPUIDefinitions.REQ_MIN_BROWSER_WIDTH : 0;
     }
 
     /**
@@ -706,12 +703,12 @@ public final class HawkbitCommonUtil {
         final StringBuilder exeJS = new StringBuilder(DRAG_COUNT_ELEMENT).append(JS_DRAG_COUNT_REM_CHILD);
         final String currentTheme = UI.getCurrent().getTheme();
         if (count > 1) {
-            exeJS.append(COUNT_STYLE).append(COUNT_STYLE_ID)
+            exeJS.append(COUNT_STYLE)
+                    .append(COUNT_STYLE_ID)
                     .append(" countStyle.innerHTML = '." + currentTheme + " tbody.v-drag-element tr:after { content:\""
                             + count + "\";top:-15px } ." + currentTheme + " tr.v-drag-element:after { content:\""
                             + count + CLOSE_BRACE_NOSEMICOLON + "." + currentTheme
-                            + " table.v-drag-element:after{ content:\"" + count + CLOSE_BRACE)
-                    .append(APPEND_CHILD);
+                            + " table.v-drag-element:after{ content:\"" + count + CLOSE_BRACE).append(APPEND_CHILD);
         }
         return exeJS.toString();
     }
@@ -906,8 +903,9 @@ public final class HawkbitCommonUtil {
         final int unassignedCount = result.getUnassigned();
 
         if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedTargets().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.assigned.one", new Object[] {
+                            result.getAssignedTargets().get(0).getName(), targTagName })).append("<br>");
 
         } else if (assignedCount > 1) {
             formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
@@ -921,8 +919,9 @@ public final class HawkbitCommonUtil {
         }
 
         if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedTargets().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.unassigned.one", new Object[] {
+                            result.getUnassignedTargets().get(0).getName(), targTagName })).append("<br>");
 
         } else if (unassignedCount > 1) {
             formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
@@ -952,8 +951,9 @@ public final class HawkbitCommonUtil {
         final int unassignedCount = result.getUnassigned();
 
         if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedDs().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.assigned.one", new Object[] { result.getAssignedDs().get(0).getName(),
+                            targTagName })).append("<br>");
 
         } else if (assignedCount > 1) {
             formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
@@ -967,8 +967,9 @@ public final class HawkbitCommonUtil {
         }
 
         if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedDs().get(0).getName(), targTagName })).append("<br>");
+            formMsg.append(
+                    i18n.get("message.target.unassigned.one", new Object[] { result.getUnassignedDs().get(0).getName(),
+                            targTagName })).append("<br>");
         } else if (unassignedCount > 1) {
             formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
                     .append("<br>");
@@ -989,8 +990,8 @@ public final class HawkbitCommonUtil {
             final BeanQueryFactory<? extends AbstractBeanQuery> queryFactory) {
         final Map<String, Object> queryConfig = new HashMap<String, Object>();
         queryFactory.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer typeContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
+        final LazyQueryContainer typeContainer = new LazyQueryContainer(new LazyQueryDefinition(true, 20,
+                SPUILabelDefinitions.VAR_NAME), queryFactory);
         return typeContainer;
     }
 
@@ -1048,10 +1049,10 @@ public final class HawkbitCommonUtil {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
             columnList
                     .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"),
                     0.1f));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
+                    i18n.get("header.modifiedDate"), 0.1f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2f));
         } else if (isShowPinColumn) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.7f));
@@ -1099,7 +1100,9 @@ public final class HawkbitCommonUtil {
      */
     public static String changeToNewSelectedPreviewColor(final String colorPickedPreview) {
         final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT).append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
+        scriptBuilder
+                .append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT)
+                .append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
                 .append("var newColorPreviewStyle = \".v-app .new-tag-name{ border: solid 3px ")
                 .append(colorPickedPreview)
                 .append(" !important; width:138px; margin-left:2px !important; box-shadow:none !important; } \"; ")
@@ -1119,48 +1122,14 @@ public final class HawkbitCommonUtil {
      */
     public static String getPreviewButtonColorScript(final String color) {
         final StringBuilder scriptBuilder = new StringBuilder();
-        scriptBuilder.append(PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT).append(PREVIEW_BUTTON_COLOR_CREATE_SCRIPT)
+        scriptBuilder
+                .append(PREVIEW_BUTTON_COLOR_REMOVE_SCRIPT)
+                .append(PREVIEW_BUTTON_COLOR_CREATE_SCRIPT)
                 .append("var tagColorPreviewStyle = \".v-app .tag-color-preview{ height: 15px !important; padding: 0 10px !important; border: 0px !important; margin-left:12px !important;  margin-top: 4px !important; border-width: 0 !important; background: ")
                 .append(color)
                 .append(" } .v-app .tag-color-preview:after{ border-color: none !important; box-shadow:none !important;} \"; ")
                 .append(PREVIEW_BUTTON_COLOR_SET_STYLE_SCRIPT);
         return scriptBuilder.toString();
-    }
-
-    /**
-     * Returns the Rollout group progress bar
-     * 
-     * @param bar
-     *            rollout group distribution bar.
-     * @param i
-     *            index
-     * @param rolloutTargetsStatus
-     *            Rollout group target status.
-     * @return bar progress bar for the rollout group.
-     */
-    public static DistributionBar getRolloutProgressBar(final DistributionBar bar, int i, final Rollout rollout) {
-        final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
-        if (totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED) != 0) {
-            final String readyStatus = TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase();
-            bar.setPartTooltip(i, readyStatus);
-            bar.setPartStyleName(i, STATUS_BAR_PART + readyStatus);
-            final String finishedStatus = TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase();
-            bar.setPartTooltip(i + 1, finishedStatus);
-            bar.setPartStyleName(i + 1, STATUS_BAR_PART + finishedStatus);
-        } else {
-            final Map<TotalTargetCountStatus.Status, Long> statusTotalCountMap = totalTargetCountStatus
-                    .getStatusTotalCountMap();
-            bar.setNumberOfParts(statusTotalCountMap.entrySet().size());
-            for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : statusTotalCountMap.entrySet()) {
-                if (entry.getValue() > 0) {
-                    bar.setPartSize(i, entry.getValue().intValue());
-                    bar.setPartTooltip(i, entry.getKey().toString().toLowerCase());
-                    bar.setPartStyleName(i, STATUS_BAR_PART + entry.getKey().toString().toLowerCase());
-                    i++;
-                }
-            }
-        }
-        return bar;
     }
 
     /**
@@ -1254,8 +1223,8 @@ public final class HawkbitCommonUtil {
                 false, false);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_ID, Long.class, null,
                 false, false);
-        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "",
-                false, true);
+        targetTableContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class,
+                "", false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class,
                 "", false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.LAST_QUERY_DATE, Date.class, null, false, false);
@@ -1285,8 +1254,8 @@ public final class HawkbitCommonUtil {
     public static void applyStatusLblStyle(final Table targetTable, final Button pinBtn, final Object itemId) {
         final Item item = targetTable.getItem(itemId);
         if (item != null) {
-            final TargetUpdateStatus updateStatus = (TargetUpdateStatus) item
-                    .getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
+            final TargetUpdateStatus updateStatus = (TargetUpdateStatus) item.getItemProperty(
+                    SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
             pinBtn.removeStyleName("statusIconRed statusIconBlue statusIconGreen statusIconYellow statusIconLightBlue");
             if (updateStatus == TargetUpdateStatus.ERROR) {
                 pinBtn.addStyleName("statusIconRed");
@@ -1321,6 +1290,14 @@ public final class HawkbitCommonUtil {
         bar.setPartStyleName(index, "status-bar-part-" + statusName);
     }
 
+    /**
+     * Initialize status progress bar with values and number of parts on load.
+     * 
+     * @param bar
+     *            DistributionBar
+     * @param item
+     *            row of a table
+     */
     public static void initialiseProgressBar(final DistributionBar bar, final Item item) {
         final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
         final Long runningTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
@@ -1330,9 +1307,10 @@ public final class HawkbitCommonUtil {
         final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
         if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
                 finishedTargetsCount, cancelledTargetsCount)) {
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(), 0, 0);
-            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
-                    1);
+            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(), 0,
+                    0);
+            HawkbitCommonUtil
+                    .setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0, 1);
 
         } else {
             bar.setNumberOfParts(6);
@@ -1340,7 +1318,15 @@ public final class HawkbitCommonUtil {
         }
     }
 
-    public static void setProgressBarDetails(final DistributionBar bar, final Item item) {
+    /**
+     * Reset the values of status progress bar on change of values.
+     * 
+     * @param bar
+     *            DistributionBar
+     * @param item
+     *            row of the table
+     */
+    private static void setProgressBarDetails(final DistributionBar bar, final Item item) {
         bar.setNumberOfParts(6);
         final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
         HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
@@ -1355,48 +1341,6 @@ public final class HawkbitCommonUtil {
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
         HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.CANCELLED.toString().toLowerCase(),
                 getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
-    }
-
-    public static void decrementStatusCount(final Item item, final Action.Status oldValue) {
-        if (oldValue == Status.RUNNING || oldValue == Status.RETRIEVED || oldValue == Status.WARNING
-                || oldValue == Status.DOWNLOAD) {
-            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
-        } else if (oldValue == Status.ERROR) {
-            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
-        } else if (oldValue == Status.CANCELED || oldValue == Status.CANCELING) {
-            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
-        } else if (oldValue == Status.SCHEDULED) {
-            decrementCountAndSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
-        }
-    }
-
-    public static void incrementStatusCount(final Item item, final Action.Status nwValue) {
-        if (nwValue == Status.RUNNING || nwValue == Status.RETRIEVED || nwValue == Status.WARNING
-                || nwValue == Status.DOWNLOAD) {
-            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
-        } else if (nwValue == Status.ERROR) {
-            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
-        } else if (nwValue == Status.CANCELED || nwValue == Status.CANCELING) {
-            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
-        } else if (nwValue == Status.SCHEDULED) {
-            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
-        } else if (nwValue == Status.FINISHED) {
-            increamentCountandSet(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
-        }
-    }
-
-    public static void decrementCountAndSet(final String statusProperty, final Item item) {
-        Long count = (Long) item.getItemProperty(statusProperty).getValue();
-        if (count > 0) {
-            final Long newValue = --count;
-            item.getItemProperty(statusProperty).setValue(newValue);
-        }
-    }
-
-    private static void increamentCountandSet(final String statusProperty, final Item item) {
-        Long count = getStatusCount(statusProperty, item);
-        final Long newValue = ++count;
-        item.getItemProperty(statusProperty).setValue(newValue);
     }
 
     private static boolean isNoTargets(final Long... statusCount) {

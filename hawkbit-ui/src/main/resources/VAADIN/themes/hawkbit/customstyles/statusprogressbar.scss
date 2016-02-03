@@ -9,27 +9,27 @@
 @mixin statusprogressbar {
   .alump-dbar {
     .status-bar-part-scheduled {
-      background-color: $bosch-color-light-blue !important;
+      background-color: $progress-bar-scheduled-part !important;
     }
 
     .status-bar-part-running {
-      background-color: $signal-yellow-color !important;
+      background-color: $progress-bar-running-part !important;
     }
 
     .status-bar-part-error {
-      background-color: $signal-red-color !important;
+      background-color: $progress-bar-error-part !important;
     }
 
     .status-bar-part-finished {
-      background-color: $signal-green-color!important;
+      background-color: $progress-bar-finished-part !important;
     }
 
     .status-bar-part-cancelled {
-      background-color: $grey-light !important;
+      background-color: $progress-bar-cancelled-part !important;
     }
 
     .status-bar-part-notstarted {
-      background-color: $grey-color !important;
+      background-color: $progress-bar-notstarted-part !important;
     }
     
     .alump-dbar-left {

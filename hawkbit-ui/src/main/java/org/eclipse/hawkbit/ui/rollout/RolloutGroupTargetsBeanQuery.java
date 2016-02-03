@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -51,8 +50,6 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     private final RolloutGroup rolloutGroup;
 
-    private transient I18N i18N;
-
     /**
      * Parametric Constructor.
      * 
@@ -82,7 +79,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
 
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
-        List<TargetWithActionStatus> rolloutGroupTargetsList = new ArrayList<TargetWithActionStatus>();
+        List<TargetWithActionStatus> rolloutGroupTargetsList = new ArrayList<>();
         if (startIndex == 0 && firstPageTargetSets != null) {
             rolloutGroupTargetsList = firstPageTargetSets.getContent();
         } else if (null != rolloutGroup) {
@@ -93,7 +90,7 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     }
 
     private List<ProxyTarget> getProxyRolloutGroupTargetsList(final List<TargetWithActionStatus> rolloutGroupTargets) {
-        final List<ProxyTarget> proxyTargetBeans = new ArrayList<ProxyTarget>();
+        final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         for (final TargetWithActionStatus targetWithActionStatus : rolloutGroupTargets) {
             final Target targ = targetWithActionStatus.getTarget();
             final ProxyTarget prxyTarget = new ProxyTarget();

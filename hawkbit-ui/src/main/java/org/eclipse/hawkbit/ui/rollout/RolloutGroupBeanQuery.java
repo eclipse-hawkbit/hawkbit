@@ -64,7 +64,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 
-        rolloutId = getRolloutUIState().getRolloutId().isPresent() ? getRolloutUIState().getRolloutId().get() : null;
+        rolloutId = getRolloutId();
 
         if (HawkbitCommonUtil.checkBolArray(sortStates)) {
             // Initalize Sor
@@ -77,6 +77,13 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
         }
     }
 
+    /**
+     * @return
+     */
+    private Long getRolloutId() {
+        return getRolloutUIState().getRolloutId().isPresent() ? getRolloutUIState().getRolloutId().get() : null;
+    }
+
     @Override
     protected ProxyRolloutGroup constructBean() {
         return new ProxyRolloutGroup();
@@ -84,14 +91,18 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 
     @Override
     protected List<ProxyRolloutGroup> loadBeans(final int startIndex, final int count) {
-        final Page<RolloutGroup> rolloutGroupBeans = getRolloutGroupManagement()
-                .findAllRolloutGroupsWithDetailedStatus(rolloutId,
-                        new PageRequest(startIndex / SPUIDefinitions.PAGE_SIZE, SPUIDefinitions.PAGE_SIZE, sort));
-        return getProxyRolloutGroupList(rolloutGroupBeans);
+        List<RolloutGroup> proxyRolloutGroupsList = new ArrayList<>();
+        if (startIndex == 0 && firstPageRolloutGroupSets != null) {
+            proxyRolloutGroupsList = firstPageRolloutGroupSets.getContent();
+        } else if (null != rolloutId) {
+            proxyRolloutGroupsList = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(rolloutId,
+                    new PageRequest(startIndex / count, count)).getContent();
+        }
+        return getProxyRolloutGroupList(proxyRolloutGroupsList);
     }
 
-    private List<ProxyRolloutGroup> getProxyRolloutGroupList(final Page<RolloutGroup> rolloutGroupBeans) {
-        final List<ProxyRolloutGroup> proxyRolloutGroupsList = new ArrayList<ProxyRolloutGroup>();
+    private List<ProxyRolloutGroup> getProxyRolloutGroupList(final List<RolloutGroup> rolloutGroupBeans) {
+        final List<ProxyRolloutGroup> proxyRolloutGroupsList = new ArrayList<>();
         for (final RolloutGroup rolloutGroup : rolloutGroupBeans) {
             final ProxyRolloutGroup proxyRolloutGroup = new ProxyRolloutGroup();
             proxyRolloutGroup.setName(rolloutGroup.getName());
@@ -165,7 +176,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     public int size() {
         long size = 0;
         if (null != rolloutId) {
-            firstPageRolloutGroupSets = getRolloutGroupManagement().findRolloutGroupsByRolloutId(rolloutId,
+            firstPageRolloutGroupSets = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(rolloutId,
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
             size = firstPageRolloutGroupSets.getTotalElements();
         }

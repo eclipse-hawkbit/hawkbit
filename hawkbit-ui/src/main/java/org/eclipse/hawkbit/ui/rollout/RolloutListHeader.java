@@ -161,7 +161,9 @@ public class RolloutListHeader extends AbstractSimpleTableHeader {
      */
     @Override
     protected void restoreCaption() {
-
+        /**
+         * No implementation required.
+         */
     }
 
 }

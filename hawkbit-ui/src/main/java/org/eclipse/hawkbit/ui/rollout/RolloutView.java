@@ -92,36 +92,57 @@ public class RolloutView extends VerticalLayout implements View {
 
     private void buildLayout() {
         if (permChecker.hasRolloutReadPermission() && rolloutUIState.isShowRollOuts()) {
-            rolloutListView.setVisible(true);
-            if (rolloutGroupsListView.isVisible()) {
-                rolloutGroupsListView.setVisible(false);
-            }
-            if (rolloutGroupTargetsListView.isVisible()) {
-                rolloutGroupTargetsListView.setVisible(false);
-            }
-            addComponent(rolloutListView);
-            setExpandRatio(rolloutListView, 1.0f);
+            showRolloutListView();
         } else if (permChecker.hasRolloutReadPermission() && rolloutUIState.isShowRolloutGroups()) {
-            rolloutGroupsListView.setVisible(true);
-            if (rolloutListView.isVisible()) {
-                rolloutListView.setVisible(false);
-            }
-            if (rolloutGroupTargetsListView.isVisible()) {
-                rolloutGroupTargetsListView.setVisible(false);
-            }
-            addComponent(rolloutGroupsListView);
-            setExpandRatio(rolloutGroupsListView, 1.0f);
+            showRolloutGroupListView();
         } else if (permChecker.hasRolloutTargetsReadPermission() && rolloutUIState.isShowRolloutGroupTargets()) {
-            rolloutGroupTargetsListView.setVisible(true);
-            if (rolloutListView.isVisible()) {
-                rolloutListView.setVisible(false);
-            }
-            if (rolloutGroupsListView.isVisible()) {
-                rolloutGroupsListView.setVisible(false);
-            }
-            addComponent(rolloutGroupTargetsListView);
-            setExpandRatio(rolloutGroupTargetsListView, 1.0f);
+            showRolloutGroupTargetsListView();
         }
+    }
+
+    /**
+     * 
+     */
+    private void showRolloutGroupTargetsListView() {
+        rolloutGroupTargetsListView.setVisible(true);
+        if (rolloutListView.isVisible()) {
+            rolloutListView.setVisible(false);
+        }
+        if (rolloutGroupsListView.isVisible()) {
+            rolloutGroupsListView.setVisible(false);
+        }
+        addComponent(rolloutGroupTargetsListView);
+        setExpandRatio(rolloutGroupTargetsListView, 1.0f);
+    }
+
+    /**
+     * 
+     */
+    private void showRolloutGroupListView() {
+        rolloutGroupsListView.setVisible(true);
+        if (rolloutListView.isVisible()) {
+            rolloutListView.setVisible(false);
+        }
+        if (rolloutGroupTargetsListView.isVisible()) {
+            rolloutGroupTargetsListView.setVisible(false);
+        }
+        addComponent(rolloutGroupsListView);
+        setExpandRatio(rolloutGroupsListView, 1.0f);
+    }
+
+    /**
+     * 
+     */
+    private void showRolloutListView() {
+        rolloutListView.setVisible(true);
+        if (rolloutGroupsListView.isVisible()) {
+            rolloutGroupsListView.setVisible(false);
+        }
+        if (rolloutGroupTargetsListView.isVisible()) {
+            rolloutGroupTargetsListView.setVisible(false);
+        }
+        addComponent(rolloutListView);
+        setExpandRatio(rolloutListView, 1.0f);
     }
 
 }

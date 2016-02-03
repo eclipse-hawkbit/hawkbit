@@ -67,6 +67,8 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class RolloutListTable extends AbstractSimpleTable {
 
+    private static final String IS_ACTION_RECIEVED = "isActionRecieved";
+
     private static final long serialVersionUID = 8141874975649180139L;
 
     @Autowired
@@ -138,8 +140,8 @@ public class RolloutListTable extends AbstractSimpleTable {
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
             item.getItemProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED).setValue(
                     totalTargetCountStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
-            item.getItemProperty("isActionRecieved").setValue(
-                    !(Boolean) item.getItemProperty("isActionRecieved").getValue());
+            item.getItemProperty(IS_ACTION_RECIEVED).setValue(
+                    !(Boolean) item.getItemProperty(IS_ACTION_RECIEVED).getValue());
 
             final Long groupCount = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue();
             if (null != rollout.getRolloutGroups() && groupCount != rollout.getRolloutGroups().size()) {
@@ -151,7 +153,7 @@ public class RolloutListTable extends AbstractSimpleTable {
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_NAME, i18n.get("header.name"), 0.225f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, i18n.get("header.distributionset"),
@@ -172,11 +174,9 @@ public class RolloutListTable extends AbstractSimpleTable {
 
     @Override
     protected Container createContainer() {
-        final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<RolloutBeanQuery>(
-                RolloutBeanQuery.class);
-        final LazyQueryContainer rolloutTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
-        return rolloutTableContainer;
+        final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<>(RolloutBeanQuery.class);
+        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE,
+                SPUILabelDefinitions.VAR_ID), rolloutQf);
 
     }
 
@@ -267,9 +267,9 @@ public class RolloutListTable extends AbstractSimpleTable {
         actionButton.addClickListener(event -> onAction(event));
         addStatusPropertyChangeListener(itemId, actionButton);
 
-        final RolloutStatus RolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
+        final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();
-        enableDisableActions(RolloutStatus, actionButton);
+        enableDisableActions(rolloutStatus, actionButton);
         return actionButton;
     }
 
@@ -391,12 +391,12 @@ public class RolloutListTable extends AbstractSimpleTable {
     }
 
     private void addPropertyChangeListenerOnActionRecieved(final Object itemId, final DistributionBar bar) {
-        final Property status = getContainerProperty(itemId, "isActionRecieved");
+        final Property status = getContainerProperty(itemId, IS_ACTION_RECIEVED);
         final Property.ValueChangeNotifier notifier = (Property.ValueChangeNotifier) status;
         notifier.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                HawkbitCommonUtil.setProgressBarDetails(bar, getItem(itemId));
+                HawkbitCommonUtil.initialiseProgressBar(bar, getItem(itemId));
             }
         });
     }
