@@ -92,7 +92,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
         setId(SPUIComponetIdProvider.COUNT_LABEL);
     }
 
-    public void displayRolloutGroupTargetMessage() {
+    private void displayRolloutGroupTargetMessage() {
         long totalTargetTableEnteries = rolloutGroupTargetsListTable.size();
         if (rolloutUIState.getRolloutGroupTargetsTruncated() != null) {
             // set the icon

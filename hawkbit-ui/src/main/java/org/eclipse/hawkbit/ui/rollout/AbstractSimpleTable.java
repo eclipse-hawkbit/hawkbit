@@ -67,7 +67,6 @@ public abstract class AbstractSimpleTable extends Table {
         if (container != null) {
             size = container.size();
         }
-        // final int size = container.size();
         if (size == 0) {
             setData(SPUIDefinitions.NO_DATA);
         }

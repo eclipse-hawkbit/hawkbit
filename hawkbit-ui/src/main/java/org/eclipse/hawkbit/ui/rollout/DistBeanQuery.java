@@ -100,7 +100,7 @@ public class DistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     }
 
     private List<ProxyDistribution> createProxyDistributions(final Page<DistributionSet> distBeans) {
-        final List<ProxyDistribution> proxyDistributions = new ArrayList<ProxyDistribution>();
+        final List<ProxyDistribution> proxyDistributions = new ArrayList<>();
         for (final DistributionSet distributionSet : distBeans) {
             final ProxyDistribution proxyDistribution = new ProxyDistribution();
             proxyDistribution.setName(HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(),

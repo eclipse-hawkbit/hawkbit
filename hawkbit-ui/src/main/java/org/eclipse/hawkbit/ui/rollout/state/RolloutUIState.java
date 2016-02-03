@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout.state;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -21,7 +22,9 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @VaadinSessionScope
 @SpringComponent
-public class RolloutUIState {
+public class RolloutUIState implements Serializable {
+
+    private static final long serialVersionUID = -5751690471177053140L;
 
     private String searchText;
 

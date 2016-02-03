@@ -87,6 +87,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private static final String MESSAGE_ENTER_NUMBER = "message.enter.number";
 
+    private static final String NUMBER_REGEXP = "[-]?[0-9]*\\.?,?[0-9]+";
+
     @Autowired
     private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
@@ -288,12 +290,12 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private Label createGroupSizeLabel() {
-        final Label groupSizeLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
-        groupSizeLabel.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
-        groupSizeLabel.setImmediate(true);
-        groupSizeLabel.setVisible(false);
-        groupSizeLabel.setSizeUndefined();
-        return groupSizeLabel;
+        final Label groupSize = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
+        groupSize.addStyleName(ValoTheme.LABEL_TINY + " " + "rollout-target-count-message");
+        groupSize.setImmediate(true);
+        groupSize.setVisible(false);
+        groupSize.setSizeUndefined();
+        return groupSize;
     }
 
     private TextArea createTargetFilterQuery() {
@@ -381,9 +383,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     private Container createTargetFilterComboContainer() {
         final BeanQueryFactory<TargetFilterBeanQuery> targetFilterQF = new BeanQueryFactory<>(
                 TargetFilterBeanQuery.class);
-        final LazyQueryContainer targetFilterContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_NAME), targetFilterQF);
-        return targetFilterContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE,
+                SPUILabelDefinitions.VAR_NAME), targetFilterQF);
 
     }
 
@@ -500,8 +501,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
                 && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
             final Item filterItem = targetFilterQueryCombo.getContainerDataSource().getItem(
                     targetFilterQueryCombo.getValue());
-            final String targetFilter = (String) filterItem.getItemProperty("query").getValue();
-            return targetFilter;
+            return (String) filterItem.getItemProperty("query").getValue();
         }
         return null;
     }
@@ -647,9 +647,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private Container createDsComboContainer() {
         final BeanQueryFactory<DistBeanQuery> distributionQF = new BeanQueryFactory<>(DistBeanQuery.class);
-        final LazyQueryContainer distributionContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
-        return distributionContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE,
+                SPUILabelDefinitions.VAR_DIST_ID_NAME), distributionQF);
 
     }
 
@@ -679,17 +678,17 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         private static final long serialVersionUID = 9049939751976326550L;
 
         @Override
-        public void validate(final Object value) throws InvalidValueException {
+        public void validate(final Object value) {
             try {
                 if (HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
                         || HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null) {
                     uiNotification.displayValidationError(i18n
                             .get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
-                    new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                    new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
                     final int groupSize = getGroupSize();
                     new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
-                            .validate(Integer.parseInt(value.toString()));
+                            .validate(Integer.valueOf(value.toString()));
                 }
             } catch (final InvalidValueException ex) {
                 throw ex;
@@ -706,11 +705,11 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         private static final long serialVersionUID = 9049939751976326550L;
 
         @Override
-        public void validate(final Object value) throws InvalidValueException {
+        public void validate(final Object value) {
             try {
-                new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
                 new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100).validate(Integer
-                        .parseInt(value.toString()));
+                        .valueOf(value.toString()));
             } catch (final InvalidValueException ex) {
                 throw ex;
             }
@@ -721,11 +720,11 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         private static final long serialVersionUID = 9049939751976326550L;
 
         @Override
-        public void validate(final Object value) throws InvalidValueException {
+        public void validate(final Object value) {
             try {
-                new RegexpValidator("[-]?[0-9]*\\.?,?[0-9]+", i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
                 new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500).validate(Integer
-                        .parseInt(value.toString()));
+                        .valueOf(value.toString()));
             } catch (final InvalidValueException ex) {
                 throw ex;
             }

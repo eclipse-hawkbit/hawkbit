@@ -82,7 +82,7 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.15f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.15f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.15f));
@@ -99,11 +99,10 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
 
     @Override
     protected Container createContainer() {
-        final BeanQueryFactory<RolloutGroupTargetsBeanQuery> rolloutgrouBeanQueryFactory = new BeanQueryFactory<RolloutGroupTargetsBeanQuery>(
+        final BeanQueryFactory<RolloutGroupTargetsBeanQuery> rolloutgrouBeanQueryFactory = new BeanQueryFactory<>(
                 RolloutGroupTargetsBeanQuery.class);
-        final LazyQueryContainer rolloutGroupTargetsTableContainer = new LazyQueryContainer(new LazyQueryDefinition(
-                true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutgrouBeanQueryFactory);
-        return rolloutGroupTargetsTableContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE,
+                SPUILabelDefinitions.VAR_ID), rolloutgrouBeanQueryFactory);
     }
 
     @Override
