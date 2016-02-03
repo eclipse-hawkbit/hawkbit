@@ -46,6 +46,17 @@ public class SimulationController {
      *            the amount of devices to be created
      * @param tenant
      *            the tenant to create the device to
+     * @param api
+     *            the api-protocol to be used either {@code dmf} or {@code ddi}
+     * @param endpoint
+     *            the URL endpoint to be used of the hawkbit-update-server for
+     *            DDI devices
+     * @param pollDelay
+     *            number of delay in milliseconds to delay polling of DDI
+     *            devices
+     * @param gatewayToken
+     *            the hawkbit-update-server gatwaytoken in case authentication
+     *            is enforced in hawkbit
      * @return a response string that devices has been created
      * @throws MalformedURLException
      */
