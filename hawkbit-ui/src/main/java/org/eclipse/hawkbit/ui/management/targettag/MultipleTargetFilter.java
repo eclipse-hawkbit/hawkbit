@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -62,6 +63,9 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
     @Autowired
     private CreateUpdateTargetTagLayout createUpdateTargetTagLayout;
+
+    @Autowired
+    private SpPermissionChecker permChecker;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -119,8 +123,10 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         simpleFilterTab = new VerticalLayout();
         final VerticalLayout targetTagTableLayout = new VerticalLayout();
         targetTagTableLayout.setSizeFull();
-        targetTagTableLayout.addComponent(config);
-        targetTagTableLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
+            targetTagTableLayout.addComponent(config);
+            targetTagTableLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        }
         targetTagTableLayout.addComponent(filterByButtons);
         targetTagTableLayout.setComponentAlignment(filterByButtons, Alignment.MIDDLE_CENTER);
         targetTagTableLayout.addStyleName("target-tag-drop-hint");
