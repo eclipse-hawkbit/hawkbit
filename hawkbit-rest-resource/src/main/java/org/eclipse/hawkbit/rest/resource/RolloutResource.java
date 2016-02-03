@@ -143,7 +143,7 @@ public class RolloutResource {
 
         // first check the given RSQL query if it's well formed, otherwise and
         // exception is thrown
-        RSQLUtility.parse(rolloutRequestBody.getTargetFilterQuery(), TargetFields.class);
+        RSQLUtility.isValid(rolloutRequestBody.getTargetFilterQuery());
 
         final DistributionSet distributionSet = findDistributionSetOrThrowException(rolloutRequestBody);
 
@@ -280,7 +280,7 @@ public class RolloutResource {
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-        findRolloutOrThrowException(rolloutId);
+        final Rollout rollout = findRolloutOrThrowException(rolloutId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -290,7 +290,7 @@ public class RolloutResource {
 
         final Page<RolloutGroup> findRolloutGroupsAll;
         if (rsqlParam != null) {
-            findRolloutGroupsAll = rolloutGroupManagement.findRolloutGroupsByPredicate(rolloutId,
+            findRolloutGroupsAll = rolloutGroupManagement.findRolloutGroupsByPredicate(rollout,
                     RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), pageable);
         } else {
             findRolloutGroupsAll = rolloutGroupManagement.findRolloutGroupsByRolloutId(rolloutId, pageable);

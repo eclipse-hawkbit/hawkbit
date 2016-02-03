@@ -109,10 +109,10 @@ public class RolloutGroupManagement {
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    public Page<RolloutGroup> findRolloutGroupsByPredicate(final Long rolloutId,
+    public Page<RolloutGroup> findRolloutGroupsByPredicate(final Rollout rollout,
             final Specification<RolloutGroup> specification, final Pageable page) {
         return rolloutGroupRepository.findAll((root, query, criteriaBuilder) -> criteriaBuilder.and(
-                criteriaBuilder.equal(root.get(RolloutGroup_.rollout), rolloutId),
+                criteriaBuilder.equal(root.get(RolloutGroup_.rollout), rollout),
                 specification.toPredicate(root, query, criteriaBuilder)), page);
     }
 

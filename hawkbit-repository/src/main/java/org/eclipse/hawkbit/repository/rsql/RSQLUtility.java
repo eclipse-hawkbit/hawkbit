@@ -102,6 +102,30 @@ public final class RSQLUtility {
         return new RSQLSpecification<>(rsql, fieldNameProvider);
     }
 
+    /**
+     * Validate the given rsql string regarding existence and correct syntax.
+     * 
+     * @param rsql
+     *            the rsql string to get validated
+     * 
+     */
+    public static void isValid(final String rsql) {
+        parseRsql(rsql);
+    }
+
+    private static Node parseRsql(final String rsql) {
+        try {
+            LOGGER.debug("parsing rsql string {}", rsql);
+            final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
+            operators.add(new ComparisonOperator("=li=", false));
+            return new RSQLParser(operators).parse(rsql);
+        } catch (final IllegalArgumentException e) {
+            throw new RSQLParameterSyntaxException("rsql filter must not be null", e);
+        } catch (final RSQLParserException e) {
+            throw new RSQLParameterSyntaxException(e);
+        }
+    }
+
     private static final class RSQLSpecification<A extends Enum<A> & FieldNameProvider, T> implements Specification<T> {
 
         private final String rsql;
@@ -123,15 +147,7 @@ public final class RSQLUtility {
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
 
-            final Node rootNode;
-            try {
-                LOGGER.debug("parsing rsql string {}", rsql);
-                final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-                operators.add(new ComparisonOperator("=li=", false));
-                rootNode = new RSQLParser(operators).parse(rsql);
-            } catch (final RSQLParserException e) {
-                throw new RSQLParameterSyntaxException(e);
-            }
+            final Node rootNode = parseRsql(rsql);
 
             final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);

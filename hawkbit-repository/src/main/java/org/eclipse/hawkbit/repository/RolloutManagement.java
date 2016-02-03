@@ -202,10 +202,10 @@ public class RolloutManagement {
     @Transactional
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
-    public Rollout createRollout(final Rollout rollout, final int amountGroup, final RolloutGroupConditions conditions) {
+    public Rollout createRollout(final Rollout rollout, final int amountGroup,
+            final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
-        createRolloutGroups(amountGroup, conditions, savedRollout);
-        return savedRollout;
+        return createRolloutGroups(amountGroup, conditions, savedRollout);
     }
 
     /**
@@ -294,7 +294,7 @@ public class RolloutManagement {
      *            the rollout
      * @return the rollout with created groups
      */
-    private void createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
+    private Rollout createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
             final Rollout savedRollout) {
         int pageIndex = 0;
         int groupIndex = 0;
@@ -310,8 +310,10 @@ public class RolloutManagement {
         RolloutGroup lastSavedGroup = null;
         while (pageIndex < totalCount) {
             groupIndex++;
+            final String nameAndDesc = "group-" + groupIndex;
             final RolloutGroup group = new RolloutGroup();
-            group.setName("group-" + groupIndex);
+            group.setName(nameAndDesc);
+            group.setDescription(nameAndDesc);
             group.setRollout(savedRollout);
             group.setParent(lastSavedGroup);
             group.setSuccessCondition(conditions.getSuccessCondition());
@@ -334,10 +336,11 @@ public class RolloutManagement {
             cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(),
                     amountGroupValidated, groupIndex);
             pageIndex += groupSize;
+
         }
 
         savedRollout.setStatus(RolloutStatus.READY);
-        rolloutRepository.save(savedRollout);
+        return rolloutRepository.save(savedRollout);
     }
 
     /**
@@ -429,8 +432,8 @@ public class RolloutManagement {
             } else {
                 // create only not active actions with status scheduled so they
                 // can be activated later
-                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime,
-                        rollout, rolloutGroup);
+                deploymentManagement.createScheduledAction(targetGroup, distributionSet, actionType, forceTime, rollout,
+                        rolloutGroup);
                 rolloutGroup.setStatus(RolloutGroupStatus.SCHEDULED);
             }
             rolloutGroupRepository.save(rolloutGroup);
@@ -584,30 +587,24 @@ public class RolloutManagement {
      */
     private void verifyStuckedRollouts() {
         final List<Rollout> rolloutsInCreatingState = rolloutRepository.findByStatus(RolloutStatus.CREATING);
-        rolloutsInCreatingState
-                .stream()
-                .filter(rollout -> !creatingRollouts.contains(rollout.getName()))
-                .forEach(
-                        rollout -> {
-                            LOGGER.warn(
-                                    "Determined error during rollout creation of rollout {}, stucking in creating state, setting to status",
-                                    rollout, RolloutStatus.ERROR_CREATING);
-                            rollout.setStatus(RolloutStatus.ERROR_CREATING);
-                            rolloutRepository.save(rollout);
-                        });
+        rolloutsInCreatingState.stream().filter(rollout -> !creatingRollouts.contains(rollout.getName()))
+                .forEach(rollout -> {
+                    LOGGER.warn(
+                            "Determined error during rollout creation of rollout {}, stucking in creating state, setting to status",
+                            rollout, RolloutStatus.ERROR_CREATING);
+                    rollout.setStatus(RolloutStatus.ERROR_CREATING);
+                    rolloutRepository.save(rollout);
+                });
 
         final List<Rollout> rolloutsInStartingState = rolloutRepository.findByStatus(RolloutStatus.STARTING);
-        rolloutsInStartingState
-                .stream()
-                .filter(rollout -> !startingRollouts.contains(rollout.getName()))
-                .forEach(
-                        rollout -> {
-                            LOGGER.warn(
-                                    "Determined error during rollout starting of rollout {}, stucking in starting state, setting to status",
-                                    rollout, RolloutStatus.ERROR_STARTING);
-                            rollout.setStatus(RolloutStatus.ERROR_STARTING);
-                            rolloutRepository.save(rollout);
-                        });
+        rolloutsInStartingState.stream().filter(rollout -> !startingRollouts.contains(rollout.getName()))
+                .forEach(rollout -> {
+                    LOGGER.warn(
+                            "Determined error during rollout starting of rollout {}, stucking in starting state, setting to status",
+                            rollout, RolloutStatus.ERROR_STARTING);
+                    rollout.setStatus(RolloutStatus.ERROR_STARTING);
+                    rolloutRepository.save(rollout);
+                });
 
     }
 
@@ -634,8 +631,8 @@ public class RolloutManagement {
     }
 
     private void executeLatestRolloutGroup(final Rollout rollout) {
-        final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository.findByRolloutAndStatusNotOrderByIdDesc(
-                rollout, RolloutGroupStatus.SCHEDULED);
+        final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository
+                .findByRolloutAndStatusNotOrderByIdDesc(rollout, RolloutGroupStatus.SCHEDULED);
         if (latestRolloutGroup.isEmpty()) {
             return;
         }
@@ -644,11 +641,11 @@ public class RolloutManagement {
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
         try {
-            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class).eval(
-                    rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
+            context.getBean(rolloutGroup.getErrorAction().getBeanName(), RolloutGroupActionEvaluator.class)
+                    .eval(rollout, rolloutGroup, rolloutGroup.getErrorActionExp());
         } catch (final BeansException e) {
-            LOGGER.error("Something bad happend when accessing the error action bean {}", rolloutGroup.getErrorAction()
-                    .getBeanName(), e);
+            LOGGER.error("Something bad happend when accessing the error action bean {}",
+                    rolloutGroup.getErrorAction().getBeanName(), e);
         }
     }
 
@@ -685,9 +682,9 @@ public class RolloutManagement {
             final RolloutGroupSuccessCondition finishCondition) {
         LOGGER.trace("Checking finish condition {} on rolloutgroup {}", finishCondition, rolloutGroup);
         try {
-            final boolean isFinished = context.getBean(finishCondition.getBeanName(),
-                    RolloutGroupConditionEvaluator.class).eval(rollout, rolloutGroup,
-                    rolloutGroup.getSuccessConditionExp());
+            final boolean isFinished = context
+                    .getBean(finishCondition.getBeanName(), RolloutGroupConditionEvaluator.class)
+                    .eval(rollout, rolloutGroup, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
                 LOGGER.info("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
@@ -732,9 +729,10 @@ public class RolloutManagement {
     private static Specification<Rollout> likeNameOrDescription(final String searchText) {
         return (rolloutRoot, query, criteriaBuilder) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return criteriaBuilder.or(criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.name)),
-                    searchTextToLower), criteriaBuilder.like(
-                    criteriaBuilder.lower(rolloutRoot.get(Rollout_.description)), searchTextToLower));
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.name)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.description)),
+                            searchTextToLower));
         };
     }
 
@@ -830,7 +828,8 @@ public class RolloutManagement {
     private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
+                rolloutIds);
 
         for (final Rollout rollout : rollouts) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
@@ -856,7 +855,8 @@ public class RolloutManagement {
      *            {@link RolloutGroup}
      * @return percentage finished
      */
-    // TODO: Need to check with Michael on this
+    // TODO is this still necessary? I think might be obsolete with the
+    // TotalTargetStatus map???
     public float getFinishedPercentForRunningGroup(final Rollout rollout, final RolloutGroup rolloutGroup) {
         final Long totalGroup = actionRepository.countByRolloutAndRolloutGroup(rollout, rolloutGroup);
         final Long finished = actionRepository.countByRolloutAndRolloutGroupAndStatus(rollout, rolloutGroup,
@@ -869,7 +869,4 @@ public class RolloutManagement {
         // calculate threshold
         return ((float) finished / (float) totalGroup) * 100;
     }
-
-    // ////////Rollout - changes ends here/////////////
-
 }
