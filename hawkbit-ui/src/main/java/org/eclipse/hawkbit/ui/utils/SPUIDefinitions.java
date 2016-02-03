@@ -124,6 +124,11 @@ public final class SPUIDefinitions {
     public static final String IN_ACTIVE = "inactive";
 
     /**
+     * Action history helping constant.
+     */
+    public static final String SCHEDULED = "scheduled";
+
+    /**
      * Action history lazy fetch page length.
      */
     public static final int PAGE_LEN_ACTION_HISTORY = 5;

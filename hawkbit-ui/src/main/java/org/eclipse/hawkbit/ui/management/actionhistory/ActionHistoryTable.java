@@ -281,8 +281,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
             /*
              * add action id.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID)
-                    .setValue(actionWithStatusCount.getActionId().toString());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID).setValue(
+                    actionWithStatusCount.getActionId().toString());
             /*
              * add active/inactive status to the item which will be used in
              * Column generator to generate respective icon
@@ -379,8 +379,15 @@ public class ActionHistoryTable extends TreeTable implements Handler {
      * @return
      */
     private Component getActiveColumn(final Object itemId) {
-        final String activeValue = (String) hierarchicalContainer.getItem(itemId)
-                .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).getValue();
+        final Action.Status status = (Action.Status) hierarchicalContainer.getItem(itemId)
+                .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).getValue();
+        String activeValue;
+        if (status == Action.Status.SCHEDULED) {
+            activeValue = Action.Status.SCHEDULED.toString().toLowerCase();
+        } else {
+            activeValue = (String) hierarchicalContainer.getItem(itemId)
+                    .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).getValue();
+        }
         final String distName = (String) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).getValue();
         final Label activeStatusIcon = createActiveStatusLabel(
@@ -577,7 +584,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     private Label createActiveStatusLabel(final String activeValue, final boolean endedWithError) {
         final Label label = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
         label.setContentMode(ContentMode.HTML);
-        if (SPUIDefinitions.ACTIVE.equals(activeValue)) {
+        if (SPUIDefinitions.SCHEDULED.equals(activeValue)) {
+            label.setDescription("Scheduled");
+            label.setValue(FontAwesome.BULLSEYE.getHtml());
+        } else if (SPUIDefinitions.ACTIVE.equals(activeValue)) {
             label.setDescription("Active");
             label.setStyleName("statusIconActive");
         } else if (SPUIDefinitions.IN_ACTIVE.equals(activeValue)) {
@@ -766,8 +776,9 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void confirmAndForceQuitAction(final Long actionId) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
-                i18n.get("message.forcequit.action.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.get("caption.forcequit.action.confirmbox"), i18n.get("message.forcequit.action.confirm"),
+                i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
                         final boolean cancelResult = forceQuitActiveAction(actionId);
                         if (cancelResult) {
@@ -782,7 +793,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                             notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
                         }
                     }
-                } , FontAwesome.WARNING);
+                }, FontAwesome.WARNING);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
