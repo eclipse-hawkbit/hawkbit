@@ -43,6 +43,7 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 
 /**
  *
@@ -63,9 +64,6 @@ public class CreateOrUpdateFilterTable extends Table {
     @Autowired
     private FilterManagementUIState filterManagementUIState;
 
-    @Autowired
-    private CreateOrUpdateFilterHeader createOrUpdateFilterHeader;
-
     private LazyQueryContainer container;
 
     private static final int PROPERTY_DEPT = 3;
@@ -82,7 +80,20 @@ public class CreateOrUpdateFilterTable extends Table {
         populateTableData();
         setStyleName("sp-table");
         setId(SPUIComponetIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
+        setSelectable(false);
         eventBus.subscribe(this);
+        addItemSetChangeListener(new ItemSetChangeListener() {
+            private static final long serialVersionUID = 9006291573733911656L;
+
+            @Override
+            public void containerItemSetChange(final com.vaadin.data.Container.ItemSetChangeEvent event) {
+                if (size() > 0) {
+                    eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
+                }
+
+            }
+
+        });
     }
 
     @PreDestroy
@@ -92,10 +103,12 @@ public class CreateOrUpdateFilterTable extends Table {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
-        if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY
-                || custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
+        if (custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
-            populateTableData();
+            UI.getCurrent().access(() -> populateTableData());
+        } else if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
+            this.getUI().access(() -> populateTableData());
+            eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
         }
     }
 
@@ -149,15 +162,6 @@ public class CreateOrUpdateFilterTable extends Table {
         setColumnProperties();
         setPageLength(30);
         setCollapsibleColumns();
-        this.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1236358037766785663L;
-
-            @Override
-            public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                createOrUpdateFilterHeader.updateTargetFilterStatusToComplete();
-
-            }
-        });
     }
 
     /**

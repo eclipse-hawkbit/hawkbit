@@ -234,7 +234,7 @@ public final class SPUIStyleDefinitions {
     /**
      * Target filter search progress indicator style.
      */
-    public static final String TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE = "target-filter-search-layout";
+    public static final String TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE = "target-filter-spinner";
 
     /**
      * Constructor.

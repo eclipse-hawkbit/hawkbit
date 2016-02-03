@@ -12,8 +12,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.filtermanagement.CreateOrUpdateFilterTable;
-import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterTable;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -43,12 +41,6 @@ import com.vaadin.ui.Label;
 public class TargetFilterCountMessageLabel extends Label {
 
     private static final long serialVersionUID = -7188528790042766877L;
-
-    @Autowired
-    private CreateOrUpdateFilterTable createNewFilterTable;
-
-    @Autowired
-    private TargetFilterTable targetFilterTable;
 
     @Autowired
     private FilterManagementUIState filterManagementUIState;
@@ -95,12 +87,10 @@ public class TargetFilterCountMessageLabel extends Label {
 
     private void displayTargetFilterMessage() {
         long totalTargets = 0;
-        long shownTargets = 0;
         if (filterManagementUIState.isCreateFilterViewDisplayed() || filterManagementUIState.isEditViewDisplayed()) {
             if (null != filterManagementUIState.getFilterQueryValue()) {
                 totalTargets = targetManagement.countTargetByTargetFilterQuery(filterManagementUIState
                         .getFilterQueryValue());
-                shownTargets = createNewFilterTable.size();
             }
             final StringBuilder targetMessage = new StringBuilder(i18n.get("label.target.filtered.total"));
             if (filterManagementUIState.getTargetsTruncated() != null) {
@@ -115,32 +105,16 @@ public class TargetFilterCountMessageLabel extends Label {
             }
             targetMessage.append(totalTargets);
             targetMessage.append(HawkbitCommonUtil.SP_STRING_SPACE);
+            targetMessage.append(i18n.get("label.filter.shown"));
             if (totalTargets > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-                targetMessage.append(i18n.get("label.filter.shown"));
                 targetMessage.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
             } else {
                 targetMessage.append(HawkbitCommonUtil.SP_STRING_SPACE);
-                targetMessage.append(i18n.get("label.filter.shown"));
-                targetMessage.append(shownTargets);
+                targetMessage.append(totalTargets);
             }
 
             setCaption(targetMessage.toString());
-        } else {
-            final StringBuilder tarFilterMessage = new StringBuilder(i18n.get("label.custom.filter.target.count"));
-            createMsgLable(targetFilterTable.size(), tarFilterMessage);
         }
 
     }
-
-    private void createMsgLable(final long totalCount, final StringBuilder message) {
-        message.append(totalCount);
-        message.append(HawkbitCommonUtil.SP_STRING_SPACE);
-        if (totalCount > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-            message.append(i18n.get("label.filter.shown"));
-            message.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
-        }
-        message.append(HawkbitCommonUtil.SP_STRING_SPACE);
-        setCaption(message.toString());
-    }
-
 }

@@ -82,7 +82,6 @@ public class FilterManagementView extends VerticalLayout implements View {
         setSizeFull();
         setSpacing(false);
         setMargin(false);
-        addStyleName("table-layout");
         if (filterManagementUIState.isCreateFilterViewDisplayed()) {
             viewCreateTargetFilterLayout();
         } else if (filterManagementUIState.isEditViewDisplayed()) {
@@ -96,8 +95,9 @@ public class FilterManagementView extends VerticalLayout implements View {
     void onEvent(final CustomFilterUIEvent custFilterUIEvent) {
         if (custFilterUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
             viewTargetFilterDetailLayout();
-        } else if (custFilterUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
-            UI.getCurrent().access(() -> viewCreateTargetFilterLayout());
+        } else if (custFilterUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
+                || custFilterUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
+            this.getUI().access(() -> viewCreateTargetFilterLayout());
         } else if (custFilterUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW) {
             UI.getCurrent().access(() -> viewListView());
         }
@@ -137,10 +137,17 @@ public class FilterManagementView extends VerticalLayout implements View {
 
     private void viewListView() {
         removeAllComponents();
-        addComponents(targetFilterHeader, targetFilterTable);
-        setComponentAlignment(targetFilterHeader, Alignment.TOP_LEFT);
-        setComponentAlignment(targetFilterTable, Alignment.TOP_LEFT);
-        setExpandRatio(targetFilterTable, 1.0f);
+        final VerticalLayout tableHeaderLayout = new VerticalLayout();
+        tableHeaderLayout.setSizeFull();
+        tableHeaderLayout.setSpacing(false);
+        tableHeaderLayout.setMargin(false);
+        tableHeaderLayout.setStyleName("table-layout");
+        tableHeaderLayout.addComponent(targetFilterHeader);
+        tableHeaderLayout.setComponentAlignment(targetFilterHeader, Alignment.TOP_CENTER);
+        tableHeaderLayout.addComponent(targetFilterTable);
+        tableHeaderLayout.setComponentAlignment(targetFilterTable, Alignment.TOP_CENTER);
+        tableHeaderLayout.setExpandRatio(targetFilterTable, 1.0f);
+        addComponent(tableHeaderLayout);
     }
 
     private HorizontalLayout addTargetFilterMessageLabel() {
