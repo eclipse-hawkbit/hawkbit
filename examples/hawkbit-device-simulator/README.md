@@ -13,7 +13,7 @@ run org.eclipse.hawkbit.simulator.DeviceSimulator
 
 ## Notes
 
-The simulator has user authentication enabled by default. Default credentials:
+The simulator has user authentication enabled in **cloud profile**. Default credentials:
 *  username : admin
 *  passwd : admin
 
@@ -29,8 +29,6 @@ The UI can be accessed via the URL:
 http://localhost:8083
 ```
 
-`Basic Authentication Credentials are admin / admin`
-
  ![](src/main/images/generateScreenshot.png)
  
  ![](src/main/images/updateProcessScreenshot.png)
@@ -45,6 +43,10 @@ Optional parameters:
 * name : name prefix simulated devices (default: "dmfSimulated"), followed by counter
 * amount : number of simulated devices (default: 20, capped at: 4000)
 * tenant : in a multi-tenenat ready hawkBit installation (default: "DEFAULT")
+* api : the API which should be used for the simulated device either `dmf` or `ddi` (default: "ddi")
+* endpoint :  URL which defines the hawkbit DDI base endpoint (deffault: "http://localhost:8080")
+* polldelay : number in milliseconds of the delay when DDI simulated devices should poll the endpoint (default: "30")
+* gatewaytoken : an hawkbit gateway token to be used in case hawkbit does not allow anonymous access for DDI devices (default: "")
 
 
 Example: for 20 simulated devices (default)
@@ -55,4 +57,9 @@ http://localhost:8083/start
 Example: for 10 simulated devices that start with the name prefix "activeSim": 
 ```
 http://localhost:8083/start?amount=10&name=activeSim
+```
+
+Example: for 5 simulated devices that start with the name prefix "ddi" using the Direct Device Integration API (http): 
+```
+http://localhost:8083/start?amount=5&name=ddi?api=ddi
 ```
