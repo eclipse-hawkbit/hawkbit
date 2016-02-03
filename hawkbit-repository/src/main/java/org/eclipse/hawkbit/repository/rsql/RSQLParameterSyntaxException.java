@@ -43,4 +43,17 @@ public class RSQLParameterSyntaxException extends SpServerRtException {
     public RSQLParameterSyntaxException(final Throwable cause) {
         super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);
     }
+
+    /**
+     * Creates a new RSQLSyntaxException with
+     * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
+     * 
+     * @param message
+     *            the message of the exception
+     * @param cause
+     *            the cause of this exception
+     */
+    public RSQLParameterSyntaxException(final String message, final Throwable cause) {
+        super(message, SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);
+    }
 }

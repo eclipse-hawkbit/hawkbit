@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.rest.resource;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.MockMvcResultPrinter;
@@ -27,6 +29,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
@@ -94,6 +97,22 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")))
                 .andReturn();
+    }
+
+    @Description("TODO")
+    public void missingTargetFilterQueryInRollout() throws Exception {
+
+        final String targetFilterQuery = null;
+
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "desc", 10, dsA.getId(), targetFilterQuery, null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")))
+                .andReturn();
+
     }
 
     @Test
@@ -416,6 +435,137 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
     }
 
+    // TODO
+    @Test
+    @Description("Start the rollout in async mode")
+    public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
+
+        final int amountTargets = 1000;
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+
+        // starting rollout
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())
+                .param(RestConstants.REQUEST_PARAMETER_ASYNC, "true")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        // check if running
+        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 5000, 100)).isNotNull();
+
+    }
+
+    @Test
+    @Description("Testing that rollout paged list with rsql parameter")
+    public void getRolloutWithRSQLParam() throws Exception {
+
+        final int amountTargetsRollout1 = 25;
+        final int amountTargetsRollout2 = 25;
+        final int amountTargetsRollout3 = 25;
+        final int amountTargetsOther = 25;
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsRollout1, "rollout1", "rollout1"));
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsRollout2, "rollout2", "rollout2"));
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsRollout3, "rollout3", "rollout3"));
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsOther, "other1", "other1"));
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+
+        createRollout("rollout1", 5, dsA.getId(), "controllerId==rollout1*");
+        final Rollout rollout2 = createRollout("rollout2", 5, dsA.getId(), "controllerId==rollout2*");
+        createRollout("rollout3", 5, dsA.getId(), "controllerId==rollout3*");
+        createRollout("other1", 5, dsA.getId(), "controllerId==other1*");
+
+        mvc.perform(get("/rest/v1/rollouts").param(RestConstants.REQUEST_PARAMETER_SEARCH, "name==*2"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)))
+                .andExpect(jsonPath("$content[0].name", equalTo(rollout2.getName())));
+
+        mvc.perform(get("/rest/v1/rollouts").param(RestConstants.REQUEST_PARAMETER_SEARCH, "name==rollout*"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(3))).andExpect(jsonPath("$total", equalTo(3)));
+
+        mvc.perform(get("/rest/v1/rollouts").param(RestConstants.REQUEST_PARAMETER_SEARCH, "name==*1"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+
+    }
+
+    @Test
+    @Description("Testing that rolloutgroup paged list with rsql parameter")
+    public void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
+        // setup
+        final int amountTargets = 20;
+        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
+                distributionSetManagement);
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+
+        // retrieve rollout groups from created rollout
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
+                .param(RestConstants.REQUEST_PARAMETER_SEARCH, "name==group-1")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(1))).andExpect(jsonPath("$total", equalTo(1)))
+                .andExpect(jsonPath("$content[0].name", equalTo("group-1")));
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
+                .param(RestConstants.REQUEST_PARAMETER_SEARCH, "name==group*")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(4))).andExpect(jsonPath("$total", equalTo(4)));
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
+                .param(RestConstants.REQUEST_PARAMETER_SEARCH, "name==group-1,name==group-2"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content", hasSize(2))).andExpect(jsonPath("$total", equalTo(2)));
+
+    }
+
+    // TODO copied code from sp-bic-test
+    protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
+            final long timeout, final long pollInterval) throws Exception // NOPMD
+    {
+
+        if (pollInterval < 0) {
+            throw new IllegalArgumentException("pollInterval must non negative");
+        }
+
+        long duration = 0;
+        Exception exception = null;
+        T returnValue = null;
+        while (untilTimeoutReached(timeout, duration)) {
+            try {
+                returnValue = callable.call();
+                // clear exception
+                exception = null;
+            } catch (final Exception ex) {
+                exception = ex;
+            }
+            Thread.sleep(pollInterval);
+            duration += pollInterval > 0 ? pollInterval : 1;
+            if (exception == null && successCondition.success(returnValue)) {
+                return returnValue;
+            } else {
+                returnValue = null;
+            }
+        }
+        if (exception != null) {
+            throw exception;
+        }
+        return returnValue;
+    }
+
+    protected boolean untilTimeoutReached(final long timeout, final long duration) {
+        return duration <= timeout || timeout < 0;
+    }
+
     private void postRollout(final String name, final int groupSize, final long distributionSetId,
             final String targetFilterQuery) throws Exception {
         mvc.perform(post("/rest/v1/rollouts")
@@ -433,4 +583,16 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
         return rolloutManagement.createRollout(rollout, amountGroups, new RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }
+
+    protected boolean success(final Rollout result) {
+        if (null != result && result.getStatus() == RolloutStatus.RUNNING) {
+            return true;
+        }
+        return false;
+    }
+
+    public Rollout getRollout(final Long rolloutId) throws Exception {
+        return rolloutManagement.findRolloutById(rolloutId);
+    }
+
 }
