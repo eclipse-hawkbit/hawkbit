@@ -1326,7 +1326,7 @@ public final class HawkbitCommonUtil {
      * @param item
      *            row of the table
      */
-    public static void setProgressBarDetails(final DistributionBar bar, final Item item) {
+    private static void setProgressBarDetails(final DistributionBar bar, final Item item) {
         bar.setNumberOfParts(6);
         final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
         HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),

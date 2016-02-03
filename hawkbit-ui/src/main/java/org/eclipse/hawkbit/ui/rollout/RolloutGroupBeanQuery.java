@@ -176,7 +176,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
     public int size() {
         long size = 0;
         if (null != rolloutId) {
-            firstPageRolloutGroupSets = getRolloutGroupManagement().findRolloutGroupsByRolloutId(rolloutId,
+            firstPageRolloutGroupSets = getRolloutGroupManagement().findAllRolloutGroupsWithDetailedStatus(rolloutId,
                     new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort));
             size = firstPageRolloutGroupSets.getTotalElements();
         }

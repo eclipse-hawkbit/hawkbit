@@ -335,7 +335,7 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         notifier.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-                HawkbitCommonUtil.setProgressBarDetails(bar, getItem(itemId));
+                HawkbitCommonUtil.initialiseProgressBar(bar, getItem(itemId));
             }
         });
     }

@@ -30,6 +30,7 @@
                <!-- We are doing "inplace" gwt compilation but into subdir VAADIN/widgetsets -->
                <webappDirectory>${project.build.directory}/classes/VAADIN/widgetsets</webappDirectory>
                <hostedWebapp>${project.build.directory}/classes/VAADIN/widgetsets</hostedWebapp>
+               <warSourceDirectory>src/main/resources</warSourceDirectory>
                <noServer>true</noServer>
                <!-- Remove draftCompile when project is ready -->
                <draftCompile>false</draftCompile>

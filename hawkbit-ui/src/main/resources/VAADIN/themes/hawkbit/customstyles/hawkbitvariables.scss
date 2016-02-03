@@ -127,3 +127,11 @@ $white-hex-color: #fff;
 $tag-border-green-color: #2c9720;
 $tag-button-disabled-grey:#c0c0c0;
 $twin-table-border-grey:#888;
+
+
+$progress-bar-scheduled-part: $blue-color;
+$progress-bar-running-part: $signal-yellow-color; 
+$progress-bar-error-part: $signal-red-color;
+$progress-bar-finished-part: $signal-green-color;
+$progress-bar-cancelled-part: $grey-light;
+$progress-bar-notstarted-part: $grey-color;
