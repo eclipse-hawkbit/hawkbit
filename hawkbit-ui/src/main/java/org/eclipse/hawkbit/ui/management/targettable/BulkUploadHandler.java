@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -62,15 +63,13 @@ import com.vaadin.ui.Upload.SucceededListener;
 
 /**
  * Bulk target upload handler.
- * 
- *
  *
  */
 public class BulkUploadHandler extends CustomComponent
         implements SucceededListener, FailedListener, Receiver, StartedListener {
 
     /**
-     * *
+     *
      */
     private static final long serialVersionUID = -1273494705754674501L;
     private static final Logger LOG = LoggerFactory.getLogger(BulkUploadHandler.class);
@@ -103,7 +102,7 @@ public class BulkUploadHandler extends CustomComponent
     final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
     /**
-     * 
+     *
      * @param targetBulkUpdateWindowLayout
      * @param targetManagement
      * @param managementUIState
@@ -152,7 +151,7 @@ public class BulkUploadHandler extends CustomComponent
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.vaadin.ui.Upload.Receiver#receiveUpload(java.lang.String,
      * java.lang.String)
      */
@@ -173,7 +172,7 @@ public class BulkUploadHandler extends CustomComponent
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.vaadin.ui.Upload.FailedListener#uploadFailed(com.vaadin.ui.Upload.
      * FailedEvent)
@@ -185,7 +184,7 @@ public class BulkUploadHandler extends CustomComponent
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.vaadin.ui.Upload.SucceededListener#uploadSucceeded(com.vaadin.ui.
      * Upload.SucceededEvent)
@@ -199,7 +198,7 @@ public class BulkUploadHandler extends CustomComponent
         final SucceededEvent event;
 
         /**
-         * 
+         *
          * @param event
          */
         public UploadAsync(final SucceededEvent event) {
@@ -208,15 +207,18 @@ public class BulkUploadHandler extends CustomComponent
 
         @Override
         public void run() {
-            BufferedReader reader = null;
             long innerCounter = 0;
             String line;
-            if (tempFile != null) {
-                try {
+            if (tempFile == null) {
+                return;
+            }
+
+            try (InputStream tempStream = new FileInputStream(tempFile)) {
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(tempStream, Charset.defaultCharset()))) {
                     LOG.info("Bulk file upload started");
                     final double totalFileSize = getTotalNumberOfLines();
-                    reader = new BufferedReader(
-                            new InputStreamReader(new FileInputStream(tempFile), Charset.defaultCharset()));
+
                     /**
                      * Once control is in upload succeeded method automatically
                      * upload button is re-enabled. To disable the button firing
@@ -232,21 +234,16 @@ public class BulkUploadHandler extends CustomComponent
 
                     // Clearing after assignments are done
                     managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
-                } catch (final FileNotFoundException e) {
-                    LOG.error("File not found with name {}", tempFile.getName(), e);
                 } catch (final IOException e) {
                     LOG.error("Error reading file {}", tempFile.getName(), e);
                 } finally {
-                    try {
-                        if (null != reader) {
-                            reader.close();
-                            resetCounts();
-                            deleteFile();
-                        }
-                    } catch (final IOException e) {
-                        LOG.error("Error while reading file ", e);
-                    }
+                    resetCounts();
+                    deleteFile();
                 }
+            } catch (final FileNotFoundException e) {
+                LOG.error("Temporary file not found with name {}", tempFile.getName(), e);
+            } catch (final IOException e) {
+                LOG.error("Error while opening temorary file ", e);
             }
 
         }
@@ -307,24 +304,19 @@ public class BulkUploadHandler extends CustomComponent
     }
 
     private double getTotalNumberOfLines() {
-        InputStreamReader inputStreamReader;
-        BufferedReader readerForSize = null;
+
         double totalFileSize = 0;
-        try {
-            inputStreamReader = new InputStreamReader(new FileInputStream(tempFile), Charset.defaultCharset());
-            readerForSize = new BufferedReader(inputStreamReader);
-            totalFileSize = readerForSize.lines().count();
+        try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(tempFile),
+                Charset.defaultCharset())) {
+            try (BufferedReader readerForSize = new BufferedReader(inputStreamReader)) {
+                totalFileSize = readerForSize.lines().count();
+            }
         } catch (final FileNotFoundException e) {
             LOG.error("Error reading file {}", tempFile.getName(), e);
-        } finally {
-            if (readerForSize != null) {
-                try {
-                    readerForSize.close();
-                } catch (final IOException e) {
-                    LOG.error("Error while closing reader of file {}", tempFile.getName(), e);
-                }
-            }
+        } catch (final IOException e) {
+            LOG.error("Error while closing reader of file {}", tempFile.getName(), e);
         }
+
         return totalFileSize;
     }
 
@@ -449,7 +441,7 @@ public class BulkUploadHandler extends CustomComponent
     private static class NullOutputStream extends OutputStream {
         /**
          * null output stream.
-         * 
+         *
          * @param i
          *            byte
          */
@@ -468,7 +460,7 @@ public class BulkUploadHandler extends CustomComponent
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.vaadin.ui.Upload.StartedListener#uploadStarted(com.vaadin.ui.Upload
      * .StartedEvent)

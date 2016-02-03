@@ -14,7 +14,7 @@
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>0.2.0-SNAPSHOT</version>
       <artifactId>hawkbit-examples-parent</artifactId>
    </parent>
 
@@ -81,9 +81,51 @@
          <artifactId>spring-boot-starter-log4j2</artifactId>
       </dependency>
       <dependency>
+         <groupId>com.vaadin</groupId>
+         <artifactId>vaadin-spring-boot-starter</artifactId>
+         <version>1.0.0</version>
+      </dependency>
+      <dependency>
+         <groupId>com.vaadin</groupId>
+         <artifactId>vaadin-push</artifactId>
+      </dependency>
+      <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-autoconfigure</artifactId>
       </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-autoconfigure</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+         <version>19.0</version>
+      </dependency>
+      <dependency>
+         <groupId>com.netflix.feign</groupId>
+         <artifactId>feign-jackson</artifactId>
+         <version>8.14.1</version>
+      </dependency>
+      <dependency>
+         <groupId>com.netflix.feign</groupId>
+         <artifactId>feign-core</artifactId>
+         <version>8.12.1</version>
+      </dependency>
+      <dependency>
+         <groupId>com.jayway.jsonpath</groupId>
+         <artifactId>json-path</artifactId>
+      </dependency>
    </dependencies>
-
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-bom</artifactId>
+            <version>7.5.5</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
 </project>

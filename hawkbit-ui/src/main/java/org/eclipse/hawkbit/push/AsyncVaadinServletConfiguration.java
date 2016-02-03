@@ -32,6 +32,7 @@ import com.vaadin.spring.boot.internal.VaadinServletConfigurationProperties;
 @Import(VaadinServletConfiguration.class)
 public class AsyncVaadinServletConfiguration extends VaadinServletConfiguration {
 
+    @Override
     @Bean
     protected ServletRegistrationBean vaadinServletRegistration() {
         return createServletRegistrationBean();
