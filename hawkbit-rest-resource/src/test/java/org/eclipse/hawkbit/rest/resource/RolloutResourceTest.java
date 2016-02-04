@@ -75,7 +75,7 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().is(403)).andReturn();
     }
 
     @Test
