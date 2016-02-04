@@ -859,7 +859,7 @@ public class RolloutManagement {
      * @return percentage finished
      */
     public float getFinishedPercentForRunningGroup(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        final Long totalGroup = actionRepository.countByRolloutAndRolloutGroup(rollout, rolloutGroup);
+        final Long totalGroup = Long.valueOf(rollout.getRolloutGroups().size());
         final Long finished = actionRepository.countByRolloutAndRolloutGroupAndStatus(rollout, rolloutGroup,
                 Action.Status.FINISHED);
         if (totalGroup == 0) {
