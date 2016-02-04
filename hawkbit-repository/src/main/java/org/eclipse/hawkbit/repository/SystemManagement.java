@@ -97,6 +97,12 @@ public class SystemManagement implements EnvironmentAware {
     private TenantConfigurationRepository tenantConfigurationRepository;
 
     @Autowired
+    private RolloutRepository rolloutRepository;
+
+    @Autowired
+    private RolloutGroupRepository rolloutGroupRepository;
+
+    @Autowired
     private TenantAware tenantAware;
 
     @Autowired
@@ -209,7 +215,8 @@ public class SystemManagement implements EnvironmentAware {
      * @return list of all tenant names in the system.
      */
     @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
     // tenant independent
     public List<String> findTenants() {
         return tenantMetaDataRepository.findAll().stream().map(md -> md.getTenant()).collect(Collectors.toList());
@@ -234,11 +241,13 @@ public class SystemManagement implements EnvironmentAware {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenantIgnoreCase(tenant);
             targetRepository.deleteByTenantIgnoreCase(tenant);
+            actionRepository.deleteByTenantIgnoreCase(tenant);
+            rolloutGroupRepository.deleteByTenantIgnoreCase(tenant);
+            rolloutRepository.deleteByTenantIgnoreCase(tenant);
             artifactRepository.deleteByTenantIgnoreCase(tenant);
             externalArtifactRepository.deleteByTenantIgnoreCase(tenant);
             externalArtifactProviderRepository.deleteByTenantIgnoreCase(tenant);
             targetTagRepository.deleteByTenantIgnoreCase(tenant);
-            actionRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetTagRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetRepository.deleteByTenantIgnoreCase(tenant);
             distributionSetTypeRepository.deleteByTenantIgnoreCase(tenant);

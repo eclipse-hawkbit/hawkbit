@@ -47,7 +47,7 @@ public class SoftwareModuleMetadata implements Serializable {
 
     @Id
     @ManyToOne(targetEntity = SoftwareModule.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "sw_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw") )
+    @JoinColumn(name = "sw_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
     private SoftwareModule softwareModule;
 
     public SoftwareModuleMetadata() {

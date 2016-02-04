@@ -17,7 +17,7 @@ import java.net.URI;
  *
  *
  */
-public class CancelTargetAssignmentEvent {
+public class CancelTargetAssignmentEvent extends AbstractEvent {
 
     private final String controllerId;
     private final Long actionId;
@@ -26,6 +26,10 @@ public class CancelTargetAssignmentEvent {
     /**
      * Creates a new {@link CancelTargetAssignmentEvent}.
      *
+     * @param revision
+     *            the revision for this event
+     * @param tenant
+     *            the tenant for this event
      * @param controllerId
      *            the ID of the controller
      * @param actionId
@@ -33,7 +37,9 @@ public class CancelTargetAssignmentEvent {
      * @param targetAdress
      *            the targetAdress of the target
      */
-    public CancelTargetAssignmentEvent(final String controllerId, final Long actionId, final URI targetAdress) {
+    public CancelTargetAssignmentEvent(final long revision, final String tenant, final String controllerId,
+            final Long actionId, final URI targetAdress) {
+        super(revision, tenant);
         this.controllerId = controllerId;
         this.actionId = actionId;
         this.targetAdress = targetAdress;

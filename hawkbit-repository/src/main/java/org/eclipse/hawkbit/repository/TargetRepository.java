@@ -12,10 +12,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -278,4 +280,43 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     @Query("UPDATE Target t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
     void setAssignedDistributionSet(@Param("set") DistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
+
+    List<Target> findByRolloutTargetGroupRolloutGroup(final RolloutGroup rolloutGroup);
+
+    /**
+     * 
+     * Finds all targets of a rollout group.
+     * 
+     * @param rolloutGroupId
+     *            the ID of the rollout group
+     * @param page
+     *            the page request parameter
+     * @return a page of all targets related to a rollout group
+     */
+    Page<Target> findByRolloutTargetGroupRolloutGroupId(final Long rolloutGroupId, Pageable page);
+
+    /**
+     * Finds all targets related to a target rollout group stored for a specific
+     * rollout.
+     * 
+     * @param rolloutGroup
+     *            the rollout group the targets should belong to
+     * @param page
+     *            the page request parameter
+     * @return a page of all targets related to a rollout group
+     */
+    Page<Target> findByActionsRolloutGroup(RolloutGroup rolloutGroup, Pageable page);
+
+    /**
+     * Find all targets with action status for a specific group.
+     * 
+     * @param pageable
+     *            the page request parameter
+     * @param rolloutGroupId
+     *            the ID of the rollout group
+     * @return targets with action status
+     */
+    @Query("select DISTINCT NEW org.eclipse.hawkbit.repository.model.TargetWithActionStatus(a.target,a.status) from Action a inner join fetch a.target t where  a.rolloutGroup.id = :rolloutGroupId")
+    Page<TargetWithActionStatus> findTargetsWithActionStatusByRolloutGroupId(final Pageable pageable,
+            @Param("rolloutGroupId") Long rolloutGroupId);
 }

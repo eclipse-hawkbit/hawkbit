@@ -143,6 +143,7 @@
                   <exclude>**/*.sql</exclude>
                   <exclude>**/*.sql</exclude>
                   <exclude>eclipse_codeformatter.xml</exclude>
+                  <exclude>**/addons.scss</exclude>
                </excludes>
                <mapping>
                   <scss>JAVADOC_STYLE</scss>
@@ -405,6 +406,16 @@
             <groupId>org.vaadin.addons</groupId>
             <artifactId>tokenfield</artifactId>
             <version>7.0.1</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.alump.distributionbar</groupId>
+            <artifactId>dbar-addon</artifactId>
+            <version>1.2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>contextmenu</artifactId>
+            <version>4.5</version>
          </dependency>
 
          <!-- Misc -->

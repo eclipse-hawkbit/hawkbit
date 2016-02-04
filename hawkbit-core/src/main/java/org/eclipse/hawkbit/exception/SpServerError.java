@@ -174,7 +174,13 @@ public enum SpServerError {
     *
     */
     SP_REPO_ENTITY_READ_ONLY("hawkbit.server.error.entityreadonly",
-            "The given entity is read only and the change cannot be completed.");
+            "The given entity is read only and the change cannot be completed."),
+
+    /**
+     * 
+     */
+    SP_ROLLOUT_ILLEGAL_STATE("hawkbit.server.error.rollout.illegalstate",
+            "The rollout is currently in the wrong state for the current operation");
 
     private final String key;
     private final String message;
