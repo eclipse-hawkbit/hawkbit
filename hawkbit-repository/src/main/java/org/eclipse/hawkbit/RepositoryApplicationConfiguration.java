@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
@@ -110,6 +111,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public CacheManagerHolder cacheManagerHolder() {
         return CacheManagerHolder.getInstance();
+    }
+
+    /**
+     * 
+     * @return the singleton instance of the
+     *         {@link AfterTransactionCommitExecutorHolder}
+     */
+    @Bean
+    public AfterTransactionCommitExecutorHolder afterTransactionCommitExecutorHolder() {
+        return AfterTransactionCommitExecutorHolder.getInstance();
     }
 
     /**
