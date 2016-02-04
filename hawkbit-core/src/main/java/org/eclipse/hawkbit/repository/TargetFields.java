@@ -52,6 +52,8 @@ public enum TargetFields implements FieldNameProvider {
     ATTRIBUTE("targetInfo.controllerAttributes", true),
 
     ASSIGNEDDS("assignedDistributionSet", "name", "version"),
+
+    INSTALLEDDS("targetInfo.installedDistributionSet", "name", "version"),
     /**
      * The tags field.
      */
