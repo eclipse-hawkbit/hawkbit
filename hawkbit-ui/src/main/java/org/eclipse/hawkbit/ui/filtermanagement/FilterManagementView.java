@@ -63,8 +63,6 @@ public class FilterManagementView extends VerticalLayout implements View {
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
 
-    private HorizontalLayout messageLabelLayout;
-
     @Override
     public void enter(final ViewChangeEvent event) {
         setSizeFull();
@@ -151,7 +149,7 @@ public class FilterManagementView extends VerticalLayout implements View {
     }
 
     private HorizontalLayout addTargetFilterMessageLabel() {
-        messageLabelLayout = new HorizontalLayout();
+        final HorizontalLayout messageLabelLayout = new HorizontalLayout();
         messageLabelLayout.addComponent(targetFilterCountMessageLabel);
         messageLabelLayout.addStyleName("footer-layout");
         messageLabelLayout.setWidth("100%");

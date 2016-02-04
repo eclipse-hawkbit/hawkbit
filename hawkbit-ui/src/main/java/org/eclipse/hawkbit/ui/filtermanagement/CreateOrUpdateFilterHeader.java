@@ -117,8 +117,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    private Label targetFilterStatusLabel;
-
     private String newFilterQuery;
 
     /**
@@ -158,7 +156,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             setUpCaptionLayout(true);
             resetComponents();
         } else if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE) {
-            this.getUI().access(() -> targetFilterStatusLabel.setVisible(false));
+            this.getUI().access(() -> showValidationSuccesIcon());
         }
 
     }
@@ -188,8 +186,10 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private Label createStatusIcon() {
         final Label statusIcon = new Label(FontAwesome.CHECK_CIRCLE.getHtml(), ContentMode.HTML);
-        statusIcon.addStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
-        statusIcon.setSizeUndefined();
+        statusIcon.setValue(null);
+        statusIcon.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
+        statusIcon.setVisible(false);
+        statusIcon.setImmediate(true);
         return statusIcon;
     }
 
@@ -202,11 +202,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
         nameTextField = createNameTextField();
         nameTextField.setWidth(380, Unit.PIXELS);
-
-        targetFilterStatusLabel = new Label();
-        targetFilterStatusLabel.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
-        targetFilterStatusLabel.setVisible(false);
-        targetFilterStatusLabel.setImmediate(true);
 
         queryTextField = createSearchField();
         addSearchLisenter();
@@ -358,7 +353,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void processQueryChange() {
         this.getUI().access(() -> {
-            targetFilterStatusLabel.setVisible(true);
+            validationIcon.setVisible(true);
             onQueryChange(newFilterQuery);
 
         });
@@ -368,12 +363,11 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         boolean validationFailed = false;
         if (!Strings.isNullOrEmpty(text)) {
             final String input = text.toLowerCase();
-            searchLayout.addComponentAsFirst(targetFilterStatusLabel);
-            searchLayout.setComponentAlignment(targetFilterStatusLabel, Alignment.MIDDLE_CENTER);
-            searchLayout.addComponent(validationIcon, 2);
+            searchLayout.addComponentAsFirst(validationIcon);
+            searchLayout.setComponentAlignment(validationIcon, Alignment.MIDDLE_CENTER);
+            showValidationInProgress();
             final ValidationResult validationResult = FilterQueryValidation.getExpectedTokens(input);
             if (!validationResult.getIsValidationFailed()) {
-                showValidationSuccesIcon();
                 filterManagementUIState.setFilterQueryValue(input);
                 filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.FALSE);
             } else {
@@ -417,14 +411,22 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void showValidationSuccesIcon() {
-        validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-        validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
-        validationIcon.setDescription("");
+        if (null != filterManagementUIState.getFilterQueryValue()) {
+            validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+            validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
+            validationIcon.setDescription("");
+        }
     }
 
     private void showValidationFailureIcon() {
         validationIcon.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
         validationIcon.setStyleName(SPUIStyleDefinitions.ERROR_ICON);
+
+    }
+
+    private void showValidationInProgress() {
+        validationIcon.setValue(null);
+        validationIcon.setStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
     }
 
     private SPUIButton createSearchResetIcon() {
