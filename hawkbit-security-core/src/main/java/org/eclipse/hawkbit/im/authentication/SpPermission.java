@@ -133,7 +133,7 @@ public final class SpPermission {
     /**
      * Permission to administrate a rollout management.
      */
-    public static final String ROLLOUT_MANAGEMENT = "ROLLOUT_MANGEMENT";
+    public static final String ROLLOUT_MANAGEMENT = "ROLLOUT_MANAGEMENT";
 
     private SpPermission() {
         // Constants only
