@@ -144,4 +144,5 @@ public class EntityChangeEventListener {
     private boolean isTargetInfoNew(final Object targetInfo) {
         return ((TargetInfo) targetInfo).isNew();
     }
+
 }

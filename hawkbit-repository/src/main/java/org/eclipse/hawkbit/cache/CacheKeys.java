@@ -28,6 +28,8 @@ public final class CacheKeys {
      * event.
      */
     public static final String DOWNLOAD_PROGRESS_PERCENT = "download.progress.percent";
+    public static final String ROLLOUT_GROUP_CREATED = "rollout.group.created";
+    public static final String ROLLOUT_GROUP_TOTAL = "rollout.group.total";
 
     /**
      * utility class only private constructor.

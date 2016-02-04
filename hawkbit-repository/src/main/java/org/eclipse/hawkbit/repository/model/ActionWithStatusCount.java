@@ -32,6 +32,7 @@ public class ActionWithStatusCount {
     private final String dsName;
     private final String dsVersion;
     private final Action action;
+    private final String rolloutName;
 
     /**
      * JPA constructor, the parameter are the result set columns of the custom
@@ -59,10 +60,14 @@ public class ActionWithStatusCount {
      *            the version of the distributionset
      * @param actionStatusCount
      *            the count of the action status for this action
+     * @param rolloutName
+     *            the rollout name
      */
+
     public ActionWithStatusCount(final Long actionId, final ActionType actionType, final boolean active,
             final long forcedTime, final Status status, final Long actionCreatedAt, final Long actionLastModifiedAt,
-            final Long dsId, final String dsName, final String dsVersion, final Long actionStatusCount) {
+            final Long dsId, final String dsName, final String dsVersion, final Long actionStatusCount,
+            final String rolloutName) {
         this.actionId = actionId;
         this.actionType = actionType;
         this.actionActive = active;
@@ -74,6 +79,7 @@ public class ActionWithStatusCount {
         this.dsName = dsName;
         this.dsVersion = dsVersion;
         this.actionStatusCount = actionStatusCount;
+        this.rolloutName = rolloutName;
 
         this.action = new Action();
         this.action.setActionType(actionType);
@@ -166,4 +172,12 @@ public class ActionWithStatusCount {
     public Long getActionStatusCount() {
         return actionStatusCount;
     }
+
+    /**
+     * @return the rolloutName
+     */
+    public String getRolloutName() {
+        return rolloutName;
+    }
+
 }

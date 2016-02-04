@@ -14,7 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
 
 /**
- * Paged list rest model for {@link Action} to RESTful API representation.
+ * Paged list rest model for {@link ErrorAction} to RESTful API representation.
  *
  */
 public class ActionPagedList extends PagedList<ActionRest> {

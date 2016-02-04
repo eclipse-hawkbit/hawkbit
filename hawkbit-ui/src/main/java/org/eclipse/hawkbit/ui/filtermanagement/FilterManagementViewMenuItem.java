@@ -26,7 +26,7 @@ import com.vaadin.server.Resource;
  *
  */
 @Component
-@Order(200)
+@Order(300)
 public class FilterManagementViewMenuItem implements DashboardMenuItem {
 
     private static final long serialVersionUID = -1272853053031512243L;

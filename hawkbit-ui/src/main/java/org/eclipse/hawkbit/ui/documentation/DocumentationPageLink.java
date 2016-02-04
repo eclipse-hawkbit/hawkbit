@@ -45,7 +45,10 @@ public enum DocumentationPageLink {
     TARGET_SECURITY_TOKEN("security.html", DocumentationUtil.DEVELOPERGUIDE, "concepts"),
 
     // userguide/targetfilter
-    TARGET_FILTER_VIEW("targetfilter.html", DocumentationUtil.USERGUIDE);
+    TARGET_FILTER_VIEW("targetfilter.html", DocumentationUtil.USERGUIDE),
+
+    // userguide/ROLLOUT
+    ROLLOUT_VIEW("rollout.html", DocumentationUtil.USERGUIDE);
 
     private static final String ROOT_PATH = "../documentation";
 
