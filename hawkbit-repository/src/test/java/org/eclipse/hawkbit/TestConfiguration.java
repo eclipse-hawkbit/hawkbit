@@ -9,10 +9,12 @@
 package org.eclipse.hawkbit;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.repository.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
@@ -30,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 import com.google.common.eventbus.AsyncEventBus;
@@ -92,8 +94,13 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
+    public EventBusHolder eventBusHolder() {
+        return EventBusHolder.getInstance();
+    }
+
+    @Bean
     public Executor asyncExecutor() {
-        return new ThreadPoolTaskExecutor();
+        return new DelegatingSecurityContextExecutor(Executors.newSingleThreadExecutor());
     }
 
     @Bean
