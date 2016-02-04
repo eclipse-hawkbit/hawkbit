@@ -53,8 +53,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 @Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
         @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
         @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
-@NamedEntityGraphs({
-        @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
+@NamedEntityGraphs({ @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode("target") }) })
 @Entity
@@ -70,11 +69,11 @@ public class Action extends BaseEntity implements Comparable<Action> {
      * the {@link DistributionSet} which should be installed by this action.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
+    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds") )
     private DistributionSet distributionSet;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
+    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target") )
     private Target target;
 
     @Column(name = "active")
@@ -91,15 +90,16 @@ public class Action extends BaseEntity implements Comparable<Action> {
     private Status status;
 
     @CascadeOnDelete
-    @OneToMany(mappedBy = "action", targetEntity = ActionStatus.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
+    @OneToMany(mappedBy = "action", targetEntity = ActionStatus.class, fetch = FetchType.LAZY, cascade = {
+            CascadeType.REMOVE })
     private List<ActionStatus> actionStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rolltoutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
+    @JoinColumn(name = "rolloutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup") )
     private RolloutGroup rolloutGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout") )
     private Rollout rollout;
 
     /**

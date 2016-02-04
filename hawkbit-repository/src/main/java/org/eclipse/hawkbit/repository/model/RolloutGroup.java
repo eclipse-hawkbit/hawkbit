@@ -26,6 +26,8 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 /**
+ * JPA entity definition of persisting a group of an rollout.
+ * 
  * @author Michael Hirsch
  *
  */
@@ -58,10 +60,10 @@ public class RolloutGroup extends NamedEntity {
     private String successConditionExp = null;
 
     @Column(name = "success_action", nullable = false)
-    private final RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
+    private RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
 
     @Column(name = "success_action_exp", length = 512, nullable = false)
-    private final String successActionExp = null;
+    private String successActionExp = null;
 
     @Column(name = "error_condition")
     private RolloutGroupErrorCondition errorCondition = null;
@@ -79,177 +81,106 @@ public class RolloutGroup extends NamedEntity {
     private long totalTargets;
 
     @Transient
-    private TotalTargetCountStatus totalTargetCountStatus;
+    private transient TotalTargetCountStatus totalTargetCountStatus;
 
-    /**
-     * @return the rollout
-     */
     public Rollout getRollout() {
         return rollout;
     }
 
-    /**
-     * @param rollout
-     *            the rollout to set
-     */
     public void setRollout(final Rollout rollout) {
         this.rollout = rollout;
     }
 
-    /**
-     * @return the status
-     */
     public RolloutGroupStatus getStatus() {
         return status;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final RolloutGroupStatus status) {
         this.status = status;
     }
 
-    /**
-     * @return the rolloutTargetGroup
-     */
     public List<RolloutTargetGroup> getRolloutTargetGroup() {
         return rolloutTargetGroup;
     }
 
-    /**
-     * @return the parent
-     */
     public RolloutGroup getParent() {
         return parent;
     }
 
-    /**
-     * @param parent
-     *            the parent to set
-     */
     public void setParent(final RolloutGroup parent) {
         this.parent = parent;
     }
 
-    /**
-     * @return the finishCondition
-     */
     public RolloutGroupSuccessCondition getSuccessCondition() {
         return successCondition;
     }
 
-    /**
-     * @param finishCondition
-     *            the finishCondition to set
-     */
     public void setSuccessCondition(final RolloutGroupSuccessCondition finishCondition) {
         this.successCondition = finishCondition;
     }
 
-    /**
-     * @return the finishExp
-     */
     public String getSuccessConditionExp() {
         return successConditionExp;
     }
 
-    /**
-     * @param finishExp
-     *            the finishExp to set
-     */
     public void setSuccessConditionExp(final String finishExp) {
         this.successConditionExp = finishExp;
     }
 
-    /**
-     * @return the errorCondition
-     */
     public RolloutGroupErrorCondition getErrorCondition() {
         return errorCondition;
     }
 
-    /**
-     * @param errorCondition
-     *            the errorCondition to set
-     */
     public void setErrorCondition(final RolloutGroupErrorCondition errorCondition) {
         this.errorCondition = errorCondition;
     }
 
-    /**
-     * @return the errorExp
-     */
     public String getErrorConditionExp() {
         return errorConditionExp;
     }
 
-    /**
-     * @param errorExp
-     *            the errorExp to set
-     */
     public void setErrorConditionExp(final String errorExp) {
         this.errorConditionExp = errorExp;
     }
 
-    /**
-     * @return the errorAction
-     */
     public RolloutGroupErrorAction getErrorAction() {
         return errorAction;
     }
 
-    /**
-     * @param errorAction
-     *            the errorAction to set
-     */
     public void setErrorAction(final RolloutGroupErrorAction errorAction) {
         this.errorAction = errorAction;
     }
 
-    /**
-     * @return the errorActionExp
-     */
     public String getErrorActionExp() {
         return errorActionExp;
     }
 
-    /**
-     * @param errorActionExp
-     *            the errorActionExp to set
-     */
     public void setErrorActionExp(final String errorActionExp) {
         this.errorActionExp = errorActionExp;
     }
 
-    /**
-     * @return the successAction
-     */
     public RolloutGroupSuccessAction getSuccessAction() {
         return successAction;
     }
 
-    /**
-     * @return the successActionExp
-     */
     public String getSuccessActionExp() {
         return successActionExp;
     }
 
-    /**
-     * @return the totalTargets
-     */
     public long getTotalTargets() {
         return totalTargets;
     }
 
-    /**
-     * @param totalTargets
-     *            the totalTargets to set
-     */
     public void setTotalTargets(final long totalTargets) {
         this.totalTargets = totalTargets;
+    }
+
+    public void setSuccessAction(final RolloutGroupSuccessAction successAction) {
+        this.successAction = successAction;
+    }
+
+    public void setSuccessActionExp(final String successActionExp) {
+        this.successActionExp = successActionExp;
     }
 
     /**
@@ -283,7 +214,7 @@ public class RolloutGroup extends NamedEntity {
      * @author Michael Hirsch
      *
      */
-    public static enum RolloutGroupStatus {
+    public enum RolloutGroupStatus {
 
         /**
          * Ready to start the group.
@@ -312,7 +243,10 @@ public class RolloutGroup extends NamedEntity {
         RUNNING;
     }
 
-    public static enum RolloutGroupSuccessCondition {
+    /**
+     * The condition to evaluate if an group is success state.
+     */
+    public enum RolloutGroupSuccessCondition {
         THRESHOLD("thresholdRolloutGroupSuccessCondition");
 
         private final String beanName;
@@ -329,7 +263,10 @@ public class RolloutGroup extends NamedEntity {
         }
     }
 
-    public static enum RolloutGroupErrorCondition {
+    /**
+     * The condition to evaluate if an group is in error state.
+     */
+    public enum RolloutGroupErrorCondition {
         THRESHOLD("thresholdRolloutGroupErrorCondition");
 
         private final String beanName;
@@ -349,7 +286,7 @@ public class RolloutGroup extends NamedEntity {
     /**
      * The actions executed when the {@link RolloutGroup#errorCondition} is hit.
      */
-    public static enum RolloutGroupErrorAction {
+    public enum RolloutGroupErrorAction {
         PAUSE("pauseRolloutGroupAction");
 
         private final String beanName;
@@ -370,7 +307,7 @@ public class RolloutGroup extends NamedEntity {
      * The actions executed when the {@link RolloutGroup#successCondition} is
      * hit.
      */
-    public static enum RolloutGroupSuccessAction {
+    public enum RolloutGroupSuccessAction {
         NEXTGROUP("startNextRolloutGroupAction");
 
         private final String beanName;

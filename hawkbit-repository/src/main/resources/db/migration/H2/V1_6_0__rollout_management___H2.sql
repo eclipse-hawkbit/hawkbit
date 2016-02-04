@@ -55,7 +55,7 @@
 	create index sp_idx_rolloutgroup_01 on sp_rolloutgroup (tenant, name);
 	
 	ALTER TABLE sp_action ADD COLUMN rollout bigint;
-    ALTER TABLE sp_action ADD COLUMN rolltoutgroup bigint;
+    ALTER TABLE sp_action ADD COLUMN rolloutgroup bigint;
 	
 	alter table sp_rollout 
         add constraint uk_rollout  unique (name, tenant);
@@ -70,11 +70,11 @@
 		
 	alter table sp_action 
         add constraint fk_action_rolloutgroup 
-        foreign key (rolltoutgroup) 
+        foreign key (rolloutgroup) 
         references sp_rolloutgroup;
 		
 	alter table sp_rollout 
-        add constraint fk_rolltout_ds 
+        add constraint fk_rollout_ds 
         foreign key (distribution_set) 
         references sp_distribution_set;
 
