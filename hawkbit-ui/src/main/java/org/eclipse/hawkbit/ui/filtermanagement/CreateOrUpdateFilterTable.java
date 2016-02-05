@@ -82,18 +82,6 @@ public class CreateOrUpdateFilterTable extends Table {
         setId(SPUIComponetIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
         setSelectable(false);
         eventBus.subscribe(this);
-        addItemSetChangeListener(new ItemSetChangeListener() {
-            private static final long serialVersionUID = 9006291573733911656L;
-
-            @Override
-            public void containerItemSetChange(final com.vaadin.data.Container.ItemSetChangeEvent event) {
-                if (size() > 0) {
-                    eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
-                }
-
-            }
-
-        });
     }
 
     @PreDestroy

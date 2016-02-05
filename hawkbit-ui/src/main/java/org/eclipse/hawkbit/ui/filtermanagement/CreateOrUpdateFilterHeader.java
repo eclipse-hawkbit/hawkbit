@@ -117,7 +117,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    private String newFilterQuery;
+    boolean validationFailed = false;
 
     /**
      * Initialize the Campaign Status History Header.
@@ -133,9 +133,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         executor = (Executor) SpringContextHelper.getBean("uiExecutor");
     }
 
-    /**
-     * 
-     */
     private void restoreOnLoad() {
         if (filterManagementUIState.isEditViewDisplayed()) {
             populateComponents();
@@ -168,7 +165,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             oldFilterName = filterManagementUIState.getTfQuery().get().getName();
             oldFilterQuery = filterManagementUIState.getTfQuery().get().getQuery();
         }
-        searchLayout.addComponentAsFirst(validationIcon);
         showValidationSuccesIcon();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
         headerCaption.setVisible(false);
@@ -179,18 +175,24 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         headerCaption.setVisible(true);
         nameLabel.setValue("");
         queryTextField.setValue("");
-        removeStatusIcon();
+        setInitialStatusIconStyle(validationIcon);
+        validationFailed = false;
         saveButton.setEnabled(false);
         titleFilterIconsLayout.removeStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
     }
 
     private Label createStatusIcon() {
-        final Label statusIcon = new Label(FontAwesome.CHECK_CIRCLE.getHtml(), ContentMode.HTML);
-        statusIcon.setValue(null);
-        statusIcon.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
-        statusIcon.setVisible(false);
-        statusIcon.setImmediate(true);
+        final Label statusIcon = new Label();
+        setInitialStatusIconStyle(statusIcon);
         return statusIcon;
+    }
+
+    private void setInitialStatusIconStyle(final Label statusIcon) {
+        statusIcon.setContentMode(ContentMode.HTML);
+        statusIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+        statusIcon.setImmediate(true);
+        statusIcon.setStyleName("hide-status-label");
+        statusIcon.setSizeFull();
     }
 
     private void createComponents() {
@@ -288,8 +290,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         searchLayout = new HorizontalLayout();
         searchLayout.setSizeUndefined();
         searchLayout.setSpacing(false);
-        searchLayout.addComponent(queryTextField);
+        searchLayout.addComponents(validationIcon, queryTextField);
         searchLayout.addStyleName("custom-search-layout");
+        searchLayout.setComponentAlignment(validationIcon, Alignment.MIDDLE_CENTER);
 
         final HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.setSizeUndefined();
@@ -326,50 +329,30 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
             @Override
             public void textChange(final TextChangeEvent event) {
-                newFilterQuery = event.getText();
-                executor.execute(new StatusCircledAsync(event));
+                validationIcon.addStyleName("show-status-label");
+                showValidationInProgress();
+                onQueryChange(event.getText());
+                executor.execute(new StatusCircledAsync());
             }
 
         });
     }
 
     class StatusCircledAsync implements Runnable {
-        final TextChangeEvent event;
-
-        /**
-         * 
-         * @param event
-         */
-        public StatusCircledAsync(final TextChangeEvent event) {
-            this.event = event;
-        }
-
         @Override
         public void run() {
-            processQueryChange();
             eventBus.publish(this, CustomFilterUIEvent.FILTER_TARGET_BY_QUERY);
         }
     }
 
-    private void processQueryChange() {
-        this.getUI().access(() -> {
-            validationIcon.setVisible(true);
-            onQueryChange(newFilterQuery);
-
-        });
-    }
-
     private void onQueryChange(final String text) {
-        boolean validationFailed = false;
         if (!Strings.isNullOrEmpty(text)) {
             final String input = text.toLowerCase();
-            searchLayout.addComponentAsFirst(validationIcon);
-            searchLayout.setComponentAlignment(validationIcon, Alignment.MIDDLE_CENTER);
-            showValidationInProgress();
             final ValidationResult validationResult = FilterQueryValidation.getExpectedTokens(input);
             if (!validationResult.getIsValidationFailed()) {
                 filterManagementUIState.setFilterQueryValue(input);
                 filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.FALSE);
+                validationFailed = false;
             } else {
                 validationFailed = true;
                 filterManagementUIState.setFilterQueryValue(null);
@@ -383,6 +366,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             filterManagementUIState.setFilterQueryValue(null);
             filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.TRUE);
         }
+        queryTextField.setValue(text);
     }
 
     private void enableDisableSaveButton(final boolean validationFailed, final String query) {
@@ -411,17 +395,15 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void showValidationSuccesIcon() {
-        if (null != filterManagementUIState.getFilterQueryValue()) {
+        if (!validationFailed) {
             validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
             validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
-            validationIcon.setDescription("");
         }
     }
 
     private void showValidationFailureIcon() {
         validationIcon.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
         validationIcon.setStyleName(SPUIStyleDefinitions.ERROR_ICON);
-
     }
 
     private void showValidationInProgress() {
