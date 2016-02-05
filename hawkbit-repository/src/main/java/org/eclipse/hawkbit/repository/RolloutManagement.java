@@ -249,6 +249,14 @@ public class RolloutManagement {
             final RolloutGroupConditions conditions) {
         final Rollout savedRollout = createRollout(rollout, amountGroup);
         creatingRollouts.add(savedRollout.getName());
+        // need to flush the entity manager here to get the ID of the rollout,
+        // because entity manager is set to FlushMode#Auto, entitymanager will
+        // flush the Target entity, due the indirect relationship to the Rollout
+        // entity without set an ID JPA is throwing a Invalid
+        // 'org.springframework.dao.InvalidDataAccessApiUsageException: During
+        // synchronization aect was found through a relationship that was not
+        // marked cascade PERSIST'
+        entityManager.flush();
         executor.execute(() -> {
             try {
                 final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -336,7 +344,6 @@ public class RolloutManagement {
             cacheWriteNotify.rolloutGroupCreated(groupIndex, savedRollout.getId(), savedGroup.getId(),
                     amountGroupValidated, groupIndex);
             pageIndex += groupSize;
-
         }
 
         savedRollout.setStatus(RolloutStatus.READY);
