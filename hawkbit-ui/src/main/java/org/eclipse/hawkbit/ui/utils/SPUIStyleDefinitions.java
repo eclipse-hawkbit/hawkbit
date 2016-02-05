@@ -225,6 +225,19 @@ public final class SPUIStyleDefinitions {
      * Query validator icon -error style.
      */
     public static final String ERROR_ICON = "error-icon";
+    /**
+     * Rollout action type layout style.
+     */
+    public static final String ROLLOUT_ACTION_TYPE_LAYOUT = "rollout-action-type-layout";
+    /**
+     * Rollout save option group style.
+     */
+    public static final String ROLLOUT_OPTION_GROUP = "rollout-option-group";
+
+    /**
+     * Style to disable the action type layout.
+     */
+    public static final String DISABLE_ACTION_TYPE_LAYOUT = "disable-action-type-layout";
 
     /**
      * Bulk upload progress indicator style.

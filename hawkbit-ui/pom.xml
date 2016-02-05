@@ -30,6 +30,7 @@
                <!-- We are doing "inplace" gwt compilation but into subdir VAADIN/widgetsets -->
                <webappDirectory>${project.build.directory}/classes/VAADIN/widgetsets</webappDirectory>
                <hostedWebapp>${project.build.directory}/classes/VAADIN/widgetsets</hostedWebapp>
+               <warSourceDirectory>src/main/resources</warSourceDirectory>
                <noServer>true</noServer>
                <!-- Remove draftCompile when project is ready -->
                <draftCompile>false</draftCompile>
@@ -212,6 +213,16 @@
          <groupId>org.vaadin.addons</groupId>
          <artifactId>tokenfield</artifactId>
       </dependency>
+      <!-- To be mentioned in release notes -->
+      <dependency>
+         <groupId>org.vaadin.alump.distributionbar</groupId>
+         <artifactId>dbar-addon</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.vaadin.addons</groupId>
+         <artifactId>contextmenu</artifactId>
+      </dependency>
+      <!-- To be mentioned in release notes -->
 
       <!-- Test -->
       <dependency>

@@ -54,6 +54,9 @@ $v-table-border-color: $widget-border-color;
 @import 'customstyles/footer-common';
 @import 'customstyles/popup-common';
 @import 'customstyles/target-filter-query';
+@import 'customstyles/statusprogressbar';
+@import 'customstyles/rollout';
+
 
 // Optimize the CSS output
 $v-included-components: remove($v-included-components, calendar);
@@ -88,7 +91,10 @@ $v-included-components: remove($v-included-components, form);
   @include popup-common;
   @include valo-menu-responsive;
   @include target-filter-query;
-
+  @include statusprogressbar;
+  @include rollout;
+  
+  
   .v-app-loading {
     background-color: rgba(0, 0, 0, 0);
     background-image: $app-background-image, linear-gradient(to bottom, $app-background-image-gradient);
@@ -120,5 +126,4 @@ $v-included-components: remove($v-included-components, form);
     left: 50%;
     margin-left: -20px;
   }
-  
 }

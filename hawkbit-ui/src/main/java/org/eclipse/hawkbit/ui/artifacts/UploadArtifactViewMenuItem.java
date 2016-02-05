@@ -25,7 +25,7 @@ import com.vaadin.server.Resource;
  *
  */
 @Component
-@Order(400)
+@Order(500)
 public class UploadArtifactViewMenuItem implements DashboardMenuItem {
 
     private static final long serialVersionUID = 4096851897640769726L;

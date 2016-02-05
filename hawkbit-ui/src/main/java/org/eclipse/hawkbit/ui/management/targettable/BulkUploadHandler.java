@@ -207,45 +207,49 @@ public class BulkUploadHandler extends CustomComponent
 
         @Override
         public void run() {
-            long innerCounter = 0;
-            String line;
             if (tempFile == null) {
                 return;
             }
 
             try (InputStream tempStream = new FileInputStream(tempFile)) {
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(tempStream, Charset.defaultCharset()))) {
-                    LOG.info("Bulk file upload started");
-                    final double totalFileSize = getTotalNumberOfLines();
-
-                    /**
-                     * Once control is in upload succeeded method automatically
-                     * upload button is re-enabled. To disable the button firing
-                     * below event.
-                     */
-                    eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
-                    while ((line = reader.readLine()) != null) {
-                        innerCounter++;
-                        readEachLine(line, innerCounter, totalFileSize);
-                    }
-                    doAssignments();
-                    eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
-
-                    // Clearing after assignments are done
-                    managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
-                } catch (final IOException e) {
-                    LOG.error("Error reading file {}", tempFile.getName(), e);
-                } finally {
-                    resetCounts();
-                    deleteFile();
-                }
+                readFileStream(tempStream);
             } catch (final FileNotFoundException e) {
                 LOG.error("Temporary file not found with name {}", tempFile.getName(), e);
             } catch (final IOException e) {
                 LOG.error("Error while opening temorary file ", e);
             }
 
+        }
+
+        private void readFileStream(final InputStream tempStream) {
+            String line;
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(tempStream, Charset.defaultCharset()))) {
+                LOG.info("Bulk file upload started");
+                long innerCounter = 0;
+                final double totalFileSize = getTotalNumberOfLines();
+
+                /**
+                 * Once control is in upload succeeded method automatically
+                 * upload button is re-enabled. To disable the button firing
+                 * below event.
+                 */
+                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_PROCESS_STARTED));
+                while ((line = reader.readLine()) != null) {
+                    innerCounter++;
+                    readEachLine(line, innerCounter, totalFileSize);
+                }
+                doAssignments();
+                eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.BULK_UPLOAD_COMPLETED));
+
+                // Clearing after assignments are done
+                managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().clear();
+            } catch (final IOException e) {
+                LOG.error("Error reading file {}", tempFile.getName(), e);
+            } finally {
+                resetCounts();
+                deleteFile();
+            }
         }
 
         private void doAssignments() {

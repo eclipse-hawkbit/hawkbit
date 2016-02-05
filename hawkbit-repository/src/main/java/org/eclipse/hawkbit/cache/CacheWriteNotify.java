@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.cache;
 
 import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
+import org.eclipse.hawkbit.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -68,6 +70,43 @@ public class CacheWriteNotify {
         }
 
         eventBus.post(new DownloadProgressEvent(tenantAware.getCurrentTenant(), statusId, progressPercent));
+    }
+
+    /**
+     * Writes the {@link CacheKeys#ROLLOUT_GROUP_CREATED} and
+     * {@link CacheKeys#ROLLOUT_GROUP_TOTAL} into the cache and notfies the
+     * {@link EventBus} with a {@link RolloutGroupCreatedEvent}.
+     * 
+     * @param revision
+     *            the revision of the event
+     * @param rolloutId
+     *            the ID of the rollout the group has been created
+     * @param rolloutGroupId
+     *            the ID of the rollout group which has been created
+     * @param totalRolloutGroup
+     *            the total number of rollout groups for this rollout
+     * @param createdRolloutGroup
+     *            the number of already created groups of the rollout
+     */
+    public void rolloutGroupCreated(final long revision, final Long rolloutId, final Long rolloutGroupId,
+            final int totalRolloutGroup, final int createdRolloutGroup) {
+
+        final Cache cache = cacheManager.getCache(Rollout.class.getName());
+        final String cacheKeyGroupTotal = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
+                CacheKeys.ROLLOUT_GROUP_TOTAL);
+        final String cacheKeyGroupCreated = CacheKeys.entitySpecificCacheKey(String.valueOf(rolloutId),
+                CacheKeys.ROLLOUT_GROUP_CREATED);
+        if (createdRolloutGroup < totalRolloutGroup) {
+            cache.put(cacheKeyGroupTotal, totalRolloutGroup);
+            cache.put(cacheKeyGroupCreated, createdRolloutGroup);
+        } else {
+            // in case we reached progress 100 delete the cache value again
+            // because otherwise he will keep there forever
+            cache.evict(cacheKeyGroupTotal);
+            cache.evict(cacheKeyGroupCreated);
+        }
+        eventBus.post(new RolloutGroupCreatedEvent(tenantAware.getCurrentTenant(), revision, rolloutId, rolloutGroupId,
+                totalRolloutGroup, createdRolloutGroup));
     }
 
     /**
