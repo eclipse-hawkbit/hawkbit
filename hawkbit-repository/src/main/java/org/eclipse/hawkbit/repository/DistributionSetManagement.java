@@ -321,14 +321,10 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSet createDistributionSet(@NotNull final DistributionSet dSet) {
         prepareDsSave(dSet);
-
         if (dSet.getType() == null) {
             dSet.setType(systemManagement.getTenantMetadata().getDefaultDsType());
         }
-
-        final DistributionSet result = distributionSetRepository.save(dSet);
-
-        return result;
+        return distributionSetRepository.save(dSet);
     }
 
     private void prepareDsSave(final DistributionSet dSet) {
@@ -400,7 +396,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSet unassignSoftwareModule(@NotNull final DistributionSet ds,
             final SoftwareModule softwareModule) {
-        final Set<SoftwareModule> softwareModules = new HashSet<SoftwareModule>();
+        final Set<SoftwareModule> softwareModules = new HashSet<>();
         softwareModules.add(softwareModule);
         ds.removeModule(softwareModule);
         checkDistributionSetSoftwareModulesIsAllowedToModify(ds, softwareModules);
@@ -491,20 +487,16 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     private DistributionSet findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
             final DistributionSetFilter distributionSetFilter) {
-
         final List<Specification<DistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
-
-        Specifications<DistributionSet> specs = null;
         if (!specList.isEmpty()) {
-            specs = Specifications.where(specList.get(0));
-        }
-        if (specList.size() > 1) {
+            Specifications<DistributionSet> specs = Specifications.where(specList.get(0));
             specList.remove(0);
             for (final Specification<DistributionSet> s : specList) {
                 specs = specs.and(s);
             }
+            return distributionSetRepository.findOne(specs);
         }
-        return distributionSetRepository.findOne(specs);
+        return null;
     }
 
     /**
@@ -531,7 +523,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSet> findDistributionSetsAll(@NotNull final Pageable pageReq, final Boolean deleted,
             final Boolean complete) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
 
         if (deleted != null) {
             final Specification<DistributionSet> spec = DistributionSetSpecification.isDeleted(deleted);
@@ -563,7 +555,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSet> findDistributionSetsAll(@NotNull final Specification<DistributionSet> spec,
             @NotNull final Pageable pageReq, final Boolean deleted) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
         if (deleted != null) {
             specList.add(DistributionSetSpecification.isDeleted(deleted));
         }
@@ -689,7 +681,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countDistributionSetsAll() {
 
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
 
         final Specification<DistributionSet> spec = DistributionSetSpecification.isDeleted(Boolean.FALSE);
         specList.add(spec);
@@ -969,9 +961,9 @@ public class DistributionSetManagement {
 
     private List<Specification<DistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
 
-        Specification<DistributionSet> spec = null;
+        Specification<DistributionSet> spec;
 
         if (null != distributionSetFilter.getIsComplete()) {
             spec = DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete());
