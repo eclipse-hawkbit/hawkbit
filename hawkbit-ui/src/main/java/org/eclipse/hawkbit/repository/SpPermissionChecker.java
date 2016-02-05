@@ -139,4 +139,42 @@ public class SpPermissionChecker implements Serializable {
         return hasReadDistributionPermission() && permissionService.hasPermission(SpPermission.DELETE_REPOSITORY);
     }
 
+    /**
+     * Gets the SP rollout create permission.
+     * 
+     * @return permission for rollout update
+     */
+    public boolean hasRolloutUpdatePermission() {
+        return hasUpdateTargetPermission() && hasReadDistributionPermission()
+                && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+    }
+
+    /**
+     * Gets the SP rollout create permission.
+     * 
+     * @return permission for rollout create
+     */
+    public boolean hasRolloutCreatePermission() {
+        return hasUpdateTargetPermission() && hasReadDistributionPermission()
+                && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+    }
+
+    /**
+     * 
+     * Gets the SP rollout read permission.
+     * 
+     * @return Gets the SP rollout read permission.
+     */
+    public boolean hasRolloutReadPermission() {
+        return permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+    }
+
+    /**
+     * Gets the SP rollout targets read permission.
+     * 
+     * @return permission to read rollout targets
+     */
+    public boolean hasRolloutTargetsReadPermission() {
+        return hasTargetReadPermission() && permissionService.hasPermission(SpPermission.ROLLOUT_MANAGEMENT);
+    }
 }

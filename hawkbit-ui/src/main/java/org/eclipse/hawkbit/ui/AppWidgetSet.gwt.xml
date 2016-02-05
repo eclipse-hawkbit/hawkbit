@@ -21,4 +21,10 @@
 
     <inherits name="org.vaadin.tokenfield.TokenfieldWidgetset" />
 
+
+    <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
+
+    
+
+    <inherits name="org.vaadin.peter.contextmenu.ContextmenuWidgetset" />
 </module>

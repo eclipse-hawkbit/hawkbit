@@ -21,5 +21,4 @@ public class CacheKeysTest {
         final String entitySpecificCacheKey = CacheKeys.entitySpecificCacheKey(knownEntityId, knownCacheKey);
         assertThat(entitySpecificCacheKey).isEqualTo(knownEntityId + "." + knownCacheKey);
     }
-
 }

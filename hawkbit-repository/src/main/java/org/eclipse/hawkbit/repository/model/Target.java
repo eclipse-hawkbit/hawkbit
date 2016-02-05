@@ -106,6 +106,11 @@ public class Target extends NamedEntity implements Persistable<Long> {
     @Column(name = "sec_token", insertable = true, updatable = true, nullable = false, length = 128)
     private String securityToken = null;
 
+    @CascadeOnDelete
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
+    @JoinColumn(name = "target_Id", insertable = false, updatable = false)
+    private final List<RolloutTargetGroup> rolloutTargetGroup = new ArrayList<>();
+
     /**
      * Constructor.
      * 
