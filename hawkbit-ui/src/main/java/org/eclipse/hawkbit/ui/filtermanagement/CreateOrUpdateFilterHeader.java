@@ -26,9 +26,9 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -85,6 +85,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     @Autowired
     private UINotification notification;
 
+    @Autowired
+    @Qualifier("uiExecutor")
     private transient Executor executor;
 
     private Label headerCaption;
@@ -130,7 +132,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         restoreOnLoad();
         setUpCaptionLayout(filterManagementUIState.isCreateFilterViewDisplayed());
         eventBus.subscribe(this);
-        executor = (Executor) SpringContextHelper.getBean("uiExecutor");
     }
 
     private void restoreOnLoad() {
