@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
  * A mapper which maps repository model to RESTful model representation and
  * back.
  */
-final public class SystemMapper {
+public class SystemMapper {
 
     private SystemMapper() {
         // Utility class
@@ -29,7 +29,7 @@ final public class SystemMapper {
     public static Map<String, TenantConfigurationValueRest> toResponse(
             final TenantConfigurationManagement tenantConfigurationManagement) {
 
-        final Map<String, TenantConfigurationValueRest> configurationMap = new HashMap<String, TenantConfigurationValueRest>();
+        final Map<String, TenantConfigurationValueRest> configurationMap = new HashMap<>();
 
         for (final TenantConfigurationKey key : TenantConfigurationKey.values()) {
             configurationMap.put(key.getKeyName(),
