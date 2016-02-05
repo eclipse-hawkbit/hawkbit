@@ -185,8 +185,8 @@ public enum SpServerError {
     /**
      * 
      */
-    SP_CONFIGURATION_KEY_INVALID("hawkbit.server.error.configKeyInvalid", "The given configuration key is invalid.");
-            
+    SP_CONFIGURATION_KEY_INVALID("hawkbit.server.error.configKeyInvalid", "The given configuration key is invalid."),
+
     /**
      * 
      */
