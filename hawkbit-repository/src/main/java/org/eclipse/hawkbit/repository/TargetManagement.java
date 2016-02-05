@@ -1010,7 +1010,7 @@ public class TargetManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final List<Target> targets) {
-        if (targetRepository.countByControllerIdIn(
+        if (!targets.isEmpty() && targetRepository.countByControllerIdIn(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }
