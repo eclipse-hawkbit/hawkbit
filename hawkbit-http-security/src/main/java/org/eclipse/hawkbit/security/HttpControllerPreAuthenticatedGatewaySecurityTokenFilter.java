@@ -35,13 +35,15 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
      *            tenant
      */
     public HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
-            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware) {
-        super(tenantConfigurationManagement, tenantAware);
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
-        return new ControllerPreAuthenticatedGatewaySecurityTokenFilter(tenantConfigurationManagement, tenantAware);
+        return new ControllerPreAuthenticatedGatewaySecurityTokenFilter(tenantConfigurationManagement, tenantAware,
+                systemSecurityContext);
     }
 
 }

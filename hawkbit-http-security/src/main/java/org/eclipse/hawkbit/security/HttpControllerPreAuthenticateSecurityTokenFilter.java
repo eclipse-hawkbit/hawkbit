@@ -47,15 +47,15 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
      */
     public HttpControllerPreAuthenticateSecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-            final ControllerManagement controllerManagement) {
-        super(tenantConfigurationManagement, tenantAware);
+            final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.controllerManagement = controllerManagement;
     }
 
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticateSecurityTokenFilter(tenantConfigurationManagement, controllerManagement,
-                tenantAware);
+                tenantAware, systemSecurityContext);
     }
 
 }

@@ -73,7 +73,8 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      */
 
     @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
     public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
             final Class<T> propertyType) throws TenantConfigurationValidatorException {
 

@@ -45,8 +45,8 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
      */
     public HttpControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
             final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
-            final TenantAware tenantAware) {
-        super(tenantConfigurationManagement, tenantAware);
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.caCommonNameHeader = caCommonNameHeader;
         this.caAuthorityNameHeader = caAuthorityNameHeader;
     }
@@ -54,7 +54,7 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedSecurityHeaderFilter(caCommonNameHeader, caAuthorityNameHeader,
-                tenantConfigurationManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
 }

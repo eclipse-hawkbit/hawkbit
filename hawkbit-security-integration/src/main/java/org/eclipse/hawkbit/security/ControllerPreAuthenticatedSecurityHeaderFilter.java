@@ -56,18 +56,20 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * @param caAuthorityNameHeader
      *            the http-header which holds the ca-authority name of the
      *            certificate
-     * @param systemManagement
-     *            the system management service to retrieve configuration
-     *            properties to check if the header authentication is enabled
-     *            for this tenant
+     * @param tenantConfigurationManagement
+     *            the tenant management service to retrieve configuration
+     *            properties
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            the system security context to get access to tenant
+     *            configuration
      */
     public ControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
             final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
-            final TenantAware tenantAware) {
-        super(tenantConfigurationManagement, tenantAware);
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.caCommonNameHeader = caCommonNameHeader;
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
     }

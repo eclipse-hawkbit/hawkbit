@@ -29,11 +29,13 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     protected final TenantConfigurationManagement tenantConfigurationManagement;
     protected final TenantAware tenantAware;
     private final SecurityConfigurationKeyTenantRunner configurationKeyTenantRunner;
+    protected final SystemSecurityContext systemSecurityContext;
 
     protected AbstractControllerAuthenticationFilter(final TenantConfigurationManagement systemManagement,
-            final TenantAware tenantAware) {
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
         this.tenantConfigurationManagement = systemManagement;
         this.tenantAware = tenantAware;
+        this.systemSecurityContext = systemSecurityContext;
         this.configurationKeyTenantRunner = new SecurityConfigurationKeyTenantRunner();
     }
 
@@ -53,9 +55,10 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     private final class SecurityConfigurationKeyTenantRunner implements TenantAware.TenantRunner<Boolean> {
         @Override
         public Boolean run() {
+
             LOGGER.trace("retrieving configuration value for configuration key {}", getTenantConfigurationKey());
-            return tenantConfigurationManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class)
-                    .getValue();
+            return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                    .getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue());
         }
 
     }

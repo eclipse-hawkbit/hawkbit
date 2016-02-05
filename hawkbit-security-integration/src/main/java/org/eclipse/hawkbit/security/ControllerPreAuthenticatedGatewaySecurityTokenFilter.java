@@ -39,16 +39,20 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
     /**
      * Constructor.
      * 
-     * @param systemManagement
-     *            the system management service to retrieve configuration
+     * @param tenantConfigurationManagement
+     *            the tenant management service to retrieve configuration
      *            properties
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            the system security context to get access to tenant
+     *            configuration
      */
     public ControllerPreAuthenticatedGatewaySecurityTokenFilter(
-            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware) {
-        super(tenantConfigurationManagement, tenantAware);
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
     @Override
@@ -84,8 +88,12 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
         public String run() {
             LOGGER.trace("retrieving configuration value for configuration key {}",
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY);
-            return tenantConfigurationManagement.getConfigurationValue(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
+
+            return systemSecurityContext
+                    .runAsSystem(() -> tenantConfigurationManagement
+                            .getConfigurationValue(
+                                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class)
+                            .getValue());
         }
     }
 

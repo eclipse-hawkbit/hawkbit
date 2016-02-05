@@ -57,6 +57,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             + "}/controller/artifacts/v1/**";
     protected TenantConfigurationManagement tenantConfigurationManagement;
     protected TenantAware tenantAware;
+    protected SystemSecurityContext systemSecurityContext;
 
     private final AntPathMatcher pathExtractor;
 
@@ -71,9 +72,10 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      *            the tenant aware service
      */
     public AbstractHttpControllerAuthenticationFilter(final TenantConfigurationManagement tenantConfigurationManagement,
-            final TenantAware tenantAware) {
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantAware = tenantAware;
+        this.systemSecurityContext = systemSecurityContext;
         pathExtractor = new AntPathMatcher();
     }
 

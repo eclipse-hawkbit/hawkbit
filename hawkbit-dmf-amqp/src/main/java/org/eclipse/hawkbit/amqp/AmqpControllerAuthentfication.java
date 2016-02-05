@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilt
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.PreAuthenficationFilter;
 import org.eclipse.hawkbit.security.SecurityProperties;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,9 @@ public class AmqpControllerAuthentfication {
     @Autowired
     private SecurityProperties secruityProperties;
 
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
+
     /**
      * Constructor.
      */
@@ -74,16 +78,16 @@ public class AmqpControllerAuthentfication {
 
     private void addFilter() {
         final ControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new ControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                tenantConfigurationManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(gatewaySecurityTokenFilter);
 
         final ControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new ControllerPreAuthenticatedSecurityHeaderFilter(
                 secruityProperties.getRpCnHeader(), secruityProperties.getRpSslIssuerHashHeader(),
-                tenantConfigurationManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityHeaderFilter);
 
         final ControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new ControllerPreAuthenticateSecurityTokenFilter(
-                tenantConfigurationManagement, controllerManagement, tenantAware);
+                tenantConfigurationManagement, controllerManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityTokenFilter);
 
         filterChain.add(new CoapAnonymousPreAuthenticatedFilter());

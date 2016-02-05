@@ -45,8 +45,8 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     /**
      * Constructor.
      * 
-     * @param systemManagement
-     *            the system management service to retrieve configuration
+     * @param tenantConfigurationManagement
+     *            the tenant management service to retrieve configuration
      *            properties
      * @param controllerManagement
      *            the controller management to retrieve the specific target
@@ -54,11 +54,15 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            the system security context to get access to tenant
+     *            configuration
      */
     public ControllerPreAuthenticateSecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final ControllerManagement controllerManagement, final TenantAware tenantAware) {
-        super(tenantConfigurationManagement, tenantAware);
+            final ControllerManagement controllerManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.controllerManagement = controllerManagement;
     }
 
