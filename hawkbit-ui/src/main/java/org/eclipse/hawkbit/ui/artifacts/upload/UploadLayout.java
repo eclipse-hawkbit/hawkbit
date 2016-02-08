@@ -196,6 +196,7 @@ public class UploadLayout extends VerticalLayout {
 							if (!checkForDuplicate(file.getFileName())) {
 								numberOfFileUploadsExpected.incrementAndGet();
 								file.setStreamVariable(createStreamVariable(file));
+								hasDirectory = Boolean.FALSE;
 							}
 						} else {
 							hasDirectory = Boolean.TRUE;
