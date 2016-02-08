@@ -865,11 +865,8 @@ public class DistributionSetManagement {
             @Override
             public Predicate toPredicate(final Root<DistributionSetMetadata> root, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-
-                final Predicate predicate = cb.equal(
-                        root.get(DistributionSetMetadata_.distributionSet).get(DistributionSet_.id), distributionSetId);
-
-                return predicate;
+                return cb.equal(root.get(DistributionSetMetadata_.distributionSet).get(DistributionSet_.id),
+                        distributionSetId);
             }
         }, pageable);
 
