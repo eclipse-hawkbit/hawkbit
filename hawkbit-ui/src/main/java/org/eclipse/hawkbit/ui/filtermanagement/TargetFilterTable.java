@@ -103,14 +103,12 @@ public class TargetFilterTable extends Table {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final CustomFilterUIEvent filterEvent) {
-        UI.getCurrent().access(() -> {
-            if (filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT
-                    || filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE
-                    || filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY
-                    || filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
-                refreshContainer();
-            }
-        });
+        if (filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT
+                || filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE
+                || filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY
+                || filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
+            UI.getCurrent().access(() -> refreshContainer());
+        }
     }
 
     /**
@@ -125,8 +123,8 @@ public class TargetFilterTable extends Table {
 
         targetQF.setQueryConfiguration(queryConfig);
         // create lazy query container with lazy defination and query
-        final LazyQueryContainer targetFilterContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), targetQF);
+        final LazyQueryContainer targetFilterContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
+                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), targetQF);
         targetFilterContainer.getQueryView().getQueryDefinition().setMaxNestedPropertyDepth(PROPERTY_DEPT);
 
         return targetFilterContainer;
@@ -135,8 +133,8 @@ public class TargetFilterTable extends Table {
 
     private Map<String, Object> prepareQueryConfigFilters() {
         final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        filterManagementUIState.getCustomFilterSearchText()
-                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+        filterManagementUIState.getCustomFilterSearchText().ifPresent(
+                value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         return queryConfig;
     }
 
@@ -205,8 +203,8 @@ public class TargetFilterTable extends Table {
                          * of the deleted custom filter.
                          */
 
-                        notification.displaySuccess(
-                                i18n.get("message.delete.filter.success", new Object[] { deletedFilterName }));
+                        notification.displaySuccess(i18n.get("message.delete.filter.success",
+                                new Object[] { deletedFilterName }));
                         refreshContainer();
                     }
                 });
