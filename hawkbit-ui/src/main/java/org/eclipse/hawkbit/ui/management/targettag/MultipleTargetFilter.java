@@ -89,10 +89,11 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
         filterByButtons.addStyleName(SPUIStyleDefinitions.NO_TOP_BORDER);
         targetFilterQueryButtonsTab.init(customTargetTagFilterButtonClick);
-        config = SPUIComponentProvider.getButton(SPUIComponetIdProvider.ADD_TARGET_TAG, "", "", "", true,
-                FontAwesome.COG, SPUIButtonStyleSmallNoBorder.class);
-        config.addClickListener(event -> settingsIconClicked());
-
+        if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
+            config = SPUIComponentProvider.getButton(SPUIComponetIdProvider.ADD_TARGET_TAG, "", "", "", true,
+                    FontAwesome.COG, SPUIButtonStyleSmallNoBorder.class);
+            config.addClickListener(event -> settingsIconClicked());
+        }
         addStyleName(ValoTheme.ACCORDION_BORDERLESS);
         addTabs();
         setSizeFull();
@@ -123,7 +124,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         simpleFilterTab = new VerticalLayout();
         final VerticalLayout targetTagTableLayout = new VerticalLayout();
         targetTagTableLayout.setSizeFull();
-        if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
+        if (null != config) {
             targetTagTableLayout.addComponent(config);
             targetTagTableLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
         }
