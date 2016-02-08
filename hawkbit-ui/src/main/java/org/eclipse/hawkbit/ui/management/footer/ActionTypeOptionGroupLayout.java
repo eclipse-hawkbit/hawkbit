@@ -127,8 +127,8 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         forcedTimeDateField.setStyleName("dist-window-forcedtime");
 
         final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
-        forcedTimeDateField.setValue(
-                Date.from(LocalDateTime.now().plusWeeks(2).atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
+        forcedTimeDateField.setValue(Date.from(LocalDateTime.now().plusWeeks(2)
+                .atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
         forcedTimeDateField.setImmediate(true);
         forcedTimeDateField.setTimeZone(tz);
         forcedTimeDateField.setLocale(i18n.getLocale());
@@ -145,7 +145,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         actionTypeOptionGroup.select(ActionTypeOption.FORCED);
     }
 
-    enum ActionTypeOption {
+    public enum ActionTypeOption {
         FORCED(ActionType.FORCED), SOFT(ActionType.SOFT), AUTO_FORCED(ActionType.TIMEFORCED);
 
         private final ActionType actionType;

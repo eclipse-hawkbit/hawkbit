@@ -94,6 +94,14 @@ public class Action extends BaseEntity implements Comparable<Action> {
             CascadeType.REMOVE })
     private List<ActionStatus> actionStatus;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rolloutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup") )
+    private RolloutGroup rolloutGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout") )
+    private Rollout rollout;
+
     /**
      * Note: filled only in {@link Status#DOWNLOAD}.
      */
@@ -219,6 +227,36 @@ public class Action extends BaseEntity implements Comparable<Action> {
      */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
+    }
+
+    /**
+     * @return the rolloutGroup
+     */
+    public RolloutGroup getRolloutGroup() {
+        return rolloutGroup;
+    }
+
+    /**
+     * @param rolloutGroup
+     *            the rolloutGroup to set
+     */
+    public void setRolloutGroup(final RolloutGroup rolloutGroup) {
+        this.rolloutGroup = rolloutGroup;
+    }
+
+    /**
+     * @return the rollout
+     */
+    public Rollout getRollout() {
+        return rollout;
+    }
+
+    /**
+     * @param rollout
+     *            the rollout to set
+     */
+    public void setRollout(final Rollout rollout) {
+        this.rollout = rollout;
     }
 
     @Override
@@ -379,7 +417,13 @@ public class Action extends BaseEntity implements Comparable<Action> {
         /**
          * Action needs download by this target which has now started.
          */
-        DOWNLOAD;
+        DOWNLOAD,
+
+        /**
+         * Action is in waiting state, e.g. the action is scheduled in a rollout
+         * but not yet activated.
+         */
+        SCHEDULED;
     }
 
     /**

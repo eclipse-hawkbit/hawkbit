@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  *
  *
  */
-public class TargetAssignDistributionSetEvent {
+public class TargetAssignDistributionSetEvent extends AbstractEvent {
 
     private final Collection<SoftwareModule> softwareModules;
     private final String controllerId;
@@ -29,6 +29,10 @@ public class TargetAssignDistributionSetEvent {
     /**
      * Creates a new {@link TargetAssignDistributionSetEvent}.
      *
+     * @param revision
+     *            the revision of the event
+     * @param tenant
+     *            the tenant of the event
      * @param controllerId
      *            the ID of the controller
      * @param actionId
@@ -38,8 +42,9 @@ public class TargetAssignDistributionSetEvent {
      * @param targetAdress
      *            the targetAdress of the target
      */
-    public TargetAssignDistributionSetEvent(final String controllerId, final Long actionId,
-            final Collection<SoftwareModule> softwareModules, final URI targetAdress) {
+    public TargetAssignDistributionSetEvent(final long revision, final String tenant, final String controllerId,
+            final Long actionId, final Collection<SoftwareModule> softwareModules, final URI targetAdress) {
+        super(revision, tenant);
         this.controllerId = controllerId;
         this.actionId = actionId;
         this.softwareModules = softwareModules;

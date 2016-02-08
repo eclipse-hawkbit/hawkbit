@@ -8,9 +8,11 @@
  */
 @import "customstyles/hawkbitvariables";
 @import "../hawkbit/hawkbittheme";
+@import "../hawkbit/addons";
 
 /* This file prefixes all rules with the theme name to avoid causing conflicts with other themes. */
 /* The actual styles should be defined in testvalothemedemo.scss */
 .hawkbit {
+  @include addons;
   @include hawkbittheme;
 }

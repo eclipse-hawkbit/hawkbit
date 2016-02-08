@@ -73,8 +73,8 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.event.Action;
@@ -249,7 +249,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
      */
@@ -260,7 +260,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
      * )
@@ -285,7 +285,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties
      * (com.vaadin.data.Container )
      */
@@ -312,7 +312,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
      * addCustomGeneratedColumns ()
      */
@@ -326,7 +326,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
      * isFirstRowSelectedOnLoad ()
      */
@@ -338,7 +338,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
      */
     @Override
@@ -352,7 +352,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
      */
@@ -377,7 +377,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
      */
@@ -388,7 +388,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
      * ()
      */
@@ -415,7 +415,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
      */
     @Override
@@ -1154,5 +1154,4 @@ public class TargetTable extends AbstractTable implements Handler {
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
-
 }

@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -69,9 +68,6 @@ public class DistributionTagDropEvent implements DropHandler {
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
-    @Autowired
-    private ManagementUIState managementUIState;
-
     private static final String ITEMID = "itemId";
 
     @Override
@@ -90,8 +86,8 @@ public class DistributionTagDropEvent implements DropHandler {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON)) {
-            notification.displayValidationError(
-                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
+                    new Object[] { i18n.get("label.no.tag.assigned") }));
             return false;
         }
         return true;
@@ -176,8 +172,8 @@ public class DistributionTagDropEvent implements DropHandler {
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
         final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
-                distTagName);
+        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(
+                distributionList, distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {

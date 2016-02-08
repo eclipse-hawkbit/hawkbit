@@ -83,8 +83,8 @@ public class GenerateDialog extends Window {
         tf5.setIcon(FontAwesome.FLAG_O);
         tf5.setRequired(true);
         tf5.setVisible(false);
-        tf5.addValidator(new RegexpValidator(
-                "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "is not an URL"));
+        tf5.addValidator(new RegexpValidator("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
+                "is not an URL"));
 
         final TextField tf6 = new TextField("gateway token", "");
         tf6.setColumns(50);
@@ -125,7 +125,8 @@ public class GenerateDialog extends Window {
             @Override
             public void buttonClick(final ClickEvent event) {
                 try {
-                    callback.okButton(tf1.getValue(), tf3.getValue(), Integer.valueOf(tf2.getValue().replace(".", "")),
+                    callback.okButton(tf1.getValue(), tf3.getValue(),
+                            Integer.valueOf(tf2.getValue().replace(".", "").replace(",", "")),
                             Integer.valueOf(tf4.getValue().replace(".", "")), new URL(tf5.getValue()), tf6.getValue(),
                             (Protocol) protocolGroup.getValue());
                 } catch (final NumberFormatException e) {

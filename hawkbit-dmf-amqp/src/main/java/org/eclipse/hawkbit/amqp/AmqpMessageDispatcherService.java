@@ -79,8 +79,10 @@ public class AmqpMessageDispatcherService {
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
         }
 
-        final Message message = rabbitTemplate.getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessageProperties(controllerId, EventTopic.DOWNLOAD_AND_INSTALL));
+        final Message message = rabbitTemplate.getMessageConverter().toMessage(
+                downloadAndUpdateRequest,
+                createConnectorMessageProperties(targetAssignDistributionSetEvent.getTenant(), controllerId,
+                        EventTopic.DOWNLOAD_AND_INSTALL));
         sendMessage(targetAdress.getHost(), message);
     }
 
@@ -96,8 +98,10 @@ public class AmqpMessageDispatcherService {
             final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
         final String controllerId = cancelTargetAssignmentDistributionSetEvent.getControllerId();
         final Long actionId = cancelTargetAssignmentDistributionSetEvent.getActionId();
-        final Message message = rabbitTemplate.getMessageConverter().toMessage(actionId,
-                createConnectorMessageProperties(controllerId, EventTopic.CANCEL_DOWNLOAD));
+        final Message message = rabbitTemplate.getMessageConverter().toMessage(
+                actionId,
+                createConnectorMessageProperties(cancelTargetAssignmentDistributionSetEvent.getTenant(), controllerId,
+                        EventTopic.CANCEL_DOWNLOAD));
 
         sendMessage(cancelTargetAssignmentDistributionSetEvent.getTargetAdress().getHost(), message);
 
@@ -117,11 +121,12 @@ public class AmqpMessageDispatcherService {
         rabbitTemplate.send(message);
     }
 
-    private MessageProperties createConnectorMessageProperties(final String controllerId, final EventTopic topic) {
+    private MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId,
+            final EventTopic topic) {
         final MessageProperties messageProperties = createMessageProperties();
         messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TENANT, tenantAware.getCurrentTenant());
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
         messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
         return messageProperties;
     }

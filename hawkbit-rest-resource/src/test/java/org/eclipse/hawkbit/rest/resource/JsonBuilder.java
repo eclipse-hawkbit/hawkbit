@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -40,9 +41,9 @@ public abstract class JsonBuilder {
             try {
                 builder.append(new JSONObject().put("name", module.getName())
                         .put("description", module.getDescription()).put("type", module.getType().getKey())
-                        .put("id", Long.MAX_VALUE).put("vendor", module.getVendor()).put("version", module.getVersion())
-                        .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
-                        .put("updatedBy", "fghdfkjghdfkjh").toString());
+                        .put("id", Long.MAX_VALUE).put("vendor", module.getVendor())
+                        .put("version", module.getVersion()).put("createdAt", "0").put("updatedAt", "0")
+                        .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
             } catch (final Exception e) {
                 e.printStackTrace();
             }
@@ -184,13 +185,15 @@ public abstract class JsonBuilder {
         final List<String> messages = new ArrayList<String>();
         messages.add(message);
 
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
+        return new JSONObject()
+                .put("id", id)
+                .put("time", "20140511T121314")
                 .put("status",
-                        new JSONObject().put("execution", execution)
+                        new JSONObject()
+                                .put("execution", execution)
                                 .put("result",
                                         new JSONObject().put("finished", finished).put("progress",
-                                                new JSONObject().put("cnt", 2).put("of", 5)))
-                                .put("details", messages))
+                                                new JSONObject().put("cnt", 2).put("of", 5))).put("details", messages))
                 .toString();
 
     }
@@ -378,9 +381,9 @@ public abstract class JsonBuilder {
         for (final Target target : targets) {
             try {
                 builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                        .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
-                        .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
-                        .toString());
+                        .put("description", target.getDescription()).put("name", target.getName())
+                        .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
+                        .put("updatedBy", "fghdfkjghdfkjh").toString());
             } catch (final Exception e) {
                 e.printStackTrace();
             }
@@ -395,6 +398,40 @@ public abstract class JsonBuilder {
         return builder.toString();
     }
 
+    public static String rollout(final String name, final String description, final int groupSize,
+            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
+        final JSONObject json = new JSONObject();
+        json.put("name", name);
+        json.put("description", description);
+        json.put("amountGroups", groupSize);
+        json.put("distributionSetId", distributionSetId);
+        json.put("targetFilterQuery", targetFilterQuery);
+
+        if (conditions != null) {
+            final JSONObject successCondition = new JSONObject();
+            json.put("successCondition", successCondition);
+            successCondition.put("condition", conditions.getSuccessCondition().toString());
+            successCondition.put("expression", conditions.getSuccessConditionExp().toString());
+
+            final JSONObject successAction = new JSONObject();
+            json.put("successAction", successAction);
+            successAction.put("action", conditions.getSuccessAction().toString());
+            successAction.put("expression", conditions.getSuccessActionExp().toString());
+
+            final JSONObject errorCondition = new JSONObject();
+            json.put("errorCondition", errorCondition);
+            errorCondition.put("condition", conditions.getErrorCondition().toString());
+            errorCondition.put("expression", conditions.getErrorConditionExp().toString());
+
+            final JSONObject errorAction = new JSONObject();
+            json.put("errorAction", errorAction);
+            errorAction.put("action", conditions.getErrorAction().toString());
+            errorAction.put("expression", conditions.getErrorActionExp().toString());
+        }
+
+        return json.toString();
+    }
+
     public static String cancelActionFeedback(final String id, final String execution) throws JSONException {
         return cancelActionFeedback(id, execution, RandomStringUtils.randomAscii(1000));
 
@@ -404,7 +441,9 @@ public abstract class JsonBuilder {
             throws JSONException {
         final List<String> messages = new ArrayList<String>();
         messages.add(message);
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
+        return new JSONObject()
+                .put("id", id)
+                .put("time", "20140511T121314")
                 .put("status",
                         new JSONObject().put("execution", execution)
                                 .put("result", new JSONObject().put("finished", "success")).put("details", messages))
@@ -414,12 +453,13 @@ public abstract class JsonBuilder {
 
     public static String configData(final String id, final Map<String, String> attributes, final String execution)
             throws JSONException {
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
+        return new JSONObject()
+                .put("id", id)
+                .put("time", "20140511T121314")
                 .put("status",
                         new JSONObject().put("execution", execution)
                                 .put("result", new JSONObject().put("finished", "success"))
-                                .put("details", new ArrayList<String>()))
-                .put("data", attributes).toString();
+                                .put("details", new ArrayList<String>())).put("data", attributes).toString();
 
     }
 

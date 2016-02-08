@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class SecurityContextTenantAware implements TenantAware {
 
     private static final ThreadLocal<String> TENANT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<AtomicInteger> RUN_AS_DEPTH = new ThreadLocal<>();
 
     /*
      * (non-Javadoc)
@@ -56,11 +59,21 @@ public class SecurityContextTenantAware implements TenantAware {
      */
     @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> callable) {
+        AtomicInteger runAsDepth = RUN_AS_DEPTH.get();
+        if (runAsDepth == null) {
+            runAsDepth = new AtomicInteger(1);
+            RUN_AS_DEPTH.set(runAsDepth);
+        } else {
+            runAsDepth.incrementAndGet();
+        }
         TENANT_THREAD_LOCAL.set(tenant);
         try {
             return callable.run();
         } finally {
-            TENANT_THREAD_LOCAL.remove();
+            if (runAsDepth.decrementAndGet() <= 0) {
+                RUN_AS_DEPTH.remove();
+                TENANT_THREAD_LOCAL.remove();
+            }
         }
     }
 }
