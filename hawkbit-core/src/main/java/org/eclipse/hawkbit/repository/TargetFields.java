@@ -60,6 +60,7 @@ public enum TargetFields implements FieldNameProvider {
      * distribution sets which is installed on the target.
      */
     INSTALLEDDS("targetInfo.installedDistributionSet", "name", "version"),
+
     /**
      * The tags field.
      */
