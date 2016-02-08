@@ -126,11 +126,14 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setInstalledDistributionSet(installedDistributionSet);
             final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
             prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
+
             if (null != assignedDistributionSet) {
-                prxyTarget.setAssignedDistNameVersion(assignedDistributionSet.getName());
+                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
+                        assignedDistributionSet.getName(), assignedDistributionSet.getVersion()));
             }
             if (null != installedDistributionSet) {
-                prxyTarget.setInstalledDistNameVersion(installedDistributionSet.getName());
+                prxyTarget.setInstalledDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
+                        installedDistributionSet.getName(), installedDistributionSet.getVersion()));
             }
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
