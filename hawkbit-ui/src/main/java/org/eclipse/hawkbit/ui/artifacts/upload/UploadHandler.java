@@ -89,7 +89,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public final OutputStream getOutputStream() {
         try {
-        	view.getDuplicateFileNamesList().clear();
             return view.saveUploadedFileDetails(fileName, fileSize, mimeType);
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
@@ -109,7 +108,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
         this.fileName = fileName;
         this.mimeType = mimeType;
-        view.getDuplicateFileNamesList().clear();
         try {
             if (view.validate()) {
                 if (view.checkForDuplicate(fileName)) {
@@ -169,7 +167,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         view.updateActionCount();
 
         // display the duplicate message after streaming all files
-        view.displayValidationMessage();
+        view.displayDuplicateValidationMessage();
     }
 
     /**
@@ -294,7 +292,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         if (view.enableProcessBtn()) {
             infoWindow.uploadSessionFinished();
         }
-        view.displayValidationMessage();
+        view.displayDuplicateValidationMessage();
 
         LOG.info("Streaming failed due to  :{}", event.getException());
     }
@@ -318,7 +316,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         }
         view.updateActionCount();
         infoWindow.uploadFailed(event.getFilename(), failureReason);
-
         LOG.info("Upload failed for file :{}", event.getReason());
 
     }
