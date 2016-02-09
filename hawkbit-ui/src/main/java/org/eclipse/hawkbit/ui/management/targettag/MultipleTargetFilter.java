@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -64,6 +65,9 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     private CreateUpdateTargetTagLayout createUpdateTargetTagLayout;
 
     @Autowired
+    private SpPermissionChecker permChecker;
+
+    @Autowired
     private ManagementUIState managementUIState;
 
     @Autowired
@@ -85,10 +89,11 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
 
         filterByButtons.addStyleName(SPUIStyleDefinitions.NO_TOP_BORDER);
         targetFilterQueryButtonsTab.init(customTargetTagFilterButtonClick);
-        config = SPUIComponentProvider.getButton(SPUIComponetIdProvider.ADD_TARGET_TAG, "", "", "", true,
-                FontAwesome.COG, SPUIButtonStyleSmallNoBorder.class);
-        config.addClickListener(event -> settingsIconClicked());
-
+        if (permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission()) {
+            config = SPUIComponentProvider.getButton(SPUIComponetIdProvider.ADD_TARGET_TAG, "", "", "", true,
+                    FontAwesome.COG, SPUIButtonStyleSmallNoBorder.class);
+            config.addClickListener(event -> settingsIconClicked());
+        }
         addStyleName(ValoTheme.ACCORDION_BORDERLESS);
         addTabs();
         setSizeFull();
@@ -119,8 +124,10 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         simpleFilterTab = new VerticalLayout();
         final VerticalLayout targetTagTableLayout = new VerticalLayout();
         targetTagTableLayout.setSizeFull();
-        targetTagTableLayout.addComponent(config);
-        targetTagTableLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        if (null != config) {
+            targetTagTableLayout.addComponent(config);
+            targetTagTableLayout.setComponentAlignment(config, Alignment.TOP_RIGHT);
+        }
         targetTagTableLayout.addComponent(filterByButtons);
         targetTagTableLayout.setComponentAlignment(filterByButtons, Alignment.MIDDLE_CENTER);
         targetTagTableLayout.addStyleName("target-tag-drop-hint");
