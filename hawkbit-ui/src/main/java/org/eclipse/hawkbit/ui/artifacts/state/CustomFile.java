@@ -96,7 +96,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getBaseSoftwareModuleName() {
-        return this.baseSoftwareModuleName;
+        return baseSoftwareModuleName;
     }
 
     public void setBaseSoftwareModuleName(final String baseSoftwareModuleName) {
@@ -104,7 +104,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getBaseSoftwareModuleVersion() {
-        return this.baseSoftwareModuleVersion;
+        return baseSoftwareModuleVersion;
     }
 
     public void setBaseSoftwareModuleVersion(final String baseSoftwareModuleVersion) {
@@ -112,11 +112,11 @@ public class CustomFile implements Serializable {
     }
 
     public String getFileName() {
-        return this.fileName;
+        return fileName;
     }
 
     public long getFileSize() {
-        return this.fileSize;
+        return fileSize;
     }
 
     public void setFileSize(final long fileSize) {
@@ -124,7 +124,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getFilePath() {
-        return this.filePath;
+        return filePath;
     }
 
     public void setFilePath(final String filePath) {
@@ -132,7 +132,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getMimeType() {
-        return this.mimeType;
+        return mimeType;
     }
 
     /**
@@ -140,7 +140,7 @@ public class CustomFile implements Serializable {
      * @return the isValid
      */
     public Boolean getIsValid() {
-        return this.isValid;
+        return isValid;
     }
 
     /**
@@ -163,17 +163,16 @@ public class CustomFile implements Serializable {
      * @return the failureReason
      */
     public String getFailureReason() {
-        return this.failureReason;
+        return failureReason;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.baseSoftwareModuleName == null) ? 0 : this.baseSoftwareModuleName.hashCode());
-        result = prime * result
-                + ((this.baseSoftwareModuleVersion == null) ? 0 : this.baseSoftwareModuleVersion.hashCode());
-        result = prime * result + ((this.fileName == null) ? 0 : this.fileName.hashCode());
+        result = prime * result + ((baseSoftwareModuleName == null) ? 0 : baseSoftwareModuleName.hashCode());
+        result = prime * result + ((baseSoftwareModuleVersion == null) ? 0 : baseSoftwareModuleVersion.hashCode());
+        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
         return result;
     }
 
@@ -189,25 +188,25 @@ public class CustomFile implements Serializable {
             return false;
         }
         final CustomFile other = (CustomFile) obj;
-        if (this.baseSoftwareModuleName == null) {
+        if (baseSoftwareModuleName == null) {
             if (other.baseSoftwareModuleName != null) {
                 return false;
             }
-        } else if (!this.baseSoftwareModuleName.equals(other.baseSoftwareModuleName)) {
+        } else if (!baseSoftwareModuleName.equals(other.baseSoftwareModuleName)) {
             return false;
         }
-        if (this.baseSoftwareModuleVersion == null) {
+        if (baseSoftwareModuleVersion == null) {
             if (other.baseSoftwareModuleVersion != null) {
                 return false;
             }
-        } else if (!this.baseSoftwareModuleVersion.equals(other.baseSoftwareModuleVersion)) {
+        } else if (!baseSoftwareModuleVersion.equals(other.baseSoftwareModuleVersion)) {
             return false;
         }
-        if (this.fileName == null) {
+        if (fileName == null) {
             if (other.fileName != null) {
                 return false;
             }
-        } else if (!this.fileName.equals(other.fileName)) {
+        } else if (!fileName.equals(other.fileName)) {
             return false;
         }
         return true;

@@ -83,7 +83,7 @@ public class Rollout extends NamedEntity {
      * @return the distributionSet
      */
     public DistributionSet getDistributionSet() {
-        return this.distributionSet;
+        return distributionSet;
     }
 
     /**
@@ -98,7 +98,7 @@ public class Rollout extends NamedEntity {
      * @return the rolloutGroups
      */
     public List<RolloutGroup> getRolloutGroups() {
-        return this.rolloutGroups;
+        return rolloutGroups;
     }
 
     /**
@@ -113,7 +113,7 @@ public class Rollout extends NamedEntity {
      * @return the targetFilterQuery
      */
     public String getTargetFilterQuery() {
-        return this.targetFilterQuery;
+        return targetFilterQuery;
     }
 
     /**
@@ -128,7 +128,7 @@ public class Rollout extends NamedEntity {
      * @return the status
      */
     public RolloutStatus getStatus() {
-        return this.status;
+        return status;
     }
 
     /**
@@ -143,7 +143,7 @@ public class Rollout extends NamedEntity {
      * @return the lastCheck
      */
     public long getLastCheck() {
-        return this.lastCheck;
+        return lastCheck;
     }
 
     /**
@@ -158,7 +158,7 @@ public class Rollout extends NamedEntity {
      * @return the actionType
      */
     public ActionType getActionType() {
-        return this.actionType;
+        return actionType;
     }
 
     /**
@@ -173,7 +173,7 @@ public class Rollout extends NamedEntity {
      * @return the forcedTime
      */
     public long getForcedTime() {
-        return this.forcedTime;
+        return forcedTime;
     }
 
     /**
@@ -188,7 +188,7 @@ public class Rollout extends NamedEntity {
      * @return the totalTargets
      */
     public long getTotalTargets() {
-        return this.totalTargets;
+        return totalTargets;
     }
 
     /**
@@ -203,7 +203,7 @@ public class Rollout extends NamedEntity {
      * @return the rolloutGroupsTotal
      */
     public int getRolloutGroupsTotal() {
-        return this.rolloutGroupsTotal;
+        return rolloutGroupsTotal;
     }
 
     /**
@@ -218,7 +218,7 @@ public class Rollout extends NamedEntity {
      * @return the rolloutGroupsCreated
      */
     public int getRolloutGroupsCreated() {
-        return this.rolloutGroupsCreated;
+        return rolloutGroupsCreated;
     }
 
     /**
@@ -233,10 +233,10 @@ public class Rollout extends NamedEntity {
      * @return the totalTargetCountStatus
      */
     public TotalTargetCountStatus getTotalTargetCountStatus() {
-        if (this.totalTargetCountStatus == null) {
-            this.totalTargetCountStatus = new TotalTargetCountStatus(this.totalTargets);
+        if (totalTargetCountStatus == null) {
+            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
         }
-        return this.totalTargetCountStatus;
+        return totalTargetCountStatus;
     }
 
     /**
@@ -249,9 +249,9 @@ public class Rollout extends NamedEntity {
 
     @Override
     public String toString() {
-        return "Rollout [rolloutGroups=" + this.rolloutGroups + ", targetFilterQuery=" + this.targetFilterQuery
-                + ", distributionSet=" + this.distributionSet + ", status=" + this.status + ", lastCheck="
-                + this.lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+        return "Rollout [rolloutGroups=" + rolloutGroups + ", targetFilterQuery=" + targetFilterQuery
+                + ", distributionSet=" + distributionSet + ", status=" + status + ", lastCheck=" + lastCheck
+                + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
     /**

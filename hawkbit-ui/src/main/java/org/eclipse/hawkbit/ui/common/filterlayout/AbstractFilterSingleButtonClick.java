@@ -38,18 +38,18 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
         if (isButtonUnClicked(clickedButton)) {
             /* If same button clicked */
             clickedButton.removeStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
-            this.alreadyClickedButton = null;
+            alreadyClickedButton = null;
             filterUnClicked(clickedButton);
-        } else if (this.alreadyClickedButton != null) {
+        } else if (alreadyClickedButton != null) {
             /* If button clicked and some other button is already clicked */
-            this.alreadyClickedButton.removeStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
+            alreadyClickedButton.removeStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
             clickedButton.addStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
-            this.alreadyClickedButton = clickedButton;
+            alreadyClickedButton = clickedButton;
             filterClicked(clickedButton);
         } else {
             /* If button clicked and not other button is clicked currently */
             clickedButton.addStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
-            this.alreadyClickedButton = clickedButton;
+            alreadyClickedButton = clickedButton;
             filterClicked(clickedButton);
         }
     }
@@ -59,7 +59,7 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
      * @return
      */
     private boolean isButtonUnClicked(final Button clickedButton) {
-        return this.alreadyClickedButton != null && this.alreadyClickedButton.equals(clickedButton);
+        return alreadyClickedButton != null && alreadyClickedButton.equals(clickedButton);
     }
 
     /*
@@ -70,7 +70,7 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
      */
     @Override
     protected void setDefaultClickedButton(final Button button) {
-        this.alreadyClickedButton = button;
+        alreadyClickedButton = button;
         if (button != null) {
             button.addStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
         }
@@ -80,7 +80,7 @@ public abstract class AbstractFilterSingleButtonClick extends AbstractFilterButt
      * @return the alreadyClickedButton
      */
     public Button getAlreadyClickedButton() {
-        return this.alreadyClickedButton;
+        return alreadyClickedButton;
     }
 
     /**

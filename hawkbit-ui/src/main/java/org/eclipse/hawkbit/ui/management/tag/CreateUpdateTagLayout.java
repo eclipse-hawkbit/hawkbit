@@ -150,126 +150,126 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         createRequiredComponents();
         addListeners();
         buildLayout();
-        this.eventBus.subscribe(this);
+        eventBus.subscribe(this);
     }
 
     @PreDestroy
     void destroy() {
-        this.eventBus.unsubscribe(this);
+        eventBus.unsubscribe(this);
     }
 
     private void createRequiredComponents() {
-        this.createTagNw = this.i18n.get("label.create.tag");
-        this.updateTagNw = this.i18n.get("label.update.tag");
-        this.createTag = SPUIComponentProvider.getLabel(this.createTagNw, null);
-        this.updateTag = SPUIComponentProvider.getLabel(this.i18n.get("label.update.tag"), null);
-        this.comboLabel = SPUIComponentProvider.getLabel(this.i18n.get("label.choose.tag"), null);
-        this.madatoryLabel = getMandatoryLabel();
-        this.colorLabel = SPUIComponentProvider.getLabel(this.i18n.get("label.choose.tag.color"), null);
-        this.colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
+        createTagNw = i18n.get("label.create.tag");
+        updateTagNw = i18n.get("label.update.tag");
+        createTag = SPUIComponentProvider.getLabel(createTagNw, null);
+        updateTag = SPUIComponentProvider.getLabel(i18n.get("label.update.tag"), null);
+        comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag"), null);
+        madatoryLabel = getMandatoryLabel();
+        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
+        colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        this.tagName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME,
-                true, "", this.i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        this.tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
+        tagName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME,
+                true, "", i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
 
-        this.tagDesc = SPUIComponentProvider.getTextArea("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC,
-                false, "", this.i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        tagDesc = SPUIComponentProvider.getTextArea("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC,
+                false, "", i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
-        this.tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
-        this.tagDesc.setImmediate(true);
-        this.tagDesc.setNullRepresentation("");
+        tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
+        tagDesc.setImmediate(true);
+        tagDesc.setNullRepresentation("");
 
-        this.tagNameComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
-                this.i18n.get("label.combobox.tag"));
-        this.tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
-        this.tagNameComboBox.setImmediate(true);
+        tagNameComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
+                i18n.get("label.combobox.tag"));
+        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
+        tagNameComboBox.setImmediate(true);
 
-        this.saveTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_SAVE, "", "", "", true,
+        saveTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        this.saveTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        saveTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
-        this.discardTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_DISRACD, "", "",
+        discardTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_DISRACD, "", "",
                 "discard-button-style", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        this.discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
-        this.tagColorPreviewBtn = new Button();
-        this.tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn = new Button();
+        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(DEFAULT_COLOR);
-        this.tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
+        tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        this.selectors = new HashSet<>();
-        this.selectedColor = new Color(44, 151, 32);
-        this.selPreview = new SpColorPickerPreview(this.selectedColor);
+        selectors = new HashSet<>();
+        selectedColor = new Color(44, 151, 32);
+        selPreview = new SpColorPickerPreview(selectedColor);
 
-        this.colorSelect = new ColorPickerGradient("rgb-gradient", this.rgbConverter);
-        this.colorSelect.setColor(this.selectedColor);
-        this.colorSelect.setWidth("220px");
+        colorSelect = new ColorPickerGradient("rgb-gradient", rgbConverter);
+        colorSelect.setColor(selectedColor);
+        colorSelect.setWidth("220px");
 
-        this.redSlider = createRGBSlider("", "red");
-        this.greenSlider = createRGBSlider("", "green");
-        this.blueSlider = createRGBSlider("", "blue");
-        setRgbSliderValues(this.selectedColor);
+        redSlider = createRGBSlider("", "red");
+        greenSlider = createRGBSlider("", "green");
+        blueSlider = createRGBSlider("", "blue");
+        setRgbSliderValues(selectedColor);
 
         createOptionGroup();
 
     }
 
     private void buildLayout() {
-        this.comboLayout = new VerticalLayout();
+        comboLayout = new VerticalLayout();
 
-        this.sliders = new VerticalLayout();
-        this.sliders.addComponents(this.redSlider, this.greenSlider, this.blueSlider);
+        sliders = new VerticalLayout();
+        sliders.addComponents(redSlider, greenSlider, blueSlider);
 
-        this.selectors.add(this.colorSelect);
+        selectors.add(colorSelect);
 
-        this.colorPickerLayout = new VerticalLayout();
-        this.colorPickerLayout.setStyleName("rgb-vertical-layout");
-        this.colorPickerLayout.addComponent(this.selPreview);
-        this.colorPickerLayout.addComponent(this.colorSelect);
+        colorPickerLayout = new VerticalLayout();
+        colorPickerLayout.setStyleName("rgb-vertical-layout");
+        colorPickerLayout.addComponent(selPreview);
+        colorPickerLayout.addComponent(colorSelect);
 
-        this.fieldLayout = new VerticalLayout();
-        this.fieldLayout.setSpacing(false);
-        this.fieldLayout.setMargin(false);
-        this.fieldLayout.setWidth("100%");
-        this.fieldLayout.setHeight(null);
-        this.fieldLayout.addComponent(this.optiongroup);
-        this.fieldLayout.addComponent(this.comboLayout);
-        this.fieldLayout.addComponent(this.madatoryLabel);
-        this.fieldLayout.addComponent(this.tagName);
-        this.fieldLayout.addComponent(this.tagDesc);
+        fieldLayout = new VerticalLayout();
+        fieldLayout.setSpacing(false);
+        fieldLayout.setMargin(false);
+        fieldLayout.setWidth("100%");
+        fieldLayout.setHeight(null);
+        fieldLayout.addComponent(optiongroup);
+        fieldLayout.addComponent(comboLayout);
+        fieldLayout.addComponent(madatoryLabel);
+        fieldLayout.addComponent(tagName);
+        fieldLayout.addComponent(tagDesc);
 
         final HorizontalLayout colorLabelLayout = new HorizontalLayout();
-        colorLabelLayout.addComponents(this.colorLabel, this.tagColorPreviewBtn);
-        this.fieldLayout.addComponent(colorLabelLayout);
+        colorLabelLayout.addComponents(colorLabel, tagColorPreviewBtn);
+        fieldLayout.addComponent(colorLabelLayout);
 
         final HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.addComponent(this.saveTag);
-        buttonLayout.addComponent(this.discardTag);
-        buttonLayout.setComponentAlignment(this.discardTag, Alignment.BOTTOM_RIGHT);
-        buttonLayout.setComponentAlignment(this.saveTag, Alignment.BOTTOM_LEFT);
+        buttonLayout.addComponent(saveTag);
+        buttonLayout.addComponent(discardTag);
+        buttonLayout.setComponentAlignment(discardTag, Alignment.BOTTOM_RIGHT);
+        buttonLayout.setComponentAlignment(saveTag, Alignment.BOTTOM_LEFT);
         buttonLayout.addStyleName("window-style");
         buttonLayout.setWidth("152px");
 
         final VerticalLayout fieldButtonLayout = new VerticalLayout();
-        fieldButtonLayout.addComponent(this.fieldLayout);
+        fieldButtonLayout.addComponent(fieldLayout);
         fieldButtonLayout.addComponent(buttonLayout);
         fieldButtonLayout.setComponentAlignment(buttonLayout, Alignment.BOTTOM_CENTER);
 
-        this.mainLayout = new HorizontalLayout();
-        this.mainLayout.addComponent(fieldButtonLayout);
+        mainLayout = new HorizontalLayout();
+        mainLayout.addComponent(fieldButtonLayout);
 
-        setCompositionRoot(this.mainLayout);
+        setCompositionRoot(mainLayout);
 
     }
 
     private void addListeners() {
-        this.saveTag.addClickListener(event -> save(event));
-        this.discardTag.addClickListener(event -> discard(event));
-        this.colorSelect.addColorChangeListener(this);
-        this.selPreview.addColorChangeListener(this);
-        this.tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
-        this.optiongroup.addValueChangeListener(event -> optionValueChanged(event));
-        this.tagNameComboBox.addValueChangeListener(event -> tagNameChosen(event));
+        saveTag.addClickListener(event -> save(event));
+        discardTag.addClickListener(event -> discard(event));
+        colorSelect.addColorChangeListener(this);
+        selPreview.addColorChangeListener(this);
+        tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
+        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
+        tagNameComboBox.addValueChangeListener(event -> tagNameChosen(event));
         slidersValueChangeListeners();
     }
 
@@ -278,38 +278,37 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * on target tag if already selected.
      */
     private void previewButtonClicked() {
-        if (!this.tagPreviewBtnClicked) {
+        if (!tagPreviewBtnClicked) {
             setColor();
-            this.selPreview.setColor(this.selectedColor);
-            this.fieldLayout.addComponent(this.sliders);
-            this.mainLayout.addComponent(this.colorPickerLayout);
-            this.mainLayout.setComponentAlignment(this.colorPickerLayout, Alignment.BOTTOM_CENTER);
+            selPreview.setColor(selectedColor);
+            fieldLayout.addComponent(sliders);
+            mainLayout.addComponent(colorPickerLayout);
+            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.BOTTOM_CENTER);
         }
-        this.tagPreviewBtnClicked = !this.tagPreviewBtnClicked;
+        tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
     private void setColor() {
-        final String selectedOption = (String) this.optiongroup.getValue();
-        if (selectedOption == null || !selectedOption.equalsIgnoreCase(this.updateTagNw)) {
+        final String selectedOption = (String) optiongroup.getValue();
+        if (selectedOption == null || !selectedOption.equalsIgnoreCase(updateTagNw)) {
             return;
         }
 
-        if (this.tagNameComboBox.getValue() == null) {
-            this.selectedColor = rgbToColorConverter(DEFAULT_COLOR);
+        if (tagNameComboBox.getValue() == null) {
+            selectedColor = rgbToColorConverter(DEFAULT_COLOR);
             return;
         }
 
-        final TargetTag targetTagSelected = this.tagManagement
-                .findTargetTag(this.tagNameComboBox.getValue().toString());
+        final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue().toString());
 
         if (targetTagSelected == null) {
-            final DistributionSetTag distTag = this.tagManagement
-                    .findDistributionSetTag(this.tagNameComboBox.getValue().toString());
-            this.selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
+            final DistributionSetTag distTag = tagManagement
+                    .findDistributionSetTag(tagNameComboBox.getValue().toString());
+            selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
                     : rgbToColorConverter(DEFAULT_COLOR);
         } else {
-            this.selectedColor = targetTagSelected.getColour() != null
-                    ? rgbToColorConverter(targetTagSelected.getColour()) : rgbToColorConverter(DEFAULT_COLOR);
+            selectedColor = targetTagSelected.getColour() != null ? rgbToColorConverter(targetTagSelected.getColour())
+                    : rgbToColorConverter(DEFAULT_COLOR);
         }
 
     }
@@ -339,7 +338,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     }
 
     private Label getMandatoryLabel() {
-        final Label label = new Label(this.i18n.get("label.mandatory.field"));
+        final Label label = new Label(i18n.get("label.mandatory.field"));
         label.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_SMALL);
         return label;
     }
@@ -354,16 +353,16 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     }
 
     private void resetTagNameField() {
-        this.tagName.setEnabled(false);
-        this.tagName.clear();
+        tagName.setEnabled(false);
+        tagName.clear();
 
-        this.tagDesc.clear();
+        tagDesc.clear();
         restoreComponentStyles();
-        this.fieldLayout.removeComponent(this.sliders);
-        this.mainLayout.removeComponent(this.colorPickerLayout);
-        this.selectedColor = new Color(44, 151, 32);
-        this.selPreview.setColor(this.selectedColor);
-        this.tagPreviewBtnClicked = false;
+        fieldLayout.removeComponent(sliders);
+        mainLayout.removeComponent(colorPickerLayout);
+        selectedColor = new Color(44, 151, 32);
+        selPreview.setColor(selectedColor);
+        tagPreviewBtnClicked = false;
 
     }
 
@@ -375,30 +374,30 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      */
     private void optionValueChanged(final ValueChangeEvent event) {
         if ("Update Tag".equals(event.getProperty().getValue())) {
-            this.tagName.clear();
-            this.tagDesc.clear();
-            this.tagName.setEnabled(false);
+            tagName.clear();
+            tagDesc.clear();
+            tagName.setEnabled(false);
             populateTagNameCombo();
             // show target name combo
-            this.comboLayout.addComponent(this.comboLabel);
-            this.comboLayout.addComponent(this.tagNameComboBox);
+            comboLayout.addComponent(comboLabel);
+            comboLayout.addComponent(tagNameComboBox);
         } else {
-            this.tagName.setEnabled(true);
-            this.tagName.clear();
-            this.tagDesc.clear();
+            tagName.setEnabled(true);
+            tagName.clear();
+            tagDesc.clear();
             // hide target name combo
-            this.comboLayout.removeComponent(this.comboLabel);
-            this.comboLayout.removeComponent(this.tagNameComboBox);
+            comboLayout.removeComponent(comboLabel);
+            comboLayout.removeComponent(tagNameComboBox);
         }
         // close the color picker layout
-        this.tagPreviewBtnClicked = false;
+        tagPreviewBtnClicked = false;
         // reset the selected color - Set defualt color
         restoreComponentStyles();
         getPreviewButtonColor(DEFAULT_COLOR);
-        this.selPreview.setColor(rgbToColorConverter(DEFAULT_COLOR));
+        selPreview.setColor(rgbToColorConverter(DEFAULT_COLOR));
         // remove the sliders and color picker layout
-        this.fieldLayout.removeComponent(this.sliders);
-        this.mainLayout.removeComponent(this.colorPickerLayout);
+        fieldLayout.removeComponent(sliders);
+        mainLayout.removeComponent(colorPickerLayout);
 
     }
 
@@ -406,23 +405,23 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * reset the components.
      */
     protected void reset() {
-        this.tagName.setEnabled(true);
-        this.tagName.clear();
-        this.tagDesc.clear();
+        tagName.setEnabled(true);
+        tagName.clear();
+        tagDesc.clear();
         restoreComponentStyles();
 
         // hide target name combo
-        this.comboLayout.removeComponent(this.comboLabel);
-        this.comboLayout.removeComponent(this.tagNameComboBox);
-        this.fieldLayout.removeComponent(this.sliders);
-        this.mainLayout.removeComponent(this.colorPickerLayout);
+        comboLayout.removeComponent(comboLabel);
+        comboLayout.removeComponent(tagNameComboBox);
+        fieldLayout.removeComponent(sliders);
+        mainLayout.removeComponent(colorPickerLayout);
 
-        this.optiongroup.select(this.createTagNw);
+        optiongroup.select(createTagNw);
 
         // Default green color
-        this.selectedColor = new Color(44, 151, 32);
-        this.selPreview.setColor(this.selectedColor);
-        this.tagPreviewBtnClicked = false;
+        selectedColor = new Color(44, 151, 32);
+        selPreview.setColor(selectedColor);
+        tagPreviewBtnClicked = false;
     }
 
     /**
@@ -432,15 +431,14 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     @Override
     public void colorChanged(final ColorChangeEvent event) {
         setColor(event.getColor());
-        for (final ColorSelector select : this.selectors) {
-            if (!event.getSource().equals(select) && select.equals(this)
-                    && !select.getColor().equals(this.selectedColor)) {
-                select.setColor(this.selectedColor);
+        for (final ColorSelector select : selectors) {
+            if (!event.getSource().equals(select) && select.equals(this) && !select.getColor().equals(selectedColor)) {
+                select.setColor(selectedColor);
             }
         }
-        setRgbSliderValues(this.selectedColor);
+        setRgbSliderValues(selectedColor);
         getPreviewButtonColor(event.getColor().getCSS());
-        createDynamicStyleForComponents(this.tagName, this.tagDesc, event.getColor().getCSS());
+        createDynamicStyleForComponents(tagName, tagDesc, event.getColor().getCSS());
     }
 
     /**
@@ -466,11 +464,11 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     private void setRgbSliderValues(final Color color) {
         try {
             final double redColorValue = color.getRed();
-            this.redSlider.setValue(new Double(redColorValue));
+            redSlider.setValue(new Double(redColorValue));
             final double blueColorValue = color.getBlue();
-            this.blueSlider.setValue(new Double(blueColorValue));
+            blueSlider.setValue(new Double(blueColorValue));
             final double greenColorValue = color.getGreen();
-            this.greenSlider.setValue(new Double(greenColorValue));
+            greenSlider.setValue(new Double(greenColorValue));
         } catch (final ValueOutOfBoundsException e) {
             LOG.error("Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
                     + color.getBlue(), e);
@@ -497,10 +495,10 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * reset the tag name and tag description component border color.
      */
     private void restoreComponentStyles() {
-        this.tagName.removeStyleName(TAG_NAME_DYNAMIC_STYLE);
-        this.tagDesc.removeStyleName(TAG_DESC_DYNAMIC_STYLE);
-        this.tagName.addStyleName(SPUIDefinitions.TAG_NAME);
-        this.tagDesc.addStyleName(SPUIDefinitions.TAG_DESC);
+        tagName.removeStyleName(TAG_NAME_DYNAMIC_STYLE);
+        tagDesc.removeStyleName(TAG_DESC_DYNAMIC_STYLE);
+        tagName.addStyleName(SPUIDefinitions.TAG_NAME);
+        tagDesc.addStyleName(SPUIDefinitions.TAG_DESC);
         getPreviewButtonColor(DEFAULT_COLOR);
     }
 
@@ -525,12 +523,12 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         if (color == null) {
             return;
         }
-        this.selectedColor = color;
-        this.selPreview.setColor(this.selectedColor);
-        final String colorPickedPreview = this.selPreview.getColor().getCSS();
-        if (this.tagName.isEnabled() && null != this.colorSelect) {
-            createDynamicStyleForComponents(this.tagName, this.tagDesc, colorPickedPreview);
-            this.colorSelect.setColor(this.selPreview.getColor());
+        selectedColor = color;
+        selPreview.setColor(selectedColor);
+        final String colorPickedPreview = selPreview.getColor().getCSS();
+        if (tagName.isEnabled() && null != colorSelect) {
+            createDynamicStyleForComponents(tagName, tagDesc, colorPickedPreview);
+            colorSelect.setColor(selPreview.getColor());
         }
     }
 
@@ -538,36 +536,33 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * Value change listeners implementations of sliders.
      */
     private void slidersValueChangeListeners() {
-        this.redSlider.addValueChangeListener(new ValueChangeListener() {
+        redSlider.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = -8336732888800920839L;
 
             @Override
             public void valueChange(final ValueChangeEvent event) {
                 final double red = (Double) event.getProperty().getValue();
-                final Color newColor = new Color((int) red, CreateUpdateTagLayout.this.selectedColor.getGreen(),
-                        CreateUpdateTagLayout.this.selectedColor.getBlue());
+                final Color newColor = new Color((int) red, selectedColor.getGreen(), selectedColor.getBlue());
                 setColorToComponents(newColor);
             }
         });
-        this.greenSlider.addValueChangeListener(new ValueChangeListener() {
+        greenSlider.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1236358037766775663L;
 
             @Override
             public void valueChange(final ValueChangeEvent event) {
                 final double green = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(CreateUpdateTagLayout.this.selectedColor.getRed(), (int) green,
-                        CreateUpdateTagLayout.this.selectedColor.getBlue());
+                final Color newColor = new Color(selectedColor.getRed(), (int) green, selectedColor.getBlue());
                 setColorToComponents(newColor);
             }
         });
-        this.blueSlider.addValueChangeListener(new ValueChangeListener() {
+        blueSlider.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 8466370763686043947L;
 
             @Override
             public void valueChange(final ValueChangeEvent event) {
                 final double blue = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(CreateUpdateTagLayout.this.selectedColor.getRed(),
-                        CreateUpdateTagLayout.this.selectedColor.getGreen(), (int) blue);
+                final Color newColor = new Color(selectedColor.getRed(), selectedColor.getGreen(), (int) blue);
                 setColorToComponents(newColor);
             }
         });
@@ -575,9 +570,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     private void setColorToComponents(final Color newColor) {
         setColor(newColor);
-        this.colorSelect.setColor(newColor);
+        colorSelect.setColor(newColor);
         getPreviewButtonColor(newColor.getCSS());
-        createDynamicStyleForComponents(this.tagName, this.tagDesc, newColor.getCSS());
+        createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
     }
 
     @Override

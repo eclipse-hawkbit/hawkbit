@@ -58,10 +58,10 @@ public class TargetFilterQueryManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public TargetFilterQuery createTargetFilterQuery(@NotNull final TargetFilterQuery customTargetFilter) {
 
-        if (this.targetFilterQueryRepository.findByName(customTargetFilter.getName()) != null) {
+        if (targetFilterQueryRepository.findByName(customTargetFilter.getName()) != null) {
             throw new EntityAlreadyExistsException(customTargetFilter.getName());
         }
-        return this.targetFilterQueryRepository.save(customTargetFilter);
+        return targetFilterQueryRepository.save(customTargetFilter);
     }
 
     /**
@@ -74,7 +74,7 @@ public class TargetFilterQueryManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     public void deleteTargetFilterQuery(@NotNull final Long targetFilterQueryId) {
-        this.targetFilterQueryRepository.delete(targetFilterQueryId);
+        targetFilterQueryRepository.delete(targetFilterQueryId);
     }
 
     /**
@@ -87,7 +87,7 @@ public class TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Page<TargetFilterQuery> findAllTargetFilterQuery(@NotNull final Pageable pageable) {
-        return this.targetFilterQueryRepository.findAll(pageable);
+        return targetFilterQueryRepository.findAll(pageable);
     }
 
     /**
@@ -120,11 +120,11 @@ public class TargetFilterQueryManagement {
     private Page<TargetFilterQuery> findTargetFilterQueryByCriteriaAPI(@NotNull final Pageable pageable,
             final List<Specification<TargetFilterQuery>> specList) {
         if (specList == null || specList.isEmpty()) {
-            return this.targetFilterQueryRepository.findAll(pageable);
+            return targetFilterQueryRepository.findAll(pageable);
         }
 
         final Specifications<TargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
-        return this.targetFilterQueryRepository.findAll(specs, pageable);
+        return targetFilterQueryRepository.findAll(specs, pageable);
     }
 
     /**
@@ -137,7 +137,7 @@ public class TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public TargetFilterQuery findTargetFilterQueryByName(@NotNull final String targetFilterQueryName) {
-        return this.targetFilterQueryRepository.findByName(targetFilterQueryName);
+        return targetFilterQueryRepository.findByName(targetFilterQueryName);
     }
 
     /**
@@ -150,7 +150,7 @@ public class TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public TargetFilterQuery findTargetFilterQueryById(@NotNull final Long targetFilterQueryId) {
-        return this.targetFilterQueryRepository.findOne(targetFilterQueryId);
+        return targetFilterQueryRepository.findOne(targetFilterQueryId);
     }
 
     /**
@@ -166,7 +166,7 @@ public class TargetFilterQueryManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetFilterQuery updateTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {
         Assert.notNull(targetFilterQuery.getId());
-        return this.targetFilterQueryRepository.save(targetFilterQuery);
+        return targetFilterQueryRepository.save(targetFilterQuery);
     }
 
 }

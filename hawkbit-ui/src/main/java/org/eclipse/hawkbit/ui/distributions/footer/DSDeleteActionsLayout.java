@@ -102,7 +102,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     @PostConstruct
     protected void init() {
         super.init();
-        this.eventBus.subscribe(this);
+        eventBus.subscribe(this);
     }
 
     @PreDestroy
@@ -111,7 +111,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
          * It's good manners to do this, even though vaadin-spring will
          * automatically unsubscribe when this UI is garbage collected.
          */
-        this.eventBus.unsubscribe(this);
+        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -129,9 +129,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
             UI.getCurrent().access(() -> {
                 if (!hasUnsavedActions()) {
                     closeUnsavedActionsWindow();
-                    final String message = this.distConfirmationWindowLayout.getConsolidatedMessage();
+                    final String message = distConfirmationWindowLayout.getConsolidatedMessage();
                     if (message != null && message.length() > 0) {
-                        this.notification.displaySuccess(message);
+                        notification.displaySuccess(message);
                     }
                 }
                 updateDSActionCount();
@@ -148,7 +148,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected boolean hasDeletePermission() {
-        return this.permChecker.hasDeleteDistributionPermission();
+        return permChecker.hasDeleteDistributionPermission();
 
     }
 
@@ -162,7 +162,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     @Override
     protected boolean hasUpdatePermission() {
 
-        return this.permChecker.hasUpdateDistributionPermission();
+        return permChecker.hasUpdateDistributionPermission();
     }
 
     /*
@@ -174,7 +174,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected String getDeleteAreaLabel() {
-        return this.i18n.get("label.components.drop.area");
+        return i18n.get("label.components.drop.area");
     }
 
     /*
@@ -200,7 +200,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     @Override
     protected AcceptCriterion getDeleteLayoutAcceptCriteria() {
 
-        return this.distributionsViewAcceptCriteria;
+        return distributionsViewAcceptCriteria;
     }
 
     /*
@@ -228,7 +228,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
             processDeleteSWType(sourceComponent.getId());
 
         }
-        this.eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         hideDropHints();
 
     }
@@ -237,12 +237,12 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         final String distTypeName = HawkbitCommonUtil.removePrefix(distTypeId,
                 SPUIDefinitions.DISTRIBUTION_SET_TYPE_ID_PREFIXS);
         if (isDsTypeSelected(distTypeName)) {
-            this.notification.displayValidationError(
-                    this.i18n.get("message.dist.type.check.delete", new Object[] { distTypeName }));
+            notification
+                    .displayValidationError(i18n.get("message.dist.type.check.delete", new Object[] { distTypeName }));
         } else if (isDefaultDsType(distTypeName)) {
-            this.notification.displayValidationError(this.i18n.get("message.cannot.delete.default.dstype"));
+            notification.displayValidationError(i18n.get("message.cannot.delete.default.dstype"));
         } else {
-            this.manageDistUIState.getSelectedDeleteDistSetTypes().add(distTypeName);
+            manageDistUIState.getSelectedDeleteDistSetTypes().add(distTypeName);
             updateDSActionCount();
         }
     }
@@ -254,7 +254,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      * @return true if ds type is selected
      */
     private boolean isDsTypeSelected(final String distTypeName) {
-        return null != this.manageDistUIState.getManageDistFilters().getClickedDistSetType() && this.manageDistUIState
+        return null != manageDistUIState.getManageDistFilters().getClickedDistSetType() && manageDistUIState
                 .getManageDistFilters().getClickedDistSetType().getName().equalsIgnoreCase(distTypeName);
     }
 
@@ -262,13 +262,13 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         final String swModuleTypeName = HawkbitCommonUtil.removePrefix(swTypeId,
                 SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS);
 
-        if (this.manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
-                && this.manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
+        if (manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
+                && manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
                         .equalsIgnoreCase(swModuleTypeName)) {
-            this.notification.displayValidationError(
-                    this.i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
+            notification.displayValidationError(
+                    i18n.get("message.swmodule.type.check.delete", new Object[] { swModuleTypeName }));
         } else {
-            this.manageDistUIState.getSelectedDeleteSWModuleTypes().add(swModuleTypeName);
+            manageDistUIState.getSelectedDeleteSWModuleTypes().add(swModuleTypeName);
             updateDSActionCount();
         }
 
@@ -288,9 +288,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
          * the deleted list (or) some distributions are already in the deleted
          * distribution list.
          */
-        final int existingDeletedDistributionsSize = this.manageDistUIState.getDeletedDistributionList().size();
-        this.manageDistUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
-        final int newDeletedDistributionsSize = this.manageDistUIState.getDeletedDistributionList().size();
+        final int existingDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
+        manageDistUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
+        final int newDeletedDistributionsSize = manageDistUIState.getDeletedDistributionList().size();
         if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
             /*
              * No new distributions are added, all distributions dropped now are
@@ -298,7 +298,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
              * message accordingly.
              */
 
-            this.uiNotification.displayValidationError(this.i18n.get("message.targets.already.deleted"));
+            uiNotification.displayValidationError(i18n.get("message.targets.already.deleted"));
         } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
             /*
              * Not the all distributions dropped now are added to the delete
@@ -306,7 +306,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
              * delete list. Hence display warning message accordingly.
              */
 
-            this.uiNotification.displayValidationError(this.i18n.get("message.dist.deleted.pending"));
+            uiNotification.displayValidationError(i18n.get("message.dist.deleted.pending"));
         }
 
     }
@@ -324,7 +324,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
                     .getItemProperty(SPUILabelDefinitions.NAME_VERSION).getValue();
-            this.manageDistUIState.getDeleteSofwareModulesList().put(id, swModuleName);
+            manageDistUIState.getDeleteSofwareModulesList().put(id, swModuleName);
         });
     }
 
@@ -332,14 +332,14 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      * Update the software module delete count.
      */
     private void updateDSActionCount() {
-        int count = this.manageDistUIState.getSelectedDeleteDistSetTypes().size()
-                + this.manageDistUIState.getSelectedDeleteSWModuleTypes().size()
-                + this.manageDistUIState.getDeleteSofwareModulesList().size()
-                + this.manageDistUIState.getDeletedDistributionList().size();
+        int count = manageDistUIState.getSelectedDeleteDistSetTypes().size()
+                + manageDistUIState.getSelectedDeleteSWModuleTypes().size()
+                + manageDistUIState.getDeleteSofwareModulesList().size()
+                + manageDistUIState.getDeletedDistributionList().size();
 
-        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> mapEntry : this.manageDistUIState
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> mapEntry : manageDistUIState
                 .getAssignedList().entrySet()) {
-            count += this.manageDistUIState.getAssignedList().get(mapEntry.getKey()).size();
+            count += manageDistUIState.getAssignedList().get(mapEntry.getKey()).size();
         }
         updateActionsCount(count);
     }
@@ -375,7 +375,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected String getNoActionsButtonLabel() {
-        return this.i18n.get("button.no.actions");
+        return i18n.get("button.no.actions");
     }
 
     /*
@@ -388,7 +388,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     @Override
     protected String getActionsButtonLabel() {
 
-        return this.i18n.get("button.actions");
+        return i18n.get("button.actions");
 
     }
 
@@ -414,7 +414,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected String getUnsavedActionsWindowCaption() {
-        return this.i18n.get("caption.save.window");
+        return i18n.get("caption.save.window");
     }
 
     /*
@@ -426,9 +426,9 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected void unsavedActionsWindowClosed() {
-        final String message = this.distConfirmationWindowLayout.getConsolidatedMessage();
+        final String message = distConfirmationWindowLayout.getConsolidatedMessage();
         if (message != null && message.length() > 0) {
-            this.notification.displaySuccess(message);
+            notification.displaySuccess(message);
         }
 
     }
@@ -442,8 +442,8 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
      */
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        this.distConfirmationWindowLayout.init();
-        return this.distConfirmationWindowLayout;
+        distConfirmationWindowLayout.init();
+        return distConfirmationWindowLayout;
     }
 
     /*
@@ -457,12 +457,12 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     protected boolean hasUnsavedActions() {
         boolean unSavedActionsTypes = false;
         boolean unSavedActionsTables = false;
-        if (!this.manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()
-                || !this.manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()) {
+        if (!manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()
+                || !manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()) {
             unSavedActionsTypes = true;
-        } else if (!this.manageDistUIState.getDeleteSofwareModulesList().isEmpty()
-                || !this.manageDistUIState.getDeletedDistributionList().isEmpty()
-                || !this.manageDistUIState.getAssignedList().isEmpty()) {
+        } else if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()
+                || !manageDistUIState.getDeletedDistributionList().isEmpty()
+                || !manageDistUIState.getAssignedList().isEmpty()) {
             unSavedActionsTables = true;
         }
 
@@ -517,7 +517,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private DistributionSetType getCurrentDistributionSetType() {
-        return this.systemManagement.getTenantMetadata().getDefaultDsType();
+        return systemManagement.getTenantMetadata().getDefaultDsType();
     }
 
     /**

@@ -39,13 +39,13 @@ public class DataReportSeriesItem<T extends Serializable> implements Serializabl
      * @return the type of the data report item
      */
     public T getType() {
-        return this.type;
+        return type;
     }
 
     /**
      * @return the data of the data report item
      */
     public Number getData() {
-        return this.data;
+        return data;
     }
 }

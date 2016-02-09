@@ -120,7 +120,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            access(new DispatcherRunnable(this.eventBus, session, userContext, event));
+            access(new DispatcherRunnable(eventBus, session, userContext, event));
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -156,7 +156,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     protected void init(final VaadinRequest vaadinRequest) {
         LOG.info("ManagementUI init starts uiid - {}", getUI().getUIId());
         addDetachListener(this);
-        SpringContextHelper.setContext(this.context);
+        SpringContextHelper.setContext(context);
 
         Responsive.makeResponsive(this);
         addStyleName(ValoTheme.UI_WITH_MENU);
@@ -165,25 +165,25 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         final HorizontalLayout rootLayout = new HorizontalLayout();
         rootLayout.setSizeFull();
 
-        this.dashboardMenu.init();
-        this.dashboardMenu.setResponsive(Boolean.TRUE);
+        dashboardMenu.init();
+        dashboardMenu.setResponsive(Boolean.TRUE);
 
         final VerticalLayout contentVerticalLayout = new VerticalLayout();
         contentVerticalLayout.addComponent(buildHeader());
         contentVerticalLayout.setSizeFull();
 
-        rootLayout.addComponent(this.dashboardMenu);
+        rootLayout.addComponent(dashboardMenu);
         rootLayout.addComponent(contentVerticalLayout);
 
-        this.content = new HorizontalLayout();
-        contentVerticalLayout.addComponent(this.content);
-        this.content.setStyleName("view-content");
-        this.content.setSizeFull();
+        content = new HorizontalLayout();
+        contentVerticalLayout.addComponent(content);
+        content.setStyleName("view-content");
+        content.setSizeFull();
         rootLayout.setExpandRatio(contentVerticalLayout, 1.0f);
         contentVerticalLayout.setStyleName("main-content");
-        contentVerticalLayout.setExpandRatio(this.content, 1.0F);
+        contentVerticalLayout.setExpandRatio(content, 1.0F);
         setContent(rootLayout);
-        final Resource resource = this.context
+        final Resource resource = context
                 .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
         try {
             final CustomLayout customLayout = new CustomLayout(resource.getInputStream());
@@ -192,7 +192,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         } catch (final IOException ex) {
             LOG.error("Footer file is missing", ex);
         }
-        final Navigator navigator = new Navigator(this, this.content);
+        final Navigator navigator = new Navigator(this, content);
         navigator.addViewChangeListener(new ViewChangeListener() {
             @Override
             public boolean beforeViewChange(final ViewChangeEvent event) {
@@ -201,17 +201,17 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
             @Override
             public void afterViewChange(final ViewChangeEvent event) {
-                final DashboardMenuItem view = HawkbitUI.this.dashboardMenu.getByViewName(event.getViewName());
-                HawkbitUI.this.dashboardMenu.postViewChange(new PostViewChangeEvent(view));
+                final DashboardMenuItem view = dashboardMenu.getByViewName(event.getViewName());
+                dashboardMenu.postViewChange(new PostViewChangeEvent(view));
                 if (view == null) {
-                    HawkbitUI.this.content.setCaption(null);
+                    content.setCaption(null);
                     return;
                 }
-                HawkbitUI.this.content.setCaption(view.getDashboardCaptionLong());
+                content.setCaption(view.getDashboardCaptionLong());
             }
         });
 
-        navigator.setErrorView(this.errorview);
+        navigator.setErrorView(errorview);
         navigator.addProvider(new ManagementViewProvider());
         setNavigator(navigator);
         navigator.addView(EMPTY_VIEW, new Navigator.EmptyView());
@@ -221,7 +221,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         setLocale(new Locale(locale));
 
         UI.getCurrent().setErrorHandler(new SPUIErrorHandler());
-        LOG.info("Current locale of the application is : {}", this.i18n.getLocale());
+        LOG.info("Current locale of the application is : {}", i18n.getLocale());
     }
 
     private Component buildHeader() {
@@ -276,20 +276,20 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
         @Override
         public String getViewName(final String viewAndParameters) {
-            return HawkbitUI.this.viewProvider.getViewName(getStartView(viewAndParameters));
+            return viewProvider.getViewName(getStartView(viewAndParameters));
         }
 
         @Override
         public View getView(final String viewName) {
-            return HawkbitUI.this.viewProvider.getView(getStartView(viewName));
+            return viewProvider.getView(getStartView(viewName));
         }
 
         private String getStartView(final String viewName) {
-            final DashboardMenuItem view = HawkbitUI.this.dashboardMenu.getByViewName(viewName);
-            if ("".equals(viewName) && !HawkbitUI.this.dashboardMenu.isAccessibleViewsEmpty()) {
-                return HawkbitUI.this.dashboardMenu.getInitialViewName();
+            final DashboardMenuItem view = dashboardMenu.getByViewName(viewName);
+            if ("".equals(viewName) && !dashboardMenu.isAccessibleViewsEmpty()) {
+                return dashboardMenu.getInitialViewName();
             }
-            if (view == null || HawkbitUI.this.dashboardMenu.isAccessDenied(viewName)) {
+            if (view == null || dashboardMenu.isAccessDenied(viewName)) {
                 return " ";
             }
             return viewName;

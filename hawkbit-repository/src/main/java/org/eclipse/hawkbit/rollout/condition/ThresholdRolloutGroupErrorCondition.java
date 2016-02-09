@@ -30,8 +30,8 @@ public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditio
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-        final Long totalGroup = this.actionRepository.countByRolloutAndRolloutGroup(rollout, rolloutGroup);
-        final Long error = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
+        final Long totalGroup = actionRepository.countByRolloutAndRolloutGroup(rollout, rolloutGroup);
+        final Long error = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.ERROR);
         try {
             final Integer threshold = Integer.valueOf(expression);

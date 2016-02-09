@@ -114,7 +114,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Target findTargetByControllerID(@NotEmpty final String controllerId) {
-        return this.targetRepository.findByControllerId(controllerId);
+        return targetRepository.findByControllerId(controllerId);
     }
 
     /**
@@ -131,7 +131,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Target findTargetByControllerIDWithDetails(@NotEmpty final String controllerId) {
-        final Target result = this.targetRepository.findByControllerId(controllerId);
+        final Target result = targetRepository.findByControllerId(controllerId);
         // load lazy relations
         if (result != null) {
             result.getTargetInfo().getControllerAttributes().size();
@@ -158,8 +158,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public List<Target> findTargetsByControllerID(@NotEmpty final Collection<String> controllerIDs) {
-        return this.targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs));
+        return targetRepository.findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs));
     }
 
     /**
@@ -169,7 +168,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetsAll() {
-        return this.targetRepository.count();
+        return targetRepository.count();
     }
 
     /**
@@ -191,7 +190,7 @@ public class TargetManagement {
             }
             return cb.conjunction();
         };
-        return this.criteriaNoCountDao.findAll(spec, pageable, Target.class);
+        return criteriaNoCountDao.findAll(spec, pageable, Target.class);
     }
 
     /**
@@ -234,7 +233,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Page<Target> findTargetsAll(@NotNull final Specification<Target> spec, @NotNull final Pageable pageable) {
-        return this.targetRepository.findAll(spec, pageable);
+        return targetRepository.findAll(spec, pageable);
     }
 
     /**
@@ -252,8 +251,7 @@ public class TargetManagement {
     public List<Target> findTargetsByControllerIDsWithTags(@NotNull final List<String> controllerIDs) {
         final List<List<String>> partition = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT);
         return partition.stream()
-                .map(ids -> this.targetRepository
-                        .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(ids)))
+                .map(ids -> targetRepository.findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(ids)))
                 .flatMap(t -> t.stream()).collect(Collectors.toList());
     }
 
@@ -272,7 +270,7 @@ public class TargetManagement {
     public Target updateTarget(@NotNull final Target target) {
         Assert.notNull(target.getId());
         target.setNew(false);
-        return this.targetRepository.save(target);
+        return targetRepository.save(target);
     }
 
     /**
@@ -289,7 +287,7 @@ public class TargetManagement {
             + SpringEvalExpressions.IS_CONTROLLER)
     public List<Target> updateTargets(@NotNull final List<Target> targets) {
         targets.forEach(target -> target.setNew(false));
-        return this.targetRepository.save(targets);
+        return targetRepository.save(targets);
     }
 
     /**
@@ -307,11 +305,11 @@ public class TargetManagement {
         // tenant! Delete statement are not automatically enhanced with the
         // @FilterDef of the
         // hibernate session.
-        final List<Long> targetsForCurrentTenant = this.targetRepository.findAll(Lists.newArrayList(targetIDs)).stream()
+        final List<Long> targetsForCurrentTenant = targetRepository.findAll(Lists.newArrayList(targetIDs)).stream()
                 .map(Target::getId).collect(Collectors.toList());
         if (!targetsForCurrentTenant.isEmpty()) {
-            this.targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
-            this.targetRepository.deleteByIdIn(targetsForCurrentTenant);
+            targetInfoRepository.deleteByTargetIdIn(targetsForCurrentTenant);
+            targetRepository.deleteByIdIn(targetsForCurrentTenant);
         }
     }
 
@@ -331,7 +329,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     public Page<Target> findTargetByAssignedDistributionSet(@NotNull final Long distributionSetID,
             @NotNull final Pageable pageReq) {
-        return this.targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
+        return targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
     }
 
     /**
@@ -352,7 +350,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     public Page<Target> findTargetByAssignedDistributionSet(@NotNull final Long distributionSetID,
             final Specification<Target> spec, @NotNull final Pageable pageReq) {
-        return this.targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
+        return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
                 TargetSpecifications.hasAssignedDistributionSet(distributionSetID).toPredicate(root, query, cb),
                 spec.toPredicate(root, query, cb)), pageReq);
     }
@@ -372,7 +370,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     public Page<Target> findTargetByInstalledDistributionSet(@NotNull final Long distributionSetID,
             @NotNull final Pageable pageReq) {
-        return this.targetRepository.findByTargetInfoInstalledDistributionSetId(pageReq, distributionSetID);
+        return targetRepository.findByTargetInfoInstalledDistributionSetId(pageReq, distributionSetID);
     }
 
     /**
@@ -391,7 +389,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetId,
             final Specification<Target> spec, final Pageable pageable) {
-        return this.targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
+        return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
                 TargetSpecifications.hasInstalledDistributionSet(distributionSetId).toPredicate(root, query, cb),
                 spec.toPredicate(root, query, cb)), pageable);
     }
@@ -411,7 +409,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Page<Target> findTargetByUpdateStatus(@NotNull final Pageable pageable,
             @NotNull final TargetUpdateStatus status) {
-        return this.targetRepository.findByTargetInfoUpdateStatus(pageable, status);
+        return targetRepository.findByTargetInfoUpdateStatus(pageable, status);
     }
 
     /**
@@ -511,17 +509,17 @@ public class TargetManagement {
      */
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<Target>> specList) {
         if (specList == null || specList.isEmpty()) {
-            return this.criteriaNoCountDao.findAll(pageable, Target.class);
+            return criteriaNoCountDao.findAll(pageable, Target.class);
         }
-        return this.criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, Target.class);
+        return criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, Target.class);
     }
 
     private Long countByCriteriaAPI(final List<Specification<Target>> specList) {
         if (specList == null || specList.isEmpty()) {
-            return this.targetRepository.count();
+            return targetRepository.count();
         }
 
-        return this.targetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
+        return targetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     /**
@@ -562,10 +560,9 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetTagAssigmentResult toggleTagAssignment(@NotEmpty final Collection<String> targetIds,
             @NotNull final String tagName) {
-        final TargetTag tag = this.targetTagRepository.findByNameEquals(tagName);
-        final List<Target> alreadyAssignedTargets = this.targetRepository.findByTagNameAndControllerIdIn(tagName,
-                targetIds);
-        final List<Target> allTargets = this.targetRepository
+        final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
+        final List<Target> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName, targetIds);
+        final List<Target> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
 
         // all are already assigned -> unassign
@@ -574,7 +571,7 @@ public class TargetManagement {
             final TargetTagAssigmentResult result = new TargetTagAssigmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
-            this.afterCommit.afterCommit(() -> this.eventBus.post(new TargetTagAssigmentResultEvent(result)));
+            afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
             return result;
         }
 
@@ -582,12 +579,12 @@ public class TargetManagement {
         // some or none are assigned -> assign
         allTargets.forEach(target -> target.getTags().add(tag));
         final TargetTagAssigmentResult result = new TargetTagAssigmentResult(alreadyAssignedTargets.size(),
-                allTargets.size(), 0, this.targetRepository.save(allTargets), Collections.emptyList(), tag);
+                allTargets.size(), 0, targetRepository.save(allTargets), Collections.emptyList(), tag);
 
-        this.afterCommit.afterCommit(() -> this.eventBus.post(new TargetTagAssigmentResultEvent(result)));
+        afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
 
         // no reason to persist the tag
-        this.entityManager.detach(tag);
+        entityManager.detach(tag);
         return result;
     }
 
@@ -605,16 +602,16 @@ public class TargetManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public List<Target> assignTag(@NotEmpty final Collection<String> targetIds, @NotNull final TargetTag tag) {
-        final List<Target> allTargets = this.targetRepository
+        final List<Target> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
 
         allTargets.forEach(target -> target.getTags().add(tag));
-        final List<Target> save = this.targetRepository.save(allTargets);
+        final List<Target> save = targetRepository.save(allTargets);
 
-        this.afterCommit.afterCommit(() -> {
+        afterCommit.afterCommit(() -> {
             final TargetTagAssigmentResult assigmentResult = new TargetTagAssigmentResult(0, save.size(), 0, save,
                     Collections.emptyList(), tag);
-            this.eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
         });
 
         return save;
@@ -623,11 +620,11 @@ public class TargetManagement {
     private List<Target> unAssignTag(@NotEmpty final Collection<Target> targets, @NotNull final TargetTag tag) {
         targets.forEach(target -> target.getTags().remove(tag));
 
-        final List<Target> save = this.targetRepository.save(targets);
-        this.afterCommit.afterCommit(() -> {
+        final List<Target> save = targetRepository.save(targets);
+        afterCommit.afterCommit(() -> {
             final TargetTagAssigmentResult assigmentResult = new TargetTagAssigmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
-            this.eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
+            eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
         });
         return save;
     }
@@ -660,7 +657,7 @@ public class TargetManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Target unAssignTag(@NotNull final String controllerID, @NotNull final TargetTag targetTag) {
-        final List<Target> allTargets = this.targetRepository
+        final List<Target> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID)));
         final List<Target> unAssignTag = unAssignTag(allTargets, targetTag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
@@ -711,7 +708,7 @@ public class TargetManagement {
             @NotNull final Long orderByDistributionId, final Long filterByDistributionId,
             final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
             final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
-        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Target> query = cb.createQuery(Target.class);
         final Root<Target> targetRoot = query.from(Target.class);
 
@@ -753,7 +750,7 @@ public class TargetManagement {
         // multiselect order) of the array and
         // the 2nd contains the selectCase int value.
         final int pageSize = pageable.getPageSize();
-        final List<Target> resultList = this.entityManager.createQuery(query).setFirstResult(pageable.getOffset())
+        final List<Target> resultList = entityManager.createQuery(query).setFirstResult(pageable.getOffset())
                 .setMaxResults(pageSize + 1).getResultList();
         final boolean hasNext = resultList.size() > pageSize;
         return new SliceImpl<>(resultList, pageable, hasNext);
@@ -782,7 +779,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByAssignedDistributionSet(final Long distId) {
-        return this.targetRepository.countByAssignedDistributionSetId(distId);
+        return targetRepository.countByAssignedDistributionSetId(distId);
     }
 
     /**
@@ -795,7 +792,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByInstalledDistributionSet(final Long distId) {
-        return this.targetRepository.countByTargetInfoInstalledDistributionSetId(distId);
+        return targetRepository.countByTargetInfoInstalledDistributionSetId(distId);
     }
 
     /**
@@ -806,10 +803,10 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public List<TargetIdName> findAllTargetIds() {
-        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<TargetIdName> query = cb.createQuery(TargetIdName.class);
         final Root<Target> targetRoot = query.from(Target.class);
-        return this.entityManager.createQuery(query.multiselect(targetRoot.get(Target_.id),
+        return entityManager.createQuery(query.multiselect(targetRoot.get(Target_.id),
                 targetRoot.get(Target_.controllerId), targetRoot.get(Target_.name))).getResultList();
 
     }
@@ -842,7 +839,7 @@ public class TargetManagement {
     public List<TargetIdName> findAllTargetIdsByFilters(final PageRequest pageRequest,
             final Long filterByDistributionId, final Collection<TargetUpdateStatus> filterByStatus,
             final String filterBySearchText, final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
-        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<Target> targetRoot = query.from(Target.class);
         List<Object[]> resultList;
@@ -879,7 +876,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public List<TargetIdName> findAllTargetIdsByTargetFilterQuery(final PageRequest pageRequest,
             @NotNull final TargetFilterQuery targetFilterQuery) {
-        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<Target> targetRoot = query.from(Target.class);
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetRoot.get(Target_.id),
@@ -905,7 +902,7 @@ public class TargetManagement {
 
     @PreDestroy
     void destroy() {
-        this.eventBus.unregister(this);
+        eventBus.unregister(this);
     }
 
     /**
@@ -934,12 +931,12 @@ public class TargetManagement {
     public Target createTarget(@NotNull final Target target, @NotNull final TargetUpdateStatus status,
             final Long lastTargetQuery, final URI address) {
 
-        if (this.targetRepository.findByControllerId(target.getControllerId()) != null) {
+        if (targetRepository.findByControllerId(target.getControllerId()) != null) {
             throw new EntityAlreadyExistsException(target.getControllerId());
         }
 
         target.setNew(true);
-        final Target savedTarget = this.targetRepository.save(target);
+        final Target savedTarget = targetRepository.save(target);
         final TargetInfo targetInfo = savedTarget.getTargetInfo();
         targetInfo.setUpdateStatus(status);
         if (lastTargetQuery != null) {
@@ -949,7 +946,7 @@ public class TargetManagement {
             targetInfo.setAddress(address.toString());
         }
         targetInfo.setNew(true);
-        final Target targetToReturn = this.targetInfoRepository.save(targetInfo).getTarget();
+        final Target targetToReturn = targetInfoRepository.save(targetInfo).getTarget();
         targetInfo.setNew(false);
         return targetToReturn;
 
@@ -992,7 +989,7 @@ public class TargetManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final List<Target> targets) {
-        if (!targets.isEmpty() && this.targetRepository.countByControllerIdIn(
+        if (!targets.isEmpty() && targetRepository.countByControllerIdIn(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }
@@ -1025,7 +1022,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final Collection<Target> targets,
             @NotNull final TargetUpdateStatus status, final long lastTargetQuery, final URI address) {
-        if (this.targetRepository.countByControllerIdIn(
+        if (targetRepository.countByControllerIdIn(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }
@@ -1047,8 +1044,8 @@ public class TargetManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public List<Target> findTargetsByTag(@NotNull final String tagName) {
-        final TargetTag tag = this.targetTagRepository.findByNameEquals(tagName);
-        return this.targetRepository.findByTag(tag);
+        final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
+        return targetRepository.findByTag(tag);
     }
 
     /**
@@ -1061,7 +1058,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {
         final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
-        return this.targetRepository.count(specs);
+        return targetRepository.count(specs);
     }
 
     /**
@@ -1074,7 +1071,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final String targetFilterQuery) {
         final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
-        return this.targetRepository.count(specs);
+        return targetRepository.count(specs);
     }
 
     private List<Object[]> getTargetIdNameResultSet(final PageRequest pageRequest, final CriteriaBuilder cb,
@@ -1091,10 +1088,10 @@ public class TargetManagement {
                 }
             }
             multiselect.orderBy(orders);
-            resultList = this.entityManager.createQuery(multiselect).setFirstResult(pageRequest.getOffset())
+            resultList = entityManager.createQuery(multiselect).setFirstResult(pageRequest.getOffset())
                     .setMaxResults(pageRequest.getPageSize()).getResultList();
         } else {
-            resultList = this.entityManager.createQuery(multiselect).getResultList();
+            resultList = entityManager.createQuery(multiselect).getResultList();
         }
         return resultList;
     }

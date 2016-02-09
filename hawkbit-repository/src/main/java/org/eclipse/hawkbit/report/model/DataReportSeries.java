@@ -49,8 +49,8 @@ public class DataReportSeries<T extends Serializable> extends AbstractReportSeri
     }
 
     private void setData(final List<DataReportSeriesItem<T>> values) {
-        this.data.clear();
-        this.data.addAll(values);
+        data.clear();
+        data.addAll(values);
     }
 
     /**
@@ -58,10 +58,10 @@ public class DataReportSeries<T extends Serializable> extends AbstractReportSeri
      */
     @SuppressWarnings("unchecked")
     public DataReportSeriesItem<T>[] getData() {
-        return this.data.toArray(new DataReportSeriesItem[this.data.size()]);
+        return data.toArray(new DataReportSeriesItem[data.size()]);
     }
 
     public Stream<DataReportSeriesItem<T>> getDataStream() {
-        return this.data.stream();
+        return data.stream();
     }
 }

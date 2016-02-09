@@ -57,7 +57,7 @@ import com.vaadin.ui.UI;
 
 /**
  * Common util class.
- *
+ * 
  *
  *
  */
@@ -122,7 +122,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check Map is valid.
-     *
+     * 
      * @param mapCheck
      *            as Map
      * @return boolean as flag
@@ -138,7 +138,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check Map is valid.
-     *
+     * 
      * @param mapCheck
      *            as Map
      * @return boolean as flag
@@ -154,7 +154,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check Map is valid.
-     *
+     * 
      * @param mapCheck
      *            as Map
      * @return boolean as flag
@@ -170,7 +170,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check List is valid.
-     *
+     * 
      * @param listCheck
      *            as List
      * @return boolean as flag
@@ -186,7 +186,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check Boolean Array is valid.
-     *
+     * 
      * @param bolArray
      *            as List
      * @return boolean as flag
@@ -202,7 +202,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check String null, return empty.
-     *
+     * 
      * @param nString
      *            as String
      * @return String
@@ -217,7 +217,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Check valid String.
-     *
+     * 
      * @param nString
      *            as String
      * @return boolean as flag
@@ -232,7 +232,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Trim the text and convert into null in case of empty string.
-     *
+     * 
      * @param text
      *            as text to be trimed
      * @return null if the text is null or if the text is blank, text.trim() if
@@ -249,7 +249,7 @@ public final class HawkbitCommonUtil {
     /**
      * Concatenate the given text all the string arguments with the given
      * delimiter.
-     *
+     * 
      * @param delimiter
      *            the delimiter text to be used while concatenation.
      * @param texts
@@ -275,7 +275,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Returns the input text within html bold tag <b>..</b>.
-     *
+     * 
      * @param text
      *            is the text to be converted in to Bold
      * @return null if the input text param is null returns text with <b>...</b>
@@ -294,7 +294,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get target label Id.
-     *
+     * 
      * @param controllerId
      *            as String
      * @return String as label name
@@ -360,7 +360,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Artifact Details.
-     *
+     * 
      * @param name
      * @return
      */
@@ -373,7 +373,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Artifact Details.
-     *
+     * 
      * @param caption
      *            as caption of the details
      * @param name
@@ -389,7 +389,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get Label for Action History Details.
-     *
+     * 
      * @param name
      * @return
      */
@@ -402,7 +402,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get tool tip for Poll status.
-     *
+     * 
      * @param pollStatus
      * @param i18N
      * @return
@@ -449,7 +449,7 @@ public final class HawkbitCommonUtil {
     /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
-     *
+     * 
      * @param newBrowserHeight
      *            as current browser height.
      * @return extra height required to increase.
@@ -668,7 +668,7 @@ public final class HawkbitCommonUtil {
     /**
      * Create javascript to display number of targets or distributions your are
      * dragging in the drag image.
-     *
+     * 
      * @param count
      * @return
      */
@@ -688,7 +688,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get IM User for user UUID.
-     *
+     * 
      * @param uuid
      * @return imReslovedUser user details
      */
@@ -699,7 +699,7 @@ public final class HawkbitCommonUtil {
             final UserDetailsService idManagement = SpringContextHelper.getBean(UserDetailsService.class);
             try {
                 imReslovedUser = HawkbitCommonUtil.getFormattedName(idManagement.loadUserByUsername(uuid));
-            } catch (final UsernameNotFoundException e) {
+            } catch (final UsernameNotFoundException e) { // NOSONAR
                 // nope not need to handle
             }
             // If Null display the UID
@@ -712,7 +712,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get formatted label.Appends ellipses if content does not fit the label.
-     *
+     * 
      * @param labelContent
      *            content
      * @return Label
@@ -790,7 +790,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Duplicate check - Unique Key.
-     *
+     * 
      * @param name
      *            as string
      * @param version
@@ -809,7 +809,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Add new base software module.
-     *
+     * 
      * @param bsname
      *            base software module name
      * @param bsversion
@@ -857,7 +857,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Display Target Tag action message.
-     *
+     * 
      * @param targTagName
      *            as tag name
      * @param result
@@ -903,7 +903,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get message to be displayed after distribution tag assignment.
-     *
+     * 
      * @param targTagName
      *            tag name
      * @param result
@@ -949,7 +949,7 @@ public final class HawkbitCommonUtil {
     /**
      * Create a lazy query container for the given query bean factory with empty
      * configurations.
-     *
+     * 
      * @param queryFactory
      *            is reference of {@link BeanQueryFactory<? extends
      *            AbstractBeanQuery>} on which lazy container should create.
@@ -963,9 +963,9 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     *
+     * 
      * Create lazy query container for DS type.
-     *
+     * 
      * @param queryFactory
      * @return LazyQueryContainer
      */
@@ -978,7 +978,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Set distribution table column properties.
-     *
+     * 
      * @param container
      *            table container
      */
@@ -996,7 +996,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get visible columns in table.
-     *
+     * 
      * @param isMaximized
      *            true if table is maximized
      * @param isShowPinColumn
@@ -1033,7 +1033,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Reset the software module table rows highlight css.
-     *
+     * 
      * @return javascript to rest software module table rows highlight css.
      */
     public static String getScriptSMHighlightReset() {
@@ -1042,7 +1042,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Highlight software module rows with the color of sw-type.
-     *
+     * 
      * @param colorCSS
      *            color to generate the css script.
      * @return javascript to append software module table rows with highlighted
@@ -1058,7 +1058,7 @@ public final class HawkbitCommonUtil {
     /**
      * Get javascript to reflect new color selection in color picker preview for
      * name and description fields .
-     *
+     * 
      * @param colorPickedPreview
      *            changed color
      * @return javascript for the selected color.
@@ -1078,7 +1078,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get javascript to reflect new color selection for preview button.
-     *
+     * 
      * @param color
      *            changed color
      * @return javascript for the selected color.
@@ -1095,7 +1095,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Java script to display drop hints for tags.
-     *
+     * 
      * @return javascript
      */
     public static String dispTargetTagsDropHintScript() {
@@ -1108,7 +1108,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Java script to hide drop hints for tags.
-     *
+     * 
      * @return javascript
      */
     public static String hideTargetTagsDropHintScript() {
@@ -1117,7 +1117,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Java script to display drop hint for Delete button.
-     *
+     * 
      * @return javascript
      */
     public static String dispDeleteDropHintScript() {
@@ -1130,7 +1130,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Java script to hide drop hint for delete button.
-     *
+     * 
      * @return javascript
      */
     public static String hideDeleteDropHintScript() {
@@ -1139,7 +1139,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get the details of selected rows of {@link TargetTable}.
-     *
+     * 
      * @param sourceTable
      * @return set of {@link TargetIdName}
      */
@@ -1154,7 +1154,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Get the details of selected rows of {@link DistributionTable}.
-     *
+     * 
      * @param sourceTable
      * @return set of {@link DistributionSetIdName}
      */
@@ -1168,9 +1168,9 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     *
+     * 
      * Add target table container properties.
-     *
+     * 
      * @param container
      *            table container
      */
@@ -1202,9 +1202,9 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     *
+     * 
      * Apply style for status label in target table.
-     *
+     * 
      * @param targetTable
      *            target table
      * @param pinBtn
@@ -1234,7 +1234,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Set status progress bar value.
-     *
+     * 
      * @param bar
      *            DistributionBar
      * @param statusName
@@ -1253,7 +1253,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Initialize status progress bar with values and number of parts on load.
-     *
+     * 
      * @param bar
      *            DistributionBar
      * @param item
@@ -1282,7 +1282,7 @@ public final class HawkbitCommonUtil {
     /**
      * Formats the finished percentage of a rollout group into a string with one
      * digit after comma.
-     *
+     * 
      * @param rolloutGroup
      *            the rollout group
      * @param finishedPercentage
@@ -1311,7 +1311,7 @@ public final class HawkbitCommonUtil {
 
     /**
      * Reset the values of status progress bar on change of values.
-     *
+     * 
      * @param bar
      *            DistributionBar
      * @param item

@@ -64,28 +64,28 @@ public class ArtifactUploadState implements Serializable {
      * @return
      */
     public SoftwareModuleFilters getSoftwareModuleFilters() {
-        return this.softwareModuleFilters;
+        return softwareModuleFilters;
     }
 
     /**
      * @return the selectedSofwareModules
      */
     public Map<Long, String> getDeleteSofwareModules() {
-        return this.deleteSofwareModules;
+        return deleteSofwareModules;
     }
 
     /**
      * @return the fileSelected
      */
     public Set<CustomFile> getFileSelected() {
-        return this.fileSelected;
+        return fileSelected;
     }
 
     /**
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return this.selectedBaseSwModuleId != null ? Optional.of(this.selectedBaseSwModuleId) : Optional.empty();
+        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
     }
 
     /**
@@ -100,8 +100,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the selectedBaseSoftwareModule
      */
     public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
-        return this.selectedBaseSoftwareModule == null ? Optional.empty()
-                : Optional.of(this.selectedBaseSoftwareModule);
+        return selectedBaseSoftwareModule == null ? Optional.empty() : Optional.of(selectedBaseSoftwareModule);
     }
 
     /**
@@ -116,14 +115,14 @@ public class ArtifactUploadState implements Serializable {
      * @return the baseSwModuleList
      */
     public Map<String, SoftwareModule> getBaseSwModuleList() {
-        return this.baseSwModuleList;
+        return baseSwModuleList;
     }
 
     /**
      * @return the selectedSoftwareModules
      */
     public Set<Long> getSelectedSoftwareModules() {
-        return this.selectedSoftwareModules;
+        return selectedSoftwareModules;
     }
 
     /**
@@ -138,7 +137,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the swTypeFilterClosed
      */
     public boolean isSwTypeFilterClosed() {
-        return this.swTypeFilterClosed;
+        return swTypeFilterClosed;
     }
 
     /**
@@ -153,7 +152,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the isSwModuleTableMaximized
      */
     public boolean isSwModuleTableMaximized() {
-        return this.isSwModuleTableMaximized;
+        return isSwModuleTableMaximized;
     }
 
     /**
@@ -165,14 +164,14 @@ public class ArtifactUploadState implements Serializable {
     }
 
     public Set<String> getSelectedDeleteSWModuleTypes() {
-        return this.selectedDeleteSWModuleTypes;
+        return selectedDeleteSWModuleTypes;
     }
 
     /**
      * @return the isArtifactDetailsMaximized
      */
     public boolean isArtifactDetailsMaximized() {
-        return this.isArtifactDetailsMaximized;
+        return isArtifactDetailsMaximized;
     }
 
     /**
@@ -187,7 +186,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the noDataAvilableSoftwareModule
      */
     public boolean isNoDataAvilableSoftwareModule() {
-        return this.noDataAvilableSoftwareModule;
+        return noDataAvilableSoftwareModule;
     }
 
     /**

@@ -61,41 +61,41 @@ public class DDISimulatedDevice extends AbstractSimulatedDevice {
     @Override
     public void clean() {
         super.clean();
-        this.removed = true;
+        removed = true;
     }
 
     public int getPollDelaySec() {
-        return this.pollDelaySec;
+        return pollDelaySec;
     }
 
     /**
      * Polls the base URL for the DDI API interface.
      */
     public void poll() {
-        if (!this.removed) {
-            final String basePollJson = this.controllerResource.get(getTenant(), getId());
+        if (!removed) {
+            final String basePollJson = controllerResource.get(getTenant(), getId());
             try {
                 final String href = JsonPath.parse(basePollJson).read("_links.deploymentBase.href");
                 final long actionId = Long.parseLong(href.substring(href.lastIndexOf("/") + 1, href.indexOf("?")));
-                if (this.currentActionId == null) {
-                    final String deploymentJson = this.controllerResource.getDeployment(getTenant(), getId(), actionId);
+                if (currentActionId == null) {
+                    final String deploymentJson = controllerResource.getDeployment(getTenant(), getId(), actionId);
                     final String swVersion = JsonPath.parse(deploymentJson).read("deployment.chunks[0].version");
-                    this.currentActionId = actionId;
-                    this.deviceUpdater.startUpdate(getTenant(), getId(), actionId, swVersion, (device, actionId1) -> {
+                    currentActionId = actionId;
+                    deviceUpdater.startUpdate(getTenant(), getId(), actionId, swVersion, (device, actionId1) -> {
                         switch (device.getResponseStatus()) {
                         case SUCCESSFUL:
-                            DDISimulatedDevice.this.controllerResource.postSuccessFeedback(getTenant(), getId(),
+                            controllerResource.postSuccessFeedback(getTenant(), getId(),
                                     actionId1);
                             break;
                         case ERROR:
-                            DDISimulatedDevice.this.controllerResource.postErrorFeedback(getTenant(), getId(),
+                            controllerResource.postErrorFeedback(getTenant(), getId(),
                                     actionId1);
                             break;
                         default:
                             throw new IllegalStateException(
                                     "simulated device has an unknown response status + " + device.getResponseStatus());
                         }
-                        DDISimulatedDevice.this.currentActionId = null;
+                        currentActionId = null;
                     });
                 }
             } catch (final PathNotFoundException e) {

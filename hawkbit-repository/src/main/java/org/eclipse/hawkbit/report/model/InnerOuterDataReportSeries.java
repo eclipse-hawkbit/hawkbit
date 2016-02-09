@@ -39,13 +39,13 @@ public class InnerOuterDataReportSeries<T extends Serializable> {
      * @return the innerSeries
      */
     public DataReportSeries<T> getInnerSeries() {
-        return this.innerSeries;
+        return innerSeries;
     }
 
     /**
      * @return the outerSeries
      */
     public DataReportSeries<T> getOuterSeries() {
-        return this.outerSeries;
+        return outerSeries;
     }
 }

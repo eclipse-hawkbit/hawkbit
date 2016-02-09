@@ -60,7 +60,7 @@ public class TotalTargetCountStatus {
      * @return the statusTotalCountMap the state map
      */
     public Map<Status, Long> getStatusTotalCountMap() {
-        return this.statusTotalCountMap;
+        return statusTotalCountMap;
     }
 
     /**
@@ -71,7 +71,7 @@ public class TotalTargetCountStatus {
      * @return the current target count cannot be <null>
      */
     public Long getTotalTargetCountByStatus(final Status status) {
-        final Long count = this.statusTotalCountMap.get(status);
+        final Long count = statusTotalCountMap.get(status);
         return count == null ? 0L : count;
     }
 
@@ -87,39 +87,39 @@ public class TotalTargetCountStatus {
     private final void mapActionStatusToTotalTargetCountStatus(
             final List<TotalTargetCountActionStatus> targetCountActionStatus) {
         if (targetCountActionStatus == null) {
-            this.statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, this.totalTargetCount);
+            statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, totalTargetCount);
             return;
         }
-        this.statusTotalCountMap.put(Status.RUNNING, 0L);
-        Long notStartedTargetCount = this.totalTargetCount;
+        statusTotalCountMap.put(Status.RUNNING, 0L);
+        Long notStartedTargetCount = totalTargetCount;
         for (final TotalTargetCountActionStatus item : targetCountActionStatus) {
             switch (item.getStatus()) {
             case SCHEDULED:
-                this.statusTotalCountMap.put(Status.SCHEDULED, item.getCount());
+                statusTotalCountMap.put(Status.SCHEDULED, item.getCount());
                 break;
             case ERROR:
-                this.statusTotalCountMap.put(Status.ERROR, item.getCount());
+                statusTotalCountMap.put(Status.ERROR, item.getCount());
                 break;
             case FINISHED:
-                this.statusTotalCountMap.put(Status.FINISHED, item.getCount());
+                statusTotalCountMap.put(Status.FINISHED, item.getCount());
                 break;
             case RETRIEVED:
             case RUNNING:
             case WARNING:
             case DOWNLOAD:
             case CANCELING:
-                final Long runningItemsCount = this.statusTotalCountMap.get(Status.RUNNING) + item.getCount();
-                this.statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
+                final Long runningItemsCount = statusTotalCountMap.get(Status.RUNNING) + item.getCount();
+                statusTotalCountMap.put(Status.RUNNING, runningItemsCount);
                 break;
             case CANCELED:
-                this.statusTotalCountMap.put(Status.CANCELLED, item.getCount());
+                statusTotalCountMap.put(Status.CANCELLED, item.getCount());
                 break;
             default:
                 throw new IllegalArgumentException("State " + item.getStatus() + "is not valid");
             }
             notStartedTargetCount -= item.getCount();
         }
-        this.statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
+        statusTotalCountMap.put(TotalTargetCountStatus.Status.NOTSTARTED, notStartedTargetCount);
     }
 
 }

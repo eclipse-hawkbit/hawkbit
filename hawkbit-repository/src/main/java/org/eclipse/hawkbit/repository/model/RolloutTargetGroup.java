@@ -63,6 +63,6 @@ public class RolloutTargetGroup implements Serializable {
     }
 
     public RolloutTargetGroupId getId() {
-        return new RolloutTargetGroupId(this.rolloutGroup, this.target);
+        return new RolloutTargetGroupId(rolloutGroup, target);
     }
 }

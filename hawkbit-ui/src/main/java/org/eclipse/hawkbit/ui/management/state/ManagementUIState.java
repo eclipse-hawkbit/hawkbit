@@ -91,7 +91,7 @@ public class ManagementUIState implements Serializable {
      * @return the bulkUploadWindowMinimised
      */
     public boolean isBulkUploadWindowMinimised() {
-        return this.bulkUploadWindowMinimised;
+        return bulkUploadWindowMinimised;
     }
 
     /**
@@ -106,7 +106,7 @@ public class ManagementUIState implements Serializable {
      * @return the isCustomFilterSelected
      */
     public boolean isCustomFilterSelected() {
-        return this.customFilterSelected;
+        return customFilterSelected;
     }
 
     /**
@@ -114,15 +114,15 @@ public class ManagementUIState implements Serializable {
      *            the isCustomFilterSelected to set
      */
     public void setCustomFilterSelected(final boolean isCustomFilterSelected) {
-        this.customFilterSelected = isCustomFilterSelected;
+        customFilterSelected = isCustomFilterSelected;
     }
 
     public Set<Object> getExpandParentActionRowId() {
-        return this.expandParentActionRowId;
+        return expandParentActionRowId;
     }
 
     public Set<String> getCanceledTargetName() {
-        return this.canceledTargetName;
+        return canceledTargetName;
     }
 
     public void setDistTagLayoutVisible(final Boolean distTagLayoutVisible) {
@@ -130,39 +130,39 @@ public class ManagementUIState implements Serializable {
     }
 
     public Boolean getDistTagLayoutVisible() {
-        return this.distTagLayoutVisible;
+        return distTagLayoutVisible;
     }
 
     public void setTargetTagLayoutVisible(final Boolean targetTagVisible) {
-        this.targetTagLayoutVisible = targetTagVisible;
+        targetTagLayoutVisible = targetTagVisible;
     }
 
     public Boolean getTargetTagLayoutVisible() {
-        return this.targetTagLayoutVisible;
+        return targetTagLayoutVisible;
     }
 
     public TargetTableFilters getTargetTableFilters() {
-        return this.targetTableFilters;
+        return targetTableFilters;
     }
 
     public DistributionTableFilters getDistributionTableFilters() {
-        return this.distributionTableFilters;
+        return distributionTableFilters;
     }
 
     public Map<TargetIdName, DistributionSetIdName> getAssignedList() {
-        return this.assignedList;
+        return assignedList;
     }
 
     public Set<DistributionSetIdName> getDeletedDistributionList() {
-        return this.deletedDistributionList;
+        return deletedDistributionList;
     }
 
     public Set<TargetIdName> getDeletedTargetList() {
-        return this.deletedTargetList;
+        return deletedTargetList;
     }
 
     public TargetIdName getLastSelectedTargetIdName() {
-        return this.lastSelectedTargetIdName;
+        return lastSelectedTargetIdName;
     }
 
     public void setLastSelectedTargetIdName(final TargetIdName lastSelectedTargetIdName) {
@@ -170,7 +170,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public Optional<Set<TargetIdName>> getSelectedTargetIdName() {
-        return this.selectedTargetIdName == null ? Optional.empty() : Optional.of(this.selectedTargetIdName);
+        return selectedTargetIdName == null ? Optional.empty() : Optional.of(selectedTargetIdName);
     }
 
     public void setSelectedTargetIdName(final Set<TargetIdName> selectedTargetIdName) {
@@ -181,7 +181,7 @@ public class ManagementUIState implements Serializable {
      * @return the targetTagFilterClosed
      */
     public boolean isTargetTagFilterClosed() {
-        return this.targetTagFilterClosed;
+        return targetTagFilterClosed;
     }
 
     /**
@@ -196,7 +196,7 @@ public class ManagementUIState implements Serializable {
      * @return the distTagFilterClosed
      */
     public boolean isDistTagFilterClosed() {
-        return this.distTagFilterClosed;
+        return distTagFilterClosed;
     }
 
     /**
@@ -211,7 +211,7 @@ public class ManagementUIState implements Serializable {
      * @return the targetsTruncated
      */
     public Long getTargetsTruncated() {
-        return this.targetsTruncated;
+        return targetsTruncated;
     }
 
     /**
@@ -226,7 +226,7 @@ public class ManagementUIState implements Serializable {
      * @return the targetsCountAll
      */
     public long getTargetsCountAll() {
-        return this.targetsCountAll.get();
+        return targetsCountAll.get();
     }
 
     /**
@@ -241,21 +241,21 @@ public class ManagementUIState implements Serializable {
      * increments the targets all counter.
      */
     public void incrementTargetsCountAll() {
-        this.targetsCountAll.incrementAndGet();
+        targetsCountAll.incrementAndGet();
     }
 
     /**
      * decrement the targets all counter.
      */
     public void decrementTargetsCountAll() {
-        final long decrementAndGet = this.targetsCountAll.decrementAndGet();
+        final long decrementAndGet = targetsCountAll.decrementAndGet();
         if (decrementAndGet < 0) {
-            this.targetsCountAll.set(0);
+            targetsCountAll.set(0);
         }
     }
 
     public boolean isDsTableMaximized() {
-        return this.isDsTableMaximized;
+        return isDsTableMaximized;
     }
 
     public void setDsTableMaximized(final boolean isDsTableMaximized) {
@@ -263,7 +263,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public DistributionSetIdName getLastSelectedDsIdName() {
-        return this.lastSelectedDsIdName;
+        return lastSelectedDsIdName;
     }
 
     public void setLastSelectedDsIdName(final DistributionSetIdName lastSelectedDsIdName) {
@@ -275,14 +275,14 @@ public class ManagementUIState implements Serializable {
     }
 
     public Optional<Set<DistributionSetIdName>> getSelectedDsIdName() {
-        return this.selectedDsIdName == null ? Optional.empty() : Optional.of(this.selectedDsIdName);
+        return selectedDsIdName == null ? Optional.empty() : Optional.of(selectedDsIdName);
     }
 
     /**
      * @return the isTargetTableMaximized
      */
     public boolean isTargetTableMaximized() {
-        return this.isTargetTableMaximized;
+        return isTargetTableMaximized;
     }
 
     /**
@@ -297,7 +297,7 @@ public class ManagementUIState implements Serializable {
      * @return the isActionHistoryMaximized
      */
     public boolean isActionHistoryMaximized() {
-        return this.isActionHistoryMaximized;
+        return isActionHistoryMaximized;
     }
 
     /**
@@ -312,7 +312,7 @@ public class ManagementUIState implements Serializable {
      * @return the noDataAvilableTarget
      */
     public boolean isNoDataAvilableTarget() {
-        return this.noDataAvilableTarget;
+        return noDataAvilableTarget;
     }
 
     /**
@@ -327,7 +327,7 @@ public class ManagementUIState implements Serializable {
      * @return the noDataAvailableDistribution
      */
     public boolean isNoDataAvailableDistribution() {
-        return this.noDataAvailableDistribution;
+        return noDataAvailableDistribution;
     }
 
     /**

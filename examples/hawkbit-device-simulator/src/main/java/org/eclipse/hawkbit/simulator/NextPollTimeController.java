@@ -54,7 +54,7 @@ public class NextPollTimeController {
     private class NextPollUpdaterRunnable implements Runnable {
         @Override
         public void run() {
-            final List<AbstractSimulatedDevice> devices = NextPollTimeController.this.repository.getAll().stream()
+            final List<AbstractSimulatedDevice> devices = repository.getAll().stream()
                     .filter(device -> device instanceof DDISimulatedDevice).collect(Collectors.toList());
 
             devices.forEach(device -> {
@@ -71,7 +71,7 @@ public class NextPollTimeController {
                 }
                 device.setNextPollCounterSec(nextCounter);
             });
-            NextPollTimeController.this.eventBus.post(new NextPollCounterUpdate(devices));
+            eventBus.post(new NextPollCounterUpdate(devices));
         }
     }
 }

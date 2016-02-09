@@ -58,13 +58,12 @@ public class DeviceSimulatorUpdater {
      */
     public void startUpdate(final String tenant, final String id, final long actionId, final String swVersion,
             final UpdaterCallback callback) {
-        final AbstractSimulatedDevice device = this.repository.get(tenant, id);
+        final AbstractSimulatedDevice device = repository.get(tenant, id);
         device.setProgress(0.0);
         device.setSwversion(swVersion);
-        this.eventbus.post(new InitUpdate(device));
-        threadPool.schedule(
-                new DeviceSimulatorUpdateThread(device, this.spSenderService, actionId, this.eventbus, callback), 2000,
-                TimeUnit.MILLISECONDS);
+        eventbus.post(new InitUpdate(device));
+        threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback),
+                2000, TimeUnit.MILLISECONDS);
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
@@ -87,15 +86,16 @@ public class DeviceSimulatorUpdater {
 
         @Override
         public void run() {
-            final double newProgress = this.device.getProgress() + 0.2;
-            this.device.setProgress(newProgress);
+            final double newProgress = device.getProgress() + 0.2;
+            device.setProgress(newProgress);
             if (newProgress < 1.0) {
-                threadPool.schedule(new DeviceSimulatorUpdateThread(this.device, this.spSenderService, this.actionId,
-                        this.eventbus, this.callback), rndSleep.nextInt(3000), TimeUnit.MILLISECONDS);
+                threadPool.schedule(
+                        new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback),
+                        rndSleep.nextInt(3000), TimeUnit.MILLISECONDS);
             } else {
-                this.callback.updateFinished(this.device, this.actionId);
+                callback.updateFinished(device, actionId);
             }
-            this.eventbus.post(new ProgressUpdate(this.device));
+            eventbus.post(new ProgressUpdate(device));
         }
     }
 

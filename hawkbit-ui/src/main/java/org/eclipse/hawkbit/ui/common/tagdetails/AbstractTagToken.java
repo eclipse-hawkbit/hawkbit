@@ -63,16 +63,16 @@ public abstract class AbstractTagToken implements Serializable {
 
     private void createTokenField() {
         final Container tokenContainer = createContainer();
-        this.tokenField = createTokenField(tokenContainer);
-        this.tokenField.setContainerDataSource(tokenContainer);
-        this.tokenField.setNewTokensAllowed(false);
-        this.tokenField.setFilteringMode(FilteringMode.CONTAINS);
-        this.tokenField.setInputPrompt(getTokenInputPrompt());
-        this.tokenField.setTokenInsertPosition(InsertPosition.AFTER);
-        this.tokenField.setImmediate(true);
-        this.tokenField.addStyleName(ValoTheme.COMBOBOX_TINY);
-        this.tokenField.setSizeFull();
-        this.tokenField.setTokenCaptionPropertyId("name");
+        tokenField = createTokenField(tokenContainer);
+        tokenField.setContainerDataSource(tokenContainer);
+        tokenField.setNewTokensAllowed(false);
+        tokenField.setFilteringMode(FilteringMode.CONTAINS);
+        tokenField.setInputPrompt(getTokenInputPrompt());
+        tokenField.setTokenInsertPosition(InsertPosition.AFTER);
+        tokenField.setImmediate(true);
+        tokenField.addStyleName(ValoTheme.COMBOBOX_TINY);
+        tokenField.setSizeFull();
+        tokenField.setTokenCaptionPropertyId("name");
     }
 
     protected void repopulateToken() {
@@ -81,26 +81,26 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     private Container createContainer() {
-        this.container = new IndexedContainer();
-        this.container.addContainerProperty("name", String.class, "");
-        this.container.addContainerProperty("id", Long.class, "");
-        this.container.addContainerProperty(COLOR_PROPERTY, String.class, "");
-        return this.container;
+        container = new IndexedContainer();
+        container.addContainerProperty("name", String.class, "");
+        container.addContainerProperty("id", Long.class, "");
+        container.addContainerProperty(COLOR_PROPERTY, String.class, "");
+        return container;
     }
 
     protected void addNewToken(final Long tagId) {
-        this.tokenField.addToken(tagId);
+        tokenField.addToken(tagId);
         removeTagAssignedFromCombo(tagId);
     }
 
     private void removeTagAssignedFromCombo(final Long tagId) {
-        this.tokensAdded.put(tagId, new TagData(tagId, getTagName(tagId), getColor(tagId)));
-        this.container.removeItem(tagId);
+        tokensAdded.put(tagId, new TagData(tagId, getTagName(tagId), getColor(tagId)));
+        container.removeItem(tagId);
     }
 
     protected void setContainerPropertValues(final Long tagId, final String tagName, final String tagColor) {
-        this.tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
-        final Item item = this.container.addItem(tagId);
+        tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
+        final Item item = container.addItem(tagId);
         item.getItemProperty("id").setValue(tagId);
         updateItem(tagName, tagColor, item);
     }
@@ -112,18 +112,18 @@ public abstract class AbstractTagToken implements Serializable {
 
     protected void checkIfTagAssignedIsAllowed() {
         if (!isToggleTagAssignmentAllowed()) {
-            this.tokenField.addStyleName("hideTokenFieldcombo");
+            tokenField.addStyleName("hideTokenFieldcombo");
         }
     }
 
     private TokenField createTokenField(final Container tokenContainer) {
-        return new CustomTokenField(this.tokenLayout, tokenContainer);
+        return new CustomTokenField(tokenLayout, tokenContainer);
     }
 
     class CustomTokenField extends TokenField {
         private static final long serialVersionUID = 694216966472937436L;
 
-        final Container tokenContainer;
+        Container tokenContainer;
 
         CustomTokenField(final CssLayout cssLayout, final Container tokenContainer) {
             super(cssLayout);
@@ -166,12 +166,12 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     private Property getItemNameProperty(final Object tokenId) {
-        final Item item = this.tokenField.getContainerDataSource().getItem(tokenId);
+        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
         return item.getItemProperty("name");
     }
 
     private String getColor(final Object tokenId) {
-        final Item item = this.tokenField.getContainerDataSource().getItem(tokenId);
+        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
         if (item.getItemProperty(COLOR_PROPERTY).getValue() != null) {
             return (String) item.getItemProperty(COLOR_PROPERTY).getValue();
         } else {
@@ -180,23 +180,23 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     private String getTagName(final Object tokenId) {
-        final Item item = this.tokenField.getContainerDataSource().getItem(tokenId);
+        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
         return (String) item.getItemProperty("name").getValue();
     }
 
     private void tokenClick(final Object tokenId) {
-        final Item item = this.tokenField.getContainerDataSource().addItem(tokenId);
-        item.getItemProperty("name").setValue(this.tagDetails.get(tokenId).getName());
-        item.getItemProperty(COLOR_PROPERTY).setValue(this.tagDetails.get(tokenId).getColor());
-        unassignTag(this.tagDetails.get(tokenId).getName());
+        final Item item = tokenField.getContainerDataSource().addItem(tokenId);
+        item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
+        item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
+        unassignTag(tagDetails.get(tokenId).getName());
     }
 
     protected void removePreviouslyAddedTokens() {
-        this.tokensAdded.keySet().forEach(previouslyAddedToken -> this.tokenField.removeToken(previouslyAddedToken));
+        tokensAdded.keySet().forEach(previouslyAddedToken -> tokenField.removeToken(previouslyAddedToken));
     }
 
     protected Long getTagIdByTagName(final String tagName) {
-        final Optional<Map.Entry<Long, TagData>> mapEntry = this.tagDetails.entrySet().stream()
+        final Optional<Map.Entry<Long, TagData>> mapEntry = tagDetails.entrySet().stream()
                 .filter(entry -> entry.getValue().getName().equals(tagName)).findFirst();
         if (mapEntry.isPresent()) {
             return mapEntry.get().getKey();
@@ -205,13 +205,13 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     protected void removeTokenItem(final Long tokenId, final String name) {
-        this.tokenField.removeToken(tokenId);
-        setContainerPropertValues(tokenId, name, this.tokensAdded.get(tokenId).getColor());
+        tokenField.removeToken(tokenId);
+        setContainerPropertValues(tokenId, name, tokensAdded.get(tokenId).getColor());
     }
 
     protected void removeTagFromCombo(final Long deletedTagId) {
         if (deletedTagId != null) {
-            this.container.removeItem(deletedTagId);
+            container.removeItem(deletedTagId);
         }
     }
 
@@ -230,7 +230,7 @@ public abstract class AbstractTagToken implements Serializable {
     protected abstract void populateContainer();
 
     public TokenField getTokenField() {
-        return this.tokenField;
+        return tokenField;
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class AbstractTagToken implements Serializable {
          * @return the name
          */
         public String getName() {
-            return this.name;
+            return name;
         }
 
         /**
@@ -279,7 +279,7 @@ public abstract class AbstractTagToken implements Serializable {
          * @return the id
          */
         public Long getId() {
-            return this.id;
+            return id;
         }
 
         /**
@@ -294,7 +294,7 @@ public abstract class AbstractTagToken implements Serializable {
          * @return the color
          */
         public String getColor() {
-            return this.color;
+            return color;
         }
 
         /**

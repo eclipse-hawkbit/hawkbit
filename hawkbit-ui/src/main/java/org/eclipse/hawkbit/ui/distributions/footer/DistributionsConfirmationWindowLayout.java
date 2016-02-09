@@ -116,30 +116,29 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
         final Map<String, ConfirmationTab> tabs = new HashMap<>();
         /* Create tab for SW Modules delete */
-        if (!this.manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {
-            tabs.put(this.i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
+        if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {
+            tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
 
         /* Create tab for SW Module Type delete */
-        if (!this.manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()) {
-            tabs.put(this.i18n.get("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
+        if (!manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()) {
+            tabs.put(i18n.get("caption.delete.sw.module.type.accordion.tab"), createSMtypeDeleteConfirmationTab());
         }
 
         /* Create tab for Distributions delete */
-        if (!this.manageDistUIState.getDeletedDistributionList().isEmpty()) {
-            tabs.put(this.i18n.get("caption.delete.dist.accordion.tab"), createDistDeleteConfirmationTab());
+        if (!manageDistUIState.getDeletedDistributionList().isEmpty()) {
+            tabs.put(i18n.get("caption.delete.dist.accordion.tab"), createDistDeleteConfirmationTab());
         }
 
         /* Create tab for Distribution Set Types delete */
-        if (!this.manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()) {
-            tabs.put(this.i18n.get("caption.delete.dist.set.type.accordion.tab"),
-                    createDistSetTypeDeleteConfirmationTab());
+        if (!manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()) {
+            tabs.put(i18n.get("caption.delete.dist.set.type.accordion.tab"), createDistSetTypeDeleteConfirmationTab());
         }
 
         /* Create tab for Assign Software Module */
 
-        if (!this.manageDistUIState.getAssignedList().isEmpty()) {
-            tabs.put(this.i18n.get("caption.assign.dist.accordion.tab"), createAssignSWModuleConfirmationTab());
+        if (!manageDistUIState.getAssignedList().isEmpty()) {
+            tabs.put(i18n.get("caption.assign.dist.accordion.tab"), createAssignSWModuleConfirmationTab());
         }
 
         return tabs;
@@ -151,10 +150,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(SPUIComponetIdProvider.SW_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
 
-        tab.getDiscardAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().addClickListener(event -> discardSMAll(tab));
 
         /* Add items container to the table. */
@@ -177,8 +176,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
             visibleColumnIds.add(SW_MODULE_NAME_MSG);
             visibleColumnIds.add(SW_DISCARD_CHGS);
-            visibleColumnLabels.add(this.i18n.get("upload.swModuleTable.header"));
-            visibleColumnLabels.add(this.i18n.get("header.second.deletetarget.table"));
+            visibleColumnLabels.add(i18n.get("upload.swModuleTable.header"));
+            visibleColumnLabels.add(i18n.get("header.second.deletetarget.table"));
         }
         tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
         tab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
@@ -190,36 +189,35 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     private void deleteSMAll(final ConfirmationTab tab) {
-        final Set<Long> swmoduleIds = this.manageDistUIState.getDeleteSofwareModulesList().keySet();
+        final Set<Long> swmoduleIds = manageDistUIState.getDeleteSofwareModulesList().keySet();
 
-        if (this.manageDistUIState.getAssignedList() == null || this.manageDistUIState.getAssignedList().isEmpty()) {
+        if (manageDistUIState.getAssignedList() == null || manageDistUIState.getAssignedList().isEmpty()) {
             removeAssignedSoftwareModules();
         }
 
-        this.softwareManagement.deleteSoftwareModules(swmoduleIds);
+        softwareManagement.deleteSoftwareModules(swmoduleIds);
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + this.i18n.get("message.swModule.deleted", swmoduleIds.size()));
-        this.manageDistUIState.getDeleteSofwareModulesList().clear();
+                + i18n.get("message.swModule.deleted", swmoduleIds.size()));
+        manageDistUIState.getDeleteSofwareModulesList().clear();
         removeCurrentTab(tab);
-        setActionMessage(this.i18n.get("message.software.delete.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.DELETE_ALL_SOFWARE);
+        setActionMessage(i18n.get("message.software.delete.success"));
+        eventBus.publish(this, SaveActionWindowEvent.DELETE_ALL_SOFWARE);
     }
 
     private void removeAssignedSoftwareModules() {
-        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entryAssignSM : this.manageDistUIState
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entryAssignSM : manageDistUIState
                 .getAssignedList().entrySet()) {
-            for (final Entry<Long, String> entryDeleteSM : this.manageDistUIState.getDeleteSofwareModulesList()
-                    .entrySet()) {
+            for (final Entry<Long, String> entryDeleteSM : manageDistUIState.getDeleteSofwareModulesList().entrySet()) {
                 final SoftwareModuleIdName smIdName = new SoftwareModuleIdName(entryDeleteSM.getKey(),
                         entryDeleteSM.getValue());
                 if (entryAssignSM.getValue().contains(smIdName)) {
                     entryAssignSM.getValue().remove(smIdName);
-                    this.assignmnetTab.getTable().removeItem(HawkbitCommonUtil.concatStrings("|||",
+                    assignmnetTab.getTable().removeItem(HawkbitCommonUtil.concatStrings("|||",
                             entryAssignSM.getKey().getId().toString(), smIdName.getId().toString()));
                 }
 
                 if (entryAssignSM.getValue().isEmpty()) {
-                    this.manageDistUIState.getAssignedList().remove(entryAssignSM.getKey());
+                    manageDistUIState.getAssignedList().remove(entryAssignSM.getKey());
                 }
             }
         }
@@ -227,9 +225,9 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardSMAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        this.manageDistUIState.getDeleteSofwareModulesList().clear();
-        setActionMessage(this.i18n.get("message.software.discard.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_SOFTWARE);
+        manageDistUIState.getDeleteSofwareModulesList().clear();
+        setActionMessage(i18n.get("message.software.discard.success"));
+        eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_SOFTWARE);
     }
 
     /**
@@ -242,29 +240,29 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty("SWModuleId", String.class, "");
         swcontactContainer.addContainerProperty(SW_MODULE_NAME_MSG, String.class, "");
-        for (final Long swModuleID : this.manageDistUIState.getDeleteSofwareModulesList().keySet()) {
+        for (final Long swModuleID : manageDistUIState.getDeleteSofwareModulesList().keySet()) {
             final Item item = swcontactContainer.addItem(swModuleID);
             item.getItemProperty("SWModuleId").setValue(swModuleID.toString());
             item.getItemProperty(SW_MODULE_NAME_MSG)
-                    .setValue(this.manageDistUIState.getDeleteSofwareModulesList().get(swModuleID));
+                    .setValue(manageDistUIState.getDeleteSofwareModulesList().get(swModuleID));
         }
         return swcontactContainer;
     }
 
     private void discardSoftwareDelete(final Button.ClickEvent event, final Object itemId, final ConfirmationTab tab) {
         final Long swmoduleId = (Long) ((Button) event.getComponent()).getData();
-        if (null != this.manageDistUIState.getDeleteSofwareModulesList()
-                && !this.manageDistUIState.getDeleteSofwareModulesList().isEmpty()
-                && this.manageDistUIState.getDeleteSofwareModulesList().containsKey(swmoduleId)) {
-            this.manageDistUIState.getDeleteSofwareModulesList().remove(swmoduleId);
+        if (null != manageDistUIState.getDeleteSofwareModulesList()
+                && !manageDistUIState.getDeleteSofwareModulesList().isEmpty()
+                && manageDistUIState.getDeleteSofwareModulesList().containsKey(swmoduleId)) {
+            manageDistUIState.getDeleteSofwareModulesList().remove(swmoduleId);
         }
         tab.getTable().getContainerDataSource().removeItem(itemId);
         final int deleteCount = tab.getTable().size();
         if (0 == deleteCount) {
             removeCurrentTab(tab);
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_SOFTWARE);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_SOFTWARE);
         } else {
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_SOFTWARE);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_SOFTWARE);
         }
     }
 
@@ -273,10 +271,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(SPUIComponetIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));
 
-        tab.getDiscardAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().setId(SPUIComponetIdProvider.DISCARD_SW_MODULE_TYPE);
         tab.getDiscardAll().addClickListener(event -> discardSMtypeAll(tab));
 
@@ -303,8 +301,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
             visibleColumnIds.add(SW_MODULE_TYPE_NAME);
             visibleColumnIds.add(DISCARD);
-            visibleColumnLabels.add(this.i18n.get("header.first.delete.swmodule.type.table"));
-            visibleColumnLabels.add(this.i18n.get("header.second.delete.swmodule.type.table"));
+            visibleColumnLabels.add(i18n.get("header.first.delete.swmodule.type.table"));
+            visibleColumnLabels.add(i18n.get("header.second.delete.swmodule.type.table"));
 
         }
         tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
@@ -317,32 +315,32 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     private void deleteSMtypeAll(final ConfirmationTab tab) {
-        final int deleteSWModuleTypeCount = this.manageDistUIState.getSelectedDeleteSWModuleTypes().size();
-        for (final String swModuleTypeName : this.manageDistUIState.getSelectedDeleteSWModuleTypes()) {
+        final int deleteSWModuleTypeCount = manageDistUIState.getSelectedDeleteSWModuleTypes().size();
+        for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
 
-            this.softwareManagement
-                    .deleteSoftwareModuleType(this.softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName));
+            softwareManagement
+                    .deleteSoftwareModuleType(softwareManagement.findSoftwareModuleTypeByName(swModuleTypeName));
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + this.i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
-        this.manageDistUIState.getSelectedDeleteSWModuleTypes().clear();
+                + i18n.get("message.sw.module.type.delete", new Object[] { deleteSWModuleTypeCount }));
+        manageDistUIState.getSelectedDeleteSWModuleTypes().clear();
         removeCurrentTab(tab);
-        setActionMessage(this.i18n.get("message.software.type.delete.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
+        setActionMessage(i18n.get("message.software.type.delete.success"));
+        eventBus.publish(this, SaveActionWindowEvent.SAVED_DELETE_SW_MODULE_TYPES);
     }
 
     private void discardSMtypeAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        this.manageDistUIState.getSelectedDeleteSWModuleTypes().clear();
-        setActionMessage(this.i18n.get("message.software.type.discard.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_SW_MODULE_TYPES);
+        manageDistUIState.getSelectedDeleteSWModuleTypes().clear();
+        setActionMessage(i18n.get("message.software.type.discard.success"));
+        eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_SW_MODULE_TYPES);
     }
 
     private Container getSWModuleTypeTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(SW_MODULE_TYPE_NAME, String.class, "");
 
-        for (final String swModuleTypeName : this.manageDistUIState.getSelectedDeleteSWModuleTypes()) {
+        for (final String swModuleTypeName : manageDistUIState.getSelectedDeleteSWModuleTypes()) {
             final Item saveTblitem = contactContainer.addItem(swModuleTypeName);
 
             saveTblitem.getItemProperty(SW_MODULE_TYPE_NAME).setValue(swModuleTypeName);
@@ -353,18 +351,18 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardSoftwareTypeDelete(final String discardSWModuleType, final Object itemId,
             final ConfirmationTab tab) {
-        if (null != this.manageDistUIState.getSelectedDeleteSWModuleTypes()
-                && !this.manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()
-                && this.manageDistUIState.getSelectedDeleteSWModuleTypes().contains(discardSWModuleType)) {
-            this.manageDistUIState.getSelectedDeleteSWModuleTypes().remove(discardSWModuleType);
+        if (null != manageDistUIState.getSelectedDeleteSWModuleTypes()
+                && !manageDistUIState.getSelectedDeleteSWModuleTypes().isEmpty()
+                && manageDistUIState.getSelectedDeleteSWModuleTypes().contains(discardSWModuleType)) {
+            manageDistUIState.getSelectedDeleteSWModuleTypes().remove(discardSWModuleType);
         }
         tab.getTable().getContainerDataSource().removeItem(itemId);
         final int deleteCount = tab.getTable().size();
         if (0 == deleteCount) {
             removeCurrentTab(tab);
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_SW_MODULE_TYPES);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_SW_MODULE_TYPES);
         } else {
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_SW_MODULE_TYPE);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_SW_MODULE_TYPE);
         }
     }
 
@@ -374,10 +372,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(SPUIComponetIdProvider.DIST_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteDistAll(tab));
 
-        tab.getDiscardAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().addClickListener(event -> discardDistAll(tab));
 
         /* Add items container to the table. */
@@ -400,8 +398,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
             visibleColumnIds.add(DIST_NAME);
             visibleColumnIds.add(DISCARD);
-            visibleColumnLabels.add(this.i18n.get("header.one.deletedist.table"));
-            visibleColumnLabels.add(this.i18n.get("header.second.deletedist.table"));
+            visibleColumnLabels.add(i18n.get("header.one.deletedist.table"));
+            visibleColumnLabels.add(i18n.get("header.second.deletedist.table"));
         }
         tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
         tab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
@@ -414,12 +412,12 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     /* Delete Distributions. */
     private void deleteDistAll(final ConfirmationTab tab) {
-        final Long[] deletedIds = this.manageDistUIState.getDeletedDistributionList().stream()
-                .map(idName -> idName.getId()).toArray(Long[]::new);
-        if (null != this.manageDistUIState.getAssignedList() && !this.manageDistUIState.getAssignedList().isEmpty()) {
-            this.manageDistUIState.getDeletedDistributionList().forEach(distSetName -> {
-                if (this.manageDistUIState.getAssignedList().containsKey(distSetName)) {
-                    this.manageDistUIState.getAssignedList().remove(distSetName);
+        final Long[] deletedIds = manageDistUIState.getDeletedDistributionList().stream().map(idName -> idName.getId())
+                .toArray(Long[]::new);
+        if (null != manageDistUIState.getAssignedList() && !manageDistUIState.getAssignedList().isEmpty()) {
+            manageDistUIState.getDeletedDistributionList().forEach(distSetName -> {
+                if (manageDistUIState.getAssignedList().containsKey(distSetName)) {
+                    manageDistUIState.getAssignedList().remove(distSetName);
 
                 }
 
@@ -427,23 +425,23 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         }
 
-        this.dsManagement.deleteDistributionSet(deletedIds);
+        dsManagement.deleteDistributionSet(deletedIds);
 
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + this.i18n.get("message.dist.deleted", deletedIds.length));
+                + i18n.get("message.dist.deleted", deletedIds.length));
 
-        this.manageDistUIState.getDeletedDistributionList()
-                .forEach(deletedIdname -> this.manageDistUIState.getAssignedList().remove(deletedIdname));
+        manageDistUIState.getDeletedDistributionList()
+                .forEach(deletedIdname -> manageDistUIState.getAssignedList().remove(deletedIdname));
         removeCurrentTab(tab);
-        this.manageDistUIState.getDeletedDistributionList().clear();
-        this.eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
+        manageDistUIState.getDeletedDistributionList().clear();
+        eventBus.publish(this, SaveActionWindowEvent.DELETED_DISTRIBUTIONS);
     }
 
     private void discardDistAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        this.manageDistUIState.getDeletedDistributionList().clear();
-        setActionMessage(this.i18n.get("message.dist.discard.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
+        manageDistUIState.getDeletedDistributionList().clear();
+        setActionMessage(i18n.get("message.dist.discard.success"));
+        eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
 
     }
 
@@ -452,7 +450,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         contactContainer.addContainerProperty(DIST_ID_NAME, DistributionSetIdName.class, "");
         contactContainer.addContainerProperty(DIST_NAME, String.class, "");
         Item item;
-        for (final DistributionSetIdName distIdName : this.manageDistUIState.getDeletedDistributionList()) {
+        for (final DistributionSetIdName distIdName : manageDistUIState.getDeletedDistributionList()) {
             item = contactContainer.addItem(distIdName);
             item.getItemProperty(DIST_NAME).setValue(distIdName.getName().concat(":" + distIdName.getVersion()));
         }
@@ -463,18 +461,18 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void discardDistDelete(final Button.ClickEvent event, final Object itemId, final ConfirmationTab tab) {
 
         final DistributionSetIdName distId = (DistributionSetIdName) ((Button) event.getComponent()).getData();
-        if (null != this.manageDistUIState.getDeletedDistributionList()
-                && !this.manageDistUIState.getDeletedDistributionList().isEmpty()
-                && this.manageDistUIState.getDeletedDistributionList().contains(distId)) {
-            this.manageDistUIState.getDeletedDistributionList().remove(distId);
+        if (null != manageDistUIState.getDeletedDistributionList()
+                && !manageDistUIState.getDeletedDistributionList().isEmpty()
+                && manageDistUIState.getDeletedDistributionList().contains(distId)) {
+            manageDistUIState.getDeletedDistributionList().remove(distId);
         }
         tab.getTable().getContainerDataSource().removeItem(itemId);
         final int deleteCount = tab.getTable().size();
         if (0 == deleteCount) {
             removeCurrentTab(tab);
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DISTRIBUTIONS);
         } else {
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_DEL_DISTRIBUTION);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DEL_DISTRIBUTION);
         }
     }
 
@@ -485,10 +483,10 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         tab.getConfirmAll().setId(SPUIComponetIdProvider.SAVE_DELETE_DIST_SET_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
-        tab.getConfirmAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
+        tab.getConfirmAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DELETE_ALL));
         tab.getConfirmAll().addClickListener(event -> deleteDistSetTypeAll(tab));
 
-        tab.getDiscardAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        tab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         tab.getDiscardAll().setId(SPUIComponetIdProvider.DISCARD_DIST_SET_TYPE);
         tab.getDiscardAll().addClickListener(event -> discardDistSetTypeAll(tab));
 
@@ -515,8 +513,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
             visibleColumnIds.add(DIST_SET_NAME);
             visibleColumnIds.add(DISCARD);
-            visibleColumnLabels.add(this.i18n.get("header.first.delete.dist.type.table"));
-            visibleColumnLabels.add(this.i18n.get("header.second.delete.dist.type.table"));
+            visibleColumnLabels.add(i18n.get("header.first.delete.dist.type.table"));
+            visibleColumnLabels.add(i18n.get("header.second.delete.dist.type.table"));
 
         }
         tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
@@ -530,32 +528,31 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void deleteDistSetTypeAll(final ConfirmationTab tab) {
 
-        final int deleteDistTypeCount = this.manageDistUIState.getSelectedDeleteDistSetTypes().size();
-        for (final String deleteDistTypeName : this.manageDistUIState.getSelectedDeleteDistSetTypes()) {
+        final int deleteDistTypeCount = manageDistUIState.getSelectedDeleteDistSetTypes().size();
+        for (final String deleteDistTypeName : manageDistUIState.getSelectedDeleteDistSetTypes()) {
 
-            this.dsManagement
-                    .deleteDistributionSetType(this.dsManagement.findDistributionSetTypeByName(deleteDistTypeName));
+            dsManagement.deleteDistributionSetType(dsManagement.findDistributionSetTypeByName(deleteDistTypeName));
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + this.i18n.get("message.dist.type.delete", new Object[] { deleteDistTypeCount }));
-        this.manageDistUIState.getSelectedDeleteDistSetTypes().clear();
+                + i18n.get("message.dist.type.delete", new Object[] { deleteDistTypeCount }));
+        manageDistUIState.getSelectedDeleteDistSetTypes().clear();
         removeCurrentTab(tab);
-        setActionMessage(this.i18n.get("message.dist.set.type.deleted.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
+        setActionMessage(i18n.get("message.dist.set.type.deleted.success"));
+        eventBus.publish(this, SaveActionWindowEvent.SAVED_DELETE_DIST_SET_TYPES);
     }
 
     private void discardDistSetTypeAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        this.manageDistUIState.getSelectedDeleteDistSetTypes().clear();
-        setActionMessage(this.i18n.get("message.dist.type.discard.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_DIST_SET_TYPES);
+        manageDistUIState.getSelectedDeleteDistSetTypes().clear();
+        setActionMessage(i18n.get("message.dist.type.discard.success"));
+        eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_DIST_SET_TYPES);
     }
 
     private IndexedContainer getDistSetTypeTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(DIST_SET_NAME, String.class, "");
 
-        for (final String distTypeMName : this.manageDistUIState.getSelectedDeleteDistSetTypes()) {
+        for (final String distTypeMName : manageDistUIState.getSelectedDeleteDistSetTypes()) {
             final Item saveTblitem = contactContainer.addItem(distTypeMName);
 
             saveTblitem.getItemProperty(DIST_SET_NAME).setValue(distTypeMName);
@@ -567,40 +564,40 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     private void discardDistTypeDelete(final String discardDSType, final Object itemId, final ConfirmationTab tab) {
 
-        if (null != this.manageDistUIState.getSelectedDeleteDistSetTypes()
-                && !this.manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()
-                && this.manageDistUIState.getSelectedDeleteDistSetTypes().contains(discardDSType)) {
-            this.manageDistUIState.getSelectedDeleteDistSetTypes().remove(discardDSType);
+        if (null != manageDistUIState.getSelectedDeleteDistSetTypes()
+                && !manageDistUIState.getSelectedDeleteDistSetTypes().isEmpty()
+                && manageDistUIState.getSelectedDeleteDistSetTypes().contains(discardDSType)) {
+            manageDistUIState.getSelectedDeleteDistSetTypes().remove(discardDSType);
         }
         tab.getTable().getContainerDataSource().removeItem(itemId);
         final int deleteCount = tab.getTable().size();
         if (0 == deleteCount) {
             removeCurrentTab(tab);
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_DIST_SET_TYPES);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_DELETE_DIST_SET_TYPES);
         } else {
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_DIST_SET_TYPE);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_DELETE_DIST_SET_TYPE);
         }
     }
 
     /* For Assign software modules */
     private ConfirmationTab createAssignSWModuleConfirmationTab() {
 
-        this.assignmnetTab = new ConfirmationTab();
+        assignmnetTab = new ConfirmationTab();
 
-        this.assignmnetTab.getConfirmAll().setId(SPUIComponetIdProvider.SAVE_ASSIGNMENT);
-        this.assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
-        this.assignmnetTab.getConfirmAll().setCaption(this.i18n.get("button.assign.all"));
-        this.assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(this.assignmnetTab));
+        assignmnetTab.getConfirmAll().setId(SPUIComponetIdProvider.SAVE_ASSIGNMENT);
+        assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
+        assignmnetTab.getConfirmAll().setCaption(i18n.get("button.assign.all"));
+        assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
 
-        this.assignmnetTab.getDiscardAll().setCaption(this.i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
-        this.assignmnetTab.getDiscardAll().setId(SPUIComponetIdProvider.DISCARD_ASSIGNMENT);
-        this.assignmnetTab.getDiscardAll().addClickListener(event -> discardAllSWAssignments(this.assignmnetTab));
+        assignmnetTab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
+        assignmnetTab.getDiscardAll().setId(SPUIComponetIdProvider.DISCARD_ASSIGNMENT);
+        assignmnetTab.getDiscardAll().addClickListener(event -> discardAllSWAssignments(assignmnetTab));
 
         // Add items container to the table.
-        this.assignmnetTab.getTable().setContainerDataSource(getSWAssignmentsTableContainer());
+        assignmnetTab.getTable().setContainerDataSource(getSWAssignmentsTableContainer());
 
         // Add the discard action column
-        this.assignmnetTab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
+        assignmnetTab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
             final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
             style.append(' ');
             style.append(SPUIStyleDefinitions.REDICON);
@@ -609,7 +606,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             deleteIcon.setData(itemId);
             deleteIcon.setImmediate(true);
             deleteIcon.addClickListener(event -> discardSWAssignment((String) ((Button) event.getComponent()).getData(),
-                    itemId, this.assignmnetTab));
+                    itemId, assignmnetTab));
             return deleteIcon;
         });
 
@@ -620,19 +617,19 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
             visibleColumnIds.add(DIST_NAME);
             visibleColumnIds.add(SOFTWARE_MODULE_NAME);
             visibleColumnIds.add(DISCARD);
-            visibleColumnLabels.add(this.i18n.get("header.dist.first.assignment.table"));
-            visibleColumnLabels.add(this.i18n.get("header.dist.second.assignment.table"));
-            visibleColumnLabels.add(this.i18n.get("header.third.assignment.table"));
+            visibleColumnLabels.add(i18n.get("header.dist.first.assignment.table"));
+            visibleColumnLabels.add(i18n.get("header.dist.second.assignment.table"));
+            visibleColumnLabels.add(i18n.get("header.third.assignment.table"));
 
         }
-        this.assignmnetTab.getTable().setVisibleColumns(visibleColumnIds.toArray());
-        this.assignmnetTab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
+        assignmnetTab.getTable().setVisibleColumns(visibleColumnIds.toArray());
+        assignmnetTab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
 
-        this.assignmnetTab.getTable().setColumnExpandRatio(DIST_NAME, 2);
-        this.assignmnetTab.getTable().setColumnExpandRatio(SOFTWARE_MODULE_NAME, 2);
-        this.assignmnetTab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        this.assignmnetTab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
-        return this.assignmnetTab;
+        assignmnetTab.getTable().setColumnExpandRatio(DIST_NAME, 2);
+        assignmnetTab.getTable().setColumnExpandRatio(SOFTWARE_MODULE_NAME, 2);
+        assignmnetTab.getTable().setColumnExpandRatio(DISCARD, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
+        assignmnetTab.getTable().setColumnAlignment(DISCARD, Align.CENTER);
+        return assignmnetTab;
 
     }
 
@@ -644,7 +641,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         contactContainer.addContainerProperty(DIST_ID_NAME, DistributionSetIdName.class, "");
         contactContainer.addContainerProperty(SOFTWARE_MODULE_ID_NAME, SoftwareModuleIdName.class, "");
 
-        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = this.manageDistUIState
+        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
                 .getAssignedList();
 
         assignedList.forEach((distIdname, softIdNameSet) -> softIdNameSet.forEach(softIdName -> {
@@ -663,38 +660,38 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     }
 
     private void saveAllAssignments(final ConfirmationTab tab) {
-        this.manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
+        manageDistUIState.getAssignedList().forEach((distIdName, softIdNameSet) -> {
 
-            final DistributionSet ds = this.dsManagement.findDistributionSetByIdWithDetails(distIdName.getId());
+            final DistributionSet ds = dsManagement.findDistributionSetByIdWithDetails(distIdName.getId());
 
             final List<Long> softIds = softIdNameSet.stream().map(softIdName -> softIdName.getId())
                     .collect(Collectors.toList());
 
-            final List<SoftwareModule> softwareModules = this.softwareManagement.findSoftwareModulesById(softIds);
+            final List<SoftwareModule> softwareModules = softwareManagement.findSoftwareModulesById(softIds);
 
             softwareModules.forEach(ds::addModule);
-            this.dsManagement.updateDistributionSet(ds);
+            dsManagement.updateDistributionSet(ds);
 
         });
         int count = 0;
-        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : this.manageDistUIState
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
                 .getAssignedList().entrySet()) {
             count += entry.getValue().size();
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
-                + this.i18n.get("message.software.assignment", new Object[] { count }));
-        this.manageDistUIState.getAssignedList().clear();
-        this.manageDistUIState.getConsolidatedDistSoftwarewList().clear();
+                + i18n.get("message.software.assignment", new Object[] { count }));
+        manageDistUIState.getAssignedList().clear();
+        manageDistUIState.getConsolidatedDistSoftwarewList().clear();
         removeCurrentTab(tab);
-        this.eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
+        eventBus.publish(this, SaveActionWindowEvent.SAVED_ASSIGNMENTS);
     }
 
     private void discardAllSWAssignments(final ConfirmationTab tab) {
         removeCurrentTab(tab);
-        this.manageDistUIState.getAssignedList().clear();
-        this.manageDistUIState.getConsolidatedDistSoftwarewList().clear();
-        setActionMessage(this.i18n.get("message.assign.discard.success"));
-        this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
+        manageDistUIState.getAssignedList().clear();
+        manageDistUIState.getConsolidatedDistSoftwarewList().clear();
+        setActionMessage(i18n.get("message.assign.discard.success"));
+        eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
     }
 
     private void discardSWAssignment(final String discardSW, final Object itemId, final ConfirmationTab tab) {
@@ -705,23 +702,23 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final SoftwareModuleIdName discardSoftIdName = (SoftwareModuleIdName) rowitem
                 .getItemProperty(SOFTWARE_MODULE_ID_NAME).getValue();
 
-        final Set<SoftwareModuleIdName> softIdNameSet = this.manageDistUIState.getAssignedList().get(discardDistIdName);
-        this.manageDistUIState.getAssignedList().get(discardDistIdName).remove(discardSoftIdName);
+        final Set<SoftwareModuleIdName> softIdNameSet = manageDistUIState.getAssignedList().get(discardDistIdName);
+        manageDistUIState.getAssignedList().get(discardDistIdName).remove(discardSoftIdName);
         softIdNameSet.remove(discardSoftIdName);
         tab.getTable().getContainerDataSource().removeItem(itemId);
         if (softIdNameSet.isEmpty()) {
-            this.manageDistUIState.getAssignedList().remove(discardDistIdName);
+            manageDistUIState.getAssignedList().remove(discardDistIdName);
         }
-        final Map<Long, HashSet<SoftwareModuleIdName>> map = this.manageDistUIState.getConsolidatedDistSoftwarewList()
+        final Map<Long, HashSet<SoftwareModuleIdName>> map = manageDistUIState.getConsolidatedDistSoftwarewList()
                 .get(discardDistIdName);
         map.keySet().forEach(typeId -> map.get(typeId).remove(discardSoftIdName));
 
         final int assigCount = tab.getTable().getContainerDataSource().size();
         if (0 == assigCount) {
             removeCurrentTab(tab);
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS);
         } else {
-            this.eventBus.publish(this, SaveActionWindowEvent.DISCARD_ASSIGNMENT);
+            eventBus.publish(this, SaveActionWindowEvent.DISCARD_ASSIGNMENT);
         }
 
     }
