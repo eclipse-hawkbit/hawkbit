@@ -161,7 +161,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = new HashMap<>();
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports
