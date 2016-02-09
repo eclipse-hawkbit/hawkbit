@@ -35,17 +35,19 @@ public class ManagementUIState implements Serializable {
 
     private static final long serialVersionUID = 7301409196969723794L;
 
+    private final transient Set<Object> expandParentActionRowId = new HashSet<>();
+
     @Autowired
     private DistributionTableFilters distributionTableFilters;
 
     @Autowired
     private TargetTableFilters targetTableFilters;
 
-    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<TargetIdName, DistributionSetIdName>();
+    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<>();
 
-    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<DistributionSetIdName>();
+    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
-    private final Set<TargetIdName> deletedTargetList = new HashSet<TargetIdName>();
+    private final Set<TargetIdName> deletedTargetList = new HashSet<>();
 
     private Boolean targetTagLayoutVisible = Boolean.TRUE;
 
@@ -79,9 +81,7 @@ public class ManagementUIState implements Serializable {
 
     private boolean noDataAvailableDistribution = Boolean.FALSE;
 
-    private final Set<String> canceledTargetName = new HashSet<String>();
-
-    private final Set<Object> expandParentActionRowId = new HashSet<Object>();
+    private final Set<String> canceledTargetName = new HashSet<>();
 
     private boolean customFilterSelected;
 
@@ -91,7 +91,7 @@ public class ManagementUIState implements Serializable {
      * @return the bulkUploadWindowMinimised
      */
     public boolean isBulkUploadWindowMinimised() {
-        return bulkUploadWindowMinimised;
+        return this.bulkUploadWindowMinimised;
     }
 
     /**
@@ -106,7 +106,7 @@ public class ManagementUIState implements Serializable {
      * @return the isCustomFilterSelected
      */
     public boolean isCustomFilterSelected() {
-        return customFilterSelected;
+        return this.customFilterSelected;
     }
 
     /**
@@ -118,11 +118,11 @@ public class ManagementUIState implements Serializable {
     }
 
     public Set<Object> getExpandParentActionRowId() {
-        return expandParentActionRowId;
+        return this.expandParentActionRowId;
     }
 
     public Set<String> getCanceledTargetName() {
-        return canceledTargetName;
+        return this.canceledTargetName;
     }
 
     public void setDistTagLayoutVisible(final Boolean distTagLayoutVisible) {
@@ -130,7 +130,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public Boolean getDistTagLayoutVisible() {
-        return distTagLayoutVisible;
+        return this.distTagLayoutVisible;
     }
 
     public void setTargetTagLayoutVisible(final Boolean targetTagVisible) {
@@ -138,31 +138,31 @@ public class ManagementUIState implements Serializable {
     }
 
     public Boolean getTargetTagLayoutVisible() {
-        return targetTagLayoutVisible;
+        return this.targetTagLayoutVisible;
     }
 
     public TargetTableFilters getTargetTableFilters() {
-        return targetTableFilters;
+        return this.targetTableFilters;
     }
 
     public DistributionTableFilters getDistributionTableFilters() {
-        return distributionTableFilters;
+        return this.distributionTableFilters;
     }
 
     public Map<TargetIdName, DistributionSetIdName> getAssignedList() {
-        return assignedList;
+        return this.assignedList;
     }
 
     public Set<DistributionSetIdName> getDeletedDistributionList() {
-        return deletedDistributionList;
+        return this.deletedDistributionList;
     }
 
     public Set<TargetIdName> getDeletedTargetList() {
-        return deletedTargetList;
+        return this.deletedTargetList;
     }
 
     public TargetIdName getLastSelectedTargetIdName() {
-        return lastSelectedTargetIdName;
+        return this.lastSelectedTargetIdName;
     }
 
     public void setLastSelectedTargetIdName(final TargetIdName lastSelectedTargetIdName) {
@@ -170,7 +170,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public Optional<Set<TargetIdName>> getSelectedTargetIdName() {
-        return selectedTargetIdName == null ? Optional.empty() : Optional.of(selectedTargetIdName);
+        return this.selectedTargetIdName == null ? Optional.empty() : Optional.of(this.selectedTargetIdName);
     }
 
     public void setSelectedTargetIdName(final Set<TargetIdName> selectedTargetIdName) {
@@ -181,7 +181,7 @@ public class ManagementUIState implements Serializable {
      * @return the targetTagFilterClosed
      */
     public boolean isTargetTagFilterClosed() {
-        return targetTagFilterClosed;
+        return this.targetTagFilterClosed;
     }
 
     /**
@@ -196,7 +196,7 @@ public class ManagementUIState implements Serializable {
      * @return the distTagFilterClosed
      */
     public boolean isDistTagFilterClosed() {
-        return distTagFilterClosed;
+        return this.distTagFilterClosed;
     }
 
     /**
@@ -211,7 +211,7 @@ public class ManagementUIState implements Serializable {
      * @return the targetsTruncated
      */
     public Long getTargetsTruncated() {
-        return targetsTruncated;
+        return this.targetsTruncated;
     }
 
     /**
@@ -226,7 +226,7 @@ public class ManagementUIState implements Serializable {
      * @return the targetsCountAll
      */
     public long getTargetsCountAll() {
-        return targetsCountAll.get();
+        return this.targetsCountAll.get();
     }
 
     /**
@@ -255,7 +255,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public boolean isDsTableMaximized() {
-        return isDsTableMaximized;
+        return this.isDsTableMaximized;
     }
 
     public void setDsTableMaximized(final boolean isDsTableMaximized) {
@@ -263,7 +263,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public DistributionSetIdName getLastSelectedDsIdName() {
-        return lastSelectedDsIdName;
+        return this.lastSelectedDsIdName;
     }
 
     public void setLastSelectedDsIdName(final DistributionSetIdName lastSelectedDsIdName) {
@@ -275,14 +275,14 @@ public class ManagementUIState implements Serializable {
     }
 
     public Optional<Set<DistributionSetIdName>> getSelectedDsIdName() {
-        return selectedDsIdName == null ? Optional.empty() : Optional.of(selectedDsIdName);
+        return this.selectedDsIdName == null ? Optional.empty() : Optional.of(this.selectedDsIdName);
     }
 
     /**
      * @return the isTargetTableMaximized
      */
     public boolean isTargetTableMaximized() {
-        return isTargetTableMaximized;
+        return this.isTargetTableMaximized;
     }
 
     /**
@@ -297,7 +297,7 @@ public class ManagementUIState implements Serializable {
      * @return the isActionHistoryMaximized
      */
     public boolean isActionHistoryMaximized() {
-        return isActionHistoryMaximized;
+        return this.isActionHistoryMaximized;
     }
 
     /**
@@ -312,7 +312,7 @@ public class ManagementUIState implements Serializable {
      * @return the noDataAvilableTarget
      */
     public boolean isNoDataAvilableTarget() {
-        return noDataAvilableTarget;
+        return this.noDataAvilableTarget;
     }
 
     /**
@@ -327,7 +327,7 @@ public class ManagementUIState implements Serializable {
      * @return the noDataAvailableDistribution
      */
     public boolean isNoDataAvailableDistribution() {
-        return noDataAvailableDistribution;
+        return this.noDataAvailableDistribution;
     }
 
     /**

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.report.model;
 
+import java.io.Serializable;
+
 /**
  * A double data series which contains an inner and an outer series ideal for
  * showing donut charts.
@@ -17,7 +19,7 @@ package org.eclipse.hawkbit.report.model;
  * @param <T>
  *            The type parameter for the report series data
  */
-public class InnerOuterDataReportSeries<T> {
+public class InnerOuterDataReportSeries<T extends Serializable> {
 
     private final DataReportSeries<T> innerSeries;
     private final DataReportSeries<T> outerSeries;
@@ -37,13 +39,13 @@ public class InnerOuterDataReportSeries<T> {
      * @return the innerSeries
      */
     public DataReportSeries<T> getInnerSeries() {
-        return innerSeries;
+        return this.innerSeries;
     }
 
     /**
      * @return the outerSeries
      */
     public DataReportSeries<T> getOuterSeries() {
-        return outerSeries;
+        return this.outerSeries;
     }
 }

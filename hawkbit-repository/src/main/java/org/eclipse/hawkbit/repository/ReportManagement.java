@@ -99,7 +99,7 @@ public class ReportManagement {
     @Cacheable("targetStatus")
     public DataReportSeries<TargetUpdateStatus> targetStatus() {
 
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<Target> targetRoot = query.from(Target.class);
         final Join<Target, TargetInfo> targetInfo = targetRoot.join(Target_.targetInfo);
@@ -111,7 +111,7 @@ public class ReportManagement {
 
         // | col1 | col2 |
         // | U_STATUS | COUNT |
-        final List<Object[]> resultList = entityManager.createQuery(multiselect).getResultList();
+        final List<Object[]> resultList = this.entityManager.createQuery(multiselect).getResultList();
 
         final List<DataReportSeriesItem<TargetUpdateStatus>> reportSeriesItems = resultList.stream()
                 .map(r -> new DataReportSeriesItem<TargetUpdateStatus>((TargetUpdateStatus) r[0], (Long) r[1]))
@@ -140,7 +140,7 @@ public class ReportManagement {
     public List<InnerOuterDataReportSeries<String>> distributionUsageAssigned(final int topXEntries) {
 
         // top X entries distribution usage
-        final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cbTopX = this.entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryTopX = cbTopX.createQuery(Object[].class);
         final Root<DistributionSet> rootTopX = queryTopX.from(DistributionSet.class);
         final ListJoin<DistributionSet, Target> joinTopX = rootTopX.join(DistributionSet_.assignedToTargets,
@@ -154,7 +154,7 @@ public class ReportManagement {
                 .orderBy(cbTopX.desc(countColumn), cbTopX.asc(rootTopX.get(DistributionSet_.name)));
         // | col1 | col2 | col3 |
         // | NAME | VER | COUNT |
-        final List<Object[]> resultListTop = entityManager.createQuery(groupBy).getResultList();
+        final List<Object[]> resultListTop = this.entityManager.createQuery(groupBy).getResultList();
         // end of top X entries distribution usage
 
         return mapDistirbutionUsageResultToDataReport(topXEntries, resultListTop);
@@ -180,7 +180,7 @@ public class ReportManagement {
     @Cacheable("distributionUsageInstalled")
     public List<InnerOuterDataReportSeries<String>> distributionUsageInstalled(final int topXEntries) {
         // top X entries distribution usage
-        final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cbTopX = this.entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryTopX = cbTopX.createQuery(Object[].class);
         final Root<DistributionSet> rootTopX = queryTopX.from(DistributionSet.class);
         final ListJoin<DistributionSet, TargetInfo> joinTopX = rootTopX.join(DistributionSet_.installedAtTargets,
@@ -194,7 +194,7 @@ public class ReportManagement {
                 .orderBy(cbTopX.desc(countColumn), cbTopX.asc(rootTopX.get(DistributionSet_.name)));
         // | col1 | col2 | col3 |
         // | NAME | VER | COUNT |
-        final List<Object[]> resultListTop = entityManager.createQuery(groupBy).getResultList();
+        final List<Object[]> resultListTop = this.entityManager.createQuery(groupBy).getResultList();
         // end of top X entries distribution usage
 
         return mapDistirbutionUsageResultToDataReport(topXEntries, resultListTop);
@@ -213,9 +213,9 @@ public class ReportManagement {
      *         count
      */
     @Cacheable("targetsCreatedOverPeriod")
-    public <T> DataReportSeries<T> targetsCreatedOverPeriod(final DateType<T> dateType, final LocalDateTime from,
-            final LocalDateTime to) {
-        final Query createNativeQuery = entityManager
+    public <T extends Serializable> DataReportSeries<T> targetsCreatedOverPeriod(final DateType<T> dateType,
+            final LocalDateTime from, final LocalDateTime to) {
+        final Query createNativeQuery = this.entityManager
                 .createNativeQuery(getTargetsCreatedQueryTemplate(dateType, from, to));
         final List<Object[]> resultList = createNativeQuery.getResultList();
 
@@ -223,22 +223,21 @@ public class ReportManagement {
                 .map(r -> new DataReportSeriesItem<>(dateType.format((String) r[0]), ((Number) r[1]).longValue()))
                 .collect(Collectors.toList());
 
-        final DataReportSeries<T> report = new DataReportSeries<>("CreatedTargets", reportItems);
-        return report;
+        return new DataReportSeries<>("CreatedTargets", reportItems);
     }
 
     private String getTargetsCreatedQueryTemplate(final DateType<?> dateType, final LocalDateTime from,
             final LocalDateTime to) {
-        switch (databaseType) {
+        switch (this.databaseType) {
         case H2_DB_TYPE:
             return String.format(H2_TARGET_CREATED_SQL_TEMPLATE, dateTimeFormatToSqlFormat(dateType),
                     dateTimeFormatToSqlFormat(dateType), from.format(DATE_FORMAT), dateTimeFormatToSqlFormat(dateType),
-                    to.format(DATE_FORMAT), dateTimeFormatToSqlFormat(dateType), tenantAware.getCurrentTenant(),
+                    to.format(DATE_FORMAT), dateTimeFormatToSqlFormat(dateType), this.tenantAware.getCurrentTenant(),
                     dateTimeFormatToSqlFormat(dateType));
         case MYSQL_DB_TYPE:
             return String.format(MYSQL_TARGET_CREATED_SQL_TEMPLATE, dateTimeFormatToSqlFormat(dateType),
                     dateTimeFormatToSqlFormat(dateType), from.toString(), dateTimeFormatToSqlFormat(dateType),
-                    to.toString(), dateTimeFormatToSqlFormat(dateType), tenantAware.getCurrentTenant(),
+                    to.toString(), dateTimeFormatToSqlFormat(dateType), this.tenantAware.getCurrentTenant(),
                     dateTimeFormatToSqlFormat(dateType));
         default:
             return null;
@@ -247,16 +246,16 @@ public class ReportManagement {
 
     private String getFeedbackReceivedQueryTemplate(final DateType<?> dateType, final LocalDateTime from,
             final LocalDateTime to) {
-        switch (databaseType) {
+        switch (this.databaseType) {
         case H2_DB_TYPE:
             return String.format(H2_CONTROLLER_FRRDBACK_SQL_TEMPLATE, dateTimeFormatToSqlFormat(dateType),
                     dateTimeFormatToSqlFormat(dateType), from.format(DATE_FORMAT), dateTimeFormatToSqlFormat(dateType),
-                    to.format(DATE_FORMAT), dateTimeFormatToSqlFormat(dateType), tenantAware.getCurrentTenant(),
+                    to.format(DATE_FORMAT), dateTimeFormatToSqlFormat(dateType), this.tenantAware.getCurrentTenant(),
                     dateTimeFormatToSqlFormat(dateType));
         case MYSQL_DB_TYPE:
             return String.format(MYSQL_CONTROLLER_FRRDBACK_SQL_TEMPLATE, dateTimeFormatToSqlFormat(dateType),
                     dateTimeFormatToSqlFormat(dateType), from.toString(), dateTimeFormatToSqlFormat(dateType),
-                    to.toString(), dateTimeFormatToSqlFormat(dateType), tenantAware.getCurrentTenant(),
+                    to.toString(), dateTimeFormatToSqlFormat(dateType), this.tenantAware.getCurrentTenant(),
                     dateTimeFormatToSqlFormat(dateType));
         default:
             return null;
@@ -276,9 +275,9 @@ public class ReportManagement {
      *         count
      */
     @Cacheable("feedbackReceivedOverTime")
-    public <T> DataReportSeries<T> feedbackReceivedOverTime(final DateType<T> dateType, final LocalDateTime from,
-            final LocalDateTime to) {
-        final Query createNativeQuery = entityManager
+    public <T extends Serializable> DataReportSeries<T> feedbackReceivedOverTime(final DateType<T> dateType,
+            final LocalDateTime from, final LocalDateTime to) {
+        final Query createNativeQuery = this.entityManager
                 .createNativeQuery(getFeedbackReceivedQueryTemplate(dateType, from, to));
         final List<Object[]> resultList = createNativeQuery.getResultList();
 
@@ -286,8 +285,7 @@ public class ReportManagement {
                 .map(r -> new DataReportSeriesItem<>(dateType.format((String) r[0]), ((Number) r[1]).longValue()))
                 .collect(Collectors.toList());
 
-        final DataReportSeries<T> report = new DataReportSeries<>("FeedbackRecieved", reportItems);
-        return report;
+        return new DataReportSeries<>("FeedbackRecieved", reportItems);
     }
 
     /**
@@ -313,30 +311,30 @@ public class ReportManagement {
         final LocalDateTime beforeMonth = now.minusMonths(1);
         final LocalDateTime beforeYear = now.minusYears(1);
 
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
         final List<DataReportSeriesItem<SeriesTime>> resultList = new ArrayList<>();
 
         // hours
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.HOUR,
-                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, beforeHour, now)).getSingleResult()));
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.HOUR, this.entityManager
+                .createQuery(createCountSelectTargetsLastPoll(cb, beforeHour, now)).getSingleResult()));
         // days
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.DAY, entityManager
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.DAY, this.entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeDay, beforeHour)).getSingleResult()));
         // weeks
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.WEEK, entityManager
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.WEEK, this.entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeWeek, beforeDay)).getSingleResult()));
         // months
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MONTH, entityManager
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MONTH, this.entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeMonth, beforeWeek)).getSingleResult()));
         // years
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.YEAR, entityManager
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.YEAR, this.entityManager
                 .createQuery(createCountSelectTargetsLastPoll(cb, beforeYear, beforeMonth)).getSingleResult()));
         // years
-        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MORE_THAN_YEAR,
-                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, beforeYear)).getSingleResult()));
+        resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.MORE_THAN_YEAR, this.entityManager
+                .createQuery(createCountSelectTargetsLastPoll(cb, null, beforeYear)).getSingleResult()));
         // never
         resultList.add(new DataReportSeriesItem<SeriesTime>(SeriesTime.NEVER,
-                entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, null)).getSingleResult()));
+                this.entityManager.createQuery(createCountSelectTargetsLastPoll(cb, null, null)).getSingleResult()));
 
         return new DataReportSeries<>("TargetLastPoll", resultList);
     }
@@ -417,23 +415,23 @@ public class ReportManagement {
         final List<InnerOuter> outer;
 
         private InnerOuter(final DSName idName) {
-            name = idName;
-            outer = new ArrayList<>();
+            this.name = idName;
+            this.outer = new ArrayList<>();
         }
 
         private InnerOuter(final DSName idName, final long count) {
-            name = idName;
+            this.name = idName;
             this.count = count;
-            outer = new ArrayList<>();
+            this.outer = new ArrayList<>();
         }
 
         private void addOuter(final DSName idName, final long count) {
-            outer.add(new InnerOuter(idName, count));
+            this.outer.add(new InnerOuter(idName, count));
             this.count += count;
         }
 
         private DataReportSeriesItem<String> toItem() {
-            return new DataReportSeriesItem<String>(name.getName() != null ? name.getName() : "misc", count);
+            return new DataReportSeriesItem<>(this.name.getName() != null ? this.name.getName() : "misc", this.count);
         }
     }
 
@@ -462,7 +460,7 @@ public class ReportManagement {
          * @return the name
          */
         private String getName() {
-            return name;
+            return this.name;
         }
 
         /*
@@ -474,7 +472,7 @@ public class ReportManagement {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (name == null ? 0 : name.hashCode());
+            result = prime * result + (this.name == null ? 0 : this.name.hashCode());
             return result;
         }
 
@@ -496,11 +494,11 @@ public class ReportManagement {
                 return false;
             }
             final DSName other = (DSName) obj;
-            if (name == null) {
+            if (this.name == null) {
                 if (other.name != null) {
                     return false;
                 }
-            } else if (!name.equals(other.name)) {
+            } else if (!this.name.equals(other.name)) {
                 return false;
             }
             return true;
@@ -513,12 +511,12 @@ public class ReportManagement {
          */
         @Override
         public String toString() {
-            return "DSName [name=" + name + "]";
+            return "DSName [name=" + this.name + "]";
         }
     }
 
     private String dateTimeFormatToSqlFormat(final DateType<?> datatype) {
-        switch (databaseType) {
+        switch (this.databaseType) {
         case H2_DB_TYPE:
             return datatype.h2Format();
         case MYSQL_DB_TYPE:

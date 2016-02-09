@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,7 +42,7 @@ public class DeviceSimulatorUpdater {
 
     /**
      * Starting an simulated update process of an simulated device.
-     * 
+     *
      * @param tenant
      *            the tenant of the device
      * @param id
@@ -57,16 +58,17 @@ public class DeviceSimulatorUpdater {
      */
     public void startUpdate(final String tenant, final String id, final long actionId, final String swVersion,
             final UpdaterCallback callback) {
-        final AbstractSimulatedDevice device = repository.get(tenant, id);
+        final AbstractSimulatedDevice device = this.repository.get(tenant, id);
         device.setProgress(0.0);
         device.setSwversion(swVersion);
-        eventbus.post(new InitUpdate(device));
-        threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback),
-                2000, TimeUnit.MILLISECONDS);
+        this.eventbus.post(new InitUpdate(device));
+        threadPool.schedule(
+                new DeviceSimulatorUpdateThread(device, this.spSenderService, actionId, this.eventbus, callback), 2000,
+                TimeUnit.MILLISECONDS);
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
-        private static final Random rndSleep = new Random();
+        private static final Random rndSleep = new SecureRandom();
 
         private final AbstractSimulatedDevice device;
         private final SpSenderService spSenderService;
@@ -74,9 +76,8 @@ public class DeviceSimulatorUpdater {
         private final EventBus eventbus;
         private final UpdaterCallback callback;
 
-        private DeviceSimulatorUpdateThread(final AbstractSimulatedDevice device,
-                final SpSenderService spSenderService, final long actionId, final EventBus eventbus,
-                final UpdaterCallback callback) {
+        private DeviceSimulatorUpdateThread(final AbstractSimulatedDevice device, final SpSenderService spSenderService,
+                final long actionId, final EventBus eventbus, final UpdaterCallback callback) {
             this.device = device;
             this.spSenderService = spSenderService;
             this.actionId = actionId;
@@ -86,15 +87,15 @@ public class DeviceSimulatorUpdater {
 
         @Override
         public void run() {
-            final double newProgress = device.getProgress() + 0.2;
-            device.setProgress(newProgress);
+            final double newProgress = this.device.getProgress() + 0.2;
+            this.device.setProgress(newProgress);
             if (newProgress < 1.0) {
-                threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus,
-                        callback), rndSleep.nextInt(3000), TimeUnit.MILLISECONDS);
+                threadPool.schedule(new DeviceSimulatorUpdateThread(this.device, this.spSenderService, this.actionId,
+                        this.eventbus, this.callback), rndSleep.nextInt(3000), TimeUnit.MILLISECONDS);
             } else {
-                callback.updateFinished(device, actionId);
+                this.callback.updateFinished(this.device, this.actionId);
             }
-            eventbus.post(new ProgressUpdate(device));
+            this.eventbus.post(new ProgressUpdate(this.device));
         }
     }
 
@@ -102,7 +103,7 @@ public class DeviceSimulatorUpdater {
      * Callback interface which is called when the simulated update process has
      * been finished and the caller of starting the simulated update process can
      * send the result to the hawkbit update server back.
-     * 
+     *
      * @author Michael Hirsch
      *
      */
@@ -111,7 +112,7 @@ public class DeviceSimulatorUpdater {
         /**
          * Callback method to indicate that the simulated update process has
          * been finished.
-         * 
+         *
          * @param device
          *            the device which has been updated
          * @param actionId

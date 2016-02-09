@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.simulator;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater.UpdaterCallback;
 import org.eclipse.hawkbit.simulator.http.ControllerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,48 +61,47 @@ public class DDISimulatedDevice extends AbstractSimulatedDevice {
     @Override
     public void clean() {
         super.clean();
-        removed = true;
+        this.removed = true;
     }
 
     public int getPollDelaySec() {
-        return pollDelaySec;
+        return this.pollDelaySec;
     }
 
     /**
      * Polls the base URL for the DDI API interface.
      */
     public void poll() {
-        if (!removed) {
-            final String basePollJson = controllerResource.get(getTenant(), getId());
+        if (!this.removed) {
+            final String basePollJson = this.controllerResource.get(getTenant(), getId());
             try {
                 final String href = JsonPath.parse(basePollJson).read("_links.deploymentBase.href");
                 final long actionId = Long.parseLong(href.substring(href.lastIndexOf("/") + 1, href.indexOf("?")));
-                if (currentActionId == null) {
-                    final String deploymentJson = controllerResource.getDeployment(getTenant(), getId(), actionId);
+                if (this.currentActionId == null) {
+                    final String deploymentJson = this.controllerResource.getDeployment(getTenant(), getId(), actionId);
                     final String swVersion = JsonPath.parse(deploymentJson).read("deployment.chunks[0].version");
-                    currentActionId = actionId;
-                    deviceUpdater.startUpdate(getTenant(), getId(), actionId, swVersion, new UpdaterCallback() {
-                        @Override
-                        public void updateFinished(final AbstractSimulatedDevice device, final Long actionId) {
-                            switch (device.getResponseStatus()) {
-                            case SUCCESSFUL:
-                                controllerResource.postSuccessFeedback(getTenant(), getId(), actionId);
-                                break;
-                            case ERROR:
-                                controllerResource.postErrorFeedback(getTenant(), getId(), actionId);
-                                break;
-                            default:
-                                throw new IllegalStateException("simulated device has an unknown response status + "
-                                        + device.getResponseStatus());
-                            }
-                            currentActionId = null;
+                    this.currentActionId = actionId;
+                    this.deviceUpdater.startUpdate(getTenant(), getId(), actionId, swVersion, (device, actionId1) -> {
+                        switch (device.getResponseStatus()) {
+                        case SUCCESSFUL:
+                            DDISimulatedDevice.this.controllerResource.postSuccessFeedback(getTenant(), getId(),
+                                    actionId1);
+                            break;
+                        case ERROR:
+                            DDISimulatedDevice.this.controllerResource.postErrorFeedback(getTenant(), getId(),
+                                    actionId1);
+                            break;
+                        default:
+                            throw new IllegalStateException(
+                                    "simulated device has an unknown response status + " + device.getResponseStatus());
                         }
+                        DDISimulatedDevice.this.currentActionId = null;
                     });
                 }
             } catch (final PathNotFoundException e) {
                 // href might not be in the json response, so ignore
                 // exception here.
-                LOGGER.trace("Response does not contain a deploymentbase href link, ignoring.");
+                LOGGER.trace("Response does not contain a deploymentbase href link, ignoring.", e);
             }
 
         }

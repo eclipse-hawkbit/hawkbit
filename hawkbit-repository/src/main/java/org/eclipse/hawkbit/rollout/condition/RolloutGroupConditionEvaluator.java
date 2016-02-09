@@ -16,7 +16,19 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  */
 public interface RolloutGroupConditionEvaluator {
 
-    boolean verifyExpression(final String expression);
+    default boolean verifyExpression(final String expression) {
+        // percentage value between 0 and 100
+        try {
+            final Integer value = Integer.valueOf(expression);
+            if (value >= 0 || value <= 100) {
+                return true;
+            }
+            return true;
+        } catch (final NumberFormatException e) {
+
+            return false;
+        }
+    }
 
     boolean eval(Rollout rollout, RolloutGroup rolloutGroup, final String expression);
 }

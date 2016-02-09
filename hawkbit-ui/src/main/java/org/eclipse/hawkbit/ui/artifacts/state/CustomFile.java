@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.state;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-
 /**
  * Custom file to hold details of uploaded file.
  *
@@ -98,7 +96,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getBaseSoftwareModuleName() {
-        return baseSoftwareModuleName;
+        return this.baseSoftwareModuleName;
     }
 
     public void setBaseSoftwareModuleName(final String baseSoftwareModuleName) {
@@ -106,7 +104,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getBaseSoftwareModuleVersion() {
-        return baseSoftwareModuleVersion;
+        return this.baseSoftwareModuleVersion;
     }
 
     public void setBaseSoftwareModuleVersion(final String baseSoftwareModuleVersion) {
@@ -114,11 +112,11 @@ public class CustomFile implements Serializable {
     }
 
     public String getFileName() {
-        return fileName;
+        return this.fileName;
     }
 
     public long getFileSize() {
-        return fileSize;
+        return this.fileSize;
     }
 
     public void setFileSize(final long fileSize) {
@@ -126,7 +124,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getFilePath() {
-        return filePath;
+        return this.filePath;
     }
 
     public void setFilePath(final String filePath) {
@@ -134,7 +132,7 @@ public class CustomFile implements Serializable {
     }
 
     public String getMimeType() {
-        return mimeType;
+        return this.mimeType;
     }
 
     /**
@@ -142,7 +140,7 @@ public class CustomFile implements Serializable {
      * @return the isValid
      */
     public Boolean getIsValid() {
-        return isValid;
+        return this.isValid;
     }
 
     /**
@@ -165,39 +163,54 @@ public class CustomFile implements Serializable {
      * @return the failureReason
      */
     public String getFailureReason() {
-        return failureReason;
+        return this.failureReason;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (fileName == null ? 0 : fileName.hashCode());
+        result = prime * result + ((this.baseSoftwareModuleName == null) ? 0 : this.baseSoftwareModuleName.hashCode());
+        result = prime * result
+                + ((this.baseSoftwareModuleVersion == null) ? 0 : this.baseSoftwareModuleVersion.hashCode());
+        result = prime * result + ((this.fileName == null) ? 0 : this.fileName.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof CustomFile)) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final CustomFile other = (CustomFile) obj;
-        return HawkbitCommonUtil.bothSame(fileName, other.fileName)
-                && HawkbitCommonUtil.bothSame(baseSoftwareModuleName, other.baseSoftwareModuleName)
-                && HawkbitCommonUtil.bothSame(baseSoftwareModuleVersion, other.baseSoftwareModuleVersion);
+        if (this.baseSoftwareModuleName == null) {
+            if (other.baseSoftwareModuleName != null) {
+                return false;
+            }
+        } else if (!this.baseSoftwareModuleName.equals(other.baseSoftwareModuleName)) {
+            return false;
+        }
+        if (this.baseSoftwareModuleVersion == null) {
+            if (other.baseSoftwareModuleVersion != null) {
+                return false;
+            }
+        } else if (!this.baseSoftwareModuleVersion.equals(other.baseSoftwareModuleVersion)) {
+            return false;
+        }
+        if (this.fileName == null) {
+            if (other.fileName != null) {
+                return false;
+            }
+        } else if (!this.fileName.equals(other.fileName)) {
+            return false;
+        }
+        return true;
     }
 
 }

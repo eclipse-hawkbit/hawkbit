@@ -32,7 +32,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract class for target/ds tag token layout.
- * 
+ *
  *
  *
  *
@@ -47,9 +47,9 @@ public abstract class AbstractTagToken implements Serializable {
 
     protected IndexedContainer container;
 
-    protected final Map<Long, TagData> tagDetails = new HashMap<Long, TagData>();
+    protected final Map<Long, TagData> tagDetails = new HashMap<>();
 
-    protected final Map<Long, TagData> tokensAdded = new HashMap<Long, TagData>();
+    protected final Map<Long, TagData> tokensAdded = new HashMap<>();
 
     protected CssLayout tokenLayout = new CssLayout();
 
@@ -63,16 +63,16 @@ public abstract class AbstractTagToken implements Serializable {
 
     private void createTokenField() {
         final Container tokenContainer = createContainer();
-        tokenField = createTokenField(tokenContainer);
-        tokenField.setContainerDataSource(tokenContainer);
-        tokenField.setNewTokensAllowed(false);
-        tokenField.setFilteringMode(FilteringMode.CONTAINS);
-        tokenField.setInputPrompt(getTokenInputPrompt());
-        tokenField.setTokenInsertPosition(InsertPosition.AFTER);
-        tokenField.setImmediate(true);
-        tokenField.addStyleName(ValoTheme.COMBOBOX_TINY);
-        tokenField.setSizeFull();
-        tokenField.setTokenCaptionPropertyId("name");
+        this.tokenField = createTokenField(tokenContainer);
+        this.tokenField.setContainerDataSource(tokenContainer);
+        this.tokenField.setNewTokensAllowed(false);
+        this.tokenField.setFilteringMode(FilteringMode.CONTAINS);
+        this.tokenField.setInputPrompt(getTokenInputPrompt());
+        this.tokenField.setTokenInsertPosition(InsertPosition.AFTER);
+        this.tokenField.setImmediate(true);
+        this.tokenField.addStyleName(ValoTheme.COMBOBOX_TINY);
+        this.tokenField.setSizeFull();
+        this.tokenField.setTokenCaptionPropertyId("name");
     }
 
     protected void repopulateToken() {
@@ -81,26 +81,26 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     private Container createContainer() {
-        container = new IndexedContainer();
-        container.addContainerProperty("name", String.class, "");
-        container.addContainerProperty("id", Long.class, "");
-        container.addContainerProperty(COLOR_PROPERTY, String.class, "");
-        return container;
+        this.container = new IndexedContainer();
+        this.container.addContainerProperty("name", String.class, "");
+        this.container.addContainerProperty("id", Long.class, "");
+        this.container.addContainerProperty(COLOR_PROPERTY, String.class, "");
+        return this.container;
     }
 
     protected void addNewToken(final Long tagId) {
-        tokenField.addToken(tagId);
+        this.tokenField.addToken(tagId);
         removeTagAssignedFromCombo(tagId);
     }
 
     private void removeTagAssignedFromCombo(final Long tagId) {
-        tokensAdded.put(tagId, new TagData(tagId, getTagName(tagId), getColor(tagId)));
-        container.removeItem(tagId);
+        this.tokensAdded.put(tagId, new TagData(tagId, getTagName(tagId), getColor(tagId)));
+        this.container.removeItem(tagId);
     }
 
     protected void setContainerPropertValues(final Long tagId, final String tagName, final String tagColor) {
-        tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
-        final Item item = container.addItem(tagId);
+        this.tagDetails.put(tagId, new TagData(tagId, tagName, tagColor));
+        final Item item = this.container.addItem(tagId);
         item.getItemProperty("id").setValue(tagId);
         updateItem(tagName, tagColor, item);
     }
@@ -112,12 +112,12 @@ public abstract class AbstractTagToken implements Serializable {
 
     protected void checkIfTagAssignedIsAllowed() {
         if (!isToggleTagAssignmentAllowed()) {
-            tokenField.addStyleName("hideTokenFieldcombo");
+            this.tokenField.addStyleName("hideTokenFieldcombo");
         }
     }
 
     private TokenField createTokenField(final Container tokenContainer) {
-        return new CustomTokenField(tokenLayout, tokenContainer);
+        return new CustomTokenField(this.tokenLayout, tokenContainer);
     }
 
     class CustomTokenField extends TokenField {
@@ -166,12 +166,12 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     private Property getItemNameProperty(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+        final Item item = this.tokenField.getContainerDataSource().getItem(tokenId);
         return item.getItemProperty("name");
     }
 
     private String getColor(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+        final Item item = this.tokenField.getContainerDataSource().getItem(tokenId);
         if (item.getItemProperty(COLOR_PROPERTY).getValue() != null) {
             return (String) item.getItemProperty(COLOR_PROPERTY).getValue();
         } else {
@@ -180,23 +180,23 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     private String getTagName(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().getItem(tokenId);
+        final Item item = this.tokenField.getContainerDataSource().getItem(tokenId);
         return (String) item.getItemProperty("name").getValue();
     }
 
     private void tokenClick(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().addItem(tokenId);
-        item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
-        item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
-        unassignTag(tagDetails.get(tokenId).getName());
+        final Item item = this.tokenField.getContainerDataSource().addItem(tokenId);
+        item.getItemProperty("name").setValue(this.tagDetails.get(tokenId).getName());
+        item.getItemProperty(COLOR_PROPERTY).setValue(this.tagDetails.get(tokenId).getColor());
+        unassignTag(this.tagDetails.get(tokenId).getName());
     }
 
     protected void removePreviouslyAddedTokens() {
-        tokensAdded.keySet().forEach(previouslyAddedToken -> tokenField.removeToken(previouslyAddedToken));
+        this.tokensAdded.keySet().forEach(previouslyAddedToken -> this.tokenField.removeToken(previouslyAddedToken));
     }
 
     protected Long getTagIdByTagName(final String tagName) {
-        final Optional<Map.Entry<Long, TagData>> mapEntry = tagDetails.entrySet().stream()
+        final Optional<Map.Entry<Long, TagData>> mapEntry = this.tagDetails.entrySet().stream()
                 .filter(entry -> entry.getValue().getName().equals(tagName)).findFirst();
         if (mapEntry.isPresent()) {
             return mapEntry.get().getKey();
@@ -205,13 +205,13 @@ public abstract class AbstractTagToken implements Serializable {
     }
 
     protected void removeTokenItem(final Long tokenId, final String name) {
-        tokenField.removeToken(tokenId);
-        setContainerPropertValues(tokenId, name, tokensAdded.get(tokenId).getColor());
+        this.tokenField.removeToken(tokenId);
+        setContainerPropertValues(tokenId, name, this.tokensAdded.get(tokenId).getColor());
     }
 
     protected void removeTagFromCombo(final Long deletedTagId) {
         if (deletedTagId != null) {
-            container.removeItem(deletedTagId);
+            this.container.removeItem(deletedTagId);
         }
     }
 
@@ -230,14 +230,16 @@ public abstract class AbstractTagToken implements Serializable {
     protected abstract void populateContainer();
 
     public TokenField getTokenField() {
-        return tokenField;
+        return this.tokenField;
     }
 
     /**
      * Tag details.
-     * 
+     *
      */
-    public static class TagData {
+    public static class TagData implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         private String name;
 
@@ -247,7 +249,7 @@ public abstract class AbstractTagToken implements Serializable {
 
         /**
          * Tag data constructor.
-         * 
+         *
          * @param id
          * @param name
          * @param color
@@ -262,7 +264,7 @@ public abstract class AbstractTagToken implements Serializable {
          * @return the name
          */
         public String getName() {
-            return name;
+            return this.name;
         }
 
         /**
@@ -277,7 +279,7 @@ public abstract class AbstractTagToken implements Serializable {
          * @return the id
          */
         public Long getId() {
-            return id;
+            return this.id;
         }
 
         /**
@@ -292,7 +294,7 @@ public abstract class AbstractTagToken implements Serializable {
          * @return the color
          */
         public String getColor() {
-            return color;
+            return this.color;
         }
 
         /**

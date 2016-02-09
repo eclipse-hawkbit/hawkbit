@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule_;
 import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.specifications.SoftwareModuleSpecification;
+import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
@@ -48,7 +49,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -117,7 +117,7 @@ public class SoftwareManagement {
     public SoftwareModule updateSoftwareModule(@NotNull final SoftwareModule sm) {
         checkNotNull(sm.getId());
 
-        final SoftwareModule module = softwareModuleRepository.findOne(sm.getId());
+        final SoftwareModule module = this.softwareModuleRepository.findOne(sm.getId());
 
         if (null == sm.getDescription() || !sm.getDescription().equals(module.getDescription())) {
             module.setDescription(sm.getDescription());
@@ -125,7 +125,7 @@ public class SoftwareManagement {
         if (null == sm.getVendor() || !sm.getVendor().equals(module.getVendor())) {
             module.setVendor(sm.getVendor());
         }
-        return softwareModuleRepository.save(module);
+        return this.softwareModuleRepository.save(module);
     }
 
     /**
@@ -143,7 +143,7 @@ public class SoftwareManagement {
     public SoftwareModuleType updateSoftwareModuleType(@NotNull final SoftwareModuleType sm) {
         checkNotNull(sm.getId());
 
-        final SoftwareModuleType type = softwareModuleTypeRepository.findOne(sm.getId());
+        final SoftwareModuleType type = this.softwareModuleTypeRepository.findOne(sm.getId());
 
         if (sm.getDescription() != null && !sm.getDescription().equals(type.getDescription())) {
             type.setDescription(sm.getDescription());
@@ -151,7 +151,7 @@ public class SoftwareManagement {
         if (sm.getColour() != null && !sm.getColour().equals(type.getColour())) {
             type.setColour(sm.getColour());
         }
-        return softwareModuleTypeRepository.save(type);
+        return this.softwareModuleTypeRepository.save(type);
     }
 
     /**
@@ -169,7 +169,7 @@ public class SoftwareManagement {
         if (null != swModule.getId()) {
             throw new EntityAlreadyExistsException();
         }
-        return softwareModuleRepository.save(swModule);
+        return this.softwareModuleRepository.save(swModule);
     }
 
     /**
@@ -191,14 +191,14 @@ public class SoftwareManagement {
             }
         });
 
-        return softwareModuleRepository.save(swModules);
+        return this.softwareModuleRepository.save(swModules);
 
     }
 
     /**
      * retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
      * .
-     * 
+     *
      * @param pageable
      *            page parameters
      * @param type
@@ -209,7 +209,7 @@ public class SoftwareManagement {
     public Slice<SoftwareModule> findSoftwareModulesByType(@NotNull final Pageable pageable,
             @NotNull final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.equalType(type);
         specList.add(spec);
@@ -230,7 +230,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModulesByType(@NotNull final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.equalType(type);
         specList.add(spec);
@@ -252,12 +252,12 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
     public SoftwareModule findSoftwareModuleById(@NotNull final Long id) {
-        return artifactManagement.findSoftwareModuleById(id);
+        return this.artifactManagement.findSoftwareModuleById(id);
     }
 
     /**
      * retrieves {@link SoftwareModule}s by their name AND version.
-     * 
+     *
      * @param name
      *            of the {@link SoftwareModule}
      * @param version
@@ -268,12 +268,12 @@ public class SoftwareManagement {
     public List<SoftwareModule> findSoftwareModuleByNameAndVersion(@NotEmpty final String name,
             @NotEmpty final String version) {
 
-        return softwareModuleRepository.findByNameAndVersion(name, version);
+        return this.softwareModuleRepository.findByNameAndVersion(name, version);
     }
 
     /**
      * Deletes the given {@link SoftwareModule} {@link Entity}.
-     * 
+     *
      * @param bsm
      *            is the {@link SoftwareModule} to be deleted
      */
@@ -286,42 +286,28 @@ public class SoftwareManagement {
     }
 
     private boolean isUnassigned(final SoftwareModule bsmMerged) {
-        return distributionSetRepository.findByModules(bsmMerged).isEmpty();
+        return this.distributionSetRepository.findByModules(bsmMerged).isEmpty();
     }
 
     private Slice<SoftwareModule> findSwModuleByCriteriaAPI(@NotNull final Pageable pageable,
             @NotEmpty final List<Specification<SoftwareModule>> specList) {
-
-        Specifications<SoftwareModule> specs = Specifications.where(specList.get(0));
-        if (specList.size() > 1) {
-            for (final Specification<SoftwareModule> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
-        }
-
-        return criteriaNoCountDao.findAll(specs, pageable, SoftwareModule.class);
+        return this.criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable,
+                SoftwareModule.class);
     }
 
     private Long countSwModuleByCriteriaAPI(@NotEmpty final List<Specification<SoftwareModule>> specList) {
-        Specifications<SoftwareModule> specs = Specifications.where(specList.get(0));
-        if (specList.size() > 1) {
-            for (final Specification<SoftwareModule> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
-        }
-
-        return softwareModuleRepository.count(specs);
+        return this.softwareModuleRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     private void deleteGridFsArtifacts(final SoftwareModule swModule) {
         for (final LocalArtifact localArtifact : swModule.getLocalArtifacts()) {
-            artifactManagement.deleteGridFsArtifact(localArtifact);
+            this.artifactManagement.deleteGridFsArtifact(localArtifact);
         }
     }
 
     /**
      * Deletes {@link SoftwareModule}s which is any if the given ids.
-     * 
+     *
      * @param ids
      *            of the Software Moduels to be deleted
      */
@@ -329,7 +315,7 @@ public class SoftwareManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteSoftwareModules(@NotNull final Iterable<Long> ids) {
-        final List<SoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
+        final List<SoftwareModule> swModulesToDelete = this.softwareModuleRepository.findByIdIn(ids);
         final Set<Long> assignedModuleIds = new HashSet<>();
         swModulesToDelete.forEach(swModule -> {
 
@@ -338,7 +324,7 @@ public class SoftwareManagement {
 
             if (isUnassigned(swModule)) {
 
-                softwareModuleRepository.delete(swModule);
+                this.softwareModuleRepository.delete(swModule);
 
             } else {
 
@@ -348,10 +334,10 @@ public class SoftwareManagement {
 
         if (!assignedModuleIds.isEmpty()) {
             String currentUser = null;
-            if (auditorProvider != null) {
-                currentUser = auditorProvider.getCurrentAuditor();
+            if (this.auditorProvider != null) {
+                currentUser = this.auditorProvider.getCurrentAuditor();
             }
-            softwareModuleRepository.deleteSoftwareModule(System.currentTimeMillis(), currentUser,
+            this.softwareModuleRepository.deleteSoftwareModule(System.currentTimeMillis(), currentUser,
                     assignedModuleIds.toArray(new Long[0]));
         }
     }
@@ -366,20 +352,16 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Slice<SoftwareModule> findSoftwareModulesAll(@NotNull final Pageable pageable) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
 
-        spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                if (!query.getResultType().isAssignableFrom(Long.class)) {
-                    root.fetch(SoftwareModule_.type);
-                }
-                return cb.conjunction();
+        spec = (root, query, cb) -> {
+            if (!query.getResultType().isAssignableFrom(Long.class)) {
+                root.fetch(SoftwareModule_.type);
             }
+            return cb.conjunction();
         };
 
         specList.add(spec);
@@ -396,7 +378,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModulesAll() {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         final Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -416,7 +398,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public SoftwareModule findSoftwareModuleWithDetails(@NotNull final Long id) {
-        return artifactManagement.findSoftwareModuleWithDetails(id);
+        return this.artifactManagement.findSoftwareModuleWithDetails(id);
     }
 
     /**
@@ -431,7 +413,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModule> findSoftwareModulesByPredicate(@NotNull final Specification<SoftwareModule> spec,
             @NotNull final Pageable pageable) {
-        return softwareModuleRepository.findAll(spec, pageable);
+        return this.softwareModuleRepository.findAll(spec, pageable);
     }
 
     /**
@@ -446,7 +428,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModuleType> findSoftwareModuleTypesByPredicate(
             @NotNull final Specification<SoftwareModuleType> spec, @NotNull final Pageable pageable) {
-        return softwareModuleTypeRepository.findAll(spec, pageable);
+        return this.softwareModuleTypeRepository.findAll(spec, pageable);
     }
 
     /**
@@ -459,7 +441,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<SoftwareModule> findSoftwareModulesById(@NotEmpty final List<Long> ids) {
-        return softwareModuleRepository.findByIdIn(ids);
+        return this.softwareModuleRepository.findByIdIn(ids);
     }
 
     /**
@@ -479,7 +461,7 @@ public class SoftwareManagement {
     public Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull final Pageable pageable, final String searchText,
             final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -494,15 +476,11 @@ public class SoftwareManagement {
             specList.add(spec);
         }
 
-        spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                if (!query.getResultType().isAssignableFrom(Long.class)) {
-                    root.fetch(SoftwareModule_.type);
-                }
-                return cb.conjunction();
+        spec = (root, query, cb) -> {
+            if (!query.getResultType().isAssignableFrom(Long.class)) {
+                root.fetch(SoftwareModule_.type);
             }
+            return cb.conjunction();
         };
 
         specList.add(spec);
@@ -531,7 +509,7 @@ public class SoftwareManagement {
 
         final List<CustomSoftwareModule> resultList = new ArrayList<>();
         final int pageSize = pageable.getPageSize();
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
 
         // get the assigned software modules
         final CriteriaQuery<SoftwareModule> assignedQuery = cb.createQuery(SoftwareModule.class);
@@ -551,7 +529,8 @@ public class SoftwareManagement {
         // don't page the assigned query on database, we need all assigned
         // software modules to filter
         // them out in the unassigned query
-        final List<SoftwareModule> assignedSoftwareModules = entityManager.createQuery(assignedQuery).getResultList();
+        final List<SoftwareModule> assignedSoftwareModules = this.entityManager.createQuery(assignedQuery)
+                .getResultList();
         // map result
         if (pageable.getOffset() < assignedSoftwareModules.size()) {
             assignedSoftwareModules
@@ -581,7 +560,7 @@ public class SoftwareManagement {
         unassignedQuery.where(unassignedSpec);
         unassignedQuery.orderBy(cb.asc(unassignedRoot.get(SoftwareModule_.name)),
                 cb.asc(unassignedRoot.get(SoftwareModule_.version)));
-        final List<SoftwareModule> unassignedSoftwareModules = entityManager.createQuery(unassignedQuery)
+        final List<SoftwareModule> unassignedSoftwareModules = this.entityManager.createQuery(unassignedQuery)
                 .setFirstResult(Math.max(0, pageable.getOffset() - assignedSoftwareModules.size()))
                 .setMaxResults(pageSize).getResultList();
         // map result
@@ -592,7 +571,7 @@ public class SoftwareManagement {
 
     private List<Specification<SoftwareModule>> buildSpecificationList(final String searchText,
             final SoftwareModuleType type) {
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
         if (!Strings.isNullOrEmpty(searchText)) {
             specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
         }
@@ -631,7 +610,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModuleByFilters(final String searchText, final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -656,7 +635,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModuleType> findSoftwareModuleTypesAll(@NotNull final Pageable pageable) {
-        return softwareModuleTypeRepository.findByDeleted(pageable, false);
+        return this.softwareModuleTypeRepository.findByDeleted(pageable, false);
     }
 
     /**
@@ -664,7 +643,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModuleTypesAll() {
-        return softwareModuleTypeRepository.countByDeleted(false);
+        return this.softwareModuleTypeRepository.countByDeleted(false);
     }
 
     /**
@@ -676,7 +655,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public SoftwareModuleType findSoftwareModuleTypeByKey(@NotNull final String key) {
-        return softwareModuleTypeRepository.findByKey(key);
+        return this.softwareModuleTypeRepository.findByKey(key);
     }
 
     /**
@@ -688,7 +667,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public SoftwareModuleType findSoftwareModuleTypeById(@NotNull final Long id) {
-        return softwareModuleTypeRepository.findOne(id);
+        return this.softwareModuleTypeRepository.findOne(id);
     }
 
     /**
@@ -700,7 +679,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public SoftwareModuleType findSoftwareModuleTypeByName(@NotNull final String name) {
-        return softwareModuleTypeRepository.findByName(name);
+        return this.softwareModuleTypeRepository.findByName(name);
     }
 
     /**
@@ -718,7 +697,7 @@ public class SoftwareManagement {
             throw new EntityAlreadyExistsException("Given type contains an Id!");
         }
 
-        return softwareModuleTypeRepository.save(type);
+        return this.softwareModuleTypeRepository.save(type);
     }
 
     /**
@@ -746,13 +725,13 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteSoftwareModuleType(@NotNull final SoftwareModuleType type) {
 
-        if (softwareModuleRepository.countByType(type) > 0
-                || distributionSetTypeRepository.countByElementsSmType(type) > 0) {
-            final SoftwareModuleType toDelete = entityManager.merge(type);
+        if (this.softwareModuleRepository.countByType(type) > 0
+                || this.distributionSetTypeRepository.countByElementsSmType(type) > 0) {
+            final SoftwareModuleType toDelete = this.entityManager.merge(type);
             toDelete.setDeleted(true);
-            softwareModuleTypeRepository.save(toDelete);
+            this.softwareModuleTypeRepository.save(toDelete);
         } else {
-            softwareModuleTypeRepository.delete(type.getId());
+            this.softwareModuleTypeRepository.delete(type.getId());
         }
     }
 
@@ -767,7 +746,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModule> findSoftwareModuleByAssignedTo(@NotNull final Pageable pageable,
             @NotNull final DistributionSet set) {
-        return softwareModuleRepository.findByAssignedTo(pageable, set);
+        return this.softwareModuleRepository.findByAssignedTo(pageable, set);
     }
 
     /**
@@ -783,12 +762,12 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModule> findSoftwareModuleByAssignedToAndType(@NotNull final Pageable pageable,
             @NotNull final DistributionSet set, @NotNull final SoftwareModuleType type) {
-        return softwareModuleRepository.findByAssignedToAndType(pageable, set, type);
+        return this.softwareModuleRepository.findByAssignedToAndType(pageable, set, type);
     }
 
     /**
      * creates or updates a single software module meta data entry.
-     * 
+     *
      * @param metadata
      *            the meta data entry to create or update
      * @return the updated or created software module meta data entry
@@ -800,20 +779,20 @@ public class SoftwareManagement {
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull final SoftwareModuleMetadata metadata) {
-        if (softwareModuleMetadataRepository.exists(metadata.getId())) {
+        if (this.softwareModuleMetadataRepository.exists(metadata.getId())) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
         // merge base software module so optLockRevision gets updated and audit
         // log written because
         // modifying metadata is modifying the base software module itself for
         // auditing purposes.
-        entityManager.merge(metadata.getSoftwareModule()).setLastModifiedAt(-1L);
-        return softwareModuleMetadataRepository.save(metadata);
+        this.entityManager.merge(metadata.getSoftwareModule()).setLastModifiedAt(-1L);
+        return this.softwareModuleMetadataRepository.save(metadata);
     }
 
     /**
      * creates a list of software module meta data entries.
-     * 
+     *
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created software module meta data entries
@@ -829,13 +808,13 @@ public class SoftwareManagement {
         for (final SoftwareModuleMetadata softwareModuleMetadata : metadata) {
             checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(softwareModuleMetadata.getId());
         }
-        metadata.forEach(m -> entityManager.merge(m.getSoftwareModule()).setLastModifiedAt(-1L));
-        return softwareModuleMetadataRepository.save(metadata);
+        metadata.forEach(m -> this.entityManager.merge(m.getSoftwareModule()).setLastModifiedAt(-1L));
+        return this.softwareModuleMetadataRepository.save(metadata);
     }
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
-     * 
+     *
      * @param metadata
      *            the meta data entry to be updated
      * @return the updated meta data entry
@@ -852,13 +831,13 @@ public class SoftwareManagement {
         // touch it to update the lock revision because we are modifying the
         // software module
         // indirectly
-        entityManager.merge(metadata.getSoftwareModule()).setLastModifiedAt(-1L);
-        return softwareModuleMetadataRepository.save(metadata);
+        this.entityManager.merge(metadata.getSoftwareModule()).setLastModifiedAt(-1L);
+        return this.softwareModuleMetadataRepository.save(metadata);
     }
 
     /**
      * deletes a software module meta data entry.
-     * 
+     *
      * @param id
      *            the ID of the software module meta data to delete
      */
@@ -866,12 +845,12 @@ public class SoftwareManagement {
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public void deleteSoftwareModuleMetadata(@NotNull final SwMetadataCompositeKey id) {
-        softwareModuleMetadataRepository.delete(id);
+        this.softwareModuleMetadataRepository.delete(id);
     }
 
     /**
      * finds all meta data by the given software module id.
-     * 
+     *
      * @param swId
      *            the software module id to retrieve the meta data from
      * @param pageable
@@ -882,12 +861,12 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull final Long swId,
             @NotNull final Pageable pageable) {
-        return softwareModuleMetadataRepository.findBySoftwareModuleId(swId, pageable);
+        return this.softwareModuleMetadataRepository.findBySoftwareModuleId(swId, pageable);
     }
 
     /**
      * finds all meta data by the given software module id.
-     * 
+     *
      * @param softwareModuleId
      *            the software module id to retrieve the meta data from
      * @param spec
@@ -900,20 +879,19 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId,
             @NotNull final Specification<SoftwareModuleMetadata> spec, @NotNull final Pageable pageable) {
-        return softwareModuleMetadataRepository.findAll(new Specification<SoftwareModuleMetadata>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModuleMetadata> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                return cb.and(cb.equal(root.get(SoftwareModuleMetadata_.softwareModule).get(SoftwareModule_.id),
-                        softwareModuleId), spec.toPredicate(root, query, cb));
-            }
-        }, pageable);
+        return this.softwareModuleMetadataRepository
+                .findAll(
+                        (Specification<SoftwareModuleMetadata>) (root, query,
+                                cb) -> cb.and(
+                                        cb.equal(root.get(SoftwareModuleMetadata_.softwareModule)
+                                                .get(SoftwareModule_.id), softwareModuleId),
+                                spec.toPredicate(root, query, cb)),
+                        pageable);
     }
 
     /**
      * finds a single software module meta data by its id.
-     * 
+     *
      * @param id
      *            the id of the software module meta data containing the meta
      *            data key and the ID of the software module
@@ -923,7 +901,7 @@ public class SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public SoftwareModuleMetadata findOne(@NotNull final SwMetadataCompositeKey id) {
-        final SoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
+        final SoftwareModuleMetadata findOne = this.softwareModuleMetadataRepository.findOne(id);
         if (findOne == null) {
             throw new EntityNotFoundException("Metadata with key '" + id.getKey() + "' does not exist");
         }
@@ -931,7 +909,7 @@ public class SoftwareManagement {
     }
 
     private void checkAndThrowAlreadyExistsIfSoftwareModuleMetadataExists(final SwMetadataCompositeKey metadataId) {
-        if (softwareModuleMetadataRepository.exists(metadataId)) {
+        if (this.softwareModuleMetadataRepository.exists(metadataId)) {
             throw new EntityAlreadyExistsException(
                     "Metadata entry with key '" + metadataId.getKey() + "' already exists");
         }

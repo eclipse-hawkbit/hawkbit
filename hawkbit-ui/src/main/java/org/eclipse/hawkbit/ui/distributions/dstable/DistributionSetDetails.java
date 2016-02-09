@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ import com.vaadin.ui.Window;
 
 /**
  * Distribution set details layout.
- * 
+ *
  *
  *
  */
@@ -113,16 +114,17 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     @Override
     @PostConstruct
     protected void init() {
-        softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(i18n, true, permissionChecker, distributionSetManagement, eventBus, manageDistUIState);
+        this.softwareModuleTable = new SoftwareModuleDetailsTable();
+        this.softwareModuleTable.init(this.i18n, true, this.permissionChecker, this.distributionSetManagement,
+                this.eventBus, this.manageDistUIState);
         super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
+        this.ui = UI.getCurrent();
+        this.eventBus.subscribe(this);
     }
 
     protected VerticalLayout createTagsLayout() {
-        tagsLayout = getTabLayout();
-        return tagsLayout;
+        this.tagsLayout = getTabLayout();
+        return this.tagsLayout;
     }
 
     private void populateDetailsWidget(final DistributionSet ds) {
@@ -146,19 +148,20 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     }
 
     private void populteModule(final DistributionSet distributionSet) {
-        softwareModuleTable.populateModule(distributionSet);
+        this.softwareModuleTable.populateModule(distributionSet);
         showUnsavedAssignment();
     }
 
     @SuppressWarnings("unchecked")
     private void showUnsavedAssignment() {
         Item item;
-        final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = manageDistUIState.getAssignedList();
-        final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent()
-                ? manageDistUIState.getLastSelectedDistribution().get().getId() : null;
+        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = this.manageDistUIState
+                .getAssignedList();
+        final Long selectedDistId = this.manageDistUIState.getLastSelectedDistribution().isPresent()
+                ? this.manageDistUIState.getLastSelectedDistribution().get().getId() : null;
         Set<SoftwareModuleIdName> softwareModuleIdNameList = null;
 
-        for (final Map.Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
+        for (final Map.Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
             if (entry.getKey().getId().equals(selectedDistId)) {
                 softwareModuleIdNameList = entry.getValue();
                 break;
@@ -167,22 +170,22 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
         if (null != softwareModuleIdNameList) {
             for (final SoftwareModuleIdName swIdName : softwareModuleIdNameList) {
-                final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(swIdName.getId());
-                if (assignedSWModule.containsKey(softwareModule.getType().getName())) {
-                    assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
+                final SoftwareModule softwareModule = this.softwareManagement.findSoftwareModuleById(swIdName.getId());
+                if (this.assignedSWModule.containsKey(softwareModule.getType().getName())) {
+                    this.assignedSWModule.get(softwareModule.getType().getName()).append("</br>").append("<I>")
                             .append(getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
                             .append("<I>");
 
                 } else {
-                    assignedSWModule.put(softwareModule.getType().getName(),
+                    this.assignedSWModule.put(softwareModule.getType().getName(),
                             new StringBuilder().append("<I>").append(
                                     getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
                             .append("<I>"));
                 }
 
             }
-            for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-                item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
+            for (final Map.Entry<String, StringBuilder> entry : this.assignedSWModule.entrySet()) {
+                item = this.softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
                 if (item != null) {
                     item.getItemProperty(SOFT_MODULE)
                             .setValue(HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
@@ -198,8 +201,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
      * @param entry
      */
     private void assignSoftModuleButton(final Item item, final Map.Entry<String, StringBuilder> entry) {
-        if (permissionChecker.hasUpdateDistributionPermission() && distributionSetManagement
-                .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
+        if (this.permissionChecker.hasUpdateDistributionPermission() && this.distributionSetManagement
+                .findDistributionSetById(this.manageDistUIState.getLastSelectedDistribution().get().getId())
                 .getAssignedTargets().isEmpty()) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(entry.getKey(), "", "", "", true,
                     FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
@@ -215,8 +218,8 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     @SuppressWarnings("unchecked")
     private void updateSoftwareModule(final SoftwareModule module) {
 
-        softwareModuleTable.getContainerDataSource().getItemIds();
-        if (assignedSWModule.containsKey(module.getType().getName())) {
+        this.softwareModuleTable.getContainerDataSource().getItemIds();
+        if (this.assignedSWModule.containsKey(module.getType().getName())) {
             /*
              * If software module type is software, means multiple softwares can
              * assigned to that type. Hence if multipe softwares belongs to same
@@ -224,7 +227,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
              */
 
             if (module.getType().getMaxAssignments() == Integer.MAX_VALUE) {
-                assignedSWModule.get(module.getType().getName()).append("</br>").append("<I>")
+                this.assignedSWModule.get(module.getType().getName()).append("</br>").append("<I>")
                         .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>");
             }
 
@@ -234,17 +237,17 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
              * same type is dropped, then override with previous one.
              */
             if (module.getType().getMaxAssignments() == 1) {
-                assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
+                this.assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
                         .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
             }
 
         } else {
-            assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
+            this.assignedSWModule.put(module.getType().getName(), new StringBuilder().append("<I>")
                     .append(getUnsavedAssigedSwModule(module.getName(), module.getVersion())).append("</I>"));
         }
 
-        for (final Map.Entry<String, StringBuilder> entry : assignedSWModule.entrySet()) {
-            final Item item = softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
+        for (final Map.Entry<String, StringBuilder> entry : this.assignedSWModule.entrySet()) {
+            final Item item = this.softwareModuleTable.getContainerDataSource().getItem(entry.getKey());
             if (item != null) {
                 item.getItemProperty(SOFT_MODULE)
                         .setValue(HawkbitCommonUtil.getFormatedLabel(entry.getValue().toString()));
@@ -257,23 +260,23 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     private VerticalLayout createSoftwareModuleTab() {
         final VerticalLayout softwareLayout = getTabLayout();
         softwareLayout.setSizeFull();
-        softwareLayout.addComponent(softwareModuleTable);
+        softwareLayout.addComponent(this.softwareModuleTable);
         return softwareLayout;
     }
 
     private void populateTags(final DistributionSet ds) {
-        tagsLayout.removeAllComponents();
+        this.tagsLayout.removeAllComponents();
         if (null != ds) {
-            tagsLayout.addComponent(distributionTagToken.getTokenField());
+            this.tagsLayout.addComponent(this.distributionTagToken.getTokenField());
         }
     }
 
     private void populateLog(final DistributionSet ds) {
         if (null != ds) {
             updateLogLayout(getLogLayout(), ds.getLastModifiedAt(), ds.getLastModifiedBy(), ds.getCreatedAt(),
-                    ds.getCreatedBy(), i18n);
+                    ds.getCreatedBy(), this.i18n);
         } else {
-            updateLogLayout(getLogLayout(), null, HawkbitCommonUtil.SP_STRING_EMPTY, null, null, i18n);
+            updateLogLayout(getLogLayout(), null, HawkbitCommonUtil.SP_STRING_EMPTY, null, null, this.i18n);
         }
     }
 
@@ -287,9 +290,9 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     private void populateDescription(final DistributionSet ds) {
         if (ds != null) {
-            updateDescriptionLayout(i18n.get("label.description"), ds.getDescription());
+            updateDescriptionLayout(this.i18n.get("label.description"), ds.getDescription());
         } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
+            updateDescriptionLayout(this.i18n.get("label.description"), null);
         }
     }
 
@@ -298,21 +301,21 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         detailsTabLayout.removeAllComponents();
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(this.i18n.get("label.dist.details.type"),
                     type);
             typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(
-                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
-                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                    this.i18n.get("checkbox.dist.migration.required"),
+                    isMigrationRequired.equals(Boolean.TRUE) ? this.i18n.get("label.yes") : this.i18n.get("label.no")));
         }
     }
 
     public Long getDsId() {
-        return dsId;
+        return this.dsId;
     }
 
     public void setDsId(final Long dsId) {
@@ -321,22 +324,22 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onEdit(com.vaadin.ui .Button.ClickEvent)
      */
     @Override
     protected void onEdit(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
-        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getDsId());
-        newDistWindow.setCaption(i18n.get("caption.update.dist"));
+        final Window newDistWindow = this.distributionAddUpdateWindowLayout.getWindow();
+        this.distributionAddUpdateWindowLayout.populateValuesOfDistribution(getDsId());
+        newDistWindow.setCaption(this.i18n.get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getEditButtonId()
      */
@@ -347,67 +350,67 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onLoadIsSwModuleSelected ()
      */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
-        return manageDistUIState.getSelectedDistributions().isPresent()
-                && !manageDistUIState.getSelectedDistributions().get().isEmpty();
+        return this.manageDistUIState.getSelectedDistributions().isPresent()
+                && !this.manageDistUIState.getSelectedDistributions().get().isEmpty();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onLoadIsTableMaximized ()
      */
     @Override
     protected Boolean onLoadIsTableMaximized() {
-        return manageDistUIState.isDsTableMaximized();
+        return this.manageDistUIState.isDsTableMaximized();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * populateDetailsWidget()
      */
     @Override
     protected void populateDetailsWidget() {
-        populateDetailsWidget(selectedDsModule);
+        populateDetailsWidget(this.selectedDsModule);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getDefaultCaption()
      */
     @Override
     protected String getDefaultCaption() {
-        return i18n.get("distribution.details.header");
+        return this.i18n.get("distribution.details.header");
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * addTabs(com.vaadin. ui.TabSheet)
      */
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), i18n.get("caption.tab.description"), null);
-        detailsTab.addTab(createSoftwareModuleTab(), i18n.get("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(createTagsLayout(), i18n.get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
+        detailsTab.addTab(createDetailsLayout(), this.i18n.get("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), this.i18n.get("caption.tab.description"), null);
+        detailsTab.addTab(createSoftwareModuleTab(), this.i18n.get("caption.softwares.distdetail.tab"), null);
+        detailsTab.addTab(createTagsLayout(), this.i18n.get("caption.tags.tab"), null);
+        detailsTab.addTab(createLogLayout(), this.i18n.get("caption.logs.tab"), null);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * clearDetails()
      */
@@ -418,19 +421,19 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * hasEditSoftwareModulePermission()
      */
     @Override
     protected Boolean hasEditPermission() {
-        return permissionChecker.hasUpdateDistributionPermission();
+        return this.permissionChecker.hasUpdateDistributionPermission();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent event) {
         if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE) {
-            ui.access(() -> updateSoftwareModule(event.getSoftwareModule()));
+            this.ui.access(() -> updateSoftwareModule(event.getSoftwareModule()));
         }
     }
 
@@ -439,37 +442,37 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE
                 || distributionTableEvent
                         .getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
-            assignedSWModule.clear();
-            ui.access(() -> {
+            this.assignedSWModule.clear();
+            this.ui.access(() -> {
                 /**
                  * distributionTableEvent.getDistributionSet() is null when
                  * table has no data.
                  */
                 if (distributionTableEvent.getDistributionSet() != null) {
-                    selectedDsModule = distributionTableEvent.getDistributionSet();
+                    this.selectedDsModule = distributionTableEvent.getDistributionSet();
                     populateData(true);
                 } else {
                     populateData(false);
                 }
             });
         } else if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.MINIMIZED) {
-            ui.access(() -> showLayout());
+            this.ui.access(() -> showLayout());
         } else if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.MAXIMIZED) {
-            ui.access(() -> hideLayout());
+            this.ui.access(() -> hideLayout());
         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleAssignmentDiscardEvent softwareModuleAssignmentDiscardEvent) {
         if (softwareModuleAssignmentDiscardEvent.getDistributionSetIdName() != null) {
-            ui.access(() -> {
+            this.ui.access(() -> {
                 final DistributionSetIdName distIdName = softwareModuleAssignmentDiscardEvent
                         .getDistributionSetIdName();
-                if (distIdName.getId().equals(selectedDsModule.getId())
-                        && distIdName.getName().equals(selectedDsModule.getName())) {
-                    selectedDsModule = distributionSetManagement
-                            .findDistributionSetByIdWithDetails(selectedDsModule.getId());
-                    populteModule(selectedDsModule);
+                if (distIdName.getId().equals(this.selectedDsModule.getId())
+                        && distIdName.getName().equals(this.selectedDsModule.getName())) {
+                    this.selectedDsModule = this.distributionSetManagement
+                            .findDistributionSetByIdWithDetails(this.selectedDsModule.getId());
+                    populteModule(this.selectedDsModule);
                 }
             });
         }
@@ -479,10 +482,11 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
-                && selectedDsModule != null) {
-            assignedSWModule.clear();
-            selectedDsModule = distributionSetManagement.findDistributionSetByIdWithDetails(selectedDsModule.getId());
-            ui.access(() -> populteModule(selectedDsModule));
+                && this.selectedDsModule != null) {
+            this.assignedSWModule.clear();
+            this.selectedDsModule = this.distributionSetManagement
+                    .findDistributionSetByIdWithDetails(this.selectedDsModule.getId());
+            this.ui.access(() -> populteModule(this.selectedDsModule));
         }
     }
 
@@ -491,7 +495,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         if (saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ASSIGNMENT
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DELETE_ALL_SOFWARE) {
-            assignedSWModule.clear();
+            this.assignedSWModule.clear();
             showUnsavedAssignment();
         }
     }
@@ -502,12 +506,12 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
          * It's good to do this, even though vaadin-spring will automatically
          * unsubscribe .
          */
-        eventBus.unsubscribe(this);
+        this.eventBus.unsubscribe(this);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getTabSheetId()
      */

@@ -77,13 +77,13 @@ public class Rollout extends NamedEntity {
     private int rolloutGroupsCreated = 0;
 
     @Transient
-    private TotalTargetCountStatus totalTargetCountStatus;
+    private transient TotalTargetCountStatus totalTargetCountStatus;
 
     /**
      * @return the distributionSet
      */
     public DistributionSet getDistributionSet() {
-        return distributionSet;
+        return this.distributionSet;
     }
 
     /**
@@ -98,7 +98,7 @@ public class Rollout extends NamedEntity {
      * @return the rolloutGroups
      */
     public List<RolloutGroup> getRolloutGroups() {
-        return rolloutGroups;
+        return this.rolloutGroups;
     }
 
     /**
@@ -113,7 +113,7 @@ public class Rollout extends NamedEntity {
      * @return the targetFilterQuery
      */
     public String getTargetFilterQuery() {
-        return targetFilterQuery;
+        return this.targetFilterQuery;
     }
 
     /**
@@ -128,7 +128,7 @@ public class Rollout extends NamedEntity {
      * @return the status
      */
     public RolloutStatus getStatus() {
-        return status;
+        return this.status;
     }
 
     /**
@@ -143,7 +143,7 @@ public class Rollout extends NamedEntity {
      * @return the lastCheck
      */
     public long getLastCheck() {
-        return lastCheck;
+        return this.lastCheck;
     }
 
     /**
@@ -158,7 +158,7 @@ public class Rollout extends NamedEntity {
      * @return the actionType
      */
     public ActionType getActionType() {
-        return actionType;
+        return this.actionType;
     }
 
     /**
@@ -173,7 +173,7 @@ public class Rollout extends NamedEntity {
      * @return the forcedTime
      */
     public long getForcedTime() {
-        return forcedTime;
+        return this.forcedTime;
     }
 
     /**
@@ -188,7 +188,7 @@ public class Rollout extends NamedEntity {
      * @return the totalTargets
      */
     public long getTotalTargets() {
-        return totalTargets;
+        return this.totalTargets;
     }
 
     /**
@@ -203,7 +203,7 @@ public class Rollout extends NamedEntity {
      * @return the rolloutGroupsTotal
      */
     public int getRolloutGroupsTotal() {
-        return rolloutGroupsTotal;
+        return this.rolloutGroupsTotal;
     }
 
     /**
@@ -218,7 +218,7 @@ public class Rollout extends NamedEntity {
      * @return the rolloutGroupsCreated
      */
     public int getRolloutGroupsCreated() {
-        return rolloutGroupsCreated;
+        return this.rolloutGroupsCreated;
     }
 
     /**
@@ -233,10 +233,10 @@ public class Rollout extends NamedEntity {
      * @return the totalTargetCountStatus
      */
     public TotalTargetCountStatus getTotalTargetCountStatus() {
-        if (totalTargetCountStatus == null) {
-            this.totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+        if (this.totalTargetCountStatus == null) {
+            this.totalTargetCountStatus = new TotalTargetCountStatus(this.totalTargets);
         }
-        return totalTargetCountStatus;
+        return this.totalTargetCountStatus;
     }
 
     /**
@@ -249,17 +249,17 @@ public class Rollout extends NamedEntity {
 
     @Override
     public String toString() {
-        return "Rollout [rolloutGroups=" + rolloutGroups + ", targetFilterQuery=" + targetFilterQuery
-                + ", distributionSet=" + distributionSet + ", status=" + status + ", lastCheck=" + lastCheck
-                + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+        return "Rollout [rolloutGroups=" + this.rolloutGroups + ", targetFilterQuery=" + this.targetFilterQuery
+                + ", distributionSet=" + this.distributionSet + ", status=" + this.status + ", lastCheck="
+                + this.lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
     /**
-     * 
+     *
      * @author Michael Hirsch
      *
      */
-    public static enum RolloutStatus {
+    public enum RolloutStatus {
 
         /**
          * Rollouts is beeing created.

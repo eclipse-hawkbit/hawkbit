@@ -12,47 +12,41 @@ import org.eclipse.hawkbit.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 
+ *
  */
 @Component("thresholdRolloutGroupSuccessCondition")
 public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupConditionEvaluator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupSuccessCondition.class);
 
     @Autowired
     private ActionRepository actionRepository;
 
     @Override
-    public boolean verifyExpression(final String expression) {
-        // percentage value between 0 and 100
-        try {
-            final Integer value = Integer.valueOf(expression);
-            if (value >= 0 || value <= 100) {
-                return true;
-            }
-            return true;
-        } catch (final RuntimeException e) {
-
-        }
-        return false;
-    }
-
-    @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
         final Long totalGroup = rolloutGroup.getTotalTargets();
-        final Long finished = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
+        final Long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.FINISHED);
-        final Integer threshold = Integer.valueOf(expression);
+        try {
+            final Integer threshold = Integer.valueOf(expression);
 
-        if (totalGroup == 0) {
-            // in case e.g. targets has been deleted we don't have any actions
-            // left for this group, so the group is finished
-            return true;
+            if (totalGroup == 0) {
+                // in case e.g. targets has been deleted we don't have any
+                // actions
+                // left for this group, so the group is finished
+                return true;
+            }
+            // calculate threshold
+            return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
+        } catch (final NumberFormatException e) {
+            LOGGER.error("Cannot evaluate condition expression " + expression, e);
+            return false;
         }
-        // calculate threshold
-        return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
     }
 
 }

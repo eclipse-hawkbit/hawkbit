@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +26,14 @@ import com.google.common.eventbus.EventBus;
 /**
  * Poll time trigger which executes the {@link DDISimulatedDevice#poll()} every
  * second.
- * 
+ *
  * @author Michael Hirsch
  *
  */
 @Component
 public class NextPollTimeController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NextPollTimeController.class);
 
     private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private static final ExecutorService pollService = Executors.newFixedThreadPool(1);
@@ -50,7 +54,7 @@ public class NextPollTimeController {
     private class NextPollUpdaterRunnable implements Runnable {
         @Override
         public void run() {
-            final List<AbstractSimulatedDevice> devices = repository.getAll().stream()
+            final List<AbstractSimulatedDevice> devices = NextPollTimeController.this.repository.getAll().stream()
                     .filter(device -> device instanceof DDISimulatedDevice).collect(Collectors.toList());
 
             devices.forEach(device -> {
@@ -58,21 +62,16 @@ public class NextPollTimeController {
                 if (nextCounter < 0) {
                     if (device instanceof DDISimulatedDevice) {
                         try {
-                            pollService.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ((DDISimulatedDevice) device).poll();
-                                }
-                            });
-                        } catch (final Exception e) {
-
+                            pollService.submit(() -> ((DDISimulatedDevice) device).poll());
+                        } catch (final IllegalStateException e) {
+                            LOGGER.trace("Device could not be polled", e);
                         }
                         nextCounter = ((DDISimulatedDevice) device).getPollDelaySec();
                     }
                 }
                 device.setNextPollCounterSec(nextCounter);
             });
-            eventBus.post(new NextPollCounterUpdate(devices));
+            NextPollTimeController.this.eventBus.post(new NextPollCounterUpdate(devices));
         }
     }
 }

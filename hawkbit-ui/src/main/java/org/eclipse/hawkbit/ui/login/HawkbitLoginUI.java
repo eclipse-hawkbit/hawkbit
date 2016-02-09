@@ -49,11 +49,11 @@ public class HawkbitLoginUI extends DefaultHawkbitUI {
     private SpringViewProvider viewProvider;
 
     @Autowired
-    private ApplicationContext context;
+    private transient ApplicationContext context;
 
     @Override
     protected void init(final VaadinRequest request) {
-        SpringContextHelper.setContext(context);
+        SpringContextHelper.setContext(this.context);
 
         final VerticalLayout rootLayout = new VerticalLayout();
         final Component header = buildHeader();
@@ -69,7 +69,7 @@ public class HawkbitLoginUI extends DefaultHawkbitUI {
 
         rootLayout.setExpandRatio(header, 1.0F);
         rootLayout.setExpandRatio(content, 2.0F);
-        final Resource resource = context
+        final Resource resource = this.context
                 .getResource("classpath:/VAADIN/themes/" + UI.getCurrent().getTheme() + "/layouts/footer.html");
         try {
             final CustomLayout customLayout = new CustomLayout(resource.getInputStream());
@@ -81,7 +81,7 @@ public class HawkbitLoginUI extends DefaultHawkbitUI {
         setContent(rootLayout);
 
         final Navigator navigator = new Navigator(this, content);
-        navigator.addProvider(viewProvider);
+        navigator.addProvider(this.viewProvider);
         setNavigator(navigator);
     }
 

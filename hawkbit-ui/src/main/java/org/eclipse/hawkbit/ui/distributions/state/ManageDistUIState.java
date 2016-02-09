@@ -40,11 +40,11 @@ public class ManageDistUIState implements Serializable {
     @Autowired
     private ManageSoftwareModuleFilters softwareModuleFilters;
 
-    private final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = new HashMap<DistributionSetIdName, Set<SoftwareModuleIdName>>();
+    private final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = new HashMap<>();
 
-    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<DistributionSetIdName>();
+    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
-    private Set<DistributionSetIdName> selectedDistributions = new HashSet<DistributionSetIdName>();
+    private Set<DistributionSetIdName> selectedDistributions = new HashSet<>();
 
     private DistributionSetIdName lastSelectedDistribution;
 
@@ -66,9 +66,9 @@ public class ManageDistUIState implements Serializable {
 
     private boolean isDsTableMaximized = Boolean.FALSE;
 
-    private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<String, SoftwareModuleIdName>();
+    private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<>();
 
-    private final Map<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>>();
+    private final Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<>();
 
     private boolean noDataAvilableSwModule = Boolean.FALSE;
 
@@ -78,36 +78,37 @@ public class ManageDistUIState implements Serializable {
      * @return the manageDistFilters
      */
     public ManageDistFilters getManageDistFilters() {
-        return manageDistFilters;
+        return this.manageDistFilters;
     }
 
     /**
      * @return the deletedDistributionList
      */
     public Set<DistributionSetIdName> getDeletedDistributionList() {
-        return deletedDistributionList;
+        return this.deletedDistributionList;
     }
 
     /**
-     * 
+     * Need HashSet because the Set have to be serializable
+     *
      * @return the assignedList
      */
-    public Map<DistributionSetIdName, Set<SoftwareModuleIdName>> getAssignedList() {
-        return assignedList;
+    public Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> getAssignedList() {
+        return this.assignedList;
     }
 
     /**
      * @return the slectedDistributions
      */
     public Optional<Set<DistributionSetIdName>> getSelectedDistributions() {
-        return selectedDistributions == null ? Optional.empty() : Optional.of(selectedDistributions);
+        return this.selectedDistributions == null ? Optional.empty() : Optional.of(this.selectedDistributions);
     }
 
     /**
      * @return the lastSelectedDistribution
      */
     public Optional<DistributionSetIdName> getLastSelectedDistribution() {
-        return lastSelectedDistribution == null ? Optional.empty() : Optional.of(lastSelectedDistribution);
+        return this.lastSelectedDistribution == null ? Optional.empty() : Optional.of(this.lastSelectedDistribution);
     }
 
     /**
@@ -126,14 +127,14 @@ public class ManageDistUIState implements Serializable {
      * @return the softwareModuleFilters
      */
     public ManageSoftwareModuleFilters getSoftwareModuleFilters() {
-        return softwareModuleFilters;
+        return this.softwareModuleFilters;
     }
 
     /**
      * @return the selectedSoftwareModules
      */
     public Set<Long> getSelectedSoftwareModules() {
-        return selectedSoftwareModules;
+        return this.selectedSoftwareModules;
     }
 
     /**
@@ -163,7 +164,7 @@ public class ManageDistUIState implements Serializable {
      * @return the distTypeFilterClosed
      */
     public boolean isDistTypeFilterClosed() {
-        return distTypeFilterClosed;
+        return this.distTypeFilterClosed;
     }
 
     /**
@@ -178,7 +179,7 @@ public class ManageDistUIState implements Serializable {
      * @return the swTypeFilterClosed
      */
     public boolean isSwTypeFilterClosed() {
-        return swTypeFilterClosed;
+        return this.swTypeFilterClosed;
     }
 
     /**
@@ -193,11 +194,11 @@ public class ManageDistUIState implements Serializable {
      * @return the deleteSofwareModulesList
      */
     public Map<Long, String> getDeleteSofwareModulesList() {
-        return deleteSofwareModulesList;
+        return this.deleteSofwareModulesList;
     }
 
     public Set<String> getSelectedDeleteDistSetTypes() {
-        return selectedDeleteDistSetTypes;
+        return this.selectedDeleteDistSetTypes;
     }
 
     public void setSelectedDeleteDistSetTypes(final Set<String> selectedDeleteDistSetTypes) {
@@ -205,7 +206,7 @@ public class ManageDistUIState implements Serializable {
     }
 
     public Set<String> getSelectedDeleteSWModuleTypes() {
-        return selectedDeleteSWModuleTypes;
+        return this.selectedDeleteSWModuleTypes;
     }
 
     public void setSelectedDeleteSWModuleTypes(final Set<String> selectedDeleteSWModuleTypes) {
@@ -214,16 +215,16 @@ public class ManageDistUIState implements Serializable {
 
     /**
      * Get isSwModuleTableMaximized.
-     * 
+     *
      * @return boolean
      */
     public boolean isDsTableMaximized() {
-        return isDsTableMaximized;
+        return this.isDsTableMaximized;
     }
 
     /***
      * Set isDsModuleTableMaximized.
-     * 
+     *
      * @param isDsModuleTableMaximized
      */
     public void setDsTableMaximized(final boolean isDsModuleTableMaximized) {
@@ -231,14 +232,14 @@ public class ManageDistUIState implements Serializable {
     }
 
     public Map<String, SoftwareModuleIdName> getAssignedSoftwareModuleDetails() {
-        return assignedSoftwareModuleDetails;
+        return this.assignedSoftwareModuleDetails;
     }
 
     /**
      * @return the isSwModuleTableMaximized
      */
     public boolean isSwModuleTableMaximized() {
-        return isSwModuleTableMaximized;
+        return this.isSwModuleTableMaximized;
     }
 
     /**
@@ -253,7 +254,7 @@ public class ManageDistUIState implements Serializable {
      * @return the noDataAvilableSwModule
      */
     public boolean isNoDataAvilableSwModule() {
-        return noDataAvilableSwModule;
+        return this.noDataAvilableSwModule;
     }
 
     /**
@@ -268,7 +269,7 @@ public class ManageDistUIState implements Serializable {
      * @return the noDataAvailableDist
      */
     public boolean isNoDataAvailableDist() {
-        return noDataAvailableDist;
+        return this.noDataAvailableDist;
     }
 
     /**
@@ -279,8 +280,13 @@ public class ManageDistUIState implements Serializable {
         this.noDataAvailableDist = noDataAvailableDist;
     }
 
-    public Map<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>> getConsolidatedDistSoftwarewList() {
-        return consolidatedDistSoftwarewList;
+    /**
+     * Need HashSet because the Set have to be serializable
+     *
+     * @return map
+     */
+    public Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> getConsolidatedDistSoftwarewList() {
+        return this.consolidatedDistSoftwarewList;
     }
 
 }
