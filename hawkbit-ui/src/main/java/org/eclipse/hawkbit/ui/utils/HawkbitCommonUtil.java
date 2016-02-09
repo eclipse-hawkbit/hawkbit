@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
@@ -437,13 +438,16 @@ public final class HawkbitCommonUtil {
      * @return String formatted text
      */
     public static String getFormattedText(final String orgText) {
-        String formtdTxt = orgText == null ? "" : orgText;
-        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
-        if (formtdTxt.length() > txtLengthAllowed) {
-            formtdTxt = new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
+        if (orgText == null) {
+            return StringUtils.EMPTY;
         }
 
-        return formtdTxt;
+        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
+        if (orgText.length() > txtLengthAllowed) {
+            return new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
+        }
+
+        return orgText;
     }
 
     /**
