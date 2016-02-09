@@ -41,6 +41,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
@@ -83,18 +84,20 @@ public class TargetFilterTable extends Table {
      * Initialize the Action History Table.
      */
     @PostConstruct
-    public void init() {
-        addCustomGeneratedColumns();
-        populateTableData();
-        setStyleName("sp-table");
-        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
-        addStyleName(ValoTheme.TABLE_SMALL);
-        setColumnCollapsingAllowed(true);
-        setColumnProperties();
-        setId(SPUIComponetIdProvider.TAEGET_FILTER_TABLE_ID);
-        eventBus.subscribe(this);
-        setSizeFull();
-    }
+	public void init() {
+		setStyleName("sp-table");
+		setSizeFull();
+		setImmediate(true);
+		setHeight(100.0f, Unit.PERCENTAGE);
+		addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+		addStyleName(ValoTheme.TABLE_SMALL);
+		addCustomGeneratedColumns();
+		populateTableData();
+		setColumnCollapsingAllowed(true);
+		setColumnProperties();
+		setId(SPUIComponetIdProvider.TAEGET_FILTER_TABLE_ID);
+		eventBus.subscribe(this);
+	}
 
     @PreDestroy
     void destroy() {

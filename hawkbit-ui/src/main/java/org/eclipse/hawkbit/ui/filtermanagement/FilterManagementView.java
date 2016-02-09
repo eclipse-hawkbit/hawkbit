@@ -152,7 +152,6 @@ public class FilterManagementView extends VerticalLayout implements View {
         final HorizontalLayout messageLabelLayout = new HorizontalLayout();
         messageLabelLayout.addComponent(targetFilterCountMessageLabel);
         messageLabelLayout.addStyleName("footer-layout");
-        messageLabelLayout.setWidth("100%");
         return messageLabelLayout;
     }
 
