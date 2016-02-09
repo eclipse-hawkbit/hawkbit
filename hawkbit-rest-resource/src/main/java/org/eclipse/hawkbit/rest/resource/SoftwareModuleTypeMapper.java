@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
@@ -73,7 +74,7 @@ final class SoftwareModuleTypeMapper {
         result.setMaxAssignments(type.getMaxAssignments());
         result.setModuleId(type.getId());
 
-        result.add(linkTo(methodOn(SoftwareModuleTypeResource.class).getSoftwareModuleType(result.getModuleId()))
+        result.add(linkTo(methodOn(SoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getModuleId()))
                 .withRel("self"));
 
         return result;

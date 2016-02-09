@@ -22,6 +22,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.rest.resource.api.DistributionSetRestApi;
+import org.eclipse.hawkbit.rest.resource.api.DistributionSetTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
@@ -169,13 +171,13 @@ public final class DistributionSetMapper {
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
         response.add(
-                linkTo(methodOn(DistributionSetResource.class).getDistributionSet(response.getDsId())).withRel("self"));
+                linkTo(methodOn(DistributionSetRestApi.class).getDistributionSet(response.getDsId())).withRel("self"));
 
         response.add(linkTo(
-                methodOn(DistributionSetTypeResource.class).getDistributionSetType(distributionSet.getType().getId()))
+                methodOn(DistributionSetTypeRestApi.class).getDistributionSetType(distributionSet.getType().getId()))
                         .withRel("type"));
 
-        response.add(linkTo(methodOn(DistributionSetResource.class).getMetadata(response.getDsId(),
+        response.add(linkTo(methodOn(DistributionSetRestApi.class).getMetadata(response.getDsId(),
                 Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
                 Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null))
                         .withRel("metadata"));

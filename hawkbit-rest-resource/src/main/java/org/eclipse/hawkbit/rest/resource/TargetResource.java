@@ -20,13 +20,14 @@ import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
+import org.eclipse.hawkbit.rest.resource.api.DistributionSetRestApi;
+import org.eclipse.hawkbit.rest.resource.api.TargetRestApi;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionPagedList;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
@@ -47,25 +48,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST Resource handling target CRUD operations.
- *
- *
- *
- *
  */
 @RestController
-@RequestMapping(RestConstants.TARGET_V1_REQUEST_MAPPING)
-public class TargetResource {
+public class TargetResource implements TargetRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(TargetResource.class);
 
     @Autowired
@@ -74,18 +65,8 @@ public class TargetResource {
     @Autowired
     private DeploymentManagement deploymentManagement;
 
-    /**
-     * Handles the GET request of retrieving a single target within SP.
-     *
-     * @param targetId
-     *            the ID of the target to retrieve
-     * @return a single target with status OK.
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetRest> getTarget(@PathVariable final String targetId) {
+    @Override
+    public ResponseEntity<TargetRest> getTarget(final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
         final TargetRest response = TargetMapper.toResponse(findTarget);
@@ -95,31 +76,9 @@ public class TargetResource {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /**
-     * Handles the GET request of retrieving all targets within SP.
-     *
-     * @param pagingOffsetParam
-     *            the offset of list of targets for pagination, might not be
-     *            present in the rest request then default value will be applied
-     * @param pagingLimitParam
-     *            the limit of the paged request, might not be present in the
-     *            rest request then default value will be applied
-     * @param sortParam
-     *            the sorting parameter in the request URL, syntax
-     *            {@code field:direction, field:direction}
-     * @param rsqlParam
-     *            the search parameter in the request URL, syntax
-     *            {@code q=name==abc}
-     * @return a list of all targets for a defined or default page request with
-     *         status OK. The response is always paged. In any failure the
-     *         JsonResponseExceptionHandler is handling the response.
-     */
-    @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetPagedList> getTargets(
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+    @Override
+    public ResponseEntity<TargetPagedList> getTargets(final int pagingOffsetParam, final int pagingLimitParam,
+            final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -129,58 +88,29 @@ public class TargetResource {
         final Slice<Target> findTargetsAll;
         final Long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<Target> findTargetPage = targetManagement
+            final Page<Target> findTargetPage = this.targetManagement
                     .findTargetsAll(RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
         } else {
-            findTargetsAll = targetManagement.findTargetsAll(pageable);
-            countTargetsAll = targetManagement.countTargetsAll();
+            findTargetsAll = this.targetManagement.findTargetsAll(pageable);
+            countTargetsAll = this.targetManagement.countTargetsAll();
         }
 
         final List<TargetRest> rest = TargetMapper.toResponse(findTargetsAll.getContent());
         return new ResponseEntity<>(new TargetPagedList(rest, countTargetsAll), HttpStatus.OK);
     }
 
-    /**
-     * Handles the POST request of creating new targets within SP. The request
-     * body must always be a list of targets. The requests is delegating to the
-     * {@link TargetManagement#createTarget(Iterable)}.
-     *
-     * @param targets
-     *            the targets to be created.
-     * @return In case all targets could successful created the ResponseEntity
-     *         with status code 201 with a list of successfully created
-     *         entities. In any failure the JsonResponseExceptionHandler is
-     *         handling the response.
-     */
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetsRest> createTargets(@RequestBody final List<TargetRequestBody> targets) {
+    @Override
+    public ResponseEntity<TargetsRest> createTargets(final List<TargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
-        final Iterable<Target> createdTargets = targetManagement.createTargets(TargetMapper.fromRequest(targets));
+        final Iterable<Target> createdTargets = this.targetManagement.createTargets(TargetMapper.fromRequest(targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(TargetMapper.toResponse(createdTargets), HttpStatus.CREATED);
     }
 
-    /**
-     * Handles the PUT request of updating a target within SP. The ID is within
-     * the URL path of the request. A given ID in the request body is ignored.
-     * It's not possible to set fields to {@code null} values.
-     *
-     * @param targetId
-     *            the path parameter which contains the ID of the target
-     * @param targetRest
-     *            the request body which contains the fields which should be
-     *            updated, fields which are not given are ignored for the
-     *            udpate.
-     * @return the updated target response which contains all fields also fields
-     *         which have not updated
-     */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{targetId}", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetRest> updateTarget(@PathVariable final String targetId,
-            @RequestBody final TargetRequestBody targetRest) {
+    @Override
+    public ResponseEntity<TargetRest> updateTarget(final String targetId, final TargetRequestBody targetRest) {
         final Target existingTarget = findTargetWithExceptionIfNotFound(targetId);
         LOG.debug("updating target {}", existingTarget.getId());
         if (targetRest.getDescription() != null) {
@@ -189,42 +119,21 @@ public class TargetResource {
         if (targetRest.getName() != null) {
             existingTarget.setName(targetRest.getName());
         }
-        final Target updateTarget = targetManagement.updateTarget(existingTarget);
+        final Target updateTarget = this.targetManagement.updateTarget(existingTarget);
 
         return new ResponseEntity<>(TargetMapper.toResponse(updateTarget), HttpStatus.OK);
     }
 
-    /**
-     * Handles the DELETE request of deleting a target within SP.
-     *
-     * @param targetId
-     *            the ID of the target to be deleted
-     * @return If the given targetId could exists and could be deleted Http OK.
-     *         In any failure the JsonResponseExceptionHandler is handling the
-     *         response.
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<Void> deleteTarget(@PathVariable final String targetId) {
+    @Override
+    public ResponseEntity<Void> deleteTarget(final String targetId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
-        targetManagement.deleteTargets(target.getId());
+        this.targetManagement.deleteTargets(target.getId());
         LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**
-     * Handles the GET request of retrieving the attributes of a specific
-     * target.
-     *
-     * @param targetId
-     *            the ID of the target to retrieve the attributes.
-     * @return the target attributes as map response with status OK
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/attributes", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetAttributes> getAttributes(@PathVariable final String targetId) {
+    @Override
+    public ResponseEntity<TargetAttributes> getAttributes(final String targetId) {
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
         final Map<String, String> controllerAttributes = foundTarget.getTargetInfo().getControllerAttributes();
         if (controllerAttributes.isEmpty()) {
@@ -237,36 +146,9 @@ public class TargetResource {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    /**
-     * Handles the GET request of retrieving the {@link Action}s of a specific
-     * target.
-     *
-     * @param targetId
-     *            to load actions for
-     * @param pagingOffsetParam
-     *            the offset of list of targets for pagination, might not be
-     *            present in the rest request then default value will be applied
-     * @param pagingLimitParam
-     *            the limit of the paged request, might not be present in the
-     *            rest request then default value will be applied
-     * @param sortParam
-     *            the sorting parameter in the request URL, syntax
-     *            {@code field:direction, field:direction}
-     * @param rsqlParam
-     *            the search parameter in the request URL, syntax
-     *            {@code q=status==pending}
-     * @return a list of all {@link Action}s for a defined or default page
-     *         request with status OK. The response is always paged. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionPagedList> getActionHistory(@PathVariable final String targetId,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+    @Override
+    public ResponseEntity<ActionPagedList> getActionHistory(final String targetId, final int pagingOffsetParam,
+            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
 
@@ -279,11 +161,11 @@ public class TargetResource {
         final Long totalActionCount;
         if (rsqlParam != null) {
             final Specification<Action> parse = RSQLUtility.parse(rsqlParam, ActionFields.class);
-            activeActions = deploymentManagement.findActionsByTarget(parse, foundTarget, pageable);
-            totalActionCount = deploymentManagement.countActionsByTarget(parse, foundTarget);
+            activeActions = this.deploymentManagement.findActionsByTarget(parse, foundTarget, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(parse, foundTarget);
         } else {
-            activeActions = deploymentManagement.findActionsByTarget(foundTarget, pageable);
-            totalActionCount = deploymentManagement.countActionsByTarget(foundTarget);
+            activeActions = this.deploymentManagement.findActionsByTarget(foundTarget, pageable);
+            totalActionCount = this.deploymentManagement.countActionsByTarget(foundTarget);
         }
 
         return new ResponseEntity<>(
@@ -291,20 +173,8 @@ public class TargetResource {
                 HttpStatus.OK);
     }
 
-    /**
-     * Handles the GET request of retrieving a specific {@link Action}s of a
-     * specific {@link Target}.
-     *
-     * @param targetId
-     *            to load the action for
-     * @param actionId
-     *            to load
-     * @return the action
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}", produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionRest> getAction(@PathVariable final String targetId,
-            @PathVariable final Long actionId) {
+    @Override
+    public ResponseEntity<ActionRest> getAction(final String targetId, final Long actionId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -317,14 +187,14 @@ public class TargetResource {
 
         if (!action.isCancelingOrCanceled()) {
             result.add(linkTo(
-                    methodOn(DistributionSetResource.class).getDistributionSet(action.getDistributionSet().getId()))
+                    methodOn(DistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
                             .withRel("distributionset"));
         } else if (action.isCancelingOrCanceled()) {
-            result.add(linkTo(methodOn(TargetResource.class).getAction(targetId, action.getId()))
+            result.add(linkTo(methodOn(TargetRestApi.class).getAction(targetId, action.getId()))
                     .withRel(RestConstants.TARGET_V1_CANCELED_ACTION));
         }
 
-        result.add(linkTo(methodOn(TargetResource.class).getActionStatusList(targetId, action.getId(), 0,
+        result.add(linkTo(methodOn(TargetRestApi.class).getActionStatusList(targetId, action.getId(), 0,
                 RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
                         .withRel(RestConstants.TARGET_V1_ACTION_STATUS));
@@ -332,32 +202,16 @@ public class TargetResource {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    /**
-     * Handles the DELETE request of canceling an specific {@link Action}s of a
-     * specific {@link Target}.
-     *
-     * @param targetId
-     *            the ID of the target in the URL path parameter
-     * @param actionId
-     *            the ID of the action in the URL path parameter
-     * @param force
-     *            optional parameter, which indicates a force cancel
-     * @return status no content in case cancellation was successful
-     * @throws CancelActionNotAllowedException
-     *             if the given action is not active and cannot be canceled.
-     * @throws EntityNotFoundException
-     *             if the target or the action is not found
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}/actions/{actionId}")
-    public ResponseEntity<Void> cancelAction(@PathVariable final String targetId, @PathVariable final Long actionId,
+    @Override
+    public ResponseEntity<Void> cancelAction(final String targetId, final Long actionId,
             @RequestParam(required = false, defaultValue = "false") final boolean force) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
         if (force) {
-            deploymentManagement.forceQuitAction(action, target);
+            this.deploymentManagement.forceQuitAction(action, target);
         } else {
-            deploymentManagement.cancelAction(action, target);
+            this.deploymentManagement.cancelAction(action, target);
         }
         // both functions will throw an exception, when action is in wrong
         // state, which is mapped by ResponseExceptionHandler.
@@ -365,35 +219,9 @@ public class TargetResource {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    /**
-     * Handles the GET request of retrieving the {@link ActionStatus}s of a
-     * specific target and action.
-     *
-     * @param targetId
-     *            of the the action
-     * @param actionId
-     *            of the status we are intend to load
-     * @param pagingOffsetParam
-     *            the offset of list of targets for pagination, might not be
-     *            present in the rest request then default value will be applied
-     * @param pagingLimitParam
-     *            the limit of the paged request, might not be present in the
-     *            rest request then default value will be applied
-     * @param sortParam
-     *            the sorting parameter in the request URL, syntax
-     *            {@code field:direction, field:direction}
-     * @return a list of all {@link ActionStatus}s for a defined or default page
-     *         request with status OK. The response is always paged. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}/status", produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionStatusPagedList> getActionStatusList(@PathVariable final String targetId,
-            @PathVariable final Long actionId,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
+    @Override
+    public ResponseEntity<ActionStatusPagedList> getActionStatusList(final String targetId, final Long actionId,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
 
         final Target target = findTargetWithExceptionIfNotFound(targetId);
 
@@ -407,7 +235,7 @@ public class TargetResource {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
 
-        final Page<ActionStatus> statusList = deploymentManagement.findActionStatusMessagesByActionInDescOrder(
+        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusMessagesByActionInDescOrder(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action, true);
 
         return new ResponseEntity<>(
@@ -417,20 +245,8 @@ public class TargetResource {
 
     }
 
-    /**
-     * Handles the GET request of retrieving the assigned distribution set of an
-     * specific target.
-     *
-     * @param targetId
-     *            the ID of the target to retrieve the assigned distribution
-     * @return the assigned distribution set with status OK, if none is assigned
-     *         than {@code null} content (e.g. "{}")
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/assignedDS", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<DistributionSetRest> getAssignedDistributionSet(@PathVariable final String targetId) {
+    @Override
+    public ResponseEntity<DistributionSetRest> getAssignedDistributionSet(final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         final DistributionSetRest distributionSetRest = DistributionSetMapper
                 .toResponse(findTarget.getAssignedDistributionSet());
@@ -443,28 +259,14 @@ public class TargetResource {
         return new ResponseEntity<>(distributionSetRest, retStatus);
     }
 
-    /**
-     * Changes the assigned distribution set of a target.
-     *
-     * @param targetId
-     *            of the target to change
-     * @param dsId
-     *            of the distributionset that is to be assigned
-     * @return {@link HttpStatus#OK}
-     *
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
-     *
-     */
-    @RequestMapping(method = RequestMethod.POST, value = "/{targetId}/assignedDS", consumes = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable final String targetId,
-            @RequestBody final DistributionSetAssigmentRest dsId) {
+    @Override
+    public ResponseEntity<Void> postAssignedDistributionSet(final String targetId,
+            final DistributionSetAssigmentRest dsId) {
 
         findTargetWithExceptionIfNotFound(targetId);
         final ActionType type = (dsId.getType() != null)
                 ? RestResourceConversionHelper.convertActionType(dsId.getType()) : ActionType.FORCED;
-        final Iterator<Target> changed = deploymentManagement
+        final Iterator<Target> changed = this.deploymentManagement
                 .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedTargets()
                 .iterator();
         if (changed.hasNext()) {
@@ -477,20 +279,8 @@ public class TargetResource {
 
     }
 
-    /**
-     * Handles the GET request of retrieving the installed distribution set of
-     * an specific target.
-     *
-     * @param targetId
-     *            the ID of the target to retrieve
-     * @return the assigned installed set with status OK, if none is installed
-     *         than {@code null} content (e.g. "{}")
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/installedDS", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<DistributionSetRest> getInstalledDistributionSet(@PathVariable final String targetId) {
+    @Override
+    public ResponseEntity<DistributionSetRest> getInstalledDistributionSet(final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         final DistributionSetRest distributionSetRest = DistributionSetMapper
                 .toResponse(findTarget.getTargetInfo().getInstalledDistributionSet());
@@ -504,7 +294,7 @@ public class TargetResource {
     }
 
     private Target findTargetWithExceptionIfNotFound(final String targetId) {
-        final Target findTarget = targetManagement.findTargetByControllerID(targetId);
+        final Target findTarget = this.targetManagement.findTargetByControllerID(targetId);
         if (findTarget == null) {
             throw new EntityNotFoundException("Target with Id {" + targetId + "} does not exist");
         }
@@ -512,7 +302,7 @@ public class TargetResource {
     }
 
     private Action findActionWithExceptionIfNotFound(final Long actionId) {
-        final Action findAction = deploymentManagement.findAction(actionId);
+        final Action findAction = this.deploymentManagement.findAction(actionId);
         if (findAction == null) {
             throw new EntityNotFoundException("Action with Id {" + actionId + "} does not exist");
         }

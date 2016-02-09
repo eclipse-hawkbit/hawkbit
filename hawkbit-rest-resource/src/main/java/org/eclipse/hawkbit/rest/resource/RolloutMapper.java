@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.rest.resource.api.RolloutRestApi;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutCondition.Condition;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutErrorAction.ErrorAction;
@@ -70,12 +71,12 @@ final class RolloutMapper {
                     rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
         }
 
-        body.add(linkTo(methodOn(RolloutResource.class).getRollout(rollout.getId())).withRel("self"));
-        body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), false)).withRel("start"));
-        body.add(linkTo(methodOn(RolloutResource.class).start(rollout.getId(), true)).withRel("startAsync"));
-        body.add(linkTo(methodOn(RolloutResource.class).pause(rollout.getId())).withRel("pause"));
-        body.add(linkTo(methodOn(RolloutResource.class).resume(rollout.getId())).withRel("resume"));
-        body.add(linkTo(methodOn(RolloutResource.class).getRolloutGroups(rollout.getId(),
+        body.add(linkTo(methodOn(RolloutRestApi.class).getRollout(rollout.getId())).withRel("self"));
+        body.add(linkTo(methodOn(RolloutRestApi.class).start(rollout.getId(), false)).withRel("start"));
+        body.add(linkTo(methodOn(RolloutRestApi.class).start(rollout.getId(), true)).withRel("startAsync"));
+        body.add(linkTo(methodOn(RolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
+        body.add(linkTo(methodOn(RolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
+        body.add(linkTo(methodOn(RolloutRestApi.class).getRolloutGroups(rollout.getId(),
                 Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
                 Integer.parseInt(RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null, null)).withRel("groups"));
         return body;
@@ -115,8 +116,9 @@ final class RolloutMapper {
         body.setName(rolloutGroup.getName());
         body.setRolloutGroupId(rolloutGroup.getId());
         body.setStatus(rolloutGroup.getStatus().toString().toLowerCase());
-        body.add(linkTo(methodOn(RolloutResource.class).getRolloutGroup(rolloutGroup.getRollout().getId(),
-                rolloutGroup.getId())).withRel("self"));
+        body.add(linkTo(
+                methodOn(RolloutRestApi.class).getRolloutGroup(rolloutGroup.getRollout().getId(), rolloutGroup.getId()))
+                        .withRel("self"));
         return body;
     }
 

@@ -1,13 +1,6 @@
-<!--
-
-    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
-
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-
--->
+<!-- Copyright (c) 2015 Bosch Software Innovations GmbH and others. All rights reserved. This program and the accompanying 
+   materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and 
+   is available at http://www.eclipse.org/legal/epl-v10.html -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
@@ -16,9 +9,43 @@
       <artifactId>hawkbit-examples-parent</artifactId>
       <version>0.2.0-SNAPSHOT</version>
    </parent>
+   <packaging>jar</packaging>
    <artifactId>hawkbit-mgmt-api-client</artifactId>
    <name>hawkBit Management API example client</name>
 
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>repackage</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${baseDir}</outputDirectory>
+                     <addResources>false</addResources>
+                     <mainClass>org.eclipse.hawkbit.mgmt.client.Application</mainClass>
+                     <layout>JAR</layout>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-netflix</artifactId>
+            <version>1.0.7.RELEASE</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
 
    <dependencies>
       <dependency>
@@ -28,43 +55,30 @@
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>
-         <artifactId>feign-jackson</artifactId>
-         <version>8.12.1</version>
-      </dependency>
-      <dependency>
-         <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
-         <version>8.12.1</version>
+         <!-- need to overwrite for the interface inheritance feature of feign-core -->
+         <version>8.14.2</version>
       </dependency>
-
-      <!-- Test -->
       <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-example-app</artifactId>
-         <version>${project.version}</version>
-         <scope>test</scope>
+         <artifactId>hibernate-validator</artifactId>
+         <groupId>org.hibernate</groupId>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
+         <artifactId>spring-boot-starter</artifactId>
       </dependency>
       <dependency>
-         <groupId>ru.yandex.qatools.allure</groupId>
-         <artifactId>allure-junit-adaptor</artifactId>
-         <scope>test</scope>
+         <groupId>org.springframework.cloud</groupId>
+         <artifactId>spring-cloud-starter-feign</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert-core</artifactId>
-         <scope>test</scope>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-logging</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.easytesting</groupId>
-         <artifactId>fest-assert</artifactId>
-         <scope>test</scope>
+         <groupId>com.google.collections</groupId>
+         <artifactId>google-collections</artifactId>
+         <version>1.0-rc2</version>
       </dependency>
    </dependencies>
-
-
 </project>
