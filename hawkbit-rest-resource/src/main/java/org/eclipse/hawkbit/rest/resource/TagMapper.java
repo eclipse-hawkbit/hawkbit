@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.rest.resource.api.DistributionSetTagRestApi;
+import org.eclipse.hawkbit.rest.resource.api.TargetTagRestApi;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
@@ -53,9 +55,9 @@ final class TagMapper {
 
         mapTag(response, targetTag);
 
-        response.add(linkTo(methodOn(TargetTagResource.class).getTargetTag(targetTag.getId())).withRel("self"));
+        response.add(linkTo(methodOn(TargetTagRestApi.class).getTargetTag(targetTag.getId())).withRel("self"));
 
-        response.add(linkTo(methodOn(TargetTagResource.class).getAssignedTargets(targetTag.getId()))
+        response.add(linkTo(methodOn(TargetTagRestApi.class).getAssignedTargets(targetTag.getId()))
                 .withRel("assignedTargets"));
 
         return response;
@@ -83,12 +85,11 @@ final class TagMapper {
 
         mapTag(response, distributionSetTag);
 
-        response.add(
-                linkTo(methodOn(DistributionSetTagResource.class).getDistributionSetTag(distributionSetTag.getId()))
-                        .withRel("self"));
+        response.add(linkTo(methodOn(DistributionSetTagRestApi.class).getDistributionSetTag(distributionSetTag.getId()))
+                .withRel("self"));
 
         response.add(linkTo(
-                methodOn(DistributionSetTagResource.class).getAssignedDistributionSets(distributionSetTag.getId()))
+                methodOn(DistributionSetTagRestApi.class).getAssignedDistributionSets(distributionSetTag.getId()))
                         .withRel("assignedDistributionSets"));
 
         return response;

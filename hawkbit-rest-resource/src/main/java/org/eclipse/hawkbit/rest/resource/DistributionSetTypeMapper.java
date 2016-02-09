@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.resource.api.DistributionSetTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypesRest;
@@ -101,13 +102,13 @@ final class DistributionSetTypeMapper {
         result.setKey(type.getKey());
         result.setModuleId(type.getId());
 
-        result.add(linkTo(methodOn(DistributionSetTypeResource.class).getDistributionSetType(result.getModuleId()))
+        result.add(linkTo(methodOn(DistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
                 .withRel("self"));
 
-        result.add(linkTo(methodOn(DistributionSetTypeResource.class).getMandatoryModules(result.getModuleId()))
+        result.add(linkTo(methodOn(DistributionSetTypeRestApi.class).getMandatoryModules(result.getModuleId()))
                 .withRel(RestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES));
 
-        result.add(linkTo(methodOn(DistributionSetTypeResource.class).getOptionalModules(result.getModuleId()))
+        result.add(linkTo(methodOn(DistributionSetTypeRestApi.class).getOptionalModules(result.getModuleId()))
                 .withRel(RestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES));
 
         return result;
