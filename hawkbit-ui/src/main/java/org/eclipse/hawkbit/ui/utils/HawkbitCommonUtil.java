@@ -263,14 +263,13 @@ public final class HawkbitCommonUtil {
     public static String concatStrings(final String delimiter, final String... texts) {
         final String delim = delimiter == null ? SP_STRING_EMPTY : delimiter;
         final StringBuilder conCatStrBldr = new StringBuilder();
-        String conCatedStr = null;
         if (null != texts) {
             for (final String text : texts) {
                 conCatStrBldr.append(delim);
                 conCatStrBldr.append(text);
             }
         }
-        conCatedStr = conCatStrBldr.toString();
+        final String conCatedStr = conCatStrBldr.toString();
         return delim.length() > 0 && conCatedStr.startsWith(delim) ? conCatedStr.substring(1) : conCatedStr;
     }
 
@@ -341,31 +340,6 @@ public final class HawkbitCommonUtil {
         labelId.append('.');
         labelId.append(version);
         return labelId.toString();
-    }
-
-    /**
-     * Check if two objects are same or not.
-     *
-     * @param obj1
-     *            as reference
-     * @param obj2
-     *            as reference
-     * @return true if both obj1 & obj2 are null (or) if the .equals() method
-     *         return true. false if only either one of obj1 & obj2 is null (or)
-     *         if .equals() method return false.
-     */
-    public static boolean bothSame(final Object obj1, final Object obj2) {
-        boolean result = false;
-        if (obj1 == null && obj2 == null) {
-            result = true;
-        } else if (obj1 == null && obj2 != null) {
-            result = false;
-        } else if (obj1 != null && obj2 == null) {
-            result = false;
-        } else {
-            result = obj2.equals(obj1);
-        }
-        return result;
     }
 
     /**
@@ -725,7 +699,7 @@ public final class HawkbitCommonUtil {
             final UserDetailsService idManagement = SpringContextHelper.getBean(UserDetailsService.class);
             try {
                 imReslovedUser = HawkbitCommonUtil.getFormattedName(idManagement.loadUserByUsername(uuid));
-            } catch (final UsernameNotFoundException e) {
+            } catch (final UsernameNotFoundException e) { // NOSONAR
                 // nope not need to handle
             }
             // If Null display the UID
@@ -982,12 +956,10 @@ public final class HawkbitCommonUtil {
      * @return instance of {@link LazyQueryContainer}.
      */
     public static LazyQueryContainer createLazyQueryContainer(
-            final BeanQueryFactory<? extends AbstractBeanQuery> queryFactory) {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+            final BeanQueryFactory<? extends AbstractBeanQuery<?>> queryFactory) {
+        final Map<String, Object> queryConfig = new HashMap<>();
         queryFactory.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer typeContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
-        return typeContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
     }
 
     /**
@@ -998,12 +970,10 @@ public final class HawkbitCommonUtil {
      * @return LazyQueryContainer
      */
     public static LazyQueryContainer createDSLazyQueryContainer(
-            final BeanQueryFactory<? extends AbstractBeanQuery> queryFactory) {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+            final BeanQueryFactory<? extends AbstractBeanQuery<?>> queryFactory) {
+        final Map<String, Object> queryConfig = new HashMap<>();
         queryFactory.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer typeContainer = new LazyQueryContainer(new LazyQueryDefinition(true, 20, "tagIdName"),
-                queryFactory);
-        return typeContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, 20, "tagIdName"), queryFactory);
     }
 
     /**
@@ -1037,7 +1007,7 @@ public final class HawkbitCommonUtil {
      */
     public static List<TableColumn> getTableVisibleColumns(final Boolean isMaximized, final Boolean isShowPinColumn,
             final I18N i18n) {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         if (isMaximized) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.2f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.1f));

@@ -56,12 +56,7 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * Abstract class for create/update target tag layout.
- * 
- *
- *
- *
  */
 public abstract class CreateUpdateTagLayout extends CustomComponent implements ColorChangeListener, ColorSelector {
     private static final long serialVersionUID = 4229177824620576456L;
@@ -78,7 +73,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected I18N i18n;
 
     @Autowired
-    protected TagManagement tagManagement;
+    protected transient TagManagement tagManagement;
 
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
@@ -124,14 +119,14 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     /**
      * Save new tag / update new tag.
-     * 
+     *
      * @param event
      */
     protected abstract void save(final Button.ClickEvent event);
 
     /**
      * Discard the changes and close the popup.
-     * 
+     *
      * @param event
      */
     protected abstract void discard(final Button.ClickEvent event);
@@ -202,7 +197,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        selectors = new HashSet<ColorSelector>();
+        selectors = new HashSet<>();
         selectedColor = new Color(44, 151, 32);
         selPreview = new SpColorPickerPreview(selectedColor);
 
@@ -284,28 +279,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      */
     private void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
-            final String selectedOption = (String) optiongroup.getValue();
-            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTagNw)) {
-                if (null != tagNameComboBox.getValue()) {
-
-                    final TargetTag targetTagSelected = tagManagement
-                            .findTargetTag(tagNameComboBox.getValue().toString());
-                    if (null != targetTagSelected) {
-                        selectedColor = targetTagSelected.getColour() != null
-                                ? rgbToColorConverter(targetTagSelected.getColour())
-                                : rgbToColorConverter(DEFAULT_COLOR);
-                    } else {
-
-                        final DistributionSetTag distTag = tagManagement
-                                .findDistributionSetTag(tagNameComboBox.getValue().toString());
-                        selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
-                                : rgbToColorConverter(DEFAULT_COLOR);
-                    }
-
-                } else {
-                    selectedColor = rgbToColorConverter(DEFAULT_COLOR);
-                }
-            }
+            setColor();
             selPreview.setColor(selectedColor);
             fieldLayout.addComponent(sliders);
             mainLayout.addComponent(colorPickerLayout);
@@ -314,28 +288,53 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
+    private void setColor() {
+        final String selectedOption = (String) optiongroup.getValue();
+        if (selectedOption == null || !selectedOption.equalsIgnoreCase(updateTagNw)) {
+            return;
+        }
+
+        if (tagNameComboBox.getValue() == null) {
+            selectedColor = rgbToColorConverter(DEFAULT_COLOR);
+            return;
+        }
+
+        final TargetTag targetTagSelected = tagManagement.findTargetTag(tagNameComboBox.getValue().toString());
+
+        if (targetTagSelected == null) {
+            final DistributionSetTag distTag = tagManagement
+                    .findDistributionSetTag(tagNameComboBox.getValue().toString());
+            selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
+                    : rgbToColorConverter(DEFAULT_COLOR);
+        } else {
+            selectedColor = targetTagSelected.getColour() != null ? rgbToColorConverter(targetTagSelected.getColour())
+                    : rgbToColorConverter(DEFAULT_COLOR);
+        }
+
+    }
+
     /**
      * Covert RGB code to {@Color}.
-     * 
+     *
      * @param value
      *            RGB vale
      * @return Color
      */
     protected Color rgbToColorConverter(final String value) {
-        if (value.startsWith("rgb")) {
-            // RGB color format rgb/rgba(255,255,255,0.1)
-            final String[] colors = value.substring(value.indexOf('(') + 1, value.length() - 1).split(",");
-            final int red = Integer.parseInt(colors[0]);
-            final int green = Integer.parseInt(colors[1]);
-            final int blue = Integer.parseInt(colors[2]);
-            if (colors.length > 3) {
-                final int alpha = (int) (Double.parseDouble(colors[3]) * 255d);
-                return new Color(red, green, blue, alpha);
-            } else {
-                return new Color(red, green, blue);
-            }
+        if (!value.startsWith("rgb")) {
+            return null;
         }
-        return null;
+        // RGB color format rgb/rgba(255,255,255,0.1)
+        final String[] colors = value.substring(value.indexOf('(') + 1, value.length() - 1).split(",");
+        final int red = Integer.parseInt(colors[0]);
+        final int green = Integer.parseInt(colors[1]);
+        final int blue = Integer.parseInt(colors[2]);
+        if (colors.length > 3) {
+            final int alpha = (int) (Double.parseDouble(colors[3]) * 255d);
+            return new Color(red, green, blue, alpha);
+        } else {
+            return new Color(red, green, blue);
+        }
     }
 
     private Label getMandatoryLabel() {
@@ -369,7 +368,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     /**
      * Listener for option group - Create tag/Update.
-     * 
+     *
      * @param event
      *            ValueChangeEvent
      */
@@ -478,7 +477,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     /**
      * Set tag name and desc field border color based on chosen color.
-     * 
+     *
      * @param tagName
      * @param tagDesc
      * @param taregtTagColor
@@ -506,7 +505,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     /**
      * Get target style - Dynamically as per the color picked, cannot be done
      * from the static css.
-     * 
+     *
      * @param colorPickedPreview
      */
     private void getTargetDynamicStyles(final String colorPickedPreview) {

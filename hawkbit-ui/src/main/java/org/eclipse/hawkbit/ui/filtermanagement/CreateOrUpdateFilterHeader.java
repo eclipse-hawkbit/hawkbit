@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+
+import java.awt.event.FocusListener;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
@@ -54,6 +56,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -119,8 +122,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
-    boolean validationFailed = false;
-
+    private boolean validationFailed = false;
+    
     /**
      * Initialize the Campaign Status History Header.
      */
@@ -146,19 +149,20 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final CustomFilterUIEvent custFUIEvent) {
-        if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
-            populateComponents();
-            eventBus.publish(this, CustomFilterUIEvent.TARGET_DETAILS_VIEW);
-        } else if (custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
-            setUpCaptionLayout(true);
-            resetComponents();
-        } else if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE) {
-            this.getUI().access(() -> showValidationSuccesIcon());
-        }
+	void onEvent(final CustomFilterUIEvent custFUIEvent) {
+		if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
+			populateComponents();
+			eventBus.publish(this, CustomFilterUIEvent.TARGET_DETAILS_VIEW);
+		} else if (custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
+			setUpCaptionLayout(true);
+			resetComponents();
+		} else if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE) {
+			this.getUI().access(() -> updateStatusIconAfterTablePopulated());
+		}
+	}
 
-    }
 
+    
     private void populateComponents() {
         if (filterManagementUIState.getTfQuery().isPresent()) {
             queryTextField.setValue(filterManagementUIState.getTfQuery().get().getQuery());
@@ -184,16 +188,16 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private Label createStatusIcon() {
         final Label statusIcon = new Label();
+        statusIcon.setImmediate(true);
+        statusIcon.setContentMode(ContentMode.HTML);
+        statusIcon.setSizeFull();
         setInitialStatusIconStyle(statusIcon);
         return statusIcon;
     }
 
     private void setInitialStatusIconStyle(final Label statusIcon) {
-        statusIcon.setContentMode(ContentMode.HTML);
         statusIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-        statusIcon.setImmediate(true);
         statusIcon.setStyleName("hide-status-label");
-        statusIcon.setSizeFull();
     }
 
     private void createComponents() {
@@ -216,10 +220,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
         closeIcon = createSearchResetIcon();
     }
-
-    /**
-     * @return
-     */
+    
+    
     private TextField createNameTextField() {
         final TextField nameField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.customfiltername"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
@@ -255,10 +257,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         };
     }
 
-    /**
-     * @param event
-     * @return
-     */
     private void onFiterNameChange(final TextChangeEvent event) {
         if (isNameAndQueryEmpty(event.getText(), queryTextField.getValue())
                 || (event.getText().equals(oldFilterName) && queryTextField.getValue().equals(oldFilterQuery))) {
@@ -363,7 +361,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             }
             enableDisableSaveButton(validationFailed, input);
         } else {
-            removeStatusIcon();
+        	setInitialStatusIconStyle(validationIcon);
             filterManagementUIState.setFilterQueryValue(null);
             filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.TRUE);
         }
@@ -389,17 +387,10 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         return false;
     }
 
-    private void removeStatusIcon() {
-        if (searchLayout.getComponentIndex(validationIcon) != -1) {
-            searchLayout.removeComponent(validationIcon);
-        }
-    }
 
     private void showValidationSuccesIcon() {
-        if (!validationFailed) {
             validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
             validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
-        }
     }
 
     private void showValidationFailureIcon() {
@@ -506,9 +497,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
     }
 
-    /**
-     * @return
-     */
     private boolean doesAlreadyExists() {
         if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()) != null) {
             notification.displayValidationError(i18n.get("message.target.filter.duplicate", nameTextField.getValue()));
@@ -517,9 +505,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         return false;
     }
 
-    /**
-     * @return
-     */
     private boolean manadatoryFieldsPresent() {
         if (Strings.isNullOrEmpty(nameTextField.getValue())
                 || Strings.isNullOrEmpty(filterManagementUIState.getFilterQueryValue())) {
@@ -528,5 +513,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
         return true;
     }
+    
+	private void updateStatusIconAfterTablePopulated() {
+		queryTextField.focus();
+		if (!validationFailed && !Strings.isNullOrEmpty(queryTextField.getValue())) {
+			showValidationSuccesIcon();
+		}
+	}
 
 }

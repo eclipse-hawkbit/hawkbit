@@ -54,6 +54,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -109,7 +110,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private String originalDistDescription;
     private Boolean originalReqMigStep;
     private String originalDistSetType;
-    private final List<Object> changedComponents = new ArrayList<Object>();
+    private final List<Component> changedComponents = new ArrayList<>();
     private ValueChangeListener reqMigStepCheckboxListerner;
     private TextChangeListener descTextAreaListener;
     private TextChangeListener distNameTextFieldListener;
@@ -197,12 +198,12 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
     /**
      * Get the LazyQueryContainer instance for DistributionSetTypes.
-     * 
+     *
      * @return
      */
     private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<DistributionSetTypeBeanQuery>(
+        final Map<String, Object> queryConfig = new HashMap<>();
+        final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<>(
                 DistributionSetTypeBeanQuery.class);
         dtQF.setQueryConfiguration(queryConfig);
 
@@ -499,7 +500,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
     /**
      * populate data.
-     * 
+     *
      * @param editDistId
      */
     public void populateValuesOfDistribution(final Long editDistId) {

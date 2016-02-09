@@ -51,9 +51,9 @@ import com.vaadin.ui.UI;
 
 /**
  * Distributions footer layout implementation.
- * 
  *
- * 
+ *
+ *
  */
 @org.springframework.stereotype.Component
 @ViewScope
@@ -94,10 +94,11 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#init()
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -140,7 +141,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * hasDeletePermission()
@@ -153,7 +154,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * hasUpdatePermission()
@@ -166,7 +167,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getDeleteAreaLabel()
@@ -178,7 +179,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getDeleteAreaId()
@@ -191,7 +192,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getDeleteLayoutAcceptCriteria ()
@@ -204,7 +205,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * processDroppedComponent(com .vaadin.event.dd.DragAndDropEvent)
@@ -248,7 +249,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /**
      * Check if distribution set type is selected.
-     * 
+     *
      * @param distTypeName
      * @return true if ds type is selected
      */
@@ -276,7 +277,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
         final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) sourceTable.getValue();
-        final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<DistributionSetIdName>();
+        final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<>();
         if (!distSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
             distributionIdNameSet.add((DistributionSetIdName) transferable.getData(SPUIDefinitions.ITEMID));
         } else {
@@ -314,7 +315,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
         @SuppressWarnings("unchecked")
         final Set<Long> swModuleSelected = (Set<Long>) sourceTable.getValue();
-        final Set<Long> swModuleIdNameSet = new HashSet<Long>();
+        final Set<Long> swModuleIdNameSet = new HashSet<>();
         if (!swModuleSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
             swModuleIdNameSet.add((Long) transferable.getData(SPUIDefinitions.ITEMID));
         } else {
@@ -336,7 +337,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
                 + manageDistUIState.getDeleteSofwareModulesList().size()
                 + manageDistUIState.getDeletedDistributionList().size();
 
-        for (final Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> mapEntry : manageDistUIState
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> mapEntry : manageDistUIState
                 .getAssignedList().entrySet()) {
             count += manageDistUIState.getAssignedList().get(mapEntry.getKey()).size();
         }
@@ -345,7 +346,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /**
      * DistributionsUIEvent.
-     * 
+     *
      * @param event
      *            as instance of {@link DistributionsUIEvent}
      */
@@ -357,27 +358,17 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     }
 
-    /**
-     * 
-     * @param source
-     * @return true if it is distribution table
-     */
     private boolean isDistributionTable(final Component source) {
-        return HawkbitCommonUtil.bothSame(source.getId(), SPUIComponetIdProvider.DIST_TABLE_ID);
+        return SPUIComponetIdProvider.DIST_TABLE_ID.equals(source.getId());
     }
 
-    /**
-     * 
-     * @param source
-     * @return true if it is SoftwareModule table
-     */
     private boolean isSoftwareModuleTable(final Component source) {
-        return HawkbitCommonUtil.bothSame(source.getId(), SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE);
+        return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE.equals(source.getId());
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getNoActionsButtonLabel()
@@ -389,7 +380,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getActionsButtonLabel()
@@ -403,7 +394,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * reloadActionCount()
@@ -416,7 +407,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getUnsavedActionsWindowCaption ()
@@ -428,7 +419,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * unsavedActionsWindowClosed()
@@ -444,7 +435,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * getUnsavedActionsWindowContent ()
@@ -457,7 +448,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
      * hasUnsavedActions()
@@ -490,7 +481,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
      * hasBulkUploadPermission()
      */
@@ -501,7 +492,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
      * showBulkUploadWindow()
      */
@@ -514,7 +505,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
      * restoreBulkUploadStatusCount()
      */
@@ -531,7 +522,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     /**
      * Check if the distribution set type is default.
-     * 
+     *
      * @param dsTypeName
      *            distribution set name
      * @return true if distribution set type is set default in configuration

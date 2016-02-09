@@ -18,30 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 
+ *
  */
 @Component("thresholdRolloutGroupErrorCondition")
 public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditionEvaluator {
 
-    private static Logger logger = LoggerFactory.getLogger(ThresholdRolloutGroupErrorCondition.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupErrorCondition.class);
 
     @Autowired
     private ActionRepository actionRepository;
-
-    @Override
-    public boolean verifyExpression(final String expression) {
-        // percentage value between 0 and 100
-        try {
-            final Integer value = Integer.valueOf(expression);
-            if (value >= 0 || value <= 100) {
-                return true;
-            }
-            return true;
-        } catch (final RuntimeException e) {
-
-        }
-        return false;
-    }
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
@@ -60,7 +45,7 @@ public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditio
             // calculate threshold
             return ((float) error / (float) totalGroup) > ((float) threshold / 100F);
         } catch (final NumberFormatException e) {
-            logger.error("Cannot evaluate condition expression " + expression, e);
+            LOGGER.error("Cannot evaluate condition expression " + expression, e);
             return false;
         }
     }

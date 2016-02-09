@@ -37,6 +37,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.base.Strings;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -44,6 +45,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  *
@@ -73,12 +75,16 @@ public class CreateOrUpdateFilterTable extends Table {
      */
     @PostConstruct
     public void init() {
+        setStyleName("sp-table");
         setSizeFull();
+        setImmediate(true);
+        setHeight(100.0f, Unit.PERCENTAGE);
+        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+        addStyleName(ValoTheme.TABLE_SMALL);
         setColumnCollapsingAllowed(true);
         addCustomGeneratedColumns();
         restoreOnLoad();
         populateTableData();
-        setStyleName("sp-table");
         setId(SPUIComponetIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
         setSelectable(false);
         eventBus.subscribe(this);
@@ -95,12 +101,13 @@ public class CreateOrUpdateFilterTable extends Table {
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
             UI.getCurrent().access(() -> populateTableData());
         } else if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
-            this.getUI().access(() -> populateTableData());
-            eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
+            this.getUI().access(() -> onQuery());
         }
     }
 
-    private void restoreOnLoad() {
+  
+
+	private void restoreOnLoad() {
         if (filterManagementUIState.isCreateFilterViewDisplayed()) {
             filterManagementUIState.setFilterQueryValue(null);
         } else {
@@ -152,9 +159,6 @@ public class CreateOrUpdateFilterTable extends Table {
         setCollapsibleColumns();
     }
 
-    /**
-     * 
-     */
     private void setCollapsibleColumns() {
         setColumnCollapsed(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, true);
         setColumnCollapsed(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, true);
@@ -178,8 +182,8 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
-        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.15F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"),0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
@@ -237,5 +241,9 @@ public class CreateOrUpdateFilterTable extends Table {
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.STATUS_ICON, (source, itemId, columnId) -> getStatusIcon(itemId));
     }
-
+    
+    private void onQuery() {
+    	populateTableData();
+        eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
+	}
 }
