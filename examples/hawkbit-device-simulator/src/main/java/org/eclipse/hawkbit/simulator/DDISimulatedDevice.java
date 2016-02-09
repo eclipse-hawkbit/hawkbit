@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.simulator;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater.UpdaterCallback;
 import org.eclipse.hawkbit.simulator.http.ControllerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,28 +81,27 @@ public class DDISimulatedDevice extends AbstractSimulatedDevice {
                     final String deploymentJson = controllerResource.getDeployment(getTenant(), getId(), actionId);
                     final String swVersion = JsonPath.parse(deploymentJson).read("deployment.chunks[0].version");
                     currentActionId = actionId;
-                    deviceUpdater.startUpdate(getTenant(), getId(), actionId, swVersion, new UpdaterCallback() {
-                        @Override
-                        public void updateFinished(final AbstractSimulatedDevice device, final Long actionId) {
-                            switch (device.getResponseStatus()) {
-                            case SUCCESSFUL:
-                                controllerResource.postSuccessFeedback(getTenant(), getId(), actionId);
-                                break;
-                            case ERROR:
-                                controllerResource.postErrorFeedback(getTenant(), getId(), actionId);
-                                break;
-                            default:
-                                throw new IllegalStateException("simulated device has an unknown response status + "
-                                        + device.getResponseStatus());
-                            }
-                            currentActionId = null;
+                    deviceUpdater.startUpdate(getTenant(), getId(), actionId, swVersion, (device, actionId1) -> {
+                        switch (device.getResponseStatus()) {
+                        case SUCCESSFUL:
+                            controllerResource.postSuccessFeedback(getTenant(), getId(),
+                                    actionId1);
+                            break;
+                        case ERROR:
+                            controllerResource.postErrorFeedback(getTenant(), getId(),
+                                    actionId1);
+                            break;
+                        default:
+                            throw new IllegalStateException(
+                                    "simulated device has an unknown response status + " + device.getResponseStatus());
                         }
+                        currentActionId = null;
                     });
                 }
             } catch (final PathNotFoundException e) {
                 // href might not be in the json response, so ignore
                 // exception here.
-                LOGGER.trace("Response does not contain a deploymentbase href link, ignoring.");
+                LOGGER.trace("Response does not contain a deploymentbase href link, ignoring.", e);
             }
 
         }

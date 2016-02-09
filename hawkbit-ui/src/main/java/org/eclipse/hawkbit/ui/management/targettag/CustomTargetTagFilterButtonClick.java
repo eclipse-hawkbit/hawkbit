@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.targettag;
 
 import java.io.Serializable;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -27,9 +26,9 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Single button click behaviour of custom target filter buttons layout.
- * 
  *
- * 
+ *
+ *
  */
 @SpringComponent
 @ViewScope
@@ -48,28 +47,28 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.filterlayout.
      * AbstractFilterButtonClickBehaviour#filterUnClicked (com.vaadin.ui.Button)
      */
     @Override
     protected void filterUnClicked(final Button clickedButton) {
-        managementUIState.getTargetTableFilters().setTargetFilterQuery(null);
-        eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY);
+        this.managementUIState.getTargetTableFilters().setTargetFilterQuery(null);
+        this.eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.layouts.SPFilterButtonClickBehaviour#filterClicked
      * (com.vaadin.ui.Button )
      */
     @Override
     protected void filterClicked(final Button clickedButton) {
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+        final TargetFilterQuery targetFilterQuery = this.targetFilterQueryManagement
                 .findTargetFilterQueryById((Long) clickedButton.getData());
-        managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery);
-        eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);
+        this.managementUIState.getTargetTableFilters().setTargetFilterQuery(targetFilterQuery);
+        this.eventBus.publish(this, TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY);
     }
 
     protected void processButtonClick(final ClickEvent event) {
@@ -77,12 +76,12 @@ public class CustomTargetTagFilterButtonClick extends AbstractFilterSingleButton
     }
 
     protected void clearAppliedTargetFilterQuery() {
-        if (getAlreadyClickedButton().isPresent()) {
-            getAlreadyClickedButton().get().removeStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
-            setAlreadyClickedButton(Optional.empty());
+        if (getAlreadyClickedButton() != null) {
+            getAlreadyClickedButton().removeStyleName(SPUIStyleDefinitions.SP_FILTER_BTN_CLICKED_STYLE);
+            setAlreadyClickedButton(null);
         }
-        managementUIState.getTargetTableFilters().setTargetFilterQuery(null);
-        eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY);
+        this.managementUIState.getTargetTableFilters().setTargetFilterQuery(null);
+        this.eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TARGET_FILTER_QUERY);
     }
 
     protected void setDefaultButtonClicked(final Button button) {

@@ -32,7 +32,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract class for target/ds tag token layout.
- * 
+ *
  *
  *
  *
@@ -47,9 +47,9 @@ public abstract class AbstractTagToken implements Serializable {
 
     protected IndexedContainer container;
 
-    protected final Map<Long, TagData> tagDetails = new HashMap<Long, TagData>();
+    protected final Map<Long, TagData> tagDetails = new HashMap<>();
 
-    protected final Map<Long, TagData> tokensAdded = new HashMap<Long, TagData>();
+    protected final Map<Long, TagData> tokensAdded = new HashMap<>();
 
     protected CssLayout tokenLayout = new CssLayout();
 
@@ -123,7 +123,7 @@ public abstract class AbstractTagToken implements Serializable {
     class CustomTokenField extends TokenField {
         private static final long serialVersionUID = 694216966472937436L;
 
-        final Container tokenContainer;
+        Container tokenContainer;
 
         CustomTokenField(final CssLayout cssLayout, final Container tokenContainer) {
             super(cssLayout);
@@ -235,9 +235,11 @@ public abstract class AbstractTagToken implements Serializable {
 
     /**
      * Tag details.
-     * 
+     *
      */
-    public static class TagData {
+    public static class TagData implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         private String name;
 
@@ -247,7 +249,7 @@ public abstract class AbstractTagToken implements Serializable {
 
         /**
          * Tag data constructor.
-         * 
+         *
          * @param id
          * @param name
          * @param color

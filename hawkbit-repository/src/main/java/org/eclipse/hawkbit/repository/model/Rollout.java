@@ -77,7 +77,7 @@ public class Rollout extends NamedEntity {
     private int rolloutGroupsCreated = 0;
 
     @Transient
-    private TotalTargetCountStatus totalTargetCountStatus;
+    private transient TotalTargetCountStatus totalTargetCountStatus;
 
     /**
      * @return the distributionSet
@@ -234,7 +234,7 @@ public class Rollout extends NamedEntity {
      */
     public TotalTargetCountStatus getTotalTargetCountStatus() {
         if (totalTargetCountStatus == null) {
-            this.totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
         }
         return totalTargetCountStatus;
     }
@@ -255,11 +255,11 @@ public class Rollout extends NamedEntity {
     }
 
     /**
-     * 
+     *
      * @author Michael Hirsch
      *
      */
-    public static enum RolloutStatus {
+    public enum RolloutStatus {
 
         /**
          * Rollouts is beeing created.

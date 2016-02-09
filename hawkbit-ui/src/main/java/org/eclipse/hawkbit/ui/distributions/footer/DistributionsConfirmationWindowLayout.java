@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.footer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,9 +53,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract layout of confirm actions window.
- * 
  *
- * 
+ *
+ *
  */
 @org.springframework.stereotype.Component
 @ViewScope
@@ -107,13 +108,13 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.confirmwindow.layout.
      * AbstractConfirmationWindowLayout# getConfimrationTabs()
      */
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<String, ConfirmationTab>();
+        final Map<String, ConfirmationTab> tabs = new HashMap<>();
         /* Create tab for SW Modules delete */
         if (!manageDistUIState.getDeleteSofwareModulesList().isEmpty()) {
             tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
@@ -190,26 +191,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
     private void deleteSMAll(final ConfirmationTab tab) {
         final Set<Long> swmoduleIds = manageDistUIState.getDeleteSofwareModulesList().keySet();
 
-        if (null != manageDistUIState.getAssignedList() && !manageDistUIState.getAssignedList().isEmpty()) {
-
-            for (final Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entryAssignSM : manageDistUIState
-                    .getAssignedList().entrySet()) {
-                for (final Entry<Long, String> entryDeleteSM : manageDistUIState.getDeleteSofwareModulesList()
-                        .entrySet()) {
-                    final SoftwareModuleIdName smIdName = new SoftwareModuleIdName(entryDeleteSM.getKey(),
-                            entryDeleteSM.getValue());
-                    if (entryAssignSM.getValue().contains(smIdName)) {
-                        entryAssignSM.getValue().remove(smIdName);
-                        assignmnetTab.getTable().removeItem(HawkbitCommonUtil.concatStrings("|||",
-                                entryAssignSM.getKey().getId().toString(), smIdName.getId().toString()));
-                    }
-
-                    if (entryAssignSM.getValue().isEmpty()) {
-                        manageDistUIState.getAssignedList().remove(entryAssignSM.getKey());
-                    }
-                }
-            }
-
+        if (manageDistUIState.getAssignedList() == null || manageDistUIState.getAssignedList().isEmpty()) {
+            removeAssignedSoftwareModules();
         }
 
         softwareManagement.deleteSoftwareModules(swmoduleIds);
@@ -221,6 +204,25 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         eventBus.publish(this, SaveActionWindowEvent.DELETE_ALL_SOFWARE);
     }
 
+    private void removeAssignedSoftwareModules() {
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entryAssignSM : manageDistUIState
+                .getAssignedList().entrySet()) {
+            for (final Entry<Long, String> entryDeleteSM : manageDistUIState.getDeleteSofwareModulesList().entrySet()) {
+                final SoftwareModuleIdName smIdName = new SoftwareModuleIdName(entryDeleteSM.getKey(),
+                        entryDeleteSM.getValue());
+                if (entryAssignSM.getValue().contains(smIdName)) {
+                    entryAssignSM.getValue().remove(smIdName);
+                    assignmnetTab.getTable().removeItem(HawkbitCommonUtil.concatStrings("|||",
+                            entryAssignSM.getKey().getId().toString(), smIdName.getId().toString()));
+                }
+
+                if (entryAssignSM.getValue().isEmpty()) {
+                    manageDistUIState.getAssignedList().remove(entryAssignSM.getKey());
+                }
+            }
+        }
+    }
+
     private void discardSMAll(final ConfirmationTab tab) {
         removeCurrentTab(tab);
         manageDistUIState.getDeleteSofwareModulesList().clear();
@@ -230,7 +232,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
     /**
      * Get SWModule table container.
-     * 
+     *
      * @return IndexedContainer
      */
     @SuppressWarnings("unchecked")
@@ -238,9 +240,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty("SWModuleId", String.class, "");
         swcontactContainer.addContainerProperty(SW_MODULE_NAME_MSG, String.class, "");
-        Item item = null;
         for (final Long swModuleID : manageDistUIState.getDeleteSofwareModulesList().keySet()) {
-            item = swcontactContainer.addItem(swModuleID);
+            final Item item = swcontactContainer.addItem(swModuleID);
             item.getItemProperty("SWModuleId").setValue(swModuleID.toString());
             item.getItemProperty(SW_MODULE_NAME_MSG)
                     .setValue(manageDistUIState.getDeleteSofwareModulesList().get(swModuleID));
@@ -640,7 +641,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         contactContainer.addContainerProperty(DIST_ID_NAME, DistributionSetIdName.class, "");
         contactContainer.addContainerProperty(SOFTWARE_MODULE_ID_NAME, SoftwareModuleIdName.class, "");
 
-        final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = manageDistUIState.getAssignedList();
+        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
+                .getAssignedList();
 
         assignedList.forEach((distIdname, softIdNameSet) -> softIdNameSet.forEach(softIdName -> {
             final String itemId = HawkbitCommonUtil.concatStrings("|||", distIdname.getId().toString(),
@@ -672,8 +674,8 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
 
         });
         int count = 0;
-        for (final Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : manageDistUIState.getAssignedList()
-                .entrySet()) {
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
+                .getAssignedList().entrySet()) {
             count += entry.getValue().size();
         }
         addToConsolitatedMsg(FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -707,7 +709,7 @@ public class DistributionsConfirmationWindowLayout extends AbstractConfirmationW
         if (softIdNameSet.isEmpty()) {
             manageDistUIState.getAssignedList().remove(discardDistIdName);
         }
-        final Map<Long, Set<SoftwareModuleIdName>> map = manageDistUIState.getConsolidatedDistSoftwarewList()
+        final Map<Long, HashSet<SoftwareModuleIdName>> map = manageDistUIState.getConsolidatedDistSoftwarewList()
                 .get(discardDistIdName);
         map.keySet().forEach(typeId -> map.get(typeId).remove(discardSoftIdName));
 
