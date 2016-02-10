@@ -104,7 +104,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     @Override
     protected List<ProxyDistribution> loadBeans(final int startIndex, final int count) {
         Page<DistributionSet> distBeans;
-        final List<ProxyDistribution> proxyDistributions = new ArrayList<ProxyDistribution>();
+        final List<ProxyDistribution> proxyDistributions = new ArrayList<>();
         if (startIndex == 0 && firstPageDistributionSets != null) {
             distBeans = firstPageDistributionSets;
         } else if (Strings.isNullOrEmpty(searchText)) {

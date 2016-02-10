@@ -76,7 +76,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     @Override
     protected List<ProxyBaseSoftwareModuleItem> loadBeans(final int startIndex, final int count) {
         final Slice<SoftwareModule> swModuleBeans;
-        final List<ProxyBaseSoftwareModuleItem> proxyBeans = new ArrayList<ProxyBaseSoftwareModuleItem>();
+        final List<ProxyBaseSoftwareModuleItem> proxyBeans = new ArrayList<>();
 
         if (type == null && Strings.isNullOrEmpty(searchText)) {
             swModuleBeans = getSoftwareManagementService()

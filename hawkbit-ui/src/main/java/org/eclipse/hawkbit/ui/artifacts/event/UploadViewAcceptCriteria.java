@@ -126,7 +126,7 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, List<String>> createDropConfigurations() {
-        final Map<String, List<String>> config = new HashMap<String, List<String>>();
+        final Map<String, List<String>> config = new HashMap<>();
         // Delete drop area droppable components
         config.put(SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID, Arrays.asList(
                 SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX));
@@ -135,7 +135,7 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, Object> createDropHintConfigurations() {
-        final Map<String, Object> config = new HashMap<String, Object>();
+        final Map<String, Object> config = new HashMap<>();
         config.put(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, UploadArtifactUIEvent.SOFTWARE_TYPE_DRAG_START);
         config.put(SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, UploadArtifactUIEvent.SOFTWARE_DRAG_START);
         return config;

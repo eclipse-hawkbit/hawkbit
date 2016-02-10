@@ -80,6 +80,7 @@ public class DistributionTagToken extends AbstractTagToken {
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -129,7 +130,7 @@ public class DistributionTagToken extends AbstractTagToken {
     }
 
     private DistributionSetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
-        final Set<Long> distributionList = new HashSet<Long>();
+        final Set<Long> distributionList = new HashSet<>();
         distributionList.add(selectedDS.getId());
         final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
                 tagNameSelected);
@@ -160,7 +161,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     /* To Be Done : this implementation will vary in views */
     private List<String> getClickedTagList() {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     /*
