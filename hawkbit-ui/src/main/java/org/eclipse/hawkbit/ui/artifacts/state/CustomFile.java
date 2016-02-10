@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.state;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-
 /**
  * Custom file to hold details of uploaded file.
  *
@@ -168,36 +166,50 @@ public class CustomFile implements Serializable {
         return failureReason;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (fileName == null ? 0 : fileName.hashCode());
+        result = prime * result + ((baseSoftwareModuleName == null) ? 0 : baseSoftwareModuleName.hashCode());
+        result = prime * result + ((baseSoftwareModuleVersion == null) ? 0 : baseSoftwareModuleVersion.hashCode());
+        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof CustomFile)) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final CustomFile other = (CustomFile) obj;
-        return HawkbitCommonUtil.bothSame(fileName, other.fileName)
-                && HawkbitCommonUtil.bothSame(baseSoftwareModuleName, other.baseSoftwareModuleName)
-                && HawkbitCommonUtil.bothSame(baseSoftwareModuleVersion, other.baseSoftwareModuleVersion);
+        if (baseSoftwareModuleName == null) {
+            if (other.baseSoftwareModuleName != null) {
+                return false;
+            }
+        } else if (!baseSoftwareModuleName.equals(other.baseSoftwareModuleName)) {
+            return false;
+        }
+        if (baseSoftwareModuleVersion == null) {
+            if (other.baseSoftwareModuleVersion != null) {
+                return false;
+            }
+        } else if (!baseSoftwareModuleVersion.equals(other.baseSoftwareModuleVersion)) {
+            return false;
+        }
+        if (fileName == null) {
+            if (other.fileName != null) {
+                return false;
+            }
+        } else if (!fileName.equals(other.fileName)) {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -41,5 +41,21 @@
 	box-shadow:none !important;
 }
 
+.target-filter-spinner{
+    @include valo-spinner(
+       $size: $v-font-size--small,
+       $color: $bosch-color-light-blue
+     );
+}
+
+.hide-status-label {
+    visibility: hidden;
+}
+  
+ .show-status-label {
+    visibility: visible;
+}
+
+
 
 }

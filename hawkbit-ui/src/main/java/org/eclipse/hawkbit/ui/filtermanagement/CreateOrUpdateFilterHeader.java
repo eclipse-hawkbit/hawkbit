@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+
+import java.awt.event.FocusListener;
+import java.util.concurrent.Executor;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -26,6 +30,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -37,10 +42,12 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -49,6 +56,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -80,6 +88,10 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     @Autowired
     private UINotification notification;
 
+    @Autowired
+    @Qualifier("uiExecutor")
+    private transient Executor executor;
+
     private Label headerCaption;
 
     private TextField queryTextField;
@@ -110,6 +122,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private LayoutClickListener nameLayoutClickListner;
 
+    private boolean validationFailed = false;
+    
     /**
      * Initialize the Campaign Status History Header.
      */
@@ -123,9 +137,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         eventBus.subscribe(this);
     }
 
-    /**
-     * 
-     */
     private void restoreOnLoad() {
         if (filterManagementUIState.isEditViewDisplayed()) {
             populateComponents();
@@ -138,17 +149,20 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final CustomFilterUIEvent custFUIEvent) {
-        if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
-            populateComponents();
-            eventBus.publish(this, CustomFilterUIEvent.TARGET_DETAILS_VIEW);
-        } else if (custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
-            setUpCaptionLayout(true);
-            resetComponents();
-        }
+	void onEvent(final CustomFilterUIEvent custFUIEvent) {
+		if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_DETAIL_VIEW) {
+			populateComponents();
+			eventBus.publish(this, CustomFilterUIEvent.TARGET_DETAILS_VIEW);
+		} else if (custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
+			setUpCaptionLayout(true);
+			resetComponents();
+		} else if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE) {
+			this.getUI().access(() -> updateStatusIconAfterTablePopulated());
+		}
+	}
 
-    }
 
+    
     private void populateComponents() {
         if (filterManagementUIState.getTfQuery().isPresent()) {
             queryTextField.setValue(filterManagementUIState.getTfQuery().get().getQuery());
@@ -156,7 +170,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             oldFilterName = filterManagementUIState.getTfQuery().get().getName();
             oldFilterQuery = filterManagementUIState.getTfQuery().get().getQuery();
         }
-        searchLayout.addComponentAsFirst(validationIcon);
         showValidationSuccesIcon();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
         headerCaption.setVisible(false);
@@ -167,16 +180,24 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         headerCaption.setVisible(true);
         nameLabel.setValue("");
         queryTextField.setValue("");
-        removeStatusIcon();
+        setInitialStatusIconStyle(validationIcon);
+        validationFailed = false;
         saveButton.setEnabled(false);
         titleFilterIconsLayout.removeStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
     }
 
     private Label createStatusIcon() {
-        final Label statusIcon = new Label(FontAwesome.CHECK_CIRCLE.getHtml(), ContentMode.HTML);
-        statusIcon.addStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
-        statusIcon.setSizeUndefined();
+        final Label statusIcon = new Label();
+        statusIcon.setImmediate(true);
+        statusIcon.setContentMode(ContentMode.HTML);
+        statusIcon.setSizeFull();
+        setInitialStatusIconStyle(statusIcon);
         return statusIcon;
+    }
+
+    private void setInitialStatusIconStyle(final Label statusIcon) {
+        statusIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+        statusIcon.setStyleName("hide-status-label");
     }
 
     private void createComponents() {
@@ -199,10 +220,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
         closeIcon = createSearchResetIcon();
     }
-
-    /**
-     * @return
-     */
+    
+    
     private TextField createNameTextField() {
         final TextField nameField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.customfiltername"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
@@ -238,10 +257,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         };
     }
 
-    /**
-     * @param event
-     * @return
-     */
     private void onFiterNameChange(final TextChangeEvent event) {
         if (isNameAndQueryEmpty(event.getText(), queryTextField.getValue())
                 || (event.getText().equals(oldFilterName) && queryTextField.getValue().equals(oldFilterQuery))) {
@@ -274,8 +289,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         searchLayout = new HorizontalLayout();
         searchLayout.setSizeUndefined();
         searchLayout.setSpacing(false);
-        searchLayout.addComponent(queryTextField);
+        searchLayout.addComponents(validationIcon, queryTextField);
         searchLayout.addStyleName("custom-search-layout");
+        searchLayout.setComponentAlignment(validationIcon, Alignment.MIDDLE_CENTER);
 
         final HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.setSizeUndefined();
@@ -308,25 +324,34 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void addSearchLisenter() {
         queryTextField.addTextChangeListener(new TextChangeListener() {
+            private static final long serialVersionUID = -6668604418942689391L;
+
             @Override
             public void textChange(final TextChangeEvent event) {
+                validationIcon.addStyleName("show-status-label");
+                showValidationInProgress();
                 onQueryChange(event.getText());
-                eventBus.publish(this, CustomFilterUIEvent.FILTER_TARGET_BY_QUERY);
+                executor.execute(new StatusCircledAsync());
             }
 
         });
     }
 
+    class StatusCircledAsync implements Runnable {
+        @Override
+        public void run() {
+            eventBus.publish(this, CustomFilterUIEvent.FILTER_TARGET_BY_QUERY);
+        }
+    }
+
     private void onQueryChange(final String text) {
-        boolean validationFailed = false;
         if (!Strings.isNullOrEmpty(text)) {
             final String input = text.toLowerCase();
-            searchLayout.addComponentAsFirst(validationIcon);
             final ValidationResult validationResult = FilterQueryValidation.getExpectedTokens(input);
             if (!validationResult.getIsValidationFailed()) {
-                showValidationSuccesIcon();
                 filterManagementUIState.setFilterQueryValue(input);
                 filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.FALSE);
+                validationFailed = false;
             } else {
                 validationFailed = true;
                 filterManagementUIState.setFilterQueryValue(null);
@@ -336,15 +361,17 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             }
             enableDisableSaveButton(validationFailed, input);
         } else {
-            removeStatusIcon();
+        	setInitialStatusIconStyle(validationIcon);
             filterManagementUIState.setFilterQueryValue(null);
             filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.TRUE);
         }
+        queryTextField.setValue(text);
     }
 
     private void enableDisableSaveButton(final boolean validationFailed, final String query) {
-        if (validationFailed || (isNameAndQueryEmpty(nameTextField.getValue(), query)
-                || (query.equals(oldFilterQuery) && nameTextField.getValue().equals(oldFilterName)))) {
+        if (validationFailed
+                || (isNameAndQueryEmpty(nameTextField.getValue(), query) || (query.equals(oldFilterQuery) && nameTextField
+                        .getValue().equals(oldFilterName)))) {
             saveButton.setEnabled(false);
         } else {
             if (hasSavePermission()) {
@@ -360,21 +387,20 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         return false;
     }
 
-    private void removeStatusIcon() {
-        if (searchLayout.getComponentIndex(validationIcon) != -1) {
-            searchLayout.removeComponent(validationIcon);
-        }
-    }
 
     private void showValidationSuccesIcon() {
-        validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-        validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
-        validationIcon.setDescription("");
+            validationIcon.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+            validationIcon.setStyleName(SPUIStyleDefinitions.SUCCESS_ICON);
     }
 
     private void showValidationFailureIcon() {
         validationIcon.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
         validationIcon.setStyleName(SPUIStyleDefinitions.ERROR_ICON);
+    }
+
+    private void showValidationInProgress() {
+        validationIcon.setValue(null);
+        validationIcon.setStyleName(SPUIStyleDefinitions.TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE);
     }
 
     private SPUIButton createSearchResetIcon() {
@@ -392,6 +418,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         textField.setWidth(900.0F, Unit.PIXELS);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         textField.setTextChangeTimeout(1000);
+
+        textField.addShortcutListener(new AbstractField.FocusShortcut(textField, KeyCode.ENTER));
         return textField;
     }
 
@@ -443,8 +471,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         targetFilterQuery.setName(nameTextField.getValue());
         targetFilterQuery.setQuery(queryTextField.getValue());
         targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
-        notification.displaySuccess(
-                i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));
+        notification.displaySuccess(i18n.get("message.create.filter.success",
+                new Object[] { targetFilterQuery.getName() }));
         eventBus.publish(this, CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY);
     }
 
@@ -469,9 +497,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
     }
 
-    /**
-     * @return
-     */
     private boolean doesAlreadyExists() {
         if (targetFilterQueryManagement.findTargetFilterQueryByName(nameTextField.getValue()) != null) {
             notification.displayValidationError(i18n.get("message.target.filter.duplicate", nameTextField.getValue()));
@@ -480,9 +505,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         return false;
     }
 
-    /**
-     * @return
-     */
     private boolean manadatoryFieldsPresent() {
         if (Strings.isNullOrEmpty(nameTextField.getValue())
                 || Strings.isNullOrEmpty(filterManagementUIState.getFilterQueryValue())) {
@@ -491,5 +513,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
         return true;
     }
+    
+	private void updateStatusIconAfterTablePopulated() {
+		queryTextField.focus();
+		if (!validationFailed && !Strings.isNullOrEmpty(queryTextField.getValue())) {
+			showValidationSuccesIcon();
+		}
+	}
 
 }

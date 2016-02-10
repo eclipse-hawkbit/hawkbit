@@ -38,13 +38,13 @@ public class ArtifactUploadState implements Serializable {
 
     private final Map<Long, String> deleteSofwareModules = new HashMap<>();
 
-    private final Set<CustomFile> fileSelected = new HashSet<CustomFile>();
+    private final Set<CustomFile> fileSelected = new HashSet<>();
 
     private Long selectedBaseSwModuleId;
 
     private SoftwareModule selectedBaseSoftwareModule;
 
-    private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<String, SoftwareModule>();
+    private final Map<String, SoftwareModule> baseSwModuleList = new HashMap<>();
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
@@ -60,7 +60,7 @@ public class ArtifactUploadState implements Serializable {
 
     /**
      * Set software.
-     * 
+     *
      * @return
      */
     public SoftwareModuleFilters getSoftwareModuleFilters() {
@@ -85,7 +85,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return this.selectedBaseSwModuleId != null ? Optional.of(this.selectedBaseSwModuleId) : Optional.empty();
+        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
     }
 
     /**
@@ -100,8 +100,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the selectedBaseSoftwareModule
      */
     public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
-        return this.selectedBaseSoftwareModule == null ? Optional.empty()
-                : Optional.of(this.selectedBaseSoftwareModule);
+        return selectedBaseSoftwareModule == null ? Optional.empty() : Optional.of(selectedBaseSoftwareModule);
     }
 
     /**

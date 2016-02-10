@@ -298,20 +298,7 @@ public class AmqpMessageHandlerService {
      */
     private void updateActionStatus(final Message message) {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
-        final Long actionId = actionUpdateStatus.getActionId();
-        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId, actionUpdateStatus
-                .getActionStatus().name());
-
-        if (actionId == null) {
-            logAndThrowMessageError(message, "Invalid message no action id");
-        }
-
-        final Action action = controllerManagement.findActionWithDetails(actionId);
-
-        if (action == null) {
-            logAndThrowMessageError(message, "Got intermediate notification about action " + actionId
-                    + " but action does not exist");
-        }
+        final Action action = checkActionExist(message, actionUpdateStatus);
 
         final ActionStatus actionStatus = new ActionStatus();
         final List<String> messageText = actionUpdateStatus.getMessage();
@@ -360,6 +347,29 @@ public class AmqpMessageHandlerService {
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
+    }
+
+    /**
+     * @param message
+     * @param actionUpdateStatus
+     * @return
+     */
+    private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
+        final Long actionId = actionUpdateStatus.getActionId();
+        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId, actionUpdateStatus
+                .getActionStatus().name());
+
+        if (actionId == null) {
+            logAndThrowMessageError(message, "Invalid message no action id");
+        }
+
+        final Action action = controllerManagement.findActionWithDetails(actionId);
+
+        if (action == null) {
+            logAndThrowMessageError(message, "Got intermediate notification about action " + actionId
+                    + " but action does not exist");
+        }
+        return action;
     }
 
     private void handleCancelRejected(final Message message, final Action action, final ActionStatus actionStatus) {

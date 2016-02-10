@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -30,16 +31,18 @@ import javax.persistence.Table;
 @IdClass(RolloutTargetGroupId.class)
 @Entity
 @Table(name = "sp_rollouttargetgroup")
-public class RolloutTargetGroup {
+public class RolloutTargetGroup implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @ManyToOne(targetEntity = RolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "rolloutGroup_Id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group"))
+    @JoinColumn(name = "rolloutGroup_Id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group") )
     private RolloutGroup rolloutGroup;
 
     @Id
     @ManyToOne(targetEntity = Target.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "target_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target"))
+    @JoinColumn(name = "target_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target") )
     private Target target;
 
     @OneToMany(targetEntity = Action.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
