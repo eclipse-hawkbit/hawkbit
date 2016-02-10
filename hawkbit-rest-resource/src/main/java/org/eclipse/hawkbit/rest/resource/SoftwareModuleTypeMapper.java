@@ -59,7 +59,7 @@ final class SoftwareModuleTypeMapper {
     }
 
     static List<SoftwareModuleTypeRest> toListResponse(final Collection<SoftwareModuleType> types) {
-        final List<SoftwareModuleTypeRest> response = new ArrayList<>();
+        final List<SoftwareModuleTypeRest> response = new ArrayList<SoftwareModuleTypeRest>();
         for (final SoftwareModuleType softwareModule : types) {
             response.add(toResponse(softwareModule));
         }

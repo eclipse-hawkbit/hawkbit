@@ -330,7 +330,7 @@ public class DeploymentManagement {
         // one we have been switched to canceling state because for targets
         // which we have changed to
         // canceling we don't want to publish the new action update event.
-        final Set<Long> targetIdsCancellList = new HashSet<>();
+        final Set<Long> targetIdsCancellList = new HashSet<Long>();
         targetIds.forEach(ids -> targetIdsCancellList.addAll(overrideObsoleteUpdateActions(ids)));
 
         // cancel all scheduled actions which are in-active, these actions were
@@ -430,7 +430,7 @@ public class DeploymentManagement {
      */
     private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
 
-        final Set<Long> cancelledTargetIds = new HashSet<>();
+        final Set<Long> cancelledTargetIds = new HashSet<Long>();
 
         // Figure out if there are potential target/action combinations that
         // need to be considered
@@ -774,7 +774,8 @@ public class DeploymentManagement {
         multiselect.where(cb.equal(actionRoot.get(Action_.target), target));
         multiselect.orderBy(cb.desc(actionRoot.get(Action_.id)));
         multiselect.groupBy(actionRoot.get(Action_.id));
-        return entityManager.createQuery(multiselect).getResultList();
+        final List<ActionWithStatusCount> resultList = entityManager.createQuery(multiselect).getResultList();
+        return resultList;
     }
 
     /**

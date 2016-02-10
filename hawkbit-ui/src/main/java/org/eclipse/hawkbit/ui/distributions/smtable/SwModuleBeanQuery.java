@@ -87,7 +87,7 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
         final Slice<CustomSoftwareModule> swModuleBeans;
-        final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<>();
+        final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<ProxyBaseSwModuleItem>();
 
         swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderByDistribution(
                 new OffsetBasedPageRequest(startIndex, count, new Sort(Direction.ASC, "name", "version")),

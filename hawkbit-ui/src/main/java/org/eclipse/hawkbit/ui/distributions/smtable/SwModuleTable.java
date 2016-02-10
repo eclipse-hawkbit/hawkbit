@@ -98,7 +98,6 @@ public class SwModuleTable extends AbstractTable {
     /**
      * Initialize the filter layout.
      */
-    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -178,7 +177,7 @@ public class SwModuleTable extends AbstractTable {
      */
     @Override
     protected Container createContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<>();
+        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
         manageDistUIState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
@@ -188,10 +187,13 @@ public class SwModuleTable extends AbstractTable {
         manageDistUIState.getLastSelectedDistribution().ifPresent(
                 distIdName -> queryConfiguration.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
 
-        final BeanQueryFactory<SwModuleBeanQuery> swQF = new BeanQueryFactory<>(SwModuleBeanQuery.class);
+        final BeanQueryFactory<SwModuleBeanQuery> swQF = new BeanQueryFactory<SwModuleBeanQuery>(
+                SwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        final LazyQueryContainer container = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        return container;
     }
 
     /*
@@ -307,7 +309,7 @@ public class SwModuleTable extends AbstractTable {
      */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = new ArrayList<TableColumn>();
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1F));

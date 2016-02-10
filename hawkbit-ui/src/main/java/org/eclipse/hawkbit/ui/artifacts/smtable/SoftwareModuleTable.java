@@ -82,7 +82,6 @@ public class SoftwareModuleTable extends AbstractTable {
     /**
      * Initialize the filter layout.
      */
-    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -128,17 +127,20 @@ public class SoftwareModuleTable extends AbstractTable {
      */
     @Override
     protected Container createContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<>();
+        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
         artifactUploadState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
         artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
                 .ifPresent(type -> queryConfiguration.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
 
-        final BeanQueryFactory<BaseSwModuleBeanQuery> swQF = new BeanQueryFactory<>(BaseSwModuleBeanQuery.class);
+        final BeanQueryFactory<BaseSwModuleBeanQuery> swQF = new BeanQueryFactory<BaseSwModuleBeanQuery>(
+                BaseSwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        final LazyQueryContainer container = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
+        return container;
     }
 
     @Override
@@ -272,7 +274,7 @@ public class SoftwareModuleTable extends AbstractTable {
      */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = new ArrayList<TableColumn>();
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1F));

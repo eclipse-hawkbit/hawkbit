@@ -221,7 +221,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
         getPreviewButtonColor(DEFAULT_COLOR);
 
-        selectors = new HashSet<>();
+        selectors = new HashSet<ColorSelector>();
         selectedColor = new Color(44, 151, 32);
         selPreview = new SpColorPickerPreview(selectedColor);
 
@@ -457,7 +457,6 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         sourceTable.setItemDescriptionGenerator(new ItemDescriptionGenerator() {
             private static final long serialVersionUID = 1L;
 
-            @Override
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
                 final Item item = sourceTable.getItem(itemId);
                 final String description = (String) item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue();
@@ -476,15 +475,15 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
     @SuppressWarnings("unchecked")
     private void getSelectedTableItemData(final Long id) {
-        if (selectedTablecontainer == null) {
-            return;
+        Item saveTblitem = null;
+        if (null != selectedTablecontainer) {
+            saveTblitem = selectedTablecontainer.addItem(id);
+            saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(
+                    sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_NAME).getValue());
+            saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox());
+            saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(
+                    sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
         }
-        final Item saveTblitem = selectedTablecontainer.addItem(id);
-        saveTblitem.getItemProperty(DIST_TYPE_NAME)
-                .setValue(sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_NAME).getValue());
-        saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox());
-        saveTblitem.getItemProperty(DIST_TYPE_DESCRIPTION).setValue(
-                sourceTable.getContainerDataSource().getItem(id).getItemProperty(DIST_TYPE_DESCRIPTION).getValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -658,10 +657,10 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             DistributionSetType newDistType = new DistributionSetType(typeKeyValue, typeNameValue, typeDescValue);
             for (final Long id : itemIds) {
                 final Item item = selectedTable.getItem(id);
-                final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
+                final String dist_type_name = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
                 final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
                 final Boolean isMandatory = mandatoryCheckBox.getValue();
-                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
+                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(dist_type_name);
                 if (isMandatory) {
                     newDistType.addMandatoryModuleType(swModuleType);
 
@@ -1033,6 +1032,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
      *            as the selected tag from combo
      */
     private void setTypeTagCombo(final String distSetTypeSelected) {
+        boolean mandatory = false;
         typeName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
@@ -1053,11 +1053,13 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
                 saveDistSetType.setEnabled(false);
             }
             for (final SoftwareModuleType swModuleType : selectedTypeTag.getOptionalModuleTypes()) {
-                addTargetTableforUpdate(swModuleType, false);
+                mandatory = false;
+                addTargetTableforUpdate(swModuleType, mandatory);
             }
 
             for (final SoftwareModuleType swModuleType : selectedTypeTag.getMandatoryModuleTypes()) {
-                addTargetTableforUpdate(swModuleType, true);
+                mandatory = true;
+                addTargetTableforUpdate(swModuleType, mandatory);
             }
 
             if (null == selectedTypeTag.getColour()) {

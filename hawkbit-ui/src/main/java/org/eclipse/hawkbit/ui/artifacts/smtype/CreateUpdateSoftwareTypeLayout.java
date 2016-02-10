@@ -193,7 +193,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        selectors = new HashSet<>();
+        selectors = new HashSet<ColorSelector>();
         selectedColor = new Color(44, 151, 32);
         selPreview = new SpColorPickerPreview(selectedColor);
 

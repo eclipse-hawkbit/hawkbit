@@ -21,11 +21,7 @@ import java.util.List;
  */
 public class ListReportSeries extends AbstractReportSeries {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-    private final List<Number> data = new ArrayList<>();
+    private final List<Number> data = new ArrayList<Number>();
 
     /**
      * @param name

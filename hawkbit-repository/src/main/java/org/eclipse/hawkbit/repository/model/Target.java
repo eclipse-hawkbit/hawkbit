@@ -83,7 +83,7 @@ public class Target extends NamedEntity implements Persistable<Long> {
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
             @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target") ) }, inverseJoinColumns = {
                     @JoinColumn(name = "tag", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag") ) })
-    private Set<TargetTag> tags = new HashSet<>();
+    private Set<TargetTag> tags = new HashSet<TargetTag>();
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.REMOVE })

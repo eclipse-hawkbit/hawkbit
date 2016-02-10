@@ -44,7 +44,7 @@ public class UploadResultWindow implements Button.ClickListener {
 
     private static final long serialVersionUID = 5205927189362269027L;
 
-    private List<UploadStatus> uploadResultList = new ArrayList<>();
+    private List<UploadStatus> uploadResultList = new ArrayList<UploadStatus>();
 
     private Button closeBtn;
 

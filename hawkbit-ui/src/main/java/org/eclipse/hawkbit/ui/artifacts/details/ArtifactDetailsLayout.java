@@ -208,13 +208,14 @@ public class ArtifactDetailsLayout extends VerticalLayout {
     }
 
     private Container createArtifactLazyQueryContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<>();
+        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
         return getArtifactLazyQueryContainer(queryConfiguration);
     }
 
     private LazyQueryContainer getArtifactLazyQueryContainer(final Map<String, Object> queryConfig) {
 
-        final BeanQueryFactory<ArtifactBeanQuery> artifactQF = new BeanQueryFactory<>(ArtifactBeanQuery.class);
+        final BeanQueryFactory<ArtifactBeanQuery> artifactQF = new BeanQueryFactory<ArtifactBeanQuery>(
+                ArtifactBeanQuery.class);
         artifactQF.setQueryConfiguration(queryConfig);
         final LazyQueryContainer artifactCont = new LazyQueryContainer(new LazyQueryDefinition(true, 10, "id"),
                 artifactQF);
@@ -430,7 +431,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 titleOfArtifactDetails.setContentMode(ContentMode.HTML);
             }
         }
-        final Map<String, Object> queryConfiguration = new HashMap<>();
+        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
         if (baseSwModuleId != null) {
             queryConfiguration.put(SPUIDefinitions.BY_BASE_SOFTWARE_MODULE, baseSwModuleId);
         }

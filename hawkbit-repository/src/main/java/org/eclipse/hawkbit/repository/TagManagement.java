@@ -160,7 +160,7 @@ public class TagManagement {
     public void deleteTargetTag(@NotEmpty final String targetTagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
 
-        final List<Target> changed = new LinkedList<>();
+        final List<Target> changed = new LinkedList<Target>();
         for (final Target target : targetRepository.findByTag(tag)) {
             target.getTags().remove(tag);
             changed.add(target);
@@ -311,7 +311,7 @@ public class TagManagement {
     public void deleteDistributionSetTag(@NotEmpty final String tagName) {
         final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName);
 
-        final List<DistributionSet> changed = new LinkedList<>();
+        final List<DistributionSet> changed = new LinkedList<DistributionSet>();
         for (final DistributionSet set : distributionSetRepository.findByTag(tag)) {
             set.getTags().remove(tag);
             changed.add(set);
