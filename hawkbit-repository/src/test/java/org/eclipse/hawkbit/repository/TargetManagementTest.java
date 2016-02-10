@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.Query;
+import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
@@ -62,6 +63,17 @@ public class TargetManagementTest extends AbstractIntegrationTest {
             targetManagement.createTarget(new Target("targetId123"));
             fail("tenant not exist");
         } catch (final TenantNotExistException e) {
+        }
+    }
+
+    @Test
+    @Description("Verify that a target with empty controller id cannot be created")
+    public void createTarget() {
+        try {
+            targetManagement.createTarget(new Target(""));
+            fail("target with empty controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
         }
     }
 

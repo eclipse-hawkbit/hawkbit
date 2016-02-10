@@ -27,8 +27,10 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.Constants;
 import org.eclipse.hawkbit.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
@@ -930,6 +932,11 @@ public class TargetManagement {
     @CacheEvict(value = { "targetsCreatedOverPeriod" }, allEntries = true)
     public Target createTarget(@NotNull final Target target, @NotNull final TargetUpdateStatus status,
             final Long lastTargetQuery, final URI address) {
+
+        if (StringUtils.isEmpty(target.getControllerId())) {
+            throw new ConstraintViolationException("Empty string for controller id not allowed",
+                    Collections.emptySet());
+        }
 
         if (targetRepository.findByControllerId(target.getControllerId()) != null) {
             throw new EntityAlreadyExistsException(target.getControllerId());
