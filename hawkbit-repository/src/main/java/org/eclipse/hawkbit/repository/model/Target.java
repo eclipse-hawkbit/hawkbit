@@ -32,6 +32,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.model.helper.SecurityChecker;
@@ -74,6 +76,8 @@ public class Target extends NamedEntity implements Persistable<Long> {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
+    @Size(min = 1)
+    @NotNull
     private String controllerId;
 
     @Transient

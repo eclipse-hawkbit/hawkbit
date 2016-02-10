@@ -68,9 +68,16 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verify that a target with empty controller id cannot be created")
-    public void createTarget() {
+    public void createTargetWithNoControllerId() {
         try {
             targetManagement.createTarget(new Target(""));
+            fail("target with empty controller id should not be created");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
+
+        try {
+            targetManagement.createTarget(new Target(null));
             fail("target with empty controller id should not be created");
         } catch (final ConstraintViolationException e) {
             // ok
