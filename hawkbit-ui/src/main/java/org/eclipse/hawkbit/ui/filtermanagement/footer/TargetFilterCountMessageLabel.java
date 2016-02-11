@@ -71,11 +71,13 @@ public class TargetFilterCountMessageLabel extends Label {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
-        if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY
-                || custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
+        if (custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
                 || custFUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW) {
             displayTargetFilterMessage();
+        }
+        else if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY){
+        	this.getUI().access(() -> displayTargetFilterMessage());
         }
     }
 
