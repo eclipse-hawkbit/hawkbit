@@ -19,24 +19,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.context.annotation.Description;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Component Tests - UI")
+@Stories("Threads with NamingThreadFactory")
 @RunWith(MockitoJUnitRunner.class)
 public class NamingThreadFactoryTest {
     @Mock
     private final Runnable runnableMock = mock(Runnable.class);
 
     @Test
+    @Description("Correct name of threads when created through NamingThreadFactory.")
     public void setsNameForThreads() {
         final String knownName = "knownName";
         final ThreadFactory threadFactory = new NamingThreadFactory(knownName);
         final Thread newThread1 = threadFactory.newThread(runnableMock);
         final Thread newThread2 = threadFactory.newThread(runnableMock);
 
-        assertThat(newThread1.getName()).isEqualTo(NamingThreadFactory.SP_PREFIX + knownName);
-        assertThat(newThread2.getName()).isEqualTo(NamingThreadFactory.SP_PREFIX + knownName);
+        assertThat(newThread1.getName()).as("Name of the thread").isEqualTo(NamingThreadFactory.SP_PREFIX + knownName);
+        assertThat(newThread2.getName()).as("Name of the thread").isEqualTo(NamingThreadFactory.SP_PREFIX + knownName);
     }
 
     @Test
+    @Description("Correct name of threads when created through NamingThreadFactory with formated name.")
     public void setsFormatedNameForThreads() {
         final String nameFormat = "knownName-%d";
         final String knownName1 = "knownName-0";
@@ -45,11 +53,12 @@ public class NamingThreadFactoryTest {
         final Thread newThread1 = threadFactory.newThread(runnableMock);
         final Thread newThread2 = threadFactory.newThread(runnableMock);
 
-        assertThat(newThread1.getName()).isEqualTo(NamingThreadFactory.SP_PREFIX + knownName1);
-        assertThat(newThread2.getName()).isEqualTo(NamingThreadFactory.SP_PREFIX + knownName2);
+        assertThat(newThread1.getName()).as("Name of the thread").isEqualTo(NamingThreadFactory.SP_PREFIX + knownName1);
+        assertThat(newThread2.getName()).as("Name of the thread").isEqualTo(NamingThreadFactory.SP_PREFIX + knownName2);
     }
 
     @Test
+    @Description("Created threads run are running.")
     public void setsRunnableForThreads() {
         final String knownName = "knownName";
         final ThreadFactory threadFactory = new NamingThreadFactory(knownName);
