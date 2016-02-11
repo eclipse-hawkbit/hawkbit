@@ -205,7 +205,7 @@ public class TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Target> findTargetsAll(@NotNull final TargetFilterQuery targetFilterQuery,
             @NotNull final Pageable pageable) {
-        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class), pageable);
+        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery().toLowerCase(), TargetFields.class), pageable);
     }
 
     /**
@@ -219,7 +219,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Slice<Target> findTargetsAll(@NotNull final String targetFilterQuery, @NotNull final Pageable pageable) {
-        return findTargetsAll(RSQLUtility.parse(targetFilterQuery, TargetFields.class), pageable);
+        return findTargetsAll(RSQLUtility.parse(targetFilterQuery.toLowerCase(), TargetFields.class), pageable);
     }
 
     /**
@@ -883,7 +883,7 @@ public class TargetManagement {
                 targetRoot.get(Target_.controllerId), targetRoot.get(Target_.name),
                 targetRoot.get(pageRequest.getSort().iterator().next().getProperty()));
 
-        final Specification<Target> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<Target> spec = RSQLUtility.parse(targetFilterQuery.getQuery().toLowerCase(), TargetFields.class);
         final List<Specification<Target>> specList = new ArrayList<>();
         specList.add(spec);
 
@@ -1057,7 +1057,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {
-        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
+        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery().toLowerCase(), TargetFields.class);
         return targetRepository.count(specs);
     }
 
@@ -1070,7 +1070,7 @@ public class TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Long countTargetByTargetFilterQuery(@NotNull final String targetFilterQuery) {
-        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
+        final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.toLowerCase(), TargetFields.class);
         return targetRepository.count(specs);
     }
 

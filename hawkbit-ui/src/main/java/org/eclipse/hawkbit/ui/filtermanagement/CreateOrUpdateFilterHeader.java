@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 
-import java.awt.event.FocusListener;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
@@ -156,8 +155,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 		} else if (custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
 			setUpCaptionLayout(true);
 			resetComponents();
-		} else if (custFUIEvent == CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE) {
-			this.getUI().access(() -> updateStatusIconAfterTablePopulated());
+		} else if (custFUIEvent == CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON) {
+			UI.getCurrent().access(() -> updateStatusIconAfterTablePopulated());
 		}
 	}
 
@@ -331,15 +330,20 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
                 validationIcon.addStyleName("show-status-label");
                 showValidationInProgress();
                 onQueryChange(event.getText());
-                executor.execute(new StatusCircledAsync());
+                executor.execute(new StatusCircledAsync(UI.getCurrent()));
             }
 
         });
     }
 
     class StatusCircledAsync implements Runnable {
-        @Override
+    	private UI current;
+        public StatusCircledAsync(UI current) {
+			this.current = current;
+		}
+		@Override
         public void run() {
+        	UI.setCurrent(current);
             eventBus.publish(this, CustomFilterUIEvent.FILTER_TARGET_BY_QUERY);
         }
     }

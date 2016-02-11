@@ -32,7 +32,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 import com.google.common.base.Strings;
 
 /**
- *
+  * Simple implementation of generics bean query which dynamically loads {@link ProxyTarget} batch
+ * of beans.
  *
  */
 public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
@@ -43,7 +44,6 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private FilterManagementUIState filterManagementUIState;
     private transient I18N i18N;
     private String filterQuery;
-    private Boolean isInvalidFilterQuery;
 
     /**
      * Parametric Constructor.
@@ -63,7 +63,6 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
         if (HawkbitCommonUtil.mapCheckStrKey(queryConfig)) {
             filterQuery = (String) queryConfig.get(SPUIDefinitions.FILTER_BY_QUERY);
-            isInvalidFilterQuery = (Boolean) queryConfig.get(SPUIDefinitions.FILTER_BY_INVALID_QUERY);
         }
         if (HawkbitCommonUtil.checkBolArray(sortStates)) {
             // Initalize Sor
@@ -164,16 +163,11 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
      */
     @Override
     public int size() {
-        final long totSize = getTargetManagement().countTargetsAll();
-        long size;
+        long size=0;
         if (!Strings.isNullOrEmpty(filterQuery)) {
             size = getTargetManagement().countTargetByTargetFilterQuery(filterQuery);
-        } else if (getFilterManagementUIState().isCreateFilterViewDisplayed() || isInvalidFilterQuery) {
-            size = 0;
-        } else {
-            size = totSize;
         }
-        getFilterManagementUIState().setTargetsCountAll(totSize);
+        getFilterManagementUIState().setTargetsCountAll(size);
         if (size > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
             getFilterManagementUIState().setTargetsTruncated(size - SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
             size = SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES;

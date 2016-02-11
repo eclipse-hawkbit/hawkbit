@@ -460,16 +460,38 @@ public final class RSQLUtility {
                 singleList.add(cb.lessThanOrEqualTo(pathOfString(fieldPath), value));
                 break;
             case "=in=":
-                singleList.add(fieldPath.in(transformedValues));
+            	singleList.add(getInPredicate(transformedValues,fieldPath));
                 break;
             case "=out=":
-                singleList.add(cb.not(fieldPath.in(transformedValues)));
+            	singleList.add(getOutPredicate(transformedValues,fieldPath));
                 break;
             default:
                 LOGGER.info("operator symbol {} is either not supported or not implemented");
             }
         }
+        
+        private Predicate getInPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+        	List<String> inParams =new ArrayList<>();
+          	for(Object param :transformedValues){
+        		if(param instanceof String){
+        			inParams.add(((String) param).toUpperCase());
+        		}
+        	}
+          return cb.upper(pathOfString(fieldPath)).in(inParams);
+        }
 
+
+        private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+        	List<String> outParams =new ArrayList<>();
+          	for(Object param :transformedValues){
+        		if(param instanceof String){
+        			outParams.add(((String) param).toUpperCase());
+        		}
+        	}
+          	return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
+        }
+
+        
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
             if (!enumField.isMap() || enumField.getValueFieldName() == null) {
                 return fieldPath;
@@ -498,6 +520,9 @@ public final class RSQLUtility {
             }
             return cb.equal(fieldPath, transformedValue);
         }
+
+        
+
 
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {

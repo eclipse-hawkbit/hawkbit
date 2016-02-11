@@ -101,7 +101,7 @@ public class CreateOrUpdateFilterTable extends Table {
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
             UI.getCurrent().access(() -> populateTableData());
         } else if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
-            this.getUI().access(() -> onQuery());
+        	UI.getCurrent().access(() -> onQuery());
         }
     }
 
@@ -112,7 +112,7 @@ public class CreateOrUpdateFilterTable extends Table {
             filterManagementUIState.setFilterQueryValue(null);
         } else {
             filterManagementUIState.getTfQuery().ifPresent(
-                    value -> filterManagementUIState.setFilterQueryValue(value.getQuery()));
+                    value -> filterManagementUIState.setFilterQueryValue(value.getQuery().toLowerCase()));
         }
     }
 
@@ -244,6 +244,6 @@ public class CreateOrUpdateFilterTable extends Table {
     
     private void onQuery() {
     	populateTableData();
-        eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
+        eventBus.publish(this, CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON);
 	}
 }
