@@ -344,22 +344,21 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
     private boolean duplicateCheck(final String name, final String version) {
         final DistributionSet existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name, version);
-        /*
-         * Distribution should not exists with the same name & version. Display
-         * error message, when the "existingDs" is not null and it is add window
-         * (or) when the "existingDs" is not null and it is edit window and the
-         * distribution Id of the edit window is different then the "existingDs"
-         */
-        if (existingDs != null && !existingDs.getId().equals(editDistId)) {
-            distNameTextField.addStyleName("v-textfield-error");
-            distVersionTextField.addStyleName("v-textfield-error");
-            notificationMessage.displayValidationError(
-                    i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
 
-            return false;
-        } else {
+        if (existingDs == null) {
             return true;
         }
+
+        if (editDistribution && !existingDs.getId().equals(editDistId)) {
+            return true;
+        }
+
+        distNameTextField.addStyleName("v-textfield-error");
+        distVersionTextField.addStyleName("v-textfield-error");
+        notificationMessage.displayValidationError(
+                i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
+
+        return false;
     }
 
     /**
