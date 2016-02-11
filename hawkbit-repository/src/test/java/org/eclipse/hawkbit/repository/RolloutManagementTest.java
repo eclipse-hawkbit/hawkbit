@@ -103,8 +103,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // verify other groups are scheduled
         final List<RolloutGroup> scheduledGroups = rolloutGroupManagement.findRolloutGroupsByRolloutId(
                 createdRollout.getId(), new OffsetBasedPageRequest(1, 100, new Sort(Direction.ASC, "id"))).getContent();
-        scheduledGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED)
-                .as("group which should be in scheduled state is in " + group.getStatus() + " state"));
+        scheduledGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.FINISHED)
+                .describedAs("group which should be in scheduled state is in " + group.getStatus() + " state"));
         // verify that the first group actions has been started and are in state
         // running
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(createdRollout,
