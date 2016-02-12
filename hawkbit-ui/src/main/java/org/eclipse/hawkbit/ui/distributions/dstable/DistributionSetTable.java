@@ -114,6 +114,8 @@ public class DistributionSetTable extends AbstractTable {
 
     @Autowired
     private transient TargetManagement targetManagement;
+    
+    private Boolean isFilterEvent = false;
 
     /**
      * Initialize the component.
@@ -157,15 +159,8 @@ public class DistributionSetTable extends AbstractTable {
     @Override
     protected Container createContainer() {
 
-        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
-        manageDistUIState.getManageDistFilters().getSearchText()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-
-        if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
-            queryConfiguration.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
-                    manageDistUIState.getManageDistFilters().getClickedDistSetType());
-        }
-
+        final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
+               
         final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<ManageDistBeanQuery>(
                 ManageDistBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
@@ -175,6 +170,20 @@ public class DistributionSetTable extends AbstractTable {
 
         return distContainer;
     }
+    
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        manageDistUIState.getManageDistFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+
+        if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
+            queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
+                    manageDistUIState.getManageDistFilters().getClickedDistSetType());
+        }
+
+        return queryConfig;
+    }
+    
 
     /*
      * (non-Javadoc)
@@ -612,7 +621,19 @@ public class DistributionSetTable extends AbstractTable {
         if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
-            UI.getCurrent().access(() -> refreshFilter());
+            if(prepareQueryConfigFilters().size()<1 && isFilterEvent==false){
+                UI.getCurrent().access(() -> ((LazyQueryContainer) getContainerDataSource()).refresh());
+                                                       
+            }else {
+                UI.getCurrent().access(() -> refreshFilter());
+                if(prepareQueryConfigFilters().size()<1){
+                    isFilterEvent = false;
+                }else{
+                    isFilterEvent = true;
+                }
+            } 
+            
+         //   UI.getCurrent().access(() -> refreshFilter());
         }
     }
 

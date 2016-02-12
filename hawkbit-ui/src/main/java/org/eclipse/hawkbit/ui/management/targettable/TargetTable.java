@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -138,6 +139,9 @@ public class TargetTable extends AbstractTable implements Handler {
     private Boolean isTargetPinned = Boolean.FALSE;
     private ShortcutAction actionSelectAll;
     private ShortcutAction actionUnSelectAll;
+    
+    private Boolean isFilterEvent = Boolean.FALSE;;
+   
 
     @Override
     @PostConstruct
@@ -207,7 +211,20 @@ public class TargetTable extends AbstractTable implements Handler {
     void onEvent(final TargetFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
             if (checkFilterEvent(filterEvent)) {
-                refreshFilter();
+               if(((boolean)prepareQueryConfigFilters().get(SPUIDefinitions.FILTER_BY_NO_TAG)==false)
+                        && prepareQueryConfigFilters().size()<2
+                        && isFilterEvent==Boolean.FALSE){
+                   ((LazyQueryContainer) getContainerDataSource()).refresh();
+                                           
+                }else {
+                    refreshFilter();
+                    if(prepareQueryConfigFilters().size()<2){
+                        isFilterEvent = Boolean.FALSE;
+                    }else{
+                        isFilterEvent = Boolean.TRUE;
+                    }
+                } 
+             
                 eventBus.publish(this, ManagementUIEvent.TARGET_TABLE_FILTER);
             }
         });
