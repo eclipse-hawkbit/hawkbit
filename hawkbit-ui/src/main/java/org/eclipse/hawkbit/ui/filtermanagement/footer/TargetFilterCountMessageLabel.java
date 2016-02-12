@@ -29,6 +29,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 
 /**
  * @author Venugopal Boodidadinne(RBEI/BSJ)
@@ -75,7 +76,7 @@ public class TargetFilterCountMessageLabel extends Label {
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
                 || custFUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW
                 || custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
-            this.getUI().access(() -> displayTargetFilterMessage());
+            UI.getCurrent().access(() -> displayTargetFilterMessage());
         }
     }
 
