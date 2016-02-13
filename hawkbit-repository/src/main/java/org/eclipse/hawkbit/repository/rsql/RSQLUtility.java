@@ -470,27 +470,35 @@ public final class RSQLUtility {
             }
         }
         
-        private Predicate getInPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
-        	List<String> inParams =new ArrayList<>();
-          	for(Object param :transformedValues){
-        		if(param instanceof String){
-        			inParams.add(((String) param).toUpperCase());
-        		}
-        	}
-          return cb.upper(pathOfString(fieldPath)).in(inParams);
-        }
+		private Predicate getInPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+			List<String> inParams = new ArrayList<>();
+			for (Object param : transformedValues) {
+				if (param instanceof String) {
+					inParams.add(((String) param).toUpperCase());
+				}
+			}
+			if (!inParams.isEmpty()) {
+				return cb.upper(pathOfString(fieldPath)).in(inParams);
+			} else {
+				return fieldPath.in(transformedValues);
 
+			}
+		}
 
-        private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
-        	List<String> outParams =new ArrayList<>();
-          	for(Object param :transformedValues){
-        		if(param instanceof String){
-        			outParams.add(((String) param).toUpperCase());
-        		}
-        	}
-          	return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
-        }
+		private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+			List<String> outParams = new ArrayList<>();
+			for (Object param : transformedValues) {
+				if (param instanceof String) {
+					outParams.add(((String) param).toUpperCase());
+				}
+			}
+			if (!outParams.isEmpty()) {
+				return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
+			} else {
+				return cb.not(fieldPath.in(transformedValues));
 
+			}
+		}
         
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
             if (!enumField.isMap() || enumField.getValueFieldName() == null) {
