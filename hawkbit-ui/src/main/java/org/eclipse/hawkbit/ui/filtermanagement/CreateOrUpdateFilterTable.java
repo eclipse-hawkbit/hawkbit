@@ -37,7 +37,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.base.Strings;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;

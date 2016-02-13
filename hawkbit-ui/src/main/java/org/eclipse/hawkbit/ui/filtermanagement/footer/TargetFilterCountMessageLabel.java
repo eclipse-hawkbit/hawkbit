@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.filtermanagement.footer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -45,9 +44,6 @@ public class TargetFilterCountMessageLabel extends Label {
 
     @Autowired
     private FilterManagementUIState filterManagementUIState;
-
-    @Autowired
-    private transient TargetManagement targetManagement;
 
     @Autowired
     private I18N i18n;
