@@ -461,46 +461,46 @@ public final class RSQLUtility {
                 singleList.add(cb.lessThanOrEqualTo(pathOfString(fieldPath), value));
                 break;
             case "=in=":
-            	singleList.add(getInPredicate(transformedValues,fieldPath));
+                singleList.add(getInPredicate(transformedValues, fieldPath));
                 break;
             case "=out=":
-            	singleList.add(getOutPredicate(transformedValues,fieldPath));
+                singleList.add(getOutPredicate(transformedValues, fieldPath));
                 break;
             default:
                 LOGGER.info("operator symbol {} is either not supported or not implemented");
             }
         }
-        
-		private Predicate getInPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
-			List<String> inParams = new ArrayList<>();
-			for (Object param : transformedValues) {
-				if (param instanceof String) {
-					inParams.add(((String) param).toUpperCase());
-				}
-			}
-			if (!inParams.isEmpty()) {
-				return cb.upper(pathOfString(fieldPath)).in(inParams);
-			} else {
-				return fieldPath.in(transformedValues);
 
-			}
-		}
+        private Predicate getInPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+            final List<String> inParams = new ArrayList<>();
+            for (final Object param : transformedValues) {
+                if (param instanceof String) {
+                    inParams.add(((String) param).toUpperCase());
+                }
+            }
+            if (!inParams.isEmpty()) {
+                return cb.upper(pathOfString(fieldPath)).in(inParams);
+            } else {
+                return fieldPath.in(transformedValues);
 
-		private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
-			List<String> outParams = new ArrayList<>();
-			for (Object param : transformedValues) {
-				if (param instanceof String) {
-					outParams.add(((String) param).toUpperCase());
-				}
-			}
-			if (!outParams.isEmpty()) {
-				return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
-			} else {
-				return cb.not(fieldPath.in(transformedValues));
+            }
+        }
 
-			}
-		}
-        
+        private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+            final List<String> outParams = new ArrayList<>();
+            for (final Object param : transformedValues) {
+                if (param instanceof String) {
+                    outParams.add(((String) param).toUpperCase());
+                }
+            }
+            if (!outParams.isEmpty()) {
+                return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
+            } else {
+                return cb.not(fieldPath.in(transformedValues));
+
+            }
+        }
+
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
             if (!enumField.isMap() || enumField.getValueFieldName() == null) {
                 return fieldPath;
@@ -509,7 +509,7 @@ public final class RSQLUtility {
         }
 
         @SuppressWarnings("unchecked")
-		private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
+        private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final A enumField) {
             if (!enumField.isMap()) {
                 return null;
@@ -517,10 +517,11 @@ public final class RSQLUtility {
             final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
             final String keyValue = graph[graph.length - 1];
             if (fieldPath instanceof MapJoin) {
-            	//Currently we support only string key .So below cast is safe.            		
-                return cb.equal(cb.upper((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key())), keyValue.toUpperCase());
+                // Currently we support only string key .So below cast is safe.
+                return cb.equal(cb.upper((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key())),
+                        keyValue.toUpperCase());
             }
-            
+
             return cb.equal(cb.upper(fieldPath.get(enumField.getKeyFieldName())), keyValue.toUpperCase());
         }
 
@@ -531,9 +532,6 @@ public final class RSQLUtility {
             }
             return cb.equal(fieldPath, transformedValue);
         }
-
-        
-
 
         private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
             if (transformedValue instanceof String) {

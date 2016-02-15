@@ -32,8 +32,8 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 import com.google.common.base.Strings;
 
 /**
-  * Simple implementation of generics bean query which dynamically loads {@link ProxyTarget} batch
- * of beans.
+ * Simple implementation of generics bean query which dynamically loads
+ * {@link ProxyTarget} batch of beans.
  *
  */
 public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
@@ -163,7 +163,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
      */
     @Override
     public int size() {
-        long size=0;
+        long size = 0;
         if (!Strings.isNullOrEmpty(filterQuery)) {
             size = getTargetManagement().countTargetByTargetFilterQuery(filterQuery);
         }
