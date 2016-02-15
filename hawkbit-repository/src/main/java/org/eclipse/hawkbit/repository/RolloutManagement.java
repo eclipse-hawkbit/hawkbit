@@ -552,7 +552,7 @@ public class RolloutManagement {
         if (updated == 0) {
             // nothing to check, maybe another instance already checked in
             // between
-            LOGGER.info("No rolloutcheck necessary for current scheduled check {}, next check at {}", lastCheck,
+            LOGGER.debug("No rolloutcheck necessary for current scheduled check {}, next check at {}", lastCheck,
                     lastCheck + delayBetweenChecks);
             return;
         }
