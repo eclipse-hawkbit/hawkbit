@@ -7,7 +7,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Dennis Melzer
@@ -21,7 +20,6 @@ public class BaseAmqpService {
 
     protected RabbitTemplate spInternalConnectorTemplate;
 
-    @Autowired
     public BaseAmqpService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
         this.messageConverter = messageConverter;
         spInternalConnectorTemplate = defaultTemplate;
