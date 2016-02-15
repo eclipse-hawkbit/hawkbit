@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.rest.resource.api.TargetRestApi;
 import org.eclipse.hawkbit.rest.resource.model.PollStatusRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusRest;
@@ -45,18 +46,18 @@ final public class TargetMapper {
 
     /**
      * Add links to a target response.
-     * 
+     *
      * @param response
      *            the target response
      */
     public static void addTargetLinks(final TargetRest response) {
-        response.add(linkTo(methodOn(TargetResource.class).getAssignedDistributionSet(response.getControllerId()))
+        response.add(linkTo(methodOn(TargetRestApi.class).getAssignedDistributionSet(response.getControllerId()))
                 .withRel(RestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET));
-        response.add(linkTo(methodOn(TargetResource.class).getInstalledDistributionSet(response.getControllerId()))
+        response.add(linkTo(methodOn(TargetRestApi.class).getInstalledDistributionSet(response.getControllerId()))
                 .withRel(RestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET));
-        response.add(linkTo(methodOn(TargetResource.class).getAttributes(response.getControllerId()))
+        response.add(linkTo(methodOn(TargetRestApi.class).getAttributes(response.getControllerId()))
                 .withRel(RestConstants.TARGET_V1_ATTRIBUTES));
-        response.add(linkTo(methodOn(TargetResource.class).getActionHistory(response.getControllerId(), 0,
+        response.add(linkTo(methodOn(TargetRestApi.class).getActionHistory(response.getControllerId(), 0,
                 RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null))
                         .withRel(RestConstants.TARGET_V1_ACTIONS));
@@ -64,7 +65,7 @@ final public class TargetMapper {
 
     /**
      * Add the pollstatus to a target response.
-     * 
+     *
      * @param target
      *            the target
      * @param targetRest
@@ -85,7 +86,7 @@ final public class TargetMapper {
 
     /**
      * Create a response which includes links and pollstatus for all targets.
-     * 
+     *
      * @param targets
      *            the targets
      * @return the response
@@ -105,7 +106,7 @@ final public class TargetMapper {
 
     /**
      * Create a response for targets.
-     * 
+     *
      * @param targets
      *            list of targets
      * @return the response
@@ -123,7 +124,7 @@ final public class TargetMapper {
 
     /**
      * Create a response for target.
-     * 
+     *
      * @param target
      *            the target
      * @return the response
@@ -163,7 +164,7 @@ final public class TargetMapper {
             targetRest.setInstalledAt(installationDate);
         }
 
-        targetRest.add(linkTo(methodOn(TargetResource.class).getTarget(target.getControllerId())).withRel("self"));
+        targetRest.add(linkTo(methodOn(TargetRestApi.class).getTarget(target.getControllerId())).withRel("self"));
 
         return targetRest;
     }
@@ -210,7 +211,7 @@ final public class TargetMapper {
 
         RestModelMapper.mapBaseToBase(result, action);
 
-        result.add(linkTo(methodOn(TargetResource.class).getAction(targetId, action.getId())).withRel("self"));
+        result.add(linkTo(methodOn(TargetRestApi.class).getAction(targetId, action.getId())).withRel("self"));
 
         return result;
     }

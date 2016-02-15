@@ -8,19 +8,22 @@
  */
 package org.eclipse.hawkbit.report.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 /**
  * A data report series which contains a list of {@link DataReportSeriesItem}.
- * 
+ *
  *
  *
  * @param <T>
  *            the type of the report series item
  */
-public class DataReportSeries<T extends Object> extends AbstractReportSeries {
+public class DataReportSeries<T extends Serializable> extends AbstractReportSeries {
+
+    private static final long serialVersionUID = 1L;
 
     private final List<DataReportSeriesItem<T>> data = new ArrayList<>();
 
@@ -46,7 +49,7 @@ public class DataReportSeries<T extends Object> extends AbstractReportSeries {
     }
 
     private void setData(final List<DataReportSeriesItem<T>> values) {
-        this.data.clear();
+        data.clear();
         data.addAll(values);
     }
 

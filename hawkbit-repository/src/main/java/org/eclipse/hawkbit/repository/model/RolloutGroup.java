@@ -27,7 +27,7 @@ import javax.persistence.UniqueConstraint;
 
 /**
  * JPA entity definition of persisting a group of an rollout.
- * 
+ *
  * @author Michael Hirsch
  *
  */
@@ -116,7 +116,7 @@ public class RolloutGroup extends NamedEntity {
     }
 
     public void setSuccessCondition(final RolloutGroupSuccessCondition finishCondition) {
-        this.successCondition = finishCondition;
+        successCondition = finishCondition;
     }
 
     public String getSuccessConditionExp() {
@@ -124,7 +124,7 @@ public class RolloutGroup extends NamedEntity {
     }
 
     public void setSuccessConditionExp(final String finishExp) {
-        this.successConditionExp = finishExp;
+        successConditionExp = finishExp;
     }
 
     public RolloutGroupErrorCondition getErrorCondition() {
@@ -140,7 +140,7 @@ public class RolloutGroup extends NamedEntity {
     }
 
     public void setErrorConditionExp(final String errorExp) {
-        this.errorConditionExp = errorExp;
+        errorConditionExp = errorExp;
     }
 
     public RolloutGroupErrorAction getErrorAction() {
@@ -188,7 +188,7 @@ public class RolloutGroup extends NamedEntity {
      */
     public TotalTargetCountStatus getTotalTargetCountStatus() {
         if (totalTargetCountStatus == null) {
-            this.totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
+            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
         }
         return totalTargetCountStatus;
     }
@@ -210,7 +210,7 @@ public class RolloutGroup extends NamedEntity {
     }
 
     /**
-     * 
+     *
      * @author Michael Hirsch
      *
      */
@@ -343,7 +343,7 @@ public class RolloutGroup extends NamedEntity {
         }
 
         public void setSuccessCondition(final RolloutGroupSuccessCondition finishCondition) {
-            this.successCondition = finishCondition;
+            successCondition = finishCondition;
         }
 
         public String getSuccessConditionExp() {
@@ -351,7 +351,7 @@ public class RolloutGroup extends NamedEntity {
         }
 
         public void setSuccessConditionExp(final String finishConditionExp) {
-            this.successConditionExp = finishConditionExp;
+            successConditionExp = finishConditionExp;
         }
 
         public RolloutGroupSuccessAction getSuccessAction() {
@@ -416,7 +416,7 @@ public class RolloutGroup extends NamedEntity {
 
         /**
          * Sets the finish condition and expression on the builder.
-         * 
+         *
          * @param condition
          *            the finish condition
          * @param expression
@@ -432,7 +432,7 @@ public class RolloutGroup extends NamedEntity {
 
         /**
          * Sets the success action and expression on the builder.
-         * 
+         *
          * @param action
          *            the success action
          * @param expression
@@ -448,7 +448,7 @@ public class RolloutGroup extends NamedEntity {
 
         /**
          * Sets the error condition and expression on the builder.
-         * 
+         *
          * @param condition
          *            the error condition
          * @param expression
@@ -464,7 +464,7 @@ public class RolloutGroup extends NamedEntity {
 
         /**
          * Sets the error action and expression on the builder.
-         * 
+         *
          * @param action
          *            the error action
          * @param expression

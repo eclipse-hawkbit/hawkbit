@@ -8,12 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
+import java.io.Serializable;
+
 import com.vaadin.ui.Component;
 
 /**
  * Interface to be implemented by any tenant specific configuration to show on
  * the UI.
- * 
+ *
  *
  *
  *
@@ -48,7 +50,7 @@ public interface TenantConfigurationItem extends Component {
     /**
      * Adds a configuration change listener to notify about configuration
      * changes.
-     * 
+     *
      * @param listener
      *            the listener to be notified in case the item changes some
      *            configuration
@@ -58,11 +60,12 @@ public interface TenantConfigurationItem extends Component {
     /**
      * Configuration Change Listener to be notified about configuration changes
      * in configuration item.
-     * 
+     *
      *
      *
      */
-    interface TenantConfigurationChangeListener {
+    @FunctionalInterface
+    interface TenantConfigurationChangeListener extends Serializable {
         /**
          * called to notify about configuration has been changed.
          */

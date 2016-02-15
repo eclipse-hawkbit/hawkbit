@@ -35,17 +35,19 @@ public class ManagementUIState implements Serializable {
 
     private static final long serialVersionUID = 7301409196969723794L;
 
+    private final transient Set<Object> expandParentActionRowId = new HashSet<>();
+
     @Autowired
     private DistributionTableFilters distributionTableFilters;
 
     @Autowired
     private TargetTableFilters targetTableFilters;
 
-    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<TargetIdName, DistributionSetIdName>();
+    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<>();
 
-    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<DistributionSetIdName>();
+    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
-    private final Set<TargetIdName> deletedTargetList = new HashSet<TargetIdName>();
+    private final Set<TargetIdName> deletedTargetList = new HashSet<>();
 
     private Boolean targetTagLayoutVisible = Boolean.TRUE;
 
@@ -79,9 +81,7 @@ public class ManagementUIState implements Serializable {
 
     private boolean noDataAvailableDistribution = Boolean.FALSE;
 
-    private final Set<String> canceledTargetName = new HashSet<String>();
-
-    private final Set<Object> expandParentActionRowId = new HashSet<Object>();
+    private final Set<String> canceledTargetName = new HashSet<>();
 
     private boolean customFilterSelected;
 
@@ -114,7 +114,7 @@ public class ManagementUIState implements Serializable {
      *            the isCustomFilterSelected to set
      */
     public void setCustomFilterSelected(final boolean isCustomFilterSelected) {
-        this.customFilterSelected = isCustomFilterSelected;
+        customFilterSelected = isCustomFilterSelected;
     }
 
     public Set<Object> getExpandParentActionRowId() {
@@ -134,7 +134,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public void setTargetTagLayoutVisible(final Boolean targetTagVisible) {
-        this.targetTagLayoutVisible = targetTagVisible;
+        targetTagLayoutVisible = targetTagVisible;
     }
 
     public Boolean getTargetTagLayoutVisible() {
@@ -241,16 +241,16 @@ public class ManagementUIState implements Serializable {
      * increments the targets all counter.
      */
     public void incrementTargetsCountAll() {
-        this.targetsCountAll.incrementAndGet();
+        targetsCountAll.incrementAndGet();
     }
 
     /**
      * decrement the targets all counter.
      */
     public void decrementTargetsCountAll() {
-        final long decrementAndGet = this.targetsCountAll.decrementAndGet();
+        final long decrementAndGet = targetsCountAll.decrementAndGet();
         if (decrementAndGet < 0) {
-            this.targetsCountAll.set(0);
+            targetsCountAll.set(0);
         }
     }
 

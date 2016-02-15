@@ -75,7 +75,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     private SpringViewProvider viewProvider;
 
     @Autowired
-    private ApplicationContext context;
+    private transient ApplicationContext context;
 
     @Autowired
     private I18N i18n;
@@ -89,13 +89,13 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     private ErrorView errorview;
 
     @Autowired
-    protected EventBus.SessionEventBus eventBus;
+    protected transient EventBus.SessionEventBus eventBus;
 
     /**
      * An {@link com.google.common.eventbus.EventBus} subscriber which
      * subscribes {@link EntityEvent} from the repository to dispatch these
      * events to the UI {@link SessionEventBus}.
-     * 
+     *
      * @param event
      *            the entity event which has been published from the repository
      */
@@ -103,21 +103,28 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     @AllowConcurrentEvents
     public void dispatch(final org.eclipse.hawkbit.eventbus.event.Event event) {
         final VaadinSession session = getSession();
-        if (session != null && session.getState() == State.OPEN) {
-            final WrappedSession wrappedSession = session.getSession();
-            if (wrappedSession != null) {
-                final SecurityContext userContext = (SecurityContext) wrappedSession
-                        .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-                if (eventSecurityCheck(userContext, event)) {
-                    final SecurityContext oldContext = SecurityContextHolder.getContext();
-                    try {
-                        access(new DispatcherRunnable(eventBus, session, userContext, event));
-                    } finally {
-                        SecurityContextHolder.setContext(oldContext);
-                    }
-                }
-            }
+        if (session == null || session.getState() != State.OPEN) {
+            return;
         }
+
+        final WrappedSession wrappedSession = session.getSession();
+        if (wrappedSession == null) {
+            return;
+        }
+
+        final SecurityContext userContext = (SecurityContext) wrappedSession
+                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+        if (!eventSecurityCheck(userContext, event)) {
+            return;
+        }
+
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            access(new DispatcherRunnable(eventBus, session, userContext, event));
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+
     }
 
     protected boolean eventSecurityCheck(final SecurityContext userContext,
@@ -134,7 +141,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.vaadin.server.ClientConnector.DetachListener#detach(com.vaadin.server
      * .ClientConnector. DetachEvent)
@@ -225,7 +232,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     /**
      * Get Specific Locale.
-     * 
+     *
      * @param availableLocalesInApp
      *            as set
      * @return String as preferred locale

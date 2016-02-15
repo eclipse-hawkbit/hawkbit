@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.specifications.TargetFilterQuerySpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ import com.google.common.base.Strings;
 
 /**
  * Business service facade for managing {@link TargetFilterQuery}s.
- * 
+ *
  *
  *
  */
@@ -47,7 +48,7 @@ public class TargetFilterQueryManagement {
 
     /**
      * creating new {@link TargetFilterQuery}.
-     * 
+     *
      * @param customTargetFilter
      * @return the created {@link TargetFilterQuery}
      */
@@ -60,13 +61,12 @@ public class TargetFilterQueryManagement {
         if (targetFilterQueryRepository.findByName(customTargetFilter.getName()) != null) {
             throw new EntityAlreadyExistsException(customTargetFilter.getName());
         }
-        final TargetFilterQuery filter = targetFilterQueryRepository.save(customTargetFilter);
-        return filter;
+        return targetFilterQueryRepository.save(customTargetFilter);
     }
 
     /**
      * Delete target filter query.
-     * 
+     *
      * @param targetFilterQueryId
      *            IDs of target filter query to be deleted
      */
@@ -78,9 +78,9 @@ public class TargetFilterQueryManagement {
     }
 
     /**
-     * 
+     *
      * Retrieves all target filter query{@link TargetFilterQuery}.
-     * 
+     *
      * @param pageable
      *            pagination parameter
      * @return the found {@link TargetFilterQuery}s
@@ -92,8 +92,8 @@ public class TargetFilterQueryManagement {
 
     /**
      * Retrieves all target filter query which {@link TargetFilterQuery}.
-     * 
-     * 
+     *
+     *
      * @param pageable
      *            pagination parameter
      * @param name
@@ -102,7 +102,7 @@ public class TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public Page<TargetFilterQuery> findTargetFilterQueryByFilters(@NotNull final Pageable pageable, final String name) {
-        final List<Specification<TargetFilterQuery>> specList = new ArrayList<Specification<TargetFilterQuery>>();
+        final List<Specification<TargetFilterQuery>> specList = new ArrayList<>();
         if (!Strings.isNullOrEmpty(name)) {
             specList.add(TargetFilterQuerySpecification.likeName(name));
         }
@@ -110,7 +110,7 @@ public class TargetFilterQueryManagement {
     }
 
     /**
-     * 
+     *
      * @param pageable
      *            pagination parameter
      * @param specList
@@ -119,29 +119,21 @@ public class TargetFilterQueryManagement {
      */
     private Page<TargetFilterQuery> findTargetFilterQueryByCriteriaAPI(@NotNull final Pageable pageable,
             final List<Specification<TargetFilterQuery>> specList) {
-        Specifications<TargetFilterQuery> specs = null;
-        if (!specList.isEmpty()) {
-            specs = Specifications.where(specList.get(0));
-        }
-        if (specList.size() > 1) {
-            for (final Specification<TargetFilterQuery> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
-        }
-        if (specs == null) {
+        if (specList == null || specList.isEmpty()) {
             return targetFilterQueryRepository.findAll(pageable);
-        } else {
-            return targetFilterQueryRepository.findAll(specs, pageable);
         }
+
+        final Specifications<TargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
+        return targetFilterQueryRepository.findAll(specs, pageable);
     }
 
     /**
      * Find target filter query by name.
-     * 
+     *
      * @param targetFilterQueryName
      *            Target filter query name
      * @return the found {@link TargetFilterQuery}
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public TargetFilterQuery findTargetFilterQueryByName(@NotNull final String targetFilterQueryName) {
@@ -150,11 +142,11 @@ public class TargetFilterQueryManagement {
 
     /**
      * Find target filter query by id.
-     * 
+     *
      * @param targetFilterQueryId
      *            Target filter query id
      * @return the found {@link TargetFilterQuery}
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     public TargetFilterQuery findTargetFilterQueryById(@NotNull final Long targetFilterQueryId) {
@@ -163,7 +155,7 @@ public class TargetFilterQueryManagement {
 
     /**
      * updates the {@link TargetFilterQuery}.
-     * 
+     *
      * @param targetFilterQuery
      *            to be updated
      * @return the updated {@link TargetFilterQuery}
