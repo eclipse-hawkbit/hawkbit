@@ -342,7 +342,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         distributionSet.setRequiredMigrationStep(isMigStepReq);
     }
 
-
     private boolean duplicateCheck(final String name, final String version) {
         final DistributionSet existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name, version);
         /*
@@ -362,6 +361,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
             return true;
         }
     }
+
     /**
      * Mandatory Check.
      *
