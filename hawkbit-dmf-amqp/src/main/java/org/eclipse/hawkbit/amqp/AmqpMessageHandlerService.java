@@ -50,7 +50,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,12 +77,9 @@ import com.google.common.eventbus.EventBus;
  *
  *
  */
-public class AmqpMessageHandlerService {
+public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageHandlerService.class);
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -103,6 +99,14 @@ public class AmqpMessageHandlerService {
 
     @Autowired
     private HostnameResolver hostnameResolver;
+
+    /**
+     * @param messageConverter
+     */
+    @Autowired
+    public AmqpMessageHandlerService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
+        super(messageConverter, defaultTemplate);
+    }
 
     /**
      * /** Method to handle all incoming amqp messages.
@@ -153,8 +157,8 @@ public class AmqpMessageHandlerService {
         final String sha1 = secruityToken.getSha1();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
-            final LocalArtifact localArtifact = artifactManagement.findFirstLocalArtifactsBySHA1(secruityToken
-                    .getSha1());
+            final LocalArtifact localArtifact = artifactManagement
+                    .findFirstLocalArtifactsBySHA1(secruityToken.getSha1());
             if (localArtifact == null) {
                 throw new EntityNotFoundException();
             }
@@ -177,9 +181,9 @@ public class AmqpMessageHandlerService {
             final String downloadId = UUID.randomUUID().toString();
             final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1);
             cache.put(downloadId, downloadCache);
-            authentificationResponse.setDownloadUrl(UriComponentsBuilder
-                    .fromUri(hostnameResolver.resolveHostname().toURI()).path("/api/v1/downloadserver/downloadId/")
-                    .path(downloadId).build().toUriString());
+            authentificationResponse
+                    .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())
+                            .path("/api/v1/downloadserver/downloadId/").path(downloadId).build().toUriString());
             authentificationResponse.setResponseCode(HttpStatus.OK.value());
         } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
             LOG.error("Login failed", e);
@@ -196,7 +200,7 @@ public class AmqpMessageHandlerService {
             authentificationResponse.setMessage(errorMessage);
         }
 
-        return rabbitTemplate.getMessageConverter().toMessage(authentificationResponse, messageProperties);
+        return messageConverter.toMessage(authentificationResponse, messageProperties);
     }
 
     private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
@@ -219,9 +223,9 @@ public class AmqpMessageHandlerService {
     }
 
     private static void setTenantSecurityContext(final String tenantId) {
-        final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(UUID.randomUUID()
-                .toString(), "AMQP-Controller", Collections.singletonList(new SimpleGrantedAuthority(
-                SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
+        final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
+                UUID.randomUUID().toString(), "AMQP-Controller",
+                Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
         setSecurityContext(authenticationToken);
     }
@@ -250,7 +254,8 @@ public class AmqpMessageHandlerService {
         if (StringUtils.isEmpty(replyTo)) {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing Event.");
         }
-        final URI amqpUri = IpUtil.createAmqpUri(replyTo);
+
+        final URI amqpUri = IpUtil.createAmqpUri(getVirtualHost(message), replyTo);
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
@@ -267,8 +272,8 @@ public class AmqpMessageHandlerService {
         final DistributionSet distributionSet = action.getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
-        eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(), target
-                .getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
+        eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
+                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
 
     }
 
@@ -281,13 +286,10 @@ public class AmqpMessageHandlerService {
      *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message, final EventTopic topic) {
-        switch (topic) {
-        case UPDATE_ACTION_STATUS:
+        if (EventTopic.UPDATE_ACTION_STATUS.equals(topic)) {
             updateActionStatus(message);
-            return;
-        default:
-            logAndThrowMessageError(message, "Got event without appropriate topic.");
         }
+        logAndThrowMessageError(message, "Got event without appropriate topic.");
     }
 
     /**
@@ -356,8 +358,8 @@ public class AmqpMessageHandlerService {
      */
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
-        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId, actionUpdateStatus
-                .getActionStatus().name());
+        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
+                actionUpdateStatus.getActionStatus().name());
 
         if (actionId == null) {
             logAndThrowMessageError(message, "Invalid message no action id");
@@ -366,8 +368,8 @@ public class AmqpMessageHandlerService {
         final Action action = controllerManagement.findActionWithDetails(actionId);
 
         if (action == null) {
-            logAndThrowMessageError(message, "Got intermediate notification about action " + actionId
-                    + " but action does not exist");
+            logAndThrowMessageError(message,
+                    "Got intermediate notification about action " + actionId + " but action does not exist");
         }
         return action;
     }
@@ -381,25 +383,9 @@ public class AmqpMessageHandlerService {
             // back to running action status
 
         } else {
-            logAndThrowMessageError(message, "Cancel Recjected message is not allowed, if action is on state: "
-                    + action.getStatus());
+            logAndThrowMessageError(message,
+                    "Cancel Recjected message is not allowed, if action is on state: " + action.getStatus());
         }
-    }
-
-    /**
-     * Is needed to convert a incoming message to is originally object type.
-     *
-     * @param message
-     *            the message to convert.
-     * @param clazz
-     *            the class of the originally object.
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    private <T> T convertMessage(final Message message, final Class<T> clazz) {
-        message.getMessageProperties().getHeaders()
-                .put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
-        return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
     /**
@@ -428,12 +414,12 @@ public class AmqpMessageHandlerService {
         this.hostnameResolver = hostnameResolver;
     }
 
-    void setRabbitTemplate(final RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
+    void setMessageConverter(final MessageConverter messageConverter) {
+        this.messageConverter = messageConverter;
     }
 
     MessageConverter getMessageConverter() {
-        return rabbitTemplate.getMessageConverter();
+        return messageConverter;
     }
 
     void setAuthenticationManager(final AmqpControllerAuthentfication authenticationManager) {

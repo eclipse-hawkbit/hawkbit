@@ -95,7 +95,6 @@ public final class IpUtil {
         if (isIpV6) {
             return URI.create(scheme + SCHEME_SEPERATOR + "[" + host + "]");
         }
-
         return URI.create(scheme + SCHEME_SEPERATOR + host);
     }
 
@@ -108,8 +107,9 @@ public final class IpUtil {
      * @throws IllegalArgumentException
      *             If the given string not parsable
      */
-    public static URI createAmqpUri(final String host) {
-        return createUri(AMPQP_SCHEME, host);
+    public static URI createAmqpUri(final String virtualHost, final String exchange) {
+        // TODO check
+        return createUri(AMPQP_SCHEME, virtualHost).resolve(exchange);
     }
 
     /**

@@ -99,14 +99,14 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
     @Before
     public void before() throws Exception {
-        amqpMessageHandlerService = new AmqpMessageHandlerService();
-        amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         messageConverter = new Jackson2JsonMessageConverter();
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate();
-        rabbitTemplate.setMessageConverter(messageConverter);
-        amqpMessageHandlerService.setRabbitTemplate(rabbitTemplate);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(messageConverter, rabbitTemplate);
+        amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
         amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);
         amqpMessageHandlerService.setCache(cacheMock);

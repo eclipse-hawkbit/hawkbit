@@ -60,11 +60,8 @@ public class AmqpControllerAuthentficationTest {
 
     @Before
     public void before() throws Exception {
-        amqpMessageHandlerService = new AmqpMessageHandlerService();
         messageConverter = new Jackson2JsonMessageConverter();
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate();
-        rabbitTemplate.setMessageConverter(messageConverter);
-        amqpMessageHandlerService.setRabbitTemplate(rabbitTemplate);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(messageConverter, mock(RabbitTemplate.class));
 
         authenticationManager = new AmqpControllerAuthentfication();
         authenticationManager.setControllerManagement(mock(ControllerManagement.class));
@@ -78,7 +75,6 @@ public class AmqpControllerAuthentficationTest {
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
         when(controllerManagement.getSecurityTokenByControllerId(anyString())).thenReturn(CONTROLLLER_ID);
         authenticationManager.setControllerManagement(controllerManagement);
-
         amqpMessageHandlerService.setArtifactManagement(mock(ArtifactManagement.class));
 
         authenticationManager.setTenantAware(new SecurityContextTenantAware());

@@ -104,23 +104,24 @@ public class IpUtilTest {
     @Description("Tests create amqp uri ipv4 and ipv6")
     public void testCreateAmqpUri() {
         final String ipv4 = "10.99.99.1";
-        URI amqpUri = IpUtil.createAmqpUri(ipv4);
+        URI amqpUri = IpUtil.createAmqpUri(ipv4, "path");
         assertAmqpUri(ipv4, amqpUri);
 
         final String host = "myhost";
-        amqpUri = IpUtil.createAmqpUri(host);
+        amqpUri = IpUtil.createAmqpUri(host, "path");
         assertAmqpUri(host, amqpUri);
 
         final String ipv6 = "0:0:0:0:0:0:0:1";
-        amqpUri = IpUtil.createAmqpUri(ipv6);
+        amqpUri = IpUtil.createAmqpUri(ipv6, "path");
         assertAmqpUri("[" + ipv6 + "]", amqpUri);
     }
 
-    private void assertAmqpUri(final String host, final URI httpUri) {
-        assertTrue(IpUtil.isAmqpUri(httpUri));
-        assertFalse(IpUtil.isHttpUri(httpUri));
-        assertEquals(host, httpUri.getHost());
-        assertEquals("amqp", httpUri.getScheme());
+    private void assertAmqpUri(final String host, final URI amqpUri) {
+        assertTrue(IpUtil.isAmqpUri(amqpUri));
+        assertFalse(IpUtil.isHttpUri(amqpUri));
+        assertEquals(host, amqpUri.getHost());
+        assertEquals("amqp", amqpUri.getScheme());
+        assertEquals("path", amqpUri.getPath());
     }
 
     @Test(expected = IllegalArgumentException.class)
