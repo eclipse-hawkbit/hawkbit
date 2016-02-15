@@ -245,8 +245,9 @@ public class RolloutGroupManagement {
                 JoinType.LEFT);
 
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.distinct(true).from(RolloutTargetGroup.class);
-        countQuery
-                .select(cb.count(countQueryFrom.join(RolloutTargetGroup_.target).join(Target_.actions, JoinType.LEFT)))
+        countQueryFrom.join(RolloutTargetGroup_.target);
+        countQueryFrom.join(RolloutTargetGroup_.actions, JoinType.LEFT);
+        countQuery.select(cb.count(countQueryFrom))
                 .where(cb.equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
         final Long totalCount = entityManager.createQuery(countQuery).getSingleResult();
 
