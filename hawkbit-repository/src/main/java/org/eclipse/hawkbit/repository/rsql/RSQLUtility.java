@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -101,7 +102,7 @@ public final class RSQLUtility {
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
             final Class<A> fieldNameProvider) {
-        return new RSQLSpecification<>(rsql, fieldNameProvider);
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider);
     }
 
     /**
@@ -507,7 +508,8 @@ public final class RSQLUtility {
             return fieldPath.get(enumField.getValueFieldName());
         }
 
-        private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
+        @SuppressWarnings("unchecked")
+		private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final A enumField) {
             if (!enumField.isMap()) {
                 return null;
@@ -515,10 +517,11 @@ public final class RSQLUtility {
             final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
             final String keyValue = graph[graph.length - 1];
             if (fieldPath instanceof MapJoin) {
-                return cb.equal(((MapJoin<?, ?, ?>) fieldPath).key(), keyValue);
+            	//Currently we support only string key .So below cast is safe.            		
+                return cb.equal(cb.upper((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key())), keyValue.toUpperCase());
             }
-
-            return cb.equal(fieldPath.get(enumField.getKeyFieldName()), keyValue);
+            
+            return cb.equal(cb.upper(fieldPath.get(enumField.getKeyFieldName())), keyValue.toUpperCase());
         }
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {

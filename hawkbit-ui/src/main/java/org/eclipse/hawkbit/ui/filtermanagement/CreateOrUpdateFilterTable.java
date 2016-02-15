@@ -111,7 +111,7 @@ public class CreateOrUpdateFilterTable extends Table {
             filterManagementUIState.setFilterQueryValue(null);
         } else {
             filterManagementUIState.getTfQuery().ifPresent(
-                    value -> filterManagementUIState.setFilterQueryValue(value.getQuery().toLowerCase()));
+                    value -> filterManagementUIState.setFilterQueryValue(value.getQuery()));
         }
     }
 

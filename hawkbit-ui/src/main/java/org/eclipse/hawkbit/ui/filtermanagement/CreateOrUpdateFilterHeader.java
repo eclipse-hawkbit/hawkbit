@@ -348,9 +348,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         }
     }
 
-    private void onQueryChange(final String text) {
-        if (!Strings.isNullOrEmpty(text)) {
-            final String input = text.toLowerCase();
+    private void onQueryChange(final String input) {
+        if (!Strings.isNullOrEmpty(input)) {
             final ValidationResult validationResult = FilterQueryValidation.getExpectedTokens(input);
             if (!validationResult.getIsValidationFailed()) {
                 filterManagementUIState.setFilterQueryValue(input);
@@ -369,7 +368,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             filterManagementUIState.setFilterQueryValue(null);
             filterManagementUIState.setIsFilterByInvalidFilterQuery(Boolean.TRUE);
         }
-        queryTextField.setValue(text);
+        queryTextField.setValue(input);
     }
 
     private void enableDisableSaveButton(final boolean validationFailed, final String query) {
