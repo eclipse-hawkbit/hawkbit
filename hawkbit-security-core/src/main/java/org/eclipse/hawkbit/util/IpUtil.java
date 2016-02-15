@@ -108,8 +108,7 @@ public final class IpUtil {
      *             If the given string not parsable
      */
     public static URI createAmqpUri(final String virtualHost, final String exchange) {
-        // TODO check
-        return createUri(AMPQP_SCHEME, virtualHost).resolve(exchange);
+        return createUri(AMPQP_SCHEME, virtualHost).resolve("/" + exchange);
     }
 
     /**

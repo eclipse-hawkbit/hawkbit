@@ -121,7 +121,7 @@ public class IpUtilTest {
         assertFalse(IpUtil.isHttpUri(amqpUri));
         assertEquals(host, amqpUri.getHost());
         assertEquals("amqp", amqpUri.getScheme());
-        assertEquals("path", amqpUri.getPath());
+        assertEquals("/path", amqpUri.getRawPath());
     }
 
     @Test(expected = IllegalArgumentException.class)

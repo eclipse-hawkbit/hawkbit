@@ -23,7 +23,7 @@ public class DefaultAmqpSenderService extends BaseAmqpService implements AmqpSen
 
     @Override
     public void sendMessage(final Message message, final URI uri) {
-        spInternalConnectorTemplate.send(uri.getPath(), message);
+        spInternalConnectorTemplate.send(getExchangeFromAmqpUri(uri), message);
     }
 
 }

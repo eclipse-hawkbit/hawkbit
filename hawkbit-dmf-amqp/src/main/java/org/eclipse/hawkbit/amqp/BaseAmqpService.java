@@ -3,6 +3,8 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.net.URI;
+
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
@@ -53,6 +55,10 @@ public class BaseAmqpService {
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getTypeName());
         return (T) messageConverter.fromMessage(message);
+    }
+
+    protected String getExchangeFromAmqpUri(final URI amqpUri) {
+        return amqpUri.getPath().substring(1);
     }
 
 }
