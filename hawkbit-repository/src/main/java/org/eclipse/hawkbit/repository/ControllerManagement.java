@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
@@ -212,14 +211,9 @@ public class ControllerManagement implements EnvironmentAware {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    public Target findOrRegisterTargetIfItDoesNotexist(@NotNull final String targetid, final URI address) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                return cb.equal(targetRoot.get(Target_.controllerId), targetid);
-            }
-        };
+    public Target findOrRegisterTargetIfItDoesNotexist(@NotEmpty final String targetid, final URI address) {
+        final Specification<Target> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(Target_.controllerId),
+                targetid);
 
         Target target = targetRepository.findOne(spec);
 
@@ -229,9 +223,9 @@ public class ControllerManagement implements EnvironmentAware {
             target.setName(targetid);
             return targetManagement.createTarget(target, TargetUpdateStatus.REGISTERED, System.currentTimeMillis(),
                     address);
-        } else {
-            return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
         }
+
+        return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
     }
 
     /**

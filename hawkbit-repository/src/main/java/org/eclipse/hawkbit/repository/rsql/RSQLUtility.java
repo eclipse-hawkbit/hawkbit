@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -101,7 +102,7 @@ public final class RSQLUtility {
      */
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
             final Class<A> fieldNameProvider) {
-        return new RSQLSpecification<>(rsql, fieldNameProvider);
+        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider);
     }
 
     /**
@@ -460,13 +461,43 @@ public final class RSQLUtility {
                 singleList.add(cb.lessThanOrEqualTo(pathOfString(fieldPath), value));
                 break;
             case "=in=":
-                singleList.add(fieldPath.in(transformedValues));
+                singleList.add(getInPredicate(transformedValues, fieldPath));
                 break;
             case "=out=":
-                singleList.add(cb.not(fieldPath.in(transformedValues)));
+                singleList.add(getOutPredicate(transformedValues, fieldPath));
                 break;
             default:
                 LOGGER.info("operator symbol {} is either not supported or not implemented");
+            }
+        }
+
+        private Predicate getInPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+            final List<String> inParams = new ArrayList<>();
+            for (final Object param : transformedValues) {
+                if (param instanceof String) {
+                    inParams.add(((String) param).toUpperCase());
+                }
+            }
+            if (!inParams.isEmpty()) {
+                return cb.upper(pathOfString(fieldPath)).in(inParams);
+            } else {
+                return fieldPath.in(transformedValues);
+
+            }
+        }
+
+        private Predicate getOutPredicate(final List<Object> transformedValues, final Path<Object> fieldPath) {
+            final List<String> outParams = new ArrayList<>();
+            for (final Object param : transformedValues) {
+                if (param instanceof String) {
+                    outParams.add(((String) param).toUpperCase());
+                }
+            }
+            if (!outParams.isEmpty()) {
+                return cb.not(cb.upper(pathOfString(fieldPath)).in(outParams));
+            } else {
+                return cb.not(fieldPath.in(transformedValues));
+
             }
         }
 
@@ -477,6 +508,7 @@ public final class RSQLUtility {
             return fieldPath.get(enumField.getValueFieldName());
         }
 
+        @SuppressWarnings("unchecked")
         private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
                 final A enumField) {
             if (!enumField.isMap()) {
@@ -485,10 +517,12 @@ public final class RSQLUtility {
             final String[] graph = node.getSelector().split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
             final String keyValue = graph[graph.length - 1];
             if (fieldPath instanceof MapJoin) {
-                return cb.equal(((MapJoin<?, ?, ?>) fieldPath).key(), keyValue);
+                // Currently we support only string key .So below cast is safe.
+                return cb.equal(cb.upper((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key())),
+                        keyValue.toUpperCase());
             }
 
-            return cb.equal(fieldPath.get(enumField.getKeyFieldName()), keyValue);
+            return cb.equal(cb.upper(fieldPath.get(enumField.getKeyFieldName())), keyValue.toUpperCase());
         }
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
