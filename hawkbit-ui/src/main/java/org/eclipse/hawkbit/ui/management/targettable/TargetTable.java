@@ -140,7 +140,7 @@ public class TargetTable extends AbstractTable implements Handler {
     private ShortcutAction actionSelectAll;
     private ShortcutAction actionUnSelectAll;
     
-    private Boolean isFilterEvent = Boolean.FALSE;;
+    private Boolean isFilterApplied = Boolean.FALSE;;
    
 
     @Override
@@ -211,17 +211,18 @@ public class TargetTable extends AbstractTable implements Handler {
     void onEvent(final TargetFilterEvent filterEvent) {
         UI.getCurrent().access(() -> {
             if (checkFilterEvent(filterEvent)) {
-               if(((boolean)prepareQueryConfigFilters().get(SPUIDefinitions.FILTER_BY_NO_TAG)==false)
-                        && prepareQueryConfigFilters().size()<2
-                        && isFilterEvent==Boolean.FALSE){
+                final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
+               if(((boolean)queryConfiguration.get(SPUIDefinitions.FILTER_BY_NO_TAG)==false)
+                        && queryConfiguration.size()<2
+                        && isFilterApplied==Boolean.FALSE){
                    ((LazyQueryContainer) getContainerDataSource()).refresh();
-                                           
+                                                             
                 }else {
                     refreshFilter();
-                    if(prepareQueryConfigFilters().size()<2){
-                        isFilterEvent = Boolean.FALSE;
+                    if(queryConfiguration.size()<2){
+                        isFilterApplied = Boolean.FALSE;
                     }else{
-                        isFilterEvent = Boolean.TRUE;
+                        isFilterApplied = Boolean.TRUE;
                     }
                 } 
              

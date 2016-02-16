@@ -115,7 +115,7 @@ public class DistributionSetTable extends AbstractTable {
     @Autowired
     private transient TargetManagement targetManagement;
     
-    private Boolean isFilterEvent = false;
+    private Boolean isFilterApplied = false;
 
     /**
      * Initialize the component.
@@ -616,19 +616,18 @@ public class DistributionSetTable extends AbstractTable {
         if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
-            if(prepareQueryConfigFilters().size()<1 && isFilterEvent==false){
+            final Map<String, Object> queryConfig = prepareQueryConfigFilters();
+            if(queryConfig.size()<1 && isFilterApplied==false){
                 UI.getCurrent().access(() -> ((LazyQueryContainer) getContainerDataSource()).refresh());
                                                        
             }else {
                 UI.getCurrent().access(() -> refreshFilter());
-                if(prepareQueryConfigFilters().size()<1){
-                    isFilterEvent = false;
+                if(queryConfig.size()<1){
+                    isFilterApplied = false;
                 }else{
-                    isFilterEvent = true;
+                    isFilterApplied = true;
                 }
             } 
-            
-         //   UI.getCurrent().access(() -> refreshFilter());
         }
     }
 
