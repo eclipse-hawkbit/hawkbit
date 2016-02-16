@@ -125,7 +125,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -147,7 +147,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -169,7 +169,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);

@@ -36,9 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.eventbus.Subscribe;
 
 /**
- * {@link AmqpMessageDispatcherService} handles all outgoing AMQP messages.
- *
- *
+ * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
+ * delegate the messages to a {@link AmqpSenderService}.
+ * 
+ * Additionally the dispatcher listener/subscribe for some target events e.g.
+ * assignment.
  *
  */
 @EventSubscriber
@@ -159,5 +161,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     public void setArtifactUrlHandler(final ArtifactUrlHandler artifactUrlHandler) {
         this.artifactUrlHandler = artifactUrlHandler;
+    }
+
+    public void setAmqpSenderService(final AmqpSenderService amqpSenderService) {
+        this.amqpSenderService = amqpSenderService;
     }
 }

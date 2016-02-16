@@ -98,15 +98,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private HostnameResolver hostnameResolver;
 
     /**
+     * Constructor.
+     * 
      * @param messageConverter
+     *            the message converter.
+     * @param defaultTemplate
+     *            the configured amqp template.
      */
-    @Autowired
     public AmqpMessageHandlerService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
         super(messageConverter, defaultTemplate);
     }
 
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
+    private Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
+            @Header(MessageHeaderKey.TENANT) final String tenant) {
+        return onMessage(message, type, tenant, internalAmqpTemplate.getConnectionFactory().getVirtualHost());
+    }
+
     /**
-     * /** Method to handle all incoming amqp messages.
+     * Method to handle all incoming amqp messages.
      *
      * @param message
      *            incoming message
@@ -116,11 +126,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the contentType of the message
      * @param tenant
      *            the contentType of the message
+     * @param virtualHost
+     *            the virtual host
      * @return a message if <null> no message is send back to sender
      */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
+    public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -128,7 +138,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             switch (messageType) {
             case THING_CREATED:
                 setTenantSecurityContext(tenant);
-                registerTarget(message);
+                registerTarget(message, virtualHost);
                 break;
             case EVENT:
                 setTenantSecurityContext(tenant);
@@ -230,7 +240,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param ip
      *            the ip of the target/thing
      */
-    private void registerTarget(final Message message) {
+    private void registerTarget(final Message message, final String virtualHost) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
         final String replyTo = message.getMessageProperties().getReplyTo();
 
@@ -238,7 +248,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing Event.");
         }
 
-        final URI amqpUri = IpUtil.createAmqpUri(getVirtualHost(message), replyTo);
+        final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
@@ -271,6 +281,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private void handleIncomingEvent(final Message message, final EventTopic topic) {
         if (EventTopic.UPDATE_ACTION_STATUS.equals(topic)) {
             updateActionStatus(message);
+            return;
         }
         logAndThrowMessageError(message, "Got event without appropriate topic.");
     }
@@ -321,17 +332,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
-        Action addUpdateActionStatus;
-
-        if (!actionStatus.getStatus().equals(Status.CANCELED)) {
-            addUpdateActionStatus = controllerManagement.addUpdateActionStatus(actionStatus, action);
-        } else {
-            addUpdateActionStatus = controllerManagement.addCancelActionStatus(actionStatus, action);
-        }
+        final Action addUpdateActionStatus = getUpdateActionStatus(action, actionStatus);
 
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
+    }
+
+    private Action getUpdateActionStatus(final Action action, final ActionStatus actionStatus) {
+        if (actionStatus.getStatus().equals(Status.CANCELED)) {
+            return controllerManagement.addCancelActionStatus(actionStatus, action);
+        }
+        return controllerManagement.addUpdateActionStatus(actionStatus, action);
     }
 
     /**

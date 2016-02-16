@@ -130,9 +130,9 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create amqp handler service bean.
+     * Create default amqp sender service bean.
      *
-     * @return
+     * @return the default amqp sender service bean
      */
     @Bean
     @ConditionalOnMissingBean

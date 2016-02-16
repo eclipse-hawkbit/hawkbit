@@ -1,9 +1,13 @@
 /**
- * Copyright (c) 2011-2016 Bosch Software Innovations GmbH, Germany. All rights reserved.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.net.URI;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,34 +18,22 @@ import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
 
 /**
- *
+ * A base class which provide basis amqp staff.
  */
 public class BaseAmqpService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAmqpService.class);
-    protected static final String VIRTUAL_HOST_MESSAGE_HEADER = "VHOST_HEADER";
-
     protected MessageConverter messageConverter;
 
-    protected RabbitTemplate spInternalConnectorTemplate;
+    protected RabbitTemplate internalAmqpTemplate;
 
     public BaseAmqpService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
         this.messageConverter = messageConverter;
-        spInternalConnectorTemplate = defaultTemplate;
-    }
-
-    protected String getVirtualHost(final Message message) {
-        final Object virtualHost = message.getMessageProperties().getHeaders().get(VIRTUAL_HOST_MESSAGE_HEADER);
-
-        if (virtualHost == null) {
-            return spInternalConnectorTemplate.getConnectionFactory().getVirtualHost();
-        }
-        return virtualHost.toString();
+        internalAmqpTemplate = defaultTemplate;
     }
 
     protected void cleanMessage(final Message message) {
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
-        message.getMessageProperties().getHeaders().remove(VIRTUAL_HOST_MESSAGE_HEADER);
     }
 
     /**
@@ -58,10 +50,6 @@ public class BaseAmqpService {
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getTypeName());
         return (T) messageConverter.fromMessage(message);
-    }
-
-    protected String getExchangeFromAmqpUri(final URI amqpUri) {
-        return amqpUri.getPath().substring(1);
     }
 
     protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
