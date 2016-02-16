@@ -119,7 +119,7 @@ public class UploadLayout extends VerticalLayout {
 
     private DragAndDropWrapper dropAreaWrapper;
 
-	private Boolean hasDirectory = Boolean.FALSE;
+    private Boolean hasDirectory = Boolean.FALSE;
 
     /**
      * Initialize the upload layout.
@@ -187,58 +187,60 @@ public class UploadLayout extends VerticalLayout {
 
         @Override
         public void drop(final DragAndDropEvent event) {
-        	if (validate()) {
-				((WrapperTransferable) event.getTransferable()).getDraggedComponent();
-				final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
-				if (files != null) {
-					for (final Html5File file : files) {
-						if (!isDirectory(file)) {
-							if (!checkForDuplicate(file.getFileName())) {
-								numberOfFileUploadsExpected.incrementAndGet();
-								file.setStreamVariable(createStreamVariable(file));
-								hasDirectory = Boolean.FALSE;
-							}
-						} else {
-							hasDirectory = Boolean.TRUE;
-						}
-					}
-					if (numberOfFileUploadsExpected.get() > 0) {
-						processBtn.setEnabled(false);
-						// reset before we start
-						uploadInfoWindow.uploadSessionStarted();
-					} else {
-						//If the upload is not started, it signifies all dropped files as either duplicate or directory.So display message accordingly
-						displayCompositeMessage();
-					}
-				}
-			}
+            if (validate()) {
+                ((WrapperTransferable) event.getTransferable()).getDraggedComponent();
+                final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
+                if (files != null) {
+                    for (final Html5File file : files) {
+                        if (!isDirectory(file)) {
+                            if (!checkForDuplicate(file.getFileName())) {
+                                numberOfFileUploadsExpected.incrementAndGet();
+                                file.setStreamVariable(createStreamVariable(file));
+                                hasDirectory = Boolean.FALSE;
+                            }
+                        } else {
+                            hasDirectory = Boolean.TRUE;
+                        }
+                    }
+                    if (numberOfFileUploadsExpected.get() > 0) {
+                        processBtn.setEnabled(false);
+                        // reset before we start
+                        uploadInfoWindow.uploadSessionStarted();
+                    } else {
+                        // If the upload is not started, it signifies all
+                        // dropped files as either duplicate or directory.So
+                        // display message accordingly
+                        displayCompositeMessage();
+                    }
+                }
+            }
         }
     }
 
-	private static boolean isDirectory(final Html5File file) {
-		if (Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0) {
-			return true;
-		}
-		return false;
-	}
+    private static boolean isDirectory(final Html5File file) {
+        if (Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0) {
+            return true;
+        }
+        return false;
+    }
 
-	private void displayCompositeMessage() {
-		final String duplicateMessage = getDuplicateFileValidationMessage();
-		final StringBuilder compositeMessage = new StringBuilder();
-		if (!Strings.isNullOrEmpty(duplicateMessage)) {
-			compositeMessage.append(duplicateMessage);
-		}
-		if (hasDirectory) {
-			if (compositeMessage.length() > 0) {
-				compositeMessage.append("<br>");
-			}
-			compositeMessage.append(i18n.get("message.no.directory.upload"));
-		}
-		if (!compositeMessage.toString().isEmpty()) {
-			uiNotification.displayValidationError(compositeMessage.toString());
-		}
-	}
-    
+    private void displayCompositeMessage() {
+        final String duplicateMessage = getDuplicateFileValidationMessage();
+        final StringBuilder compositeMessage = new StringBuilder();
+        if (!Strings.isNullOrEmpty(duplicateMessage)) {
+            compositeMessage.append(duplicateMessage);
+        }
+        if (hasDirectory) {
+            if (compositeMessage.length() > 0) {
+                compositeMessage.append("<br>");
+            }
+            compositeMessage.append(i18n.get("message.no.directory.upload"));
+        }
+        if (!compositeMessage.toString().isEmpty()) {
+            uiNotification.displayValidationError(compositeMessage.toString());
+        }
+    }
+
     private VerticalLayout createDropAreaLayout() {
         dropAreaLayout = new VerticalLayout();
         final Label dropHereLabel = new Label("Drop files to upload");
@@ -421,27 +423,26 @@ public class UploadLayout extends VerticalLayout {
             displayCompositeMessage();
         }
     }
-    
 
-	private String getDuplicateFileValidationMessage() {
-		StringBuilder message = new StringBuilder();
-		if (!duplicateFileNamesList.isEmpty()) {
-			final String fileNames = StringUtils.collectionToCommaDelimitedString(duplicateFileNamesList);
-			if (duplicateFileNamesList.size() == 1) {
-				message.append(i18n.get("message.no.duplicateFile") + fileNames);
+    private String getDuplicateFileValidationMessage() {
+        StringBuilder message = new StringBuilder();
+        if (!duplicateFileNamesList.isEmpty()) {
+            final String fileNames = StringUtils.collectionToCommaDelimitedString(duplicateFileNamesList);
+            if (duplicateFileNamesList.size() == 1) {
+                message.append(i18n.get("message.no.duplicateFile") + fileNames);
 
-			} else if (duplicateFileNamesList.size() > 1) {
-				message.append(i18n.get("message.no.duplicateFiles"));
-			}
-			duplicateFileNamesList.clear();
-		}
-		return message.toString();
-	}
+            } else if (duplicateFileNamesList.size() > 1) {
+                message.append(i18n.get("message.no.duplicateFiles"));
+            }
+            duplicateFileNamesList.clear();
+        }
+        return message.toString();
+    }
 
-	public void showDuplicateMessage() {
-		uiNotification.displayValidationError(getDuplicateFileValidationMessage());
-	}
-	
+    public void showDuplicateMessage() {
+        uiNotification.displayValidationError(getDuplicateFileValidationMessage());
+    }
+
     void increaseNumberOfFileUploadsExpected() {
         numberOfFileUploadsExpected.incrementAndGet();
     }
