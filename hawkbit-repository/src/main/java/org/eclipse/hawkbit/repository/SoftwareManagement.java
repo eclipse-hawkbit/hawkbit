@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule_;
 import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.specifications.SoftwareModuleSpecification;
+import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
@@ -48,7 +49,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -198,7 +198,7 @@ public class SoftwareManagement {
     /**
      * retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
      * .
-     * 
+     *
      * @param pageable
      *            page parameters
      * @param type
@@ -209,7 +209,7 @@ public class SoftwareManagement {
     public Slice<SoftwareModule> findSoftwareModulesByType(@NotNull final Pageable pageable,
             @NotNull final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.equalType(type);
         specList.add(spec);
@@ -230,7 +230,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModulesByType(@NotNull final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.equalType(type);
         specList.add(spec);
@@ -257,7 +257,7 @@ public class SoftwareManagement {
 
     /**
      * retrieves {@link SoftwareModule}s by their name AND version.
-     * 
+     *
      * @param name
      *            of the {@link SoftwareModule}
      * @param version
@@ -273,7 +273,7 @@ public class SoftwareManagement {
 
     /**
      * Deletes the given {@link SoftwareModule} {@link Entity}.
-     * 
+     *
      * @param bsm
      *            is the {@link SoftwareModule} to be deleted
      */
@@ -291,26 +291,12 @@ public class SoftwareManagement {
 
     private Slice<SoftwareModule> findSwModuleByCriteriaAPI(@NotNull final Pageable pageable,
             @NotEmpty final List<Specification<SoftwareModule>> specList) {
-
-        Specifications<SoftwareModule> specs = Specifications.where(specList.get(0));
-        if (specList.size() > 1) {
-            for (final Specification<SoftwareModule> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
-        }
-
-        return criteriaNoCountDao.findAll(specs, pageable, SoftwareModule.class);
+        return criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable,
+                SoftwareModule.class);
     }
 
     private Long countSwModuleByCriteriaAPI(@NotEmpty final List<Specification<SoftwareModule>> specList) {
-        Specifications<SoftwareModule> specs = Specifications.where(specList.get(0));
-        if (specList.size() > 1) {
-            for (final Specification<SoftwareModule> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
-        }
-
-        return softwareModuleRepository.count(specs);
+        return softwareModuleRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     private void deleteGridFsArtifacts(final SoftwareModule swModule) {
@@ -321,7 +307,7 @@ public class SoftwareManagement {
 
     /**
      * Deletes {@link SoftwareModule}s which is any if the given ids.
-     * 
+     *
      * @param ids
      *            of the Software Moduels to be deleted
      */
@@ -366,20 +352,16 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Slice<SoftwareModule> findSoftwareModulesAll(@NotNull final Pageable pageable) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
 
-        spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                if (!query.getResultType().isAssignableFrom(Long.class)) {
-                    root.fetch(SoftwareModule_.type);
-                }
-                return cb.conjunction();
+        spec = (root, query, cb) -> {
+            if (!query.getResultType().isAssignableFrom(Long.class)) {
+                root.fetch(SoftwareModule_.type);
             }
+            return cb.conjunction();
         };
 
         specList.add(spec);
@@ -396,7 +378,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModulesAll() {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         final Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -479,7 +461,7 @@ public class SoftwareManagement {
     public Slice<SoftwareModule> findSoftwareModuleByFilters(@NotNull final Pageable pageable, final String searchText,
             final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -494,15 +476,11 @@ public class SoftwareManagement {
             specList.add(spec);
         }
 
-        spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                if (!query.getResultType().isAssignableFrom(Long.class)) {
-                    root.fetch(SoftwareModule_.type);
-                }
-                return cb.conjunction();
+        spec = (root, query, cb) -> {
+            if (!query.getResultType().isAssignableFrom(Long.class)) {
+                root.fetch(SoftwareModule_.type);
             }
+            return cb.conjunction();
         };
 
         specList.add(spec);
@@ -592,7 +570,7 @@ public class SoftwareManagement {
 
     private List<Specification<SoftwareModule>> buildSpecificationList(final String searchText,
             final SoftwareModuleType type) {
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
         if (!Strings.isNullOrEmpty(searchText)) {
             specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
         }
@@ -631,7 +609,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countSoftwareModuleByFilters(final String searchText, final SoftwareModuleType type) {
 
-        final List<Specification<SoftwareModule>> specList = new ArrayList<Specification<SoftwareModule>>();
+        final List<Specification<SoftwareModule>> specList = new ArrayList<>();
 
         Specification<SoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
@@ -788,7 +766,7 @@ public class SoftwareManagement {
 
     /**
      * creates or updates a single software module meta data entry.
-     * 
+     *
      * @param metadata
      *            the meta data entry to create or update
      * @return the updated or created software module meta data entry
@@ -813,7 +791,7 @@ public class SoftwareManagement {
 
     /**
      * creates a list of software module meta data entries.
-     * 
+     *
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created software module meta data entries
@@ -835,7 +813,7 @@ public class SoftwareManagement {
 
     /**
      * updates a distribution set meta data value if corresponding entry exists.
-     * 
+     *
      * @param metadata
      *            the meta data entry to be updated
      * @return the updated meta data entry
@@ -858,7 +836,7 @@ public class SoftwareManagement {
 
     /**
      * deletes a software module meta data entry.
-     * 
+     *
      * @param id
      *            the ID of the software module meta data to delete
      */
@@ -871,7 +849,7 @@ public class SoftwareManagement {
 
     /**
      * finds all meta data by the given software module id.
-     * 
+     *
      * @param swId
      *            the software module id to retrieve the meta data from
      * @param pageable
@@ -887,7 +865,7 @@ public class SoftwareManagement {
 
     /**
      * finds all meta data by the given software module id.
-     * 
+     *
      * @param softwareModuleId
      *            the software module id to retrieve the meta data from
      * @param spec
@@ -900,20 +878,19 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(final Long softwareModuleId,
             @NotNull final Specification<SoftwareModuleMetadata> spec, @NotNull final Pageable pageable) {
-        return softwareModuleMetadataRepository.findAll(new Specification<SoftwareModuleMetadata>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModuleMetadata> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                return cb.and(cb.equal(root.get(SoftwareModuleMetadata_.softwareModule).get(SoftwareModule_.id),
-                        softwareModuleId), spec.toPredicate(root, query, cb));
-            }
-        }, pageable);
+        return softwareModuleMetadataRepository
+                .findAll(
+                        (Specification<SoftwareModuleMetadata>) (root, query,
+                                cb) -> cb.and(
+                                        cb.equal(root.get(SoftwareModuleMetadata_.softwareModule)
+                                                .get(SoftwareModule_.id), softwareModuleId),
+                                spec.toPredicate(root, query, cb)),
+                        pageable);
     }
 
     /**
      * finds a single software module meta data by its id.
-     * 
+     *
      * @param id
      *            the id of the software module meta data containing the meta
      *            data key and the ID of the software module

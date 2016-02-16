@@ -707,6 +707,11 @@ public final class SPUIComponetIdProvider {
     public static final String BULK_UPLOAD_STATUS_BUTTON = "bulk.upload.notification.id";
 
     /**
+     * Target Filter Status button id.
+     */
+    public static final String TARGET_FILTER_STATUS_BUTTON = "target.filter.status.button.id";
+
+    /**
      * Target bulk upload minimize button id.
      */
     public static final String BULK_UPLOAD_MINIMIZE_BUTTON_ID = "bulk.upload.minimize.button.id";

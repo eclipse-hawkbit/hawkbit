@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.footer;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Table.TableTransferable;
 
 /**
  * Upload view footer layout implementation.
@@ -196,7 +199,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
         final Component sourceComponent = event.getTransferable().getSourceComponent();
         if (sourceComponent instanceof Table) {
             final Table sourceTable = (Table) event.getTransferable().getSourceComponent();
-            addToDeleteList(sourceTable);
+            addToDeleteList(sourceTable,(TableTransferable) event.getTransferable());
             updateSWActionCount();
         }
         if (sourceComponent.getId().startsWith(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX)) {
@@ -220,16 +223,23 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private void deleteSWModuleType(final String swModuleTypeName) {
         artifactUploadState.getSelectedDeleteSWModuleTypes().add(swModuleTypeName);
     }
-
-    private void addToDeleteList(final Table sourceTable) {
-        final Set<Long> swModuleIds = (Set<Long>) sourceTable.getValue();
-        swModuleIds.forEach(id -> {
+   
+    private void addToDeleteList(final Table sourceTable, final TableTransferable transferable) {
+        @SuppressWarnings("unchecked")
+        final Set<Long> swModuleSelected = (Set<Long>) sourceTable.getValue();
+        final Set<Long> swModuleIdNameSet = new HashSet<Long>();
+        if (!swModuleSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
+            swModuleIdNameSet.add((Long) transferable.getData(SPUIDefinitions.ITEMID));
+        } else {
+            swModuleIdNameSet.addAll(swModuleSelected);
+        }
+        swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
                     .getItemProperty(SPUILabelDefinitions.NAME_VERSION).getValue();
             artifactUploadState.getDeleteSofwareModules().put(id, swModuleName);
         });
     }
-
+  
     /**
      * Update the software module delete count.
      */

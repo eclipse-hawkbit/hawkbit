@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  * Store all states with the target count of a rollout or rolloutgroup.
  *
  */
@@ -27,12 +27,12 @@ public class TotalTargetCountStatus {
         SCHEDULED, RUNNING, ERROR, FINISHED, CANCELLED, NOTSTARTED
     }
 
-    private final Map<Status, Long> statusTotalCountMap = new HashMap<>();
+    private final Map<Status, Long> statusTotalCountMap = new EnumMap<>(Status.class);
     private final Long totalTargetCount;
 
     /**
      * Create a new states map with the target count for each state.
-     * 
+     *
      * @param targetCountActionStatus
      *            the action state map
      * @param totalTargets
@@ -46,7 +46,7 @@ public class TotalTargetCountStatus {
 
     /**
      * Create a new states map with the target count for each state.
-     * 
+     *
      * @param totalTargetCount
      *            the total target count
      */
@@ -56,7 +56,7 @@ public class TotalTargetCountStatus {
 
     /**
      * The current state mape which the total target count
-     * 
+     *
      * @return the statusTotalCountMap the state map
      */
     public Map<Status, Long> getStatusTotalCountMap() {
@@ -65,7 +65,7 @@ public class TotalTargetCountStatus {
 
     /**
      * Gets the total target count from a state.
-     * 
+     *
      * @param status
      *            the state key
      * @return the current target count cannot be <null>
@@ -77,7 +77,7 @@ public class TotalTargetCountStatus {
 
     /**
      * Populate all target status to a the given map
-     * 
+     *
      * @param statusTotalCountMap
      *            the map
      * @param rolloutStatusCountItems

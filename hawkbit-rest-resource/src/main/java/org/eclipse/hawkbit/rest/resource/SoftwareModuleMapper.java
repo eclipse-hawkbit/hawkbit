@@ -21,6 +21,8 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleRestAPI;
+import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactHash;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
@@ -142,13 +144,13 @@ public final class SoftwareModuleMapper {
         response.setType(baseSofwareModule.getType().getKey());
         response.setVendor(baseSofwareModule.getVendor());
 
-        response.add(linkTo(methodOn(SoftwareModuleResource.class).getArtifacts(response.getModuleId()))
+        response.add(linkTo(methodOn(SoftwareModuleRestAPI.class).getArtifacts(response.getModuleId()))
                 .withRel(RestConstants.SOFTWAREMODULE_V1_ARTIFACT));
-        response.add(linkTo(methodOn(SoftwareModuleResource.class).getSoftwareModule(response.getModuleId()))
+        response.add(linkTo(methodOn(SoftwareModuleRestAPI.class).getSoftwareModule(response.getModuleId()))
                 .withRel("self"));
 
         response.add(linkTo(
-                methodOn(SoftwareModuleTypeResource.class).getSoftwareModuleType(baseSofwareModule.getType().getId()))
+                methodOn(SoftwareModuleTypeRestApi.class).getSoftwareModuleType(baseSofwareModule.getType().getId()))
                         .withRel(RestConstants.SOFTWAREMODULE_V1_TYPE));
 
         response.add(linkTo(methodOn(SoftwareModuleResource.class).getMetadata(response.getModuleId(),
@@ -178,13 +180,13 @@ public final class SoftwareModuleMapper {
 
         RestModelMapper.mapBaseToBase(artifactRest, artifact);
 
-        artifactRest.add(linkTo(methodOn(SoftwareModuleResource.class).getArtifact(artifact.getSoftwareModule().getId(),
+        artifactRest.add(linkTo(methodOn(SoftwareModuleRestAPI.class).getArtifact(artifact.getSoftwareModule().getId(),
                 artifact.getId())).withRel("self"));
 
         if (artifact instanceof LocalArtifact) {
-            artifactRest.add(
-                    linkTo(methodOn(SoftwareModuleResource.class).downloadArtifact(artifact.getSoftwareModule().getId(),
-                            artifact.getId(), null, null)).withRel("download"));
+            artifactRest.add(linkTo(methodOn(DownloadArtifactResource.class)
+                    .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId(), null, null))
+                            .withRel("download"));
         }
 
         return artifactRest;

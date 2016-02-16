@@ -79,10 +79,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     private I18N i18n;
 
     @Autowired
-    private DeploymentManagement deploymentManagement;
+    private transient DeploymentManagement deploymentManagement;
 
     @Autowired
-    private EventBus.SessionEventBus eventBus;
+    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private UINotification notification;
@@ -204,10 +204,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Get Action based on status.
-     * 
+     *
      * @param type
      *            as Action.Type
-     * 
+     *
      * @return List of Actions
      */
     private List<Object> getVisbleColumns() {
@@ -227,12 +227,12 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * fetch the target details using controller id, and set it globally.
-     * 
+     *
      * @param selectedTarget
      *            reference of target
      */
     public void populateTableData(final Target selectedTarget) {
-        this.target = selectedTarget;
+        target = selectedTarget;
         refreshContainer();
     }
 
@@ -255,7 +255,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Populate Container for Action.
-     * 
+     *
      * @param isActiveActions
      *            as flag
      * @param reversedActions
@@ -275,14 +275,14 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final Item item = hierarchicalContainer.addItem(actionWithStatusCount.getActionId());
 
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).setValue(
-                    actionWithStatusCount.getActionStatus());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
+                    .setValue(actionWithStatusCount.getActionStatus());
 
             /*
              * add action id.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID).setValue(
-                    actionWithStatusCount.getActionId().toString());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID)
+                    .setValue(actionWithStatusCount.getActionId().toString());
             /*
              * add active/inactive status to the item which will be used in
              * Column generator to generate respective icon
@@ -294,28 +294,27 @@ public class ActionHistoryTable extends TreeTable implements Handler {
              * add action Id to the item which will be used for fetching child
              * items ( previous action status ) during expand
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN).setValue(
-                    actionWithStatusCount.getActionId());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN)
+                    .setValue(actionWithStatusCount.getActionId());
 
             /*
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
-                    HawkbitCommonUtil.getFormattedText(actionWithStatusCount.getDsName() + ":"
-                            + actionWithStatusCount.getDsVersion()));
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(HawkbitCommonUtil
+                    .getFormattedText(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion()));
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
             ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), false);
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
-                    .setValue(
-                            SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null) ? actionWithStatusCount
-                                    .getActionLastModifiedAt() : actionWithStatusCount.getActionCreatedAt()));
+                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null)
+                            ? actionWithStatusCount.getActionLastModifiedAt()
+                            : actionWithStatusCount.getActionCreatedAt()));
 
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME).setValue(
-                    actionWithStatusCount.getRolloutName());
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME)
+                    .setValue(actionWithStatusCount.getRolloutName());
 
             if (actionWithStatusCount.getActionStatusCount() > 0) {
                 ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), true);
@@ -390,10 +389,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         }
         final String distName = (String) hierarchicalContainer.getItem(itemId)
                 .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).getValue();
-        final Label activeStatusIcon = createActiveStatusLabel(
-                activeValue,
+        final Label activeStatusIcon = createActiveStatusLabel(activeValue,
                 (Action.Status) hierarchicalContainer.getItem(itemId)
-                        .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).getValue() == Action.Status.ERROR);
+                        .getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
+                        .getValue() == Action.Status.ERROR);
         activeStatusIcon.setId(new StringJoiner(".").add(distName).add(itemId.toString())
                 .add(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE).add(activeValue).toString());
         return activeStatusIcon;
@@ -412,7 +411,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     /**
      * Load the rows of previous status history of the selected action row and
      * add it next to the selected action row.
-     * 
+     *
      * @param parentRowIdx
      *            index of the selected action row.
      */
@@ -447,14 +446,14 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                      */
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(
-                            HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
+                            .setValue(HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
                                     + action.getDistributionSet().getVersion()));
 
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME).setValue(
-                            SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
-                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN).setValue(
-                            actionStatus.getStatus());
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
+                            .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
+                    childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
+                            .setValue(actionStatus.getStatus());
                     showOrHideMessage(childItem, actionStatus);
                     /* No further child items allowed for the child items */
                     ((Hierarchical) hierarchicalContainer).setChildrenAllowed(childId, false);
@@ -469,7 +468,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Hide the rows of previous status history of the selected action row.
-     * 
+     *
      * @param parentRowIdx
      *            index of the selected action row.
      */
@@ -487,7 +486,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Get status icon.
-     * 
+     *
      * @param status
      *            as Status
      * @return Label as UI
@@ -561,13 +560,11 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         if (actionWithActiveStatus.isHitAutoForceTime(currentTimeMillis)) {
             autoForceLabel.setDescription("autoforced");
             autoForceLabel.setStyleName(STATUS_ICON_GREEN);
-            autoForceLabel.setDescription("auto forced since "
-                    + SPDateTimeUtil.getDurationFormattedString(actionWithActiveStatus.getForcedTime(),
-                            currentTimeMillis, i18n));
+            autoForceLabel.setDescription("auto forced since " + SPDateTimeUtil
+                    .getDurationFormattedString(actionWithActiveStatus.getForcedTime(), currentTimeMillis, i18n));
         } else {
-            autoForceLabel.setDescription("auto forcing in "
-                    + SPDateTimeUtil.getDurationFormattedString(currentTimeMillis,
-                            actionWithActiveStatus.getForcedTime(), i18n));
+            autoForceLabel.setDescription("auto forcing in " + SPDateTimeUtil
+                    .getDurationFormattedString(currentTimeMillis, actionWithActiveStatus.getForcedTime(), i18n));
             autoForceLabel.setStyleName("statusIconPending");
             autoForceLabel.setValue(FontAwesome.HISTORY.getHtml());
         }
@@ -576,7 +573,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Create Status Label.
-     * 
+     *
      * @param activeValue
      *            as String
      * @return Labeal as UI
@@ -649,7 +646,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * create Message block for Actions.
-     * 
+     *
      * @param messages
      *            as List of msg
      * @return Component as UI
@@ -748,7 +745,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Show confirmation window and if ok then only, force the action.
-     * 
+     *
      * @param actionId
      *            as Id if the action needs to be forced.
      */
@@ -776,9 +773,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void confirmAndForceQuitAction(final Long actionId) {
         /* Display the confirmation */
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
-                i18n.get("caption.forcequit.action.confirmbox"), i18n.get("message.forcequit.action.confirm"),
-                i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
+                i18n.get("message.forcequit.action.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
                         final boolean cancelResult = forceQuitActiveAction(actionId);
                         if (cancelResult) {
@@ -793,14 +789,14 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                             notification.displayValidationError(i18n.get("message.forcequit.action.failed"));
                         }
                     }
-                }, FontAwesome.WARNING);
+                } , FontAwesome.WARNING);
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
 
     /**
      * Show confirmation window and if ok then only, cancel the action.
-     * 
+     *
      * @param actionId
      *            as Id if the action needs to be cancelled.
      */
@@ -880,8 +876,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
         if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
                 && null != managementUIState.getDistributionTableFilters().getPinnedTargetId().get()) {
-            final String alreadyPinnedControllerId = managementUIState.getDistributionTableFilters()
-                    .getPinnedTargetId().get();
+            final String alreadyPinnedControllerId = managementUIState.getDistributionTableFilters().getPinnedTargetId()
+                    .get();
             // if the current target is pinned publish a pin event again
             if (null != alreadyPinnedControllerId && alreadyPinnedControllerId.equals(target.getControllerId())) {
                 eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
@@ -898,7 +894,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     /**
      * Set messages false.
-     * 
+     *
      * @param alreadyHasMessages
      *            the alreadyHasMessages to set
      */
