@@ -174,7 +174,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(set.getId(), "4711");
 
-        final Action action = result.getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(result.getActions().get(0));
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
                 new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
@@ -221,7 +221,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
      * verifies, that all {@link TargetTag} of parameter. NOTE: it's accepted
      * that the target have additional tags assigned to them which are not
      * contained within parameter tags.
-     * 
+     *
      * @param strict
      *            if true, the given targets MUST contain EXACTLY ALL given
      *            tags, AND NO OTHERS. If false, the given targets MUST contain

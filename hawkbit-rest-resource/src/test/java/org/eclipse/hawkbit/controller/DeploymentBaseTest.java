@@ -484,7 +484,8 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         final DistributionSet savedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
 
-        final Action action1 = deploymentManagement.assignDistributionSet(savedSet, toAssign).getActions().get(0);
+        final Action action1 = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(savedSet, toAssign).getActions().get(0));
         mvc.perform(
                 get("/{tenant}/controller/v1/4712/deploymentBase/" + action1.getId(), tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -544,12 +545,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(savedTarget1);
 
-        final Action action1 = deploymentManagement.assignDistributionSet(ds1.getId(), new String[] { "4712" })
-                .getActions().get(0);
-        final Action action2 = deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4712" })
-                .getActions().get(0);
-        final Action action3 = deploymentManagement.assignDistributionSet(ds3.getId(), new String[] { "4712" })
-                .getActions().get(0);
+        final Action action1 = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds1.getId(), new String[] { "4712" }).getActions().get(0));
+        final Action action2 = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4712" }).getActions().get(0));
+        final Action action3 = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds3.getId(), new String[] { "4712" }).getActions().get(0));
 
         Target myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);

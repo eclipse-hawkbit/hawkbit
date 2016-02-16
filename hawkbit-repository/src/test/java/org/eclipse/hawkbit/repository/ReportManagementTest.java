@@ -138,7 +138,8 @@ public class ReportManagementTest extends AbstractIntegrationTest {
             final Target createTarget = targetManagement.createTarget(new Target("t" + month));
             final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
-            controllerManagament.registerRetrieved(result.getActions().get(0),
+            controllerManagament.registerRetrieved(
+                    deploymentManagement.findActionWithDetails(result.getActions().get(0)),
                     "Controller retrieved update action and should start now the download.");
         }
         DataReportSeries<LocalDate> feedbackReceivedOverTime = reportManagement
@@ -158,7 +159,8 @@ public class ReportManagementTest extends AbstractIntegrationTest {
             final Target createTarget = targetManagement.createTarget(new Target("t2" + month));
             final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
-            controllerManagament.registerRetrieved(result.getActions().get(0),
+            controllerManagament.registerRetrieved(
+                    deploymentManagement.findActionWithDetails(result.getActions().get(0)),
                     "Controller retrieved update action and should start now the download.");
         }
         feedbackReceivedOverTime = reportManagement.feedbackReceivedOverTime(DateTypes.perMonth(), from, to);
@@ -572,7 +574,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.springframework.data.auditing.DateTimeProvider#getNow()
          */
         @Override
