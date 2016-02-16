@@ -4,18 +4,21 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
 
 /**
- * @author Dennis Melzer
  *
  */
 public class BaseAmqpService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseAmqpService.class);
     protected static final String VIRTUAL_HOST_MESSAGE_HEADER = "VHOST_HEADER";
 
     protected MessageConverter messageConverter;
@@ -59,6 +62,20 @@ public class BaseAmqpService {
 
     protected String getExchangeFromAmqpUri(final URI amqpUri) {
         return amqpUri.getPath().substring(1);
+    }
+
+    protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
+        final Map<String, Object> header = message.getMessageProperties().getHeaders();
+        final Object value = header.get(key);
+        if (value == null) {
+            logAndThrowMessageError(message, errorMessageIfNull);
+        }
+        return value.toString();
+    }
+
+    protected void logAndThrowMessageError(final Message message, final String error) {
+        LOGGER.error("Error \"{}\" reported by message {}", error, message.getMessageProperties().getMessageId());
+        throw new IllegalArgumentException(error);
     }
 
 }

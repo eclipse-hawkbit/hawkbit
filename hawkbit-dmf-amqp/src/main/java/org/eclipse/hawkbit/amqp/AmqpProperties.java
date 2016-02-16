@@ -22,8 +22,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
 
-    private String deadLetterQueue = "dmf_connector_deadletter";
-    private String deadLetterExchange = "dmf.connector.deadletter";
+    private String deadLetterQueue = "dmf_receiver_deadletter";
+    private String deadLetterExchange = "dmf.receiver.deadletter";
     private String receiverQueue = "dmf_receiver";
     private boolean missingQueuesFatal = false;
 

@@ -12,7 +12,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -71,10 +70,8 @@ import com.google.common.eventbus.EventBus;
 
 /**
  *
- * {@link AmqpMessageHandlerService} handles all incoming AMQP messages.
- *
- *
- *
+ * {@link AmqpMessageHandlerService} handles all incoming AMQP messages for the
+ * queue which is configure for the property hawkbit.dmf.rabbitmq.receiverQueue.
  *
  */
 public class AmqpMessageHandlerService extends BaseAmqpService {
@@ -211,11 +208,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return artifact;
     }
 
-    protected void logAndThrowMessageError(final Message message, final String error) {
-        LOG.error("Error \"{}\" reported by message {}", error, message.getMessageProperties().getMessageId());
-        throw new IllegalArgumentException(error);
-    }
-
     private static void setSecurityContext(final Authentication authentication) {
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
         securityContextImpl.setAuthentication(authentication);
@@ -228,15 +220,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
         setSecurityContext(authenticationToken);
-    }
-
-    private String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
-        final Map<String, Object> header = message.getMessageProperties().getHeaders();
-        final Object value = header.get(key);
-        if (value == null) {
-            logAndThrowMessageError(message, errorMessageIfNull);
-        }
-        return value.toString();
     }
 
     /**
