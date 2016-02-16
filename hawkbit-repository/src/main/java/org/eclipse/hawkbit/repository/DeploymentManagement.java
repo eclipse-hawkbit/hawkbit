@@ -710,8 +710,8 @@ public class DeploymentManagement {
     }
 
     /**
-     * Get the {@link Action} entity for given actionId with all lazy
-     * attributes.
+     * Get the {@link Action} entity for given actionId with all lazy attributes
+     * (i.e. distributionSet, target, target.assignedDs).
      *
      * @param actionId
      *            to be id of the action

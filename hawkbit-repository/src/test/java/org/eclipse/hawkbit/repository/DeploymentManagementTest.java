@@ -67,6 +67,22 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     private EventBus eventBus;
 
     @Test
+    @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
+    public void findActionWithLazyDetails() {
+        final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
+                distributionSetManagement, new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
+        // one action with one action status is generated
+        final Action action = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0));
+
+        assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
+        assertThat(action.getTarget()).as("Target in action").isNotNull();
+        assertThat(action.getTarget().getAssignedDistributionSet()).as("AssignedDistributionSet of target in action")
+                .isNotNull();
+    }
+
+    @Test
     @Description("Test verifies that the custom query to find all actions include the count of action status is working correctly")
     public void findActionsWithStatusCountByTarget() {
         final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,

@@ -24,6 +24,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedEntityGraphs;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -55,7 +56,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
         @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
 @NamedEntityGraphs({ @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
-                @NamedAttributeNode("target") }) })
+                @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet") ) ) })
 @Entity
 public class Action extends BaseEntity implements Comparable<Action> {
     private static final long serialVersionUID = 1L;
