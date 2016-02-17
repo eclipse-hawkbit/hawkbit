@@ -73,8 +73,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 distributionSetManagement, new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
         // one action with one action status is generated
-        final Action action = deploymentManagement.findActionWithDetails(
-                deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0));
+        final Long actionId = deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(actionId);
 
         assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
         assertThat(action.getTarget()).as("Target in action").isNotNull();
