@@ -13,5 +13,5 @@
 
     <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
 
-    <inherits name="org.eclipse.hawkbit.ui.distributionbar2.CustomRenderersWidgetSet" />
+    
 </module>
