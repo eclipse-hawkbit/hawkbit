@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -53,6 +56,27 @@ public class BaseAmqpService {
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getTypeName());
         return (T) messageConverter.fromMessage(message);
+    }
+
+    /**
+     * Is needed to convert a incoming message to is originally object type.
+     *
+     * @param message
+     *            the message to convert.
+     * @param clazz
+     *            the class of the originally object.
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> List<T> convertMessageList(final Message message, final Class<T> clazz) {
+        if (message == null) {
+            return Collections.emptyList();
+        }
+        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
+                ArrayList.class);
+        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CONTENT_CLASSID_FIELD_NAME,
+                clazz.getTypeName());
+        return (List<T>) messageConverter.fromMessage(message);
     }
 
     protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
