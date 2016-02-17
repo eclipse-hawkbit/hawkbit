@@ -54,7 +54,7 @@ public class BaseAmqpService {
             return null;
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
-                clazz.getTypeName());
+                clazz.getName());
         return (T) messageConverter.fromMessage(message);
     }
 
@@ -73,9 +73,9 @@ public class BaseAmqpService {
             return Collections.emptyList();
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
-                ArrayList.class);
+                ArrayList.class.getName());
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CONTENT_CLASSID_FIELD_NAME,
-                clazz.getTypeName());
+                clazz.getName());
         return (List<T>) messageConverter.fromMessage(message);
     }
 
