@@ -47,6 +47,9 @@ public class BaseAmqpService {
      */
     @SuppressWarnings("unchecked")
     protected <T> T convertMessage(final Message message, final Class<T> clazz) {
+        if (message == null) {
+            return null;
+        }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getTypeName());
         return (T) messageConverter.fromMessage(message);
