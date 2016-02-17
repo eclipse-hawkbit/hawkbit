@@ -113,8 +113,7 @@ public class DistributionTable extends AbstractTable {
 
     private Button distributinPinnedBtn;
     
-    private Boolean isFilterApplied = false;
-
+   
     /**
      * Initialize the distribution table.
      */
@@ -142,24 +141,8 @@ public class DistributionTable extends AbstractTable {
         if (event == DistributionTableFilterEvent.FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
-            final Map<String, Object> queryConfig = prepareQueryConfigFilters();
-            if(((boolean)queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG)==false)
-                    && ((List)queryConfig.get(SPUIDefinitions.FILTER_BY_TAG)).isEmpty()
-                    && queryConfig.size()<3
-                    && isFilterApplied==false){
-                UI.getCurrent().access(() -> ((LazyQueryContainer) getContainerDataSource()).refresh());
-                                                       
-            }else {
-                UI.getCurrent().access(() -> refreshFilter());
-                if(((boolean)queryConfig.get(SPUIDefinitions.FILTER_BY_NO_TAG)==false)
-                        && ((List)queryConfig.get(SPUIDefinitions.FILTER_BY_TAG)).isEmpty()
-                        && queryConfig.size()<3){
-                    isFilterApplied = false;
-                }else{
-                    isFilterApplied = true;
-                }
-            } 
-        }
+            UI.getCurrent().access(() -> refreshFilter());
+         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

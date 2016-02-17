@@ -210,8 +210,10 @@ public class DistributionTableHeader extends AbstractTableHeader {
      */
     @Override
     protected void resetSearchText() {
-        managementUIState.getDistributionTableFilters().setSearchText(null);
-        eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
+        if( managementUIState.getDistributionTableFilters().getSearchText().isPresent()){
+            managementUIState.getDistributionTableFilters().setSearchText(null);
+            eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
+        }
     }
 
     /*

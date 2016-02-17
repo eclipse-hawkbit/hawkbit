@@ -79,8 +79,7 @@ public class SoftwareModuleTable extends AbstractTable {
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
     
-    private Boolean isFilterApplied = false;
-
+ 
     /**
      * Initialize the filter layout.
      */
@@ -107,18 +106,7 @@ public class SoftwareModuleTable extends AbstractTable {
             if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
                     || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
                     || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
-                final Map<String, Object> queryConfig = prepareQueryConfigFilters();
-                if(queryConfig.size()<1 && isFilterApplied==false){
-                    UI.getCurrent().access(() -> ((LazyQueryContainer) getContainerDataSource()).refresh());
-                                                           
-                }else {
-                     refreshFilter();
-                    if(queryConfig.size()<1){
-                        isFilterApplied = false;
-                    }else{
-                        isFilterApplied = true;
-                    }
-                }
+                refreshFilter();
             }
         });
     }

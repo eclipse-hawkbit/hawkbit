@@ -95,9 +95,7 @@ public class SwModuleTable extends AbstractTable {
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
     
-    private Boolean isFilterApplied = false;
-
-    /**
+   /**
      * Initialize the filter layout.
      */
     @PostConstruct
@@ -126,21 +124,9 @@ public class SwModuleTable extends AbstractTable {
             if (filterEvent == SMFilterEvent.FILTER_BY_TYPE || filterEvent == SMFilterEvent.FILTER_BY_TEXT
                     || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TYPE
                     || filterEvent == SMFilterEvent.REMOVER_FILTER_BY_TEXT) {
-                final Map<String, Object> queryConfig = prepareQueryConfigFilters();
-                if(queryConfig.size()<2 && isFilterApplied==false){
-                    UI.getCurrent().access(() -> ((LazyQueryContainer) getContainerDataSource()).refresh());
-                                                           
-                }else {
-                    UI.getCurrent().access(() ->{ refreshFilter();
-                         styleTableOnDistSelection();
-                     });
-                    if(queryConfig.size()<2){
-                        isFilterApplied = false;
-                    }else{
-                        isFilterApplied = true;
-                    }
-                } 
-           }
+                refreshFilter();
+                styleTableOnDistSelection();
+            }
         });
     }
 
