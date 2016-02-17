@@ -37,16 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface ActionRepository extends BaseEntityRepository<Action, Long>, JpaSpecificationExecutor<Action> {
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.repository.CrudRepository#findAll()
-     */
-    @Override
-    @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    Iterable<Action> findAll();
-
     /**
      * Retrieves an Action with all lazy attributes.
      *
@@ -67,7 +57,6 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            the {@link DistributionSet} on which will be filtered
      * @return the found {@link Action}s
      */
-    @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
     Page<Action> findByDistributionSet(final Pageable pageable, final DistributionSet ds);
 
     /**
@@ -84,7 +73,8 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Retrieves all {@link Action}s which are active and referring the given
-     * {@link Target} in a specified order.
+     * {@link Target} in a specified order. Loads also the lazy
+     * {@link Action#getDistributionSet()} field.
      *
      * @param pageable
      *            page parameters
@@ -125,7 +115,6 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      * @return the found {@link UpdateAction}s
      */
     @Query("Select a from Action a where a.target = :target and a.distributionSet = :ds order by a.id")
-    @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
     Page<Action> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final Target target,
             @Param("ds") DistributionSet ds);
 
@@ -159,7 +148,8 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag
-     * ordered by action ID.
+     * ordered by action ID. Loads also the lazy
+     * {@link Action#getDistributionSet()} field.
      *
      * @param target
      *            to search for

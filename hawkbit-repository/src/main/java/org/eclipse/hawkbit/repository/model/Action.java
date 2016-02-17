@@ -35,21 +35,15 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * <p>
- * Applicable transition changes of the software {@link SoftwareModule} state of
- * a {@link Target}, e.g. install, uninstall, update, start, stop, and
- * preparations for the transition change, i.e. download.
+ * Applicable transition changes of the {@link SoftwareModule}s state of a
+ * {@link Target}, e.g. install, uninstall, update and preparations for the
+ * transition change, i.e. download.
  * </p>
  *
  * <p>
- * Actions are managed by the SP server (SPS) and applied to the edge controller
- * by the SP controller (SPC). Actions may also be value added commands that are
- * nor directly related to SP, e.g. factory reset.
+ * Actions are managed by the SP server and applied to the targets by the
+ * client.
  * <p>
- *
- *
- *
- *
- *
  */
 @Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
         @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
