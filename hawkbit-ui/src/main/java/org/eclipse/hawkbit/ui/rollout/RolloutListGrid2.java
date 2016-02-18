@@ -54,7 +54,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 
 @SpringComponent
 @ViewScope
-public class RolloutListGrid extends AbstractSimpleGrid {
+public class RolloutListGrid2 extends AbstractSimpleGrid {
     private static final long serialVersionUID = 4060904914954370524L;
 
     @Autowired

@@ -32,9 +32,14 @@ public class RolloutGroupsListView extends AbstractSimpleTableLayout {
     @Autowired
     private RolloutGroupListTable rolloutGroupListTable;
 
+    
+    @Autowired
+    private RolloutListGrid2 rolloutListGrid;
+    
+    
     @PostConstruct
     protected void init() {
-        super.init(rolloutGroupListHeader, rolloutGroupListTable);
+        super.init(rolloutGroupListHeader, rolloutGroupListTable,rolloutListGrid);
     }
 
     @Override

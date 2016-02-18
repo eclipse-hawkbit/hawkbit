@@ -78,6 +78,25 @@
                <nosuffix>true</nosuffix>
             </configuration>
          </plugin>
+		 <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<configuration>
+				<archive>
+					<index>true</index>
+					<manifest>
+						<addClasspath>true</addClasspath>
+						<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+					</manifest>
+					<manifestEntries>
+					<!-- Package format version - do not change -->
+						<Implementation-Title>DistributionBarRenderer</Implementation-Title>
+						<Vaadin-Package-Version>1</Vaadin-Package-Version>
+						<Vaadin-Widgetsets>org.eclipse.hawkbit.ui.distributionbar.DistributionBarRendererWidgetSet</Vaadin-Widgetsets>
+					</manifestEntries>
+				</archive>
+			</configuration>
+		</plugin>
       </plugins>
       <pluginManagement>
          <plugins>
@@ -173,8 +192,11 @@
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-server</artifactId>
       </dependency>
-
-      <dependency>
+	  <dependency>
+		 <groupId>com.vaadin</groupId>
+		 <artifactId>vaadin-client</artifactId>
+	  </dependency>
+	  <dependency>
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-push</artifactId>
       </dependency>

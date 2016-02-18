@@ -539,6 +539,14 @@ public final class SPUILabelDefinitions {
      * Total target coulmn property name.
      */
     public static final String VAR_TOTAL_TARGETS = "totalTargetsCount";
+    
+    
+    /**
+     * Total target count status coulmn property name.
+     */
+    public static final String VAR_TOTAL_TARGETS_COUNT_STATUS = "totalTargetCountStatus";
+    
+    
 
     /**
      * Constructor.

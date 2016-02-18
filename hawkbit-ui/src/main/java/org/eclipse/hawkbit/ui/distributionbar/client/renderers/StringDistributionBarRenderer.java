@@ -22,7 +22,7 @@ public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDis
     public void render(RendererCellReference cell, String input, GwtDistributionBar widget) {
         if (null != input) {
             widget.setNumberOfParts(2);
-            widget.addStyleName("progress-bar");
+            widget.addStyleName("status-bar");
             Map<String, Long> map = formatData(input);
             if (!map.isEmpty()) {
                 if (isNoTargets(map.values())) {

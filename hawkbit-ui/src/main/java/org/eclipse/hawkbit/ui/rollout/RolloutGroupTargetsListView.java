@@ -33,13 +33,14 @@ public class RolloutGroupTargetsListView extends AbstractSimpleTableLayout {
     
     @Autowired
     private RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
-
+    @Autowired
+    private RolloutListGrid3 rolloutListGrid;
     /**
      * Initialization of Rollout group component.
      */
     @PostConstruct
     protected void init() {
-        super.init(rolloutGroupTargetsListHeader, rolloutGroupTargetsListTable);
+        super.init(rolloutGroupTargetsListHeader, rolloutGroupTargetsListTable,rolloutListGrid);
     }
 
     @Override

@@ -197,33 +197,36 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
     }
 
     private void setRolloutStatusIcon(final Status targetUpdateStatus, final Label statusLabel) {
-        switch (targetUpdateStatus) {
-        case ERROR:
-            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-            statusLabel.addStyleName("statusIconRed");
-            break;
-        case SCHEDULED:
-            statusLabel.setValue(FontAwesome.BULLSEYE.getHtml());
-            statusLabel.addStyleName("statusIconBlue");
-            break;
-        case FINISHED:
-            statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-            statusLabel.addStyleName("statusIconGreen");
-            break;
-        case RUNNING:
-        case RETRIEVED:
-        case WARNING:
-        case DOWNLOAD:
-            statusLabel.setValue(FontAwesome.ADJUST.getHtml());
-            statusLabel.addStyleName("statusIconYellow");
-            break;
-        case CANCELED:
-        case CANCELING:
-            statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-            statusLabel.addStyleName("statusIconPending");
-            break;
-        default:
-            break;
-        }
+		switch (targetUpdateStatus) {
+		case ERROR:
+			statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+			statusLabel.addStyleName("statusIconRed");
+			break;
+		case SCHEDULED:
+			statusLabel.setValue(FontAwesome.BULLSEYE.getHtml());
+			statusLabel.addStyleName("statusIconBlue");
+			break;
+		case FINISHED:
+			statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+			statusLabel.addStyleName("statusIconGreen");
+			break;
+		case RUNNING:
+		case RETRIEVED:
+		case WARNING:
+		case DOWNLOAD:
+			statusLabel.setValue(FontAwesome.ADJUST.getHtml());
+			statusLabel.addStyleName("statusIconYellow");
+			break;
+		case CANCELED:
+			statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
+			statusLabel.addStyleName("statusIconPending");
+			break;
+		case CANCELING:
+			statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
+			statusLabel.addStyleName("statusIconGreen");
+			break;
+		default:
+			break;
+		}
     }
 }

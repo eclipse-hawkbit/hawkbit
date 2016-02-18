@@ -8,7 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.hawkbit.repository.model.Rollout;
+
+import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Label;
 
 /**
  * Proxy rollout with suctome properties.
@@ -45,6 +51,13 @@ public class ProxyRollout extends Rollout {
     private Boolean isActionRecieved = Boolean.FALSE;
 
     private String totalTargetsCount;
+    
+    //TODO remove this
+    private DistributionBarDetails distributionBarDetails ;
+    
+    //TODO remove this
+    private Map<String,Long> statusTotalCountMap = new HashMap<>();
+    
 
     /**
      * @return the distributionSetNameVersion
@@ -255,4 +268,27 @@ public class ProxyRollout extends Rollout {
     public void setTotalTargetsCount(final String totalTargetsCount) {
         this.totalTargetsCount = totalTargetsCount;
     }
+    
+    public Map<String, Long> getStatusTotalCountMap() {
+		return statusTotalCountMap;
+	}
+    
+    public void setStatusTotalCountMap(Map<String, Long> statusTotalCountMap) {
+		this.statusTotalCountMap = statusTotalCountMap;
+	}
+    
+    public DistributionBarDetails getDistributionBarDetails() {
+		return distributionBarDetails;
+	}
+    
+    public void setDistributionBarDetails(DistributionBarDetails distributionBarDetails) {
+		this.distributionBarDetails = distributionBarDetails;
+	}
+
+    public String getAction() { 
+        return FontAwesome.CIRCLE_O.getHtml();
+    }
+    
+    
+    
 }
