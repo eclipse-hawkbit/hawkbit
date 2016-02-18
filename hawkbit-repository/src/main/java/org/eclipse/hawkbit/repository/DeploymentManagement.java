@@ -380,7 +380,7 @@ public class DeploymentManagement {
 
         // flush to get action IDs
         entityManager.flush();
-        // select updated targets in order to return them
+        // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), targets.size(),
                 controllerIDs.size() - targets.size(),
@@ -393,12 +393,22 @@ public class DeploymentManagement {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
 
-        // send distribution set assignment event
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions, softwareModules);
+
+        return result;
+    }
+
+    /**
+     * @param targets
+     * @param targetIdsCancellList
+     * @param targetIdsToActions
+     * @param softwareModules
+     */
+    private void sendDistributionSetAssignmentEvent(final List<Target> targets, final Set<Long> targetIdsCancellList,
+            final Map<String, Action> targetIdsToActions, final List<SoftwareModule> softwareModules) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
                 .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
                         softwareModules));
-
-        return result;
     }
 
     /**
