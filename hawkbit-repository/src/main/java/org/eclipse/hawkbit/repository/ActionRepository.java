@@ -37,19 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface ActionRepository extends BaseEntityRepository<Action, Long>, JpaSpecificationExecutor<Action> {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.repository.CrudRepository#findAll()
-     */
-    @Override
-    @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    Iterable<Action> findAll();
-
     /**
      * Retrieves an Action with all lazy attributes.
-     * 
+     *
      * @param actionId
      *            the ID of the action
      * @return the found {@link Action}
@@ -67,13 +57,12 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            the {@link DistributionSet} on which will be filtered
      * @return the found {@link Action}s
      */
-    @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
     Page<Action> findByDistributionSet(final Pageable pageable, final DistributionSet ds);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
      * {@link Target}.
-     * 
+     *
      * @param pageable
      *            page parameters
      * @param target
@@ -84,8 +73,9 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Retrieves all {@link Action}s which are active and referring the given
-     * {@link Target} in a specified order.
-     * 
+     * {@link Target} in a specified order. Loads also the lazy
+     * {@link Action#getDistributionSet()} field.
+     *
      * @param pageable
      *            page parameters
      * @param target
@@ -125,14 +115,13 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      * @return the found {@link UpdateAction}s
      */
     @Query("Select a from Action a where a.target = :target and a.distributionSet = :ds order by a.id")
-    @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
     Page<Action> findByTargetAndDistributionSet(final Pageable pageable, @Param("target") final Target target,
             @Param("ds") DistributionSet ds);
 
     /**
      * Retrieves all {@link Action}s of a specific target, without pagination
      * ordered by action ID.
-     * 
+     *
      * @param target
      *            to search for
      * @return a list of actions according to the searched target
@@ -143,7 +132,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag
      * ordered by action ID.
-     * 
+     *
      * @param pageable
      *            the pagination parameter
      * @param target
@@ -159,8 +148,9 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Retrieves all {@link Action}s of a specific target and given active flag
-     * ordered by action ID.
-     * 
+     * ordered by action ID. Loads also the lazy
+     * {@link Action#getDistributionSet()} field.
+     *
      * @param target
      *            to search for
      * @param active
@@ -174,7 +164,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Updates all {@link Action} to inactive for all targets with given ID.
-     * 
+     *
      * @param keySet
      *            the list of actions to set inactive
      * @param targetsIds
@@ -190,7 +180,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      * Switches the status of actions from one specific status into another,
      * only if the actions are in a specific status. This should be a atomar
      * operation.
-     * 
+     *
      * @param statusToSet
      *            the new status the actions should get
      * @param targetIds
@@ -210,7 +200,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      * Switches the status of actions from one specific status into another,
      * only if the actions are in a specific status. This should be a atomar
      * operation.
-     * 
+     *
      * @param statusToSet
      *            the new status the actions should get
      * @param rollout
@@ -227,7 +217,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
 
     /**
-     * 
+     *
      * Retrieves all {@link Action}s which are active and referring to the given
      * target Ids and distribution set required migration step.
      *
@@ -243,36 +233,24 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Counts all {@link Action}s referring to the given target.
-     * 
+     *
      * @param target
      *            the target to count the {@link Action}s
      * @return the count of actions referring to the given target
      */
     Long countByTarget(Target target);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.repository.CrudRepository#save(java.lang.
-     * Iterable)
-     */
     @Override
     @CacheEvict(value = "feedbackReceivedOverTime", allEntries = true)
     <S extends Action> List<S> save(Iterable<S> entities);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.data.repository.CrudRepository#save(java.lang.Object)
-     */
     @Override
     @CacheEvict(value = "feedbackReceivedOverTime", allEntries = true)
     <S extends Action> S save(S entity);
 
     /**
      * Counts all {@link Action}s referring to the given DistributionSet.
-     * 
+     *
      * @param distributionSet
      *            DistributionSet to count the {@link Action}s from
      * @return the count of actions referring to the given distributionSet
@@ -281,7 +259,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Counts all {@link Action}s referring to the given rollout.
-     * 
+     *
      * @param rollout
      *            the rollout to count the {@link Action}s from
      * @return the count of actions referring to the given rollout
@@ -293,7 +271,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      * are currently not in the given status. An in-clause statement does not
      * work with the spring-data, so this is specific usecase regarding to the
      * rollout-management to find out actions which are not in specific states.
-     * 
+     *
      * @param rollout
      *            the rollout the actions are belong to
      * @param rolloutGroup
@@ -312,7 +290,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup.
-     * 
+     *
      * @param rollout
      *            the rollout the actions belong to
      * @param rolloutGroup
@@ -323,7 +301,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Counts all actions referring to a given rollout, rolloutgroup and status.
-     * 
+     *
      * @param rolloutId
      *            the ID of rollout the actions belong to
      * @param rolloutGroupId
@@ -338,7 +316,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     /**
      * Retrieving all actions referring to a given rollout with a specific
      * action as parent reference and a specific status.
-     * 
+     *
      * Finding all actions of a specific rolloutgroup parent relation.
      *
      * @param rollout
@@ -355,7 +333,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
-     * 
+     *
      * @param rollout
      *            the rollout the actions beglong to
      * @param actionStatus
@@ -367,7 +345,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout.
-     * 
+     *
      * @param rolloutId
      *            id of {@link Rollout}
      * @return list of objects with status and target count
@@ -378,7 +356,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout.
-     * 
+     *
      * @param rolloutId
      *            id of {@link Rollout}
      * @return list of objects with status and target count
@@ -389,7 +367,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout group.
-     * 
+     *
      * @param rolloutGroupId
      *            id of {@link RolloutGroup}
      * @return list of objects with status and target count
@@ -400,7 +378,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout group.
-     * 
+     *
      * @param rolloutGroupId
      *            list of id of {@link RolloutGroup}
      * @return list of objects with status and target count

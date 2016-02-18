@@ -199,13 +199,14 @@ public final class RepositoryDataGenerator {
 
         }
 
-        private void createActionStatusHistory(final List<Action> actions, final int sizeMultiplikator) {
+        private void createActionStatusHistory(final List<Long> actions, final int sizeMultiplikator) {
             final AtomicInteger counter = new AtomicInteger();
 
             int index = 0;
-            for (final Action actionGiven : actions) {
+            for (final Long actionGiven : actions) {
                 // retrieved
-                Action action = controllerManagement.registerRetrieved(actionGiven,
+                Action action = controllerManagement.registerRetrieved(
+                        deploymentManagement.findActionWithDetails(actionGiven),
                         "Controller retrieved update action and should start now the download.");
 
                 // download
@@ -260,10 +261,11 @@ public final class RepositoryDataGenerator {
             }
         }
 
-        private void createSimpleActionStatusHistory(final List<Action> actions) {
-            for (final Action actionGiven : actions) {
+        private void createSimpleActionStatusHistory(final List<Long> actions) {
+            for (final Long actionGiven : actions) {
                 // retrieved
-                Action action = controllerManagement.registerRetrieved(actionGiven,
+                Action action = controllerManagement.registerRetrieved(
+                        deploymentManagement.findActionWithDetails(actionGiven),
                         "Controller retrieved update action and should start now the download.");
 
                 // close

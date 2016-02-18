@@ -56,7 +56,8 @@ public class CancelActionTest extends AbstractIntegrationTest {
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(savedTarget);
 
-        final Action updateAction = deploymentManagement.assignDistributionSet(ds, toAssign).getActions().get(0);
+        final Action updateAction = deploymentManagement
+                .findActionWithDetails(deploymentManagement.assignDistributionSet(ds, toAssign).getActions().get(0));
 
         final Action cancelAction = deploymentManagement.cancelAction(updateAction,
                 targetManagement.findTargetByControllerID(savedTarget.getControllerId()));
@@ -112,7 +113,8 @@ public class CancelActionTest extends AbstractIntegrationTest {
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(savedTarget);
 
-        final Action updateAction = deploymentManagement.assignDistributionSet(ds, toAssign).getActions().get(0);
+        final Action updateAction = deploymentManagement
+                .findActionWithDetails(deploymentManagement.assignDistributionSet(ds, toAssign).getActions().get(0));
 
         long current = System.currentTimeMillis();
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
@@ -227,7 +229,8 @@ public class CancelActionTest extends AbstractIntegrationTest {
         final Target savedTarget = targetManagement.createTarget(target);
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(savedTarget);
-        final Action updateAction = deploymentManagement.assignDistributionSet(ds, toAssign).getActions().get(0);
+        final Action updateAction = deploymentManagement
+                .findActionWithDetails(deploymentManagement.assignDistributionSet(ds, toAssign).getActions().get(0));
 
         return deploymentManagement.cancelAction(updateAction,
                 targetManagement.findTargetByControllerID(savedTarget.getControllerId()));
@@ -243,8 +246,8 @@ public class CancelActionTest extends AbstractIntegrationTest {
 
         final Target savedTarget = targetManagement.createTarget(target);
 
-        final Action updateAction = deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4712" })
-                .getActions().get(0);
+        final Action updateAction = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4712" }).getActions().get(0));
 
         // cancel action manually
         final Action cancelAction = deploymentManagement.cancelAction(updateAction,
@@ -340,12 +343,12 @@ public class CancelActionTest extends AbstractIntegrationTest {
 
         final Target savedTarget = targetManagement.createTarget(target);
 
-        final Action updateAction = deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4712" })
-                .getActions().get(0);
-        final Action updateAction2 = deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4712" })
-                .getActions().get(0);
-        final Action updateAction3 = deploymentManagement.assignDistributionSet(ds3.getId(), new String[] { "4712" })
-                .getActions().get(0);
+        final Action updateAction = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4712" }).getActions().get(0));
+        final Action updateAction2 = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4712" }).getActions().get(0));
+        final Action updateAction3 = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds3.getId(), new String[] { "4712" }).getActions().get(0));
 
         assertThat(actionStatusRepository.findAll()).hasSize(3);
 
@@ -456,8 +459,8 @@ public class CancelActionTest extends AbstractIntegrationTest {
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(target);
 
-        final Action action = deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4712" })
-                .getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4712" }).getActions().get(0));
 
         final Action cancelAction = deploymentManagement.cancelAction(action,
                 targetManagement.findTargetByControllerID(target.getControllerId()));
