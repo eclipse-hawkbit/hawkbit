@@ -398,12 +398,6 @@ public class DeploymentManagement {
         return result;
     }
 
-    /**
-     * @param targets
-     * @param targetIdsCancellList
-     * @param targetIdsToActions
-     * @param softwareModules
-     */
     private void sendDistributionSetAssignmentEvent(final List<Target> targets, final Set<Long> targetIdsCancellList,
             final Map<String, Action> targetIdsToActions, final List<SoftwareModule> softwareModules) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
