@@ -59,12 +59,13 @@ public class BaseAmqpService {
     }
 
     /**
-     * Is needed to convert a incoming message to is originally object type.
+     * Is needed to convert a incoming message to is originally list object
+     * type.
      *
      * @param message
      *            the message to convert.
      * @param clazz
-     *            the class of the originally object.
+     *            the class of the list content.
      * @return
      */
     @SuppressWarnings("unchecked")
