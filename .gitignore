@@ -16,6 +16,11 @@
 *.jar
 *.war
 
+######################
+# Sonar
+######################
+.sonar_lock
+
 # Eclipse IDE
 
 *.pydevproject
