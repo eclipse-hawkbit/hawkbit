@@ -167,45 +167,48 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
 
     @Override
     protected void addContainerProperties(final Container container) {
-        final LazyQueryContainer rolloutTableContainer = (LazyQueryContainer) container;
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_ID, String.class, null, false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutGroupStatus.class, null,
+        final LazyQueryContainer rolloutGroupGridContainer = (LazyQueryContainer) container;
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_ID, String.class, null, false, false);
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutGroupStatus.class, null,
                 false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE, String.class,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE, String.class,
                 null, false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, String.class, null,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, String.class, null,
                 false, false);
 
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD, String.class, null, false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD, String.class, null, false,
                 false);
 
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,
                 false);
 
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_DATE, String.class, null, false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_DATE, String.class, null, false,
                 false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_USER, String.class, null, false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_USER, String.class, null, false,
                 false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null, false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null, false,
                 false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, Long.class, 0L,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, Long.class, 0L,
                 false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, Long.class, 0L,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, Long.class, 0L,
                 false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, Long.class, 0L,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, Long.class, 0L,
                 false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, Long.class, 0L, false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, Long.class, 0L, false,
                 false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, Long.class, 0L,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, Long.class, 0L,
                 false, false);
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, Long.class, 0L,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, Long.class, 0L,
                 false, false);
-        rolloutTableContainer.addContainerProperty(IS_ACTION_RECIEVED, Boolean.class, false, false, false);
+        rolloutGroupGridContainer.addContainerProperty(IS_ACTION_RECIEVED, Boolean.class, false, false, false);
 
-        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS, String.class, "0", false,
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS, String.class, "0", false,
                 false);
+        
+        rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
+                TotalTargetCountStatus.class, null, false, false);
 
     }
 
