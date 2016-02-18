@@ -363,6 +363,11 @@
             <artifactId>vaadin-push</artifactId>
             <version>${vaadin.version}</version>
          </dependency>
+         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-client</artifactId>
+            <version>${vaadin.version}</version>
+         </dependency>
          <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory).
             For widgetset compilation, vaadin-client-compiler is automatically added
             on the compilation classpath by vaadin-maven-plugin so normally there is

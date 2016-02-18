@@ -32,10 +32,13 @@ public class RolloutListView extends AbstractSimpleTableLayout {
 
     @Autowired
     private RolloutListTable rolloutListTable;
+    
+    @Autowired
+    private RolloutListGrid rolloutListGrid;
 
     @PostConstruct
     void init() {
-        super.init(rolloutListHeader, rolloutListTable);
+        super.init(rolloutListHeader, rolloutListTable,rolloutListGrid);
     }
 
     

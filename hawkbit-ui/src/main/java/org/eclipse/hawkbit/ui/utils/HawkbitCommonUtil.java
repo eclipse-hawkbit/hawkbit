@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
@@ -30,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -1348,4 +1350,24 @@ public final class HawkbitCommonUtil {
     private static Long getStatusCount(final String propertName, final Item item) {
         return (Long) item.getItemProperty(propertName).getValue();
     }
+
+    /**
+     * Get the formatted string of status and target count details.
+     * 
+     * @param details
+     *            details of status and count
+     * @return String
+     */
+    public static String getFormattedString(Map<Status, Long> details) {
+        StringBuilder val = new StringBuilder();
+        String finalVal = null;
+        if (null != details && !details.isEmpty()) {
+            for (Entry<Status, Long> entry : details.entrySet()) {
+                val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
+            }
+            finalVal = val.substring(0, val.length() - 1);
+        }
+        return finalVal;
+    }
+    
 }

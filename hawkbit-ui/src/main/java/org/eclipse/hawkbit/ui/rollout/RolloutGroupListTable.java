@@ -145,11 +145,11 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         columnList.add(new TableColumn(SPUIDefinitions.DETAIL_STATUS, i18n.get("header.detail.status"), 0.42f));
         columnList
                 .add(new TableColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS, i18n.get("header.total.targets"), 0.08f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE,
+        columnList.add(new TableColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE,
                 i18n.get("header.rolloutgroup.installed.percentage"), 0.1f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD,
+        columnList.add(new TableColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD,
                 i18n.get("header.rolloutgroup.threshold.error"), 0.1f));
-        columnList.add(new TableColumn(SPUIDefinitions.ROLLOUT_GROUP_THRESHOLD,
+        columnList.add(new TableColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD,
                 i18n.get("header.rolloutgroup.threshold"), 0.1f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.15f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.15f));
@@ -173,12 +173,12 @@ public class RolloutGroupListTable extends AbstractSimpleTable {
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutGroupStatus.class, null,
                 false, false);
-        rolloutTableContainer.addContainerProperty(SPUIDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE, String.class,
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE, String.class,
                 null, false, false);
-        rolloutTableContainer.addContainerProperty(SPUIDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, String.class, null,
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD, String.class, null,
                 false, false);
 
-        rolloutTableContainer.addContainerProperty(SPUIDefinitions.ROLLOUT_GROUP_THRESHOLD, String.class, null, false,
+        rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD, String.class, null, false,
                 false);
 
         rolloutTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false,

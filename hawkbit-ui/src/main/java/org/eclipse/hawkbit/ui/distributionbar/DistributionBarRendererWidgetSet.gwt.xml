@@ -1,0 +1,17 @@
+<module>
+
+    <!-- Inherit DefaultWidgetSet -->
+    <inherits name="com.vaadin.DefaultWidgetSet"/>
+
+    <inherits name="org.vaadin.alump.distributionbar.gwt.DistributionBarWidgetset" />
+
+    <inherits name="org.eclipse.hawkbit.ui.AppWidgetSet" />
+
+    <inherits name="org.vaadin.peter.contextmenu.ContextmenuWidgetset" />
+
+    <inherits name="org.vaadin.tokenfield.TokenfieldWidgetset" />
+
+    <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
+
+    
+</module>

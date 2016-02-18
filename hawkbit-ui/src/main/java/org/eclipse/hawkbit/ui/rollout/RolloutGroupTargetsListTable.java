@@ -196,7 +196,7 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
         }
     }
 
-    private void setRolloutStatusIcon(final Status targetUpdateStatus, final Label statusLabel) {
+     private void setRolloutStatusIcon(final Status targetUpdateStatus, final Label statusLabel) {
 		switch (targetUpdateStatus) {
 		case ERROR:
 			statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
