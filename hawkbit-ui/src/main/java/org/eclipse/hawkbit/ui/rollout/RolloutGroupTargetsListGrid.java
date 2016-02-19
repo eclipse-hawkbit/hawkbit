@@ -98,17 +98,31 @@ public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
 
     @Override
     protected void setColumnExpandRatio() {
+        setSizeFull();
         getColumn(SPUILabelDefinitions.VAR_NAME).setExpandRatio(1);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(300);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(200);
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(75);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(100);
 
         getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMaximumWidth(200);
+
         getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setMaximumWidth(200);
+
+
         getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMaximumWidth(200);
+
+
         getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(200);
+
+
         getColumn(SPUILabelDefinitions.VAR_DESC).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.VAR_DESC).setMaximumWidth(200);
+
         getColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).setExpandRatio(0);
 
     }
@@ -201,10 +215,10 @@ public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
                     case DOWNLOAD:
                         result = "<div class=\"statusIconYellow\">" + FontAwesome.ADJUST.getHtml() + "</div>";
                         break;
-                    case CANCELED:
+                    case CANCELING:
                         result = "<div class=\"statusIconPending\">" + FontAwesome.TIMES_CIRCLE.getHtml() + "</div>";
                         break;
-                    case CANCELING:
+                    case CANCELED:
                         result = "<div class=\"statusIconGreen\">" + FontAwesome.TIMES_CIRCLE.getHtml() + "</div>";
                         break;
                     case ERROR:

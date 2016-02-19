@@ -37,6 +37,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 @SpringComponent
@@ -146,7 +147,7 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
     @Override
     protected void setColumnExpandRatio() {
         getColumn(SPUILabelDefinitions.VAR_NAME).setExpandRatio(1);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(300);
+        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(150);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMinimumWidth(95);
@@ -155,11 +156,17 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
         getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(75);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setExpandRatio(2);
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(600);
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(400);
 
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE).setMinimumWidth(80);
+
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD).setMinimumWidth(100);
+
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setMinimumWidth(140);
+
         getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setExpandRatio(0);
@@ -180,7 +187,7 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
         getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD)
                 .setHeaderCaption(i18n.get("header.rolloutgroup.threshold"));
         getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setHeaderCaption(i18n.get("header.createdBy"));
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.get("header.createdBy"));
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setHeaderCaption(i18n.get("header.createdDate"));
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setHeaderCaption(i18n.get("header.modifiedDate"));
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setHeaderCaption(i18n.get("header.modifiedBy"));
         getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.get("header.description"));
@@ -267,7 +274,7 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
                             result = "<div class=\"statusIconBlue\">" + FontAwesome.BULLSEYE.getHtml() + "</div>";
                             break;
                         case RUNNING:
-                            result = "<div class=\"statusIconYellow\">" + FontAwesome.ADJUST.getHtml() + "</div>";
+                            result = "<div class=\"statusIconYellow\"><span  title=\"xxx\">" + FontAwesome.ADJUST.getHtml() + "</span></div>";
                             break;
                         case READY:
                             result = "<div class=\"statusIconLightBlue\"> <span title=\"xxx\">"

@@ -39,7 +39,7 @@ public abstract class AbstractSimpleGrid extends Grid {
         setHeight("200px");
         setWidth("200px");
         
-        addStyleName("sp-table rollout-table");
+//        addStyleName("sp-table rollout-table");
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
         

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.vaadin.alump.distributionbar.gwt.client.GwtDistributionBar;
+import org.vaadin.alump.distributionbar.gwt.client.dom.ToolTipPresenter.TooltipClassNameProvider;
 
 import com.google.gwt.core.client.GWT;
 import com.vaadin.client.renderers.WidgetRenderer;
@@ -13,9 +14,18 @@ import com.vaadin.client.widget.grid.RendererCellReference;
 
 public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDistributionBar> {
 
+    private String uiWidgetClassName;
+
     @Override
     public GwtDistributionBar createWidget() {
-        return GWT.create(GwtDistributionBar.class);
+        GwtDistributionBar gwt = GWT.create(GwtDistributionBar.class);
+        gwt.setTooltipClassNameProvider(new TooltipClassNameProvider() {
+            @Override
+            public String getClassNames() {
+                return getUiWidgetClassName();
+            }
+        });
+        return gwt;
     }
 
     @Override
@@ -74,12 +84,19 @@ public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDis
         return true;
     }
 
-
     private void setBarPartSize(final GwtDistributionBar bar, final String statusName, final int count,
             final int index) {
         bar.setPartSize(index, count);
         bar.setPartTooltip(index, statusName);
         bar.setPartStyleName(index, index, "status-bar-part-" + statusName);
+    }
+
+    public String getUiWidgetClassName() {
+        return uiWidgetClassName;
+    }
+
+    public void setUiWidgetClassName(String uiWidgetClassName) {
+        this.uiWidgetClassName = uiWidgetClassName;
     }
 
 }
