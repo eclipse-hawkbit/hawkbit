@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.components;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.sass.internal.util.StringUtil;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
@@ -109,7 +109,7 @@ public final class SPUIComponentProvider {
         // Do we really need this???
         HorizontalLayout hLayout = getHorizontalLayout(new SPUIHorizontalLayout().getUiHorizontalLayout().getClass());
         try {
-            SPUIHeaderLayoutDecorator layoutDecorator = null;
+            SPUIHeaderLayoutDecorator layoutDecorator;
             if (tableHeaderLayoutDecorator != null) {
                 layoutDecorator = tableHeaderLayoutDecorator.newInstance();
                 hLayout = layoutDecorator.decorate(hLayout);
@@ -324,7 +324,7 @@ public final class SPUIComponentProvider {
      * @return Label
      */
     public static Label createNameValueLabel(final String label, final String... values) {
-        final String valueStr = StringUtil.collectionToDelimitedString(Arrays.asList(values), " ");
+        final String valueStr = StringUtils.join(Arrays.asList(values), " ");
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + valueStr, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
