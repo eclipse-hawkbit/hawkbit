@@ -15,7 +15,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>1.2.7.RELEASE</version>
+      <version>1.2.8.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -57,42 +57,49 @@
    </repositories>
 
    <properties>
-      <spring.boot.version>1.2.7.RELEASE</spring.boot.version>
+      <spring.boot.version>1.2.8.RELEASE</spring.boot.version>
 
-      <!-- Spring boot overrides - START -->
-      <h2.version>1.4.186</h2.version>
+      <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
+      <!-- Newer versions needed than defined in Boot-->
       <jackson.version>2.5.0</jackson.version>
       <hibernate-validator.version>5.2.2.Final</hibernate-validator.version>
-      <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
       <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
-      <mongodb.version>3.0.2</mongodb.version>
-      <!-- Spring boot overrides - END -->
+      <!--  Support for MongoDB 3 -->
+      <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
+      <mongodb.version>3.2.2</mongodb.version>
+      <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.0.0</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.5.7</vaadin.version>
+      <vaadin.version>7.5.10</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
       <!-- Vaadin versions - END -->
 
-      <!-- Misc -->
+      <!-- Misc libraries versions - START -->
       <fest-assert.version>1.4</fest-assert.version>
       <org.easytesting.version>2.0M10</org.easytesting.version>
-      <java.version>1.8</java.version>
       <allure.version>1.4.15</allure.version>
-      <eclipselink.version>2.6.0</eclipselink.version>
+      <eclipselink.version>2.6.2</eclipselink.version>
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <json-path.version>0.9.1</json-path.version>
       <commons-lang3.version>3.4</commons-lang3.version>
       <aspectj.version>1.8.5</aspectj.version>
+      <guava.version>19.0</guava.version>
+      <mariadb-java-client.version>1.3.5</mariadb-java-client.version>
+      <embedded-mongo.version>1.50.2</embedded-mongo.version>
+      <!-- Misc libraries versions - END -->
+      
+      <java.version>1.8</java.version>
 
-      <!-- Release -->
+      <!-- Release - START -->
       <release.scm.connection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.connection>
       <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
       <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
+      <!-- Release - END -->
 
-      <!-- Sonar -->
+      <!-- Sonar - START-->
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -123,7 +130,7 @@
       <!-- Tells Sonar where the Jacoco coverage result file is located for
          Integration Tests -->
       <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
-      <guava.version>19.0</guava.version>
+      <!-- Sonar - END-->
    </properties>
 
 
@@ -335,7 +342,7 @@
          <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>${slf4j.version}</version>
          </dependency>
          <!-- Vaadin -->
          <dependency>
@@ -582,7 +589,7 @@
          <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.50.0</version>
+            <version>${embedded-mongo.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -624,7 +631,7 @@
          <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>1.2.3</version>
+            <version>${mariadb-java-client.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
