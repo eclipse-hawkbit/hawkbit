@@ -74,6 +74,11 @@
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
       <vaadin.version>7.5.10</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+      <vaadin.addon.vaadin-lazyquerycontainer.version>7.4.0.1</vaadin.addon.vaadin-lazyquerycontainer.version>
+      <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
+      <vaadin.addon.tokenfield.version>7.0.1</vaadin.addon.tokenfield.version>
+      <vaadin.addon.dbar-addon.version>1.2.0</vaadin.addon.dbar-addon.version>
+      <vaadin.addon.contextmenu.version>4.5</vaadin.addon.contextmenu.version>
       <!-- Vaadin versions - END -->
 
       <!-- Misc libraries versions - START -->
@@ -84,11 +89,18 @@
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <json-path.version>0.9.1</json-path.version>
-      <commons-lang3.version>3.4</commons-lang3.version>
       <aspectj.version>1.8.5</aspectj.version>
       <guava.version>19.0</guava.version>
       <mariadb-java-client.version>1.3.5</mariadb-java-client.version>
       <embedded-mongo.version>1.50.2</embedded-mongo.version>
+      <jersey-client.version>1.18.1</jersey-client.version>
+      <javax.el-api.version>2.2.4</javax.el-api.version>
+      <corn-cps.version>1.1.7</corn-cps.version>
+      <jlorem.version>1.1</jlorem.version>
+      <json-simple.version>1.1.1</json-simple.version>
+      <commons-lang3.version>3.4</commons-lang3.version>
+      <json.version>20141113</json.version>
+      <rsql-parser.version>2.0.0</rsql-parser.version>
       <!-- Misc libraries versions - END -->
       
       <java.version>1.8</java.version>
@@ -402,44 +414,44 @@
          <dependency>
             <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
             <artifactId>vaadin-lazyquerycontainer</artifactId>
-            <version>7.4.0.1</version>
+            <version>${vaadin.addon.vaadin-lazyquerycontainer.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>flexibleoptiongroup</artifactId>
-            <version>2.2.0</version>
+            <version>${vaadin.addon.flexibleoptiongroup.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>tokenfield</artifactId>
-            <version>7.0.1</version>
+            <version>${vaadin.addon.tokenfield.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.alump.distributionbar</groupId>
             <artifactId>dbar-addon</artifactId>
-            <version>1.2.0</version>
+            <version>${vaadin.addon.dbar-addon.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>contextmenu</artifactId>
-            <version>4.5</version>
+            <version>${vaadin.addon.contextmenu.version}</version>
          </dependency>
 
          <!-- Misc -->
          <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
-            <version>2.2.4</version>
+            <version>${javax.el-api.version}</version>
          </dependency>
          <dependency>
             <groupId>net.sf.corn</groupId>
             <artifactId>corn-cps</artifactId>
-            <version>1.1.7</version>
+            <version>${corn-cps.version}</version>
          </dependency>
          <dependency>
             <groupId>net._01001111</groupId>
             <artifactId>jlorem</artifactId>
-            <version>1.1</version>
+            <version>${jlorem.version}</version>
          </dependency>
          <!-- Spring -->
          <dependency>
@@ -521,13 +533,6 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Override of classmate version, that is a hibernate validator
-            dependency. allow PB of CQ -->
-         <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>classmate</artifactId>
-            <version>1.3.0</version>
-         </dependency>
          <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
@@ -537,7 +542,7 @@
          <dependency>
             <groupId>cz.jirutka.rsql</groupId>
             <artifactId>rsql-parser</artifactId>
-            <version>2.0.0</version>
+            <version>${rsql-parser.version}</version>
          </dependency>
          <!-- JSON PATH, used to e.g. parse vcap services from environment -->
          <dependency>
@@ -548,7 +553,7 @@
          <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
+            <version>${json-simple.version}</version>
             <exclusions>
                <exclusion>
                   <groupId>junit</groupId>
@@ -556,13 +561,13 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Spring boot overrides - START -->
-         <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
+         
+          <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
          </dependency>
-         <!-- Spring boot overrides - END -->
+         
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -575,15 +580,9 @@
             </exclusions>
          </dependency>
          <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <version>4.0.3</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20141113</version>
+            <version>${json.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -613,7 +612,7 @@
          <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>1.18.1</version>
+            <version>${jersey-client.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -625,7 +624,7 @@
          <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path-assert</artifactId>
-            <version>0.9.1</version>
+            <version>${json-path.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
