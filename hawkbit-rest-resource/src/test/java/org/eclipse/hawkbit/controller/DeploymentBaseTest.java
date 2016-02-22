@@ -52,7 +52,7 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @ActiveProfiles({ "im", "test" })
-@Features("Component Tests - Controller RESTful API")
+@Features("Component Tests - Direct Device Integration API")
 @Stories("Deployment Action Resource")
 public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
