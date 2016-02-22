@@ -26,6 +26,9 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         if (value != null) {
             label.setHTML("<span>&#x" + Integer.toHexString(Integer.parseInt(value)) + ";</span>");
         }
+        else{
+            label.setHTML("<span></span>");
+        }
         applyStyle(label, style);
         label.setTitle(description);
         label.getElement().setId(id);
@@ -33,7 +36,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
 
     private void applyStyle(VLabel label, String style) {
         label.setStylePrimaryName("v-label");
-        label.addStyleName("small v-label-small");
+        label.setStyleName("small v-label-small");
         label.addStyleName("font-icon v-label-font-icon");
         if (style != null) {
             label.addStyleName(style + " v-label-" + style);

@@ -28,14 +28,12 @@ public abstract class AbstractSimpleTableLayout extends VerticalLayout {
 
     private AbstractSimpleTableHeader tableHeader;
 
-    private AbstractSimpleTable table;
     
     private AbstractSimpleGrid grid;
 
 
-    protected void init(final AbstractSimpleTableHeader tableHeader, final AbstractSimpleTable table,final AbstractSimpleGrid grid) {
+    protected void init(final AbstractSimpleTableHeader tableHeader,final AbstractSimpleGrid grid) {
         this.tableHeader = tableHeader;
-        this.table = table;
         this.grid = grid;
         buildLayout();
     }
@@ -54,7 +52,7 @@ public abstract class AbstractSimpleTableLayout extends VerticalLayout {
         tableHeaderLayout.addComponent(tableHeader);
 
         tableHeaderLayout.setComponentAlignment(tableHeader, Alignment.TOP_CENTER);
-        grid.setSizeFull();
+//        grid.setSizeFull();
         tableHeaderLayout.addComponent(grid);
         tableHeaderLayout.setComponentAlignment(grid, Alignment.TOP_CENTER);
         tableHeaderLayout.setExpandRatio(grid, 1.0f);

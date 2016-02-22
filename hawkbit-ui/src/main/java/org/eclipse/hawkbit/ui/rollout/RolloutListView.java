@@ -31,27 +31,22 @@ public class RolloutListView extends AbstractSimpleTableLayout {
     private RolloutListHeader rolloutListHeader;
 
     @Autowired
-    private RolloutListTable rolloutListTable;
-    
-    @Autowired
     private RolloutListGrid rolloutListGrid;
 
     @PostConstruct
     void init() {
-        super.init(rolloutListHeader, rolloutListTable,rolloutListGrid);
+        super.init(rolloutListHeader, rolloutListGrid);
     }
 
-    
     @Override
     protected boolean hasCountMessage() {
-       
+
         return false;
     }
 
-   
     @Override
     protected Label getCountMessageLabel() {
-        
+
         return null;
     }
 

@@ -8,17 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.TableColumn;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Indexed;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -36,40 +31,28 @@ public abstract class AbstractSimpleGrid extends Grid {
         setSizeFull();
         setImmediate(true);
         setId(getTableId());
-        setHeight("200px");
-        setWidth("200px");
-        
-//        addStyleName("sp-table rollout-table");
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
-        
+
         addNewContainerDS();
-        
-//        addValueChangeListener(event -> onValueChange());
-//        setPageLength(SPUIDefinitions.PAGE_SIZE);
         setSelectionMode(SelectionMode.NONE);
-//        setColumnCollapsingAllowed(true);
-        addColumnRenderes();
         setColumnReorderingAllowed(true);
     }
 
-
-
-
-	public void addNewContainerDS() {
+    private void addNewContainerDS() {
         final Container container = createContainer();
         setContainerDataSource((Indexed) container);
         addContainerProperties();
+        setColumnExpandRatio();
         setColumnProperties();
         setColumnHeaderNames();
-        setColumnExpandRatio();
-        
-        //Allow column hiding
+        addColumnRenderes();
+        // Allow column hiding
         for (Column c : getColumns()) {
-        	c.setHidable(true);
+            c.setHidable(true);
         }
         setHiddenColumns();
-        
+
         int size = 0;
         if (container != null) {
             size = container.size();
@@ -77,22 +60,22 @@ public abstract class AbstractSimpleGrid extends Grid {
         if (size == 0) {
             setData(SPUIDefinitions.NO_DATA);
         }
+        
     }
-	
-	 
+
     protected abstract Container createContainer();
-    
+
     protected abstract void addContainerProperties();
 
-    protected abstract void setColumnExpandRatio() ;
+    protected abstract void setColumnExpandRatio();
 
-	protected abstract void setColumnHeaderNames() ;
+    protected abstract void setColumnHeaderNames();
 
     protected abstract String getTableId();
 
-	protected abstract void setColumnProperties() ;
-    
-	protected abstract void  addColumnRenderes() ;
-	
-	protected abstract void setHiddenColumns();
+    protected abstract void setColumnProperties();
+
+    protected abstract void addColumnRenderes();
+
+    protected abstract void setHiddenColumns();
 }

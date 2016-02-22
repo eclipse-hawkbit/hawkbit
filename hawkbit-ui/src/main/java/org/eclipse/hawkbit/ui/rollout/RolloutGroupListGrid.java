@@ -149,31 +149,35 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
     @Override
     protected void setColumnExpandRatio() {
         getColumn(SPUILabelDefinitions.VAR_NAME).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(150);
 
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMinimumWidth(95);
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMaximumWidth(100);
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(75);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMaximumWidth(75);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setExpandRatio(2);
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(400);
 
-        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE).setMinimumWidth(80);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE).setMaximumWidth(100);
 
-        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD).setMinimumWidth(100);
+        
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD).setMaximumWidth(100);
 
-        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setMinimumWidth(140);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD).setMaximumWidth(100);
 
         getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setExpandRatio(0);
         getColumn(SPUILabelDefinitions.VAR_DESC).setExpandRatio(0);
+        getColumn(SPUILabelDefinitions.VAR_ID).setExpandRatio(0);
+        setFrozenColumnCount(7);
     }
 
     @Override
@@ -217,7 +221,6 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
         columnList.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
         columnList.add(SPUILabelDefinitions.VAR_DESC);
         setColumnOrder(columnList.toArray());
-
         alignColumns();
     }
 
@@ -289,23 +292,23 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
         String result = null;
         switch (value) {
         case FINISHED:
-            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()),
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()),
                     value.name().toLowerCase(), "statusIconGreen", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case SCHEDULED:
-            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.BULLSEYE.getCodepoint()),
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.BULLSEYE.getCodepoint()),
                     value.name().toLowerCase(), "statusIconBlue", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case RUNNING:
-            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.ADJUST.getCodepoint()),
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.ADJUST.getCodepoint()),
                     value.name().toLowerCase(), "statusIconYellow", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case READY:
-            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
                     value.name().toLowerCase(), "statusIconLightBlue", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case ERROR:
-            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
                     value.name().toLowerCase(), "statusIconRed", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         default:

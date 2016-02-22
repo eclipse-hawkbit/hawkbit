@@ -19,7 +19,7 @@ public class HtmlButtonRenderer extends ButtonRenderer {
 
     private void applystyles(Button button) {
         button.setStylePrimaryName("v-button");
-        button.addStyleName("tiny v-button-tiny");
+        button.setStyleName("tiny v-button-tiny");
         button.addStyleName("borderless v-button-borderless");
         button.addStyleName("icon-only v-button-icon-only");
         button.addStyleName("button-no-border v-button-button-no-border");

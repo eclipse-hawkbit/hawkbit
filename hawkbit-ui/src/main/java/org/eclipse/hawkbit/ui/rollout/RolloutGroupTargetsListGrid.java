@@ -10,8 +10,10 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -29,7 +31,6 @@ import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.renderers.HtmlRenderer;
 
 @SpringComponent
 @ViewScope
@@ -98,32 +99,29 @@ public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
 
     @Override
     protected void setColumnExpandRatio() {
-        setSizeFull();
-        getColumn(SPUILabelDefinitions.VAR_NAME).setExpandRatio(1);
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(200);
+        getColumn(SPUILabelDefinitions.VAR_NAME).setExpandRatio(2);
+        getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(200);
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(100);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(150);
 
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMaximumWidth(200);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMaximumWidth(250);
 
-        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setMaximumWidth(200);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setMaximumWidth(250);
 
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMaximumWidth(250);
 
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMaximumWidth(200);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(250);
 
-
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(200);
-
-
-        getColumn(SPUILabelDefinitions.VAR_DESC).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_DESC).setMaximumWidth(200);
+        getColumn(SPUILabelDefinitions.VAR_DESC).setExpandRatio(1);
+        getColumn(SPUILabelDefinitions.VAR_DESC).setMaximumWidth(300);
 
         getColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).setExpandRatio(0);
+        setFrozenColumnCount(getColumns().size());
 
     }
 
@@ -180,11 +178,11 @@ public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
 
     @Override
     protected void setHiddenColumns() {
-            getColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).setHidden(true);
+        getColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).setHidden(true);
     }
 
     private void addStatusCoulmn() {
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlRenderer(), new Converter<String, Status>() {
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new Converter<String, Status>() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -198,31 +196,45 @@ public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
                     final Locale locale) {
                 String result = null;
                 if (status == null) {
-                    //Actions are not created for targets when rollout's status is READY and when duplicate assignment is done.
-                    //In these cases display a appropriate status with description
-                    return getStatus(status);
+                    // Actions are not created for targets when rollout's status
+                    // is READY and when duplicate assignment is done.
+                    // In these cases display a appropriate status with
+                    // description
+                    return getStatus();
                 } else {
                     switch (status) {
                     case FINISHED:
-                        result = "<div class=\"statusIconGreen\">" + FontAwesome.CHECK_CIRCLE.getHtml() + "</div>";
+                        result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                                Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), status.name().toLowerCase(),
+                                "statusIconGreen", null);
                         break;
                     case SCHEDULED:
-                        result = "<div class=\"statusIconBlue\">" + FontAwesome.BULLSEYE.getHtml() + "</div>";
+                        result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                                Integer.toString(FontAwesome.BULLSEYE.getCodepoint()), status.name().toLowerCase(),
+                                "statusIconBlue", null);
                         break;
                     case RUNNING:
                     case RETRIEVED:
                     case WARNING:
                     case DOWNLOAD:
-                        result = "<div class=\"statusIconYellow\">" + FontAwesome.ADJUST.getHtml() + "</div>";
+                        result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                                Integer.toString(FontAwesome.ADJUST.getCodepoint()), status.name().toLowerCase(),
+                                "statusIconYellow", null);
                         break;
                     case CANCELING:
-                        result = "<div class=\"statusIconPending\">" + FontAwesome.TIMES_CIRCLE.getHtml() + "</div>";
+                        result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                                Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), status.name().toLowerCase(),
+                                "statusIconPending", null);
                         break;
                     case CANCELED:
-                        result = "<div class=\"statusIconGreen\">" + FontAwesome.TIMES_CIRCLE.getHtml() + "</div>";
+                        result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                                Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), status.name().toLowerCase(),
+                                "statusIconGreen", null);
                         break;
                     case ERROR:
-                        result = "<div class=\"statusIconRed\">" + FontAwesome.EXCLAMATION_CIRCLE.getHtml() + "</div>";
+                        result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                                Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
+                                status.name().toLowerCase(), "statusIconRed", null);
                         break;
                     default:
                         break;
@@ -243,19 +255,19 @@ public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
         });
     }
 
-    private String getStatus(Status status) {
+    private String getStatus() {
         final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
                 ? rolloutUIState.getRolloutGroup().get() : null;
         if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
-            return "<div class=\"statusIconLightBlue\">" + FontAwesome.DOT_CIRCLE_O.getHtml() + "</div>";
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), RolloutGroupStatus.READY.toString().toLowerCase(),
+                    "statusIconLightBlue", null);
         } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
-            return "<div class=\"statusIconBlue\">" + FontAwesome.MINUS_CIRCLE.getHtml() + "</div>";
-            // TODO set descriptionf or status icons
-            // final String dsNameVersion = (String) item.getItemProperty(
-            // SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).getValue();
-            // statusLabel.setDescription(i18n
-            // .get("message.dist.already.assigned", new Object[] {
-            // dsNameVersion }));
+            String ds =  rolloutUIState.getRolloutDistributionSet().isPresent()? rolloutUIState.getRolloutDistributionSet() .get():"";
+            ds = ds.replace(":", "-");
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.MINUS_CIRCLE.getCodepoint()),
+                    i18n.get("message.dist.already.assigned", new Object[] { ds }), "statusIconBlue", null);
         }
         return null;
     }

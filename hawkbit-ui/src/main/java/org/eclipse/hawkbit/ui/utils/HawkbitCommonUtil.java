@@ -17,9 +17,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
@@ -31,10 +31,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.slf4j.Logger;
@@ -1371,8 +1371,21 @@ public final class HawkbitCommonUtil {
         return finalVal;
     }
 
-    
-    public static String getFormattedString(String value, String description, String style, String id) {
+    /**
+     * Returns a formatted string as needed by label custom render .This string
+     * holds the properties of a status label.
+     * 
+     * @param value
+     *            label value
+     * @param description
+     *            label description
+     * @param style
+     *            label style
+     * @param id
+     *            label id
+     * @return
+     */
+    public static String getStatusLabelDetailsInString(String value, String description, String style, String id) {
         StringBuilder val = new StringBuilder();
         if (!Strings.isNullOrEmpty(value)) {
             val.append("value:").append(value).append(",");
