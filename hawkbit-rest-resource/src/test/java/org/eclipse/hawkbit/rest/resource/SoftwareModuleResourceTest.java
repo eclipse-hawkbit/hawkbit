@@ -112,14 +112,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.rest.resource.SoftwareModuleResource#uploadArtifact(java.lang.Long, org.springframework.web.multipart.MultipartFile)}
-     * .
-     *
-     * @throws Exception
-     *             if test fails
-     */
     @Test
     @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
     public void uploadArtifact() throws Exception {

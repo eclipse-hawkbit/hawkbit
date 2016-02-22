@@ -46,9 +46,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test for {@link DistributionSetTypeResource}.
  *
- *
- *
- *
  */
 @Features("Component Tests - Management API")
 @Stories("Distribution Set Type Resource")

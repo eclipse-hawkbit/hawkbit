@@ -74,8 +74,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Target Resource")
-// TODO: fully document tests -> @Description for long text and reasonable
-// method name as short text
 public class TargetResourceTest extends AbstractIntegrationTest {
 
     private static final String TARGET_DESCRIPTION_TEST = "created in test";
@@ -103,10 +101,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     private static final String JSON_PATH_CONTROLLERID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLERID;
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
 
-    // TODO kzimmerm: test *modified after entity change
-
     @Test
-    // MECS-1064
+    @Description("Ensures that actions list is in exptected order.")
     public void getActionStatusReturnsCorrectType() throws Exception {
         final int limitSize = 2;
         final String knownTargetId = "targetId";
@@ -141,6 +137,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that security token is not returned if user does not have READ_TARGET_SEC_TOKEN permission.")
     @WithUser(allSpPermissions = false, authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET })
     public void securityTokenIsNotInResponseIfMissingPermission() throws Exception {
 
@@ -152,6 +149,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that security token is returned if user does have READ_TARGET_SEC_TOKEN permission.")
     @WithUser(allSpPermissions = false, authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET,
             SpPermission.READ_TARGET_SEC_TOKEN })
     public void securityTokenIsInResponseWithCorrectPermission() throws Exception {
@@ -164,6 +162,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that that IP address is in result as stored in the repository.")
     public void addressAndIpAddressInTargetResult() throws Exception {
         // prepare targets with IP
         final String knownControllerId1 = "0815";
@@ -195,6 +194,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that actions history is returned as defined by filter status==pending,status==finished.")
     public void searchActionsRsql() throws Exception {
 
         // prepare test
@@ -227,6 +227,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a deletion of an active action results in cancelation triggered.")
     public void cancelActionOK() throws Exception {
         // prepare test
         final Target tA = createTargetAndStartAction();
@@ -250,7 +251,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void cancelAnCancelActionIsNotAllowed() throws Exception {
+    @Description("Ensures that method not allowed is returned if cancelation is triggered on already canceled action.")
+    public void cancelAndCancelActionIsNotAllowed() throws Exception {
         // prepare test
         final Target tA = createTargetAndStartAction();
 
@@ -302,6 +304,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that deletion is executed if permitted.")
     public void deleteTargetReturnsOK() throws Exception {
         final String knownControllerId = "knownControllerIdDelete";
         targetManagement.createTarget(new Target(knownControllerId));
@@ -314,6 +317,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that deletion is refused with not found if target does not exist.")
     public void deleteTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
         final String knownControllerId = "knownControllerIdDelete";
 
@@ -322,6 +326,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that update is refused with not found if target does not exist.")
     public void updateTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
         final String knownControllerId = "knownControllerIdUpdate";
         mvc.perform(put(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content("{}")
@@ -330,6 +335,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that target update request is reflected by repository.")
     public void updateTargetDescription() throws Exception {
         final String knownControllerId = "123";
         final String knownNewDescription = "a new desc updated over rest";
@@ -354,6 +360,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that target query returns list of targets in defined format.")
     public void getTargetWithoutAddtionalRequestParameters() throws Exception {
         final int knownTargetAmount = 3;
         final String idA = "a";
@@ -393,6 +400,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that target query returns list of targets in defined format in size reduced by given limit parameter.")
     public void getTargetWithPagingLimitRequestParameter() throws Exception {
         final int knownTargetAmount = 3;
         final int limitSize = 1;
@@ -413,10 +421,10 @@ public class TargetResourceTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].controllerId", equalTo(idA)))
                 .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].createdBy", equalTo("bumlux")))
                 .andExpect(jsonPath("$content.[?(@.name==" + idA + ")][0].updateStatus", equalTo("unknown")));
-
     }
 
     @Test
+    @Description("Ensures that target query returns list of targets in defined format in size reduced by given limit and offset parameter.")
     public void getTargetWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int knownTargetAmount = 5;
         final int offsetParam = 2;

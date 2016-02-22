@@ -99,7 +99,7 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andReturn();
     }
 
-    @Description("TODO")
+    @Description("Ensures that the repository refuses to create rollout without a defined target filter set.")
     public void missingTargetFilterQueryInRollout() throws Exception {
 
         final String targetFilterQuery = null;
