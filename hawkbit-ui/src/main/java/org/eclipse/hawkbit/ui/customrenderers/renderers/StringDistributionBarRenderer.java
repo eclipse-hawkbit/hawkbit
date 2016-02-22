@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.ui.distributionbar.renderers;
+package org.eclipse.hawkbit.ui.customrenderers.renderers;
 
 
 import com.vaadin.ui.Grid.AbstractRenderer;

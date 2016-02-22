@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -16,9 +14,9 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
-import org.eclipse.hawkbit.ui.distributionbar.renderers.HtmlButtonRenderer;
-import org.eclipse.hawkbit.ui.distributionbar.renderers.LinkRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.LinkRenderer;
 import org.eclipse.hawkbit.ui.rollout.RolloutListTable.ACTION;
 import org.eclipse.hawkbit.ui.rollout.RolloutListTable.ContextMenuData;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -40,6 +38,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.PropertyValueGenerator;
@@ -48,6 +47,7 @@ import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
@@ -84,6 +84,8 @@ public class RolloutListGrid extends AbstractSimpleGrid {
     protected void init() {
         super.init();
         eventBus.subscribe(this);
+        setColumnReorderingAllowed(true);
+        isColumnReorderingAllowed();
     }
 
     @PreDestroy
@@ -315,7 +317,7 @@ public class RolloutListGrid extends AbstractSimpleGrid {
 
     private void addDetailStatusColumn() {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(
-                new org.eclipse.hawkbit.ui.distributionbar.renderers.StringDistributionBarRenderer(),
+                new org.eclipse.hawkbit.ui.customrenderers.renderers.StringDistributionBarRenderer(),
                 new Converter<String, TotalTargetCountStatus>() {
                     private static final long serialVersionUID = 2660476405836705932L;
 
@@ -346,7 +348,7 @@ public class RolloutListGrid extends AbstractSimpleGrid {
     }
 
     private void addStatusCoulmn() {
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlRenderer(),
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new Converter<String, RolloutStatus>() {
                     private static final long serialVersionUID = 1L;
 
@@ -359,42 +361,7 @@ public class RolloutListGrid extends AbstractSimpleGrid {
                     @Override
                     public String convertToPresentation(final RolloutStatus value,
                             final Class<? extends String> targetType, final Locale locale) {
-                        String result = null;
-                        switch (value) {
-                        case FINISHED:
-                            result = "<div class=\"statusIconGreen\">" + FontAwesome.CHECK_CIRCLE.getHtml() + "</div>";
-                            break;
-                        case PAUSED:
-                            result = "<div class=\"statusIconBlue\">" + FontAwesome.PAUSE.getHtml() + "</div>";
-                            break;
-                        case RUNNING:
-                            result = "<div class=\"yellowSpinner\"></div>";
-                            break;
-                        case READY:
-                            result = "<div class=\"statusIconLightBlue\"> <span title=\"xxx\">"
-                                    + FontAwesome.DOT_CIRCLE_O.getHtml() + "</span></div>";
-                            break;
-                        case STOPPED:
-                            result = "<div class=\"statusIconRed\">" + FontAwesome.STOP.getHtml() + "</div>";
-                            break;
-                        case CREATING:
-                            result = "<div class=\"greySpinner\"></div>";
-                            break;
-                        case STARTING:
-                            result = "<div class=\"blueSpinner\"></div>";
-                            break;
-                        case ERROR_CREATING:
-                            result = "<div class=\"statusIconRed\">" + FontAwesome.EXCLAMATION_CIRCLE.getHtml()
-                                    + "</div>";
-                            break;
-                        case ERROR_STARTING:
-                            result = "<div class=\"statusIconRed\">" + FontAwesome.EXCLAMATION_CIRCLE.getHtml()
-                                    + "</div>";
-                            break;
-                        default:
-                            break;
-                        }
-                        return result;
+                        return convertRolloutStatusToString(value);
                     }
 
                     @Override
@@ -407,6 +374,53 @@ public class RolloutListGrid extends AbstractSimpleGrid {
                         return String.class;
                     }
                 });
+    }
+
+    private String convertRolloutStatusToString(final RolloutStatus value) {
+        String result = null;
+        switch (value) {
+        case FINISHED:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconGreen", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case PAUSED:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.PAUSE.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconBlue", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case RUNNING:
+            result = HawkbitCommonUtil.getFormattedString(null, value.name().toLowerCase(), "yellowSpinner",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case READY:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconLightBlue", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case STOPPED:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.STOP.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case CREATING:
+            result = HawkbitCommonUtil.getFormattedString(null, value.name().toLowerCase(), "greySpinner",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case STARTING:
+            result = HawkbitCommonUtil.getFormattedString(null, value.name().toLowerCase(), "blueSpinner",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case ERROR_CREATING:
+            result = HawkbitCommonUtil.getFormattedString(
+                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), value.name().toLowerCase(),
+                    "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        case ERROR_STARTING:
+            result = HawkbitCommonUtil.getFormattedString(
+                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), value.name().toLowerCase(),
+                    "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            break;
+        default:
+            break;
+        }
+        return result;
     }
 
     private void menuItemClicked(final ContextMenuItemClickEvent event) {

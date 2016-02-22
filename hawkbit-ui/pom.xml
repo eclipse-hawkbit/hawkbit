@@ -90,9 +90,9 @@
 					</manifest>
 					<manifestEntries>
 					<!-- Package format version - do not change -->
-						<Implementation-Title>DistributionBarRenderer</Implementation-Title>
+						<Implementation-Title>CustomRenderers</Implementation-Title>
 						<Vaadin-Package-Version>1</Vaadin-Package-Version>
-						<Vaadin-Widgetsets>org.eclipse.hawkbit.ui.distributionbar.DistributionBarRendererWidgetSet</Vaadin-Widgetsets>
+						<Vaadin-Widgetsets>org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet</Vaadin-Widgetsets>
 					</manifestEntries>
 				</archive>
 			</configuration>

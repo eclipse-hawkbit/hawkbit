@@ -14,7 +14,10 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.ui.distributionbar.renderers.LinkRenderer;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.LinkRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.StringDistributionBarRenderer;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -37,7 +40,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 @SpringComponent
@@ -251,8 +253,9 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
     }
 
+    
     private void addStatusCoulmn() {
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlRenderer(),
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new Converter<String, RolloutGroupStatus>() {
                     private static final long serialVersionUID = 1L;
 
@@ -265,29 +268,7 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
                     @Override
                     public String convertToPresentation(final RolloutGroupStatus value,
                             final Class<? extends String> targetType, final Locale locale) {
-                        String result = null;
-                        switch (value) {
-                        case FINISHED:
-                            result = "<div class=\"statusIconGreen\">" + FontAwesome.CHECK_CIRCLE.getHtml() + "</div>";
-                            break;
-                        case SCHEDULED:
-                            result = "<div class=\"statusIconBlue\">" + FontAwesome.BULLSEYE.getHtml() + "</div>";
-                            break;
-                        case RUNNING:
-                            result = "<div class=\"statusIconYellow\"><span  title=\"xxx\">" + FontAwesome.ADJUST.getHtml() + "</span></div>";
-                            break;
-                        case READY:
-                            result = "<div class=\"statusIconLightBlue\"> <span title=\"xxx\">"
-                                    + FontAwesome.DOT_CIRCLE_O.getHtml() + "</span></div>";
-                            break;
-                        case ERROR:
-                            result = "<div class=\"statusIconRed\">" + FontAwesome.EXCLAMATION_CIRCLE.getHtml()
-                                    + "</div>";
-                            break;
-                        default:
-                            break;
-                        }
-                        return result;
+                        return convertRolloutGroupStatusToString(value);
                     }
 
                     @Override
@@ -301,10 +282,43 @@ public class RolloutGroupListGrid extends AbstractSimpleGrid {
                     }
                 });
     }
+    
+    
+
+    private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
+        String result = null;
+        switch (value) {
+        case FINISHED:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconGreen", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+            break;
+        case SCHEDULED:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.BULLSEYE.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconBlue", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+            break;
+        case RUNNING:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.ADJUST.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconYellow", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+            break;
+        case READY:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconLightBlue", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+            break;
+        case ERROR:
+            result = HawkbitCommonUtil.getFormattedString(Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
+                    value.name().toLowerCase(), "statusIconRed", SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+            break;
+        default:
+            break;
+        }
+        return result;
+        
+    }
+
 
     private void addDetailStatusColumn() {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(
-                new org.eclipse.hawkbit.ui.distributionbar.renderers.StringDistributionBarRenderer(),
+                new StringDistributionBarRenderer(),
                 new Converter<String, TotalTargetCountStatus>() {
                     private static final long serialVersionUID = 2660476405836705932L;
 

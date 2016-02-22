@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.ui.distributionbar.client.renderers;
+package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,18 +40,22 @@ public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDis
                     setBarPartSize(widget, "FINISHED".toLowerCase(), 0, 1);
 
                 } else {
-                    widget.setNumberOfParts(getNumberOfParts(map.values()));
-                    int index = 0;
-                    for (Entry<String, Long> entryVal : map.entrySet()) {
-                        Long count = entryVal.getValue();
-                        if (count > 0) {
-                            setBarPartSize(widget, entryVal.getKey().toLowerCase(), count.intValue(), index);
-                            index++;
-                        }
-                    }
+                    setThePartDetails(widget, map);
                 }
             }
             widget.updateParts();
+        }
+    }
+
+    private void setThePartDetails(GwtDistributionBar widget, Map<String, Long> map) {
+        widget.setNumberOfParts(getNumberOfParts(map.values()));
+        int index = 0;
+        for (Entry<String, Long> entryVal : map.entrySet()) {
+            Long count = entryVal.getValue();
+            if (count > 0) {
+                setBarPartSize(widget, entryVal.getKey().toLowerCase(), count.intValue(), index);
+                index++;
+            }
         }
     }
 

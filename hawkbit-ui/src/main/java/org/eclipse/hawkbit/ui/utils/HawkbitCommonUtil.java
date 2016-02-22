@@ -48,6 +48,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.alump.distributionbar.DistributionBar;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.server.Sizeable.Unit;
@@ -1369,5 +1370,21 @@ public final class HawkbitCommonUtil {
         }
         return finalVal;
     }
+
     
+    public static String getFormattedString(String value, String description, String style, String id) {
+        StringBuilder val = new StringBuilder();
+        if (!Strings.isNullOrEmpty(value)) {
+            val.append("value:").append(value).append(",");
+        }
+        if (!Strings.isNullOrEmpty(description)) {
+            val.append("description:").append(description).append(",");
+        }
+        if (!Strings.isNullOrEmpty(style)) {
+            val.append("style:").append(style).append(",");
+        }
+        val.append("id:").append(id);
+        return val.toString();
+    }
+
 }
