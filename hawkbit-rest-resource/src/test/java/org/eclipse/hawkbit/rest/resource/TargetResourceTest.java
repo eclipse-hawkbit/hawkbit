@@ -72,7 +72,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  *
  *
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Target Resource")
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
@@ -229,7 +229,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Test
     public void cancelActionOK() throws Exception {
         // prepare test
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // test - cancel the active action
         mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
@@ -252,7 +252,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Test
     public void cancelAnCancelActionIsNotAllowed() throws Exception {
         // prepare test
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // cancel the active action
         deploymentManagement.cancelAction(tA.getActions().get(0), tA);
@@ -272,7 +272,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Description("Force Quit an Action, which is already canceled. Expected Result is an HTTP response code 204.")
     public void forceQuitAnCanceledActionReturnsOk() throws Exception {
 
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // cancel the active action
         deploymentManagement.cancelAction(tA.getActions().get(0), tA);
@@ -293,7 +293,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Description("Force Quit an Action, which is not canceled. Expected Result is an HTTP response code 405.")
     public void forceQuitAnNotCanceledActionReturnsMethodNotAllowed() throws Exception {
 
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // test - cancel an cancel action returns forbidden
         mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
@@ -1232,7 +1232,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // prepare test
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
-        Target tA = targetManagement.createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
+        final Target tA = targetManagement
+                .createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
         // assign a distribution set so we get an active update action
         deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
         // verify active action

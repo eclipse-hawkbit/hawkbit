@@ -47,7 +47,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Tests for covering the {@link RolloutResource}.
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Rollout Resource")
 public class RolloutResourceTest extends AbstractIntegrationTest {
 

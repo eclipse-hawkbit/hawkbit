@@ -65,7 +65,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  * Tests for {@link SoftwareModuleResource} {@link RestController}.
  *
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Software Module Resource")
 public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongoDB {
 
