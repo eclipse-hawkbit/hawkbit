@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Indexed;
-import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.themes.ValoTheme;
 

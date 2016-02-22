@@ -14,7 +14,6 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Label;
 
 /**
  * Proxy rollout with suctome properties.
