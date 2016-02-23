@@ -29,6 +29,11 @@ import org.springframework.hateoas.Identifiable;
 
 import com.google.common.eventbus.EventBus;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Cluster Cache")
+@Stories("EventDistributor Test")
 @RunWith(MockitoJUnitRunner.class)
 public class EventDistributorTest {
 

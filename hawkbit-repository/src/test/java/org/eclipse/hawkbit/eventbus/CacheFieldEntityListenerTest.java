@@ -27,6 +27,11 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.hateoas.Identifiable;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Repository")
+@Stories("EventBus")
 @RunWith(MockitoJUnitRunner.class)
 public class CacheFieldEntityListenerTest {
 

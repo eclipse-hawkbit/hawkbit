@@ -34,13 +34,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test class for {@link TagManagement}.
  *
- *
- *
  */
 @Features("Component Tests - Repository")
 @Stories("Tag Management")
-// TODO: fully document tests -> @Description for long text and reasonable
-// method name as short text
 public class TagManagementTest extends AbstractIntegrationTest {
     public TagManagementTest() {
         LOG = LoggerFactory.getLogger(TagManagementTest.class);
@@ -155,13 +151,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
         return new DistributionSetFilterBuilder();
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#findTargetTag(java.lang.String)}
-     * .
-     */
     @Test
-    public void testFindTargetTag() {
+    @Description("Ensures that all tags are retrieved through repository.")
+    public void findAllTargetTags() {
         assertThat(targetTagRepository.findAll()).isEmpty();
 
         final List<TargetTag> tags = createTargetsWithTags();
@@ -170,13 +162,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
                 .hasSize(20);
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#createTargetTag(org.eclipse.hawkbit.repository.model.TargetTag)}
-     * .
-     */
     @Test
-    public void testCreateTargetTag() {
+    @Description("Ensures that a created tag is persisted in the repository as defined.")
+    public void createTargetTag() {
         assertThat(targetTagRepository.findAll()).isEmpty();
 
         final Tag tag = tagManagement.createTargetTag(new TargetTag("kai1", "kai2", "colour"));
@@ -186,13 +174,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).isEqualTo("colour");
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#deleteTargetTag(java.lang.String[])}
-     * .
-     */
     @Test
-    public void testDeleteTargetTagsStringArray() {
+    @Description("Ensures that a deleted tag is removed from the repository as defined.")
+    public void deleteTargetTas() {
         assertThat(targetTagRepository.findAll()).isEmpty();
 
         // create test data
@@ -217,7 +201,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Tests the creation of a target tag.")
+    @Description("Tests the name update of a target tag.")
     public void updateTargetTag() {
         assertThat(targetTagRepository.findAll()).isEmpty();
 
@@ -237,13 +221,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(targetTagRepository.findOne(savedAssigned.getId()).getOptLockRevision()).isEqualTo(2);
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#createDistributionSetTag(org.eclipse.hawkbit.repository.model.DistributionSetTag)}
-     * .
-     */
     @Test
-    public void testCreateDistributionSetTag() {
+    @Description("Ensures that a created tag is persisted in the repository as defined.")
+    public void createDistributionSetTag() {
         assertThat(distributionSetTagRepository.findAll()).isEmpty();
 
         final Tag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("kai1", "kai2", "colour"));
@@ -253,13 +233,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).isEqualTo("colour");
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#createDistributionSetTags(java.lang.Iterable)}
-     * .
-     */
     @Test
-    public void testCreateDistributionSetTags() {
+    @Description("Ensures that a created tags are persisted in the repository as defined.")
+    public void createDistributionSetTags() {
         assertThat(distributionSetTagRepository.findAll()).isEmpty();
 
         final List<DistributionSetTag> tags = createDsSetsWithTags();
@@ -267,13 +243,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(distributionSetTagRepository.findAll()).hasSize(tags.size());
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#deleteDistributionSetTag(java.lang.String[])}
-     * .
-     */
     @Test
-    public void testDeleteDistributionSetTag() {
+    @Description("Ensures that a deleted tag is removed from the repository as defined.")
+    public void deleteDistributionSetTag() {
         assertThat(distributionSetTagRepository.findAll()).isEmpty();
 
         // create test data
@@ -298,24 +270,40 @@ public class TagManagementTest extends AbstractIntegrationTest {
     }
 
     @Test(expected = EntityAlreadyExistsException.class)
-    public void testFailedDuplicateTargetTagNameException() {
+    @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
+    public void failedDuplicateTargetTagNameException() {
         tagManagement.createTargetTag(new TargetTag("A"));
         tagManagement.createTargetTag(new TargetTag("A"));
     }
 
     @Test(expected = EntityAlreadyExistsException.class)
-    public void testFailedDuplicateDsTagNameException() {
+    @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
+    public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
+        tagManagement.createTargetTag(new TargetTag("A"));
+        final TargetTag tag = tagManagement.createTargetTag(new TargetTag("B"));
+        tag.setName("A");
+        tagManagement.updateTargetTag(tag);
+    }
+
+    @Test(expected = EntityAlreadyExistsException.class)
+    @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
+    public void failedDuplicateDsTagNameException() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#updateDistributionSetTag(org.eclipse.hawkbit.repository.model.DistributionSetTag)}
-     * .
-     */
+    @Test(expected = EntityAlreadyExistsException.class)
+    @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
+    public void failedDuplicateDsTagNameExceptionAfterUpdate() {
+        tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+        final DistributionSetTag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("B"));
+        tag.setName("A");
+        tagManagement.updateDistributionSetTag(tag);
+    }
+
     @Test
-    public void testUpdateDistributionSetTag() {
+    @Description("Tests the name update of a target tag.")
+    public void updateDistributionSetTag() {
         assertThat(distributionSetTagRepository.findAll()).isEmpty();
 
         // create test data
@@ -333,13 +321,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).isEqualTo("test123");
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.repository.TagManagement#findAllDistributionSetTags()}
-     * .
-     */
     @Test
-    public void testFindDistributionSetTagsAll() {
+    @Description("Ensures that all tags are retrieved through repository.")
+    public void findDistributionSetTagsAll() {
         assertThat(distributionSetTagRepository.findAll()).isEmpty();
 
         final List<DistributionSetTag> tags = createDsSetsWithTags();

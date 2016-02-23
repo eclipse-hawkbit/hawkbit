@@ -435,7 +435,6 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
     }
 
-    // TODO
     @Test
     @Description("Start the rollout in async mode")
     public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
@@ -528,7 +527,6 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
 
     }
 
-    // TODO copied code from sp-bic-test
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
             final long timeout, final long pollInterval) throws Exception // NOPMD
     {

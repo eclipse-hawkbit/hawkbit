@@ -47,8 +47,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
  *
  * Test Amqp controller authentfication.
  */
-@Features("AMQP Authenfication Test")
-@Stories("Tests the authenfication")
+@Features("Component Tests - Device Management Federation API")
+@Stories("AmqpController Authentfication Test")
 public class AmqpControllerAuthentficationTest {
 
     private static final String TENANT = "DEFAULT";

@@ -34,6 +34,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.google.common.io.BaseEncoding;
 import com.mongodb.gridfs.GridFSDBFile;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Component Tests - Repository")
+@Stories("Artifact Store MongoDB")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { ArtifactStoreAutoConfiguration.class, TestConfiguration.class })
 public class ArtifactStoreTest {

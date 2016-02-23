@@ -66,10 +66,7 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- *
  * Spring MVC Tests against the TargetResource.
- *
- *
  *
  */
 @Features("Component Tests - Management API")
