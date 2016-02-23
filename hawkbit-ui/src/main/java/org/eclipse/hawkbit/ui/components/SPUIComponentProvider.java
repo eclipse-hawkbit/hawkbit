@@ -108,16 +108,16 @@ public final class SPUIComponentProvider {
             final Class<? extends SPUIHeaderLayoutDecorator> tableHeaderLayoutDecorator) {
         // Do we really need this???
         HorizontalLayout hLayout = getHorizontalLayout(new SPUIHorizontalLayout().getUiHorizontalLayout().getClass());
+
+        if (tableHeaderLayoutDecorator == null) {
+            return hLayout;
+        }
+
         try {
-            SPUIHeaderLayoutDecorator layoutDecorator;
-            if (tableHeaderLayoutDecorator != null) {
-                layoutDecorator = tableHeaderLayoutDecorator.newInstance();
-                hLayout = layoutDecorator.decorate(hLayout);
-            }
-        } catch (final InstantiationException exception) {
-            LOG.error("Error occured while creating horizontal decorator " + SPUIHeaderLayoutDecorator.class,
-                    exception);
-        } catch (final IllegalAccessException exception) {
+            final SPUIHeaderLayoutDecorator layoutDecorator = tableHeaderLayoutDecorator.newInstance();
+            hLayout = layoutDecorator.decorate(hLayout);
+
+        } catch (final InstantiationException | IllegalAccessException exception) {
             LOG.error("Error occured while creating horizontal decorator " + SPUIHeaderLayoutDecorator.class,
                     exception);
         }
