@@ -43,6 +43,7 @@ public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDis
                     setThePartDetails(widget, map);
                 }
             }
+            widget.getElement().setId("rollout.status.progress.bar.id");
             widget.updateParts();
         }
     }
