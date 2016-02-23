@@ -27,6 +27,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Unit Tests - Cluster Event Bus")
 @Stories("EventBus Subscriber Processor Test")
 @RunWith(MockitoJUnitRunner.class)
+// TODO: create description annotations
 public class EventBusSubscriberProcessorTest {
 
     @Mock

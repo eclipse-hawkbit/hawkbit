@@ -26,6 +26,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Unit Tests - Security")
 @Stories("PreAuthToken Source TrustAuthentication Provider Test")
 @RunWith(MockitoJUnitRunner.class)
+// TODO: create description annotations
 public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     private static final String REQUEST_SOURCE_IP = "127.0.0.1";

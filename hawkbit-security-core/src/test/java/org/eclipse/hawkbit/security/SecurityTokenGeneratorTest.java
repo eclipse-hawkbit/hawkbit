@@ -20,6 +20,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("SecurityToken Generator Test")
 public class SecurityTokenGeneratorTest {
 
+    // FIXME: figure what is this all about??
     @Test
     public void test() throws NoSuchAlgorithmException, UnsupportedEncodingException {
         final SecurityTokenGenerator securityTokenGenerator = new SecurityTokenGenerator();

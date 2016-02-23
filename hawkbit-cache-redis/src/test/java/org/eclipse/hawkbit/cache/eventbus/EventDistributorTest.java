@@ -35,6 +35,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Unit Tests - Cluster Cache")
 @Stories("EventDistributor Test")
 @RunWith(MockitoJUnitRunner.class)
+// TODO: create description annotations
 public class EventDistributorTest {
 
     @Mock
