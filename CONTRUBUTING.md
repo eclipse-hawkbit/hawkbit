@@ -45,6 +45,11 @@ Examples for hawkBit components:
 * Repository
 * Security
 
+```
+@Features("Component Tests - Management API")
+@Stories("Distribution Set Type Resource")
+```
+
 In addition all test method's name describes in **camel case** what the test is all about and has a long description aith Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
