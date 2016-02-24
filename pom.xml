@@ -15,7 +15,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>1.2.7.RELEASE</version>
+      <version>1.2.8.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -57,42 +57,61 @@
    </repositories>
 
    <properties>
-      <spring.boot.version>1.2.7.RELEASE</spring.boot.version>
+      <java.version>1.8</java.version>
+   
+      <spring.boot.version>1.2.8.RELEASE</spring.boot.version>
 
-      <!-- Spring boot overrides - START -->
-      <h2.version>1.4.186</h2.version>
-      <jackson.version>2.5.0</jackson.version>
-      <hibernate-validator.version>5.2.2.Final</hibernate-validator.version>
-      <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
+      <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
+      <!-- Newer versions needed than defined in Boot-->
+      <jackson.version>2.5.5</jackson.version>
+      <hibernate-validator.version>5.2.4.Final</hibernate-validator.version>
       <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
-      <mongodb.version>3.0.2</mongodb.version>
-      <!-- Spring boot overrides - END -->
+      <!--  Support for MongoDB 3 -->
+      <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
+      <mongodb.version>3.2.2</mongodb.version>
+      <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.0.0</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.5.7</vaadin.version>
+      <vaadin.version>7.5.10</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+      <vaadin.addon.vaadin-lazyquerycontainer.version>7.4.0.1</vaadin.addon.vaadin-lazyquerycontainer.version>
+      <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
+      <vaadin.addon.tokenfield.version>7.0.1</vaadin.addon.tokenfield.version>
+      <vaadin.addon.dbar-addon.version>1.2.0</vaadin.addon.dbar-addon.version>
+      <vaadin.addon.contextmenu.version>4.5</vaadin.addon.contextmenu.version>
       <!-- Vaadin versions - END -->
 
-      <!-- Misc -->
+      <!-- Misc libraries versions - START -->
       <fest-assert.version>1.4</fest-assert.version>
       <org.easytesting.version>2.0M10</org.easytesting.version>
-      <java.version>1.8</java.version>
       <allure.version>1.4.22</allure.version>
-      <eclipselink.version>2.6.0</eclipselink.version>
+      <eclipselink.version>2.6.2</eclipselink.version>
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>
       <json-path.version>0.9.1</json-path.version>
-      <commons-lang3.version>3.4</commons-lang3.version>
       <aspectj.version>1.8.5</aspectj.version>
+      <guava.version>19.0</guava.version>
+      <mariadb-java-client.version>1.3.5</mariadb-java-client.version>
+      <embedded-mongo.version>1.50.2</embedded-mongo.version>
+      <jersey-client.version>1.18.1</jersey-client.version>
+      <javax.el-api.version>2.2.4</javax.el-api.version>
+      <corn-cps.version>1.1.7</corn-cps.version>
+      <jlorem.version>1.1</jlorem.version>
+      <json-simple.version>1.1.1</json-simple.version>
+      <commons-lang3.version>3.4</commons-lang3.version>
+      <json.version>20141113</json.version>
+      <rsql-parser.version>2.0.0</rsql-parser.version>
+      <!-- Misc libraries versions - END -->
 
-      <!-- Release -->
+      <!-- Release - START -->
       <release.scm.connection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.connection>
       <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
       <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
+      <!-- Release - END -->
 
-      <!-- Sonar -->
+      <!-- Sonar - START-->
       <sonar.host.url>https://sonar.eu-gb.mybluemix.net</sonar.host.url>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -123,7 +142,7 @@
       <!-- Tells Sonar where the Jacoco coverage result file is located for
          Integration Tests -->
       <sonar.jacoco.itReportPath>${jacoco.outputDir}/${jacoco.out.it.file}</sonar.jacoco.itReportPath>
-      <guava.version>19.0</guava.version>
+      <!-- Sonar - END-->
    </properties>
 
 
@@ -335,7 +354,7 @@
          <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>${slf4j.version}</version>
          </dependency>
          <!-- Vaadin -->
          <dependency>
@@ -363,30 +382,6 @@
             <artifactId>vaadin-push</artifactId>
             <version>${vaadin.version}</version>
          </dependency>
-         <!-- Needed when using the widgetset optimizer (custom ConnectorBundleLoaderFactory).
-            For widgetset compilation, vaadin-client-compiler is automatically added
-            on the compilation classpath by vaadin-maven-plugin so normally there is
-            no need for an explicit dependency. -->
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-client-compiler</artifactId>
-            <version>${vaadin.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.eclipse.jetty</groupId>
-                  <artifactId>jetty-servlets</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.eclipse.jetty</groupId>
-                  <artifactId>jetty-annotations</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.eclipse.jetty</groupId>
-                  <artifactId>jetty-util</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
          <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-themes</artifactId>
@@ -395,44 +390,44 @@
          <dependency>
             <groupId>org.vaadin.addons.lazyquerycontainer</groupId>
             <artifactId>vaadin-lazyquerycontainer</artifactId>
-            <version>7.4.0.1</version>
+            <version>${vaadin.addon.vaadin-lazyquerycontainer.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>flexibleoptiongroup</artifactId>
-            <version>2.2.0</version>
+            <version>${vaadin.addon.flexibleoptiongroup.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>tokenfield</artifactId>
-            <version>7.0.1</version>
+            <version>${vaadin.addon.tokenfield.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.alump.distributionbar</groupId>
             <artifactId>dbar-addon</artifactId>
-            <version>1.2.0</version>
+            <version>${vaadin.addon.dbar-addon.version}</version>
          </dependency>
          <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>contextmenu</artifactId>
-            <version>4.5</version>
+            <version>${vaadin.addon.contextmenu.version}</version>
          </dependency>
 
          <!-- Misc -->
          <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
-            <version>2.2.4</version>
+            <version>${javax.el-api.version}</version>
          </dependency>
          <dependency>
             <groupId>net.sf.corn</groupId>
             <artifactId>corn-cps</artifactId>
-            <version>1.1.7</version>
+            <version>${corn-cps.version}</version>
          </dependency>
          <dependency>
             <groupId>net._01001111</groupId>
             <artifactId>jlorem</artifactId>
-            <version>1.1</version>
+            <version>${jlorem.version}</version>
          </dependency>
          <!-- Spring -->
          <dependency>
@@ -514,13 +509,6 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Override of classmate version, that is a hibernate validator
-            dependency. allow PB of CQ -->
-         <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>classmate</artifactId>
-            <version>1.3.0</version>
-         </dependency>
          <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
@@ -530,7 +518,7 @@
          <dependency>
             <groupId>cz.jirutka.rsql</groupId>
             <artifactId>rsql-parser</artifactId>
-            <version>2.0.0</version>
+            <version>${rsql-parser.version}</version>
          </dependency>
          <!-- JSON PATH, used to e.g. parse vcap services from environment -->
          <dependency>
@@ -541,7 +529,7 @@
          <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
+            <version>${json-simple.version}</version>
             <exclusions>
                <exclusion>
                   <groupId>junit</groupId>
@@ -549,13 +537,13 @@
                </exclusion>
             </exclusions>
          </dependency>
-         <!-- Spring boot overrides - START -->
-         <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
+         
+          <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
          </dependency>
-         <!-- Spring boot overrides - END -->
+         
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -568,21 +556,15 @@
             </exclusions>
          </dependency>
          <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <version>4.0.3</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20141113</version>
+            <version>${json.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.50.0</version>
+            <version>${embedded-mongo.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -606,7 +588,7 @@
          <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>1.18.1</version>
+            <version>${jersey-client.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -618,13 +600,13 @@
          <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path-assert</artifactId>
-            <version>0.9.1</version>
+            <version>${json-path.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>1.2.3</version>
+            <version>${mariadb-java-client.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>

@@ -88,7 +88,7 @@ public class MongoDBTestRule implements TestRule {
             System.setProperty("spring.data.mongodb.port", String.valueOf(port));
         }
 
-        Version version = Version.V3_1_0;
+        Version version = Version.V3_0_8;
         if (System.getProperty("inf.mongodb.version") != null) {
             version = Version.valueOf("V" + System.getProperty("inf.mongodb.version").trim().replaceAll("\\.", "_"));
         }
