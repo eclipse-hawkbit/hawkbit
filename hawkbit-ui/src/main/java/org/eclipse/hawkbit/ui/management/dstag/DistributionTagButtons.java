@@ -70,6 +70,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
      * @param filterButtonClickBehaviour
      *            the clickable behaviour.
      */
+    @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
         addNewTag(new DistributionSetTag("NO TAG"));
@@ -106,34 +107,18 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButtonsTableId()
-     */
     @Override
     protected String getButtonsTableId() {
         return SPUIComponetIdProvider.DISTRIBUTION_TAG_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonsLazyQueryContainer ()
-     */
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<DistributionTagBeanQuery>(
-                DistributionTagBeanQuery.class);
+        final Map<String, Object> queryConfig = new HashMap<>();
+        final BeanQueryFactory<DistributionTagBeanQuery> tagQF = new BeanQueryFactory<>(DistributionTagBeanQuery.class);
         tagQF.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer tagContainer = HawkbitCommonUtil.createDSLazyQueryContainer(
+        return HawkbitCommonUtil.createDSLazyQueryContainer(
                 new BeanQueryFactory<DistributionTagBeanQuery>(DistributionTagBeanQuery.class));
-        return tagContainer;
 
     }
 
@@ -142,13 +127,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         return SPUIDefinitions.DISTRIBUTION_TAG_BUTTON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * isClickedByDefault(java.lang .Long)
-     */
     @Override
     protected boolean isClickedByDefault(final Long buttonId) {
         final DistributionSetTag dsTagObject = tagMgmtService.findDistributionSetTagById(buttonId);
@@ -161,37 +139,16 @@ public class DistributionTagButtons extends AbstractFilterButtons {
         return managementUIState.getDistributionTableFilters().isNoTagSelected();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonId(java.lang. String)
-     */
     @Override
     protected String createButtonId(final String name) {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getFilterButtonDropHandler()
-     */
     @Override
     protected DropHandler getFilterButtonDropHandler() {
         return spDistTagDropEvent;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButttonWrapperId()
-     */
     @Override
     protected String getButttonWrapperIdPrefix() {
         return SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS;

@@ -95,7 +95,7 @@ public class EventDistributor {
      *         wants to subscribe
      */
     public Collection<Topic> getTopics() {
-        final List<Topic> topics = new ArrayList<Topic>();
+        final List<Topic> topics = new ArrayList<>();
         topics.add(new PatternTopic(SUB_DISTRIBUTION_CHANNEL));
         return topics;
     }

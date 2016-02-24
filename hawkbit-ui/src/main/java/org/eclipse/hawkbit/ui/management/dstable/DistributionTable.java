@@ -73,8 +73,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Distribution set table.
- * 
- *
  *
  */
 @SpringComponent
@@ -112,11 +110,11 @@ public class DistributionTable extends AbstractTable {
     private Boolean isDistPinned = false;
 
     private Button distributinPinnedBtn;
-    
-   
+
     /**
      * Initialize the distribution table.
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -142,7 +140,7 @@ public class DistributionTable extends AbstractTable {
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
             UI.getCurrent().access(() -> refreshFilter());
-         }
+        }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -221,23 +219,22 @@ public class DistributionTable extends AbstractTable {
     @Override
     protected Container createContainer() {
         final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
-               
-        final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<DistributionBeanQuery>(
+
+        final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distributionContainer = new LazyQueryContainer(
+        return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
-        return distributionContainer;
     }
-    
+
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig =  new HashMap<String, Object>();
-             managementUIState.getDistributionTableFilters().getSearchText()
+        final Map<String, Object> queryConfig = new HashMap<>();
+        managementUIState.getDistributionTableFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-             managementUIState.getDistributionTableFilters().getPinnedTargetId()
+        managementUIState.getDistributionTableFilters().getPinnedTargetId()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.ORDER_BY_PINNED_TARGET, value));
-       final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG,
                 managementUIState.getDistributionTableFilters().isNoTagSelected());
         if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
@@ -247,23 +244,11 @@ public class DistributionTable extends AbstractTable {
         return queryConfig;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties(
-     * com.vaadin.data.Container )
-     */
     @Override
     protected void addContainerProperties(final Container container) {
         HawkbitCommonUtil.getDsTableColumnProperties(container);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * addCustomGeneratedColumns()
-     */
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.PIN_COLUMN, new Table.ColumnGenerator() {
@@ -276,23 +261,12 @@ public class DistributionTable extends AbstractTable {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * isFirstRowSelectedOnLoad()
-     */
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
         return !managementUIState.getSelectedDsIdName().isPresent()
                 || managementUIState.getSelectedDsIdName().get().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
-     */
     @Override
     protected Object getItemIdToSelect() {
         if (managementUIState.getSelectedDsIdName().isPresent()) {
@@ -301,16 +275,9 @@ public class DistributionTable extends AbstractTable {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
-     */
     @Override
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        @SuppressWarnings("unchecked")
         final Set<DistributionSetIdName> values = HawkbitCommonUtil.getSelectedDSDetails(this);
         DistributionSetIdName value = null;
         if (values != null && !values.isEmpty()) {
@@ -319,10 +286,7 @@ public class DistributionTable extends AbstractTable {
             while (iterator.hasNext()) {
                 value = iterator.next();
             }
-            /**
-             * Adding null check to make to avoid NPE.Its weird that at times
-             * getValue returns null.
-             */
+
             if (null != value) {
                 managementUIState.setSelectedDsIdName(values);
                 managementUIState.setLastSelectedDsIdName(value);
@@ -339,33 +303,16 @@ public class DistributionTable extends AbstractTable {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
-     */
     @Override
     protected boolean isMaximized() {
         return managementUIState.isDsTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns(
-     * )
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         return HawkbitCommonUtil.getTableVisibleColumns(isMaximized(), true, i18n);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
-     */
     @Override
     protected DropHandler getTableDropHandler() {
         return new DropHandler() {
@@ -403,7 +350,7 @@ public class DistributionTable extends AbstractTable {
         final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
         final Table distTable = (Table) taregtDet.getTarget();
         final Set<DistributionSetIdName> distsSelected = HawkbitCommonUtil.getSelectedDSDetails(distTable);
-        final Set<Long> distList = new HashSet<Long>();
+        final Set<Long> distList = new HashSet<>();
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object distItemId = dropData.getItemIdOver();
@@ -435,7 +382,7 @@ public class DistributionTable extends AbstractTable {
         // assign dist to those targets
         final List<Target> assignedTargets = targetService.findTargetsByTag(targetTagName);
         if (!assignedTargets.isEmpty()) {
-            final Set<TargetIdName> targetDetailsList = new HashSet<TargetIdName>();
+            final Set<TargetIdName> targetDetailsList = new HashSet<>();
             assignedTargets.forEach(target -> targetDetailsList
                     .add(new TargetIdName(target.getId(), target.getControllerId(), target.getName())));
             assignTargetToDs(getItem(distItemId), targetDetailsList);
@@ -448,7 +395,7 @@ public class DistributionTable extends AbstractTable {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final Table source = transferable.getSourceComponent();
         final Set<TargetIdName> targetsSelected = HawkbitCommonUtil.getSelectedTargetDetails(source);
-        final Set<TargetIdName> targetDetailsList = new HashSet<TargetIdName>();
+        final Set<TargetIdName> targetDetailsList = new HashSet<>();
 
         if (!targetsSelected.contains(transferable.getData("itemId"))) {
             targetDetailsList.add((TargetIdName) transferable.getData("itemId"));
@@ -474,13 +421,6 @@ public class DistributionTable extends AbstractTable {
         }
     }
 
-    /**
-     * Validate event.
-     *
-     * @param dragEvent
-     *            as event
-     * @return boolean as flag
-     */
     private Boolean doValidation(final DragAndDropEvent dragEvent) {
         final Component compsource = dragEvent.getTransferable().getSourceComponent();
         if (compsource instanceof Table) {
@@ -528,15 +468,6 @@ public class DistributionTable extends AbstractTable {
         return false;
     }
 
-    /**
-     * Validate the assignment.
-     *
-     * @param targetDetailsList
-     * @param source
-     * @param distId
-     * @param distName
-     * @return String as indicator
-     */
     private String validate(final Set<TargetIdName> targetDetailsList,
             final DistributionSetIdName distributionSetIdName) {
         String pendingActionMessage = null;
@@ -555,17 +486,6 @@ public class DistributionTable extends AbstractTable {
         return pendingActionMessage;
     }
 
-    /**
-     * Message for Pending Action.
-     *
-     * @param message
-     *            as msg
-     * @param targId
-     *            as ID
-     * @param distName
-     *            as Dist Set Name
-     * @return String as message
-     */
     private String getPendingActionMessage(final String message, final String targId, final String distNameVersion) {
         String pendActionMsg = i18n.get("message.target.assigned.pending");
         if (null == message) {
@@ -574,12 +494,6 @@ public class DistributionTable extends AbstractTable {
         return pendActionMsg;
     }
 
-    /**
-     * Show or Hide Popup Notification Message.
-     *
-     * @param message
-     *            as msg
-     */
     private void showOrHidePopupAndNotification(final String message) {
         if (null != managementUIState.getAssignedList() && !managementUIState.getAssignedList().isEmpty()) {
             eventBus.publish(this, ManagementUIEvent.UPDATE_COUNT);
@@ -636,19 +550,6 @@ public class DistributionTable extends AbstractTable {
         }
     }
 
-    /**
-     * Added by Saumya Get Pin style.
-     * 
-     * @param itemId
-     *            as item clicked
-     * @param propertyId
-     *            as property
-     * @param installedDistItemIds
-     *            as set
-     * @param assignedDistTableItemIds
-     *            as set
-     * @return String as Style
-     */
     private String getPinnedDistributionStyle(final Long installedDistItemIds, final Long assignedDistTableItemIds,
             final Object itemId) {
         final Long distId = ((DistributionSetIdName) itemId).getId();
@@ -662,10 +563,6 @@ public class DistributionTable extends AbstractTable {
         }
     }
 
-    /**
-     * @param itemId
-     * @return
-     */
     private Object getPinButton(final Object itemId) {
         final DistributionSetIdName dist = (DistributionSetIdName) getContainerDataSource().getItem(itemId)
                 .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();
@@ -684,12 +581,6 @@ public class DistributionTable extends AbstractTable {
         }
     }
 
-    /**
-     * Add listener to pin.
-     *
-     * @param pinBtn
-     *            as event
-     */
     private void addPinClickListener(final ClickEvent event) {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         checkifAlreadyPinned(event.getButton());
@@ -701,12 +592,6 @@ public class DistributionTable extends AbstractTable {
 
     }
 
-    /**
-     * Check already pinned.
-     *
-     * @param eventBtn
-     *            as button
-     */
     private void checkifAlreadyPinned(final Button eventBtn) {
         final Long newPinnedDistItemId = ((DistributionSetIdName) eventBtn.getData()).getId();
         Long pinnedDistId = null;
@@ -758,9 +643,6 @@ public class DistributionTable extends AbstractTable {
         }
     }
 
-    /**
-     * set style to distribution set table.
-     */
     private void styleDistributionSetTable() {
         setCellStyleGenerator(new Table.CellStyleGenerator() {
             private static final long serialVersionUID = 1L;
@@ -772,12 +654,6 @@ public class DistributionTable extends AbstractTable {
         });
     }
 
-    /**
-     * Apply pin style to pin.
-     * 
-     * @param eventBtn
-     *            as button
-     */
     private void applyPinStyle(final Button eventBtn) {
         final StringBuilder style = new StringBuilder(SPUIComponentProvider.getPinButtonStyle());
         style.append(' ').append(SPUIStyleDefinitions.DIST_PIN).append(' ').append("tablePin").append(' ')
@@ -822,14 +698,9 @@ public class DistributionTable extends AbstractTable {
      * @param assignedDistTableItemIds
      *            Item ids of assigned distribution set
      */
-    @SuppressWarnings("serial")
     public void styleDistributionSetTable(final Long installedDistItemId, final Long assignedDistTableItemId) {
-        setCellStyleGenerator(new Table.CellStyleGenerator() {
-            @Override
-            public String getStyle(final Table source, final Object itemId, final Object propertyId) {
-                return getPinnedDistributionStyle(installedDistItemId, assignedDistTableItemId, itemId);
-            }
-        });
+        setCellStyleGenerator((source, itemId, propertyId) -> getPinnedDistributionStyle(installedDistItemId,
+                assignedDistTableItemId, itemId));
     }
 
     public void setDistributinPinnedBtn(final Button distributinPinnedBtn) {

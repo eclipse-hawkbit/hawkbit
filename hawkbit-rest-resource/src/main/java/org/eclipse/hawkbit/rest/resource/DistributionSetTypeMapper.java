@@ -88,7 +88,7 @@ final class DistributionSetTypeMapper {
     }
 
     static List<DistributionSetTypeRest> toListResponse(final List<DistributionSetType> types) {
-        final List<DistributionSetTypeRest> response = new ArrayList<DistributionSetTypeRest>();
+        final List<DistributionSetTypeRest> response = new ArrayList<>();
         for (final DistributionSetType dsType : types) {
             response.add(toResponse(dsType));
         }

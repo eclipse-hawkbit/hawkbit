@@ -63,7 +63,7 @@ public class ActionStatus extends BaseEntity {
     @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat") ) , indexes = {
             @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
     @Column(name = "detail_message", length = 512)
-    private final List<String> messages = new ArrayList<String>();
+    private final List<String> messages = new ArrayList<>();
 
     /**
      * Creates a new {@link ActionStatus} object.

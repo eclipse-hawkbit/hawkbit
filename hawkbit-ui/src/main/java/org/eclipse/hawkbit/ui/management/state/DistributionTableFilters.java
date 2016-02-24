@@ -33,9 +33,9 @@ public class DistributionTableFilters implements Serializable {
 
     private String pinnedTargetId;
 
-    private final List<String> distSetTags = new ArrayList<String>();
+    private final List<String> distSetTags = new ArrayList<>();
 
-    private List<String> clickedDistSetTags = new ArrayList<String>();
+    private List<String> clickedDistSetTags = new ArrayList<>();
 
     private Boolean noTagSelected = Boolean.FALSE;
 

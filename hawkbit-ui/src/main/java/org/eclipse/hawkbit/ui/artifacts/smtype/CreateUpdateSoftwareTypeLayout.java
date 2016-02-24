@@ -193,7 +193,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        selectors = new HashSet<ColorSelector>();
+        selectors = new HashSet<>();
         selectedColor = new Color(44, 151, 32);
         selPreview = new SpColorPickerPreview(selectedColor);
 
@@ -741,38 +741,17 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.components.colorpicker.HasColorChangeListener#
-     * addColorChangeListener(com.vaadin
-     * .ui.components.colorpicker.ColorChangeListener)
-     */
     @Override
     public void addColorChangeListener(final ColorChangeListener listener) {
         LOG.debug("inside addColorChangeListener");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.components.colorpicker.HasColorChangeListener#
-     * removeColorChangeListener(com.
-     * vaadin.ui.components.colorpicker.ColorChangeListener)
-     */
     @Override
     public void removeColorChangeListener(final ColorChangeListener listener) {
         LOG.debug("inside removeColorChangeListener");
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.components.colorpicker.ColorSelector#setColor(com.vaadin.
-     * shared.ui.colorpicker .Color)
-     */
     @Override
     public void setColor(final Color color) {
         if (color == null) {
@@ -788,23 +767,11 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.components.colorpicker.ColorSelector#getColor()
-     */
     @Override
     public Color getColor() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.components.colorpicker.ColorChangeListener#colorChanged(com
-     * .vaadin.ui.components .colorpicker.ColorChangeEvent)
-     */
     @Override
     public void colorChanged(final ColorChangeEvent event) {
         setColor(event.getColor());
