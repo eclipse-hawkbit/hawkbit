@@ -112,7 +112,8 @@ public class DistributionTable extends AbstractTable {
     private Boolean isDistPinned = false;
 
     private Button distributinPinnedBtn;
-
+    
+   
     /**
      * Initialize the distribution table.
      */
@@ -141,7 +142,7 @@ public class DistributionTable extends AbstractTable {
                 || event == DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT
                 || event == DistributionTableFilterEvent.FILTER_BY_TAG) {
             UI.getCurrent().access(() -> refreshFilter());
-        }
+         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -219,18 +220,8 @@ public class DistributionTable extends AbstractTable {
      */
     @Override
     protected Container createContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
-        managementUIState.getDistributionTableFilters().getSearchText()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-        managementUIState.getDistributionTableFilters().getPinnedTargetId()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.ORDER_BY_PINNED_TARGET, value));
-        final List<String> list = new ArrayList<String>();
-        queryConfiguration.put(SPUIDefinitions.FILTER_BY_NO_TAG,
-                managementUIState.getDistributionTableFilters().isNoTagSelected());
-        if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
-            list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
-        }
-        queryConfiguration.put(SPUIDefinitions.FILTER_BY_TAG, list);
+        final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
+               
         final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<DistributionBeanQuery>(
                 DistributionBeanQuery.class);
         distributionQF.setQueryConfiguration(queryConfiguration);
@@ -238,6 +229,22 @@ public class DistributionTable extends AbstractTable {
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
         return distributionContainer;
+    }
+    
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig =  new HashMap<String, Object>();
+             managementUIState.getDistributionTableFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+             managementUIState.getDistributionTableFilters().getPinnedTargetId()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.ORDER_BY_PINNED_TARGET, value));
+       final List<String> list = new ArrayList<String>();
+        queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG,
+                managementUIState.getDistributionTableFilters().isNoTagSelected());
+        if (!managementUIState.getDistributionTableFilters().getDistSetTags().isEmpty()) {
+            list.addAll(managementUIState.getDistributionTableFilters().getDistSetTags());
+        }
+        queryConfig.put(SPUIDefinitions.FILTER_BY_TAG, list);
+        return queryConfig;
     }
 
     /*

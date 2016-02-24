@@ -219,8 +219,10 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
      */
     @Override
     protected void resetSearchText() {
-        artifactUploadState.getSoftwareModuleFilters().setSearchText(null);
-        eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
+        if(artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()){
+            artifactUploadState.getSoftwareModuleFilters().setSearchText(null);
+            eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
+        }
     }
 
     /*

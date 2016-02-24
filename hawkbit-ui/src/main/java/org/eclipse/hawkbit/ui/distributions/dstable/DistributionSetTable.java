@@ -114,7 +114,7 @@ public class DistributionSetTable extends AbstractTable {
 
     @Autowired
     private transient TargetManagement targetManagement;
-
+    
     /**
      * Initialize the component.
      */
@@ -157,21 +157,28 @@ public class DistributionSetTable extends AbstractTable {
     @Override
     protected Container createContainer() {
 
-        final Map<String, Object> queryConfiguration = new HashMap<>();
-        manageDistUIState.getManageDistFilters().getSearchText()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-
-        if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
-            queryConfiguration.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
-                    manageDistUIState.getManageDistFilters().getClickedDistSetType());
-        }
-
+        final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
         final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<>(ManageDistBeanQuery.class);
+
         distributionQF.setQueryConfiguration(queryConfiguration);
         return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
     }
+    
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        manageDistUIState.getManageDistFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+
+        if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
+            queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
+                    manageDistUIState.getManageDistFilters().getClickedDistSetType());
+        }
+
+        return queryConfig;
+    }
+    
 
     /*
      * (non-Javadoc)

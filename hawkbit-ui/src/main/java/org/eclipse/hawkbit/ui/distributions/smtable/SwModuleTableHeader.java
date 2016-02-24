@@ -203,8 +203,10 @@ public class SwModuleTableHeader extends AbstractTableHeader {
      */
     @Override
     protected void resetSearchText() {
-        manageDistUIState.getSoftwareModuleFilters().setSearchText(null);
-        eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
+        if(manageDistUIState.getSoftwareModuleFilters().getSearchText().isPresent()){
+            manageDistUIState.getSoftwareModuleFilters().setSearchText(null);
+            eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
+        }
     }
 
     /*

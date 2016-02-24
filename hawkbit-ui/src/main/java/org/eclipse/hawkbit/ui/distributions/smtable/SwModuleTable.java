@@ -94,8 +94,8 @@ public class SwModuleTable extends AbstractTable {
 
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
-
-    /**
+    
+   /**
      * Initialize the filter layout.
      */
     @PostConstruct
@@ -177,15 +177,7 @@ public class SwModuleTable extends AbstractTable {
      */
     @Override
     protected Container createContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
-        manageDistUIState.getSoftwareModuleFilters().getSearchText()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-
-        manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
-                .ifPresent(type -> queryConfiguration.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
-
-        manageDistUIState.getLastSelectedDistribution().ifPresent(
-                distIdName -> queryConfiguration.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
+        final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
 
         final BeanQueryFactory<SwModuleBeanQuery> swQF = new BeanQueryFactory<SwModuleBeanQuery>(
                 SwModuleBeanQuery.class);
@@ -194,6 +186,20 @@ public class SwModuleTable extends AbstractTable {
         final LazyQueryContainer container = new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
         return container;
+    }
+    
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        manageDistUIState.getSoftwareModuleFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+
+        manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
+                .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
+
+        manageDistUIState.getLastSelectedDistribution().ifPresent(
+                distIdName -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
+
+        return queryConfig;
     }
 
     /*

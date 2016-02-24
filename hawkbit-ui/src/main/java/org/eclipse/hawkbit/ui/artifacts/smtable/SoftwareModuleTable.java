@@ -78,7 +78,8 @@ public class SoftwareModuleTable extends AbstractTable {
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
-
+    
+ 
     /**
      * Initialize the filter layout.
      */
@@ -127,12 +128,7 @@ public class SoftwareModuleTable extends AbstractTable {
      */
     @Override
     protected Container createContainer() {
-        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
-        artifactUploadState.getSoftwareModuleFilters().getSearchText()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
-
-        artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
-                .ifPresent(type -> queryConfiguration.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
+        final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
 
         final BeanQueryFactory<BaseSwModuleBeanQuery> swQF = new BeanQueryFactory<BaseSwModuleBeanQuery>(
                 BaseSwModuleBeanQuery.class);
@@ -142,6 +138,19 @@ public class SoftwareModuleTable extends AbstractTable {
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
         return container;
     }
+    
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        artifactUploadState.getSoftwareModuleFilters().getSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+
+        artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType()
+                .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
+
+        return queryConfig;
+    }
+    
+    
 
     @Override
     protected void addContainerProperties(final Container container) {
