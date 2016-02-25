@@ -67,13 +67,30 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     private EventBus eventBus;
 
     @Test
+    @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
+    public void findActionWithLazyDetails() {
+        final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
+                distributionSetManagement, new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
+        // one action with one action status is generated
+        final Long actionId = deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(actionId);
+
+        assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
+        assertThat(action.getTarget()).as("Target in action").isNotNull();
+        assertThat(action.getTarget().getAssignedDistributionSet()).as("AssignedDistributionSet of target in action")
+                .isNotNull();
+    }
+
+    @Test
     @Description("Test verifies that the custom query to find all actions include the count of action status is working correctly")
     public void findActionsWithStatusCountByTarget() {
         final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
                 distributionSetManagement, new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
         // one action with one action status is generated
-        final Action action = deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0));
         // save 2 action status
         actionStatusRepository.save(new ActionStatus(action, Status.RETRIEVED, System.currentTimeMillis()));
         actionStatusRepository.save(new ActionStatus(action, Status.RUNNING, System.currentTimeMillis()));
@@ -349,7 +366,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
      * test a simple deployment by calling the
      * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
      * and checking the active action and the action history of the targets.
-     * 
+     *
      * @throws InterruptedException
      */
     @Test
@@ -805,7 +822,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.SOFT, Action.NO_FORCE_TIME, target.getControllerId());
-        final Action action = assignDistributionSet.getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify preparation
         Action findAction = deploymentManagement.findAction(action.getId());
         assertThat(findAction.getActionType()).isEqualTo(ActionType.SOFT);
@@ -828,7 +845,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.FORCED, Action.NO_FORCE_TIME, target.getControllerId());
-        final Action action = assignDistributionSet.getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify perparation
         Action findAction = deploymentManagement.findAction(action.getId());
         assertThat(findAction.getActionType()).isEqualTo(ActionType.FORCED);
@@ -848,7 +865,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
      * <p>
      * <b>All created distribution sets are assigned to all targets of the
      * target list deployedTargets.</b>
-     * 
+     *
      * @param undeployedTargetPrefix
      *            prefix to be used as target controller prefix
      * @param noOfUndeployedTargets

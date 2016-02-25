@@ -258,8 +258,10 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void resetSearchText() {
-        managementUIState.getTargetTableFilters().setSearchText(null);
-        eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
+        if(managementUIState.getTargetTableFilters().getSearchText().isPresent()){
+            managementUIState.getTargetTableFilters().setSearchText(null);
+            eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
+        }
     }
 
     private String getSearchText() {

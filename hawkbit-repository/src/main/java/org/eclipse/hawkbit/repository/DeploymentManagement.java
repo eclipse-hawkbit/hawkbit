@@ -378,11 +378,13 @@ public class DeploymentManagement {
             actionStatusRepository.save(actionStatus);
         });
 
-        // select updated targets in order to return them
+        // flush to get action IDs
+        entityManager.flush();
+        // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), targets.size(),
-                controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
-                targetManagement);
+                controllerIDs.size() - targets.size(),
+                targetIdsToActions.values().stream().map(Action::getId).collect(Collectors.toList()), targetManagement);
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
@@ -391,13 +393,16 @@ public class DeploymentManagement {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
 
-        // send distribution set assignment event
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions, softwareModules);
 
+        return result;
+    }
+
+    private void sendDistributionSetAssignmentEvent(final List<Target> targets, final Set<Long> targetIdsCancellList,
+            final Map<String, Action> targetIdsToActions, final List<SoftwareModule> softwareModules) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
                 .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
                         softwareModules));
-
-        return result;
     }
 
     /**
@@ -709,8 +714,8 @@ public class DeploymentManagement {
     }
 
     /**
-     * Get the {@link Action} entity for given actionId with all lazy
-     * attributes.
+     * Get the {@link Action} entity for given actionId with all lazy attributes
+     * (i.e. distributionSet, target, target.assignedDs).
      *
      * @param actionId
      *            to be id of the action
