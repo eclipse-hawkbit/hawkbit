@@ -36,8 +36,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Distribution table header.
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -60,9 +58,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
     @Autowired
     private DistributionAddUpdateWindowLayout addUpdateWindowLayout;
 
-    /**
-     * Initialize the component.
-     */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -76,54 +72,26 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#getHeaderCaption(
-     * )
-     */
     @Override
     protected String getHeaderCaption() {
         return i18n.get("header.dist.table");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#getSearchBoxId()
-     */
     @Override
     protected String getSearchBoxId() {
         return SPUIComponetIdProvider.DIST_SEARCH_TEXTFIELD;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * getSearchRestIconId()
-     */
     @Override
     protected String getSearchRestIconId() {
         return SPUIComponetIdProvider.DIST_SEARCH_ICON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#getAddIconId()
-     */
     @Override
     protected String getAddIconId() {
         return SPUIComponetIdProvider.DIST_ADD_ICON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * onLoadSearchBoxValue()
-     */
     @Override
     protected String onLoadSearchBoxValue() {
         if (manageDistUIstate.getManageDistFilters().getSearchText().isPresent()) {
@@ -132,11 +100,6 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#getDropFilterId()
-     */
     @Override
     protected String getDropFilterId() {
         return null;
@@ -170,7 +133,7 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void resetSearchText() {
-        if(manageDistUIstate.getManageDistFilters().getSearchText().isPresent()){
+        if (manageDistUIstate.getManageDistFilters().getSearchText().isPresent()) {
             manageDistUIstate.getManageDistFilters().setSearchText(null);
             eventbus.publish(this, DistributionTableFilterEvent.REMOVE_FILTER_BY_TEXT);
         }
@@ -223,11 +186,6 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
         eventbus.unsubscribe(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#canAddNewItem()
-     */
     @Override
     protected Boolean isAddNewItemAllowed() {
         return Boolean.TRUE;
@@ -248,47 +206,21 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * getBulkUploadIconId()
-     */
     @Override
     protected String getBulkUploadIconId() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#bulkUpload(com.
-     * vaadin.ui.Button.ClickEvent )
-     */
     @Override
     protected void bulkUpload(final ClickEvent event) {
-        /**
-         * No implementation as no bulk upload is supported.
-         */
+        // No implementation as no bulk upload is supported.
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * isBulkUploadAllowed()
-     */
     @Override
     protected Boolean isBulkUploadAllowed() {
         return Boolean.FALSE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
-     * isBulkUploadInProgress()
-     */
     @Override
     protected boolean isBulkUploadInProgress() {
         return false;

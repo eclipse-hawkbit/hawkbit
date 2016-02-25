@@ -75,7 +75,7 @@ public class DistributionTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
     @Override
     protected List<ProxyTag> loadBeans(final int startIndex, final int count) {
         Page<DistributionSetTag> dsTagBeans;
-        final List<ProxyTag> tagList = new ArrayList<ProxyTag>();
+        final List<ProxyTag> tagList = new ArrayList<>();
         if (startIndex == 0 && firstPageDsTag != null) {
             dsTagBeans = firstPageDsTag;
         } else {

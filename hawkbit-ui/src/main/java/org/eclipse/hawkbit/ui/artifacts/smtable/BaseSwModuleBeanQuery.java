@@ -32,10 +32,6 @@ import com.google.common.base.Strings;
  * Simple implementation of generics bean query which dynamically loads a batch
  * of beans.
  *
- *
- *
- *
- *
  */
 public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareModuleItem> {
     private static final long serialVersionUID = 4362142538539335466L;
@@ -76,7 +72,7 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
     @Override
     protected List<ProxyBaseSoftwareModuleItem> loadBeans(final int startIndex, final int count) {
         final Slice<SoftwareModule> swModuleBeans;
-        final List<ProxyBaseSoftwareModuleItem> proxyBeans = new ArrayList<ProxyBaseSoftwareModuleItem>();
+        final List<ProxyBaseSoftwareModuleItem> proxyBeans = new ArrayList<>();
 
         if (type == null && Strings.isNullOrEmpty(searchText)) {
             swModuleBeans = getSoftwareManagementService()

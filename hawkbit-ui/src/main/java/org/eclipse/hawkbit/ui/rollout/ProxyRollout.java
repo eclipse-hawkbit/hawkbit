@@ -24,10 +24,6 @@ public class ProxyRollout extends Rollout {
 
     private String modifiedDate;
 
-    private String createdBy;
-
-    private String lastModifiedBy;
-
     private Long numberOfGroups;
 
     private Long runningTargetsCount;
@@ -104,36 +100,6 @@ public class ProxyRollout extends Rollout {
      */
     public void setModifiedDate(final String modifiedDate) {
         this.modifiedDate = modifiedDate;
-    }
-
-    /**
-     * @return the createdBy
-     */
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * @param createdBy
-     *            the createdBy to set
-     */
-    public void setCreatedBy(final String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    /**
-     * @return the lastModifiedBy
-     */
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    /**
-     * @param lastModifiedBy
-     *            the lastModifiedBy to set
-     */
-    public void setLastModifiedBy(final String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
     }
 
     /**

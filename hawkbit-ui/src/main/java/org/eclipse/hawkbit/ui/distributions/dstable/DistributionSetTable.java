@@ -74,8 +74,6 @@ import com.vaadin.ui.UI;
 /**
  * Distribution set table.
  *
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -114,7 +112,7 @@ public class DistributionSetTable extends AbstractTable {
 
     @Autowired
     private transient TargetManagement targetManagement;
-    
+
     /**
      * Initialize the component.
      */
@@ -136,24 +134,11 @@ public class DistributionSetTable extends AbstractTable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
-     */
     @Override
     protected String getTableId() {
         return SPUIComponetIdProvider.DIST_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
-     * )
-     */
     @Override
     protected Container createContainer() {
 
@@ -165,9 +150,9 @@ public class DistributionSetTable extends AbstractTable {
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
     }
-    
+
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        final Map<String, Object> queryConfig = new HashMap<>();
         manageDistUIState.getManageDistFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
@@ -178,14 +163,7 @@ public class DistributionSetTable extends AbstractTable {
 
         return queryConfig;
     }
-    
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties
-     * (com.vaadin.data.Container )
-     */
     @Override
     protected void addContainerProperties(final Container container) {
         HawkbitCommonUtil.getDsTableColumnProperties(container);
@@ -193,12 +171,6 @@ public class DistributionSetTable extends AbstractTable {
                 Boolean.class, null, false, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * addCustomGeneratedColumns ()
-     */
     @Override
     protected void addCustomGeneratedColumns() {
         /**
@@ -206,23 +178,12 @@ public class DistributionSetTable extends AbstractTable {
          */
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * isFirstRowSelectedOnLoad ()
-     */
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
         return !manageDistUIState.getSelectedDistributions().isPresent()
                 || manageDistUIState.getSelectedDistributions().get().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
-     */
     @Override
     protected Object getItemIdToSelect() {
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
@@ -231,12 +192,6 @@ public class DistributionSetTable extends AbstractTable {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
-     */
     @Override
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
@@ -271,33 +226,16 @@ public class DistributionSetTable extends AbstractTable {
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
-     */
     @Override
     protected boolean isMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
-     * ()
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         return HawkbitCommonUtil.getTableVisibleColumns(isMaximized(), false, i18n);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
-     */
     @Override
     protected DropHandler getTableDropHandler() {
         return new DropHandler() {

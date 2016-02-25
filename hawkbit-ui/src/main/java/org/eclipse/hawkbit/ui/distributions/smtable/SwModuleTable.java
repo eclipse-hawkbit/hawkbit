@@ -67,8 +67,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Implementation of software module table using generic abstract table styles .
- * 
- *
  *
  */
 @SpringComponent
@@ -94,10 +92,11 @@ public class SwModuleTable extends AbstractTable {
 
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
-    
-   /**
+
+    /**
      * Initialize the filter layout.
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -158,56 +157,35 @@ public class SwModuleTable extends AbstractTable {
         }
     }
 
-    /* All Override methods */
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTable#getTableId()
-     */
     @Override
     protected String getTableId() {
         return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTable#createContainer()
-     */
     @Override
     protected Container createContainer() {
         final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
 
-        final BeanQueryFactory<SwModuleBeanQuery> swQF = new BeanQueryFactory<SwModuleBeanQuery>(
-                SwModuleBeanQuery.class);
+        final BeanQueryFactory<SwModuleBeanQuery> swQF = new BeanQueryFactory<>(SwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        final LazyQueryContainer container = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
-        return container;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
     }
-    
+
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        final Map<String, Object> queryConfig = new HashMap<>();
         manageDistUIState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
         manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType()
                 .ifPresent(type -> queryConfig.put(SPUIDefinitions.BY_SOFTWARE_MODULE_TYPE, type));
 
-        manageDistUIState.getLastSelectedDistribution().ifPresent(
-                distIdName -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
+        manageDistUIState.getLastSelectedDistribution()
+                .ifPresent(distIdName -> queryConfig.put(SPUIDefinitions.ORDER_BY_DISTRIBUTION, distIdName.getId()));
 
         return queryConfig;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTable#addContainerProperties(com.
-     * vaadin.data.Container)
-     */
     @Override
     protected void addContainerProperties(final Container container) {
         final LazyQueryContainer lazyContainer = (LazyQueryContainer) container;
@@ -226,11 +204,6 @@ public class SwModuleTable extends AbstractTable {
         lazyContainer.addContainerProperty(SPUILabelDefinitions.VAR_SOFT_TYPE_ID, Long.class, null, false, true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTable#addCustomGeneratedColumns()
-     */
     @Override
     protected void addCustomGeneratedColumns() {
 
@@ -249,32 +222,16 @@ public class SwModuleTable extends AbstractTable {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTable#isFirstRowSelectedOnLoad()
-     */
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
         return manageDistUIState.getSelectedSoftwareModules().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTable#getItemIdToSelect()
-     */
     @Override
     protected Object getItemIdToSelect() {
         return manageDistUIState.getSelectedSoftwareModules();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTable#isMaximized()
-     */
     @Override
     protected boolean isMaximized() {
         return manageDistUIState.isSwModuleTableMaximized();
@@ -306,16 +263,9 @@ public class SwModuleTable extends AbstractTable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTable#getTableVisibleColumns
-     * ()
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1F));
@@ -370,11 +320,6 @@ public class SwModuleTable extends AbstractTable {
 
     }
 
-    /**
-     * @param color
-     * @param isAssigned
-     * @return
-     */
     private String getTableStyle(final Long typeId, final boolean isAssigned, final String color) {
         if (isAssigned) {
             addTypeStyle(typeId, color);
@@ -391,11 +336,6 @@ public class SwModuleTable extends AbstractTable {
                                 + "{background-color:" + color + " !important;background-image:none !important }")));
     }
 
-    /**
-     * @param itemId
-     * @param propertyId
-     * @return
-     */
     private String createTableStyle(final Object itemId, final Object propertyId) {
         if (null == propertyId) {
             final Item item = getItem(itemId);
@@ -429,12 +369,6 @@ public class SwModuleTable extends AbstractTable {
         return name + "." + version;
     }
 
-    /**
-     * Add new software module to table.
-     *
-     * @param swModule
-     *            new software module
-     */
     @SuppressWarnings("unchecked")
     private void addSoftwareModule(final SoftwareModule swModule) {
         final Object addItem = addItem();
@@ -461,11 +395,6 @@ public class SwModuleTable extends AbstractTable {
         select(swModule.getId());
     }
 
-    /**
-     * @param itemId
-     * @param nameVersionStr
-     * @return
-     */
     private void showArtifactDetailsWindow(final Long itemId, final String nameVersionStr) {
         final Window atrifactDtlsWindow = new Window();
         atrifactDtlsWindow.setCaption(HawkbitCommonUtil.getArtifactoryDetailsLabelId(nameVersionStr));
