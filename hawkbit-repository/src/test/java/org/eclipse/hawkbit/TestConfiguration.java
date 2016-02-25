@@ -18,12 +18,10 @@ import org.eclipse.hawkbit.repository.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.annotation.AdviceMode;
@@ -47,7 +45,8 @@ import com.mongodb.MongoClientOptions;
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
-@EnableConfigurationProperties({ DdiSecurityProperties.class, ControllerPollProperties.class })
+// @EnableConfigurationProperties({ DdiSecurityProperties.class,
+// ControllerPollProperties.class })
 @Profile("test")
 public class TestConfiguration implements AsyncConfigurer {
 

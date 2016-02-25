@@ -9,12 +9,14 @@
 package org.eclipse.hawkbit.cache;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Bean which holds the necessary properties for configuring the Redis
  * connection.
  *
  */
+@Component
 @ConfigurationProperties("hawkbit.server.redis")
 public class RedisProperties {
 

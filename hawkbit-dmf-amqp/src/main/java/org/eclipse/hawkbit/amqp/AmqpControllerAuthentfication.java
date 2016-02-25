@@ -21,9 +21,9 @@ import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.PreAuthenficationFilter;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,8 +78,8 @@ public class AmqpControllerAuthentfication {
         filterChain.add(gatewaySecurityTokenFilter);
 
         final ControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new ControllerPreAuthenticatedSecurityHeaderFilter(
-                secruityProperties.getRpCnHeader(), secruityProperties.getRpSslIssuerHashHeader(), systemManagement,
-                tenantAware);
+                secruityProperties.getRp().getCnHeader(), secruityProperties.getRp().getSslIssuerHashHeader(),
+                systemManagement, tenantAware);
         filterChain.add(securityHeaderFilter);
 
         final ControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new ControllerPreAuthenticateSecurityTokenFilter(

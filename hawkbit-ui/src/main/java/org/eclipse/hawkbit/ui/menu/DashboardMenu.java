@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.ServerProperties;
+import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -67,7 +67,7 @@ public final class DashboardMenu extends CustomComponent {
     private transient UiProperties uiProperties;
 
     @Autowired
-    private transient ServerProperties serverProperties;
+    private transient HawkbitServerProperties serverProperties;
 
     private static final long serialVersionUID = 5394474618559481462L;
 

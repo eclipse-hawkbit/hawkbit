@@ -9,13 +9,15 @@
 package org.eclipse.hawkbit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Properties for the server e.g. the server's URL which must be configured.
  * 
  */
+@Component
 @ConfigurationProperties("hawkbit.server")
-public class ServerProperties {
+public class HawkbitServerProperties {
     /**
      * Defines under which URI the update server can be reached. Used to
      * calculate download URLs for DMF transmitted update actions.

@@ -10,25 +10,34 @@ package org.eclipse.hawkbit.security;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
  * The common properties for DDI security.
  */
+@Component
 @ConfigurationProperties("hawkbit.server.ddi.security")
 public class DdiSecurityProperties {
 
+    private final Rp rp = new Rp();
+    private final Authentication authentication = new Authentication();
+
+    public Authentication getAuthentication() {
+        return authentication;
+    }
+
+    public Rp getRp() {
+        return rp;
+    }
+
     /**
-     * Inner class for reverse proxy configuration. Defines the security
-     * properties for authenticating controllers behind a reverse proxy which
-     * terminates the SSL session at the reverse proxy but adding request header
-     * which contains the CN of the certificate.
+     * Reverse proxy configuration. Defines the security properties for
+     * authenticating controllers behind a reverse proxy which terminates the
+     * SSL session at the reverse proxy but adding request header which contains
+     * the CN of the certificate.
      */
-    @Component
-    @ConfigurationProperties("hawkbit.server.ddi.security.rp")
-    public static class RpProperties {
+    public static class Rp {
 
         /**
          * HTTP header field for common name of a DDI target client certificate.
@@ -94,54 +103,119 @@ public class DdiSecurityProperties {
     }
 
     /**
-     * Inner class for anonymous enable configuration.
+     * DDI Authentication options.
      */
-    @Component
-    @ConfigurationProperties("hawkbit.server.ddi.security.authentication.anonymous")
-    public static class AnoymousAuthenticationProperties {
+    public static class Authentication {
+        private final Anonymous anonymous = new Anonymous();
+        private final Targettoken targettoken = new Targettoken();
+        private final Gatewaytoken gatewaytoken = new Gatewaytoken();
 
-        /**
-         * Set to true to enable anonymous DDI client authentication.
-         */
-        private Boolean enabled = Boolean.FALSE;
+        public Anonymous getAnonymous() {
+            return anonymous;
+        }
 
-        /**
-         * @param enabled
-         *            the enabled to set
-         */
-        public void setEnabled(final Boolean enabled) {
-            this.enabled = enabled;
+        public Gatewaytoken getGatewaytoken() {
+            return gatewaytoken;
+        }
+
+        public Targettoken getTargettoken() {
+            return targettoken;
         }
 
         /**
-         * @return the enabled
+         * Target token authentication. Tokens are defined per target.
+         *
          */
-        public Boolean getEnabled() {
-            return enabled;
+        public static class Targettoken {
+            /**
+             * Set to true to enable target token authentication.
+             */
+            private boolean enabled = false;
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(final boolean enabled) {
+                this.enabled = enabled;
+            }
+
         }
 
-    }
+        /**
+         * Gateway token authentication. Tokens are defined per tenant. Use with
+         * care!
+         *
+         */
+        public static class Gatewaytoken {
 
-    @Autowired
-    private RpProperties rppProperties;
+            /**
+             * Gateway token based authentication enabled.
+             */
+            private boolean enabled = false;
 
-    @Autowired
-    private AnoymousAuthenticationProperties authenticationsProperties;
+            /**
+             * Default gateway token name.
+             */
+            private String name = "";
 
-    public String getRpCnHeader() {
-        return rppProperties.getCnHeader();
-    }
+            /**
+             * Default gateway token itself.
+             */
+            private String key = "";
 
-    public String getRpSslIssuerHashHeader() {
-        return rppProperties.getSslIssuerHashHeader();
-    }
+            public boolean isEnabled() {
+                return enabled;
+            }
 
-    public List<String> getRpTrustedIPs() {
-        return rppProperties.getTrustedIPs();
-    }
+            public void setEnabled(final boolean enabled) {
+                this.enabled = enabled;
+            }
 
-    public Boolean getAnonymousEnabled() {
-        return authenticationsProperties.getEnabled();
+            public String getName() {
+                return name;
+            }
+
+            public void setName(final String name) {
+                this.name = name;
+            }
+
+            public String getKey() {
+                return key;
+            }
+
+            public void setKey(final String key) {
+                this.key = key;
+            }
+
+        }
+
+        /**
+         * Anonymous authentication.
+         */
+        public static class Anonymous {
+
+            /**
+             * Set to true to enable anonymous DDI client authentication.
+             */
+            private boolean enabled = false;
+
+            /**
+             * @param enabled
+             *            the enabled to set
+             */
+            public void setEnabled(final boolean enabled) {
+                this.enabled = enabled;
+            }
+
+            /**
+             * @return the enabled
+             */
+            public boolean isEnabled() {
+                return enabled;
+            }
+        }
+
     }
 
 }

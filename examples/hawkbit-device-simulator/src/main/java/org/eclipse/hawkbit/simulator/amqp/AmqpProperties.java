@@ -9,12 +9,14 @@
 package org.eclipse.hawkbit.simulator.amqp;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Bean which holds the necessary properties for configuring the AMQP
  * connection.
  *
  */
+@Component
 @ConfigurationProperties("hawkbit.device.simulator.amqp")
 public class AmqpProperties {
 

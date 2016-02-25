@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.url;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.hawkbit.ServerProperties;
+import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,11 +28,11 @@ import com.google.common.base.Throwables;
  *
  */
 @Configuration
-@EnableConfigurationProperties(ServerProperties.class)
+@EnableConfigurationProperties(HawkbitServerProperties.class)
 public class PropertyHostnameResolverAutoConfiguration {
 
     @Autowired
-    private ServerProperties serverProperties;
+    private HawkbitServerProperties serverProperties;
 
     /**
      * @return the default autoconfigure hostname resolver implementation which

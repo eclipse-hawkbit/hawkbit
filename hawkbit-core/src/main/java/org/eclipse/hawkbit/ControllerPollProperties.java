@@ -9,14 +9,13 @@
 package org.eclipse.hawkbit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines the polling time for the controllers in HH:MM:SS notation.
  * 
- *
- *
  */
-
+@Component
 @ConfigurationProperties(prefix = "hawkbit.controller")
 public class ControllerPollProperties {
 

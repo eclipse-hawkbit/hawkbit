@@ -9,12 +9,14 @@
 package org.eclipse.hawkbit.mgmt.client;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Configuration bean which holds the configuration of the client e.g. the base
  * URL of the hawkbit-server and the credentials to use the RESTful Management
  * API.
  */
+@Component
 @ConfigurationProperties(prefix = "hawkbit")
 public class ClientConfigurationProperties {
 

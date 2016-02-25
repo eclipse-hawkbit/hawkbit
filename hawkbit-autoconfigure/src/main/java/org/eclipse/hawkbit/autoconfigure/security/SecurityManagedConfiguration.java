@@ -33,12 +33,12 @@ import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
-import org.eclipse.hawkbit.security.SecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ public class SecurityManagedConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
     @Autowired
-    private SecurityProperties securityProperties;
+    private HawkbitSecurityProperties securityProperties;
 
     /**
      * {@link WebSecurityConfigurer} for the internal SP controller API.
@@ -124,7 +124,7 @@ public class SecurityManagedConfiguration {
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    securityConfiguration.getRpCnHeader(), securityConfiguration.getRpSslIssuerHashHeader(),
+                    securityConfiguration.getRp().getCnHeader(), securityConfiguration.getRp().getSslIssuerHashHeader(),
                     systemManagement, tenantAware);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
             securityHeaderFilter.setCheckForPrincipalChanges(true);
@@ -150,7 +150,7 @@ public class SecurityManagedConfiguration {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            if (securityConfiguration.getAnonymousEnabled()) {
+            if (securityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
@@ -181,7 +181,7 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
             auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRpTrustedIPs()));
+                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRp().getTrustedIPs()));
         }
     }
 
@@ -197,8 +197,9 @@ public class SecurityManagedConfiguration {
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
         filterRegBean.setFilter(new DosFilter(securityProperties.getDos().getFilter().getMaxRead(),
-                securityProperties.getDos().getFilter().getMaxWrite(), securityProperties.getDos().getWhitelist(),
-                securityProperties.getClients().getBlacklist(), securityProperties.getClients().getRemoteIpHeader()));
+                securityProperties.getDos().getFilter().getMaxWrite(),
+                securityProperties.getDos().getFilter().getWhitelist(), securityProperties.getClients().getBlacklist(),
+                securityProperties.getClients().getRemoteIpHeader()));
         filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*", "/rest/*");
         return filterRegBean;
     }
@@ -308,7 +309,7 @@ public class SecurityManagedConfiguration {
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
         @Autowired
-        private SecurityProperties securityProperties;
+        private HawkbitSecurityProperties securityProperties;
 
         /**
          * post construct for setting the authentication success handler for the
@@ -466,7 +467,7 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
             auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRpTrustedIPs()));
+                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRp().getTrustedIPs()));
         }
 
     }

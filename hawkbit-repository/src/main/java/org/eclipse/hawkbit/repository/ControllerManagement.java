@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
-import org.eclipse.hawkbit.security.SecurityProperties;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +84,7 @@ public class ControllerManagement {
     private ActionStatusRepository actionStatusRepository;
 
     @Autowired
-    private SecurityProperties securityProperties;
+    private HawkbitSecurityProperties securityProperties;
 
     /**
      * Refreshes the time of the last time the controller has been connected to

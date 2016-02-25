@@ -16,13 +16,12 @@
 *.jar
 *.war
 
-######################
 # Sonar
-######################
 .sonar_lock
 
 # Eclipse IDE
 
+.factorypath
 *.pydevproject
 .project
 .metadata
