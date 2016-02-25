@@ -633,4 +633,8 @@ public class UploadLayout extends VerticalLayout {
         return uiNotification;
     }
 
+    
+    public void setHasDirectory(Boolean hasDirectory) {
+        this.hasDirectory = hasDirectory;
+    }
 }

@@ -108,6 +108,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
         this.fileName = fileName;
         this.mimeType = mimeType;
+        //reset has directory flag before upload
+        view.setHasDirectory(false);
         try {
             if (view.validate()) {
                 if (view.checkForDuplicate(fileName)) {
