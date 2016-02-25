@@ -140,7 +140,6 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     @Override
     protected void addContainerProperties() {
         final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) getContainerDataSource();
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_ID, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
@@ -478,7 +477,6 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_ID);
         for (Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
