@@ -191,12 +191,13 @@ public class UploadLayout extends VerticalLayout {
                 ((WrapperTransferable) event.getTransferable()).getDraggedComponent();
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 if (files != null) {
+                    //reset the flag
+                    hasDirectory = Boolean.FALSE;
                     for (final Html5File file : files) {
                         if (!isDirectory(file)) {
                             if (!checkForDuplicate(file.getFileName())) {
                                 numberOfFileUploadsExpected.incrementAndGet();
                                 file.setStreamVariable(createStreamVariable(file));
-                                hasDirectory = Boolean.FALSE;
                             }
                         } else {
                             hasDirectory = Boolean.TRUE;
