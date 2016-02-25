@@ -69,8 +69,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Upload files layout.
- *
- *
  */
 @ViewScope
 @SpringComponent
@@ -102,7 +100,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
 
-    private final List<String> duplicateFileNamesList = new ArrayList<String>();
+    private final List<String> duplicateFileNamesList = new ArrayList<>();
 
     private Button processBtn;
 

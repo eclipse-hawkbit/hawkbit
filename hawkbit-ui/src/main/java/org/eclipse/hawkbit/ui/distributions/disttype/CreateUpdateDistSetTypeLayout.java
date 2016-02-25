@@ -79,8 +79,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Window for create update Distribution Set Type.
- * 
- *
  */
 @SpringComponent
 @ViewScope
@@ -221,7 +219,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
         getPreviewButtonColor(DEFAULT_COLOR);
 
-        selectors = new HashSet<ColorSelector>();
+        selectors = new HashSet<>();
         selectedColor = new Color(44, 151, 32);
         selPreview = new SpColorPickerPreview(selectedColor);
 
@@ -457,6 +455,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         sourceTable.setItemDescriptionGenerator(new ItemDescriptionGenerator() {
             private static final long serialVersionUID = 1L;
 
+            @Override
             public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
                 final Item item = sourceTable.getItem(itemId);
                 final String description = (String) item.getItemProperty(DIST_TYPE_DESCRIPTION).getValue();
@@ -475,7 +474,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
     @SuppressWarnings("unchecked")
     private void getSelectedTableItemData(final Long id) {
-        Item saveTblitem = null;
+        Item saveTblitem;
         if (null != selectedTablecontainer) {
             saveTblitem = selectedTablecontainer.addItem(id);
             saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(
@@ -657,10 +656,10 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             DistributionSetType newDistType = new DistributionSetType(typeKeyValue, typeNameValue, typeDescValue);
             for (final Long id : itemIds) {
                 final Item item = selectedTable.getItem(id);
-                final String dist_type_name = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
+                final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
                 final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
                 final Boolean isMandatory = mandatoryCheckBox.getValue();
-                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(dist_type_name);
+                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
                 if (isMandatory) {
                     newDistType.addMandatoryModuleType(swModuleType);
 
@@ -1032,7 +1031,6 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
      *            as the selected tag from combo
      */
     private void setTypeTagCombo(final String distSetTypeSelected) {
-        boolean mandatory = false;
         typeName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
@@ -1053,13 +1051,11 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
                 saveDistSetType.setEnabled(false);
             }
             for (final SoftwareModuleType swModuleType : selectedTypeTag.getOptionalModuleTypes()) {
-                mandatory = false;
-                addTargetTableforUpdate(swModuleType, mandatory);
+                addTargetTableforUpdate(swModuleType, false);
             }
 
             for (final SoftwareModuleType swModuleType : selectedTypeTag.getMandatoryModuleTypes()) {
-                mandatory = true;
-                addTargetTableforUpdate(swModuleType, mandatory);
+                addTargetTableforUpdate(swModuleType, true);
             }
 
             if (null == selectedTypeTag.getColour()) {

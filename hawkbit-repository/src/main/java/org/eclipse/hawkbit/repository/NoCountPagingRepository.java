@@ -57,7 +57,7 @@ public class NoCountPagingRepository {
      */
     public <T, I extends Serializable> Slice<T> findAll(final Specification<T> spec, final Pageable pageable,
             final Class<T> domainClass) {
-        final SimpleJpaNoCountRepository<T, I> noCountDao = new SimpleJpaNoCountRepository<T, I>(domainClass, em);
+        final SimpleJpaNoCountRepository<T, I> noCountDao = new SimpleJpaNoCountRepository<>(domainClass, em);
         return noCountDao.findAll(spec, pageable);
     }
 
@@ -76,7 +76,7 @@ public class NoCountPagingRepository {
      *      org.springframework.data.domain.Pageable)
      */
     public <T, I extends Serializable> Slice<T> findAll(final Pageable pageable, final Class<T> domainClass) {
-        final SimpleJpaNoCountRepository<T, I> noCountDao = new SimpleJpaNoCountRepository<T, I>(domainClass, em);
+        final SimpleJpaNoCountRepository<T, I> noCountDao = new SimpleJpaNoCountRepository<>(domainClass, em);
         return noCountDao.findAll(pageable);
     }
 
@@ -120,7 +120,7 @@ public class NoCountPagingRepository {
 
             final List<T> content = query.getResultList();
 
-            return new PageImpl<T>(content, pageable, content.size());
+            return new PageImpl<>(content, pageable, content.size());
         }
     }
 }

@@ -54,7 +54,7 @@ public class MethodSecurityUtil {
             if (!METHOD_SECURITY_EXCLUSION.contains(method.getName()) && !method.isSynthetic()
                     && Modifier.isPublic(method.getModifiers())) {
                 final PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
-                assertThat(annotation).describedAs(
+                assertThat(annotation).as(
                         "The public method " + method.getName() + " is not annoated with @PreAuthorize, security leak?")
                         .isNotNull();
             }

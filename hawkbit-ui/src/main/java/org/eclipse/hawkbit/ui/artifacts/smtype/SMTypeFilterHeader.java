@@ -28,9 +28,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Software module type filter buttons header.
- * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
@@ -53,6 +50,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     /**
      * Initialize the components.
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -61,32 +59,16 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.layouts.SPFilterHeader#hasCreateUpdatePermission()
-     */
     @Override
     protected boolean hasCreateUpdatePermission() {
         return permChecker.hasCreateDistributionPermission() || permChecker.hasUpdateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterHeader#getTitle()
-     */
     @Override
     protected String getTitle() {
         return SPUILabelDefinitions.TYPE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.layouts.SPFilterHeader#settingsIconClicked(com.
-     * vaadin.ui.Button.ClickEvent )
-     */
     @Override
     protected void settingsIconClicked(final ClickEvent event) {
         final Window addUpdateWindow = createUpdateSWTypeLayout.getWindow();
@@ -94,58 +76,27 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
         addUpdateWindow.setVisible(Boolean.TRUE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.layouts.SPFilterHeader#dropHitsRequired()
-     */
     @Override
     protected boolean dropHitsRequired() {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.SPFilterHeader#
-     * hideFilterButtonLayout()
-     */
     @Override
     protected void hideFilterButtonLayout() {
         artifactUploadState.setSwTypeFilterClosed(true);
         eventbus.publish(this, UploadArtifactUIEvent.HIDE_FILTER_BY_TYPE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.SPFilterHeader#
-     * getConfigureFilterButtonId()
-     */
     @Override
     protected String getConfigureFilterButtonId() {
         return SPUIDefinitions.ADD_SOFTWARE_MODULE_TYPE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * getHideButtonId()
-     */
     @Override
     protected String getHideButtonId() {
         return SPUIComponetIdProvider.SM_SHOW_FILTER_BUTTON_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader#
-     * isAddTagRequired()
-     */
     @Override
     protected boolean isAddTagRequired() {
         return true;

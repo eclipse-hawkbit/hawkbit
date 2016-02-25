@@ -52,6 +52,7 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     private Label headerCaption;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -71,54 +72,42 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
     }
 
     private void setCaptionDetails() {
-        headerCaption.setCaption(rolloutUiState.getRolloutName().isPresent() ? rolloutUiState.getRolloutName().get()
-                : "");
+        headerCaption
+                .setCaption(rolloutUiState.getRolloutName().isPresent() ? rolloutUiState.getRolloutName().get() : "");
     }
 
     @Override
     protected void resetSearchText() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
     }
 
     @Override
     protected String getSearchBoxId() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
         return null;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
         return null;
     }
 
     @Override
     protected void searchBy(final String newSearchText) {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
 
     }
 
     @Override
     protected String getAddIconId() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
         return null;
     }
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
     }
 
     @Override
@@ -129,7 +118,6 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected boolean hasCreatePermission() {
-
         return true;
     }
 
@@ -140,7 +128,6 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected boolean showCloseButton() {
-
         return true;
     }
 
@@ -159,12 +146,6 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.rollout.AbstractSimpleTableHeader#
-     * getHeaderCaptionLayout()
-     */
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
         headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
@@ -184,12 +165,6 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
         return headerCaptionLayout;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.ui.rollout.AbstractSimpleTableHeader#restoreCaption()
-     */
     @Override
     protected void restoreCaption() {
         setCaptionDetails();

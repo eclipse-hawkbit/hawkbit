@@ -30,9 +30,9 @@ public class TargetFilterParameters implements Serializable {
 
     private String searchText;
 
-    private final List<TargetUpdateStatus> status = new ArrayList<TargetUpdateStatus>();
+    private final List<TargetUpdateStatus> status = new ArrayList<>();
 
-    private List<String> targetTags = new ArrayList<String>();
+    private List<String> targetTags = new ArrayList<>();
 
     private Long distributionSetId;
 

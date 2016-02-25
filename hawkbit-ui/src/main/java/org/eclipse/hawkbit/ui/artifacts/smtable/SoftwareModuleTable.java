@@ -55,8 +55,6 @@ import com.vaadin.ui.UI;
 /**
  * Header of Software module table.
  *
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -78,11 +76,11 @@ public class SoftwareModuleTable extends AbstractTable {
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
-    
- 
+
     /**
      * Initialize the filter layout.
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -111,36 +109,23 @@ public class SoftwareModuleTable extends AbstractTable {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTable#getTableId()
-     */
     @Override
     protected String getTableId() {
         return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTable#createContainer()
-     */
     @Override
     protected Container createContainer() {
         final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
 
-        final BeanQueryFactory<BaseSwModuleBeanQuery> swQF = new BeanQueryFactory<BaseSwModuleBeanQuery>(
-                BaseSwModuleBeanQuery.class);
+        final BeanQueryFactory<BaseSwModuleBeanQuery> swQF = new BeanQueryFactory<>(BaseSwModuleBeanQuery.class);
         swQF.setQueryConfiguration(queryConfiguration);
 
-        final LazyQueryContainer container = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
-        return container;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, "swId"), swQF);
     }
-    
+
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        final Map<String, Object> queryConfig = new HashMap<>();
         artifactUploadState.getSoftwareModuleFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
@@ -149,8 +134,6 @@ public class SoftwareModuleTable extends AbstractTable {
 
         return queryConfig;
     }
-    
-    
 
     @Override
     protected void addContainerProperties(final Container container) {
@@ -274,16 +257,9 @@ public class SoftwareModuleTable extends AbstractTable {
         select(swModule.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTable#getTableVisibleColumns
-     * ()
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1F));

@@ -70,6 +70,7 @@ public class SoftwareModuleDetails extends AbstractTableDetailsLayout {
     /**
      * Initialize the component.
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();

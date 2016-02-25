@@ -39,9 +39,6 @@ import com.vaadin.ui.Window;
 /**
  * Implementation of software module details block using generic abstract
  * details style .
- * 
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -70,9 +67,7 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
 
     private SoftwareModule selectedSwModule;
 
-    /**
-     * Initialize the component.
-     */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -133,49 +128,21 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
         detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * getDefaultCaption()
-     */
     @Override
     protected String getDefaultCaption() {
         return i18n.get("upload.swModuleTable.header");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * onLoadIsSwModuleSelected()
-     */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
         return !manageDistUIState.getSelectedSoftwareModules().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * onLoadIsTableMaximized()
-     */
     @Override
     protected Boolean onLoadIsTableMaximized() {
         return manageDistUIState.isSwModuleTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * populateDetailsWidget()
-     */
     @Override
     protected void populateDetailsWidget() {
         populateDetailsWidget(selectedSwModule);
@@ -191,12 +158,6 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
         return permissionChecker.hasUpdateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getTabSheetId()
-     */
     @Override
     protected String getTabSheetId() {
         return null;

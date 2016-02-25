@@ -62,6 +62,7 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     /**
      * Initialize the components.
      */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -84,55 +85,26 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
         eventbus.unsubscribe(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#getHeaderCaption
-     * ()
-     */
     @Override
     protected String getHeaderCaption() {
         return i18n.get("upload.swModuleTable.header");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#getSearchBoxId()
-     */
     @Override
     protected String getSearchBoxId() {
         return SPUIComponetIdProvider.SW_MODULE_SEARCH_TEXT_FIELD;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#getSearchRestIconId()
-     */
     @Override
     protected String getSearchRestIconId() {
         return SPUIComponetIdProvider.SW_MODULE_SEARCH_RESET_ICON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#getAddIconId()
-     */
     @Override
     protected String getAddIconId() {
         return SPUIComponetIdProvider.SW_MODULE_ADD_BUTTON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#onLoadSearchBoxValue()
-     */
     @Override
     protected String onLoadSearchBoxValue() {
         if (artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()) {
@@ -141,68 +113,34 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#getDropFilterId(
-     * )
-     */
     @Override
     protected String getDropFilterId() {
         /* No dropping on software module table header in Upload View */
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#hasCreatePermission()
-     */
     @Override
     protected boolean hasCreatePermission() {
         return permChecker.hasCreateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#isDropHintRequired()
-     */
     @Override
     protected boolean isDropHintRequired() {
         /* No dropping on software module table header in Upload View */
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#isDropFilterRequired()
-     */
     @Override
     protected boolean isDropFilterRequired() {
         /* No dropping on software module table header in Upload View */
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#
-     * getShowFilterButtonLayoutId()
-     */
     @Override
     protected String getShowFilterButtonLayoutId() {
         return "show.type.icon";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#showFilterButtonsLayout
-     * ()
-     */
     @Override
     protected void showFilterButtonsLayout() {
         artifactUploadState.setSwTypeFilterClosed(false);
@@ -210,39 +148,19 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#resetSearchText(
-     * )
-     */
     @Override
     protected void resetSearchText() {
-        if(artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()){
+        if (artifactUploadState.getSoftwareModuleFilters().getSearchText().isPresent()) {
             artifactUploadState.getSoftwareModuleFilters().setSearchText(null);
             eventbus.publish(this, SMFilterEvent.REMOVER_FILTER_BY_TEXT);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#getMaxMinIconId(
-     * )
-     */
     @Override
     protected String getMaxMinIconId() {
         return SPUIComponetIdProvider.SW_MAX_MIN_TABLE_ICON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#maximizeTable()
-     */
     @Override
     public void maximizeTable() {
         artifactUploadState.setSwModuleTableMaximized(Boolean.TRUE);
@@ -250,58 +168,28 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#minimizeTable()
-     */
     @Override
     public void minimizeTable() {
         artifactUploadState.setSwModuleTableMaximized(Boolean.FALSE);
         eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MINIMIZED, null));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#onLoadIsTableMaximized(
-     * )
-     */
     @Override
     public Boolean onLoadIsTableMaximized() {
         return artifactUploadState.isSwModuleTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.SPTableHeader#
-     * onLoadIsShowFilterButtonDisplayed()
-     */
     @Override
     public Boolean onLoadIsShowFilterButtonDisplayed() {
         return artifactUploadState.isSwTypeFilterClosed();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#searchBy(java.lang.
-     * String)
-     */
     @Override
     protected void searchBy(final String newSearchText) {
         artifactUploadState.getSoftwareModuleFilters().setSearchText(newSearchText);
         eventbus.publish(this, SMFilterEvent.FILTER_BY_TEXT);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.SPTableHeader#addNewItem(com.vaadin.
-     * ui.Button.ClickEvent)
-     */
     @Override
     protected void addNewItem(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow.createAddSoftwareModuleWindow();
@@ -310,11 +198,6 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
         addSoftwareModule.setVisible(Boolean.TRUE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#canAddNewItem()
-     */
     @Override
     protected Boolean isAddNewItemAllowed() {
         return Boolean.TRUE;
@@ -335,47 +218,21 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * getBulkUploadIconId()
-     */
     @Override
     protected String getBulkUploadIconId() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTableHeader#bulkUpload(com.
-     * vaadin.ui.Button.ClickEvent )
-     */
     @Override
     protected void bulkUpload(final ClickEvent event) {
-        /**
-         * No implementation as no bulk upload is supported.
-         */
+        // No implementation as no bulk upload is supported.
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * isBulkUploadAllowed()
-     */
     @Override
     protected Boolean isBulkUploadAllowed() {
         return Boolean.FALSE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
-     * isBulkUploadInProgress()
-     */
     @Override
     protected boolean isBulkUploadInProgress() {
         return false;
