@@ -38,8 +38,18 @@ public class SystemSecurityContext {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemSecurityContext.class);
 
+    private final TenantAware tenantAware;
+
+    /**
+     * Autowired constructor.
+     * 
+     * @param tenantAware
+     *            the tenant aware bean to retrieve the current tenant
+     */
     @Autowired
-    private TenantAware tenantAware;
+    public SystemSecurityContext(final TenantAware tenantAware) {
+        this.tenantAware = tenantAware;
+    }
 
     public <T> T runAsSystem(final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();

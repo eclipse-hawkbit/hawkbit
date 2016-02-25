@@ -153,4 +153,7 @@ public class AmqpControllerAuthentfication {
         this.tenantAware = tenantAware;
     }
 
+    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
+        this.systemSecurityContext = systemSecurityContext;
+    }
 }
