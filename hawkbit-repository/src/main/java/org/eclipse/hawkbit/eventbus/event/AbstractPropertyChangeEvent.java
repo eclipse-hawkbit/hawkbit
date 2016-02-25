@@ -47,7 +47,7 @@ public class AbstractPropertyChangeEvent<E extends BaseEntity> extends AbstractB
      * Carries old value and new value of a property .
      *
      */
-    public class Values {
+    public static class Values {
         private final Object oldValue;
         private final Object newValue;
 

@@ -72,7 +72,7 @@ public class RSQLActionFieldsTest extends AbstractIntegrationTest {
 
         try {
             assertRSQLQuery(ActionFields.STATUS.name() + "==true", 5);
-            fail();
+            fail("Missing expected RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
     }
