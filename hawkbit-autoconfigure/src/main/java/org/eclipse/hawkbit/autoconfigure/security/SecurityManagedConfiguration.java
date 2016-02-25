@@ -115,7 +115,7 @@ public class SecurityManagedConfiguration {
         @Autowired
         private TenantAware tenantAware;
         @Autowired
-        private DdiSecurityProperties securityConfiguration;
+        private DdiSecurityProperties ddiSecurityConfiguration;
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
 
@@ -124,7 +124,7 @@ public class SecurityManagedConfiguration {
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    securityConfiguration.getRp().getCnHeader(), securityConfiguration.getRp().getSslIssuerHashHeader(),
+                    ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(),
                     systemManagement, tenantAware);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
             securityHeaderFilter.setCheckForPrincipalChanges(true);
@@ -150,7 +150,7 @@ public class SecurityManagedConfiguration {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            if (securityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
+            if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
@@ -181,7 +181,7 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
             auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRp().getTrustedIPs()));
+                    new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
     }
 
@@ -444,7 +444,7 @@ public class SecurityManagedConfiguration {
     public static class IdRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
-        private DdiSecurityProperties securityConfiguration;
+        private DdiSecurityProperties ddiSecurityConfiguration;
 
         @Autowired
         @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
@@ -467,7 +467,7 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
             auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRp().getTrustedIPs()));
+                    new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
 
     }

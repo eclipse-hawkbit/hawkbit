@@ -11,12 +11,10 @@ package org.eclipse.hawkbit.security;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * The common properties for DDI security.
  */
-@Component
 @ConfigurationProperties("hawkbit.server.ddi.security")
 public class DdiSecurityProperties {
 

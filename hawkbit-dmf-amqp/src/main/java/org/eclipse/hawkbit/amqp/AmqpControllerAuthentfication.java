@@ -55,7 +55,7 @@ public class AmqpControllerAuthentfication {
     private TenantAware tenantAware;
 
     @Autowired
-    private DdiSecurityProperties secruityProperties;
+    private DdiSecurityProperties ddiSecruityProperties;
 
     /**
      * Constructor.
@@ -78,7 +78,7 @@ public class AmqpControllerAuthentfication {
         filterChain.add(gatewaySecurityTokenFilter);
 
         final ControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new ControllerPreAuthenticatedSecurityHeaderFilter(
-                secruityProperties.getRp().getCnHeader(), secruityProperties.getRp().getSslIssuerHashHeader(),
+                ddiSecruityProperties.getRp().getCnHeader(), ddiSecruityProperties.getRp().getSslIssuerHashHeader(),
                 systemManagement, tenantAware);
         filterChain.add(securityHeaderFilter);
 
@@ -138,7 +138,7 @@ public class AmqpControllerAuthentfication {
     }
 
     public void setSecruityProperties(final DdiSecurityProperties secruityProperties) {
-        this.secruityProperties = secruityProperties;
+        this.ddiSecruityProperties = secruityProperties;
     }
 
     public void setSystemManagement(final SystemManagement systemManagement) {

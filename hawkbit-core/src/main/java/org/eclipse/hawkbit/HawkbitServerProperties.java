@@ -9,13 +9,11 @@
 package org.eclipse.hawkbit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Properties for the server e.g. the server's URL which must be configured.
  * 
  */
-@Component
 @ConfigurationProperties("hawkbit.server")
 public class HawkbitServerProperties {
     /**
@@ -31,7 +29,7 @@ public class HawkbitServerProperties {
     }
 
     /**
-     * Build information of the hawkBit instance. Influeneced by maven.
+     * Build information of the hawkBit instance. Influenced by maven.
      *
      */
     public static class Build {

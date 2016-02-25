@@ -9,13 +9,11 @@
 package org.eclipse.hawkbit.autoconfigure.scheduling;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Properties for the async configurer.
  * 
  */
-@Component
 @ConfigurationProperties("hawkbit.threadpool")
 public class AsyncConfigurerThreadpoolProperties {
 
