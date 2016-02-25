@@ -40,10 +40,6 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 /**
  * General configuration for the SP Repository.
  *
- *
- *
- *
- *
  */
 @EnableJpaRepositories(basePackages = { "org.eclipse.hawkbit.repository" })
 @EnableTransactionManagement

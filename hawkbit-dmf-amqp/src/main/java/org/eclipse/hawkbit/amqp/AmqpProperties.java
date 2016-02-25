@@ -15,16 +15,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Bean which holds the necessary properties for configuring the AMQP
  * connection.
  * 
- *
- *
- *
  */
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
 
+    /**
+     * DMF API dead letter queue.
+     */
     private String deadLetterQueue = "dmf_connector_deadletter";
+
+    /**
+     * DMF API dead letter exchange.
+     */
     private String deadLetterExchange = "dmf.connector.deadletter";
+
+    /**
+     * DMF API receiving queue.
+     */
     private String receiverQueue = "dmf_receiver";
+
+    /**
+     * Missing queue fatal, see
+     * {@link SimpleMessageListenerContainer#setMissingQueuesFatal(boolean)}.
+     */
     private boolean missingQueuesFatal = false;
 
     /**

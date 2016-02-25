@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTok
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.PreAuthenficationFilter;
-import org.eclipse.hawkbit.security.SecurityProperties;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class AmqpControllerAuthentfication {
     private TenantAware tenantAware;
 
     @Autowired
-    private SecurityProperties secruityProperties;
+    private DdiSecurityProperties secruityProperties;
 
     /**
      * Constructor.
@@ -137,7 +137,7 @@ public class AmqpControllerAuthentfication {
         this.controllerManagement = controllerManagement;
     }
 
-    public void setSecruityProperties(final SecurityProperties secruityProperties) {
+    public void setSecruityProperties(final DdiSecurityProperties secruityProperties) {
         this.secruityProperties = secruityProperties;
     }
 

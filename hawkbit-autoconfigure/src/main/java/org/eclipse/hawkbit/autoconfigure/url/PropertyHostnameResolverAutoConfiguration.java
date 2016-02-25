@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.url;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.hawkbit.ServerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

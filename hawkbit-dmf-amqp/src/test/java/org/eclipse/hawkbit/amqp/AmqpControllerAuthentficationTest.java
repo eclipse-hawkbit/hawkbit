@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SecurityProperties;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +68,7 @@ public class AmqpControllerAuthentficationTest {
 
         authenticationManager = new AmqpControllerAuthentfication();
         authenticationManager.setControllerManagement(mock(ControllerManagement.class));
-        final SecurityProperties secruityProperties = mock(SecurityProperties.class);
+        final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
         when(secruityProperties.getRpSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
         authenticationManager.setSecruityProperties(secruityProperties);
         systemManagement = mock(SystemManagement.class);

@@ -20,7 +20,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "hawkbit.controller")
 public class ControllerPollProperties {
 
+    /**
+     * Recommended target polling time for DDI API. Final choice is up to the
+     * target.
+     */
     private String pollingTime = "00:05:00";
+
+    /**
+     * Assumed time frame where the target is considered overdue when no DDI
+     * polling has been registered by the update server.
+     */
     private String pollingOverdueTime = "00:05:00";
 
     public String getPollingTime() {
