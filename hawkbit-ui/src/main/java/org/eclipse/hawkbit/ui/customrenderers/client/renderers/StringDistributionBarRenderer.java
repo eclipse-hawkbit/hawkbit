@@ -9,11 +9,16 @@ import org.vaadin.alump.distributionbar.gwt.client.GwtDistributionBar;
 import org.vaadin.alump.distributionbar.gwt.client.dom.ToolTipPresenter.TooltipClassNameProvider;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.vaadin.client.renderers.WidgetRenderer;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
 public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDistributionBar> {
 
+    private static final String STATUS_BAR_PART = "status-bar-part-";
+    private static final String FINISHED = "FINISHED";
+    private static final String SCHEDULED = "SCHEDULED";
+    private static final String ROLLOUT_STATUS_PROGRESS_BAR_ID = "rollout.status.progress.bar.id";
     private String uiWidgetClassName;
 
     @Override
@@ -28,24 +33,26 @@ public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDis
         return gwt;
     }
 
+    
     @Override
     public void render(RendererCellReference cell, String input, GwtDistributionBar widget) {
         if (null != input) {
             widget.setNumberOfParts(2);
-            widget.addStyleName("status-bar");
             Map<String, Long> map = formatData(input);
             if (!map.isEmpty()) {
                 if (isNoTargets(map.values())) {
-                    setBarPartSize(widget, "SCHEDULED".toLowerCase(), 0, 0);
-                    setBarPartSize(widget, "FINISHED".toLowerCase(), 0, 1);
+                    setBarPartSize(widget, SCHEDULED.toLowerCase(), 0, 0);
+                    setBarPartSize(widget, FINISHED.toLowerCase(), 0, 1);
 
                 } else {
                     setThePartDetails(widget, map);
                 }
             }
-            widget.getElement().setId("rollout.status.progress.bar.id");
-            widget.updateParts();
+            widget.getElement().setId(ROLLOUT_STATUS_PROGRESS_BAR_ID);
+            widget.getElement().getStyle().setWidth(100, Unit.PCT);
+            widget.getElement().getStyle().setHeight(100, Unit.PCT);
         }
+        widget.updateParts();
     }
 
     private void setThePartDetails(GwtDistributionBar widget, Map<String, Long> map) {
@@ -93,7 +100,7 @@ public class StringDistributionBarRenderer extends WidgetRenderer<String, GwtDis
             final int index) {
         bar.setPartSize(index, count);
         bar.setPartTooltip(index, statusName);
-        bar.setPartStyleName(index, index, "status-bar-part-" + statusName);
+        bar.setPartStyleName(index, index, STATUS_BAR_PART + statusName);
     }
 
     public String getUiWidgetClassName() {

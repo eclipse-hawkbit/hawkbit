@@ -44,15 +44,19 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Grid.CellReference;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 
 @SpringComponent
 @ViewScope
-public class RolloutListGrid extends AbstractSimpleGrid {
+public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindowResizeListener {
     private static final long serialVersionUID = 4060904914954370524L;
 
     @Autowired
@@ -81,8 +85,8 @@ public class RolloutListGrid extends AbstractSimpleGrid {
     protected void init() {
         super.init();
         eventBus.subscribe(this);
-        setColumnReorderingAllowed(true);
-        isColumnReorderingAllowed();
+        Page.getCurrent().addBrowserWindowResizeListener(this);
+
     }
 
     @PreDestroy
@@ -165,59 +169,26 @@ public class RolloutListGrid extends AbstractSimpleGrid {
     }
 
     @Override
-    protected String getTableId() {
-        return SPUIComponetIdProvider.ROLLOUT_LIST_TABLE_ID;
-    }
+    protected void setColumnExpandRatio() {
+        getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(40);
+        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(150);
 
-    @Override
-    protected void setColumnProperties() {
-        List<Object> columnList = new ArrayList<>();
-        columnList.add(SPUILabelDefinitions.VAR_NAME);
-        columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
-        columnList.add(SPUILabelDefinitions.VAR_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
-        columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
-        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
-        columnList.add(SPUILabelDefinitions.ACTION);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnList.add(SPUILabelDefinitions.VAR_DESC);
-        setColumnOrder(columnList.toArray());
+        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMinimumWidth(40);
+        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMaximumWidth(150);
 
-        alignColumns();
-    }
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(75);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMaximumWidth(75);
 
-    private void alignColumns() {
-        setCellStyleGenerator(new CellStyleGenerator() {
-            private static final long serialVersionUID = 5573570647129792429L;
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMinimumWidth(40);
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMaximumWidth(100);
 
-            @Override
-            public String getStyle(final CellReference cellReference) {
-                String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS,
-                        SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.ACTION };
-                if (Arrays.asList(coulmnNames).contains(cellReference.getPropertyId())) {
-                    return "centeralign";
-                }
-                return null;
-            }
-        });
-    }
+        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
+        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(100);
 
-    @Override
-    protected void setHiddenColumns() {
-        List<Object> columnsToBeHidden = new ArrayList<>();
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_ID);
+        getColumn(SPUILabelDefinitions.ACTION).setMinimumWidth(75);
+        getColumn(SPUILabelDefinitions.ACTION).setMaximumWidth(75);
 
-        for (Object propertyId : columnsToBeHidden) {
-            getColumn(propertyId).setHidden(true);
-        }
+        setFrozenColumnCount(getColumns().size());
     }
 
     @Override
@@ -238,30 +209,44 @@ public class RolloutListGrid extends AbstractSimpleGrid {
     }
 
     @Override
-    protected void setColumnExpandRatio() {
-        getColumn(SPUILabelDefinitions.VAR_NAME).setExpandRatio(1);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(150);
+    protected String getTableId() {
+        return SPUIComponetIdProvider.ROLLOUT_LIST_TABLE_ID;
+    }
 
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setExpandRatio(1);
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMaximumWidth(150);
+    @Override
+    protected void setColumnProperties() {
+        List<Object> columnList = new ArrayList<>();
+        columnList.add(SPUILabelDefinitions.VAR_NAME);
+        columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
+        columnList.add(SPUILabelDefinitions.VAR_STATUS);
+        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
+        columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
+        columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
+        columnList.add(SPUILabelDefinitions.ACTION);
 
-        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setExpandRatio(0);
+        columnList.add(SPUILabelDefinitions.VAR_CREATED_DATE);
+        columnList.add(SPUILabelDefinitions.VAR_CREATED_USER);
+        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
+        columnList.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
+        columnList.add(SPUILabelDefinitions.VAR_DESC);
+        setColumnOrder(columnList.toArray());
+        alignColumns();
+    }
 
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_CREATED_USER).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_MODIFIED_DATE).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_MODIFIED_BY).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_DESC).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setExpandRatio(0);
-        
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setExpandRatio(2);
+    private void alignColumns() {
+        setCellStyleGenerator(new CellStyleGenerator() {
+            private static final long serialVersionUID = 5573570647129792429L;
 
-        getColumn(SPUILabelDefinitions.ACTION).setExpandRatio(0);
-        getColumn(SPUILabelDefinitions.ACTION).setMinimumWidth(90);
-        setFrozenColumnCount(getColumns().size());
+            @Override
+            public String getStyle(final CellReference cellReference) {
+                String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS,
+                        SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.ACTION };
+                if (Arrays.asList(coulmnNames).contains(cellReference.getPropertyId())) {
+                    return "centeralign";
+                }
+                return null;
+            }
+        });
     }
 
     @Override
@@ -379,42 +364,44 @@ public class RolloutListGrid extends AbstractSimpleGrid {
         String result = null;
         switch (value) {
         case FINISHED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()),
-                    value.name().toLowerCase(), "statusIconGreen", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), "statusIconGreen",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case PAUSED:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.PAUSE.getCodepoint()),
-                    value.name().toLowerCase(), "statusIconBlue", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+                    "statusIconBlue", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case RUNNING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, value.name().toLowerCase(), "yellowSpinner",
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, "yellowSpinner",
                     SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case READY:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
-                    value.name().toLowerCase(), "statusIconLightBlue", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), "statusIconLightBlue",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case STOPPED:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.STOP.getCodepoint()),
-                    value.name().toLowerCase(), "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+                    "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case CREATING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, value.name().toLowerCase(), "greySpinner",
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, "greySpinner",
                     SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case STARTING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, value.name().toLowerCase(), "blueSpinner",
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, "blueSpinner",
                     SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case ERROR_CREATING:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), value.name().toLowerCase(),
-                    "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), "statusIconRed",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case ERROR_STARTING:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), value.name().toLowerCase(),
-                    "statusIconRed", SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), "statusIconRed",
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         default:
             break;
@@ -466,6 +453,52 @@ public class RolloutListGrid extends AbstractSimpleGrid {
         @Override
         public Class<String> getType() {
             return String.class;
+        }
+    }
+
+    @Override
+    public void browserWindowResized(BrowserWindowResizeEvent event) {
+        // Intermediate solution for the column width problem for
+        // SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS column
+        // Readding the column
+        recalculateColumnWidths();
+        removeColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
+        addColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
+                .setHeaderCaption(i18n.get("header.detail.status"));
+        setColumnProperties();
+        addDetailStatusColumn();
+    }
+
+    @Override
+    protected void setHiddenColumns() {
+        List<Object> columnsToBeHidden = new ArrayList<>();
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_ID);
+        for (Object propertyId : columnsToBeHidden) {
+            getColumn(propertyId).setHidden(true);
+        }
+
+    }
+
+    @Override
+    protected CellDescriptionGenerator getDescriptionGenerator() {
+        return cell -> getDescription(cell);
+    };
+
+    private String getDescription(CellReference cell) {
+        if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
+            return cell.getProperty().getValue().toString().toLowerCase();
+        } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
+            return SPUILabelDefinitions.ACTION.toLowerCase();
+        } else if (SPUILabelDefinitions.VAR_NAME.equals(cell.getPropertyId())) {
+            return cell.getProperty().getValue().toString();
+        } else {
+            return null;
         }
     }
 

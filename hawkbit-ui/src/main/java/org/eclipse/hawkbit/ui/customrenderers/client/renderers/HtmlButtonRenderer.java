@@ -14,7 +14,6 @@ public class HtmlButtonRenderer extends ButtonRenderer {
         // this is to allow the button to disappear, if the text is null
         button.setVisible(text != null);
         button.getElement().setId("rollout.action.button.id");
-        button.getElement().setTitle("action");
     }
 
     private void applystyles(Button button) {

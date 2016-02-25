@@ -19,7 +19,6 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
     public void render(RendererCellReference cell, String input, VLabel label) {
         Map<String, String> map = formatInput(input);
         String value = map.containsKey("value") ? map.get("value") : null;
-        String description = map.containsKey("description") ? map.get("description") : null;
         String style = map.containsKey("style") ? map.get("style") : null;
         String id = map.containsKey("id") ? map.get("id") : null;
 
@@ -30,7 +29,6 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
             label.setHTML("<span></span>");
         }
         applyStyle(label, style);
-        label.setTitle(description);
         label.getElement().setId(id);
     }
 

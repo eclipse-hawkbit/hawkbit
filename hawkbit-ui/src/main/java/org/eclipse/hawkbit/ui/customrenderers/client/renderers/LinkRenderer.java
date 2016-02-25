@@ -12,7 +12,6 @@ public class LinkRenderer extends ButtonRenderer {
         // this is to allow the button to disappear, if the text is null
         button.setVisible(text != null);
         button.getElement().setId(new StringBuilder("link").append(".").append(text).toString());
-        button.setTitle(text);
     }
 
     private void applystyle(Button button) {

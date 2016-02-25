@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Indexed;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -33,12 +34,15 @@ public abstract class AbstractSimpleGrid extends Grid {
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
 
-        addNewContainerDS();
+        setHeight("100%");
+        setHeightMode(HeightMode.CSS);
         setSelectionMode(SelectionMode.NONE);
         setColumnReorderingAllowed(true);
+        
+        addNewContainerDS();
     }
 
-    private void addNewContainerDS() {
+    public void addNewContainerDS() {
         final Container container = createContainer();
         setContainerDataSource((Indexed) container);
         addContainerProperties();
@@ -46,12 +50,17 @@ public abstract class AbstractSimpleGrid extends Grid {
         setColumnProperties();
         setColumnHeaderNames();
         addColumnRenderes();
+
+        CellDescriptionGenerator cellDescriptionGenerator = getDescriptionGenerator();
+        if (getDescriptionGenerator() != null) {
+            setCellDescriptionGenerator(cellDescriptionGenerator);
+        }
+
         // Allow column hiding
         for (Column c : getColumns()) {
             c.setHidable(true);
         }
         setHiddenColumns();
-
         int size = 0;
         if (container != null) {
             size = container.size();
@@ -59,7 +68,6 @@ public abstract class AbstractSimpleGrid extends Grid {
         if (size == 0) {
             setData(SPUIDefinitions.NO_DATA);
         }
-        
     }
 
     protected abstract Container createContainer();
@@ -77,4 +85,6 @@ public abstract class AbstractSimpleGrid extends Grid {
     protected abstract void addColumnRenderes();
 
     protected abstract void setHiddenColumns();
+
+    protected abstract CellDescriptionGenerator getDescriptionGenerator();
 }

@@ -1377,21 +1377,16 @@ public final class HawkbitCommonUtil {
      * 
      * @param value
      *            label value
-     * @param description
-     *            label description
      * @param style
      *            label style
      * @param id
      *            label id
      * @return
      */
-    public static String getStatusLabelDetailsInString(String value, String description, String style, String id) {
+    public static String getStatusLabelDetailsInString(String value, String style, String id) {
         StringBuilder val = new StringBuilder();
         if (!Strings.isNullOrEmpty(value)) {
             val.append("value:").append(value).append(",");
-        }
-        if (!Strings.isNullOrEmpty(description)) {
-            val.append("description:").append(description).append(",");
         }
         if (!Strings.isNullOrEmpty(style)) {
             val.append("style:").append(style).append(",");

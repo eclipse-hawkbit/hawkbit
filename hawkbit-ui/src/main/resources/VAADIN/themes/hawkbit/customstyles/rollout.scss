@@ -70,7 +70,11 @@
    }
    
    .v-grid-cell.frozen{
-   	   box-shadow: none!important;
+   	   box-shadow: none !important;
+   }
+   
+   .v-grid-cell.frozen + th{
+   	   border-left: $v-grid-border-size solid $widget-border-color ;
    }
    
 }
