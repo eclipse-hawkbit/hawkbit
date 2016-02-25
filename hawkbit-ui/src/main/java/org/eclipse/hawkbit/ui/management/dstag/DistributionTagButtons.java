@@ -64,12 +64,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @Autowired
     private ManagementUIState managementUIState;
 
-    /**
-     * Initialize component.
-     * 
-     * @param filterButtonClickBehaviour
-     *            the clickable behaviour.
-     */
     @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
@@ -99,7 +93,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DragEvent dragEvent) {
-
         if (dragEvent == DragEvent.DISTRIBUTION_DRAG) {
             UI.getCurrent().access(() -> addStyleName(SPUIStyleDefinitions.SHOW_DROP_HINT_FILTER_BUTTON));
         } else {

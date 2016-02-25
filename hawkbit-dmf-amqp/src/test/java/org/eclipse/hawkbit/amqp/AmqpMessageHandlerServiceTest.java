@@ -133,18 +133,15 @@ public class AmqpMessageHandlerServiceTest {
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
-        // mock
         final ArgumentCaptor<String> targetIdCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(null);
 
-        // test
         amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT);
 
-        // verify
-        assertThat(targetIdCaptor.getValue()).isEqualTo(knownThingId);
-        assertThat(uriCaptor.getValue().toString()).isEqualTo("amqp://MyTest");
+        assertThat(targetIdCaptor.getValue()).as("Extraxted Thing should be the same").isEqualTo(knownThingId);
+        assertThat(uriCaptor.getValue().toString()).as("Extraxted Uri should be the same").isEqualTo("amqp://MyTest");
 
     }
 
@@ -271,8 +268,9 @@ public class AmqpMessageHandlerServiceTest {
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
-        assertThat(downloadResponse).isNotNull();
-        assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(downloadResponse).as("Message body should not null").isNotNull();
+        assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
+                .isEqualTo(HttpStatus.NOT_FOUND.value());
     }
 
     @Test
@@ -294,8 +292,9 @@ public class AmqpMessageHandlerServiceTest {
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
-        assertThat(downloadResponse).isNotNull();
-        assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(downloadResponse).as("Message body should not null").isNotNull();
+        assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
+                .isEqualTo(HttpStatus.NOT_FOUND.value());
     }
 
     @Test
@@ -325,9 +324,10 @@ public class AmqpMessageHandlerServiceTest {
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
-        assertThat(downloadResponse).isNotNull();
-        assertThat(downloadResponse.getResponseCode()).isEqualTo(HttpStatus.OK.value());
-        assertThat(downloadResponse.getArtifact().getSize()).isEqualTo(1L);
+        assertThat(downloadResponse).as("Message body should not null").isNotNull();
+        assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
+                .isEqualTo(HttpStatus.OK.value());
+        assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
         assertThat(downloadResponse.getDownloadUrl()).startsWith("http://localhost/api/v1/downloadserver/downloadId/");
     }
 
@@ -364,9 +364,11 @@ public class AmqpMessageHandlerServiceTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = captorTargetAssignDistributionSetEvent
                 .getValue();
 
-        assertThat(targetAssignDistributionSetEvent.getControllerId()).isEqualTo("target1");
-        assertThat(targetAssignDistributionSetEvent.getActionId()).isEqualTo(22L);
-        assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).isEqualTo(softwareModuleList);
+        assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
+                .isEqualTo("target1");
+        assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
+        assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
+                .isEqualTo(softwareModuleList);
 
     }
 

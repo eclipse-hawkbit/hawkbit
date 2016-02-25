@@ -25,9 +25,6 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  * Target Tag filter by Tag Header.
- * 
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -50,9 +47,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     @Autowired
     private ManagementUIState managementUIState;
 
-    /**
-     * Initialize Tag Header.
-     */
+    @Override
     @PostConstruct
     public void init() {
         super.init();
@@ -61,101 +56,45 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * getHideButtonId()
-     */
     @Override
     protected String getHideButtonId() {
 
         return SPUIComponetIdProvider.HIDE_TARGET_TAGS;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * hasCreateUpdatePermission()
-     */
     @Override
     protected boolean hasCreateUpdatePermission() {
 
         return permChecker.hasCreateTargetPermission() || permChecker.hasUpdateTargetPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#getTitle(
-     * )
-     */
     @Override
     protected String getTitle() {
         return i18n.get("header.target.filter.tag", new Object[] {});
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * settingsIconClicked(com.vaadin .ui.Button.ClickEvent)
-     */
     @Override
     protected void settingsIconClicked(final ClickEvent event) {
-        /**
-         * Add tag icon not displayed.
-         */
+        // Add tag icon not displayed.
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * dropHitsRequired()
-     */
     @Override
     protected boolean dropHitsRequired() {
 
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * hideFilterButtonLayout()
-     */
     @Override
     protected void hideFilterButtonLayout() {
         managementUIState.setTargetTagFilterClosed(true);
         eventbus.publish(this, ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterHeader#
-     * getConfigureFilterButtonId()
-     */
     @Override
     protected String getConfigureFilterButtonId() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader#
-     * isAddTagRequired()
-     */
     @Override
     protected boolean isAddTagRequired() {
         return false;

@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
@@ -96,7 +95,8 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         // +1 because we go back #maxMonthBackAmountReportTargets but in the
         // report the current month
         // is included for sure, so from this month we go back
-        assertThat(targetsCreatedOverPeriod.getData()).hasSize(maxMonthBackAmountReportTargets + 1);
+        assertThat(targetsCreatedOverPeriod.getData()).as("created over period has wrong size")
+                .hasSize(maxMonthBackAmountReportTargets + 1);
         for (final DataReportSeriesItem<LocalDate> reportItem : targetsCreatedOverPeriod.getData()) {
             // only one target is created for each month
             assertThat(reportItem.getData().intValue()).as("Target for each month").isEqualTo(1);
@@ -147,10 +147,11 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         // +1 because we go back #maxMonthBackAmountReportTargets but in the
         // report the current month
         // is included for sure, so from this month we go back
-        assertThat(feedbackReceivedOverTime.getData()).hasSize(maxMonthBackAmountReportTargets + 1);
+        assertThat(feedbackReceivedOverTime.getData()).as("feedback receiver has wrong data size")
+                .hasSize(maxMonthBackAmountReportTargets + 1);
         for (final DataReportSeriesItem<LocalDate> reportItem : feedbackReceivedOverTime.getData()) {
             // only one target feedback is created for each month
-            assertThat(reportItem.getData().intValue()).isEqualTo(1);
+            assertThat(reportItem.getData().intValue()).as("data size is wrong").isEqualTo(1);
         }
 
         // check cache evict
@@ -165,7 +166,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         }
         feedbackReceivedOverTime = reportManagement.feedbackReceivedOverTime(DateTypes.perMonth(), from, to);
         for (final DataReportSeriesItem<LocalDate> reportItem : feedbackReceivedOverTime.getData()) {
-            assertThat(reportItem.getData().intValue()).isEqualTo(2);
+            assertThat(reportItem.getData().intValue()).as("report item has wrong data size").isEqualTo(2);
         }
 
     }
@@ -227,12 +228,12 @@ public class ReportManagementTest extends AbstractIntegrationTest {
                         .isEqualTo(3L);
                 final DataReportSeriesItem<String>[] outerData = innerOuterDataReportSeries.getOuterSeries().getData();
                 assertThat(Arrays.stream(outerData).map(DataReportSeriesItem::getType).collect(Collectors.toList()))
-                        .contains("0.0.0", "0.0.1");
+                        .as("versio item contains wrong version").contains("0.0.0", "0.0.1");
             } else if (dataReportSeriesItem.getType().equals("ds2")) {
                 assertThat(dataReportSeriesItem.getData()).as("Version/Item type of DistributionSet 2 in statistics")
                         .isEqualTo(1L);
                 final DataReportSeriesItem<String>[] outerData = innerOuterDataReportSeries.getOuterSeries().getData();
-                assertThat(outerData).hasSize(1);
+                assertThat(outerData).as("Version/Item type has wrong size").hasSize(1);
                 assertThat(outerData[0].getType()).as("Version/Item type of DistributionSet 2 in statistics")
                         .isEqualTo("0.0.2");
             } else if (dataReportSeriesItem.getType().equals("ds3")) {
@@ -240,7 +241,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
                 assertThat(dataReportSeriesItem.getData()).as("Version/Item type of DistributionSet 3 in statistics")
                         .isEqualTo(0L);
                 final DataReportSeriesItem<String>[] outerData = innerOuterDataReportSeries.getOuterSeries().getData();
-                assertThat(outerData).hasSize(1);
+                assertThat(outerData).as("Version/Item type has wrong size").hasSize(1);
                 assertThat(outerData[0].getType()).as("Version/Item type of DistributionSet 3 in statistics")
                         .isEqualTo("0.0.3");
             } else {
@@ -395,13 +396,13 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
                 final DataReportSeriesItem<String>[] outerData = innerOuterDataReportSeries.getOuterSeries().getData();
                 assertThat(Arrays.stream(outerData).map(DataReportSeriesItem::getType).collect(Collectors.toList()))
-                        .contains("0.0.0", "0.0.1");
+                        .as("Out series contains wrong version").contains("0.0.0", "0.0.1");
 
             } else if (dataReportSeriesItem.getType().equals("ds2")) {
                 assertThat(dataReportSeriesItem.getData()).as("Total count of DistributionSet 2 in statistics")
                         .isEqualTo(1L);
                 final DataReportSeriesItem<String>[] outerData = innerOuterDataReportSeries.getOuterSeries().getData();
-                assertThat(outerData).hasSize(1);
+                assertThat(outerData).as("out series has wrong size").hasSize(1);
                 assertThat(outerData[0].getType()).as("Version/Item type of DistributionSet 2 in statistics")
                         .isEqualTo("0.0.2");
 
@@ -409,7 +410,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
                 assertThat(dataReportSeriesItem.getData()).as("Total count of DistributionSet 3 in statistics")
                         .isEqualTo(0L);
                 final DataReportSeriesItem<String>[] outerData = innerOuterDataReportSeries.getOuterSeries().getData();
-                assertThat(outerData).hasSize(1);
+                assertThat(outerData).as("out series has wrong size").hasSize(1);
                 assertThat(outerData[0].getType()).as("Version/Item type of DistributionSet 3 in statistics")
                         .isEqualTo("0.0.3");
             } else {
@@ -487,33 +488,26 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         final int targetCreateAmount = 10;
 
         // create targets for another tenant
-        securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", "anotherTenant"), new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                for (int index = 0; index < targetCreateAmount; index++) {
-                    targetManagement.createTarget(new Target("t" + index));
-                }
-                return null;
+        securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", "anotherTenant"), () -> {
+            for (int index = 0; index < targetCreateAmount; index++) {
+                targetManagement.createTarget(new Target("t" + index));
             }
+            return null;
         });
 
         // ensure targets has been created for 'anotherTenant'
         final Slice<Target> targetsForAnotherTenant = securityRule.runAs(
-                WithSpringAuthorityRule.withUserAndTenant("user", "anotherTenant"), new Callable<Slice<Target>>() {
-                    @Override
-                    public Slice<Target> call() throws Exception {
-                        return targetManagement.findTargetsAll(new PageRequest(0, 1000));
-                    }
-                });
-        assertThat(targetsForAnotherTenant).hasSize(targetCreateAmount);
+                WithSpringAuthorityRule.withUserAndTenant("user", "anotherTenant"),
+                () -> targetManagement.findTargetsAll(new PageRequest(0, 1000)));
+        assertThat(targetsForAnotherTenant).as("targets has wrong size").hasSize(targetCreateAmount);
 
         final LocalDateTime to = LocalDateTime.now();
         final LocalDateTime from = to.minusMonths(targetCreateAmount);
         // now retrieve the report for the 'mytenant'
         final DataReportSeries<LocalDate> targetsCreatedOverPeriod = reportManagement
                 .targetsCreatedOverPeriod(DateTypes.perMonth(), from, to);
-        // final no targets should final be created for this tenant
-        assertThat(targetsCreatedOverPeriod.getData()).hasSize(0);
+        assertThat(targetsCreatedOverPeriod.getData()).as("final no targets should final be created for this tenant")
+                .hasSize(0);
 
     }
 

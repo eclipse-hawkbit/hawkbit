@@ -89,9 +89,6 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private Boolean isComplexFilterViewDisplayed = Boolean.FALSE;
 
-    /**
-     * Initialization of Target Header Component.
-     */
     @Override
     @PostConstruct
     protected void init() {

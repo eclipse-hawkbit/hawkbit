@@ -39,9 +39,6 @@ import com.vaadin.ui.Window;
 
 /**
  * Distribution set details layout.
- *
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -75,9 +72,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     private UI ui;
 
-    /**
-     * softwareLayout Initialize the component.
-     */
+    @Override
     @PostConstruct
     protected void init() {
         eventBus.subscribe(this);
@@ -116,23 +111,11 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getDefaultCaption()
-     */
     @Override
     protected String getDefaultCaption() {
         return i18n.get("distribution.details.header");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * addTabs(com.vaadin. ui.TabSheet)
-     */
     @Override
     protected void addTabs(final TabSheet detailsTab) {
         detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
@@ -142,12 +125,6 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * onEdit(com.vaadin.ui .Button.ClickEvent)
-     */
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
@@ -157,79 +134,37 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         newDistWindow.setVisible(Boolean.TRUE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getEditButtonId()
-     */
     @Override
     protected String getEditButtonId() {
         return SPUIComponetIdProvider.DS_EDIT_BUTTON;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * onLoadIsTableRowSelected ()
-     */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
         return !(managementUIState.getSelectedDsIdName().isPresent()
                 && managementUIState.getSelectedDsIdName().get().isEmpty());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * onLoadIsTableMaximized ()
-     */
     @Override
     protected Boolean onLoadIsTableMaximized() {
         return managementUIState.isDsTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * populateDetailsWidget()
-     */
     @Override
     protected void populateDetailsWidget() {
         populateDetailsWidget(selectedDsModule);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * clearDetails()
-     */
     @Override
     protected void clearDetails() {
         populateDetailsWidget(null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * hasEditPermission()
-     */
     @Override
     protected Boolean hasEditPermission() {
         return permissionChecker.hasUpdateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getTabSheetId()
-     */
     @Override
     protected String getTabSheetId() {
         return SPUIComponetIdProvider.DISTRIBUTION_DETAILS_TABSHEET;

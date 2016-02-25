@@ -53,6 +53,7 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
     private Button rolloutsGroupViewLink;
     private Label headerCaption;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -78,8 +79,8 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
             headerCaption.setCaption(rolloutGroup.getName());
         }
 
-        rolloutsGroupViewLink.setCaption(rolloutUiState.getRolloutName().isPresent() ? rolloutUiState.getRolloutName()
-                .get() : "");
+        rolloutsGroupViewLink
+                .setCaption(rolloutUiState.getRolloutName().isPresent() ? rolloutUiState.getRolloutName().get() : "");
     }
 
     @Override
@@ -103,9 +104,7 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected void searchBy(final String newSearchText) {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
 
     }
 
@@ -162,12 +161,6 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.rollout.AbstractSimpleTableHeader#
-     * getHeaderCaptionLayout()
-     */
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
         headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
@@ -204,12 +197,6 @@ public class RolloutGroupTargetsListHeader extends AbstractSimpleTableHeader {
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.ui.rollout.AbstractSimpleTableHeader#restoreCaption()
-     */
     @Override
     protected void restoreCaption() {
         setCaptionDetails();

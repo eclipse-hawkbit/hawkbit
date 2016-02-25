@@ -56,12 +56,6 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     @Autowired
     private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 
-    /**
-     * Initialize component.
-     * 
-     * @param filterButtonClickBehaviour
-     *            the clickable behaviour.
-     */
     @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
@@ -70,7 +64,6 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonsTableId() {
-
         return SPUIComponetIdProvider.SW_MODULE_TYPE_TABLE_ID;
     }
 
@@ -120,7 +113,6 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButttonWrapperIdPrefix() {
-
         return SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS;
     }
 

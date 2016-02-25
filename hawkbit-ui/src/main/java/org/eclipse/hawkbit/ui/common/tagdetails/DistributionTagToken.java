@@ -87,34 +87,16 @@ public class DistributionTagToken extends AbstractTagToken {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagDetails.AbstractTagToken#getTagStyleName
-     * ()
-     */
     @Override
     protected String getTagStyleName() {
         return "distribution-tag-";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagDetails.AbstractTagToken#
-     * getTokenInputPrompt()
-     */
     @Override
     protected String getTokenInputPrompt() {
         return i18n.get("combo.type.tag.name");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagDetails.AbstractTagToken#assignTag(java.
-     * lang.String)
-     */
     @Override
     protected void assignTag(final String tagNameSelected) {
         if (tagNameSelected != null) {

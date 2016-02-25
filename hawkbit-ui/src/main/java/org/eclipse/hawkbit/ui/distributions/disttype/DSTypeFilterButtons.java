@@ -60,44 +60,24 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
      * @param filterButtonClickBehaviour
      *            the clickable behaviour.
      */
+    @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
         eventBus.subscribe(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButtonsTableId()
-     */
     @Override
     protected String getButtonsTableId() {
 
         return SPUIComponetIdProvider.DISTRIBUTION_SET_TYPE_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonsLazyQueryContainer ()
-     */
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
         return HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<DistributionSetTypeBeanQuery>(DistributionSetTypeBeanQuery.class));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * isClickedByDefault(java.lang .Long)
-     */
     @Override
     protected boolean isClickedByDefault(final Long buttonId) {
 
@@ -105,26 +85,12 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
                 && manageDistUIState.getManageDistFilters().getClickedDistSetType().getId().equals(buttonId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonId(java.lang. String)
-     */
     @Override
     protected String createButtonId(final String name) {
 
         return SPUIComponetIdProvider.DS_TYPE_FILTER_BTN_ID + name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getFilterButtonDropHandler()
-     */
     @Override
     protected DropHandler getFilterButtonDropHandler() {
 
@@ -148,13 +114,6 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButttonWrapperId()
-     */
     @Override
     protected String getButttonWrapperIdPrefix() {
 

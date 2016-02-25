@@ -73,7 +73,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Distribution set table.
- *
  */
 @SpringComponent
 @ViewScope
@@ -111,9 +110,6 @@ public class DistributionTable extends AbstractTable {
 
     private Button distributinPinnedBtn;
 
-    /**
-     * Initialize the distribution table.
-     */
     @Override
     @PostConstruct
     protected void init() {

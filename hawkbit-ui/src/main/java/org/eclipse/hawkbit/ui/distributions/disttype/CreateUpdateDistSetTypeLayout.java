@@ -474,7 +474,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
     @SuppressWarnings("unchecked")
     private void getSelectedTableItemData(final Long id) {
-        Item saveTblitem = null;
+        Item saveTblitem;
         if (null != selectedTablecontainer) {
             saveTblitem = selectedTablecontainer.addItem(id);
             saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(
