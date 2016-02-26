@@ -59,6 +59,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
@@ -187,21 +188,13 @@ public class UploadLayout extends VerticalLayout {
 
         @Override
         public void drop(final DragAndDropEvent event) {
-            if (validate()) {
-                ((WrapperTransferable) event.getTransferable()).getDraggedComponent();
+            if (event.getTransferable() instanceof WrapperTransferable && validate()) {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 if (files != null) {
-                    //reset the flag
+                    // reset the flag
                     hasDirectory = Boolean.FALSE;
                     for (final Html5File file : files) {
-                        if (!isDirectory(file)) {
-                            if (!checkForDuplicate(file.getFileName())) {
-                                numberOfFileUploadsExpected.incrementAndGet();
-                                file.setStreamVariable(createStreamVariable(file));
-                            }
-                        } else {
-                            hasDirectory = Boolean.TRUE;
-                        }
+                        processFile(file);
                     }
                     if (numberOfFileUploadsExpected.get() > 0) {
                         processBtn.setEnabled(false);
@@ -214,6 +207,17 @@ public class UploadLayout extends VerticalLayout {
                         displayCompositeMessage();
                     }
                 }
+            }
+        }
+
+        private void processFile(final Html5File file) {
+            if (!isDirectory(file)) {
+                if (!checkForDuplicate(file.getFileName())) {
+                    numberOfFileUploadsExpected.incrementAndGet();
+                    file.setStreamVariable(createStreamVariable(file));
+                }
+            } else {
+                hasDirectory = Boolean.TRUE;
             }
         }
     }
