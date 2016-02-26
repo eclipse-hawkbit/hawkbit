@@ -4,16 +4,13 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.Label;
 
 /**
  * The DurationConfigField consists of three vaadin fields. A {@link #Label}
@@ -30,10 +27,9 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
     private final CheckBox checkBox = new CheckBox();
     private final DurationField durationField = new DurationField();
     private Duration globalDuration;
-    private final Label labelCustomValue;
 
     private DurationConfigField() {
-        super(3, 2);
+        super(2, 2);
 
         this.addStyleName("duration-config-field");
         this.setSpacing(true);
@@ -43,11 +39,7 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
         this.addComponent(checkBox, 0, 0);
         this.setComponentAlignment(checkBox, Alignment.MIDDLE_LEFT);
 
-        labelCustomValue = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
-        this.addComponent(labelCustomValue, 1, 0);
-        this.setComponentAlignment(labelCustomValue, Alignment.MIDDLE_LEFT);
-
-        this.addComponent(durationField, 2, 0);
+        this.addComponent(durationField, 1, 0);
         this.setComponentAlignment(durationField, Alignment.MIDDLE_LEFT);
 
         checkBox.addValueChangeListener(this);
@@ -80,8 +72,8 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
         this.setValue(tenantDuration);
     }
 
-    private void setCheckboxLabel(final String label) {
-        labelCustomValue.setValue(label);
+    private void setCheckBoxTooltip(final String label) {
+        checkBox.setDescription(label);
     }
 
     private void setAllowedRange(final Duration minimumDuration, final Duration maximumDuration) {
@@ -148,8 +140,8 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
             field = new DurationConfigField();
         };
 
-        public DurationConfigFieldBuilder checkBoxLabel(final String label) {
-            field.setCheckboxLabel(label);
+        public DurationConfigFieldBuilder checkBoxTooltip(final String label) {
+            field.setCheckBoxTooltip(label);
             return this;
         }
 

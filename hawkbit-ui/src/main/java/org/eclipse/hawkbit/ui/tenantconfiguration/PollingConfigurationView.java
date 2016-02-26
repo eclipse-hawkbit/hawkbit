@@ -91,13 +91,13 @@ public class PollingConfigurationView extends BaseConfigurationView
         vLayout.addComponent(headerDisSetType);
 
         fieldPollTime = DurationConfigField.builder().caption(i18n.get("configuration.polling.time"))
-                .checkBoxLabel(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
+                .checkBoxTooltip(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalPollTime).tenantDuration(tenantPollTime).build();
         fieldPollTime.addChangeListener(this);
         vLayout.addComponent(fieldPollTime);
 
         fieldPollingOverdueTime = DurationConfigField.builder().caption(i18n.get("configuration.polling.overduetime"))
-                .checkBoxLabel(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
+                .checkBoxTooltip(i18n.get("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalOverdueTime).tenantDuration(tenantOverdueTime).build();
         fieldPollingOverdueTime.addChangeListener(this);
         vLayout.addComponent(fieldPollingOverdueTime);
