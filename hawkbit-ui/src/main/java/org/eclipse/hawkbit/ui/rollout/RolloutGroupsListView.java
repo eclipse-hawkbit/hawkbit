@@ -30,22 +30,20 @@ public class RolloutGroupsListView extends AbstractSimpleTableLayout {
     private RolloutGroupsListHeader rolloutGroupListHeader;
 
     @Autowired
-    private RolloutGroupListTable rolloutGroupListTable;
+    private RolloutGroupListGrid rolloutListGrid;
 
     @PostConstruct
     protected void init() {
-        super.init(rolloutGroupListHeader, rolloutGroupListTable);
+        super.init(rolloutGroupListHeader, rolloutListGrid);
     }
 
     @Override
     protected boolean hasCountMessage() {
-
         return false;
     }
 
     @Override
     protected Label getCountMessageLabel() {
-
         return null;
     }
 

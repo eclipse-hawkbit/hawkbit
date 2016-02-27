@@ -15,7 +15,6 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -122,22 +121,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             proxyRolloutGroup.setSuccessConditionExp(rolloutGroup.getSuccessConditionExp());
             proxyRolloutGroup.setFinishedPercentage(calculateFinishedPercentage(rolloutGroup));
 
-            final TotalTargetCountStatus totalTargetCountActionStatus = rolloutGroup.getTotalTargetCountStatus();
-
-            proxyRolloutGroup.setRunningTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING));
-            proxyRolloutGroup.setErrorTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR));
-            proxyRolloutGroup.setCancelledTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED));
-            proxyRolloutGroup.setFinishedTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED));
-            proxyRolloutGroup.setScheduledTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED));
-            proxyRolloutGroup.setNotStartedTargetsCount(
-                    totalTargetCountActionStatus.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED));
-
             proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
+            proxyRolloutGroup.setTotalTargetCountStatus(rolloutGroup.getTotalTargetCountStatus());
 
             proxyRolloutGroupsList.add(proxyRolloutGroup);
         }

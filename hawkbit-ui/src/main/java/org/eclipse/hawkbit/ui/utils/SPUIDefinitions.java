@@ -1001,20 +1001,6 @@ public final class SPUIDefinitions {
      */
     public static final String ROLLOUT_GROUP_STARTED_DATE = "Started date";
 
-    /**
-     * Rollout group started date column property.
-     */
-    public static final String ROLLOUT_GROUP_ERROR_THRESHOLD = "errorConditionExp";
-
-    /**
-     * Rollout group started date column property.
-     */
-    public static final String ROLLOUT_GROUP_THRESHOLD = "successConditionExp";
-
-    /**
-     * Rollout group installed percentage column property.
-     */
-    public static final String ROLLOUT_GROUP_INSTALLED_PERCENTAGE = "finishedPercentage";
 
     /**
      * Rollout group status column property.

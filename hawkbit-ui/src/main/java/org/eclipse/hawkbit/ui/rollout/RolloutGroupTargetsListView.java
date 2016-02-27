@@ -29,28 +29,28 @@ public class RolloutGroupTargetsListView extends AbstractSimpleTableLayout {
     private RolloutGroupTargetsListHeader rolloutGroupTargetsListHeader;
 
     @Autowired
-    private RolloutGroupTargetsListTable rolloutGroupTargetsListTable;
+    private RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
     
     @Autowired
-    private RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
+    private RolloutGroupTargetsListGrid rolloutListGrid;
 
     /**
      * Initialization of Rollout group component.
      */
     @PostConstruct
     protected void init() {
-        super.init(rolloutGroupTargetsListHeader, rolloutGroupTargetsListTable);
+        super.init(rolloutGroupTargetsListHeader, rolloutListGrid);
     }
 
     @Override
     protected boolean hasCountMessage() {
-        
+
         return true;
     }
-    
+
     @Override
     protected Label getCountMessageLabel() {
-        
+
         return rolloutGroupTargetsCountLabelMessage;
     }
 

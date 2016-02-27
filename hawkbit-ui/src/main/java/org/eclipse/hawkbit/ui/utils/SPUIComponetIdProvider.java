@@ -827,6 +827,11 @@ public final class SPUIComponetIdProvider {
      * Rollout status label id.
      */
     public static final String ROLLOUT_STATUS_LABEL_ID = "rollout.status.id";
+    
+    /**
+     * Rollout group status label id.
+     */
+    public static final String ROLLOUT_GROUP_STATUS_LABEL_ID = "rollout.group.status.id";
 
     /**
      * Rollout % or count option group id.
