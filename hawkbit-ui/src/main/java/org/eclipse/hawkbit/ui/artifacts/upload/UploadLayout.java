@@ -59,7 +59,6 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
@@ -188,24 +187,22 @@ public class UploadLayout extends VerticalLayout {
 
         @Override
         public void drop(final DragAndDropEvent event) {
-            if (event.getTransferable() instanceof WrapperTransferable && validate()) {
+            if (validate(event)) {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
-                if (files != null) {
-                    // reset the flag
-                    hasDirectory = Boolean.FALSE;
-                    for (final Html5File file : files) {
-                        processFile(file);
-                    }
-                    if (numberOfFileUploadsExpected.get() > 0) {
-                        processBtn.setEnabled(false);
-                        // reset before we start
-                        uploadInfoWindow.uploadSessionStarted();
-                    } else {
-                        // If the upload is not started, it signifies all
-                        // dropped files as either duplicate or directory.So
-                        // display message accordingly
-                        displayCompositeMessage();
-                    }
+                // reset the flag
+                hasDirectory = Boolean.FALSE;
+                for (final Html5File file : files) {
+                    processFile(file);
+                }
+                if (numberOfFileUploadsExpected.get() > 0) {
+                    processBtn.setEnabled(false);
+                    // reset before we start
+                    uploadInfoWindow.uploadSessionStarted();
+                } else {
+                    // If the upload is not started, it signifies all
+                    // dropped files as either duplicate or directory.So
+                    // display message accordingly
+                    displayCompositeMessage();
                 }
             }
         }
@@ -354,10 +351,33 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    Boolean validate() {
+    Boolean validate(DragAndDropEvent event) {
+        // check if drop is valid.If valid ,check if software module is
+        // selected.
+        if(!isFilesDropped(event)){
+            uiNotification.displayValidationError(i18n.get("message.action.not.allowed"));
+            return false;
+        }
+        return checkIfSoftwareModuleIsSelected();
+    }
+
+    private boolean isFilesDropped(DragAndDropEvent event) {
+        if (event.getTransferable() instanceof WrapperTransferable) {
+            final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
+            // other components can also be wrapped in WrapperTransferable , so
+            // additional check on files
+            if (files == null) {
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    Boolean checkIfSoftwareModuleIsSelected() {
         if (!isSoftwareModuleSelected()) {
             uiNotification.displayValidationError(i18n.get("message.error.noSwModuleSelected"));
-
             return false;
         }
         return true;

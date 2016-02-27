@@ -111,7 +111,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         //reset has directory flag before upload
         view.setHasDirectory(false);
         try {
-            if (view.validate()) {
+            if (view.checkIfSoftwareModuleIsSelected()) {
                 if (view.checkForDuplicate(fileName)) {
                     view.showDuplicateMessage();
                 } else {
