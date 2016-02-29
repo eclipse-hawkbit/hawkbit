@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.tenantconfiguration.polling;
 
 import java.text.ParseException;
@@ -78,16 +86,16 @@ public class DurationField extends DateField {
      * ConversionException is thrown which marks the DurationField as invalid.
      */
     @Override
-    protected Date handleUnparsableDateString(String value) throws ConversionException {
+    protected Date handleUnparsableDateString(final String value) throws ConversionException {
 
         try {
             return durationFormat.parse(value);
 
-        } catch (ParseException e1) {
+        } catch (final ParseException e1) {
             try {
 
                 return additionalFormat.parse("000000".substring(value.length() <= 6 ? value.length() : 6) + value);
-            } catch (ParseException e2) {
+            } catch (final ParseException e2) {
                 // if Parsing is not possible ConversionException is thrown
             }
         }
@@ -95,13 +103,13 @@ public class DurationField extends DateField {
     }
 
     @Override
-    public void valueChange(Property.ValueChangeEvent event) {
+    public void valueChange(final Property.ValueChangeEvent event) {
         // do not delete this method, even when removing the code inside this
         // method. This method overwrites the super method, which is
         // necessary, that parsing works correctly on pressing enter key
 
         if (event.getProperty() instanceof DurationField) {
-            Date value = (Date) event.getProperty().getValue();
+            final Date value = (Date) event.getProperty().getValue();
 
             // setValue() calls valueChanged again, when the minimum is greater
             // than the maximum this can lead to an endless loop
@@ -120,7 +128,7 @@ public class DurationField extends DateField {
     }
 
     @Override
-    public void validate(Date value) throws InvalidValueException {
+    public void validate(final Date value) throws InvalidValueException {
         super.validate(value);
 
         if (value != null && maximumDuration != null && compareTimeOfDates(value, maximumDuration) > 0) {
@@ -138,7 +146,7 @@ public class DurationField extends DateField {
      * @param duration
      *            duration, only values <= 23:59:59 are excepted
      */
-    public void setDuration(@NotNull Duration duration) {
+    public void setDuration(@NotNull final Duration duration) {
         if (duration.compareTo(MAXIMUM_DURATION) > 0) {
             throw new IllegalArgumentException("The duaration has to be smaller than 23:59:59.");
         }
@@ -163,7 +171,7 @@ public class DurationField extends DateField {
      * @param minimumDuration
      *            minimum Duration, only values smaller 23:59:59 are excepted
      */
-    public void setMinimumDuration(@NotNull Duration minimumDuration) {
+    public void setMinimumDuration(@NotNull final Duration minimumDuration) {
         if (minimumDuration.compareTo(MAXIMUM_DURATION) > 0) {
             throw new IllegalArgumentException("The minimum duaration has to be smaller than 23:59:59.");
         }
@@ -176,7 +184,7 @@ public class DurationField extends DateField {
      * @param maximumDuration
      *            maximumDuration, only values smaller 23:59:59 are excepted
      */
-    public void setMaximumDuration(@NotNull Duration maximumDuration) {
+    public void setMaximumDuration(@NotNull final Duration maximumDuration) {
         if (maximumDuration.compareTo(MAXIMUM_DURATION) > 0) {
             throw new IllegalArgumentException("The maximum duaration has to be smaller than 23:59:59.");
         }
@@ -212,9 +220,9 @@ public class DurationField extends DateField {
      *         before the time of d2; and a value greater than 0 if the time of
      *         d1 is after the time represented by d2.
      */
-    private int compareTimeOfDates(Date d1, Date d2) {
-        LocalTime lt1 = LocalDateTime.ofInstant(d1.toInstant(), ZONEID_UTC).toLocalTime();
-        LocalTime lt2 = LocalDateTime.ofInstant(d2.toInstant(), ZONEID_UTC).toLocalTime();
+    private int compareTimeOfDates(final Date d1, final Date d2) {
+        final LocalTime lt1 = LocalDateTime.ofInstant(d1.toInstant(), ZONEID_UTC).toLocalTime();
+        final LocalTime lt2 = LocalDateTime.ofInstant(d2.toInstant(), ZONEID_UTC).toLocalTime();
 
         return lt1.compareTo(lt2);
     }
