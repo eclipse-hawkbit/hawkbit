@@ -51,7 +51,6 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Grid.CellReference;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 
 @SpringComponent
@@ -486,7 +485,7 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
         return cell -> getDescription(cell);
-    };
+    }
 
     private String getDescription(CellReference cell) {
         if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
