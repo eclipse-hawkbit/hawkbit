@@ -26,6 +26,7 @@ public interface ConfigurationItem {
      * in configuration group.
      *
      */
+    @FunctionalInterface
     interface ConfigurationItemChangeListener extends Serializable {
         /**
          * called to notify about configuration has been changed.
