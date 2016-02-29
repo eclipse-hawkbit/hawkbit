@@ -22,7 +22,6 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * View to configure the polling interval and the overdue time.
  * 
- * @author Fabian Nonnenmacher
  *
  */
 @SpringComponent

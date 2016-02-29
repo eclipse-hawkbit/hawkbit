@@ -9,7 +9,6 @@ import com.vaadin.ui.CustomComponent;
  * base class for all configuration views. This class implements the logic for
  * the handling of the
  * 
- * @author Fabian Nonnenmacher
  */
 public abstract class BaseConfigurationView extends CustomComponent implements ConfigurationGroup {
 
