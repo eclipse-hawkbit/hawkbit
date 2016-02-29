@@ -96,24 +96,26 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final TargetTag targetTag = tagManagement.createTargetTag(new TargetTag("Tag1"));
 
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag);
-        assertThat(assignedTargets.size()).isEqualTo(4);
+        assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
         assignedTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(1));
 
         TargetTag findTargetTag = tagManagement.findTargetTag("Tag1");
-        assertThat(assignedTargets.size()).isEqualTo(findTargetTag.getAssignedToTargets().size());
+        assertThat(assignedTargets.size()).as("Assigned targets are wrong")
+                .isEqualTo(findTargetTag.getAssignedToTargets().size());
 
-        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag)).isNull();
+        assertThat(targetManagement.unAssignTag("NotExist", findTargetTag)).as("Unassign target does not work")
+                .isNull();
 
         final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag);
-        assertThat(unAssignTarget.getControllerId()).isEqualTo("targetId123");
-        assertThat(unAssignTarget.getTags().size()).isEqualTo(0);
+        assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
+        assertThat(unAssignTarget.getTags()).as("Tag size is wrong").isEmpty();
         findTargetTag = tagManagement.findTargetTag("Tag1");
-        assertThat(findTargetTag.getAssignedToTargets().size()).isEqualTo(3);
+        assertThat(findTargetTag.getAssignedToTargets()).as("Assigned targets are wrong").hasSize(3);
 
         final List<Target> unAssignTargets = targetManagement.unAssignAllTargetsByTag(findTargetTag);
         findTargetTag = tagManagement.findTargetTag("Tag1");
-        assertThat(findTargetTag.getAssignedToTargets().size()).isEqualTo(0);
-        assertThat(unAssignTargets.size()).isEqualTo(3);
+        assertThat(findTargetTag.getAssignedToTargets()).as("Unassigned targets are wrong").isEmpty();
+        assertThat(unAssignTargets).as("Unassigned targets are wrong").hasSize(3);
         unAssignTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(0));
     }
 
@@ -121,14 +123,14 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Ensures that targets can deleted e.g. test all cascades")
     public void deleteAndCreateTargets() {
         Target target = targetManagement.createTarget(new Target("targetId123"));
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(1);
+        assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
         targetManagement.deleteTargets(target.getId());
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
 
         target = createTargetWithAttributes("4711");
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(1);
+        assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
         targetManagement.deleteTargets(target.getId());
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
 
         final List<Long> targets = new ArrayList<Long>();
         for (int i = 0; i < 5; i++) {
@@ -136,9 +138,9 @@ public class TargetManagementTest extends AbstractIntegrationTest {
             targets.add(target.getId());
             targets.add(createTargetWithAttributes("" + (i * i + 1000)).getId());
         }
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(10);
+        assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(10);
         targetManagement.deleteTargets(targets.toArray(new Long[targets.size()]));
-        assertThat(targetManagement.countTargetsAll()).isEqualTo(0);
+        assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
     }
 
     private Target createTargetWithAttributes(final String controllerId) {
@@ -150,7 +152,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         target = controllerManagament.updateControllerAttributes(controllerId, testData);
 
         target = targetManagement.findTargetByControllerIDWithDetails(controllerId);
-        assertThat(target.getTargetInfo().getControllerAttributes()).isEqualTo(testData);
+        assertThat(target.getTargetInfo().getControllerAttributes()).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
         return target;
     }
 
@@ -162,10 +165,14 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final DistributionSet set2 = TestDataUtil.generateDistributionSet("test2", softwareManagement,
                 distributionSetManagement);
 
-        assertThat(targetManagement.countTargetByAssignedDistributionSet(set.getId())).isEqualTo(0);
-        assertThat(targetManagement.countTargetByInstalledDistributionSet(set.getId())).isEqualTo(0);
-        assertThat(targetManagement.countTargetByAssignedDistributionSet(set2.getId())).isEqualTo(0);
-        assertThat(targetManagement.countTargetByInstalledDistributionSet(set2.getId())).isEqualTo(0);
+        assertThat(targetManagement.countTargetByAssignedDistributionSet(set.getId())).as("Target count is wrong")
+                .isEqualTo(0);
+        assertThat(targetManagement.countTargetByInstalledDistributionSet(set.getId())).as("Target count is wrong")
+                .isEqualTo(0);
+        assertThat(targetManagement.countTargetByAssignedDistributionSet(set2.getId())).as("Target count is wrong")
+                .isEqualTo(0);
+        assertThat(targetManagement.countTargetByInstalledDistributionSet(set2.getId())).as("Target count is wrong")
+                .isEqualTo(0);
 
         Target target = createTargetWithAttributes("4711");
 
@@ -183,13 +190,19 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         target = targetManagement.findTargetByControllerIDWithDetails("4711");
         // read data
 
-        assertThat(targetManagement.countTargetByAssignedDistributionSet(set.getId())).isEqualTo(0);
-        assertThat(targetManagement.countTargetByInstalledDistributionSet(set.getId())).isEqualTo(1);
-        assertThat(targetManagement.countTargetByAssignedDistributionSet(set2.getId())).isEqualTo(1);
-        assertThat(targetManagement.countTargetByInstalledDistributionSet(set2.getId())).isEqualTo(0);
-        assertThat(target.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
-        assertThat(target.getAssignedDistributionSet()).isEqualTo(set2);
-        assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).isEqualTo(set.getId());
+        assertThat(targetManagement.countTargetByAssignedDistributionSet(set.getId())).as("Target count is wrong")
+                .isEqualTo(0);
+        assertThat(targetManagement.countTargetByInstalledDistributionSet(set.getId())).as("Target count is wrong")
+                .isEqualTo(1);
+        assertThat(targetManagement.countTargetByAssignedDistributionSet(set2.getId())).as("Target count is wrong")
+                .isEqualTo(1);
+        assertThat(targetManagement.countTargetByInstalledDistributionSet(set2.getId())).as("Target count is wrong")
+                .isEqualTo(0);
+        assertThat(target.getTargetInfo().getLastTargetQuery()).as("Target query is not work")
+                .isGreaterThanOrEqualTo(current);
+        assertThat(target.getAssignedDistributionSet()).as("Assigned ds size is wrong").isEqualTo(set2);
+        assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).as("Installed ds is wrong")
+                .isEqualTo(set.getId());
 
     }
 
@@ -373,8 +386,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         assertThat(firstSaved.spliterator().getExactSizeIfKnown() - nr2Del).as("Size of splited list")
                 .isEqualTo(allFound.spliterator().getExactSizeIfKnown());
 
-        // verify that all undeleted are still found
-        assertThat(allFound).doesNotContain(deletedTargets);
+        assertThat(allFound).as("Not all undeleted found").doesNotContain(deletedTargets);
     }
 
     @Test
@@ -404,7 +416,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
             targetInfo = targetInfoRepository.save(targetInfo);
         }
         final Query qry = entityManager.createNativeQuery("select * from sp_target_attributes ta");
-        final List result = qry.getResultList();
+        final List<?> result = qry.getResultList();
 
         assertThat(attribs.size() * ts.spliterator().getExactSizeIfKnown()).as("Amount of all target attributes")
                 .isEqualTo(result.size());
@@ -467,7 +479,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
                 final Target tNoAttrib = targetManagement.findTargetByControllerID(tNoAttribl.getControllerId());
 
                 if (tNoAttrib.getControllerId().equals(target.getControllerId())) {
-                    assertThat(target.getTargetInfo().getControllerAttributes()).isEmpty();
+                    assertThat(target.getTargetInfo().getControllerAttributes())
+                            .as("Controller attributes should be empty").isEmpty();
                     continue restTarget_;
                 }
             }
@@ -479,7 +492,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
                 if (tNoAttrib.getControllerId().equals(target.getControllerId())) {
                     assertThat(target.getTargetInfo().getControllerAttributes().keySet().toArray())
-                            .doesNotContain(attribs2Del.toArray());
+                            .as("Controller attributes are wrong").doesNotContain(attribs2Del.toArray());
                     continue restTarget_;
                 }
             }
@@ -504,12 +517,14 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         t2 = targetManagement.createTarget(t2);
 
         t1 = targetManagement.findTargetByControllerID(t1.getControllerId());
-        assertThat(t1.getTags()).hasSize(noT1Tags).containsAll(t1Tags);
-        assertThat(t1.getTags()).hasSize(noT1Tags).doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
+        assertThat(t1.getTags()).as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
+        assertThat(t1.getTags()).as("Tag size is wrong").hasSize(noT1Tags)
+                .doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
 
         t2 = targetManagement.findTargetByControllerID(t2.getControllerId());
-        assertThat(t2.getTags()).hasSize(noT2Tags).containsAll(t2Tags);
-        assertThat(t2.getTags()).hasSize(noT2Tags).doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
+        assertThat(t2.getTags()).as("Tag size is wrong").hasSize(noT2Tags).containsAll(t2Tags);
+        assertThat(t2.getTags()).as("Tag size is wrong").hasSize(noT2Tags)
+                .doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
     }
 
     @Test
@@ -531,7 +546,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final TargetTag tagA = tagManagement.createTargetTag(new TargetTag("A"));
         final TargetTag tagB = tagManagement.createTargetTag(new TargetTag("B"));
         final TargetTag tagC = tagManagement.createTargetTag(new TargetTag("C"));
-        final TargetTag tagX = tagManagement.createTargetTag(new TargetTag("X"));
+        tagManagement.createTargetTag(new TargetTag("X"));
 
         // doing different assignments
         targetManagement.toggleTagAssignment(tagATargets, tagA);
@@ -545,7 +560,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         targetManagement.toggleTagAssignment(tagABCTargets, tagB);
         targetManagement.toggleTagAssignment(tagABCTargets, tagC);
 
-        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "X")).isEqualTo(0);
+        assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "X"))
+                .as("Target count is wrong").isEqualTo(0);
 
         // search for targets with tag tagA
         final List<Target> targetWithTagA = new ArrayList<Target>();
@@ -575,11 +591,11 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         // check again target lists refreshed from DB
         assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "A"))
-                .isEqualTo(targetWithTagA.size());
+                .as("Target count is wrong").isEqualTo(targetWithTagA.size());
         assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "B"))
-                .isEqualTo(targetWithTagB.size());
+                .as("Target count is wrong").isEqualTo(targetWithTagB.size());
         assertThat(targetManagement.countTargetByFilters(null, null, null, Boolean.FALSE, "C"))
-                .isEqualTo(targetWithTagC.size());
+                .as("Target count is wrong").isEqualTo(targetWithTagC.size());
     }
 
     @Test
@@ -656,14 +672,15 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         targetManagement.toggleTagAssignment(targAs, targTagA);
 
         assertThat(targetManagement.findTargetsByControllerIDsWithTags(
-                targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()))).hasSize(25);
+                targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList())))
+                        .as("Target count is wrong").hasSize(25);
 
         // no lazy loading exception and tag correctly assigned
         assertThat(targetManagement
                 .findTargetsByControllerIDsWithTags(
                         targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()))
                 .stream().map(target -> target.getTags().contains(targTagA)).collect(Collectors.toList()))
-                        .containsOnly(true);
+                        .as("Tags not correctly assigned").containsOnly(true);
     }
 
     @Test
@@ -678,7 +695,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final List<String> findAllTargetIds = findAllTargetIdNames.stream().map(TargetIdName::getControllerId)
                 .collect(Collectors.toList());
 
-        assertThat(findAllTargetIds).containsOnly(createdTargetIds);
+        assertThat(findAllTargetIds).as("Target list has wrong content").containsOnly(createdTargetIds);
     }
 
     @Test
