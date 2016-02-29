@@ -41,7 +41,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
@@ -84,20 +83,20 @@ public class TargetFilterTable extends Table {
      * Initialize the Action History Table.
      */
     @PostConstruct
-	public void init() {
-		setStyleName("sp-table");
-		setSizeFull();
-		setImmediate(true);
-		setHeight(100.0f, Unit.PERCENTAGE);
-		addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
-		addStyleName(ValoTheme.TABLE_SMALL);
-		addCustomGeneratedColumns();
-		populateTableData();
-		setColumnCollapsingAllowed(true);
-		setColumnProperties();
-		setId(SPUIComponetIdProvider.TAEGET_FILTER_TABLE_ID);
-		eventBus.subscribe(this);
-	}
+    public void init() {
+        setStyleName("sp-table");
+        setSizeFull();
+        setImmediate(true);
+        setHeight(100.0f, Unit.PERCENTAGE);
+        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+        addStyleName(ValoTheme.TABLE_SMALL);
+        addCustomGeneratedColumns();
+        populateTableData();
+        setColumnCollapsingAllowed(true);
+        setColumnProperties();
+        setId(SPUIComponetIdProvider.TAEGET_FILTER_TABLE_ID);
+        eventBus.subscribe(this);
+    }
 
     @PreDestroy
     void destroy() {
@@ -114,20 +113,14 @@ public class TargetFilterTable extends Table {
         }
     }
 
-    /**
-     * Create a empty HierarchicalContainer.
-     * 
-     * 
-     */
     private Container createContainer() {
         final Map<String, Object> queryConfig = prepareQueryConfigFilters();
-        final BeanQueryFactory<TargetFilterBeanQuery> targetQF = new BeanQueryFactory<TargetFilterBeanQuery>(
-                TargetFilterBeanQuery.class);
+        final BeanQueryFactory<TargetFilterBeanQuery> targetQF = new BeanQueryFactory<>(TargetFilterBeanQuery.class);
 
         targetQF.setQueryConfiguration(queryConfig);
         // create lazy query container with lazy defination and query
-        final LazyQueryContainer targetFilterContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), targetQF);
+        final LazyQueryContainer targetFilterContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), targetQF);
         targetFilterContainer.getQueryView().getQueryDefinition().setMaxNestedPropertyDepth(PROPERTY_DEPT);
 
         return targetFilterContainer;
@@ -135,15 +128,12 @@ public class TargetFilterTable extends Table {
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        filterManagementUIState.getCustomFilterSearchText().ifPresent(
-                value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+        final Map<String, Object> queryConfig = new HashMap<>();
+        filterManagementUIState.getCustomFilterSearchText()
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         return queryConfig;
     }
 
-    /**
-     * Create a empty HierarchicalContainer.
-     */
     private void addContainerproperties() {
         /* Create HierarchicalContainer container */
         container.addContainerProperty(SPUILabelDefinitions.NAME, Link.class, null);
@@ -154,7 +144,7 @@ public class TargetFilterTable extends Table {
     }
 
     private List<TableColumn> getVisbleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.15F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2F));
@@ -165,7 +155,6 @@ public class TargetFilterTable extends Table {
 
     }
 
-    /* re -create the container and get the data and set it to the table */
     private void refreshContainer() {
         populateTableData();
 
@@ -187,10 +176,6 @@ public class TargetFilterTable extends Table {
                 .toString();
     }
 
-    /**
-     * @param event
-     * @return
-     */
     private void onDelete(final ClickEvent event) {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.filter.delete.confirmbox"),
@@ -206,8 +191,8 @@ public class TargetFilterTable extends Table {
                          * of the deleted custom filter.
                          */
 
-                        notification.displaySuccess(i18n.get("message.delete.filter.success",
-                                new Object[] { deletedFilterName }));
+                        notification.displaySuccess(
+                                i18n.get("message.delete.filter.success", new Object[] { deletedFilterName }));
                         refreshContainer();
                     }
                 });
@@ -236,10 +221,6 @@ public class TargetFilterTable extends Table {
         return updateIcon;
     }
 
-    /**
-     * @param event
-     * @return
-     */
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement

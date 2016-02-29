@@ -50,9 +50,7 @@ public class RolloutListHeader extends AbstractSimpleTableHeader {
     @Autowired
     private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
-    /**
-     * Initialization of Target Header Component.
-     */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -101,9 +99,7 @@ public class RolloutListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected void onClose(final ClickEvent event) {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
     }
 
     @Override
@@ -133,16 +129,9 @@ public class RolloutListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected boolean isRollout() {
-
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.rollout.AbstractSimpleTableHeader#
-     * getHeaderCaptionLayout()
-     */
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
         final Label headerCaption = SPUIComponentProvider.getLabel(getHeaderCaption(),
@@ -153,17 +142,9 @@ public class RolloutListHeader extends AbstractSimpleTableHeader {
         return headerCaptionLayout;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.ui.rollout.AbstractSimpleTableHeader#restoreCaption()
-     */
     @Override
     protected void restoreCaption() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
     }
 
 }

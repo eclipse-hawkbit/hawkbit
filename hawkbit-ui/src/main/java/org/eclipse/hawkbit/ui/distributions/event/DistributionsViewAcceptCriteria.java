@@ -28,8 +28,6 @@ import com.vaadin.ui.Component;
 /**
  * Distributions View for Accept criteria.
  * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
@@ -47,12 +45,6 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.AbstractAcceptCriteria#analyseDragComponent
-     * (com.vaadin.event .dd.DragAndDropEvent, com.vaadin.ui.Component)
-     */
     @Override
     protected void analyseDragComponent(final Component compsource) {
         final String sourceID = getComponentId(compsource);
@@ -60,24 +52,11 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
         eventBus.publish(this, event);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.AbstractAcceptCriteria#hideDropHints
-     * ()
-     */
     @Override
     protected void hideDropHints() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.AbstractAcceptCriteria#invalidDrop()
-     */
     @Override
     protected void invalidDrop() {
         uiNotification.displayValidationError(SPUILabelDefinitions.ACTION_NOT_ALLOWED);
@@ -94,34 +73,16 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
         return id;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.AbstractAcceptCriteria#
-     * getDropHintConfigurations()
-     */
     @Override
     protected Map<String, Object> getDropHintConfigurations() {
         return DROP_HINTS_CONFIGS;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.AbstractAcceptCriteria#
-     * publishDragStartEvent(java.lang.Object)
-     */
     @Override
     protected void publishDragStartEvent(final Object event) {
         eventBus.publish(this, event);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.AbstractAcceptCriteria#
-     * getDropConfigurations()
-     */
     @Override
     protected Map<String, List<String>> getDropConfigurations() {
         return DROP_CONFIGS;
@@ -137,7 +98,7 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, List<String>> createDropConfigurations() {
-        final Map<String, List<String>> config = new HashMap<String, List<String>>();
+        final Map<String, List<String>> config = new HashMap<>();
 
         // Delete drop area droppable components
         config.put(SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID,
@@ -153,7 +114,7 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     }
 
     private static Map<String, Object> createDropHintConfigurations() {
-        final Map<String, Object> config = new HashMap<String, Object>();
+        final Map<String, Object> config = new HashMap<>();
         config.put(SPUIDefinitions.DISTRIBUTION_TYPE_ID_PREFIXS, DragEvent.DISTRIBUTION_TYPE_DRAG);
         config.put(SPUIComponetIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);
         config.put(SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, DragEvent.SOFTWAREMODULE_DRAG);

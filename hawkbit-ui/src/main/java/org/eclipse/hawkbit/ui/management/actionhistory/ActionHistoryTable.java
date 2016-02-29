@@ -202,16 +202,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         hierarchicalContainer.addContainerProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME, String.class, null);
     }
 
-    /**
-     * Get Action based on status.
-     *
-     * @param type
-     *            as Action.Type
-     *
-     * @return List of Actions
-     */
     private List<Object> getVisbleColumns() {
-        final List<Object> visibleColumnIds = new ArrayList<Object>();
+        final List<Object> visibleColumnIds = new ArrayList<>();
         visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE);
         visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_DIST);
         visibleColumnIds.add(SPUIDefinitions.ACTION_HIS_TBL_DATETIME);

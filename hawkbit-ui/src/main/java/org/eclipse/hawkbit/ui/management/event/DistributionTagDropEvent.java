@@ -86,20 +86,13 @@ public class DistributionTagDropEvent implements DropHandler {
     private Boolean isNoTagAssigned(final DragAndDropEvent event) {
         final String tagName = ((DragAndDropWrapper) (event.getTargetDetails().getTarget())).getData().toString();
         if (tagName.equals(SPUIDefinitions.DISTRIBUTION_TAG_BUTTON)) {
-            notification.displayValidationError(i18n.get("message.tag.cannot.be.assigned",
-                    new Object[] { i18n.get("label.no.tag.assigned") }));
+            notification.displayValidationError(
+                    i18n.get("message.tag.cannot.be.assigned", new Object[] { i18n.get("label.no.tag.assigned") }));
             return false;
         }
         return true;
     }
 
-    /**
-     * Validate the drop.
-     *
-     * @param event
-     *            DragAndDropEvent reference
-     * @return Boolean
-     */
     private Boolean validate(final DragAndDropEvent event) {
         final Component compsource = event.getTransferable().getSourceComponent();
         if (!(compsource instanceof Table)) {
@@ -116,11 +109,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * validate the update permission.
-     *
-     * @return boolean
-     */
     private boolean checkForDSUpdatePermission() {
         if (!permChecker.hasUpdateDistributionPermission()) {
 
@@ -131,13 +119,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * validate the source tables.
-     *
-     * @param source
-     *            table
-     * @return boolean
-     */
     private boolean validateIfSourceIsDs(final Table source) {
         if (!source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
             notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
@@ -146,12 +127,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * Process target Drop event.
-     *
-     * @param event
-     *            DragAndDropEvent
-     */
     private void processDistributionDrop(final DragAndDropEvent event) {
 
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
@@ -161,7 +136,7 @@ public class DistributionTagDropEvent implements DropHandler {
 
         @SuppressWarnings("unchecked")
         final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) source.getValue();
-        final Set<Long> distributionList = new HashSet<Long>();
+        final Set<Long> distributionList = new HashSet<>();
         if (!distSelected.contains(transferable.getData(ITEMID))) {
             distributionList.add(((DistributionSetIdName) transferable.getData(ITEMID)).getId());
         } else {
@@ -172,8 +147,8 @@ public class DistributionTagDropEvent implements DropHandler {
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
         final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(
-                distributionList, distTagName);
+        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
+                distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {

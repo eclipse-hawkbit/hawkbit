@@ -56,11 +56,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Artifact upload confirmation popup.
- *
- *
- *
- *
- *
+ * 
  */
 public class UploadConfirmationwindow implements Button.ClickListener {
 
@@ -106,7 +102,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     private IndexedContainer tabelContainer;
 
-    private final List<UploadStatus> uploadResultList = new ArrayList<UploadStatus>();
+    private final List<UploadStatus> uploadResultList = new ArrayList<>();
 
     private VerticalLayout uploadArtifactDetails;
 

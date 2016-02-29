@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 
@@ -19,14 +18,11 @@ import org.eclipse.hawkbit.repository.model.Target;
  * information of an assignment and how much of the assignment has been done and
  * how much of the assignments had already been existed.
  *
- *
- *
- *
  */
 public class DistributionSetAssignmentResult extends AssignmentResult {
 
     private final List<String> assignedTargets;
-    private final List<Action> actions;
+    private final List<Long> actions;
 
     private final TargetManagement targetManagement;
 
@@ -48,7 +44,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult {
      *
      */
     public DistributionSetAssignmentResult(final List<String> assignedTargets, final int assigned,
-            final int alreadyAssigned, final List<Action> actions, final TargetManagement targetManagement) {
+            final int alreadyAssigned, final List<Long> actions, final TargetManagement targetManagement) {
         super(assigned, alreadyAssigned);
         this.assignedTargets = assignedTargets;
         this.actions = actions;
@@ -63,9 +59,9 @@ public class DistributionSetAssignmentResult extends AssignmentResult {
     }
 
     /**
-     * @return the actionId
+     * @return the actionIds
      */
-    public List<Action> getActions() {
+    public List<Long> getActions() {
         return actions;
     }
 

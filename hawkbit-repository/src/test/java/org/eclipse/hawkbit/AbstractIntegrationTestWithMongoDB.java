@@ -55,7 +55,7 @@ public abstract class AbstractIntegrationTestWithMongoDB extends AbstractIntegra
                 System.setProperty("spring.data.mongodb.port", String.valueOf(port));
             }
 
-            Version version = Version.V3_0_5;
+            Version version = Version.V3_0_8;
             if (System.getProperty("inf.mongodb.version") != null) {
                 version = Version
                         .valueOf("V" + System.getProperty("inf.mongodb.version").trim().replaceAll("\\.", "_"));

@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.Constants;
@@ -67,13 +66,30 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     private EventBus eventBus;
 
     @Test
+    @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
+    public void findActionWithLazyDetails() {
+        final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
+                distributionSetManagement, new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
+        // one action with one action status is generated
+        final Long actionId = deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(actionId);
+
+        assertThat(action.getDistributionSet()).as("DistributionSet in action").isNotNull();
+        assertThat(action.getTarget()).as("Target in action").isNotNull();
+        assertThat(action.getTarget().getAssignedDistributionSet()).as("AssignedDistributionSet of target in action")
+                .isNotNull();
+    }
+
+    @Test
     @Description("Test verifies that the custom query to find all actions include the count of action status is working correctly")
     public void findActionsWithStatusCountByTarget() {
         final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
                 distributionSetManagement, new ArrayList<DistributionSetTag>());
         final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
         // one action with one action status is generated
-        final Action action = deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(
+                deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0));
         // save 2 action status
         actionStatusRepository.save(new ActionStatus(action, Status.RETRIEVED, System.currentTimeMillis()));
         actionStatusRepository.save(new ActionStatus(action, Status.RUNNING, System.currentTimeMillis()));
@@ -81,8 +97,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final List<ActionWithStatusCount> findActionsWithStatusCountByTarget = deploymentManagement
                 .findActionsWithStatusCountByTargetOrderByIdDesc(testTarget.get(0));
 
-        assertThat(findActionsWithStatusCountByTarget).hasSize(1);
-        assertThat(findActionsWithStatusCountByTarget.get(0).getActionStatusCount()).isEqualTo(3L);
+        assertThat(findActionsWithStatusCountByTarget).as("wrong action size").hasSize(1);
+        assertThat(findActionsWithStatusCountByTarget.get(0).getActionStatusCount()).as("wrong action status size")
+                .isEqualTo(3L);
     }
 
     @Test
@@ -98,27 +115,32 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final DistributionSetTag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("Tag1"));
 
         final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag);
-        assertThat(assignedDS.size()).isEqualTo(4);
-        assignedDS.forEach(ds -> assertThat(ds.getTags().size()).isEqualTo(1));
+        assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
+        assignedDS.forEach(ds -> assertThat(ds.getTags().size()).as("ds has wrong tag size").isEqualTo(1));
 
         DistributionSetTag findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1");
-        assertThat(assignedDS.size()).isEqualTo(findDistributionSetTag.getAssignedToDistributionSet().size());
+        assertThat(assignedDS.size()).as("assigned ds has wrong size")
+                .isEqualTo(findDistributionSetTag.getAssignedToDistributionSet().size());
 
-        assertThat(distributionSetManagement.unAssignTag(Long.valueOf(100), findDistributionSetTag)).isNull();
+        assertThat(distributionSetManagement.unAssignTag(Long.valueOf(100), findDistributionSetTag))
+                .as("unassign tag result should be null").isNull();
 
         final DistributionSet unAssignDS = distributionSetManagement.unAssignTag(assignDS.get(0),
                 findDistributionSetTag);
-        assertThat(unAssignDS.getId()).isEqualTo(assignDS.get(0));
-        assertThat(unAssignDS.getTags().size()).isEqualTo(0);
+        assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
+        assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isEqualTo(0);
         findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1");
-        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).isEqualTo(3);
+        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).as("ds tag ds has wrong ds size")
+                .isEqualTo(3);
 
         final List<DistributionSet> unAssignTargets = distributionSetManagement
                 .unAssignAllDistributionSetsByTag(findDistributionSetTag);
         findDistributionSetTag = tagManagement.findDistributionSetTag("Tag1");
-        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).isEqualTo(0);
-        assertThat(unAssignTargets.size()).isEqualTo(3);
-        unAssignTargets.forEach(target -> assertThat(target.getTags().size()).isEqualTo(0));
+        assertThat(findDistributionSetTag.getAssignedToDistributionSet().size()).as("ds tag has wrong ds size")
+                .isEqualTo(0);
+        assertThat(unAssignTargets.size()).as("unassigned target has wrong size").isEqualTo(3);
+        unAssignTargets
+                .forEach(target -> assertThat(target.getTags().size()).as("target has wrong tag size").isEqualTo(0));
     }
 
     @Test
@@ -140,7 +162,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         targetManagement.findAllTargetIds().forEach(targetIdName -> {
             assertThat(deploymentManagement.findActiveActionsByTarget(
-                    targetManagement.findTargetByControllerID(targetIdName.getControllerId()))).hasSize(2);
+                    targetManagement.findTargetByControllerID(targetIdName.getControllerId())))
+                            .as("active action has wrong size").hasSize(2);
         });
     }
 
@@ -163,14 +186,14 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         // check initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("target has update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         // assign the two sets in a row
         Action firstAction = assignSet(target, dsFirst);
         Action secondAction = assignSet(target, dsSecond);
 
-        assertThat(actionRepository.findAll()).hasSize(2);
-        assertThat(actionStatusRepository.findAll()).hasSize(2);
+        assertThat(actionRepository.findAll()).as("wrong size of actions").hasSize(2);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(2);
 
         // we cancel second -> back to first
         deploymentManagement.cancelAction(secondAction,
@@ -180,10 +203,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         secondAction.setStatus(Status.CANCELED);
         controllerManagement.addCancelActionStatus(
                 new ActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()), secondAction);
-        assertThat(actionStatusRepository.findAll()).hasSize(4);
-        assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).isEqualTo(dsFirst);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(4);
+        assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).as("wrong ds")
+                .isEqualTo(dsFirst);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
 
         // we cancel first -> back to installed
         deploymentManagement.cancelAction(firstAction,
@@ -193,11 +217,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         firstAction.setStatus(Status.CANCELED);
         controllerManagement.addCancelActionStatus(
                 new ActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()), firstAction);
-        assertThat(actionStatusRepository.findAll()).hasSize(6);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(6);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
-                .isEqualTo(dsInstalled);
+                .as("wrong assigned ds").isEqualTo(dsInstalled);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
     }
 
     @Test
@@ -219,14 +243,14 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         // check initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         // assign the two sets in a row
         Action firstAction = assignSet(target, dsFirst);
         Action secondAction = assignSet(target, dsSecond);
 
-        assertThat(actionRepository.findAll()).hasSize(2);
-        assertThat(actionStatusRepository.findAll()).hasSize(2);
+        assertThat(actionRepository.findAll()).as("wrong size of actions").hasSize(2);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(2);
 
         // we cancel first -> second is left
         deploymentManagement.cancelAction(firstAction,
@@ -236,26 +260,28 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         firstAction.setStatus(Status.CANCELED);
         controllerManagement.addCancelActionStatus(
                 new ActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()), firstAction);
-        assertThat(actionStatusRepository.findAll()).hasSize(4);
-        assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).isEqualTo(dsSecond);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
+        assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
+                .as("wrong assigned ds").isEqualTo(dsSecond);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
+                .as("wrong target update status").isEqualTo(TargetUpdateStatus.PENDING);
 
         // we cancel second -> remain assigned until finished cancellation
         deploymentManagement.cancelAction(secondAction,
                 targetManagement.findTargetByControllerID(target.getControllerId()));
         secondAction = deploymentManagement.findActionWithDetails(secondAction.getId());
-        assertThat(actionStatusRepository.findAll()).hasSize(5);
-        assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).isEqualTo(dsSecond);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(5);
+        assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
+                .as("wrong assigned ds").isEqualTo(dsSecond);
         // confirm cancellation
         secondAction.setStatus(Status.CANCELED);
         controllerManagement.addCancelActionStatus(
                 new ActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()), secondAction);
         // cancelled success -> back to dsInstalled
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
-                .isEqualTo(dsInstalled);
+                .as("wrong installed ds").isEqualTo(dsInstalled);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
     }
 
     @Test
@@ -274,13 +300,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         // verify initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("wrong target info update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         Action assigningAction = assignSet(target, ds);
 
         // verify assignment
-        assertThat(actionRepository.findAll()).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(1);
+        assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(1);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(1);
 
         target = targetManagement.findTargetByControllerID(target.getControllerId());
 
@@ -293,11 +319,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assigningAction = deploymentManagement.findActionWithDetails(assigningAction.getId());
 
         // verify
-        assertThat(assigningAction.getStatus()).isEqualTo(Status.CANCELED);
+        assertThat(assigningAction.getStatus()).as("wrong size of status").isEqualTo(Status.CANCELED);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
-                .isEqualTo(dsInstalled);
+                .as("wrong assigned ds").isEqualTo(dsInstalled);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+                .as("wrong target update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
     }
 
     @Test
@@ -316,13 +342,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         // verify initial status
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.UNKNOWN);
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         final Action assigningAction = assignSet(target, ds);
 
         // verify assignment
-        assertThat(actionRepository.findAll()).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(1);
+        assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(1);
+        assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(1);
 
         // force quit assignment
         try {
@@ -337,11 +363,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         deploymentManagement.assignDistributionSet(ds.getId(), new String[] { target.getControllerId() });
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).getTargetInfo().getUpdateStatus())
-                        .isEqualTo(TargetUpdateStatus.PENDING);
+                        .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getAssignedDistributionSet())
-                .isEqualTo(ds);
+                .as("wrong assigned ds").isEqualTo(ds);
         final Action action = actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent().get(0);
-        assertThat(action).isNotNull();
+        assertThat(action).as("action should not be null").isNotNull();
         return action;
     }
 
@@ -349,7 +375,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
      * test a simple deployment by calling the
      * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
      * and checking the active action and the action history of the targets.
-     * 
+     *
      * @throws InterruptedException
      */
     @Test
@@ -373,26 +399,30 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         deploymentManagement.assignDistributionSet(ds, savedDeployedTargets);
 
         // verify that one Action for each assignDistributionSet
-        assertThat(actionRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(20);
+        assertThat(actionRepository.findAll(pageReq).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
 
         final Iterable<Target> allFoundTargets = targetManagement.findTargetsAll(pageReq).getContent();
 
-        assertThat(allFoundTargets).containsAll(savedDeployedTargets).containsAll(savedNakedTargets);
-        assertThat(savedDeployedTargets).doesNotContain(Iterables.toArray(savedNakedTargets, Target.class));
-        assertThat(savedNakedTargets).doesNotContain(Iterables.toArray(savedDeployedTargets, Target.class));
+        assertThat(allFoundTargets).as("founded targets are wrong").containsAll(savedDeployedTargets)
+                .containsAll(savedNakedTargets);
+        assertThat(savedDeployedTargets).as("saved target are wrong")
+                .doesNotContain(Iterables.toArray(savedNakedTargets, Target.class));
+        assertThat(savedNakedTargets).as("saved target are wrong")
+                .doesNotContain(Iterables.toArray(savedDeployedTargets, Target.class));
 
         for (final Target myt : savedNakedTargets) {
             final Target t = targetManagement.findTargetByControllerID(myt.getControllerId());
-            assertThat(deploymentManagement.findActionsByTarget(t)).isEmpty();
+            assertThat(deploymentManagement.findActionsByTarget(t)).as("action should be empty").isEmpty();
         }
 
         for (final Target myt : savedDeployedTargets) {
             final Target t = targetManagement.findTargetByControllerID(myt.getControllerId());
             final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(t);
-            assertThat(activeActionsByTarget).isNotEmpty();
-            assertThat(t.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(activeActionsByTarget).as("action should not be empty").isNotEmpty();
+            assertThat(t.getTargetInfo().getUpdateStatus()).as("wrong target update status")
+                    .isEqualTo(TargetUpdateStatus.PENDING);
             for (final Action ua : activeActionsByTarget) {
-                assertThat(ua.getDistributionSet()).isEqualTo(ds);
+                assertThat(ua.getDistributionSet()).as("action has wrong ds").isEqualTo(ds);
             }
         }
 
@@ -431,12 +461,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // give some chance to receive events asynchronously
         Thread.sleep(300);
         final List<TargetAssignDistributionSetEvent> events = eventHandlerMock.getEvents(1, TimeUnit.MILLISECONDS);
-        assertThat(events).isEmpty();
+        assertThat(events).as("events should be empty").isEmpty();
 
         final EventHandlerMock eventHandlerMockAfterCompletionOfDs = new EventHandlerMock(10);
         eventBus.register(eventHandlerMockAfterCompletionOfDs);
 
-        assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned()).isEqualTo(10);
+        assertThat(deploymentManagement.assignDistributionSet(nowComplete, targets).getAssigned())
+                .as("assign ds doesn't work").isEqualTo(10);
         assertTargetAssignDistributionSetEvents(targets, nowComplete,
                 eventHandlerMockAfterCompletionOfDs.getEvents(10, TimeUnit.SECONDS));
     }
@@ -476,7 +507,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // retrieving all Actions created by the assignDistributionSet call
         final Page<Action> page = actionRepository.findAll(pageReq);
         // and verify the number
-        assertThat(page.getTotalElements()).isEqualTo(noOfDeployedTargets * noOfDistributionSets);
+        assertThat(page.getTotalElements()).as("wrong size of actions")
+                .isEqualTo(noOfDeployedTargets * noOfDistributionSets);
 
         // only records retrieved from the DB can be evaluated to be sure that
         // all fields are
@@ -487,17 +519,20 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final Iterable<Target> undeployedTargetsFromDB = targetRepository.findAll(undeployedTargetIDs);
 
         // test that number of Targets
-        assertThat(allFoundTargets.spliterator().getExactSizeIfKnown())
+        assertThat(allFoundTargets.spliterator().getExactSizeIfKnown()).as("number of target is wrong")
                 .isEqualTo(deployedTargetsFromDB.spliterator().getExactSizeIfKnown()
                         + undeployedTargetsFromDB.spliterator().getExactSizeIfKnown());
-        assertThat(deployedTargetsFromDB.spliterator().getExactSizeIfKnown()).isEqualTo(noOfDeployedTargets);
-        assertThat(undeployedTargetsFromDB.spliterator().getExactSizeIfKnown()).isEqualTo(noOfUndeployedTargets);
+        assertThat(deployedTargetsFromDB.spliterator().getExactSizeIfKnown()).as("number of target is wrong")
+                .isEqualTo(noOfDeployedTargets);
+        assertThat(undeployedTargetsFromDB.spliterator().getExactSizeIfKnown()).as("number of target is wrong")
+                .isEqualTo(noOfUndeployedTargets);
 
         // test the content of different lists
-        assertThat(allFoundTargets).containsAll(deployedTargetsFromDB).containsAll(undeployedTargetsFromDB);
-        assertThat(deployedTargetsFromDB).containsAll(savedDeployedTargets)
+        assertThat(allFoundTargets).as("content of founded target is wrong").containsAll(deployedTargetsFromDB)
+                .containsAll(undeployedTargetsFromDB);
+        assertThat(deployedTargetsFromDB).as("content of deployed target is wrong").containsAll(savedDeployedTargets)
                 .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, Target.class));
-        assertThat(undeployedTargetsFromDB).containsAll(savedNakedTargets)
+        assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
                 .doesNotContain(Iterables.toArray(deployedTargetsFromDB, Target.class));
 
         // For each of the 4 targets 1 distribution sets gets assigned
@@ -525,42 +560,42 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final DistributionSet dsC = deployResWithDsC.getDistributionSets().get(0);
 
         // retrieving the UpdateActions created by the assignments
-        final Action updActA = actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(0);
-        final Action updActB = actionRepository.findByDistributionSet(pageRequest, dsB).getContent().get(0);
-        final Action updActC = actionRepository.findByDistributionSet(pageRequest, dsC).getContent().get(0);
+        actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(0);
+        actionRepository.findByDistributionSet(pageRequest, dsB).getContent().get(0);
+        actionRepository.findByDistributionSet(pageRequest, dsC).getContent().get(0);
 
         // verifying the correctness of the assignments
         for (final Target t : deployResWithDsA.getDeployedTargets()) {
-            assertThat(t.getAssignedDistributionSet().getId()).isEqualTo(dsA.getId());
+            assertThat(t.getAssignedDistributionSet().getId()).as("assignment is not correct").isEqualTo(dsA.getId());
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo()
-                    .getInstalledDistributionSet()).isNull();
+                    .getInstalledDistributionSet()).as("installed ds should be null").isNull();
         }
         for (final Target t : deployResWithDsB.getDeployedTargets()) {
-            assertThat(t.getAssignedDistributionSet().getId()).isEqualTo(dsB.getId());
+            assertThat(t.getAssignedDistributionSet().getId()).as("assigned ds is wrong").isEqualTo(dsB.getId());
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo()
-                    .getInstalledDistributionSet()).isNull();
+                    .getInstalledDistributionSet()).as("installed ds should be null").isNull();
         }
         for (final Target t : deployResWithDsC.getDeployedTargets()) {
             assertThat(t.getAssignedDistributionSet().getId()).isEqualTo(dsC.getId());
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo()
-                    .getInstalledDistributionSet()).isNull();
+                    .getInstalledDistributionSet()).as("installed ds should not be null").isNull();
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo().getUpdateStatus())
-                    .isEqualTo(TargetUpdateStatus.PENDING);
+                    .as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
         }
 
         final List<Target> updatedTsDsA = sendUpdateActionStatusToTargets(dsA, deployResWithDsA.getDeployedTargets(),
                 Status.FINISHED, new String[] { "alles gut" });
 
         // verify, that dsA is deployed correctly
-        assertThat(updatedTsDsA).isEqualTo(deployResWithDsA.getDeployedTargets());
+        assertThat(updatedTsDsA).as("ds is not deployed correctly").isEqualTo(deployResWithDsA.getDeployedTargets());
         for (final Target t_ : updatedTsDsA) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId());
-            assertThat(t.getAssignedDistributionSet()).isEqualTo(dsA);
+            assertThat(t.getAssignedDistributionSet()).as("assigned ds is wrong").isEqualTo(dsA);
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo()
-                    .getInstalledDistributionSet()).isEqualTo(dsA);
+                    .getInstalledDistributionSet()).as("installed ds is wrong").isEqualTo(dsA);
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo().getUpdateStatus())
-                    .isEqualTo(TargetUpdateStatus.IN_SYNC);
-            assertThat(deploymentManagement.findActiveActionsByTarget(t)).hasSize(0);
+                    .as("wrong target info update status").isEqualTo(TargetUpdateStatus.IN_SYNC);
+            assertThat(deploymentManagement.findActiveActionsByTarget(t)).as("no actions should be active").hasSize(0);
         }
 
         // deploy dsA to the target which already have dsB deployed -> must
@@ -569,18 +604,18 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // UpdateAction for dsA
         final Iterable<Target> deployed2DS = deploymentManagement
                 .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedTargets();
-        final Action updActA2 = actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(1);
+        actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(1);
 
-        assertThat(deployed2DS).containsAll(deployResWithDsB.getDeployedTargets());
-        assertThat(deployed2DS).hasSameSizeAs(deployResWithDsB.getDeployedTargets());
+        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsB.getDeployedTargets());
+        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsB.getDeployedTargets());
 
         for (final Target t_ : deployed2DS) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId());
-            assertThat(t.getAssignedDistributionSet()).isEqualTo(dsA);
+            assertThat(t.getAssignedDistributionSet()).as("assigned ds is wrong").isEqualTo(dsA);
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo()
-                    .getInstalledDistributionSet()).isNull();
+                    .getInstalledDistributionSet()).as("installed ds should be null").isNull();
             assertThat(targetManagement.findTargetByControllerID(t.getControllerId()).getTargetInfo().getUpdateStatus())
-                    .isEqualTo(TargetUpdateStatus.PENDING);
+                    .as("wrong target info update status").isEqualTo(TargetUpdateStatus.PENDING);
 
         }
     }
@@ -613,22 +648,22 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         distributionSetManagement.deleteDistributionSet(dsA.getId());
         dsA = distributionSetManagement.findDistributionSetById(dsA.getId());
-        assertThat(dsA).isNull();
+        assertThat(dsA).as("ds should be null").isNull();
 
         // // verify that the ds is not physically deleted
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
             distributionSetManagement.deleteDistributionSet(ds.getId());
             final DistributionSet foundDS = distributionSetManagement.findDistributionSetById(ds.getId());
-            assertThat(foundDS).isNotNull();
-            assertThat(foundDS.isDeleted()).isTrue();
+            assertThat(foundDS).as("founded should not be null").isNotNull();
+            assertThat(foundDS.isDeleted()).as("founded ds should be deleted").isTrue();
         }
 
         // verify that deleted attribute is used correctly
         List<DistributionSet> allFoundDS = distributionSetManagement.findDistributionSetsAll(pageReq, false, true)
                 .getContent();
-        assertThat(allFoundDS.size()).isEqualTo(0);
+        assertThat(allFoundDS.size()).as("no ds should be founded").isEqualTo(0);
         allFoundDS = distributionSetManagement.findDistributionSetsAll(pageRequest, true, true).getContent();
-        assertThat(allFoundDS).hasSize(noOfDistributionSets);
+        assertThat(allFoundDS).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
             sendUpdateActionStatusToTargets(ds, deploymentResult.getDeployedTargets(), Status.FINISHED,
@@ -642,9 +677,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // successfully and no activeAction is referring to created distribution
         // sets
         allFoundDS = distributionSetManagement.findDistributionSetsAll(pageRequest, false, true).getContent();
-        assertThat(allFoundDS.size()).isEqualTo(0);
+        assertThat(allFoundDS.size()).as("no ds should be founded").isEqualTo(0);
         allFoundDS = distributionSetManagement.findDistributionSetsAll(pageRequest, true, true).getContent();
-        assertThat(allFoundDS).hasSize(noOfDistributionSets);
+        assertThat(allFoundDS).as("size of founded ds is wrong").hasSize(noOfDistributionSets);
 
     }
 
@@ -668,15 +703,15 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                     "blabla alles gut");
         }
 
-        assertThat(targetManagement.countTargetsAll()).isNotZero();
-        assertThat(actionStatusRepository.count()).isNotZero();
+        assertThat(targetManagement.countTargetsAll()).as("size of targets is wrong").isNotZero();
+        assertThat(actionStatusRepository.count()).as("size of action status is wrong").isNotZero();
 
         targetManagement
                 .deleteTargets(deploymentResult.getUndeployedTargetIDs().toArray(new Long[noOfUndeployedTargets]));
         targetManagement.deleteTargets(deploymentResult.getDeployedTargetIDs().toArray(new Long[noOfDeployedTargets]));
 
-        assertThat(targetManagement.countTargetsAll()).isZero();
-        assertThat(actionStatusRepository.count()).isZero();
+        assertThat(targetManagement.countTargetsAll()).as("size of targets should be zero").isZero();
+        assertThat(actionStatusRepository.count()).as("size of action status is wrong").isZero();
     }
 
     private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
@@ -727,7 +762,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // checking the revisions of the created entities
         // verifying that the revision of the object and the revision within the
         // DB has not changed
-        assertThat(dsA.getOptLockRevision()).isEqualTo(
+        assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
         // verifying that the assignment is correct
@@ -778,12 +813,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     public void checkThatDsRevisionsIsNotChangedWithTargetAssignment() {
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("a", softwareManagement,
                 distributionSetManagement);
-        final DistributionSet dsB = TestDataUtil.generateDistributionSet("b", softwareManagement,
-                distributionSetManagement);
+        TestDataUtil.generateDistributionSet("b", softwareManagement, distributionSetManagement);
         Target targ = targetManagement
                 .createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
 
-        assertThat(dsA.getOptLockRevision()).isEqualTo(
+        assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
         final List<Target> targs = new ArrayList<Target>();
@@ -791,7 +825,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final Iterable<Target> savedTargs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedTargets();
         targ = savedTargs.iterator().next();
 
-        assertThat(dsA.getOptLockRevision()).isEqualTo(
+        assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
     }
 
@@ -805,17 +839,17 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.SOFT, Action.NO_FORCE_TIME, target.getControllerId());
-        final Action action = assignDistributionSet.getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify preparation
         Action findAction = deploymentManagement.findAction(action.getId());
-        assertThat(findAction.getActionType()).isEqualTo(ActionType.SOFT);
+        assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.SOFT);
 
         // test
         deploymentManagement.forceTargetAction(action.getId());
 
         // verify test
         findAction = deploymentManagement.findAction(action.getId());
-        assertThat(findAction.getActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
     }
 
     @Test
@@ -828,18 +862,18 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.FORCED, Action.NO_FORCE_TIME, target.getControllerId());
-        final Action action = assignDistributionSet.getActions().get(0);
+        final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify perparation
         Action findAction = deploymentManagement.findAction(action.getId());
-        assertThat(findAction.getActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
 
         // test
         final Action forceTargetAction = deploymentManagement.forceTargetAction(action.getId());
 
         // verify test
-        assertThat(forceTargetAction.getActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(forceTargetAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
         findAction = deploymentManagement.findAction(action.getId());
-        assertThat(findAction.getActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(findAction.getActionType()).as("action type is wrong").isEqualTo(ActionType.FORCED);
     }
 
     /**
@@ -848,7 +882,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
      * <p>
      * <b>All created distribution sets are assigned to all targets of the
      * target list deployedTargets.</b>
-     * 
+     *
      * @param undeployedTargetPrefix
      *            prefix to be used as target controller prefix
      * @param noOfUndeployedTargets
@@ -901,14 +935,14 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 if (event.getControllerId().equals(myt.getControllerId())) {
                     found = true;
                     final List<Action> activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(myt);
-                    assertThat(activeActionsByTarget).isNotEmpty();
-                    assertThat(event.getActionId()).isEqualTo(activeActionsByTarget.get(0).getId())
-                            .as("Action id in database and event do not match");
-                    assertThat(event.getSoftwareModules())
+                    assertThat(activeActionsByTarget).as("size of active actions for target is wrong").isNotEmpty();
+                    assertThat(event.getActionId()).as("Action id in database and event do not match")
+                            .isEqualTo(activeActionsByTarget.get(0).getId());
+                    assertThat(event.getSoftwareModules()).as("softwaremodule size is not correct")
                             .containsOnly(ds.getModules().toArray(new SoftwareModule[ds.getModules().size()]));
                 }
             }
-            assertThat(found).isTrue().as("No event found for controller " + myt.getControllerId());
+            assertThat(found).as("No event found for controller " + myt.getControllerId()).isTrue();
         }
     }
 
@@ -927,42 +961,19 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         private final List<Target> deployedTargets = new ArrayList<Target>();
         private final List<DistributionSet> distributionSets = new ArrayList<DistributionSet>();
 
-        private final String undeployedTargetPrefix;
-        private final String deployedTargetPrefix;
-        private final String distributionSetPrefix;
-
         public DeploymentResult(final Iterable<Target> deployedTs, final Iterable<Target> undeployedTs,
                 final Iterable<DistributionSet> dss, final String deployedTargetPrefix,
                 final String undeployedTargetPrefix, final String distributionSetPrefix) {
-
-            this.undeployedTargetPrefix = undeployedTargetPrefix;
-            this.deployedTargetPrefix = deployedTargetPrefix;
-            this.distributionSetPrefix = distributionSetPrefix;
 
             Iterables.addAll(deployedTargets, deployedTs);
             Iterables.addAll(undeployedTargets, undeployedTs);
             Iterables.addAll(distributionSets, dss);
 
-            deployedTargets.forEach(new Consumer<Target>() {
-                @Override
-                public void accept(final Target t) {
-                    deployedTargetIDs.add(t.getId());
-                }
-            });
+            deployedTargets.forEach(t -> deployedTargetIDs.add(t.getId()));
 
-            undeployedTargets.forEach(new Consumer<Target>() {
-                @Override
-                public void accept(final Target t) {
-                    undeployedTargetIDs.add(t.getId());
-                }
-            });
+            undeployedTargets.forEach(t -> undeployedTargetIDs.add(t.getId()));
 
-            distributionSets.forEach(new Consumer<DistributionSet>() {
-                @Override
-                public void accept(final DistributionSet ds) {
-                    distributionSetIDs.add(ds.getId());
-                }
-            });
+            distributionSets.forEach(ds -> distributionSetIDs.add(ds.getId()));
 
         }
 
@@ -1002,53 +1013,12 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         }
 
         /**
-         * @return the noOfUndeployedTargets
-         */
-        public int getNoOfUndeployedTargets() {
-            return undeployedTargetIDs.size();
-        }
-
-        /**
-         * @return the noOfDeployedTargets
-         */
-        public int getNoOfDeployedTargets() {
-            return deployedTargetIDs.size();
-        }
-
-        /**
-         * @return the noOfDistributionSets
-         */
-        public int getNoOfDistributionSets() {
-            return distributionSets.size();
-        }
-
-        /**
          * @return the undeployedTargetIDs
          */
         public List<Long> getUndeployedTargetIDs() {
             return undeployedTargetIDs;
         }
 
-        /**
-         * @return the undeployedTargetPrefix
-         */
-        public String getUndeployedTargetPrefix() {
-            return undeployedTargetPrefix;
-        }
-
-        /**
-         * @return the deployedTargetPrefix
-         */
-        public String getDeployedTargetPrefix() {
-            return deployedTargetPrefix;
-        }
-
-        /**
-         * @return the distributionSetPrefix
-         */
-        public String getDistributionSetPrefix() {
-            return distributionSetPrefix;
-        }
     }
 
     private static class EventHandlerMock {
@@ -1073,9 +1043,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
             latch.await(timeout, unit);
             final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<TargetAssignDistributionSetEvent>(
                     events);
-            assertThat(handledEvents).hasSize(expectedNumberOfEvents)
-                    .as("Did not receive the expected amount of events (" + expectedNumberOfEvents
-                            + ") within timeout. Received events are " + handledEvents);
+            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
+                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
+
             return handledEvents;
         }
     }
@@ -1101,9 +1071,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 throws InterruptedException {
             latch.await(timeout, unit);
             final List<CancelTargetAssignmentEvent> handledEvents = new LinkedList<CancelTargetAssignmentEvent>(events);
-            assertThat(handledEvents).hasSize(expectedNumberOfEvents)
-                    .as("Did not receive the expected amount of events (" + expectedNumberOfEvents
-                            + ") within timeout. Received events are " + handledEvents);
+            assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
+                    + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
             return handledEvents;
         }
     }

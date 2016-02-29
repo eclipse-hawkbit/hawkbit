@@ -29,9 +29,6 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  * module.
  *
- *
- *
- *
  */
 public class ConfirmationDialog implements Button.ClickListener {
     /** Serial version UID. */
@@ -127,6 +124,7 @@ public class ConfirmationDialog implements Button.ClickListener {
      * @param event
      *            the click event.
      */
+    @Override
     public void buttonClick(final ClickEvent event) {
         if (window.getParent() != null) {
             UI.getCurrent().removeWindow(window);
@@ -146,6 +144,7 @@ public class ConfirmationDialog implements Button.ClickListener {
     /**
      * Interface for confirmation dialog callbacks.
      */
+    @FunctionalInterface
     public interface ConfirmationDialogCallback {
         /**
          * The user response.

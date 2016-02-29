@@ -32,6 +32,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.model.helper.SecurityChecker;
@@ -74,6 +76,8 @@ public class Target extends NamedEntity implements Persistable<Long> {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
+    @Size(min = 1)
+    @NotNull
     private String controllerId;
 
     @Transient
@@ -83,7 +87,7 @@ public class Target extends NamedEntity implements Persistable<Long> {
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
             @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target") ) }, inverseJoinColumns = {
                     @JoinColumn(name = "tag", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag") ) })
-    private Set<TargetTag> tags = new HashSet<TargetTag>();
+    private Set<TargetTag> tags = new HashSet<>();
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.REMOVE })

@@ -330,7 +330,7 @@ public class DeploymentManagement {
         // one we have been switched to canceling state because for targets
         // which we have changed to
         // canceling we don't want to publish the new action update event.
-        final Set<Long> targetIdsCancellList = new HashSet<Long>();
+        final Set<Long> targetIdsCancellList = new HashSet<>();
         targetIds.forEach(ids -> targetIdsCancellList.addAll(overrideObsoleteUpdateActions(ids)));
 
         // cancel all scheduled actions which are in-active, these actions were
@@ -378,11 +378,13 @@ public class DeploymentManagement {
             actionStatusRepository.save(actionStatus);
         });
 
-        // select updated targets in order to return them
+        // flush to get action IDs
+        entityManager.flush();
+        // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), targets.size(),
-                controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
-                targetManagement);
+                controllerIDs.size() - targets.size(),
+                targetIdsToActions.values().stream().map(Action::getId).collect(Collectors.toList()), targetManagement);
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
@@ -391,13 +393,16 @@ public class DeploymentManagement {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
 
-        // send distribution set assignment event
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions, softwareModules);
 
+        return result;
+    }
+
+    private void sendDistributionSetAssignmentEvent(final List<Target> targets, final Set<Long> targetIdsCancellList,
+            final Map<String, Action> targetIdsToActions, final List<SoftwareModule> softwareModules) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
                 .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
                         softwareModules));
-
-        return result;
     }
 
     /**
@@ -430,7 +435,7 @@ public class DeploymentManagement {
      */
     private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
 
-        final Set<Long> cancelledTargetIds = new HashSet<Long>();
+        final Set<Long> cancelledTargetIds = new HashSet<>();
 
         // Figure out if there are potential target/action combinations that
         // need to be considered
@@ -709,8 +714,8 @@ public class DeploymentManagement {
     }
 
     /**
-     * Get the {@link Action} entity for given actionId with all lazy
-     * attributes.
+     * Get the {@link Action} entity for given actionId with all lazy attributes
+     * (i.e. distributionSet, target, target.assignedDs).
      *
      * @param actionId
      *            to be id of the action
@@ -774,8 +779,7 @@ public class DeploymentManagement {
         multiselect.where(cb.equal(actionRoot.get(Action_.target), target));
         multiselect.orderBy(cb.desc(actionRoot.get(Action_.id)));
         multiselect.groupBy(actionRoot.get(Action_.id));
-        final List<ActionWithStatusCount> resultList = entityManager.createQuery(multiselect).getResultList();
-        return resultList;
+        return entityManager.createQuery(multiselect).getResultList();
     }
 
     /**

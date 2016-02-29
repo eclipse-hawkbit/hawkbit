@@ -45,7 +45,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  *
- *
+ * Test Amqp controller authentfication.
  */
 @Features("AMQP Authenfication Test")
 @Stories("Tests the authenfication")
@@ -82,24 +82,34 @@ public class AmqpControllerAuthentficationTest {
         amqpMessageHandlerService.setAuthenticationManager(authenticationManager);
     }
 
-    @Test(expected = BadCredentialsException.class)
+    @Test
     @Description("Tests authentication manager without principal")
     public void testAuthenticationeBadCredantialsWithoutPricipal() {
         final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
-        authenticationManager.doAuthenticate(securityToken);
-        fail();
+        try {
+            authenticationManager.doAuthenticate(securityToken);
+            fail("BadCredentialsException was excepeted since principal was missing");
+        } catch (final BadCredentialsException exception) {
+            // test ok - exception was excepted
+        }
+
     }
 
-    @Test(expected = BadCredentialsException.class)
-    @Description("Tests authentication manager  without wrong credential")
+    @Test
+    @Description("Tests authentication manager without wrong credential")
     public void testAuthenticationBadCredantialsWithWrongCredential() {
         final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
         when(systemManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), any()))
                         .thenReturn(Boolean.TRUE);
         securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
-        authenticationManager.doAuthenticate(securityToken);
-        fail();
+        try {
+            authenticationManager.doAuthenticate(securityToken);
+            fail("BadCredentialsException was excepeted due to wrong credential");
+        } catch (final BadCredentialsException exception) {
+            // test ok - exception was excepted
+        }
+
     }
 
     @Test

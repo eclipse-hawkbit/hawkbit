@@ -61,6 +61,7 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -88,8 +89,8 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.15f));
         columnList
                 .add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.15f));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                0.15f));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.15f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.15f));
 
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_TARGET_STATUS, i18n.get("header.status"), 0.1f));
@@ -101,15 +102,16 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
     protected Container createContainer() {
         final BeanQueryFactory<RolloutGroupTargetsBeanQuery> rolloutgrouBeanQueryFactory = new BeanQueryFactory<>(
                 RolloutGroupTargetsBeanQuery.class);
-        return new LazyQueryContainer(new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE,
-                SPUILabelDefinitions.VAR_ID), rolloutgrouBeanQueryFactory);
+        return new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID),
+                rolloutgrouBeanQueryFactory);
     }
 
     @Override
     protected void addContainerProperties(final Container container) {
         final LazyQueryContainer rolloutGroupTargetTableContainer = (LazyQueryContainer) container;
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "",
-                false, false);
+        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CONT_ID, String.class, "", false,
+                false);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false,
                 true);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, Status.class,
@@ -124,10 +126,10 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
                 false, true);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class,
                 null, false, true);
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class,
+        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null,
+                false, true);
+        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class,
                 null, false, true);
-        rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE,
-                String.class, null, false, true);
         rolloutGroupTargetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false,
                 true);
     }
@@ -140,23 +142,20 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
 
     @Override
     protected void onValueChange() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
 
     }
 
     @Override
     protected void addCustomGeneratedColumns() {
-        addGeneratedColumn(SPUILabelDefinitions.VAR_TARGET_STATUS, (source, itemId, columnId) -> getStatusLabel(itemId));
+        addGeneratedColumn(SPUILabelDefinitions.VAR_TARGET_STATUS,
+                (source, itemId, columnId) -> getStatusLabel(itemId));
         setColumnAlignment(SPUILabelDefinitions.VAR_TARGET_STATUS, Align.CENTER);
     }
 
     @Override
     protected void setCollapsiblecolumns() {
-        /**
-         * No implementation required.
-         */
+        // No implementation required.
     }
 
     private Label getStatusLabel(final Object itemId) {
@@ -171,8 +170,8 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
 
     private void setStatusIcon(final Object itemId, final Label statusLabel) {
         final Item item = getItem(itemId);
-        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent() ? rolloutUIState
-                .getRolloutGroup().get() : null;
+        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
+                ? rolloutUIState.getRolloutGroup().get() : null;
         if (item != null) {
             final Status status = (Status) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue();
             if (status == null) {
@@ -184,10 +183,10 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
                     statusLabel.setValue(FontAwesome.MINUS_CIRCLE.getHtml());
                     statusLabel.addStyleName("statusIconBlue");
 
-                    final String dsNameVersion = (String) item.getItemProperty(
-                            SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).getValue();
-                    statusLabel.setDescription(i18n
-                            .get("message.dist.already.assigned", new Object[] { dsNameVersion }));
+                    final String dsNameVersion = (String) item
+                            .getItemProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).getValue();
+                    statusLabel
+                            .setDescription(i18n.get("message.dist.already.assigned", new Object[] { dsNameVersion }));
                 }
             } else {
                 setRolloutStatusIcon(status, statusLabel);
@@ -197,36 +196,36 @@ public class RolloutGroupTargetsListTable extends AbstractSimpleTable {
     }
 
     private void setRolloutStatusIcon(final Status targetUpdateStatus, final Label statusLabel) {
-		switch (targetUpdateStatus) {
-		case ERROR:
-			statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
-			statusLabel.addStyleName("statusIconRed");
-			break;
-		case SCHEDULED:
-			statusLabel.setValue(FontAwesome.BULLSEYE.getHtml());
-			statusLabel.addStyleName("statusIconBlue");
-			break;
-		case FINISHED:
-			statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
-			statusLabel.addStyleName("statusIconGreen");
-			break;
-		case RUNNING:
-		case RETRIEVED:
-		case WARNING:
-		case DOWNLOAD:
-			statusLabel.setValue(FontAwesome.ADJUST.getHtml());
-			statusLabel.addStyleName("statusIconYellow");
-			break;
-		case CANCELED:
-			statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-			statusLabel.addStyleName("statusIconGreen");
-			break;
-		case CANCELING:
-			statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
-			statusLabel.addStyleName("statusIconPending");
-			break;
-		default:
-			break;
-		}
+        switch (targetUpdateStatus) {
+        case ERROR:
+            statusLabel.setValue(FontAwesome.EXCLAMATION_CIRCLE.getHtml());
+            statusLabel.addStyleName("statusIconRed");
+            break;
+        case SCHEDULED:
+            statusLabel.setValue(FontAwesome.BULLSEYE.getHtml());
+            statusLabel.addStyleName("statusIconBlue");
+            break;
+        case FINISHED:
+            statusLabel.setValue(FontAwesome.CHECK_CIRCLE.getHtml());
+            statusLabel.addStyleName("statusIconGreen");
+            break;
+        case RUNNING:
+        case RETRIEVED:
+        case WARNING:
+        case DOWNLOAD:
+            statusLabel.setValue(FontAwesome.ADJUST.getHtml());
+            statusLabel.addStyleName("statusIconYellow");
+            break;
+        case CANCELED:
+            statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
+            statusLabel.addStyleName("statusIconGreen");
+            break;
+        case CANCELING:
+            statusLabel.setValue(FontAwesome.TIMES_CIRCLE.getHtml());
+            statusLabel.addStyleName("statusIconPending");
+            break;
+        default:
+            break;
+        }
     }
 }

@@ -93,7 +93,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
-        assertTrue(downloadAndUpdateRequest.getSoftwareModules().isEmpty());
+        assertTrue("No softwaremmodule should be contained in the request",
+                downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
 
     @Test
@@ -106,17 +107,22 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
-        assertEquals(3, downloadAndUpdateRequest.getSoftwareModules().size());
+        assertEquals("Expecting a size of 3 software modules in the reuqest", 3,
+                downloadAndUpdateRequest.getSoftwareModules().size());
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
-            assertTrue(softwareModule.getArtifacts().isEmpty());
+            assertTrue("Artifact list for softwaremodule should be empty", softwareModule.getArtifacts().isEmpty());
             for (final SoftwareModule softwareModule2 : dsA.getModules()) {
-                assertNotNull(softwareModule.getModuleId());
+                assertNotNull("Sofware module ID should be set", softwareModule.getModuleId());
                 if (!softwareModule.getModuleId().equals(softwareModule2.getId())) {
                     continue;
                 }
-                assertEquals(softwareModule.getModuleType(), softwareModule2.getType().getKey());
-                assertEquals(softwareModule.getModuleVersion(), softwareModule2.getVersion());
+                assertEquals(
+                        "Software module type in event should be the same as the softwaremodule in the distribution set",
+                        softwareModule.getModuleType(), softwareModule2.getType().getKey());
+                assertEquals(
+                        "Software module version in event should be the same as the softwaremodule in the distribution set",
+                        softwareModule.getModuleVersion(), softwareModule2.getVersion());
             }
         }
     }
@@ -140,13 +146,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
-        assertEquals(3, downloadAndUpdateRequest.getSoftwareModules().size());
+        assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
+                downloadAndUpdateRequest.getSoftwareModules().size());
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {
                 continue;
             }
-            assertFalse(softwareModule.getArtifacts().isEmpty());
+            assertFalse("The software module artifacts should not be empty", softwareModule.getArtifacts().isEmpty());
         }
     }
 
@@ -165,8 +172,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
         final Long actionId = convertMessage(sendMessage, Long.class);
-        assertEquals(actionId, Long.valueOf(1));
-        assertEquals(EventTopic.CANCEL_DOWNLOAD,
+        assertEquals("Action ID should be 1", actionId, Long.valueOf(1));
+        assertEquals("The topc in the message should be a CANCEL_DOWNLOAD value", EventTopic.CANCEL_DOWNLOAD,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
 
     }
@@ -175,8 +182,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         assertEventMessage(sendMessage);
         final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
                 DownloadAndUpdateRequest.class);
-        assertEquals(downloadAndUpdateRequest.getActionId(), Long.valueOf(1));
-        assertEquals(EventTopic.DOWNLOAD_AND_INSTALL,
+        assertEquals("The action ID of the downloadAndUpdateRequest event shuold be 1",
+                downloadAndUpdateRequest.getActionId(), Long.valueOf(1));
+        assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
         return downloadAndUpdateRequest;
 
@@ -186,11 +194,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
      * @param sendMessage
      */
     private void assertEventMessage(final Message sendMessage) {
-        assertNotNull(sendMessage);
+        assertNotNull("The message should not be null", sendMessage);
 
-        assertEquals(CONTROLLER_ID, sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID));
-        assertEquals(MessageType.EVENT, sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE));
-        assertEquals(MessageProperties.CONTENT_TYPE_JSON, sendMessage.getMessageProperties().getContentType());
+        assertEquals("The value of the message header THING_ID should be " + CONTROLLER_ID, CONTROLLER_ID,
+                sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID));
+        assertEquals("The value of the message header TYPE should be EVENT", MessageType.EVENT,
+                sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE));
+        assertEquals("The content type message should be " + MessageProperties.CONTENT_TYPE_JSON,
+                MessageProperties.CONTENT_TYPE_JSON, sendMessage.getMessageProperties().getContentType());
     }
 
     protected Message createArgumentCapture(final URI uri) {

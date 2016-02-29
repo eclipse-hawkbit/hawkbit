@@ -37,7 +37,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.google.common.base.Strings;
 import com.vaadin.data.Item;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -101,18 +100,16 @@ public class CreateOrUpdateFilterTable extends Table {
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK) {
             UI.getCurrent().access(() -> populateTableData());
         } else if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
-            this.getUI().access(() -> onQuery());
+            UI.getCurrent().access(() -> onQuery());
         }
     }
 
-  
-
-	private void restoreOnLoad() {
+    private void restoreOnLoad() {
         if (filterManagementUIState.isCreateFilterViewDisplayed()) {
             filterManagementUIState.setFilterQueryValue(null);
         } else {
-            filterManagementUIState.getTfQuery().ifPresent(
-                    value -> filterManagementUIState.setFilterQueryValue(value.getQuery()));
+            filterManagementUIState.getTfQuery()
+                    .ifPresent(value -> filterManagementUIState.setFilterQueryValue(value.getQuery()));
         }
     }
 
@@ -128,8 +125,9 @@ public class CreateOrUpdateFilterTable extends Table {
         targetQF.setQueryConfiguration(queryConfig);
 
         // create lazy query container with lazy defination and query
-        final LazyQueryContainer targetTableContainer = new LazyQueryContainer(new LazyQueryDefinition(true,
-                SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_CONT_ID_NAME), targetQF);
+        final LazyQueryContainer targetTableContainer = new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_CONT_ID_NAME),
+                targetQF);
         targetTableContainer.getQueryView().getQueryDefinition().setMaxNestedPropertyDepth(PROPERTY_DEPT);
 
         return targetTableContainer;
@@ -182,16 +180,16 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private List<TableColumn> getVisbleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
-        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"),0.15f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.15f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, i18n
-                .get("header.assigned.ds"), 0.125F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, i18n
-                .get("header.installed.ds"), 0.125F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
+                i18n.get("header.assigned.ds"), 0.125F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
+                i18n.get("header.installed.ds"), 0.125F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
         return columnList;
@@ -199,8 +197,8 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private Component getStatusIcon(final Object itemId) {
         final Item row1 = getItem(itemId);
-        final TargetUpdateStatus targetStatus = (TargetUpdateStatus) row1.getItemProperty(
-                SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
+        final TargetUpdateStatus targetStatus = (TargetUpdateStatus) row1
+                .getItemProperty(SPUILabelDefinitions.VAR_TARGET_STATUS).getValue();
         final Label label = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
         label.setContentMode(ContentMode.HTML);
         if (targetStatus == TargetUpdateStatus.PENDING) {
@@ -241,9 +239,9 @@ public class CreateOrUpdateFilterTable extends Table {
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUILabelDefinitions.STATUS_ICON, (source, itemId, columnId) -> getStatusIcon(itemId));
     }
-    
+
     private void onQuery() {
-    	populateTableData();
-        eventBus.publish(this, CustomFilterUIEvent.TARGET_FILTER_STATUS_HIDE);
-	}
+        populateTableData();
+        eventBus.publish(this, CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON);
+    }
 }
