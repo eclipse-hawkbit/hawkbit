@@ -53,7 +53,8 @@ public class IpUtilTest {
         final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "bumlux");
 
         // verify
-        assertThat(remoteAddr).isEqualTo(knownRemoteClientIP);
+        assertThat(remoteAddr).as("The remote address should be as the known client IP address")
+                .isEqualTo(knownRemoteClientIP);
         verify(requestMock, times(1)).getHeader("bumlux");
         verify(requestMock, times(1)).getRemoteAddr();
     }
@@ -71,7 +72,8 @@ public class IpUtilTest {
         final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "X-Forwarded-For");
 
         // verify
-        assertThat(remoteAddr).isEqualTo(knownRemoteClientIP);
+        assertThat(remoteAddr).as("The remote address should be as the known client IP address")
+                .isEqualTo(knownRemoteClientIP);
         verify(requestMock, times(1)).getHeader(HttpHeaders.X_FORWARDED_FOR);
         verify(requestMock, times(0)).getRemoteAddr();
     }
@@ -94,10 +96,10 @@ public class IpUtilTest {
     }
 
     private void assertHttpUri(final String host, final URI httpUri) {
-        assertTrue(IpUtil.isHttpUri(httpUri));
-        assertFalse(IpUtil.isAmqpUri(httpUri));
-        assertEquals(host, httpUri.getHost());
-        assertEquals("http", httpUri.getScheme());
+        assertTrue("The given URI has an http scheme", IpUtil.isHttpUri(httpUri));
+        assertFalse("The given URI is not an AMQP scheme", IpUtil.isAmqpUri(httpUri));
+        assertEquals("The URI hosts matches the given host", host, httpUri.getHost());
+        assertEquals("The given URI scheme is http", "http", httpUri.getScheme());
     }
 
     @Test
@@ -117,22 +119,26 @@ public class IpUtilTest {
     }
 
     private void assertAmqpUri(final String host, final URI httpUri) {
-        assertTrue(IpUtil.isAmqpUri(httpUri));
-        assertFalse(IpUtil.isHttpUri(httpUri));
-        assertEquals(host, httpUri.getHost());
-        assertEquals("amqp", httpUri.getScheme());
+        assertTrue("The given URI is an AMQP scheme", IpUtil.isAmqpUri(httpUri));
+        assertFalse("The given URI is not an HTTP scheme", IpUtil.isHttpUri(httpUri));
+        assertEquals("The given host matches the URI host", host, httpUri.getHost());
+        assertEquals("The given URI has an AMQP scheme", "amqp", httpUri.getScheme());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     @Description("Tests create invalid uri")
     public void testCreateInvalidUri() {
         final String host = "10.99.99.1";
         final URI testUri = IpUtil.createUri("test", host);
-        assertFalse(IpUtil.isAmqpUri(testUri));
-        assertFalse(IpUtil.isHttpUri(testUri));
-        assertEquals(host, testUri.getHost());
-        IpUtil.createUri(":/", host);
-        fail();
+        assertFalse("The given URI is not an AMQP address", IpUtil.isAmqpUri(testUri));
+        assertFalse("The given URI is not an HTTP address", IpUtil.isHttpUri(testUri));
+        assertEquals("The given host matches the URI host", host, testUri.getHost());
+        try {
+            IpUtil.createUri(":/", host);
+            fail("Missing expected IllegalArgumentException due invalid URI");
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
 
     }
 }
