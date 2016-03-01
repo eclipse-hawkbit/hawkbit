@@ -70,8 +70,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         super.before();
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
-        amqpMessageDispatcherService = new AmqpMessageDispatcherService(new Jackson2JsonMessageConverter(),
-                rabbitTemplate);
+        amqpMessageDispatcherService = new AmqpMessageDispatcherService(new Jackson2JsonMessageConverter());
         amqpMessageDispatcherService = spy(amqpMessageDispatcherService);
 
         senderService = Mockito.mock(DefaultAmqpSenderService.class);

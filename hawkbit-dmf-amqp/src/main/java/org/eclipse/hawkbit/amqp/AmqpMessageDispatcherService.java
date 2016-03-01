@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.util.ArtifactUrlHandler;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,9 +51,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @Autowired
     private AmqpSenderService amqpSenderService;
 
+    /**
+     * Constructor.
+     * 
+     * @param messageConverter
+     *            message converter
+     */
     @Autowired
-    public AmqpMessageDispatcherService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
-        super(messageConverter, defaultTemplate);
+    public AmqpMessageDispatcherService(final MessageConverter messageConverter) {
+        super(messageConverter);
     }
 
     /**

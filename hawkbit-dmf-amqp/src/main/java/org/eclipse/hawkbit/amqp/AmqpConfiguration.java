@@ -122,11 +122,11 @@ public class AmqpConfiguration {
     /**
      * Create amqp handler service bean.
      *
-     * @return
+     * @return handler service bean
      */
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService() {
-        return new AmqpMessageHandlerService(jsonMessageConverter(), rabbitTemplate);
+        return new AmqpMessageHandlerService(rabbitTemplate);
     }
 
     /**

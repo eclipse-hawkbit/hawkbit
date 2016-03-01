@@ -49,7 +49,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
@@ -97,16 +96,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     @Autowired
     private HostnameResolver hostnameResolver;
 
+    private final RabbitTemplate internalAmqpTemplate;
+
     /**
      * Constructor.
      * 
-     * @param messageConverter
-     *            the message converter.
      * @param defaultTemplate
      *            the configured amqp template.
      */
-    public AmqpMessageHandlerService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
-        super(messageConverter, defaultTemplate);
+    public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate) {
+        super(defaultTemplate.getMessageConverter());
+        this.internalAmqpTemplate = defaultTemplate;
     }
 
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
@@ -346,11 +346,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return controllerManagement.addUpdateActionStatus(actionStatus, action);
     }
 
-    /**
-     * @param message
-     * @param actionUpdateStatus
-     * @return
-     */
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
         LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
@@ -383,17 +378,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    /**
-     * Is needed to verify if an incoming message has the content type json.
-     *
-     * @param message
-     *            the to verify
-     * @param contentType
-     *            the content type
-     * @return true if the content type has json, false it not.
-     */
-
-    private static void checkContentTypeJson(final Message message) {
+    private void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;
@@ -407,14 +392,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     void setHostnameResolver(final HostnameResolver hostnameResolver) {
         this.hostnameResolver = hostnameResolver;
-    }
-
-    void setMessageConverter(final MessageConverter messageConverter) {
-        this.messageConverter = messageConverter;
-    }
-
-    MessageConverter getMessageConverter() {
-        return messageConverter;
     }
 
     void setAuthenticationManager(final AmqpControllerAuthentfication authenticationManager) {

@@ -105,7 +105,8 @@ public class AmqpMessageHandlerServiceTest {
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
-        amqpMessageHandlerService = new AmqpMessageHandlerService(messageConverter, rabbitTemplate);
+        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate);
         amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
         amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);

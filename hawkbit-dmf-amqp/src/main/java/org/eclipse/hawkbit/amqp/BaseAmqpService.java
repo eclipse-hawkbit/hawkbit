@@ -16,7 +16,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
 
@@ -28,14 +27,23 @@ public class BaseAmqpService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAmqpService.class);
     protected MessageConverter messageConverter;
 
-    protected RabbitTemplate internalAmqpTemplate;
-
-    public BaseAmqpService(final MessageConverter messageConverter, final RabbitTemplate defaultTemplate) {
+    /**
+     * Constructor.
+     * 
+     * @param messageConverter
+     *            the message messageConverter.
+     */
+    public BaseAmqpService(final MessageConverter messageConverter) {
         this.messageConverter = messageConverter;
-        internalAmqpTemplate = defaultTemplate;
     }
 
-    protected void cleanMessage(final Message message) {
+    /**
+     * Clean message properties before sending a message.
+     * 
+     * @param message
+     *            the message to cleaned up
+     */
+    protected void cleanMessageHeaderProperties(final Message message) {
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
     }
 
@@ -46,7 +54,7 @@ public class BaseAmqpService {
      *            the message to convert.
      * @param clazz
      *            the class of the originally object.
-     * @return
+     * @return the converted object
      */
     @SuppressWarnings("unchecked")
     protected <T> T convertMessage(final Message message, final Class<T> clazz) {
@@ -66,7 +74,7 @@ public class BaseAmqpService {
      *            the message to convert.
      * @param clazz
      *            the class of the list content.
-     * @return
+     * @return the list of converted objects
      */
     @SuppressWarnings("unchecked")
     protected <T> List<T> convertMessageList(final Message message, final Class<T> clazz) {
@@ -80,7 +88,12 @@ public class BaseAmqpService {
         return (List<T>) messageConverter.fromMessage(message);
     }
 
-    protected String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
+    public MessageConverter getMessageConverter() {
+        return messageConverter;
+    }
+
+    protected final String getStringHeaderKey(final Message message, final String key,
+            final String errorMessageIfNull) {
         final Map<String, Object> header = message.getMessageProperties().getHeaders();
         final Object value = header.get(key);
         if (value == null) {
@@ -89,7 +102,7 @@ public class BaseAmqpService {
         return value.toString();
     }
 
-    protected void logAndThrowMessageError(final Message message, final String error) {
+    protected final void logAndThrowMessageError(final Message message, final String error) {
         LOGGER.error("Error \"{}\" reported by message {}", error, message.getMessageProperties().getMessageId());
         throw new IllegalArgumentException(error);
     }

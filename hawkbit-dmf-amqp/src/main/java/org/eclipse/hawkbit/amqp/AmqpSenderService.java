@@ -20,7 +20,7 @@ public interface AmqpSenderService {
 
     /**
      * Send the given message to the given uri. The uri contains the (virtual)
-     * host and exchange.
+     * host and exchange e.g amqp://host/exchange.
      * 
      * @param message
      *            the amqp message
