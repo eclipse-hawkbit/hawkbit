@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,8 @@ import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
 /**
- * @author gah6kor
+ * Simple implementation of generics bean query which dynamically loads a batch
+ * of {@link ProxyRolloutGroup} beans.
  *
  */
 public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> {

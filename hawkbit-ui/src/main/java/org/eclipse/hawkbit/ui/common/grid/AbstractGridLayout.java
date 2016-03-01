@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.common.grid;
 
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 
@@ -17,22 +17,21 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * 
- * Abstract table layout class which builds layout with table
- * {@link AbstractSimpleTable} and table header
- * {@link AbstractSimpleTableHeader}.
+ * Abstract grid layout class which builds layout with grid
+ * {@link AbstractGrid} and table header
+ * {@link AbstractGridHeader}.
  *
  */
-public abstract class AbstractSimpleTableLayout extends VerticalLayout {
+public abstract class AbstractGridLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 8611248179949245460L;
 
-    private AbstractSimpleTableHeader tableHeader;
-
+    private AbstractGridHeader tableHeader;
     
-    private AbstractSimpleGrid grid;
+    private AbstractGrid grid;
 
 
-    protected void init(final AbstractSimpleTableHeader tableHeader,final AbstractSimpleGrid grid) {
+    protected void init(final AbstractGridHeader tableHeader,final AbstractGrid grid) {
         this.tableHeader = tableHeader;
         this.grid = grid;
         buildLayout();
@@ -52,7 +51,6 @@ public abstract class AbstractSimpleTableLayout extends VerticalLayout {
         tableHeaderLayout.addComponent(tableHeader);
 
         tableHeaderLayout.setComponentAlignment(tableHeader, Alignment.TOP_CENTER);
-//        grid.setSizeFull();
         tableHeaderLayout.addComponent(grid);
         tableHeaderLayout.setComponentAlignment(grid, Alignment.TOP_CENTER);
         tableHeaderLayout.setExpandRatio(grid, 1.0f);
@@ -83,9 +81,14 @@ public abstract class AbstractSimpleTableLayout extends VerticalLayout {
     /**
      * Only in rollout group targets view count message is displayed.
      * 
-     * @return
+     * @return true if count message has to be displayed
      */
     protected abstract boolean hasCountMessage();
 
+    /**
+     * Get the count message label.
+     * 
+     * @return count message
+     */
     protected abstract Label getCountMessageLabel();
 }

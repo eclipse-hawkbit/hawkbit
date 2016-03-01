@@ -6,10 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.model.Rollout;
 
@@ -35,13 +32,6 @@ public class ProxyRollout extends Rollout {
 
     private String totalTargetsCount;
     
-    //TODO remove this
-    private DistributionBarDetails distributionBarDetails ;
-    
-    //TODO remove this
-    private Map<String,Long> statusTotalCountMap = new HashMap<>();
-    
-
     /**
      * @return the distributionSetNameVersion
      */
@@ -132,26 +122,9 @@ public class ProxyRollout extends Rollout {
         this.totalTargetsCount = totalTargetsCount;
     }
     
-    public Map<String, Long> getStatusTotalCountMap() {
-		return statusTotalCountMap;
-	}
     
-    public void setStatusTotalCountMap(Map<String, Long> statusTotalCountMap) {
-		this.statusTotalCountMap = statusTotalCountMap;
-	}
-    
-    public DistributionBarDetails getDistributionBarDetails() {
-		return distributionBarDetails;
-	}
-    
-    public void setDistributionBarDetails(DistributionBarDetails distributionBarDetails) {
-		this.distributionBarDetails = distributionBarDetails;
-	}
-
     public String getAction() { 
         return FontAwesome.CIRCLE_O.getHtml();
     }
-    
-    
     
 }

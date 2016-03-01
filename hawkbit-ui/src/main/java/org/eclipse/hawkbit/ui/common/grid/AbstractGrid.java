@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.common.grid;
 
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
@@ -20,7 +20,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Abstract table class.
  *
  */
-public abstract class AbstractSimpleGrid extends Grid {
+public abstract class AbstractGrid extends Grid {
 
     private static final long serialVersionUID = 4856562746502217630L;
 

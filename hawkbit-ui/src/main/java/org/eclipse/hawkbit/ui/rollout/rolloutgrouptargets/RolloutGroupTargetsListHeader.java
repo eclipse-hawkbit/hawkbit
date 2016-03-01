@@ -6,11 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -32,24 +34,24 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Header Layout of Rollout Group list view.
+ * Header Layout of Rollout Group Targets list view.
  *
  */
 @SpringComponent
 @ViewScope
-public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
+public class RolloutGroupTargetsListHeader extends AbstractGridHeader {
 
-    private static final long serialVersionUID = 5077741997839715209L;
-
+    private static final long serialVersionUID = 5613986489156507581L;
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
-    private RolloutUIState rolloutUiState;
-
-    @Autowired
     private I18N i18n;
 
+    @Autowired
+    private RolloutUIState rolloutUiState;
+
+    private Button rolloutsGroupViewLink;
     private Label headerCaption;
 
     @Override
@@ -66,30 +68,38 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final RolloutEvent event) {
-        if (event == RolloutEvent.SHOW_ROLLOUT_GROUPS) {
+        if (event == RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS) {
             setCaptionDetails();
         }
     }
 
     private void setCaptionDetails() {
-        headerCaption
+        RolloutGroup rolloutGroup;
+        if (rolloutUiState.getRolloutGroup().isPresent()) {
+            rolloutGroup = rolloutUiState.getRolloutGroup().get();
+            headerCaption.setCaption(rolloutGroup.getName());
+        }
+
+        rolloutsGroupViewLink
                 .setCaption(rolloutUiState.getRolloutName().isPresent() ? rolloutUiState.getRolloutName().get() : "");
     }
 
     @Override
     protected void resetSearchText() {
-        // No implementation required.
+        /**
+         * No implementation required.
+         */
     }
 
     @Override
     protected String getSearchBoxId() {
-        // No implementation required.
+
         return null;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        // No implementation required.
+
         return null;
     }
 
@@ -101,55 +111,61 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
 
     @Override
     protected String getAddIconId() {
-        // No implementation required.
+
         return null;
     }
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        // No implementation required.
+        /**
+         * No implementation required.
+         */
     }
 
     @Override
     protected void onClose(final ClickEvent event) {
-        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
-
+        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
     }
 
     @Override
     protected boolean hasCreatePermission() {
-        return true;
+
+        return false;
     }
 
     @Override
     protected String getCloseButtonId() {
-        return SPUIComponetIdProvider.ROLLOUT_GROUP_CLOSE;
+        return SPUIComponetIdProvider.ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID;
     }
 
     @Override
     protected boolean showCloseButton() {
+
         return true;
     }
 
     @Override
     protected boolean isAllowSearch() {
+
         return false;
     }
 
     @Override
     protected String onLoadSearchBoxValue() {
+
         return null;
     }
 
     @Override
     protected boolean isRollout() {
+
         return false;
     }
 
     @Override
     protected HorizontalLayout getHeaderCaptionLayout() {
         headerCaption = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        headerCaption.setId(SPUIComponetIdProvider.ROLLOUT_GROUP_HEADER_CAPTION);
+        headerCaption.setStyleName(ValoTheme.LABEL_BOLD + " " + ValoTheme.LABEL_SMALL);
         final Button rolloutsListViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         rolloutsListViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
@@ -157,21 +173,34 @@ public class RolloutGroupsListHeader extends AbstractSimpleTableHeader {
         rolloutsListViewLink.setCaption(i18n.get("message.rollouts"));
         rolloutsListViewLink.addClickListener(value -> showRolloutListView());
 
+        rolloutsGroupViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
+                SPUIButtonStyleSmallNoBorder.class);
+        rolloutsGroupViewLink
+                .setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
+        rolloutsGroupViewLink.setDescription("Rollouts Group");
+        rolloutsGroupViewLink.addClickListener(value -> showRolloutGroupListView());
+
         final HorizontalLayout headerCaptionLayout = new HorizontalLayout();
         headerCaptionLayout.addComponent(rolloutsListViewLink);
+        headerCaptionLayout.addComponent(new Label(">"));
+        headerCaptionLayout.addComponent(rolloutsGroupViewLink);
         headerCaptionLayout.addComponent(new Label(">"));
         headerCaptionLayout.addComponent(headerCaption);
 
         return headerCaptionLayout;
     }
 
-    @Override
-    protected void restoreCaption() {
-        setCaptionDetails();
+    private void showRolloutGroupListView() {
+        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
     }
 
     private void showRolloutListView() {
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
+    }
+
+    @Override
+    protected void restoreCaption() {
+        setCaptionDetails();
     }
 
 }

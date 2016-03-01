@@ -6,10 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -17,34 +18,41 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
- * Groups List View.
- *
+ * Rollout Group Targets List View.
  */
 @SpringComponent
 @ViewScope
-public class RolloutGroupsListView extends AbstractSimpleTableLayout {
+public class RolloutGroupTargetsListView extends AbstractGridLayout {
 
-    private static final long serialVersionUID = 7252345838154270259L;
-
-    @Autowired
-    private RolloutGroupsListHeader rolloutGroupListHeader;
+    private static final long serialVersionUID = 26089134783467012L;
 
     @Autowired
-    private RolloutGroupListGrid rolloutListGrid;
+    private RolloutGroupTargetsListHeader rolloutGroupTargetsListHeader;
 
+    @Autowired
+    private RolloutGroupTargetsCountLabelMessage rolloutGroupTargetsCountLabelMessage;
+    
+    @Autowired
+    private RolloutGroupTargetsListGrid rolloutListGrid;
+
+    /**
+     * Initialization of Rollout group component.
+     */
     @PostConstruct
     protected void init() {
-        super.init(rolloutGroupListHeader, rolloutListGrid);
+        super.init(rolloutGroupTargetsListHeader, rolloutListGrid);
     }
 
     @Override
     protected boolean hasCountMessage() {
-        return false;
+
+        return true;
     }
 
     @Override
     protected Label getCountMessageLabel() {
-        return null;
+
+        return rolloutGroupTargetsCountLabelMessage;
     }
 
 }

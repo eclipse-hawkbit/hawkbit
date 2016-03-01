@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,11 +14,11 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.LinkRenderer;
-import org.eclipse.hawkbit.ui.rollout.RolloutListTable.ACTION;
-import org.eclipse.hawkbit.ui.rollout.RolloutListTable.ContextMenuData;
+import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -44,18 +44,19 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Grid.CellDescriptionGenerator;
+import com.vaadin.ui.Grid.CellReference;
+import com.vaadin.ui.Grid.CellStyleGenerator;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.renderers.HtmlRenderer;
 
 @SpringComponent
 @ViewScope
-public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindowResizeListener {
+public class RolloutListGrid extends AbstractGrid {
     private static final long serialVersionUID = 4060904914954370524L;
 
     @Autowired
@@ -84,8 +85,6 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     protected void init() {
         super.init();
         eventBus.subscribe(this);
-        Page.getCurrent().addBrowserWindowResizeListener(this);
-
     }
 
     @PreDestroy
@@ -186,6 +185,8 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         getColumn(SPUILabelDefinitions.ACTION).setMinimumWidth(75);
         getColumn(SPUILabelDefinitions.ACTION).setMaximumWidth(75);
 
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
+
         setFrozenColumnCount(getColumns().size());
     }
 
@@ -231,6 +232,25 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         alignColumns();
     }
 
+    @Override
+    protected void setHiddenColumns() {
+        List<Object> columnsToBeHidden = new ArrayList<>();
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
+        for (Object propertyId : columnsToBeHidden) {
+            getColumn(propertyId).setHidden(true);
+        }
+
+    }
+
+    @Override
+    protected CellDescriptionGenerator getDescriptionGenerator() {
+        return cell -> getDescription(cell);
+    }
+
     private void alignColumns() {
         setCellStyleGenerator(new CellStyleGenerator() {
             private static final long serialVersionUID = 5573570647129792429L;
@@ -238,7 +258,9 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
             @Override
             public String getStyle(final CellReference cellReference) {
                 String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS,
-                        SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS, SPUILabelDefinitions.ACTION };
+                        /*
+                         * SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
+                         */ SPUILabelDefinitions.ACTION };
                 if (Arrays.asList(coulmnNames).contains(cellReference.getPropertyId())) {
                     return "centeralign";
                 }
@@ -298,8 +320,7 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     }
 
     private void addDetailStatusColumn() {
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(
-                new org.eclipse.hawkbit.ui.customrenderers.renderers.StringDistributionBarRenderer(),
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new Converter<String, TotalTargetCountStatus>() {
                     private static final long serialVersionUID = 2660476405836705932L;
 
@@ -314,7 +335,7 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
                     public String convertToPresentation(TotalTargetCountStatus value,
                             Class<? extends String> targetType, Locale locale)
                                     throws com.vaadin.data.util.converter.Converter.ConversionException {
-                        return HawkbitCommonUtil.getFormattedString(value.getStatusTotalCountMap());
+                        return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
                     }
 
                     @Override
@@ -454,39 +475,6 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         }
     }
 
-    @Override
-    public void browserWindowResized(BrowserWindowResizeEvent event) {
-        // Intermediate solution for the column width problem for
-        // SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS column
-        // Readding the column
-        recalculateColumnWidths();
-        removeColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
-        addColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
-                .setHeaderCaption(i18n.get("header.detail.status"));
-        setColumnProperties();
-        addDetailStatusColumn();
-    }
-
-    @Override
-    protected void setHiddenColumns() {
-        List<Object> columnsToBeHidden = new ArrayList<>();
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
-        columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
-        for (Object propertyId : columnsToBeHidden) {
-            getColumn(propertyId).setHidden(true);
-        }
-
-    }
-
-    @Override
-    protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
-    }
-
     private String getDescription(CellReference cell) {
         if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             return cell.getProperty().getValue().toString().toLowerCase();
@@ -494,9 +482,71 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
             return SPUILabelDefinitions.ACTION.toLowerCase();
         } else if (SPUILabelDefinitions.VAR_NAME.equals(cell.getPropertyId())) {
             return cell.getProperty().getValue().toString();
+        } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
+            return DistributionBarHelper
+                    .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
         } else {
             return null;
         }
     }
+    
+    
+    enum ACTION {
+        PAUSE, RESUME, START, UPDATE
+    }
 
+    /**
+     * Represents data of context menu item.
+     *
+     */
+    public static class ContextMenuData {
+
+        private Long rolloutId;
+
+        private ACTION action;
+
+        /**
+         * Set rollout if and action.
+         * 
+         * @param rolloutId
+         *            id of rollout
+         * @param action
+         *            user action {@link ACTION}
+         */
+        public ContextMenuData(final Long rolloutId, final ACTION action) {
+            this.action = action;
+            this.rolloutId = rolloutId;
+        }
+
+        /**
+         * @return the rolloutId
+         */
+        public Long getRolloutId() {
+            return rolloutId;
+        }
+
+        /**
+         * @param rolloutId
+         *            the rolloutId to set
+         */
+        public void setRolloutId(final Long rolloutId) {
+            this.rolloutId = rolloutId;
+        }
+
+        /**
+         * @return the action
+         */
+        public ACTION getAction() {
+            return action;
+        }
+
+        /**
+         * @param action
+         *            the action to set
+         */
+        public void setAction(final ACTION action) {
+            this.action = action;
+        }
+
+    }
 }

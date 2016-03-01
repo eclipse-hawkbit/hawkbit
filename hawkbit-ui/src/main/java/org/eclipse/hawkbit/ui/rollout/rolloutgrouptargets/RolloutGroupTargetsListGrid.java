@@ -1,4 +1,4 @@
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
@@ -31,12 +32,10 @@ import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Grid.CellDescriptionGenerator;
-import com.vaadin.ui.Grid.CellReference;
 
 @SpringComponent
 @ViewScope
-public class RolloutGroupTargetsListGrid extends AbstractSimpleGrid {
+public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     private static final long serialVersionUID = -2244756637458984597L;
 

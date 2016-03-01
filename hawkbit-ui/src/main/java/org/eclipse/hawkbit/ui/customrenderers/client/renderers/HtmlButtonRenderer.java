@@ -2,6 +2,7 @@ package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
 import com.google.gwt.user.client.ui.Button;
 import com.vaadin.client.renderers.ButtonRenderer;
+import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
 public class HtmlButtonRenderer extends ButtonRenderer {
@@ -17,8 +18,8 @@ public class HtmlButtonRenderer extends ButtonRenderer {
     }
 
     private void applystyles(Button button) {
-        button.setStylePrimaryName("v-button");
-        button.setStyleName("tiny v-button-tiny");
+        button.setStyleName(VButton.CLASSNAME);
+        button.addStyleName("tiny v-button-tiny");
         button.addStyleName("borderless v-button-borderless");
         button.addStyleName("icon-only v-button-icon-only");
         button.addStyleName("button-no-border v-button-button-no-border");
