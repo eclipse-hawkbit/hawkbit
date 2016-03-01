@@ -43,10 +43,7 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
 
     @Override
     public void validate(final Object tenantConfigurationObject) {
-        if (!(tenantConfigurationObject instanceof String)) {
-            throw new TenantConfigurationValidatorException("The given configuration value is expected as a string.");
-        }
-
+        TenantConfigurationValidator.super.validate(tenantConfigurationObject);
         final String tenantConfigurationString = (String) tenantConfigurationObject;
 
         final Duration tenantConfigurationValue;
@@ -65,5 +62,10 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
                             durationHelper.durationToFormattedString(minDuration),
                             durationHelper.durationToFormattedString(maxDuration)));
         }
+    }
+
+    @Override
+    public Class<?> validateToClass() {
+        return String.class;
     }
 }

@@ -15,10 +15,7 @@ package org.eclipse.hawkbit.tenancy.configuration.validator;
 public class TenantConfigurationStringValidator implements TenantConfigurationValidator {
 
     @Override
-    public void validate(final Object tenantConfigurationValue) {
-        if (tenantConfigurationValue instanceof String) {
-            return;
-        }
-        throw new TenantConfigurationValidatorException("The given configuration value is expected as a String.");
+    public Class<?> validateToClass() {
+        return String.class;
     }
 }

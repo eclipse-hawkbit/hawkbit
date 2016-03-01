@@ -15,11 +15,8 @@ package org.eclipse.hawkbit.tenancy.configuration.validator;
 public class TenantConfigurationBooleanValidator implements TenantConfigurationValidator {
 
     @Override
-    public void validate(final Object tenantConfigurationValue) {
-        if (tenantConfigurationValue instanceof Boolean) {
-            return;
-        }
-        throw new TenantConfigurationValidatorException("The given configuration value is expected as a boolean.");
+    public Class<?> validateToClass() {
+        return Boolean.class;
     }
 
 }
