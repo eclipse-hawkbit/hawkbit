@@ -143,12 +143,13 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      */
     protected boolean eventSecurityCheck(final SecurityContext userContext,
             final org.eclipse.hawkbit.eventbus.event.Event event) {
-        if (userContext != null && userContext.getAuthentication() != null) {
-            final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
-            if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
-                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
-                        .equalsIgnoreCase(event.getTenant());
-            }
+        if (userContext == null || userContext.getAuthentication() == null) {
+            return false;
+        }
+        final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
+        if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
+            return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
+                    .equalsIgnoreCase(event.getTenant());
         }
         return false;
     }
