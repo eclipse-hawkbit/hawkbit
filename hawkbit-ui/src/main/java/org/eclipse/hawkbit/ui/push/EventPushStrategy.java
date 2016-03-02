@@ -12,8 +12,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Interface declaring a strategy to push events from the back-end to the UI.
- * 
- * @author Michael Hirsch
  *
  */
 public interface EventPushStrategy {

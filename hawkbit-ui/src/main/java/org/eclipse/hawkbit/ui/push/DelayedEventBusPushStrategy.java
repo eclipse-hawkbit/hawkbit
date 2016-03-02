@@ -58,8 +58,6 @@ import com.vaadin.ui.UI;
  * The strategy also verifies the current tenant in the session with the tenant
  * in the event and only forwards event from the right tenant to the UI.
  * 
- * @author Michael Hirsch
- *
  */
 public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
