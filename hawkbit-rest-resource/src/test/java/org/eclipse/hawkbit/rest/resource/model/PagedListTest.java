@@ -29,10 +29,13 @@ public class PagedListTest {
         knownContentList.add("content1");
         knownContentList.add("content2");
 
-        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
+        assertListSize(knownTotal, knownContentList);
+    }
 
-        assertThat(pagedList.getTotal()).isEqualTo(knownTotal);
-        assertThat(pagedList.getSize()).isEqualTo(knownContentList.size());
+    private void assertListSize(final long knownTotal, final List<String> knownContentList) {
+        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
+        assertThat(pagedList.getTotal()).as("total size is wrong").isEqualTo(knownTotal);
+        assertThat(pagedList.getSize()).as("list size is wrong").isEqualTo(knownContentList.size());
     }
 
     @Test
@@ -42,9 +45,7 @@ public class PagedListTest {
         knownContentList.add("content1");
         knownContentList.add("content2");
 
-        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
-        assertThat(pagedList.getTotal()).isEqualTo(knownTotal);
-        assertThat(pagedList.getSize()).isEqualTo(knownContentList.size());
+        assertListSize(knownTotal, knownContentList);
 
     }
 }
