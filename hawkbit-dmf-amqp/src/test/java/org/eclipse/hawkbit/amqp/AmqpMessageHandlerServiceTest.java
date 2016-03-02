@@ -116,14 +116,16 @@ public class AmqpMessageHandlerServiceTest {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
     @Description("Tests not allowed content-type in message")
     public void testWrongContentType() {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType("xml");
         final Message message = new Message(new byte[0], messageProperties);
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
-        fail();
+        try {
+            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+            fail("IllegalArgumentException was excepeted due to worng content type");
+        } catch (final IllegalArgumentException e) {
+        }
     }
 
     @Test
@@ -199,14 +201,14 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = new Message(new byte[0], messageProperties);
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail();
+            fail("IllegalArgumentException was excepeted due to unknown message type");
         } catch (final IllegalArgumentException e) {
         }
 
         try {
             messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
-            fail();
+            fail("IllegalArgumentException was excepeted due to unknown topic");
         } catch (final IllegalArgumentException e) {
         }
 
@@ -330,7 +332,8 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
-        assertThat(downloadResponse.getDownloadUrl()).startsWith("http://localhost/api/v1/downloadserver/downloadId/");
+        assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
+                .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
     }
 
     @Test

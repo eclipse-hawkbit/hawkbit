@@ -25,7 +25,7 @@ public class SoftwareModuleAssigmentBuilder {
     private final List<Long> ids;
 
     public SoftwareModuleAssigmentBuilder() {
-        ids = new ArrayList<Long>();
+        ids = new ArrayList<>();
     }
 
     /**
