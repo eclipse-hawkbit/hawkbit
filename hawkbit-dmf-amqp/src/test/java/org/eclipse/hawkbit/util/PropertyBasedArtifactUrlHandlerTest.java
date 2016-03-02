@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.util;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.AmqpTestConfiguration;
+import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.TestConfiguration;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -20,6 +23,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -31,6 +35,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Artifact URL Handler")
 @Stories("Test to generate the artifact download URL")
+@SpringApplicationConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
+        AmqpTestConfiguration.class })
 public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTestWithMongoDB {
 
     @Autowired

@@ -127,10 +127,7 @@ public class AmqpControllerAuthentfication {
 
         LOGGER.debug("preAuthenticatedPrincipal = {} trying to authenticate", principal);
 
-        final PreAuthenticatedAuthenticationToken authRequest = new PreAuthenticatedAuthenticationToken(principal,
-                credentials);
-
-        return authRequest;
+        return new PreAuthenticatedAuthenticationToken(principal, credentials);
     }
 
     public void setControllerManagement(final ControllerManagement controllerManagement) {

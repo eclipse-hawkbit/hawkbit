@@ -106,23 +106,24 @@ public class IpUtilTest {
     @Description("Tests create amqp uri ipv4 and ipv6")
     public void testCreateAmqpUri() {
         final String ipv4 = "10.99.99.1";
-        URI amqpUri = IpUtil.createAmqpUri(ipv4);
+        URI amqpUri = IpUtil.createAmqpUri(ipv4, "path");
         assertAmqpUri(ipv4, amqpUri);
 
         final String host = "myhost";
-        amqpUri = IpUtil.createAmqpUri(host);
+        amqpUri = IpUtil.createAmqpUri(host, "path");
         assertAmqpUri(host, amqpUri);
 
         final String ipv6 = "0:0:0:0:0:0:0:1";
-        amqpUri = IpUtil.createAmqpUri(ipv6);
+        amqpUri = IpUtil.createAmqpUri(ipv6, "path");
         assertAmqpUri("[" + ipv6 + "]", amqpUri);
     }
 
-    private void assertAmqpUri(final String host, final URI httpUri) {
-        assertTrue("The given URI is an AMQP scheme", IpUtil.isAmqpUri(httpUri));
-        assertFalse("The given URI is not an HTTP scheme", IpUtil.isHttpUri(httpUri));
-        assertEquals("The given host matches the URI host", host, httpUri.getHost());
-        assertEquals("The given URI has an AMQP scheme", "amqp", httpUri.getScheme());
+    private void assertAmqpUri(final String host, final URI amqpUri) {
+        assertTrue("The given URI is an AMQP scheme", IpUtil.isAmqpUri(amqpUri));
+        assertFalse("The given URI is not an HTTP scheme", IpUtil.isHttpUri(amqpUri));
+        assertEquals("The given host matches the URI host", host, amqpUri.getHost());
+        assertEquals("The given URI has an AMQP scheme", "amqp", amqpUri.getScheme());
+        assertEquals("The given URI has an AMQP path", "/path", amqpUri.getRawPath());
     }
 
     @Test
