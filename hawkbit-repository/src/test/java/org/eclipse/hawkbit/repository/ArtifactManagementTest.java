@@ -150,14 +150,14 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         ExternalArtifact result = artifactManagement.createExternalArtifact(provider, null, sm.getId());
 
-        assertNotNull(result);
+        assertNotNull("The result of an external artifact should not be null", result);
         assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(1);
         assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
         assertThat(result.getUrl()).isEqualTo("https://fhghdfjgh/{version}/");
         assertThat(result.getExternalArtifactProvider()).isEqualTo(provider);
 
         result = artifactManagement.createExternalArtifact(provider, "/test", sm2.getId());
-        assertNotNull(result);
+        assertNotNull("The newly created external artifact should not be null", result);
         assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(2);
         assertThat(result.getUrl()).isEqualTo("https://fhghdfjgh/test");
         assertThat(result.getExternalArtifactProvider()).isEqualTo(provider);
@@ -176,7 +176,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
                 "https://fhghdfjgh", "/{version}/");
 
         final ExternalArtifact result = artifactManagement.createExternalArtifact(provider, null, sm.getId());
-        assertNotNull(result);
+        assertNotNull("The newly created external artifact should not be null", result);
         assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(1);
 
         artifactManagement.deleteExternalArtifact(result.getId());
@@ -348,7 +348,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
         final LocalArtifact result = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 sm.getId(), "file1", false);
 
-        assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random),
+        assertTrue("The stored binary matches the given binary", IOUtils.contentEquals(new ByteArrayInputStream(random),
                 artifactManagement.loadLocalArtifactBinary(result).getFileInputStream()));
     }
 
