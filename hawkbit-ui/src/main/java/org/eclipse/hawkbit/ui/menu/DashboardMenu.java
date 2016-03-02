@@ -77,15 +77,11 @@ public final class DashboardMenu extends CustomComponent {
     private static final String STYLE_VISIBLE = "valo-menu-visible";
 
     // this should be resolved when we introduce event bus on UI to just inform
-    // the buttons directly
-    // via events
+    // the buttons directly via events
     private final List<ValoMenuItemButton> menuButtons = new ArrayList<>();
 
     @Autowired
     private transient PermissionService permissionService;
-
-    // @Autowired
-    // private transient SPInfo spInfo;
 
     @Autowired
     private final List<DashboardMenuItem> dashboardVaadinViews = new ArrayList<>();
@@ -96,8 +92,8 @@ public final class DashboardMenu extends CustomComponent {
 
     /**
      * initializing the view and creating the layout, cannot be done in the
-     * custructor because the constructor will be called by spring and the
-     * dashabord must be initialized when the dashboard UI is creating.
+     * constructor because the constructor will be called by spring and the
+     * dashboard must be initialized when the dashboard UI is creating.
      */
     public void init() {
         initialViewName = "";
