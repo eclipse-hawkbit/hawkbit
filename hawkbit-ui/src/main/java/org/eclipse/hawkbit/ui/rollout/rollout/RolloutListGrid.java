@@ -46,9 +46,6 @@ import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Grid.CellDescriptionGenerator;
-import com.vaadin.ui.Grid.CellReference;
-import com.vaadin.ui.Grid.CellStyleGenerator;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
@@ -96,12 +93,12 @@ public class RolloutListGrid extends AbstractGrid {
     void onEvent(final RolloutEvent event) {
         if (event == RolloutEvent.FILTER_BY_TEXT || event == RolloutEvent.CREATE_ROLLOUT
                 || event == RolloutEvent.UPDATE_ROLLOUT || event == RolloutEvent.SHOW_ROLLOUTS) {
-            refreshTable();
+            refreshGrid();
         }
     }
 
     /**
-     * Handles the RolloutChangeEvent to refresh the item in the table.
+     * Handles the RolloutChangeEvent to refresh the item in the grid.
      * 
      * @param rolloutChangeEvent
      *            the event which contains the rollout which has been changed
@@ -208,8 +205,8 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     @Override
-    protected String getTableId() {
-        return SPUIComponetIdProvider.ROLLOUT_LIST_TABLE_ID;
+    protected String getGridId() {
+        return SPUIComponetIdProvider.ROLLOUT_LIST_GRID_ID;
     }
 
     @Override
@@ -451,7 +448,7 @@ public class RolloutListGrid extends AbstractGrid {
         }
     }
 
-    private void refreshTable() {
+    private void refreshGrid() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 

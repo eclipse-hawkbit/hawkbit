@@ -83,7 +83,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     /**
      * 
-     * Handles the RolloutGroupChangeEvent to refresh the item in the table.
+     * Handles the RolloutGroupChangeEvent to refresh the item in the grid.
      * 
      * 
      * @param rolloutGroupChangeEvent
@@ -102,7 +102,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
                 item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rolloutGroup.getStatus());
                 item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
                         .setValue(rolloutGroup.getTotalTargetCountStatus());
-
             }
         }
     }
@@ -191,8 +190,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
 
     @Override
-    protected String getTableId() {
-        return SPUIComponetIdProvider.ROLLOUT_GROUP_LIST_TABLE_ID;
+    protected String getGridId() {
+        return SPUIComponetIdProvider.ROLLOUT_GROUP_LIST_GRID_ID;
     }
 
     @Override

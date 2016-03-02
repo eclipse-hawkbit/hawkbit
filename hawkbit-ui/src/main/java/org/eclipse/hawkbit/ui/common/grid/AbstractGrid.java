@@ -30,7 +30,8 @@ public abstract class AbstractGrid extends Grid {
     protected void init() {
         setSizeFull();
         setImmediate(true);
-        setId(getTableId());
+        setId(getGridId());
+        //TODO these styles are rwquired??
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
 
@@ -78,7 +79,7 @@ public abstract class AbstractGrid extends Grid {
 
     protected abstract void setColumnHeaderNames();
 
-    protected abstract String getTableId();
+    protected abstract String getGridId();
 
     protected abstract void setColumnProperties();
 

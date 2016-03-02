@@ -136,8 +136,8 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     }
 
     @Override
-    protected String getTableId() {
-        return SPUIComponetIdProvider.ROLLOUT_GROUP_TARGETS_LIST_TABLE_ID;
+    protected String getGridId() {
+        return SPUIComponetIdProvider.ROLLOUT_GROUP_TARGETS_LIST_GRID_ID;
     }
 
     @Override
