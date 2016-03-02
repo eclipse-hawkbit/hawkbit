@@ -374,7 +374,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         } else {
             logAndThrowMessageError(message,
-                    "Cancel Recjected message is not allowed, if action is on state: " + action.getStatus());
+                    "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
         }
     }
 
