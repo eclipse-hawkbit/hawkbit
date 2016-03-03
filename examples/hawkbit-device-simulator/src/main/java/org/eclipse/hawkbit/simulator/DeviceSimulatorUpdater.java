@@ -63,7 +63,7 @@ public class DeviceSimulatorUpdater {
         device.setSwversion(swVersion);
         eventbus.post(new InitUpdate(device));
         threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback),
-                2000, TimeUnit.MILLISECONDS);
+                (new Random().nextInt(10_000) + 2000), TimeUnit.MILLISECONDS);
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
