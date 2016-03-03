@@ -96,8 +96,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     @Autowired
     private HostnameResolver hostnameResolver;
 
-    private final RabbitTemplate internalAmqpTemplate;
-
     /**
      * Constructor.
      * 
@@ -105,14 +103,13 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the configured amqp template.
      */
     public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate) {
-        super(defaultTemplate.getMessageConverter());
-        this.internalAmqpTemplate = defaultTemplate;
+        super(defaultTemplate);
     }
 
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
     private Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
             @Header(MessageHeaderKey.TENANT) final String tenant) {
-        return onMessage(message, type, tenant, internalAmqpTemplate.getConnectionFactory().getVirtualHost());
+        return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
     /**
@@ -207,7 +204,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             authentificationResponse.setMessage(errorMessage);
         }
 
-        return messageConverter.toMessage(authentificationResponse, messageProperties);
+        return getMessageConverter().toMessage(authentificationResponse, messageProperties);
     }
 
     private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {

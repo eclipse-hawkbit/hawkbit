@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.util.ArtifactUrlHandler;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.eventbus.Subscribe;
@@ -58,8 +58,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            message converter
      */
     @Autowired
-    public AmqpMessageDispatcherService(final MessageConverter messageConverter) {
-        super(messageConverter);
+    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate) {
+        super(rabbitTemplate);
     }
 
     /**
@@ -87,8 +87,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
         }
 
-        final Message message = messageConverter.toMessage(downloadAndUpdateRequest, createConnectorMessageProperties(
-                targetAssignDistributionSetEvent.getTenant(), controllerId, EventTopic.DOWNLOAD_AND_INSTALL));
+        final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
+                createConnectorMessageProperties(targetAssignDistributionSetEvent.getTenant(), controllerId,
+                        EventTopic.DOWNLOAD_AND_INSTALL));
         amqpSenderService.sendMessage(message, targetAdress);
     }
 
@@ -104,7 +105,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
         final String controllerId = cancelTargetAssignmentDistributionSetEvent.getControllerId();
         final Long actionId = cancelTargetAssignmentDistributionSetEvent.getActionId();
-        final Message message = messageConverter.toMessage(actionId, createConnectorMessageProperties(
+        final Message message = getMessageConverter().toMessage(actionId, createConnectorMessageProperties(
                 cancelTargetAssignmentDistributionSetEvent.getTenant(), controllerId, EventTopic.CANCEL_DOWNLOAD));
 
         amqpSenderService.sendMessage(message, cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
