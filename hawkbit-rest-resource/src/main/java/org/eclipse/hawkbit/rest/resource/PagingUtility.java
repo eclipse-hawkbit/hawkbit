@@ -102,7 +102,7 @@ public final class PagingUtility {
             sorting = new Sort(SortUtility.parse(ActionStatusFields.class, sortParam));
         } else {
             // default sort
-            sorting = new Sort(Direction.ASC, ActionStatusFields.ID.getFieldName());
+            sorting = new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName());
         }
         return sorting;
     }

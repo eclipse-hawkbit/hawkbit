@@ -16,6 +16,7 @@ import java.util.StringJoiner;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -43,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -417,9 +420,9 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final org.eclipse.hawkbit.repository.model.Action action = deploymentManagement
                     .findActionWithDetails(actionId);
-            final Pageable pageReq = new PageRequest(0, 1000);
+            final Pageable pageReq = new PageRequest(0, 1000, new Sort(Direction.ASC, ActionStatusFields.ID.getFieldName()));
             final Page<ActionStatus> actionStatusList = deploymentManagement
-                    .findActionStatusMessagesByActionInDescOrder(pageReq, action,
+                    .findActionStatusByAction(pageReq, action,
                             managementUIState.isActionHistoryMaximized());
             final List<ActionStatus> content = actionStatusList.getContent();
             /*

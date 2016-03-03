@@ -51,13 +51,6 @@ public interface ActionStatusRepository
     Page<ActionStatus> findByAction(Pageable pageReq, Action action);
 
     /**
-     * @param pageReq
-     * @param action
-     * @return
-     */
-    Page<ActionStatus> findByActionOrderByIdDesc(Pageable pageReq, Action action);
-
-    /**
      * Finds all status updates for the defined action and target order by
      * {@link ActionStatus#getId()} desc including
      * {@link ActionStatus#getMessages()}.
@@ -71,6 +64,6 @@ public interface ActionStatusRepository
      * @return Page with found targets
      */
     @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
-    Page<ActionStatus> getByActionOrderByIdDesc(Pageable pageReq, Action action);
+    Page<ActionStatus> getByAction(Pageable pageReq, Action action);
 
 }
