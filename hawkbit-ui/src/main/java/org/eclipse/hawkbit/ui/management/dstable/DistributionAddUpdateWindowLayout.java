@@ -94,8 +94,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     @Autowired
     private transient TenantMetaDataRepository tenantMetaDataRepository;
 
-    private Button saveDistribution;
-    private Button discardDistribution;
+    private Button saveDistributionButton;
+    private Button discardDistributionButton;
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private Label madatoryLabel;
@@ -103,7 +103,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
     private boolean editDistribution = Boolean.FALSE;
-    private Long editDistId = null;
+    private Long editDistId;
     private Window addDistributionWindow;
     private String originalDistName;
     private String originalDistVersion;
@@ -131,9 +131,9 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         final HorizontalLayout buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
         buttonsLayout.setStyleName("dist-buttons-horz-layout");
-        buttonsLayout.addComponents(saveDistribution, discardDistribution);
-        buttonsLayout.setComponentAlignment(saveDistribution, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(discardDistribution, Alignment.BOTTOM_RIGHT);
+        buttonsLayout.addComponents(saveDistributionButton, discardDistributionButton);
+        buttonsLayout.setComponentAlignment(saveDistributionButton, Alignment.BOTTOM_LEFT);
+        buttonsLayout.setComponentAlignment(discardDistributionButton, Alignment.BOTTOM_RIGHT);
         buttonsLayout.addStyleName("window-style");
 
         /*
@@ -186,14 +186,14 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         reqMigStepCheckbox.setId(SPUIComponetIdProvider.DIST_ADD_MIGRATION_CHECK);
 
         /* save or update button */
-        saveDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
+        saveDistributionButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveDistribution.addClickListener(event -> saveDistribution());
+        saveDistributionButton.addClickListener(event -> saveDistribution());
 
         /* close button */
-        discardDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardDistribution.addClickListener(event -> discardDistribution());
+        discardDistributionButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "",
+                true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        discardDistributionButton.addClickListener(event -> discardDistribution());
     }
 
     /**
@@ -216,7 +216,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void enableSaveButton() {
-        saveDistribution.setEnabled(true);
+        saveDistributionButton.setEnabled(true);
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
@@ -226,7 +226,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void disableSaveButton() {
-        saveDistribution.setEnabled(false);
+        saveDistributionButton.setEnabled(false);
     }
 
     private void saveDistribution() {
@@ -415,7 +415,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-        saveDistribution.setEnabled(true);
+        saveDistributionButton.setEnabled(true);
         removeListeners();
         changedComponents.clear();
     }
@@ -497,7 +497,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     public void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
         editDistribution = Boolean.TRUE;
-        saveDistribution.setEnabled(false);
+        saveDistributionButton.setEnabled(false);
         final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
         if (distSet != null) {
             distNameTextField.setValue(distSet.getName());

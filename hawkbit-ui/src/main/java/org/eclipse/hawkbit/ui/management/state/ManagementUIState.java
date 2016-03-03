@@ -62,20 +62,20 @@ public class ManagementUIState implements Serializable {
 
     private boolean distTagFilterClosed = true;
 
-    private Long targetsTruncated = null;
+    private Long targetsTruncated;
 
     private final AtomicLong targetsCountAll = new AtomicLong();
 
-    private boolean isDsTableMaximized = Boolean.FALSE;
+    private boolean dsTableMaximized = Boolean.FALSE;
 
     // Contains ID and NAme of last selected target
     private DistributionSetIdName lastSelectedDsIdName;
     // Contains list of ID and Names of all the selected Targets
     private Set<DistributionSetIdName> selectedDsIdName = Collections.emptySet();
 
-    private boolean isTargetTableMaximized = Boolean.FALSE;
+    private boolean targetTableMaximized = Boolean.FALSE;
 
-    private boolean isActionHistoryMaximized = Boolean.FALSE;
+    private boolean actionHistoryMaximized = Boolean.FALSE;
 
     private boolean noDataAvilableTarget = Boolean.FALSE;
 
@@ -255,11 +255,11 @@ public class ManagementUIState implements Serializable {
     }
 
     public boolean isDsTableMaximized() {
-        return isDsTableMaximized;
+        return dsTableMaximized;
     }
 
     public void setDsTableMaximized(final boolean isDsTableMaximized) {
-        this.isDsTableMaximized = isDsTableMaximized;
+        this.dsTableMaximized = isDsTableMaximized;
     }
 
     public DistributionSetIdName getLastSelectedDsIdName() {
@@ -282,7 +282,7 @@ public class ManagementUIState implements Serializable {
      * @return the isTargetTableMaximized
      */
     public boolean isTargetTableMaximized() {
-        return isTargetTableMaximized;
+        return targetTableMaximized;
     }
 
     /**
@@ -290,14 +290,14 @@ public class ManagementUIState implements Serializable {
      *            the isTargetTableMaximized to set
      */
     public void setTargetTableMaximized(final boolean isTargetTableMaximized) {
-        this.isTargetTableMaximized = isTargetTableMaximized;
+        this.targetTableMaximized = isTargetTableMaximized;
     }
 
     /**
      * @return the isActionHistoryMaximized
      */
     public boolean isActionHistoryMaximized() {
-        return isActionHistoryMaximized;
+        return actionHistoryMaximized;
     }
 
     /**
@@ -305,7 +305,7 @@ public class ManagementUIState implements Serializable {
      *            the isActionHistoryMaximized to set
      */
     public void setActionHistoryMaximized(final boolean isActionHistoryMaximized) {
-        this.isActionHistoryMaximized = isActionHistoryMaximized;
+        this.actionHistoryMaximized = isActionHistoryMaximized;
     }
 
     /**
