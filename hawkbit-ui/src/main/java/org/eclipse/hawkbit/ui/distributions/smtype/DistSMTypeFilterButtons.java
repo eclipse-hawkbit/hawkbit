@@ -40,8 +40,6 @@ import com.vaadin.spring.annotation.ViewScope;
 /**
  * Software Module Type filter buttons.
  * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
@@ -58,46 +56,24 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     @Autowired
     private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
 
-    /**
-     * Initialize component.
-     * 
-     * @param filterButtonClickBehaviour
-     *            the clickable behaviour.
-     */
+    @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
         eventBus.subscribe(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButtonsTableId()
-     */
     @Override
     protected String getButtonsTableId() {
-
         return SPUIComponetIdProvider.SW_MODULE_TYPE_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonsLazyQueryContainer ()
-     */
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        final BeanQueryFactory<SoftwareModuleTypeBeanQuery> typeQF = new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(
+        final Map<String, Object> queryConfig = new HashMap<>();
+        final BeanQueryFactory<SoftwareModuleTypeBeanQuery> typeQF = new BeanQueryFactory<>(
                 SoftwareModuleTypeBeanQuery.class);
         typeQF.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer lazyQueryContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), typeQF);
-        return lazyQueryContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), typeQF);
     }
 
     @Override
@@ -105,13 +81,6 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * isClickedByDefault(java.lang .Long)
-     */
     @Override
     protected boolean isClickedByDefault(final Long buttonId) {
 
@@ -119,25 +88,11 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
                 && manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getId().equals(buttonId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonId(java.lang. String)
-     */
     @Override
     protected String createButtonId(final String name) {
         return SPUIComponetIdProvider.SM_TYPE_FILTER_BTN_ID + name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getFilterButtonDropHandler()
-     */
     @Override
     protected DropHandler getFilterButtonDropHandler() {
 
@@ -156,16 +111,8 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButttonWrapperId()
-     */
     @Override
     protected String getButttonWrapperIdPrefix() {
-
         return SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS;
     }
 

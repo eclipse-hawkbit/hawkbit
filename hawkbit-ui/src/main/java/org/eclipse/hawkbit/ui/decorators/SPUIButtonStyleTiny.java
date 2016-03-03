@@ -14,29 +14,12 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Style for button: Small.
- * 
- *
- * 
- *
- * 
  *
  */
 public class SPUIButtonStyleTiny implements SPUIButtonDecorator {
 
-    /**
-     * Decorate Button and return.
-     * 
-     * @param button
-     *            as Button
-     * @param style
-     *            as String
-     * @param setStyle
-     *            as String
-     * @param icon
-     *            as resource
-     * @return Button
-     */
-    public Button decorate(Button button, String style, boolean setStyle, Resource icon) {
+    @Override
+    public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
         button.addStyleName(ValoTheme.BUTTON_TINY);
         // Set Style
         if (null != style) {

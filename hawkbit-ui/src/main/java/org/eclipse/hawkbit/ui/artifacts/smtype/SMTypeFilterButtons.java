@@ -35,8 +35,6 @@ import com.vaadin.spring.annotation.ViewScope;
 /**
  * Software module type filter buttons.
  * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
@@ -59,6 +57,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
      * @param filterButtonClickBehaviour
      *            the clickable behaviour.
      */
+    @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
         eventBus.subscribe(this);
@@ -86,58 +85,28 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.layouts.SPFilterButtons#getButtonsTableId()
-     */
     @Override
     protected String getButtonsTableId() {
         return SPUIComponetIdProvider.SW_MODULE_TYPE_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.layouts.SPFilterButtons#
-     * createButtonsLazyQueryContainer()
-     */
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
         return HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.layouts.SPFilterButtons#isClickedByDefault(java.
-     * lang.Long)
-     */
     @Override
     protected boolean isClickedByDefault(final Long buttonId) {
         return artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent() && artifactUploadState
                 .getSoftwareModuleFilters().getSoftwareModuleType().get().getId().equals(buttonId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.layouts.SPFilterButtons#createButtonId(java.lang.
-     * String)
-     */
     @Override
     protected String createButtonId(final String name) {
         return SPUIComponetIdProvider.SM_TYPE_FILTER_BTN_ID + name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.filterlayout.SPFilterButtons#
-     * getFilterButtonDropHandler()
-     */
     @Override
     protected DropHandler getFilterButtonDropHandler() {
         return new DropHandler() {
@@ -155,13 +124,6 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButttonWrapperId()
-     */
     @Override
     protected String getButttonWrapperIdPrefix() {
         return SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX;

@@ -39,10 +39,15 @@ public class ExceptionInfoTest {
         underTest.setMessage(knownMessage);
         underTest.setParameters(knownParameters);
 
-        assertThat(underTest.getErrorCode()).isEqualTo(knownErrorCode);
-        assertThat(underTest.getExceptionClass()).isEqualTo(knownExceptionClass);
-        assertThat(underTest.getMessage()).isEqualTo(knownMessage);
-        assertThat(underTest.getParameters()).isEqualTo(knownParameters);
+        assertThat(underTest.getErrorCode()).as("The error code should match with the known error code in the test")
+                .isEqualTo(knownErrorCode);
+        assertThat(underTest.getExceptionClass())
+                .as("The exception class should match with the known error code in the test")
+                .isEqualTo(knownExceptionClass);
+        assertThat(underTest.getMessage()).as("The message should match with the known error code in the test")
+                .isEqualTo(knownMessage);
+        assertThat(underTest.getParameters()).as("The parameters should match with the known error code in the test")
+                .isEqualTo(knownParameters);
     }
 
 }

@@ -57,9 +57,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Target Tag filter buttons table.
- * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
@@ -129,40 +126,18 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButtonsTableId()
-     */
     @Override
     protected String getButtonsTableId() {
         return SPUIComponetIdProvider.TARGET_TAG_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonsLazyQueryContainer ()
-     */
     @Override
     protected LazyQueryContainer createButtonsLazyQueryContainer() {
-        final LazyQueryContainer tagContainer = HawkbitCommonUtil
+        return HawkbitCommonUtil
                 .createDSLazyQueryContainer(new BeanQueryFactory<TargetTagBeanQuery>(TargetTagBeanQuery.class));
-        return tagContainer;
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * isClickedByDefault(java.lang .Long)
-     */
     @Override
     protected boolean isClickedByDefault(final Long buttonId) {
         final TargetTag newTagClickedObj = tagMgmtService.findTargetTagById(buttonId);
@@ -175,26 +150,12 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return managementUIState.getTargetTableFilters().isNoTagSelected();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * createButtonId(java.lang. String)
-     */
     @Override
     protected String createButtonId(final String name) {
 
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getFilterButtonDropHandler()
-     */
     @Override
     protected DropHandler getFilterButtonDropHandler() {
 
@@ -267,21 +228,14 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return true;
     }
 
-    /**
-     * Process target Drop event.
-     *
-     * @param event
-     *            DragAndDropEvent
-     */
     private void processTargetDrop(final DragAndDropEvent event) {
 
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final Table source = transferable.getSourceComponent();
 
-        @SuppressWarnings("unchecked")
         final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(source);
-        final Set<String> targetList = new HashSet<String>();
+        final Set<String> targetList = new HashSet<>();
         if (transferable.getData(ITEMID) != null) {
             if (!targetSelected.contains(transferable.getData(ITEMID))) {
                 targetList.add(((TargetIdName) transferable.getData(ITEMID)).getControllerId());
@@ -306,13 +260,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         }
     }
 
-    /**
-     * validate the source tables.
-     *
-     * @param source
-     *            table
-     * @return boolean
-     */
     private boolean validateIfSourceisTargetTable(final Table source) {
         if (!source.getId().equals(SPUIComponetIdProvider.TARGET_TABLE_ID)) {
             notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
@@ -321,13 +268,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.filterlayout.AbstractFilterButtons#
-     * getButttonWrapperId()
-     */
     @Override
     protected String getButttonWrapperIdPrefix() {
 

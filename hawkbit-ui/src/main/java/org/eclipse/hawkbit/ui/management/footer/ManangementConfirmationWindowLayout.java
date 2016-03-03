@@ -107,32 +107,15 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         super.inittialize();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.confirmwindow.layout.
-     * AbstractConfirmationWindowLayout# getConfimrationTabs()
-     */
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<String, ConfirmationTab>();
-        /**
-         * create tab for deleted distribution.
-         */
-
-        /* Create tab for SW Module Type delete */
+        final Map<String, ConfirmationTab> tabs = new HashMap<>();
         if (!managementUIState.getDeletedDistributionList().isEmpty()) {
             tabs.put(i18n.get("caption.delete.dist.accordion.tab"), createDeletedDistributionTab());
         }
-        /**
-         * create tab for deleted target.
-         */
         if (!managementUIState.getDeletedTargetList().isEmpty()) {
             tabs.put(i18n.get("caption.delete.target.accordion.tab"), createDeletedTargetTab());
         }
-        /**
-         * create tab for assignment.
-         */
         if (!managementUIState.getAssignedList().isEmpty()) {
             tabs.put(i18n.get("caption.assign.dist.accordion.tab"), createAssignmentTab());
         }
@@ -196,8 +179,8 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private void saveAllAssignments(final ConfirmationTab tab) {
         final Set<TargetIdName> itemIds = managementUIState.getAssignedList().keySet();
         Long distId;
-        List<TargetIdName> targetIdSetList = null;
-        List<TargetIdName> tempIdList = null;
+        List<TargetIdName> targetIdSetList;
+        List<TargetIdName> tempIdList;
         final ActionType actionType = ((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
                 .getActionTypeOptionGroup().getValue()).getActionType();
         final long forcedTimeStamp = (((ActionTypeOptionGroupLayout.ActionTypeOption) actionTypeOptionGroupLayout
@@ -205,7 +188,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
                         ? actionTypeOptionGroupLayout.getForcedTimeDateField().getValue().getTime()
                         : Action.NO_FORCE_TIME;
 
-        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = new HashMap<Long, ArrayList<TargetIdName>>();
+        final Map<Long, ArrayList<TargetIdName>> saveAssignedList = new HashMap<>();
 
         int successAssignmentCount = 0;
         int duplicateAssignmentCount = 0;
@@ -216,7 +199,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
             if (saveAssignedList.containsKey(distId)) {
                 targetIdSetList = saveAssignedList.get(distId);
             } else {
-                targetIdSetList = new ArrayList<TargetIdName>();
+                targetIdSetList = new ArrayList<>();
             }
             targetIdSetList.add(itemId);
             saveAssignedList.put(distId, (ArrayList<TargetIdName>) targetIdSetList);
@@ -275,15 +258,13 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private String getAssigmentSuccessMessage(final int assignedCount) {
-        final String assignment = FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
+        return FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.target.assignment", new Object[] { assignedCount });
-        return assignment;
     }
 
     private String getDuplicateAssignmentMessage(final int alreadyAssignedCount) {
-        final String alreadyAssigned = FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
+        return FontAwesome.TASKS.getHtml() + SPUILabelDefinitions.HTML_SPACE
                 + i18n.get("message.target.alreadyAssigned", new Object[] { alreadyAssignedCount });
-        return alreadyAssigned;
     }
 
     private void discardAllAssignments(final ConfirmationTab tab) {
@@ -456,7 +437,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     }
 
     private void deleteAllDistributions(final ConfirmationTab tab) {
-        final Set<Long> deletedIds = new HashSet<Long>();
+        final Set<Long> deletedIds = new HashSet<>();
         managementUIState.getDeletedDistributionList().forEach(distIdName -> deletedIds.add(distIdName.getId()));
         distributionSetManagement.deleteDistributionSet(deletedIds.toArray(new Long[deletedIds.size()]));
         addToConsolitatedMsg(FontAwesome.TRASH_O.getHtml() + SPUILabelDefinitions.HTML_SPACE
@@ -516,7 +497,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(TARGET_ID, String.class, "");
         contactContainer.addContainerProperty(TARGET_NAME, String.class, "");
-        Item item = null;
+        Item item;
         for (final TargetIdName targteId : managementUIState.getDeletedTargetList()) {
             item = contactContainer.addItem(targteId);
             item.getItemProperty(TARGET_ID).setValue(targteId.getControllerId());

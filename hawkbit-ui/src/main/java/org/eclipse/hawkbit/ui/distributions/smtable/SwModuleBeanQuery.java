@@ -32,9 +32,6 @@ import com.google.common.base.Strings;
 /**
  * Simple implementation of generics bean query which dynamically loads a batch
  * of beans.
- * 
- *
- *
  *
  */
 public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> {
@@ -77,17 +74,10 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         return new ProxyBaseSwModuleItem();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery#loadBeans(int,
-     * int)
-     */
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
         final Slice<CustomSoftwareModule> swModuleBeans;
-        final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<ProxyBaseSwModuleItem>();
+        final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<>();
 
         swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderByDistribution(
                 new OffsetBasedPageRequest(startIndex, count, new Sort(Direction.ASC, "name", "version")),
