@@ -420,10 +420,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final org.eclipse.hawkbit.repository.model.Action action = deploymentManagement
                     .findActionWithDetails(actionId);
-            final Pageable pageReq = new PageRequest(0, 1000, new Sort(Direction.ASC, ActionStatusFields.ID.getFieldName()));
-            final Page<ActionStatus> actionStatusList = deploymentManagement
-                    .findActionStatusByAction(pageReq, action,
-                            managementUIState.isActionHistoryMaximized());
+            final Pageable pageReq = new PageRequest(0, 1000,
+                    new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
+            final Page<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action,
+                    managementUIState.isActionHistoryMaximized());
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
              * Since the recent action status and messages are already
