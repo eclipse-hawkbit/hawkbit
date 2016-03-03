@@ -19,7 +19,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Junit Tests - Management API")
+@Features("Unit Tests - Management API")
 @Stories("Paged List Handling")
 public class PagedListTest {
 
