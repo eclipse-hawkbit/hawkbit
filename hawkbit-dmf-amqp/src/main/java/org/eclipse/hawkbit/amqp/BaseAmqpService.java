@@ -16,6 +16,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConverter;
 
@@ -25,16 +26,16 @@ import org.springframework.amqp.support.converter.MessageConverter;
 public class BaseAmqpService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAmqpService.class);
-    protected MessageConverter messageConverter;
+    private final RabbitTemplate rabbitTemplate;
 
     /**
      * Constructor.
      * 
-     * @param messageConverter
-     *            the message messageConverter.
+     * @param rabbitTemplate
+     *            the rabbit template.
      */
-    public BaseAmqpService(final MessageConverter messageConverter) {
-        this.messageConverter = messageConverter;
+    public BaseAmqpService(final RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
@@ -63,7 +64,7 @@ public class BaseAmqpService {
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getName());
-        return (T) messageConverter.fromMessage(message);
+        return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
     /**
@@ -85,11 +86,11 @@ public class BaseAmqpService {
                 ArrayList.class.getName());
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CONTENT_CLASSID_FIELD_NAME,
                 clazz.getName());
-        return (List<T>) messageConverter.fromMessage(message);
+        return (List<T>) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
     public MessageConverter getMessageConverter() {
-        return messageConverter;
+        return rabbitTemplate.getMessageConverter();
     }
 
     protected final String getStringHeaderKey(final Message message, final String key,
@@ -107,4 +108,7 @@ public class BaseAmqpService {
         throw new IllegalArgumentException(error);
     }
 
+    protected RabbitTemplate getRabbitTemplate() {
+        return rabbitTemplate;
+    }
 }
