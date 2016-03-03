@@ -314,7 +314,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         deploymentManagement.cancelAction(assigningAction, target);
         assigningAction = deploymentManagement.findActionWithDetails(assigningAction.getId());
 
-        deploymentManagement.forceQuitAction(assigningAction, target);
+        deploymentManagement.forceQuitAction(assigningAction);
 
         assigningAction = deploymentManagement.findActionWithDetails(assigningAction.getId());
 
@@ -352,8 +352,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         // force quit assignment
         try {
-            deploymentManagement.forceQuitAction(assigningAction,
-                    targetManagement.findTargetByControllerID(target.getControllerId()));
+            deploymentManagement.forceQuitAction(assigningAction);
             fail("expected ForceQuitActionNotAllowedException");
         } catch (final ForceQuitActionNotAllowedException ex) {
         }

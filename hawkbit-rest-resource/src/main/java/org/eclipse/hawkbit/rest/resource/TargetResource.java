@@ -209,7 +209,7 @@ public class TargetResource implements TargetRestApi {
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
         if (force) {
-            this.deploymentManagement.forceQuitAction(action, target);
+            this.deploymentManagement.forceQuitAction(action);
         } else {
             this.deploymentManagement.cancelAction(action, target);
         }

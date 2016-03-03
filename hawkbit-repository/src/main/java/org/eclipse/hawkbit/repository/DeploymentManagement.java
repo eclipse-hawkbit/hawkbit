@@ -572,7 +572,7 @@ public class DeploymentManagement {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public Action forceQuitAction(@NotNull final Action action, @NotNull final Target target) {
+    public Action forceQuitAction(@NotNull final Action action) {
         final Action mergedAction = entityManager.merge(action);
 
         if (!mergedAction.isCancelingOrCanceled()) {
