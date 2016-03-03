@@ -833,7 +833,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
         mvc.perform(get(
-                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS))
+                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS)
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("update")))
@@ -960,7 +961,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // page 1: one entry
         mvc.perform(get(
                 RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS)
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1)))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
@@ -976,7 +978,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
                 RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS)
                         .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
                         .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("update")))
