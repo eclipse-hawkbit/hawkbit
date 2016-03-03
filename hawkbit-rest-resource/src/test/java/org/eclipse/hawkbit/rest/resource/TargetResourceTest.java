@@ -879,7 +879,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that the API resturns the status list with expected content split into two pages.")
+    @Description("Verfies that the API returns the status list with expected content split into two pages.")
     public void getMultipleActionStatusWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
 
