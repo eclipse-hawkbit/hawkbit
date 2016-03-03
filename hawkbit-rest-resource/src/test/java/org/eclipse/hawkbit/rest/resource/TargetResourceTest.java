@@ -856,23 +856,20 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Description("Verfies that the API returns the status list with expected content.")
     public void getMultipleActionStatus() throws Exception {
         final String knownTargetId = "targetId";
-        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+        final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
+        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
+                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
 
-        mvc.perform(get(
-                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS
-                        + "/" + actions.get(0).getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS))
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(
-                        jsonPath("content.[0].id", equalTo(actions.get(0).getActionStatus().get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
                 .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
-                .andExpect(jsonPath("content.[0].reportedAt",
-                        equalTo(actions.get(0).getActionStatus().get(1).getCreatedAt())))
-                .andExpect(
-                        jsonPath("content.[1].id", equalTo(actions.get(0).getActionStatus().get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
+                .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("running")))
-                .andExpect(jsonPath("content.[1].reportedAt",
-                        equalTo(actions.get(0).getActionStatus().get(0).getCreatedAt())))
+                .andExpect(jsonPath("content.[1].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
@@ -883,36 +880,32 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     public void getMultipleActionStatusWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
 
-        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+        final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
+        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
+                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
 
         // Page 1
-        mvc.perform(get(
-                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS
-                        + "/" + actions.get(0).getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
-                                .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1)))
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(
-                        jsonPath("content.[0].id", equalTo(actions.get(0).getActionStatus().get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
                 .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
-                .andExpect(jsonPath("content.[0].reportedAt",
-                        equalTo(actions.get(0).getActionStatus().get(1).getCreatedAt())))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
 
         // Page 2
-        mvc.perform(get(
-                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS
-                        + "/" + actions.get(0).getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
-                                .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                                .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(
-                        jsonPath("content.[0].id", equalTo(actions.get(0).getActionStatus().get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("running")))
-                .andExpect(jsonPath("content.[0].reportedAt",
-                        equalTo(actions.get(0).getActionStatus().get(0).getCreatedAt())))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
