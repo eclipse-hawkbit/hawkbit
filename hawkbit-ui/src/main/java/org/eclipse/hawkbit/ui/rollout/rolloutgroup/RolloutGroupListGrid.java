@@ -265,7 +265,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
             break;
         case RUNNING:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.ADJUST.getCodepoint()), SPUIStyleDefinitions.STATUS_ICON_LIGHT_YELLOW,
+                    Integer.toString(FontAwesome.ADJUST.getCodepoint()), SPUIStyleDefinitions.STATUS_ICON_YELLOW,
                     SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case READY:

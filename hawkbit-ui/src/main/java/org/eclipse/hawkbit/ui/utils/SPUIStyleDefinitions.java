@@ -248,16 +248,50 @@ public final class SPUIStyleDefinitions {
      * Target filter search progress indicator style.
      */
     public static final String TARGET_FILTER_SEARCH_PROGRESS_INDICATOR_STYLE = "target-filter-spinner";
-    
-    
+
+    /**
+     * Status icon style - red color.
+     */
     public static final String STATUS_ICON_RED = "statusIconRed";
+
+    /**
+     * Status icon style - green color.
+     */
     public static final String STATUS_ICON_GREEN = "statusIconGreen";
+
+    /**
+     * Status icon style - blue color.
+     */
     public static final String STATUS_ICON_BLUE = "statusIconBlue";
+
+    /**
+     * Status icon spinner style - yellow color.
+     */
     public static final String STATUS_SPINNER_YELLOW = "yellowSpinner";
+
+    /**
+     * Status icon style - light blue color.
+     */
     public static final String STATUS_ICON_LIGHT_BLUE = "statusIconLightBlue";
+
+    /**
+     * Status icon spinner style - grey color.
+     */
     public static final String STATUS_SPINNER_GREY = "greySpinner";
+
+    /**
+     * Status icon spinner style - blue color.
+     */
     public static final String STATUS_SPINNER_BLUE = "blueSpinner";
-    public static final String STATUS_ICON_LIGHT_YELLOW = "statusIconYellow";
+
+    /**
+     * Status icon style - yellow color.
+     */
+    public static final String STATUS_ICON_YELLOW = "statusIconYellow";
+
+    /**
+     * Status pending icon.
+     */
     public static final String STATUS_ICON_PENDING = "statusIconPending";
 
     /**
