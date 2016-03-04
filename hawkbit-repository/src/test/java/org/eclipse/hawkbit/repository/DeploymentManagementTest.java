@@ -766,12 +766,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
         // verifying that the assignment is correct
-        assertEquals(1, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals(1, deploymentManagement.findActionsByTarget(targ).size());
-        assertEquals(TargetUpdateStatus.PENDING, targ.getTargetInfo().getUpdateStatus());
-        assertEquals(dsA, targ.getAssignedDistributionSet());
-        assertEquals(dsA, deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
-        assertNull(targ.getTargetInfo().getInstalledDistributionSet());
+        assertEquals("Active target actions are wrong", 1, deploymentManagement.findActiveActionsByTarget(targ).size());
+        assertEquals("Target actions are wrong", 1, deploymentManagement.findActionsByTarget(targ).size());
+        assertEquals("Target status is wrong", TargetUpdateStatus.PENDING, targ.getTargetInfo().getUpdateStatus());
+        assertEquals("Assigned ds is wrong", dsA, targ.getAssignedDistributionSet());
+        assertEquals("Active ds is wrong", dsA,
+                deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
+        assertNull("Installed ds should be null", targ.getTargetInfo().getInstalledDistributionSet());
 
         final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, dsA);
         final Action action = updAct.getContent().get(0);
@@ -782,12 +783,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 
         assertEquals(0, deploymentManagement.findActiveActionsByTarget(targ).size());
-        // try {
         assertEquals(1, deploymentManagement.findInActiveActionsByTarget(targ).size());
-        // }
-        // catch( final LazyInitializationException ex ) {
-        //
-        // }
+
         assertEquals(TargetUpdateStatus.IN_SYNC, targ.getTargetInfo().getUpdateStatus());
         assertEquals(dsA, targ.getAssignedDistributionSet());
         assertEquals(dsA, targ.getTargetInfo().getInstalledDistributionSet());
@@ -797,13 +794,15 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         targ = targs.iterator().next();
 
-        assertEquals(1, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals(TargetUpdateStatus.PENDING,
+        assertEquals("active actions are wrong", 1, deploymentManagement.findActiveActionsByTarget(targ).size());
+        assertEquals("target status is wrong", TargetUpdateStatus.PENDING,
                 targetManagement.findTargetByControllerID(targ.getControllerId()).getTargetInfo().getUpdateStatus());
         assertEquals(dsB, targ.getAssignedDistributionSet());
-        assertEquals(dsA.getId(), targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId())
-                .getTargetInfo().getInstalledDistributionSet().getId());
-        assertEquals(dsB, deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
+        assertEquals("Installed ds is wrong", dsA.getId(),
+                targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId()).getTargetInfo()
+                        .getInstalledDistributionSet().getId());
+        assertEquals("Active ds is wrong", dsB,
+                deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
 
     }
 

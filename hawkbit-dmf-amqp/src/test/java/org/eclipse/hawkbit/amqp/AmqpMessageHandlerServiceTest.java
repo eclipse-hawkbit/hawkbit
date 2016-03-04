@@ -99,14 +99,15 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
     @Before
     public void before() throws Exception {
-        amqpMessageHandlerService = new AmqpMessageHandlerService();
-        amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         messageConverter = new Jackson2JsonMessageConverter();
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate();
-        rabbitTemplate.setMessageConverter(messageConverter);
-        amqpMessageHandlerService.setRabbitTemplate(rabbitTemplate);
+        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate);
+        amqpMessageHandlerService.setControllerManagement(controllerManagementMock);
         amqpMessageHandlerService.setAuthenticationManager(authenticationManagerMock);
         amqpMessageHandlerService.setArtifactManagement(artifactManagementMock);
         amqpMessageHandlerService.setCache(cacheMock);
@@ -115,14 +116,16 @@ public class AmqpMessageHandlerServiceTest {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
     @Description("Tests not allowed content-type in message")
     public void testWrongContentType() {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType("xml");
         final Message message = new Message(new byte[0], messageProperties);
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT);
-        fail();
+        try {
+            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
+            fail("IllegalArgumentException was excepeted due to worng content type");
+        } catch (final IllegalArgumentException e) {
+        }
     }
 
     @Test
@@ -138,10 +141,11 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.findOrRegisterTargetIfItDoesNotexist(targetIdCaptor.capture(),
                 uriCaptor.capture())).thenReturn(null);
 
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT);
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
 
-        assertThat(targetIdCaptor.getValue()).as("Extraxted Thing should be the same").isEqualTo(knownThingId);
-        assertThat(uriCaptor.getValue().toString()).as("Extraxted Uri should be the same").isEqualTo("amqp://MyTest");
+        // verify
+        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(knownThingId);
+        assertThat(uriCaptor.getValue().toString()).as("Uri is not right").isEqualTo("amqp://vHost/MyTest");
 
     }
 
@@ -153,7 +157,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = messageConverter.toMessage("", messageProperties);
 
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT);
+            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no replyTo header was set");
         } catch (final IllegalArgumentException exception) {
             // test ok - exception was excepted
@@ -167,7 +171,7 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT);
+            amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no thingID was set");
         } catch (final IllegalArgumentException exception) {
             // test ok - exception was excepted
@@ -183,7 +187,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = messageConverter.toMessage(new byte[0], messageProperties);
 
         try {
-            amqpMessageHandlerService.onMessage(message, type, TENANT);
+            amqpMessageHandlerService.onMessage(message, type, TENANT, "vHost");
             fail("IllegalArgumentException was excepeted due to unknown message type");
         } catch (final IllegalArgumentException exception) {
             // test ok - exception was excepted
@@ -196,21 +200,21 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT);
-            fail();
+            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+            fail("IllegalArgumentException was excepeted due to unknown message type");
         } catch (final IllegalArgumentException e) {
         }
 
         try {
             messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT);
-            fail();
+            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
+            fail("IllegalArgumentException was excepeted due to unknown topic");
         } catch (final IllegalArgumentException e) {
         }
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT);
+            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted because there was no event topic");
         } catch (final IllegalArgumentException exception) {
             // test ok - exception was excepted
@@ -229,7 +233,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT);
+            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no action id was set");
         } catch (final IllegalArgumentException exception) {
             // test ok - exception was excepted
@@ -246,7 +250,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         try {
-            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT);
+            amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no action id was set");
         } catch (final IllegalArgumentException exception) {
             // test ok - exception was excepted
@@ -264,7 +268,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -288,7 +292,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -320,7 +324,7 @@ public class AmqpMessageHandlerServiceTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -328,7 +332,8 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
-        assertThat(downloadResponse.getDownloadUrl()).startsWith("http://localhost/api/v1/downloadserver/downloadId/");
+        assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
+                .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
     }
 
     @Test
@@ -355,7 +360,7 @@ public class AmqpMessageHandlerServiceTest {
                 messageProperties);
 
         // test
-        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT);
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
 
         // verify
         final ArgumentCaptor<TargetAssignDistributionSetEvent> captorTargetAssignDistributionSetEvent = ArgumentCaptor

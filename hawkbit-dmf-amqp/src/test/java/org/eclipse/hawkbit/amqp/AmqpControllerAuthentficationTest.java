@@ -60,11 +60,10 @@ public class AmqpControllerAuthentficationTest {
 
     @Before
     public void before() throws Exception {
-        amqpMessageHandlerService = new AmqpMessageHandlerService();
         messageConverter = new Jackson2JsonMessageConverter();
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate();
-        rabbitTemplate.setMessageConverter(messageConverter);
-        amqpMessageHandlerService.setRabbitTemplate(rabbitTemplate);
+        final RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
+        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate);
 
         authenticationManager = new AmqpControllerAuthentfication();
         authenticationManager.setControllerManagement(mock(ControllerManagement.class));
@@ -78,7 +77,6 @@ public class AmqpControllerAuthentficationTest {
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
         when(controllerManagement.getSecurityTokenByControllerId(anyString())).thenReturn(CONTROLLLER_ID);
         authenticationManager.setControllerManagement(controllerManagement);
-
         amqpMessageHandlerService.setArtifactManagement(mock(ArtifactManagement.class));
 
         authenticationManager.setTenantAware(new SecurityContextTenantAware());
@@ -139,7 +137,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -161,7 +159,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -183,7 +181,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
