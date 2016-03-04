@@ -58,26 +58,6 @@
                </execution>
             </executions>
          </plugin>
-         <plugin>
-            <groupId>net.alchim31.maven</groupId>
-            <artifactId>yuicompressor-maven-plugin</artifactId>
-            <version>1.5.0</version>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>compress</goal>
-                  </goals>
-               </execution>
-            </executions>
-            <configuration>
-               <includes>
-                  <include>**/*.css</include>
-               </includes>
-               <excludeResources>true</excludeResources>
-               <outputDirectory>${basedir}/src/main/resources/VAADIN/themes/hawkbit/styles.css</outputDirectory>
-               <nosuffix>true</nosuffix>
-            </configuration>
-         </plugin>
       </plugins>
       <pluginManagement>
          <plugins>
@@ -115,7 +95,7 @@
                            <pluginExecutionFilter>
                               <groupId>com.vaadin</groupId>
                               <artifactId>vaadin-maven-plugin</artifactId>
-                              <versionRange>[7.5.2,)</versionRange>
+                              <versionRange>[7.6.3,)</versionRange>
                               <goals>
                                  <goal>compile-theme</goal>
                               </goals>
