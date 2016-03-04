@@ -74,7 +74,7 @@
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.0.0</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.5.10</vaadin.version>
+      <vaadin.version>7.6.3</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
       <vaadin.addon.vaadin-lazyquerycontainer.version>7.4.0.1</vaadin.addon.vaadin-lazyquerycontainer.version>
       <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
