@@ -89,7 +89,6 @@
 						<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 					</manifest>
 					<manifestEntries>
-					<!-- Package format version - do not change -->
 						<Implementation-Title>CustomRenderers</Implementation-Title>
 						<Vaadin-Package-Version>1</Vaadin-Package-Version>
 						<Vaadin-Widgetsets>org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet</Vaadin-Widgetsets>
