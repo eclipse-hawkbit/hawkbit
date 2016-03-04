@@ -99,52 +99,6 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
         return new ResponseEntity<>(SoftwareModuleMapper.artifactsToResponse(module.getArtifacts()), HttpStatus.OK);
     }
 
-    /**
-     * Handles the GET request for downloading an artifact.
-     *
-     * @param softwareModuleId
-     *            of the parent SoftwareModule
-     * @param artifactId
-     *            of the related LocalArtifact
-     * @param servletResponse
-     *            of the servlet
-     * @param request
-     *            of the client
-     *
-     * @return responseEntity with status ok if successful
-     */
-    // @RequestMapping(method = RequestMethod.GET, value =
-    // RestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-    // + "/{softwareModuleId}/artifacts/{artifactId}/download")
-    // @ResponseBody
-    // public ResponseEntity<Void> downloadArtifact(@PathVariable final Long
-    // softwareModuleId,
-    // @PathVariable final Long artifactId, final HttpServletResponse
-    // servletResponse,
-    // final HttpServletRequest request) {
-    // final SoftwareModule module =
-    // findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
-    //
-    // if (null == module || !module.getLocalArtifact(artifactId).isPresent()) {
-    // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    // }
-    //
-    // final LocalArtifact artifact = module.getLocalArtifact(artifactId).get();
-    // final DbArtifact file =
-    // artifactManagement.loadLocalArtifactBinary(artifact);
-    //
-    // final String ifMatch = request.getHeader("If-Match");
-    // if (ifMatch != null &&
-    // !RestResourceConversionHelper.matchesHttpHeader(ifMatch,
-    // artifact.getSha1Hash())) {
-    // return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
-    // }
-    //
-    // return RestResourceConversionHelper.writeFileResponse(artifact,
-    // servletResponse, request, file);
-    //
-    // }
-
     @Override
     public ResponseEntity<ArtifactRest> getArtifact(@PathVariable final Long softwareModuleId,
             @PathVariable final Long artifactId) {

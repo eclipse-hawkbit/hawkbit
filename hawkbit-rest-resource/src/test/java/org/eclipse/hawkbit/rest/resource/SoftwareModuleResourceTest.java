@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -69,6 +71,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Software Module Resource")
 public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongoDB {
 
+    @Before
+    public void assertPreparationOfRepo() {
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("no softwaremodule should be founded")
+                .hasSize(0);
+        assertThat(artifactRepository.findAll()).as("no artifacts should be founded").hasSize(0);
+    }
+
     @Test
     @Description("Tests the update of software module metadata. It is verfied that only the selected fields for the update are really updated and the modification values are filled (i.e. updated by and at).")
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
@@ -81,18 +90,14 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        softwareManagement.createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
 
         SoftwareModule sm = new SoftwareModule(osType, knownSWName, knownSWVersion, knownSWDescription, knownSWVendor);
         sm = softwareManagement.createSoftwareModule(sm);
 
-        assertThat(sm.getName()).isEqualTo(knownSWName);
-        assertThat(sm.getName()).isEqualTo(knownSWName);
+        assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
 
         final String body = new JSONObject().put("vendor", updateVendor).put("description", updateDescription)
                 .put("name", "nameShouldNotBeChanged").toString();
@@ -123,9 +128,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     @Test
     @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
     public void uploadArtifact() throws Exception {
-        // prepare repo
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -152,36 +154,41 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
         final Long artId = ((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()
                 .get(0)).getId();
-        assertThat(artResult.getArtifactId()).isEqualTo(artId);
+        assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat(JsonPath.compile("$_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .as("Link contains no self url")
                 .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
         assertThat(
                 JsonPath.compile("$_links.download.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId
-                                + "/download");
+                        .as("response contains no download url ").isEqualTo("http://localhost/rest/v1/softwaremodules/"
+                                + sm.getId() + "/artifacts/" + artId + "/download");
 
+        assertArtifact(sm, random);
+    }
+
+    private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
         // check result in db...
         // repo
-        assertThat(artifactRepository.findAll()).hasSize(1);
+        assertThat(artifactRepository.findAll()).as("Wrong artifact size").hasSize(1);
 
         // binary
-        assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random),
-                artifactManagement
-                        .loadLocalArtifactBinary((LocalArtifact) softwareManagement
-                                .findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
-                .getFileInputStream()));
+        assertTrue("Wrong artifact content",
+                IOUtils.contentEquals(new ByteArrayInputStream(random),
+                        artifactManagement
+                                .loadLocalArtifactBinary((LocalArtifact) softwareManagement
+                                        .findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
+                        .getFileInputStream()));
 
         // hashes
         assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getSha1Hash())
-                .isEqualTo(HashGeneratorUtils.generateSHA1(random));
+                .as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
 
         assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getMd5Hash())
-                .isEqualTo(HashGeneratorUtils.generateMD5(random));
+                .as("Wrong md5 hash").isEqualTo(HashGeneratorUtils.generateMD5(random));
 
         // metadata
         assertThat(((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
-                .getFilename()).isEqualTo("origFilename");
-
+                .getFilename()).as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
     @Test
@@ -203,9 +210,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     @Test
     @Description("Verfies that the system does not accept identical artifacts uploads for the same software module. Expected response: CONFLICT")
     public void duplicateUploadArtifact() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
-
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -228,9 +232,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     @Test
     @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
     public void uploadArtifactWithCustomName() throws Exception {
-        // prepare repo
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -245,22 +246,19 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$providedFilename", equalTo("customFilename"))).andExpect(status().isCreated());
-        ;
 
         // check result in db...
         // repo
-        assertThat(artifactRepository.findAll()).hasSize(1);
+        assertThat(artifactRepository.findAll()).as("Artifact size is wring").hasSize(1);
 
         // hashes
-        assertThat(artifactManagement.findLocalArtifactByFilename("customFilename")).hasSize(1);
+        assertThat(artifactManagement.findLocalArtifactByFilename("customFilename")).as("Local artifact is wrong")
+                .hasSize(1);
     }
 
     @Test
     @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
     public void uploadArtifactWithHashCheck() throws Exception {
-        // prepare repo
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -280,7 +278,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
         // check error result
         ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
-        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH.getKey());
+        assertThat(exceptionInfo.getErrorCode()).as("Exception contains wrong error code")
+                .isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH.getKey());
 
         // wrong md5
         mvcResult = mvc
@@ -290,42 +289,20 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
         // check error result
         exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
-        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH.getKey());
+        assertThat(exceptionInfo.getErrorCode()).as("Exception contains wrong error code")
+                .isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH.getKey());
 
         mvc.perform(fileUpload("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                 .param("md5sum", md5sum).param("sha1sum", sha1sum)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
 
-        // check result...
-        // repo
-        assertThat(artifactRepository.findAll()).hasSize(1);
-
-        // binary
-        assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random),
-                artifactManagement
-                        .loadLocalArtifactBinary((LocalArtifact) softwareManagement
-                                .findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
-                .getFileInputStream()));
-
-        // hashes
-        assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getSha1Hash())
-                .isEqualTo(HashGeneratorUtils.generateSHA1(random));
-
-        assertThat(artifactManagement.findLocalArtifactByFilename("origFilename").get(0).getMd5Hash())
-                .isEqualTo(md5sum);
-
-        // metadata
-        assertThat(((LocalArtifact) softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts().get(0))
-                .getFilename()).isEqualTo("origFilename");
+        assertArtifact(sm, random);
 
     }
 
     @Test
     @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
     public void downloadArtifact() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
-
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -350,19 +327,16 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(header().string("ETag", artifact2.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM)).andReturn();
 
-        assertTrue(Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
+        assertTrue("Response has wrong response content",
+                Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
-        assertThat(artifactRepository.findAll()).hasSize(2);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(1);
+        assertThat(artifactRepository.findAll()).as("Wrong artifact repostiory").hasSize(2);
     }
 
     @Test
     @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and download links.")
     public void getArtifact() throws Exception {
-        // check baseline
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
-
         // prepare data for test
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
@@ -548,8 +522,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Test retrieval of all software modules the user has access to.")
     public void getSoftwareModules() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
         SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
         os = softwareManagement.createSoftwareModule(os);
 
@@ -612,14 +584,12 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("$content.[?(@.id==" + ah.getId() + ")][0]._links.self.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId())));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(3);
     }
 
     @Test
     @Description("Test the various filter parameters, e.g. filter by name or type of the module.")
     public void getSoftwareModulesWithFilterParameters() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
         SoftwareModule os1 = new SoftwareModule(osType, "osName1", "1.0.0", "description1", "vendor1");
         os1 = softwareManagement.createSoftwareModule(os1);
 
@@ -712,8 +682,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Tests GET request on /rest/v1/softwaremodules/{smId}.")
     public void getSoftareModule() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
         SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
         os = softwareManagement.createSoftwareModule(os);
 
@@ -771,15 +739,13 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("$_links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + ah.getId() + "/artifacts")));
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(3);
     }
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
     public void createSoftwareModules() throws JSONException, Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-
         final SoftwareModule os = new SoftwareModule(osType, "name1", "version1", "description1", "vendor1");
         final SoftwareModule jvm = new SoftwareModule(runtimeType, "name2", "version1", "description1", "vendor1");
         final SoftwareModule ah = new SoftwareModule(appType, "name3", "version1", "description1", "vendor1");
@@ -824,74 +790,75 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .as("Response contains invalid self href")
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
         assertThat(JsonPath.compile("[0]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId() + "/artifacts");
+                .toString()).as("Response contains invalid artifacts href")
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId() + "/artifacts");
 
         assertThat(
                 JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .as("Response contains invalid self href")
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId());
         assertThat(JsonPath.compile("[1]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId() + "/artifacts");
+                .toString()).as("Response contains invalid artfacts href")
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + jvmCreated.getId() + "/artifacts");
 
         assertThat(
                 JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                        .as("Response contains links self href")
                         .isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId());
         assertThat(JsonPath.compile("[2]_links.artifacts.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId() + "/artifacts");
+                .toString()).as("Response contains invalid artifacts href")
+                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + ahCreated.getId() + "/artifacts");
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Wrong softwaremodule size").hasSize(3);
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent().get(0).getName())
-                .isEqualTo(os.getName());
+                .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent().get(0).getCreatedBy())
-                .isEqualTo("uploadTester");
+                .as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent().get(0).getCreatedAt())
-                .isGreaterThanOrEqualTo(current);
+                .as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, runtimeType).getContent().get(0).getName())
-                .isEqualTo(jvm.getName());
+                .as("Softwaremoudle name is wrong").isEqualTo(jvm.getName());
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, appType).getContent().get(0).getName())
-                .isEqualTo(ah.getName());
+                .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
     @Test
     @Description("Verifies successfull deletion of software modules that are not in use, i.e. assigned to a DS.")
     public void deleteUnassignedSoftwareModule() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
-        assertThat(artifactRepository.findAll()).isEmpty();
 
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final Artifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(),
-                "file1", false);
+        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
-        assertThat(artifactRepository.findAll()).hasSize(1);
-        assertThat(softwareModuleRepository.findAll()).hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremoudle size is wrong").hasSize(1);
+        assertThat(artifactRepository.findAll()).as("artifact site is wrong").hasSize(1);
+        assertThat(softwareModuleRepository.findAll()).as("Softwaremoudle size is wrong").hasSize(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
-        assertThat(softwareModuleRepository.findAll()).isEmpty();
-        assertThat(artifactRepository.findAll()).isEmpty();
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq))
+                .as("After delete no softwarmodule should be available").isEmpty();
+        assertThat(softwareModuleRepository.findAll()).as("After delete no softwarmodule should be available")
+                .isEmpty();
+        assertThat(artifactRepository.findAll()).as("After delete no artifact should be available").isEmpty();
     }
 
     @Test
     @Description("Verifies successfull deletion of software modules that are in use, i.e. assigned to a DS which should result in movinf the module to the archive.")
     public void deleteAssignedSoftwareModule() throws Exception {
-        // check baseline
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
-        assertThat(artifactRepository.findAll()).isEmpty();
-
         final DistributionSet ds1 = TestDataUtil.generateDistributionSet("a", softwareManagement,
                 distributionSetManagement);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
+        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 ds1.findFirstModuleByType(appType).getId(), "file1", false);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
@@ -906,17 +873,17 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // all 3 are now marked as deleted
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq).getNumber()).isEqualTo(0);
-        assertThat(softwareModuleRepository.findAll()).hasSize(3);
-        assertThat(artifactRepository.findAll()).hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq).getNumber())
+                .as("After delete no softwarmodule should be available").isEqualTo(0);
+        assertThat(softwareModuleRepository.findAll()).as("After delete no softwarmodule should marked as deleted")
+                .hasSize(3);
+        assertThat(artifactRepository.findAll()).as("After delete artifact should available for marked as deleted sm's")
+                .hasSize(1);
     }
 
     @Test
     @Description("Tests the deletion of an artifact including verfication that the artifact is actually erased in the repository and removed from the software module.")
     public void deleteArtifact() throws Exception {
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).isEmpty();
-        assertThat(artifactRepository.findAll()).isEmpty();
-
         // Create 1 SM
         SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
@@ -926,8 +893,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
         // Create 2 artifacts
         final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
                 sm.getId(), "file1", false);
-        final LocalArtifact artifact2 = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
-                sm.getId(), "file2", false);
+        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file2", false);
 
         // check repo before delete
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
@@ -940,9 +906,12 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // check that only one artifact is still alive and still assigned
-        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
-        assertThat(artifactRepository.findAll()).hasSize(1);
-        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()).hasSize(1);
+        assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("After the sm should be marked as deleted")
+                .hasSize(1);
+        assertThat(artifactRepository.findAll()).as("After delete artifact should available for marked as deleted sm's")
+                .hasSize(1);
+        assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts())
+                .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
 
     }
 
@@ -972,8 +941,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
         final SoftwareModuleMetadata metaKey1 = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey1));
         final SoftwareModuleMetadata metaKey2 = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey2));
 
-        assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
-        assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+        assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
+        assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
     }
 
     @Test
@@ -997,7 +966,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
         final SoftwareModuleMetadata assertDS = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey));
-        assertThat(assertDS.getValue()).isEqualTo(updateValue);
+        assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
     }
 
     @Test

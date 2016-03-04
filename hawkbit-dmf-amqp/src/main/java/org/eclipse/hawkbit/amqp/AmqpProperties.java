@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
-
     /**
      * DMF API dead letter queue.
      */

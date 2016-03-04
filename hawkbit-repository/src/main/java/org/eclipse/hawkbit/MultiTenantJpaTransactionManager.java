@@ -48,7 +48,9 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
                 && !definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".deleteTenant")
                 && !definition.getName()
                         .startsWith(SystemManagement.class.getCanonicalName() + ".currentTenantKeyGenerator")
-                && !definition.getName().startsWith(RolloutManagement.class.getCanonicalName() + ".rolloutScheduler")) {
+                && !definition.getName().startsWith(RolloutManagement.class.getCanonicalName() + ".rolloutScheduler")
+                && !definition.getName()
+                        .startsWith(SystemManagement.class.getCanonicalName() + ".getOrCreateTenantMetadata")) {
 
             final String currentTenant = tenantAware.getCurrentTenant();
             if (currentTenant == null) {

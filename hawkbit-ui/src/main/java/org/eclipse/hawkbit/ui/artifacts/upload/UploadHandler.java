@@ -108,8 +108,10 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
         this.fileName = fileName;
         this.mimeType = mimeType;
+        //reset has directory flag before upload
+        view.setHasDirectory(false);
         try {
-            if (view.validate()) {
+            if (view.checkIfSoftwareModuleIsSelected()) {
                 if (view.checkForDuplicate(fileName)) {
                     view.showDuplicateMessage();
                 } else {
@@ -167,7 +169,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         view.updateActionCount();
 
         // display the duplicate message after streaming all files
-        view.displayDuplicateMessageAfterStreamingAll();
+        view.displayDuplicateValidationMessage();
     }
 
     /**
@@ -292,7 +294,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         if (view.enableProcessBtn()) {
             infoWindow.uploadSessionFinished();
         }
-        view.displayDuplicateMessageAfterStreamingAll();
+        view.displayDuplicateValidationMessage();
 
         LOG.info("Streaming failed due to  :{}", event.getException());
     }
@@ -316,7 +318,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         }
         view.updateActionCount();
         infoWindow.uploadFailed(event.getFilename(), failureReason);
-
         LOG.info("Upload failed for file :{}", event.getReason());
 
     }
