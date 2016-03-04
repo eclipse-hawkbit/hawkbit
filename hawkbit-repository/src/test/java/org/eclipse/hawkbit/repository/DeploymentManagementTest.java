@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -765,12 +764,17 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
         // verifying that the assignment is correct
-        assertEquals(1, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals(1, deploymentManagement.findActionsByTarget(targ).size());
-        assertEquals(TargetUpdateStatus.PENDING, targ.getTargetInfo().getUpdateStatus());
-        assertEquals(dsA, targ.getAssignedDistributionSet());
-        assertEquals(dsA, deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
-        assertNull(targ.getTargetInfo().getInstalledDistributionSet());
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).size()).as("Active action of target")
+                .isEqualTo(1);
+        assertThat(deploymentManagement.findActionsByTarget(targ).size()).as("Action of target").isEqualTo(1);
+        assertThat(targ.getTargetInfo().getUpdateStatus()).as("UpdateStatus of target")
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        assertThat(targ.getAssignedDistributionSet()).as("Assigned distribution set of target").isEqualTo(dsA);
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
+                .as("Distribution set of action").isEqualTo(dsA);
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
+                .as("Installed distribution set of action").isNotNull();
 
         final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, dsA);
         final Action action = updAct.getContent().get(0);
@@ -780,16 +784,16 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 
-        assertEquals(0, deploymentManagement.findActiveActionsByTarget(targ).size());
-        // try {
-        assertEquals(1, deploymentManagement.findInActiveActionsByTarget(targ).size());
-        // }
-        // catch( final LazyInitializationException ex ) {
-        //
-        // }
-        assertEquals(TargetUpdateStatus.IN_SYNC, targ.getTargetInfo().getUpdateStatus());
-        assertEquals(dsA, targ.getAssignedDistributionSet());
-        assertEquals(dsA, targ.getTargetInfo().getInstalledDistributionSet());
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).size()).as("Active action of target")
+                .isEqualTo(0);
+        assertThat(deploymentManagement.findInActiveActionsByTarget(targ).size()).as("Inactive action of target")
+                .isEqualTo(1);
+        assertThat(targ.getTargetInfo().getUpdateStatus()).as("UpdateStatus of target")
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+
+        assertThat(targ.getAssignedDistributionSet()).as("Assigned distribution set of target").isEqualTo(dsA);
+        assertThat(targ.getTargetInfo().getInstalledDistributionSet()).as("Installed distribution set of target")
+                .isEqualTo(dsA);
 
         targs = deploymentManagement.assignDistributionSet(dsB.getId(), new String[] { "target-id-A" })
                 .getAssignedTargets();
