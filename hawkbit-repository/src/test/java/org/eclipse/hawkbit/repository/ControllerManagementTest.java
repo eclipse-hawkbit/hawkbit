@@ -70,8 +70,8 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusMessagesByActionInDescOrder(pageReq, savedAction, false)
-                .getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction, false).getNumberOfElements())
+                .isEqualTo(3);
     }
 
     @Test

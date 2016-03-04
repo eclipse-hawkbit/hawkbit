@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.rest.resource;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -34,6 +35,7 @@ import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -116,27 +118,24 @@ public class TargetResourceTest extends AbstractIntegrationTest {
                 new ActionStatus(actions.get(0), Status.FINISHED, System.currentTimeMillis(), "testmessage"),
                 actions.get(0));
 
-        final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionStatusFields.ID.getFieldName());
+        final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
+        final ActionStatus status = deploymentManagement
+                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
+                .get(0).getActionStatus().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
+                .collect(Collectors.toList()).get(0);
 
-        // limit to 1 - first page -> standard cancel message
-        final Long reportAt = deploymentManagement
-                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
-                .get(0).getCreatedAt();
-        final Long id = deploymentManagement
-                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
-                .get(0).getId();
         mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + RestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
                         .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize))
-                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:DESC"))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(3)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)))
-                .andExpect(jsonPath("content.[0].id", equalTo(id.intValue())))
+                .andExpect(jsonPath("content.[0].id", equalTo(status.getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("finished")))
                 .andExpect(jsonPath("content.[0].messages", hasSize(1)))
-                .andExpect(jsonPath("content.[0].reportedAt", equalTo(reportAt)))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(status.getCreatedAt().longValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("canceling")));
     }
 
@@ -229,7 +228,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Test
     public void cancelActionOK() throws Exception {
         // prepare test
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // test - cancel the active action
         mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
@@ -252,7 +251,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Test
     public void cancelAnCancelActionIsNotAllowed() throws Exception {
         // prepare test
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // cancel the active action
         deploymentManagement.cancelAction(tA.getActions().get(0), tA);
@@ -272,7 +271,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Description("Force Quit an Action, which is already canceled. Expected Result is an HTTP response code 204.")
     public void forceQuitAnCanceledActionReturnsOk() throws Exception {
 
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // cancel the active action
         deploymentManagement.cancelAction(tA.getActions().get(0), tA);
@@ -293,7 +292,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     @Description("Force Quit an Action, which is not canceled. Expected Result is an HTTP response code 405.")
     public void forceQuitAnNotCanceledActionReturnsMethodNotAllowed() throws Exception {
 
-        Target tA = createTargetAndStartAction();
+        final Target tA = createTargetAndStartAction();
 
         // test - cancel an cancel action returns forbidden
         mvc.perform(delete(RestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
@@ -834,7 +833,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
         mvc.perform(get(
-                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS))
+                RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS)
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("update")))
@@ -852,6 +852,108 @@ public class TargetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Verfies that the API returns the status list with expected content.")
+    public void getMultipleActionStatus() throws Exception {
+        final String knownTargetId = "targetId";
+        final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
+        // retrieve list in default descending order for actionstaus entries
+        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
+                .sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).collect(Collectors.toList());
+
+        // sort is default descending order, latest status first
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
+                .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
+                .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[1].type", equalTo("running")))
+                .andExpect(jsonPath("content.[1].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+    }
+
+    @Test
+    @Description("Verfies that the API returns the status list with expected content sorted by reportedAt field.")
+    public void getMultipleActionStatusSortedByReportedAt() throws Exception {
+        final String knownTargetId = "targetId";
+        final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
+        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
+                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
+
+        // descending order
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "REPORTEDAT:DESC"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
+                .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
+                .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[1].type", equalTo("running")))
+                .andExpect(jsonPath("content.[1].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+
+        // ascending order
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "REPORTEDAT:ASC"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[1].type", equalTo("canceling")))
+                .andExpect(jsonPath("content.[1].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[1].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("running")))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+    }
+
+    @Test
+    @Description("Verfies that the API returns the status list with expected content split into two pages.")
+    public void getMultipleActionStatusWithPagingLimitRequestParameter() throws Exception {
+        final String knownTargetId = "targetId";
+
+        final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
+        final List<ActionStatus> actionStatus = action.getActionStatus().stream()
+                .sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId())).collect(Collectors.toList());
+
+        // Page 1
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
+                .andExpect(jsonPath("content.[0].messages", hasItem("manual cancelation requested")))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(1).getCreatedAt())))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+
+        // Page 2
+        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("running")))
+                .andExpect(jsonPath("content.[0].reportedAt", equalTo(actionStatus.get(0).getCreatedAt())))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+    }
+
+    @Test
     public void getMultipleActionsWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
@@ -859,7 +961,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // page 1: one entry
         mvc.perform(get(
                 RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS)
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1)))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
@@ -874,7 +977,9 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         mvc.perform(get(
                 RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + RestConstants.TARGET_V1_ACTIONS)
                         .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("update")))
@@ -902,7 +1007,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
                 + "?offset=0&limit=50&sort=id:DESC";
     }
 
-    private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId) {
+    private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId)
+            throws InterruptedException {
 
         final PageRequest pageRequest = new PageRequest(0, 100, Direction.ASC, ActionStatusFields.ID.getFieldName());
 
@@ -920,6 +1026,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         final List<Target> updatedTargets = deploymentManagement.assignDistributionSet(one, targets)
                 .getAssignedTargets();
         // 2nd update
+        // sleep 10ms to ensure that we can sort by reportedAt
+        Thread.sleep(10);
         deploymentManagement.assignDistributionSet(two, updatedTargets);
 
         // two updates, one cancelation
@@ -944,54 +1052,6 @@ public class TargetResourceTest extends AbstractIntegrationTest {
                                 + actions.get(1).getDistributionSet().getId())))
                 .andExpect(jsonPath("_links.status.href",
                         equalTo(generateStatusreferenceLink(knownTargetId, actions.get(1)))));
-    }
-
-    @Test
-    public void getActionStatusWithMultipleResultsWithPagingLimitRequestParameter() throws Exception {
-        final int limitSize = 1;
-        final String knownTargetId = "targetId";
-        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-        actions.get(0).setStatus(Status.RUNNING);
-        controllerManagament.addUpdateActionStatus(
-                new ActionStatus(actions.get(0), Status.RUNNING, System.currentTimeMillis(), "testmessage"),
-                actions.get(0));
-
-        final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionStatusFields.ID.getFieldName());
-
-        // limit to 1 - first page -> standard cancel message
-        Long reportAt = deploymentManagement
-                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
-                .get(0).getCreatedAt();
-        Long id = deploymentManagement
-                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
-                .get(0).getId();
-        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + RestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
-                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(3)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)))
-                .andExpect(jsonPath("content.[0].id", equalTo(id.intValue())))
-                .andExpect(jsonPath("content.[0].type", equalTo("running")))
-                .andExpect(jsonPath("content.[0].messages", hasSize(1)))
-                .andExpect(jsonPath("content.[0].reportedAt", equalTo(reportAt)));
-
-        // limit to 1 - first page -> added custom message
-        reportAt = deploymentManagement
-                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
-                .get(1).getCreatedAt();
-        id = deploymentManagement
-                .findActionsByTarget(pageRequest, targetManagement.findTargetByControllerID(knownTargetId)).getContent()
-                .get(1).getCreatedAt();
-
-        mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + RestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize))
-                        .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
-                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(3)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(1)));
     }
 
     @Test
@@ -1232,7 +1292,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // prepare test
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
-        Target tA = targetManagement.createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
+        final Target tA = targetManagement
+                .createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
         // assign a distribution set so we get an active update action
         deploymentManagement.assignDistributionSet(dsA, Lists.newArrayList(tA));
         // verify active action
