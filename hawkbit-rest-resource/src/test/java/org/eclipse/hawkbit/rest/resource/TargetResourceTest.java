@@ -887,7 +887,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // descending order
         mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
-                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "REPORTED_AT:DESC"))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "REPORTEDAT:DESC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[0].type", equalTo("canceling")))
@@ -903,7 +903,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         // ascending order
         mvc.perform(get(RestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + RestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/" + RestConstants.TARGET_V1_ACTION_STATUS)
-                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "REPORTED_AT:ASC"))
+                        .param(RestConstants.REQUEST_PARAMETER_SORTING, "REPORTEDAT:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))
                 .andExpect(jsonPath("content.[1].type", equalTo("canceling")))

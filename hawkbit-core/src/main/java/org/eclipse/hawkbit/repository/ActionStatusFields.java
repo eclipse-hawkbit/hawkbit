@@ -25,7 +25,7 @@ public enum ActionStatusFields implements FieldNameProvider {
     /**
      * The reportedAt field.
      */
-    REPORTED_AT("createdAt");
+    REPORTEDAT("createdAt");
 
     private final String fieldName;
 
