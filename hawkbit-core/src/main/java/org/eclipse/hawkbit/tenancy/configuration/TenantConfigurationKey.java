@@ -22,35 +22,35 @@ public enum TenantConfigurationKey {
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_HEADER_ENABLED("authentication.header.enabled",
-            "hawkbit.server.controller.security.authentication.header.enabled", Boolean.FALSE.toString()),
+            "hawkbit.server.ddi.security.authentication.header.enabled", Boolean.FALSE.toString()),
     /**
     *
     */
     AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME("authentication.header.authority",
-            "hawkbit.server.controller.security.authentication.header.authority", Boolean.FALSE.toString()),
+            "hawkbit.server.ddi.security.authentication.header.authority", Boolean.FALSE.toString()),
     /**
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED("authentication.targettoken.enabled",
-            "hawkbit.server.controller.security.authentication.targettoken.enabled", Boolean.FALSE.toString()),
+            "hawkbit.server.ddi.security.authentication.targettoken.enabled", Boolean.FALSE.toString()),
 
     /**
      * boolean value {@code true} {@code false}.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED("authentication.gatewaytoken.enabled",
-            "hawkbit.server.controller.security.authentication.gatewaytoken.enabled", Boolean.FALSE.toString()),
+            "hawkbit.server.ddi.security.authentication.gatewaytoken.enabled", Boolean.FALSE.toString()),
     /**
      * string value which holds the name of the security token key.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME("authentication.gatewaytoken.name",
-            "hawkbit.server.controller.security.authentication.gatewaytoken.name", null),
+            "hawkbit.server.ddi.security.authentication.gatewaytoken.name", null),
 
     /**
      * string value which holds the actual security-key of the gateway security
      * token.
      */
     AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY("authentication.gatewaytoken.key",
-            "hawkbit.server.controller.security.authentication.gatewaytoken.key", null);
+            "hawkbit.server.ddi.security.authentication.gatewaytoken.key", null);
 
     private final String keyName;
     private final String defaultKeyName;

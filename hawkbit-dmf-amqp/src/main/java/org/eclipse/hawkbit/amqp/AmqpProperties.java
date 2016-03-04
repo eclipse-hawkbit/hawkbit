@@ -8,41 +8,91 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Bean which holds the necessary properties for configuring the AMQP
  * connection.
- *
+ * 
  */
+@Component
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
-
+    /**
+     * DMF API dead letter queue.
+     */
     private String deadLetterQueue = "dmf_receiver_deadletter";
+
+    /**
+     * DMF API dead letter exchange.
+     */
     private String deadLetterExchange = "dmf.receiver.deadletter";
+
+    /**
+     * DMF API receiving queue.
+     */
     private String receiverQueue = "dmf_receiver";
+
+    /**
+     * Missing queue fatal.
+     */
     private boolean missingQueuesFatal = false;
 
+    /**
+     * Is missingQueuesFatal enabled
+     * 
+     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
+     * @return the missingQueuesFatal <true> enabled <false> disabled
+     */
     public boolean isMissingQueuesFatal() {
         return missingQueuesFatal;
     }
 
+    /**
+     * @param missingQueuesFatal
+     *            the missingQueuesFatal to set.
+     * @see SimpleMessageListenerContainer#setMissingQueuesFatal
+     */
     public void setMissingQueuesFatal(final boolean missingQueuesFatal) {
         this.missingQueuesFatal = missingQueuesFatal;
     }
 
+    /**
+     * Returns the dead letter exchange.
+     * 
+     * @return dead letter exchange
+     */
     public String getDeadLetterExchange() {
         return deadLetterExchange;
     }
 
+    /**
+     * Sets the dead letter exchange.
+     * 
+     * @param deadLetterExchange
+     *            the deadLetterExchange to be set
+     */
     public void setDeadLetterExchange(final String deadLetterExchange) {
         this.deadLetterExchange = deadLetterExchange;
     }
 
+    /**
+     * Returns the dead letter queue.
+     * 
+     * @return the dead letter queue
+     */
     public String getDeadLetterQueue() {
         return deadLetterQueue;
     }
 
+    /**
+     * Sets the dead letter queue.
+     * 
+     * @param deadLetterQueue
+     *            the deadLetterQueue ro be set
+     */
     public void setDeadLetterQueue(final String deadLetterQueue) {
         this.deadLetterQueue = deadLetterQueue;
     }

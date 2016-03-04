@@ -15,16 +15,14 @@ import javax.servlet.http.Cookie;
 
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
-import org.eclipse.hawkbit.util.SPInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -61,7 +59,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringView(name = "")
 @UIScope
-public class LoginView extends VerticalLayout implements View, EnvironmentAware {
+public class LoginView extends VerticalLayout implements View {
     private static final String LOGIN_TEXTFIELD = "login-textfield";
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginView.class);
@@ -76,7 +74,7 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
     private I18N i18n;
 
     @Autowired
-    private transient SPInfo spInfo;
+    private transient UiProperties uiProperties;
 
     @Autowired
     private transient MultitenancyIndicator multiTenancyIndicator;
@@ -85,9 +83,6 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
     private TextField tenant;
     private PasswordField password;
     private Button signin;
-
-    private Boolean secureCookie = Boolean.TRUE;
-    private String userManagementLoginUrl;
 
     void loginAuthenticationFailedNotification() {
         final Notification notification = new Notification(i18n.get("notification.login.failed.title"));
@@ -119,7 +114,8 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
         final URI spURI = Page.getCurrent().getLocation();
         final String lookForDemoFragment = spURI.toString();
         if (lookForDemoFragment.contains("?demo")) {
-            login(spInfo.getDemoTenant(), spInfo.getDemoUser(), spInfo.getDemoPassword(), false);
+            login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
+                    uiProperties.getDemo().getPassword(), false);
         }
 
         final Component loginForm = buildLoginForm();
@@ -243,18 +239,18 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
         links.addComponent(demoLink);
         demoLink.addStyleName(ValoTheme.LINK_SMALL);
 
-        if (spInfo.getRequestAccountEmail() != null) {
+        if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
             final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_REQUESTACCOUNT,
-                    i18n.get("link.requestaccount.name"), spInfo.getRequestAccountEmail(), FontAwesome.SHOPPING_CART,
-                    "", linkStyle, true);
+                    i18n.get("link.requestaccount.name"), uiProperties.getLinks().getRequestAccount(),
+                    FontAwesome.SHOPPING_CART, "", linkStyle, true);
             links.addComponent(requestAccountLink);
             requestAccountLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
-        if (userManagementLoginUrl != null) {
+        if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_USERMANAGEMENT,
-                    i18n.get("link.usermanagement.name"), userManagementLoginUrl, FontAwesome.USERS, "_blank",
-                    linkStyle, true);
+                    i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
+                    FontAwesome.USERS, "_blank", linkStyle, true);
             links.addComponent(userManagementLink);
             userManagementLink.addStyleName(ValoTheme.LINK_SMALL);
         }
@@ -315,7 +311,7 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
             // 100 days
             tenantCookie.setMaxAge(3600 * 24 * 100);
             tenantCookie.setHttpOnly(true);
-            tenantCookie.setSecure(secureCookie);
+            tenantCookie.setSecure(uiProperties.getLogin().getCookie().isSecure());
             VaadinService.getCurrentResponse().addCookie(tenantCookie);
         }
 
@@ -324,7 +320,7 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
         // 100 days
         usernameCookie.setMaxAge(3600 * 24 * 100);
         usernameCookie.setHttpOnly(true);
-        usernameCookie.setSecure(secureCookie);
+        usernameCookie.setSecure(uiProperties.getLogin().getCookie().isSecure());
         VaadinService.getCurrentResponse().addCookie(usernameCookie);
     }
 
@@ -367,17 +363,5 @@ public class LoginView extends VerticalLayout implements View, EnvironmentAware 
             LOGGER.debug("Login failed", e);
             loginAuthenticationFailedNotification();
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
-     * springframework.core.env. Environment)
-     */
-    @Override
-    public void setEnvironment(final Environment environment) {
-        secureCookie = environment.getProperty("hawkbit.server.ui.login.cookie.secure", Boolean.class, Boolean.TRUE);
-        userManagementLoginUrl = environment.getProperty("hawkbit.server.im.login.url", String.class);
     }
 }
