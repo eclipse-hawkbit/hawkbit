@@ -1026,8 +1026,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         final List<Target> updatedTargets = deploymentManagement.assignDistributionSet(one, targets)
                 .getAssignedTargets();
         // 2nd update
-        // sleep 1ms to ensure that we can sort by reportedAt
-        Thread.sleep(1);
+        // sleep 10ms to ensure that we can sort by reportedAt
+        Thread.sleep(10);
         deploymentManagement.assignDistributionSet(two, updatedTargets);
 
         // two updates, one cancelation
