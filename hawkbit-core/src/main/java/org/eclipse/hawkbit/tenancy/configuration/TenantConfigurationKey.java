@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.tenancy.configuration;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationBooleanValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationPollingDurationValidator;
@@ -84,10 +84,18 @@ public enum TenantConfigurationKey {
     private final Class<? extends TenantConfigurationValidator> validator;
 
     /**
+     * 
      * @param key
      *            the property key name
-     * @param allowedValues
+     * @param defaultKeyName
      *            the allowed values for this specific key
+     * @param dataType
+     *            the class of the property
+     * @param defaultValue
+     *            value which should be returned, in case there is no value in
+     *            the database
+     * @param validator
+     *            Validator which validates, that property is of correct format
      */
     private TenantConfigurationKey(final String key, final String defaultKeyName, final Class<?> dataType,
             final String defaultValue, final Class<? extends TenantConfigurationValidator> validator) {
@@ -96,7 +104,6 @@ public enum TenantConfigurationKey {
         this.defaultKeyName = defaultKeyName;
         this.defaultValue = defaultValue;
         this.validator = validator;
-
     }
 
     /**
@@ -138,17 +145,14 @@ public enum TenantConfigurationKey {
      * @param value
      *            which will be validated
      * @throws TenantConfigurationValidatorException
-     *             is thrown when object is invalid.
+     *             is thrown, when object is invalid
      */
-    public void validate(final ApplicationContext context, final Object value)
-            throws TenantConfigurationValidatorException {
-        final TenantConfigurationValidator createBean = context.getAutowireCapableBeanFactory().createBean(validator);
+    public void validate(final ApplicationContext context, final Object value) {
+        final TenantConfigurationValidator createdBean = context.getAutowireCapableBeanFactory().createBean(validator);
         try {
-            createBean.validate(value);
-        } catch (final TenantConfigurationValidatorException ex) {
-            throw ex;
+            createdBean.validate(value);
         } finally {
-            context.getAutowireCapableBeanFactory().destroyBean(createBean);
+            context.getAutowireCapableBeanFactory().destroyBean(createdBean);
         }
     }
 
@@ -156,17 +160,15 @@ public enum TenantConfigurationKey {
      * @param keyName
      *            name of the TenantConfigurationKey
      * @return the TenantConfigurationKey with the name keyName
-     * @throws InvalidTenantConfigurationKeyException
-     *             if there is no TenantConfigurationKey with the name keyName
      */
-    public static TenantConfigurationKey fromKeyName(final String keyName)
-            throws InvalidTenantConfigurationKeyException {
+    public static TenantConfigurationKey fromKeyName(final String keyName) {
 
-        try {
-            return Arrays.stream(TenantConfigurationKey.values()).filter(conf -> conf.getKeyName().equals(keyName))
-                    .findFirst().get();
-        } catch (final NoSuchElementException e) {
-            throw new InvalidTenantConfigurationKeyException("The given configuration key name does not exist.");
+        final Optional<TenantConfigurationKey> optKey = Arrays.stream(TenantConfigurationKey.values())
+                .filter(conf -> conf.getKeyName().equals(keyName)).findFirst();
+
+        if (optKey.isPresent()) {
+            return optKey.get();
         }
+        throw new InvalidTenantConfigurationKeyException("The given configuration key name does not exist.");
     }
 }

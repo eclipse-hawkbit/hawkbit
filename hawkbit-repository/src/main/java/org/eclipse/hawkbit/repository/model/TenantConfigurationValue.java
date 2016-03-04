@@ -16,15 +16,15 @@ package org.eclipse.hawkbit.repository.model;
  */
 public class TenantConfigurationValue<T> {
 
+    private T value;
+    private Long lastModifiedAt;
+    private String lastModifiedBy;
+    private Long createdAt;
+    private String createdBy;
+    private boolean isGlobal = true;
+
     private TenantConfigurationValue() {
     }
-
-    private T value = null;
-    private boolean isGlobal = true;
-    private Long lastModifiedAt = null;
-    private String lastModifiedBy = null;
-    private Long createdAt = null;
-    private String createdBy = null;
 
     /**
      * Gets the value.

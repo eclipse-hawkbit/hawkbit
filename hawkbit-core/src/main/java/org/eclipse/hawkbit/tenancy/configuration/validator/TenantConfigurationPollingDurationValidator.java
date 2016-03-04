@@ -16,12 +16,11 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * specific tenant configuration validator, which validates that the given value
- * is a String in the correct duration format..
+ * This class is used to validate, that the property is a String and that it is
+ * in the correct duration format.
+ *
  */
 public class TenantConfigurationPollingDurationValidator implements TenantConfigurationValidator {
-
-    // private final ControllerPollProperties properties;
 
     private final DurationHelper durationHelper = new DurationHelper();
 
@@ -35,8 +34,6 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
      */
     @Autowired
     public TenantConfigurationPollingDurationValidator(final ControllerPollProperties properties) {
-        // this.properties = properties;
-
         minDuration = durationHelper.formattedStringToDuration(properties.getMinPollingTime());
         maxDuration = durationHelper.formattedStringToDuration(properties.getMaxPollingTime());
     }

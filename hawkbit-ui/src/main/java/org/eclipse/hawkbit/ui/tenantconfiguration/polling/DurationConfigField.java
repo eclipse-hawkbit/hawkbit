@@ -56,14 +56,18 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
 
     @Override
     public void valueChange(final ValueChangeEvent event) {
-        if (event.getProperty() == checkBox) {
-            if (checkBox.getValue()) {
-                durationField.setEnabled(true);
-            } else {
-                durationField.setDuration(globalDuration);
-                durationField.setEnabled(false);
-            }
+        if (event.getProperty() != checkBox) {
+            return;
         }
+
+        durationField.setEnabled(checkBox.getValue());
+
+        if (!checkBox.getValue()) {
+            durationField.setDuration(globalDuration);
+        }
+
+        durationField.setEnabled(false);
+
         notifyConfigurationChanged();
     }
 
@@ -102,11 +106,12 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
             checkBox.setValue(false);
             durationField.setDuration(globalDuration);
             durationField.setEnabled(false);
-        } else {
-            checkBox.setValue(true);
-            durationField.setDuration(tenantDuration);
-            durationField.setEnabled(true);
+            return;
         }
+
+        checkBox.setValue(true);
+        durationField.setDuration(tenantDuration);
+        durationField.setEnabled(true);
     }
 
     /**

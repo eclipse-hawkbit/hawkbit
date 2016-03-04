@@ -15,20 +15,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * A json annotated rest model for a tenant configuration value to RESTful API
+ * representation.
+ *
+ */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TenantConfigurationValueRest extends ResourceSupport {
 
     @JsonInclude(Include.ALWAYS)
-    private Object value = null;
+    private Object value;
 
     @JsonInclude(Include.ALWAYS)
     private boolean isGlobal = true;
 
-    private Long lastModifiedAt = null;
-    private String lastModifiedBy = null;
-    private Long createdAt = null;
-    private String createdBy = null;
+    private Long lastModifiedAt;
+    private String lastModifiedBy;
+    private Long createdAt;
+    private String createdBy;
 
     public Object getValue() {
         return value;

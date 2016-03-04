@@ -84,7 +84,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
-            final Class<T> propertyType) throws TenantConfigurationValidatorException {
+            final Class<T> propertyType) {
 
         if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
             throw new TenantConfigurationValidatorException(
@@ -130,8 +130,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    public TenantConfigurationValue<?> getConfigurationValue(final TenantConfigurationKey configurationKey)
-            throws TenantConfigurationValidatorException {
+    public TenantConfigurationValue<?> getConfigurationValue(final TenantConfigurationKey configurationKey) {
         return getConfigurationValue(configurationKey, configurationKey.getDataType());
     }
 
@@ -156,8 +155,8 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    public <T> T getGlobalConfigurationValue(final TenantConfigurationKey configurationKey, final Class<T> propertyType)
-            throws TenantConfigurationValidatorException {
+    public <T> T getGlobalConfigurationValue(final TenantConfigurationKey configurationKey,
+            final Class<T> propertyType) {
 
         if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
             throw new TenantConfigurationValidatorException(
@@ -167,10 +166,11 @@ public class TenantConfigurationManagement implements EnvironmentAware {
 
         final T valueInProperties = environment.getProperty(configurationKey.getDefaultKeyName(), propertyType);
 
-        if (valueInProperties != null) {
-            return valueInProperties;
+        if (valueInProperties == null) {
+            return conversionService.convert(configurationKey.getDefaultValue(), propertyType);
         }
-        return conversionService.convert(configurationKey.getDefaultValue(), propertyType);
+
+        return valueInProperties;
     }
 
     /**
@@ -206,14 +206,11 @@ public class TenantConfigurationManagement implements EnvironmentAware {
 
         TenantConfiguration tenantConfiguration = tenantConfigurationRepository
                 .findByKey(configurationKey.getKeyName());
-        if (tenantConfiguration != null)
 
-        {
-            tenantConfiguration.setValue(value.toString());
-        } else
-
-        {
+        if (tenantConfiguration == null) {
             tenantConfiguration = new TenantConfiguration(configurationKey.getKeyName(), value.toString());
+        } else {
+            tenantConfiguration.setValue(value.toString());
         }
 
         final TenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository.save(tenantConfiguration);

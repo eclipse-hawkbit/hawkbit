@@ -35,7 +35,7 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
     /**
      * Constructor.
      * 
-     * @param systemManagement
+     * @param tenantConfigurationManagement
      *            the system management service to retrieve configuration
      *            properties
      * @param tenantAware
@@ -44,6 +44,8 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
      * @param controllerManagement
      *            the controller management to retrieve the specific target
      *            security token to verify
+     * @param systemSecurityContext
+     *            the system security context
      */
     public HttpControllerPreAuthenticateSecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,

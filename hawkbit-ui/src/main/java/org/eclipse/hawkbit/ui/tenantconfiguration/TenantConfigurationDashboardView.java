@@ -44,8 +44,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = HawkbitUI.class)
 @ViewScope
-public class TenantConfigurationDashboardView extends CustomComponent
-        implements View, ConfigurationItemChangeListener {
+public class TenantConfigurationDashboardView extends CustomComponent implements View, ConfigurationItemChangeListener {
 
     public static final String VIEW_NAME = "spSystemConfig";
     private static final long serialVersionUID = 1L;
@@ -68,7 +67,7 @@ public class TenantConfigurationDashboardView extends CustomComponent
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
 
-    private List<ConfigurationGroup> configurationViews = new ArrayList<ConfigurationGroup>();
+    private final List<ConfigurationGroup> configurationViews = new ArrayList<ConfigurationGroup>();
 
     /**
      * init method adds all Configuration Views to the list of Views.
@@ -91,9 +90,7 @@ public class TenantConfigurationDashboardView extends CustomComponent
         rootLayout.setMargin(true);
         rootLayout.setSpacing(true);
 
-        configurationViews.forEach(view -> {
-            rootLayout.addComponent(view);
-        });
+        configurationViews.forEach(view -> rootLayout.addComponent(view));
 
         final HorizontalLayout buttonContent = saveConfigurationButtonsLayout();
         rootLayout.addComponent(buttonContent);
@@ -101,9 +98,7 @@ public class TenantConfigurationDashboardView extends CustomComponent
         rootPanel.setContent(rootLayout);
         setCompositionRoot(rootPanel);
 
-        configurationViews.forEach(view -> {
-            view.addChangeListener(this);
-        });
+        configurationViews.forEach(view -> view.addChangeListener(this));
     }
 
     private HorizontalLayout saveConfigurationButtonsLayout() {
@@ -132,23 +127,18 @@ public class TenantConfigurationDashboardView extends CustomComponent
 
     private void saveConfiguration() {
 
-        boolean isUserInputValid = configurationViews.stream().allMatch(confView -> {
-            return confView.isUserInputValid();
-        });
+        final boolean isUserInputValid = configurationViews.stream().allMatch(confView -> confView.isUserInputValid());
 
-        if (isUserInputValid) {
-            configurationViews.forEach(confView -> {
-                confView.save();
-            });
-
-            // More methods
-            saveConfigurationBtn.setEnabled(false);
-            undoConfigurationBtn.setEnabled(false);
-            uINotification.displaySuccess(i18n.get("notification.configuration.save.successful"));
-
-        } else {
+        if (!isUserInputValid) {
             uINotification.displayValidationError(i18n.get("notification.configuration.save.notpossible"));
+            return;
         }
+        configurationViews.forEach(confView -> confView.save());
+
+        // More methods
+        saveConfigurationBtn.setEnabled(false);
+        undoConfigurationBtn.setEnabled(false);
+        uINotification.displaySuccess(i18n.get("notification.configuration.save.successful"));
     }
 
     private void undoConfiguration() {
