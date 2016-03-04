@@ -23,12 +23,12 @@ public class AmqpProperties {
     /**
      * DMF API dead letter queue.
      */
-    private String deadLetterQueue = "dmf_connector_deadletter";
+    private String deadLetterQueue = "dmf_receiver_deadletter";
 
     /**
      * DMF API dead letter exchange.
      */
-    private String deadLetterExchange = "dmf.connector.deadletter";
+    private String deadLetterExchange = "dmf.receiver.deadletter";
 
     /**
      * DMF API receiving queue.
@@ -36,8 +36,7 @@ public class AmqpProperties {
     private String receiverQueue = "dmf_receiver";
 
     /**
-     * Missing queue fatal, see
-     * {@link SimpleMessageListenerContainer#setMissingQueuesFatal(boolean)}.
+     * Missing queue fatal.
      */
     private boolean missingQueuesFatal = false;
 
