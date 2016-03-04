@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.common.grid;
 
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -26,10 +26,10 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * 
- * Abstract table header.
+ * Abstract grid header.
  * 
  */
-public abstract class AbstractSimpleTableHeader extends VerticalLayout {
+public abstract class AbstractGridHeader extends VerticalLayout {
 
     private static final long serialVersionUID = -24429876573255519L;
 

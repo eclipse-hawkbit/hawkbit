@@ -527,7 +527,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         } else if (Action.Status.SCHEDULED == status) {
             label.setStyleName(statusIconPending);
             label.setDescription(i18n.get("label.scheduled"));
-            label.setValue(FontAwesome.BULLSEYE.getHtml());
+            label.setValue(FontAwesome.HOURGLASS_1.getHtml());
         } else {
             label.setDescription("");
             label.setValue("");
@@ -578,7 +578,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         label.setContentMode(ContentMode.HTML);
         if (SPUIDefinitions.SCHEDULED.equals(activeValue)) {
             label.setDescription("Scheduled");
-            label.setValue(FontAwesome.BULLSEYE.getHtml());
+            label.setValue(FontAwesome.HOURGLASS_1.getHtml());
         } else if (SPUIDefinitions.ACTIVE.equals(activeValue)) {
             label.setDescription("Active");
             label.setStyleName("statusIconActive");

@@ -6,9 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.model.Rollout;
+
+import com.vaadin.server.FontAwesome;
 
 /**
  * Proxy rollout with suctome properties.
@@ -26,22 +28,10 @@ public class ProxyRollout extends Rollout {
 
     private Long numberOfGroups;
 
-    private Long runningTargetsCount;
-
-    private Long scheduledTargetsCount;
-
-    private Long cancelledTargetsCount;
-
-    private Long errorTargetsCount;
-
-    private Long finishedTargetsCount;
-
-    private Long notStartedTargetsCount;
-
     private Boolean isActionRecieved = Boolean.FALSE;
 
     private String totalTargetsCount;
-
+    
     /**
      * @return the distributionSetNameVersion
      */
@@ -103,81 +93,6 @@ public class ProxyRollout extends Rollout {
     }
 
     /**
-     * @return the runningTargetsCount
-     */
-    public Long getRunningTargetsCount() {
-        return runningTargetsCount;
-    }
-
-    /**
-     * @param runningTargetsCount
-     *            the runningTargetsCount to set
-     */
-    public void setRunningTargetsCount(final Long runningTargetsCount) {
-        this.runningTargetsCount = runningTargetsCount;
-    }
-
-    /**
-     * @return the scheduledTargetsCount
-     */
-    public Long getScheduledTargetsCount() {
-        return scheduledTargetsCount;
-    }
-
-    /**
-     * @param scheduledTargetsCount
-     *            the scheduledTargetsCount to set
-     */
-    public void setScheduledTargetsCount(final Long scheduledTargetsCount) {
-        this.scheduledTargetsCount = scheduledTargetsCount;
-    }
-
-    /**
-     * @return the cancelledTargetsCount
-     */
-    public Long getCancelledTargetsCount() {
-        return cancelledTargetsCount;
-    }
-
-    /**
-     * @param cancelledTargetsCount
-     *            the cancelledTargetsCount to set
-     */
-    public void setCancelledTargetsCount(final Long cancelledTargetsCount) {
-        this.cancelledTargetsCount = cancelledTargetsCount;
-    }
-
-    /**
-     * @return the errorTargetsCount
-     */
-    public Long getErrorTargetsCount() {
-        return errorTargetsCount;
-    }
-
-    /**
-     * @param errorTargetsCount
-     *            the errorTargetsCount to set
-     */
-    public void setErrorTargetsCount(final Long errorTargetsCount) {
-        this.errorTargetsCount = errorTargetsCount;
-    }
-
-    /**
-     * @return the finishedTargetsCount
-     */
-    public Long getFinishedTargetsCount() {
-        return finishedTargetsCount;
-    }
-
-    /**
-     * @param finishedTargetsCount
-     *            the finishedTargetsCount to set
-     */
-    public void setFinishedTargetsCount(final Long finishedTargetsCount) {
-        this.finishedTargetsCount = finishedTargetsCount;
-    }
-
-    /**
      * @return the isActionRecieved
      */
     public Boolean getIsActionRecieved() {
@@ -190,21 +105,6 @@ public class ProxyRollout extends Rollout {
      */
     public void setIsActionRecieved(final Boolean isActionRecieved) {
         this.isActionRecieved = isActionRecieved;
-    }
-
-    /**
-     * @return the notStartedTargetsCount
-     */
-    public Long getNotStartedTargetsCount() {
-        return notStartedTargetsCount;
-    }
-
-    /**
-     * @param notStartedTargetsCount
-     *            the notStartedTargetsCount to set
-     */
-    public void setNotStartedTargetsCount(final Long notStartedTargetsCount) {
-        this.notStartedTargetsCount = notStartedTargetsCount;
     }
 
     /**
@@ -221,4 +121,10 @@ public class ProxyRollout extends Rollout {
     public void setTotalTargetsCount(final String totalTargetsCount) {
         this.totalTargetsCount = totalTargetsCount;
     }
+    
+    
+    public String getAction() { 
+        return FontAwesome.CIRCLE_O.getHtml();
+    }
+    
 }

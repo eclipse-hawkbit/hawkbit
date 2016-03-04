@@ -56,5 +56,26 @@
       }
 	}
 	
+	.v-grid-cell.centeralign {
+       text-align: center;
+   }
+   
+   .v-grid-cell {
+       font-size: $v-font-size--small !important;
+       height: 34px !important; 
+   }
+   
+   .v-grid-row{
+   	   height: 34px !important; 
+   }
+   
+   .v-grid-cell.frozen{
+   	   box-shadow: none !important;
+   }
+   
+   .v-grid-cell.frozen + th{
+   	   border-left: $v-grid-border-size solid $widget-border-color ;
+   }
+   
 }
    
