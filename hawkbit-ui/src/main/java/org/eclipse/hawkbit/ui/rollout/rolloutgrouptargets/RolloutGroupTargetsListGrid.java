@@ -94,29 +94,27 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
                 null, false, true);
         rolloutGroupTargetGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false,
                 true);
-        rolloutGroupTargetGridContainer.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
-                String.class, "", false, true);
     }
 
     @Override
     protected void setColumnExpandRatio() {
         getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(20);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(250);
+        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(280);
 
         getColumn(SPUILabelDefinitions.VAR_STATUS).setMinimumWidth(50);
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setMaximumWidth(100);
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setMaximumWidth(80);
 
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMaximumWidth(150);
-        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMinimumWidth(50);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMaximumWidth(180);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_DATE).setMinimumWidth(30);
 
-        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setMaximumWidth(150);
+        getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setMaximumWidth(180);
         getColumn(SPUILabelDefinitions.VAR_CREATED_BY).setMinimumWidth(50);
 
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMaximumWidth(150);
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMinimumWidth(20);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMaximumWidth(180);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setMinimumWidth(30);
 
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(150);
-        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMinimumWidth(20);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMaximumWidth(180);
+        getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setMinimumWidth(50);
 
         setFrozenColumnCount(getColumns().size());
 
@@ -131,8 +129,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE).setHeaderCaption(i18n.get("header.modifiedDate"));
         getColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setHeaderCaption(i18n.get("header.modifiedBy"));
         getColumn(SPUILabelDefinitions.VAR_DESC).setHeaderCaption(i18n.get("header.description"));
-        getColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).setHeaderCaption(i18n.get("header.assigned.ds"));
-
     }
 
     @Override
@@ -154,6 +150,23 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         alignColumns();
     }
 
+    @Override
+    protected void addColumnRenderes() {
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new StatusConverter());
+    }
+
+    @Override
+    protected void setHiddenColumns() {
+        /**
+         * No hidden columns.
+         */
+    }
+
+    @Override
+    protected CellDescriptionGenerator getDescriptionGenerator() {
+        return cell -> getDescription(cell);
+    };
+
     private void alignColumns() {
         setCellStyleGenerator(new CellStyleGenerator() {
             private static final long serialVersionUID = 5573570647129792429L;
@@ -168,88 +181,81 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         });
     }
 
-    @Override
-    protected void addColumnRenderes() {
-        addStatusCoulmn();
+    /**
+     * 
+     * Converts {@link Status} into string with status icon details.
+     *
+     */
+    private class StatusConverter implements Converter<String, Status> {
+        private static final long serialVersionUID = -7467206089699548808L;
+
+        @Override
+        public Status convertToModel(final String value, final Class<? extends Status> targetType,
+                final Locale locale) {
+            return null;
+        }
+
+        @Override
+        public String convertToPresentation(final Status status, final Class<? extends String> targetType,
+                final Locale locale) {
+            if (status == null) {
+                // Actions are not created for targets when
+                // rollout's status
+                // is READY and when duplicate assignment is done.
+                // In these cases display a appropriate status with
+                // description
+                return getStatus();
+            } else {
+                return processActionStatus(status);
+            }
+        }
+
+        @Override
+        public Class<Status> getModelType() {
+            return Status.class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
+
     }
 
-    @Override
-    protected void setHiddenColumns() {
-        getColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER).setHidden(true);
-    }
-
-    private void addStatusCoulmn() {
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
-                new Converter<String, Status>() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public Status convertToModel(final String value, final Class<? extends Status> targetType,
-                            final Locale locale) {
-                        return null;
-                    }
-
-                    @Override
-                    public String convertToPresentation(final Status status, final Class<? extends String> targetType,
-                            final Locale locale) {
-                        String result = null;
-                        if (status == null) {
-                            // Actions are not created for targets when
-                            // rollout's status
-                            // is READY and when duplicate assignment is done.
-                            // In these cases display a appropriate status with
-                            // description
-                            return getStatus();
-                        } else {
-                            switch (status) {
-                            case FINISHED:
-                                result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                                        Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), "statusIconGreen",
-                                        null);
-                                break;
-                            case SCHEDULED:
-                                result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                                        Integer.toString(FontAwesome.BULLSEYE.getCodepoint()), "statusIconBlue", null);
-                                break;
-                            case RUNNING:
-                            case RETRIEVED:
-                            case WARNING:
-                            case DOWNLOAD:
-                                result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                                        Integer.toString(FontAwesome.ADJUST.getCodepoint()), "statusIconYellow", null);
-                                break;
-                            case CANCELING:
-                                result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                                        Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), "statusIconPending",
-                                        null);
-                                break;
-                            case CANCELED:
-                                result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                                        Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), "statusIconGreen",
-                                        null);
-                                break;
-                            case ERROR:
-                                result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                                        Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
-                                        "statusIconRed", null);
-                                break;
-                            default:
-                                break;
-                            }
-                            return result;
-                        }
-                    }
-
-                    @Override
-                    public Class<Status> getModelType() {
-                        return Status.class;
-                    }
-
-                    @Override
-                    public Class<String> getPresentationType() {
-                        return String.class;
-                    }
-                });
+    private String processActionStatus(final Status status) {
+        String result = null;
+        switch (status) {
+        case FINISHED:
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), "statusIconGreen", null);
+            break;
+        case SCHEDULED:
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.HOURGLASS_1.getCodepoint()), "statusIconPending", null);
+            break;
+        case RUNNING:
+        case RETRIEVED:
+        case WARNING:
+        case DOWNLOAD:
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.ADJUST.getCodepoint()), "statusIconYellow", null);
+            break;
+        case CANCELING:
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), "statusIconPending", null);
+            break;
+        case CANCELED:
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), "statusIconGreen", null);
+            break;
+        case ERROR:
+            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), "statusIconRed", null);
+            break;
+        default:
+            break;
+        }
+        return result;
     }
 
     private String getStatus() {
@@ -267,30 +273,29 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         }
     }
 
-    @Override
-    protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
-    };
-
     private String getDescription(CellReference cell) {
         if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             if (null != cell.getProperty().getValue()) {
                 return cell.getProperty().getValue().toString().toLowerCase();
 
             } else {
-                final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
-                        ? rolloutUIState.getRolloutGroup().get() : null;
-                if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
-                    return RolloutGroupStatus.READY.toString().toLowerCase();
-                } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
-                    String ds = rolloutUIState.getRolloutDistributionSet().isPresent()
-                            ? rolloutUIState.getRolloutDistributionSet().get() : "";
-                    return i18n.get("message.dist.already.assigned", new Object[] { ds });
-                } else {
-                    return "unknown";
-                }
+                return getDescriptionWhenNoAction();
             }
         }
         return null;
+    }
+
+    private String getDescriptionWhenNoAction() {
+        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
+                ? rolloutUIState.getRolloutGroup().get() : null;
+        if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
+            return RolloutGroupStatus.READY.toString().toLowerCase();
+        } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
+            String ds = rolloutUIState.getRolloutDistributionSet().isPresent()
+                    ? rolloutUIState.getRolloutDistributionSet().get() : "";
+            return i18n.get("message.dist.already.assigned", new Object[] { ds });
+        } else {
+            return "unknown";
+        }
     }
 }

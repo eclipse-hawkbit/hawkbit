@@ -24,8 +24,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
 
         if (value != null) {
             label.setHTML("<span>&#x" + Integer.toHexString(Integer.parseInt(value)) + ";</span>");
-        }
-        else{
+        } else {
             label.setHTML("<span></span>");
         }
         applyStyle(label, style);
@@ -33,12 +32,16 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
     }
 
     private void applyStyle(VLabel label, String style) {
-        label.setStylePrimaryName("v-label");
-        label.setStyleName("small v-label-small");
-        label.addStyleName("font-icon v-label-font-icon");
+        label.setStyleName(VLabel.CLASSNAME);
+        label.addStyleName(getStyle("small"));
+        label.addStyleName(getStyle("font-icon"));
         if (style != null) {
-            label.addStyleName(style + " v-label-" + style);
+            label.addStyleName(getStyle(style));
         }
+    }
+
+    private String getStyle(final String style) {
+        return new StringBuilder(style).append(" ").append(VLabel.CLASSNAME).append("-").append(style).toString();
     }
 
     private Map<String, String> formatInput(String input) {

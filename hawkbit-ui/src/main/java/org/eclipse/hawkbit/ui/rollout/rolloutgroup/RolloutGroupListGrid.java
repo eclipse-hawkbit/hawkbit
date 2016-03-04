@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -213,26 +214,12 @@ public class RolloutGroupListGrid extends AbstractGrid {
         alignColumns();
     }
 
-    private void alignColumns() {
-        setCellStyleGenerator(new CellStyleGenerator() {
-            private static final long serialVersionUID = 5573570647129792429L;
-
-            @Override
-            public String getStyle(final CellReference cellReference) {
-                String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS,
-                        SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS };
-                if (Arrays.asList(coulmnNames).contains(cellReference.getPropertyId())) {
-                    return "centeralign";
-                }
-                return null;
-            }
-        });
-    }
-
     @Override
     protected void addColumnRenderes() {
-        addDetailStatusColumn();
-        addStatusCoulmn();
+        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
+                new RolloutGroupStatusConverter());
+        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
+                new TotalTargetCountStatusConverter());
         if (permissionChecker.hasRolloutTargetsReadPermission()) {
             getColumn(SPUILabelDefinitions.VAR_NAME)
                     .setRenderer(new LinkRenderer(event -> onClickOfRolloutGroupName(event)));
@@ -263,99 +250,39 @@ public class RolloutGroupListGrid extends AbstractGrid {
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
     }
 
-    private void addStatusCoulmn() {
-        getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
-                new Converter<String, RolloutGroupStatus>() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public RolloutGroupStatus convertToModel(final String value,
-                            final Class<? extends RolloutGroupStatus> targetType, final Locale locale) {
-                        return null;
-                    }
-
-                    @Override
-                    public String convertToPresentation(final RolloutGroupStatus value,
-                            final Class<? extends String> targetType, final Locale locale) {
-                        return convertRolloutGroupStatusToString(value);
-                    }
-
-                    @Override
-                    public Class<RolloutGroupStatus> getModelType() {
-                        return RolloutGroupStatus.class;
-                    }
-
-                    @Override
-                    public Class<String> getPresentationType() {
-                        return String.class;
-                    }
-                });
-    }
-
     private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
         String result = null;
         switch (value) {
         case FINISHED:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), "statusIconGreen",
+                    Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), SPUIStyleDefinitions.STATUS_ICON_GREEN,
                     SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case SCHEDULED:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.BULLSEYE.getCodepoint()), "statusIconBlue",
+                    Integer.toString(FontAwesome.HOURGLASS_1.getCodepoint()), SPUIStyleDefinitions.STATUS_ICON_PENDING,
                     SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case RUNNING:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.ADJUST.getCodepoint()), "statusIconYellow",
+                    Integer.toString(FontAwesome.ADJUST.getCodepoint()), SPUIStyleDefinitions.STATUS_ICON_LIGHT_YELLOW,
                     SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case READY:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), "statusIconLightBlue",
-                    SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+                    Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
+                    SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE, SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         case ERROR:
             result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), "statusIconRed",
-                    SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
+                    SPUIStyleDefinitions.STATUS_ICON_RED, SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
             break;
         default:
             break;
         }
         return result;
 
-    }
-
-    private void addDetailStatusColumn() {
-        getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
-                new Converter<String, TotalTargetCountStatus>() {
-                    private static final long serialVersionUID = 2660476405836705932L;
-
-                    @Override
-                    public TotalTargetCountStatus convertToModel(String value,
-                            Class<? extends TotalTargetCountStatus> targetType, Locale locale)
-                                    throws com.vaadin.data.util.converter.Converter.ConversionException {
-                        return null;
-                    }
-
-                    @Override
-                    public String convertToPresentation(TotalTargetCountStatus value,
-                            Class<? extends String> targetType, Locale locale)
-                                    throws com.vaadin.data.util.converter.Converter.ConversionException {
-                        return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
-                    }
-
-                    @Override
-                    public Class<TotalTargetCountStatus> getModelType() {
-                        return TotalTargetCountStatus.class;
-                    }
-
-                    @Override
-                    public Class<String> getPresentationType() {
-                        return String.class;
-                    }
-                });
     }
 
     private String getDescription(CellReference cell) {
@@ -373,4 +300,85 @@ public class RolloutGroupListGrid extends AbstractGrid {
         }
     }
 
+    private void alignColumns() {
+        setCellStyleGenerator(new CellStyleGenerator() {
+            private static final long serialVersionUID = 5573570647129792429L;
+
+            @Override
+            public String getStyle(final CellReference cellReference) {
+                String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS,
+                        SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS };
+                if (Arrays.asList(coulmnNames).contains(cellReference.getPropertyId())) {
+                    return "centeralign";
+                }
+                return null;
+            }
+        });
+    }
+
+    /**
+     * 
+     * Converts {@link TotalTargetCountStatus} into formatted string with status
+     * and count details.
+     *
+     */
+    class TotalTargetCountStatusConverter implements Converter<String, TotalTargetCountStatus> {
+
+        private static final long serialVersionUID = -9205943894818450807L;
+
+        @Override
+        public TotalTargetCountStatus convertToModel(String value, Class<? extends TotalTargetCountStatus> targetType,
+                Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+            return null;
+        }
+
+        @Override
+        public String convertToPresentation(TotalTargetCountStatus value, Class<? extends String> targetType,
+                Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+            return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
+        }
+
+        @Override
+        public Class<TotalTargetCountStatus> getModelType() {
+            return TotalTargetCountStatus.class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
+    }
+
+    /**
+     * 
+     * Converts {@link RolloutGroupStatus} to string.
+     *
+     */
+    class RolloutGroupStatusConverter implements Converter<String, RolloutGroupStatus> {
+
+        private static final long serialVersionUID = 5448062736373292820L;
+
+        @Override
+        public RolloutGroupStatus convertToModel(final String value,
+                final Class<? extends RolloutGroupStatus> targetType, final Locale locale) {
+            return null;
+        }
+
+        @Override
+        public String convertToPresentation(final RolloutGroupStatus value, final Class<? extends String> targetType,
+                final Locale locale) {
+            return convertRolloutGroupStatusToString(value);
+        }
+
+        @Override
+        public Class<RolloutGroupStatus> getModelType() {
+            return RolloutGroupStatus.class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
+
+    }
 }

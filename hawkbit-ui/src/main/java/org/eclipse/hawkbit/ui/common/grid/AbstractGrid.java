@@ -14,6 +14,7 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Container.Indexed;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -31,15 +32,8 @@ public abstract class AbstractGrid extends Grid {
         setSizeFull();
         setImmediate(true);
         setId(getGridId());
-        //TODO these styles are rwquired??
-        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
-        addStyleName(ValoTheme.TABLE_SMALL);
-
-        setHeight("100%");
-        setHeightMode(HeightMode.CSS);
         setSelectionMode(SelectionMode.NONE);
         setColumnReorderingAllowed(true);
-        
         addNewContainerDS();
     }
 
