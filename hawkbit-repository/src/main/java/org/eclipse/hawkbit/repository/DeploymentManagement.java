@@ -925,7 +925,7 @@ public class DeploymentManagement {
 
     /**
      * retrieves all the {@link ActionStatus} entries of the given
-     * {@link Action} and {@link Target} in the order latest first.
+     * {@link Action} and {@link Target}.
      *
      * @param pageReq
      *            pagination parameter
@@ -937,12 +937,12 @@ public class DeploymentManagement {
      * @return the corresponding {@link Page} of {@link ActionStatus}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Page<ActionStatus> findActionStatusMessagesByActionInDescOrder(final Pageable pageReq, final Action action,
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Action action,
             final boolean withMessages) {
         if (withMessages) {
-            return actionStatusRepository.getByActionOrderByIdDesc(pageReq, action);
+            return actionStatusRepository.getByAction(pageReq, action);
         } else {
-            return actionStatusRepository.findByActionOrderByIdDesc(pageReq, action);
+            return actionStatusRepository.findByAction(pageReq, action);
         }
     }
 

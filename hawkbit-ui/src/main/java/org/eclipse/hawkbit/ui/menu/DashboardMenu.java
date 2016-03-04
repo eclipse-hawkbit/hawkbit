@@ -18,17 +18,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
-import org.eclipse.hawkbit.util.SPInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -42,7 +41,6 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -50,7 +48,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -61,10 +58,16 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @UIScope
-public final class DashboardMenu extends CustomComponent implements EnvironmentAware {
+public final class DashboardMenu extends CustomComponent {
 
     @Autowired
     private I18N i18n;
+
+    @Autowired
+    private transient UiProperties uiProperties;
+
+    @Autowired
+    private transient HawkbitServerProperties serverProperties;
 
     private static final long serialVersionUID = 5394474618559481462L;
 
@@ -74,15 +77,11 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
     private static final String STYLE_VISIBLE = "valo-menu-visible";
 
     // this should be resolved when we introduce event bus on UI to just inform
-    // the buttons directly
-    // via events
+    // the buttons directly via events
     private final List<ValoMenuItemButton> menuButtons = new ArrayList<>();
 
     @Autowired
     private transient PermissionService permissionService;
-
-    @Autowired
-    private transient SPInfo spInfo;
 
     @Autowired
     private final List<DashboardMenuItem> dashboardVaadinViews = new ArrayList<>();
@@ -91,12 +90,10 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
 
     private boolean accessibleViewsEmpty;
 
-    private String userManagementLoginUrl;
-
     /**
      * initializing the view and creating the layout, cannot be done in the
-     * custructor because the constructor will be called by spring and the
-     * dashabord must be initialized when the dashboard UI is creating.
+     * constructor because the constructor will be called by spring and the
+     * dashboard must be initialized when the dashboard UI is creating.
      */
     public void init() {
         initialViewName = "";
@@ -162,20 +159,20 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
         links.addComponent(docuLink);
         links.setComponentAlignment(docuLink, Alignment.BOTTOM_CENTER);
 
-        if (userManagementLoginUrl != null) {
+        if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_USERMANAGEMENT,
-                    i18n.get("link.usermanagement.name"), userManagementLoginUrl, FontAwesome.USERS, "_blank",
-                    linkStyle, true);
+                    i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
+                    FontAwesome.USERS, "_blank", linkStyle, true);
             userManagementLink.setDescription(i18n.get("link.usermanagement.name"));
             links.addComponent(userManagementLink);
             userManagementLink.setSizeFull();
             links.setComponentAlignment(userManagementLink, Alignment.BOTTOM_CENTER);
         }
 
-        if (spInfo.getSupportEmail() != null) {
+        if (!uiProperties.getLinks().getSupport().isEmpty()) {
             final Link supportLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_SUPPORT,
-                    i18n.get("link.support.name"), spInfo.getSupportEmail(), FontAwesome.ENVELOPE_O, "", linkStyle,
-                    true);
+                    i18n.get("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O, "",
+                    linkStyle, true);
             supportLink.setDescription(i18n.get("link.support.name"));
             supportLink.setSizeFull();
             links.addComponent(supportLink);
@@ -222,12 +219,7 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
             settingsItem.setDescription(user.getUsername());
         }
 
-        settingsItem.addItem("Sign Out", new Command() {
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                Page.getCurrent().setLocation("/UI/logout");
-            }
-        });
+        settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation("/UI/logout"));
         return settings;
     }
 
@@ -254,14 +246,11 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
     }
 
     private Component buildToggleButton() {
-        final Button valoMenuToggleButton = new Button("Menu", new ClickListener() {
-            @Override
-            public void buttonClick(final ClickEvent event) {
-                if (getCompositionRoot().getStyleName().contains(STYLE_VISIBLE)) {
-                    getCompositionRoot().removeStyleName(STYLE_VISIBLE);
-                } else {
-                    getCompositionRoot().addStyleName(STYLE_VISIBLE);
-                }
+        final Button valoMenuToggleButton = new Button("Menu", (ClickListener) event -> {
+            if (getCompositionRoot().getStyleName().contains(STYLE_VISIBLE)) {
+                getCompositionRoot().removeStyleName(STYLE_VISIBLE);
+            } else {
+                getCompositionRoot().addStyleName(STYLE_VISIBLE);
             }
         });
         valoMenuToggleButton.setIcon(FontAwesome.LIST);
@@ -307,7 +296,7 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
         final Label label = new Label();
         label.setSizeFull();
         label.setStyleName("version-layout");
-        label.setValue(spInfo.getVersion());
+        label.setValue(serverProperties.getBuild().getVersion());
         return label;
     }
 
@@ -339,11 +328,6 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
      */
     public void postViewChange(final PostViewChangeEvent event) {
         menuButtons.forEach(button -> button.postViewChange(event));
-    }
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        userManagementLoginUrl = environment.getProperty("hawkbit.server.im.login.url", String.class);
     }
 
     /**
@@ -411,12 +395,7 @@ public final class DashboardMenu extends CustomComponent implements EnvironmentA
             setDescription(view.getDashboardCaptionLong());
             /* Avoid double click */
             setDisableOnClick(true);
-            addClickListener(new ClickListener() {
-                @Override
-                public void buttonClick(final ClickEvent event) {
-                    event.getComponent().getUI().getNavigator().navigateTo(view.getViewName());
-                }
-            });
+            addClickListener(event -> event.getComponent().getUI().getNavigator().navigateTo(view.getViewName()));
 
         }
 

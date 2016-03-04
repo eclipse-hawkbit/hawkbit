@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,14 +54,10 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Service layer for generating SP reportings.
  *
- *
- *
- *
  */
 @Transactional(readOnly = true)
 @Validated
 @Service
-@ConfigurationProperties
 public class ReportManagement {
 
     @Value("${spring.jpa.database}")

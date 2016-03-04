@@ -56,7 +56,7 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
     }
 
     @Test
-    @Description("Tests generate the http download url")
+    @Description("Tests the generation of http download url.")
     public void testHttpUrl() {
         final String url = urlHandlerProperties.getUrl(controllerId, localArtifact, Artifact.UrlProtocol.HTTP);
         assertEquals("http is build incorrect",
@@ -67,7 +67,7 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
     }
 
     @Test
-    @Description("Tests generate the https download url")
+    @Description("Tests the generation of https download url.")
     public void testHttpsUrl() {
         final String url = urlHandlerProperties.getUrl(controllerId, localArtifact, Artifact.UrlProtocol.HTTPS);
         assertEquals("https is build incorrect",
@@ -78,7 +78,7 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
     }
 
     @Test
-    @Description("Tests generate the coap download url")
+    @Description("Tests the generation of coap download url.")
     public void testCoapUrl() {
         final String url = urlHandlerProperties.getUrl(controllerId, localArtifact, Artifact.UrlProtocol.COAP);
 

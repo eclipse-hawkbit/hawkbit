@@ -297,8 +297,8 @@ final public class TargetMapper {
         final ActionStatusRest result = new ActionStatusRest();
 
         result.setMessages(actionStatus.getMessages());
-        result.setReportedAt(action.getCreatedAt());
-        result.setStatusId(action.getId());
+        result.setReportedAt(actionStatus.getCreatedAt());
+        result.setStatusId(actionStatus.getId());
         result.setType(getNameOfActionStatusType(actionStatus.getStatus()));
 
         return result;

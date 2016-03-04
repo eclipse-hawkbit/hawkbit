@@ -41,15 +41,13 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +72,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(ControllerConstants.BASE_V1_REQUEST_MAPPING)
-public class RootController implements EnvironmentAware {
+public class RootController {
 
     private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
@@ -99,16 +97,8 @@ public class RootController implements EnvironmentAware {
     @Autowired
     private TenantAware tenantAware;
 
-    private String requestHeader;
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        final RelaxedPropertyResolver relaxedPropertyResolver = new RelaxedPropertyResolver(environment,
-                SP_SERVER_CONFIG_PREFIX);
-
-        requestHeader = relaxedPropertyResolver.getProperty("security.rp.remote_ip_header", String.class,
-                "X-Forwarded-For");
-    }
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
 
     /**
      * Returns all artifacts of a given software module and target.
@@ -155,12 +145,13 @@ public class RootController implements EnvironmentAware {
         LOG.debug("getControllerBase({})", targetid);
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         if (target.getTargetInfo().getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
             LOG.debug("target with {} extsisted but was in status UNKNOWN -> REGISTERED)", targetid);
             controllerManagement.updateTargetStatus(target.getTargetInfo(), TargetUpdateStatus.REGISTERED,
-                    System.currentTimeMillis(), IpUtil.getClientIpFromRequest(request, requestHeader));
+                    System.currentTimeMillis(),
+                    IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
         }
 
         return new ResponseEntity<>(
@@ -195,7 +186,7 @@ public class RootController implements EnvironmentAware {
         ResponseEntity<Void> result;
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
 
         if (checkModule(fileName, module)) {
@@ -265,7 +256,8 @@ public class RootController implements EnvironmentAware {
     public ResponseEntity<Void> downloadArtifactMd5(@PathVariable final String targetid,
             @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
             final HttpServletResponse response, final HttpServletRequest request) {
-        controllerManagement.updateLastTargetQuery(targetid, IpUtil.getClientIpFromRequest(request, requestHeader));
+        controllerManagement.updateLastTargetQuery(targetid,
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
 
@@ -311,7 +303,7 @@ public class RootController implements EnvironmentAware {
         LOG.debug("getControllerBasedeploymentAction({},{})", targetid, resource);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -362,7 +354,7 @@ public class RootController implements EnvironmentAware {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", targetid, actionId, feedback);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         if (!actionId.equals(feedback.getId())) {
             LOG.warn(
@@ -467,7 +459,8 @@ public class RootController implements EnvironmentAware {
             + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final ConfigData configData,
             @PathVariable final String targetid, final HttpServletRequest request) {
-        controllerManagement.updateLastTargetQuery(targetid, IpUtil.getClientIpFromRequest(request, requestHeader));
+        controllerManagement.updateLastTargetQuery(targetid,
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         controllerManagement.updateControllerAttributes(targetid, configData.getData());
 
@@ -493,7 +486,7 @@ public class RootController implements EnvironmentAware {
         LOG.debug("getControllerCancelAction({})", targetid);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -540,7 +533,7 @@ public class RootController implements EnvironmentAware {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", targetid, feedback);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, requestHeader));
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         if (!actionId.equals(feedback.getId())) {
             LOG.warn(

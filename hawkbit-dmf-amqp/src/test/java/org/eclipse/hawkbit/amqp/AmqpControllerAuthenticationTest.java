@@ -23,8 +23,9 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +68,11 @@ public class AmqpControllerAuthenticationTest {
 
         authenticationManager = new AmqpControllerAuthentfication();
         authenticationManager.setControllerManagement(mock(ControllerManagement.class));
-        final SecurityProperties secruityProperties = mock(SecurityProperties.class);
-        when(secruityProperties.getRpSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
+
+        final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
+        final Rp rp = mock(Rp.class);
+        when(secruityProperties.getRp()).thenReturn(rp);
+        when(rp.getSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
         authenticationManager.setSecruityProperties(secruityProperties);
         systemManagement = mock(SystemManagement.class);
         authenticationManager.setSystemManagement(systemManagement);
