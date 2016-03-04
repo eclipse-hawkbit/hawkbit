@@ -67,7 +67,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  * Tests for {@link SoftwareModuleResource} {@link RestController}.
  *
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Software Module Resource")
 public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongoDB {
 
@@ -117,14 +117,6 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
 
     }
 
-    /**
-     * Test method for
-     * {@link org.eclipse.hawkbit.rest.resource.SoftwareModuleResource#uploadArtifact(java.lang.Long, org.springframework.web.multipart.MultipartFile)}
-     * .
-     *
-     * @throws Exception
-     *             if test fails
-     */
     @Test
     @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
     public void uploadArtifact() throws Exception {

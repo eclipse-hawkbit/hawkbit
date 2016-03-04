@@ -15,14 +15,22 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Management API")
+@Stories("Paged List Handling")
 public class PagedListTest {
 
     @Test(expected = NullPointerException.class)
+    @Description("Ensures that a null payload entitiy throws an exception.")
     public void createListWithNullContentThrowsException() {
         new PagedList<>(null, 0);
     }
 
     @Test
+    @Description("Create list with payload and verify content.")
     public void createListWithContent() {
         final long knownTotal = 2;
         final List<String> knownContentList = new ArrayList<>();
@@ -39,6 +47,7 @@ public class PagedListTest {
     }
 
     @Test
+    @Description("Create list with payload and verify size values.")
     public void createListWithSmallerTotalThanContentSizeIsOk() {
         final long knownTotal = 0;
         final List<String> knownContentList = new ArrayList<>();

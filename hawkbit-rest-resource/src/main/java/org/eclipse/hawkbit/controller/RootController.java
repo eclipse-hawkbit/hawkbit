@@ -427,8 +427,6 @@ public class RootController {
         LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.", actionid,
                 targetid, feedback.getStatus().getExecution());
         actionStatus.setStatus(Status.RUNNING);
-        // MECS-400: we should not use the unstructed message list for
-        // the server comment on the status.
         actionStatus.addMessage("Controller reported: " + feedback.getStatus().getExecution());
     }
 

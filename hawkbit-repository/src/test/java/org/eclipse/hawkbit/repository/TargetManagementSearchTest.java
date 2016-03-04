@@ -47,7 +47,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final TargetTag targTagC = tagManagement.createTargetTag(new TargetTag("TargTag-C"));
         final TargetTag targTagD = tagManagement.createTargetTag(new TargetTag("TargTag-D"));
 
-        // TODO kzimmerm: test also installedDS (not only assignedDS)
+        // TODO kaizimmerm: test also installedDS (not only assignedDS)
 
         final DistributionSet setA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
@@ -90,7 +90,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final PageRequest pageReq = new PageRequest(0, 500);
         // try to find several targets with different filter settings
 
-        // TODO kzimmerm: comment and check also the content itself, not only
+        // TODO kaizimmerm: comment and check also the content itself, not only
         // the numbers
         // (containsOnly)
         assertThat(targetManagement.countTargetsAll()).isEqualTo(400);
@@ -185,7 +185,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
 
     }
 
-    // TODO kzimmerm: add filter tests
+    // TODO kaizimmerm: add filter tests
     @Test
     @Description("Tests the correct order of targets based on selected distribution set. The system expects to have an order based on installed, assigned DS.")
     public void targetSearchWithVariousFilterCombinationsAndOrderByDistributionSet() {

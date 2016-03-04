@@ -53,8 +53,8 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @ActiveProfiles({ "test" })
-@Features("AMQP Dispatcher Test")
-@Stories("Tests send messages")
+@Features("Component Tests - Device Management Federation API")
+@Stories("AmqpMessage Dispatcher Service Test")
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
 
     private AmqpMessageDispatcherService amqpMessageDispatcherService;

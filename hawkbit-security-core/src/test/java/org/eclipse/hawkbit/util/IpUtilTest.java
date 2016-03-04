@@ -33,8 +33,8 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @RunWith(MockitoJUnitRunner.class)
-@Features("IpUtil Test")
-@Stories("Tests the created uris")
+@Features("Unit Tests - Security")
+@Stories("IP Util Test")
 public class IpUtilTest {
 
     @Mock

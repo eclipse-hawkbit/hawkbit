@@ -294,8 +294,7 @@ public class DistributionSetManagement {
         // hard delete the rest if exixts
         if (!toHardDelete.isEmpty()) {
             // don't give the delete statement an empty list, JPA/Oracle cannot
-            // handle the empty list,
-            // see MECS-403
+            // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
     }

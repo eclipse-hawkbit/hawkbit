@@ -86,7 +86,7 @@
       <!-- Misc libraries versions - START -->
       <fest-assert.version>1.4</fest-assert.version>
       <org.easytesting.version>2.0M10</org.easytesting.version>
-      <allure.version>1.4.15</allure.version>
+      <allure.version>1.4.22</allure.version>
       <eclipselink.version>2.6.2</eclipselink.version>
       <org.powermock.version>1.5.4</org.powermock.version>
       <pl.pragmatists.version>1.0.2</pl.pragmatists.version>

@@ -68,8 +68,8 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @RunWith(MockitoJUnitRunner.class)
-@Features("AMQP Controller Test")
-@Stories("Tests the servcies for message handler and dispatcher")
+@Features("Component Tests - Device Management Federation API")
+@Stories("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
 
     private static final String TENANT = "DEFAULT";

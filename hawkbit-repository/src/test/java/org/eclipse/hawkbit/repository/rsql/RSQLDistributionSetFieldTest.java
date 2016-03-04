@@ -28,7 +28,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL filter distribution set")
 public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
 

@@ -365,7 +365,7 @@ public class DeploymentManagement {
         }).collect(Collectors.toList())).stream()
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
-        // MECS-720 create initial action status when action is created so we
+        // create initial action status when action is created so we
         // remember the initial
         // running status because we will change the status of the action itself
         // and with this action

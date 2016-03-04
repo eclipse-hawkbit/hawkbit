@@ -145,7 +145,6 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
-    @Issue("MECS-674")
     public void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
 
         final DistributionSet cancelDs = TestDataUtil.generateDistributionSet("Canceled DS", "1.0", softwareManagement,
