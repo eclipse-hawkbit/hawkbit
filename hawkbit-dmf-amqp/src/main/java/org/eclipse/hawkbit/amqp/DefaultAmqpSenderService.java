@@ -34,7 +34,7 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
 
     @Override
     public void sendMessage(final Message message, final URI uri) {
-        internalAmqpTemplate.send(extractExchange(uri), message);
+        internalAmqpTemplate.send(extractExchange(uri), null, message);
     }
 
 }
