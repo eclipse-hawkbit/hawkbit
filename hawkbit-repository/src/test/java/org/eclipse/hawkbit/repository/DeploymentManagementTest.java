@@ -49,7 +49,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Issue;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -596,9 +595,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         }
 
         // deploy dsA to the target which already have dsB deployed -> must
-        // remove updActB from
-        // activeActions, add a corresponding cancelAction and another
-        // UpdateAction for dsA
+        // remove updActB from activeActions, add a corresponding cancelAction
+        // and another UpdateAction for dsA
         final Iterable<Target> deployed2DS = deploymentManagement
                 .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedTargets();
         actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(1);
