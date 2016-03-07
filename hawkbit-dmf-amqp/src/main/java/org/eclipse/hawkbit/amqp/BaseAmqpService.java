@@ -99,6 +99,7 @@ public class BaseAmqpService {
         final Object value = header.get(key);
         if (value == null) {
             logAndThrowMessageError(message, errorMessageIfNull);
+            return null;
         }
         return value.toString();
     }

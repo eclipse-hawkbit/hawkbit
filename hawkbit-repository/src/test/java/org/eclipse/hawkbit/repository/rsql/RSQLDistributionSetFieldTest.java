@@ -98,7 +98,7 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 4);
         try {
             assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
-            fail();
+            fail("Expected RSQLParameterSyntaxException");
         } catch (final RSQLParameterSyntaxException e) {
         }
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);

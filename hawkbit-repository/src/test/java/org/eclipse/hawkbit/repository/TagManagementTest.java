@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class TagManagementTest extends AbstractIntegrationTest {
     public TagManagementTest() {
         LOG = LoggerFactory.getLogger(TagManagementTest.class);
+    }
+
+    @Before
+    public void setup() {
+        assertThat(targetTagRepository.findAll()).as("Not tags should be available").isEmpty();
     }
 
     @Test
@@ -88,7 +95,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         // search for not deleted
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Lists.newArrayList(tagA.getName()));
-        assertEquals(
+        assertEquals("filter works not correct",
                 dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
@@ -96,7 +103,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Lists.newArrayList(tagB.getName()));
-        assertEquals(
+        assertEquals("filter works not correct",
                 dsBs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
@@ -104,7 +111,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Lists.newArrayList(tagC.getName()));
-        assertEquals(
+        assertEquals("filter works not correct",
                 dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
@@ -112,22 +119,22 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Lists.newArrayList(tagX.getName()));
-        assertEquals(0, distributionSetManagement
+        assertEquals("filter works not correct", 0, distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getTotalElements());
 
-        assertEquals(5, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
+        assertEquals("wrong tag size", 5, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
         tagManagement.deleteDistributionSetTag(tagY.getName());
-        assertEquals(4, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
+        assertEquals("wrong tag size", 4, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
         tagManagement.deleteDistributionSetTag(tagX.getName());
-        assertEquals(3, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
+        assertEquals("wrong tag size", 3, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
         tagManagement.deleteDistributionSetTag(tagB.getName());
-        assertEquals(2, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
+        assertEquals("wrong tag size", 2, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Lists.newArrayList(tagA.getName()));
-        assertEquals(
+        assertEquals("filter works not correct",
                 dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
@@ -135,12 +142,12 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Lists.newArrayList(tagB.getName()));
-        assertEquals(0, distributionSetManagement
+        assertEquals("filter works not correct", 0, distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getTotalElements());
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Lists.newArrayList(tagC.getName()));
-        assertEquals(
+        assertEquals("filter works not correct",
                 dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build())
@@ -154,30 +161,25 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that all tags are retrieved through repository.")
     public void findAllTargetTags() {
-        assertThat(targetTagRepository.findAll()).isEmpty();
-
         final List<TargetTag> tags = createTargetsWithTags();
 
         assertThat(targetTagRepository.findAll()).isEqualTo(tagManagement.findAllTargetTags()).isEqualTo(tags)
-                .hasSize(20);
+                .as("Wrong tag size").hasSize(20);
     }
 
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createTargetTag() {
-        assertThat(targetTagRepository.findAll()).isEmpty();
-
         final Tag tag = tagManagement.createTargetTag(new TargetTag("kai1", "kai2", "colour"));
 
-        assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).isEqualTo("kai2");
-        assertThat(tagManagement.findTargetTag("kai1").getColour()).isEqualTo("colour");
-        assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).isEqualTo("colour");
+        assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag ed").isEqualTo("kai2");
+        assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).as("wrong tag found").isEqualTo("colour");
     }
 
     @Test
     @Description("Ensures that a deleted tag is removed from the repository as defined.")
     public void deleteTargetTas() {
-        assertThat(targetTagRepository.findAll()).isEmpty();
 
         // create test data
         final Iterable<TargetTag> tags = createTargetsWithTags();
@@ -196,16 +198,13 @@ public class TagManagementTest extends AbstractIntegrationTest {
             assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
                     .doesNotContain(toDelete);
         }
-        assertThat(targetTagRepository.findOne(toDelete.getId())).isNull();
-        assertThat(tagManagement.findAllTargetTags()).hasSize(19);
+        assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
+        assertThat(tagManagement.findAllTargetTags()).as("Wrong target tag size").hasSize(19);
     }
 
     @Test
     @Description("Tests the name update of a target tag.")
     public void updateTargetTag() {
-        assertThat(targetTagRepository.findAll()).isEmpty();
-
-        // create test data
         final List<TargetTag> tags = createTargetsWithTags();
 
         // change data
@@ -216,95 +215,104 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.updateTargetTag(savedAssigned);
 
         // check data
-        assertThat(tagManagement.findAllTargetTags()).hasSize(tags.size());
-        assertThat(targetTagRepository.findOne(savedAssigned.getId()).getName()).isEqualTo("test123");
-        assertThat(targetTagRepository.findOne(savedAssigned.getId()).getOptLockRevision()).isEqualTo(2);
+        assertThat(tagManagement.findAllTargetTags()).as("Wrong target tag size").hasSize(tags.size());
+        assertThat(targetTagRepository.findOne(savedAssigned.getId()).getName()).as("wrong target tag is saved")
+                .isEqualTo("test123");
+        assertThat(targetTagRepository.findOne(savedAssigned.getId()).getOptLockRevision())
+                .as("wrong target tag is saved").isEqualTo(2);
     }
 
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createDistributionSetTag() {
-        assertThat(distributionSetTagRepository.findAll()).isEmpty();
-
         final Tag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("kai1", "kai2", "colour"));
 
-        assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).isEqualTo("kai2");
-        assertThat(tagManagement.findDistributionSetTag("kai1").getColour()).isEqualTo("colour");
-        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).isEqualTo("colour");
+        assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag found")
+                .isEqualTo("kai2");
+        assertThat(tagManagement.findDistributionSetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).as("wrong tag found")
+                .isEqualTo("colour");
     }
 
     @Test
     @Description("Ensures that a created tags are persisted in the repository as defined.")
     public void createDistributionSetTags() {
-        assertThat(distributionSetTagRepository.findAll()).isEmpty();
-
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
-        assertThat(distributionSetTagRepository.findAll()).hasSize(tags.size());
+        assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags created").hasSize(tags.size());
     }
 
     @Test
     @Description("Ensures that a deleted tag is removed from the repository as defined.")
     public void deleteDistributionSetTag() {
-        assertThat(distributionSetTagRepository.findAll()).isEmpty();
-
         // create test data
         final Iterable<DistributionSetTag> tags = createDsSetsWithTags();
         final DistributionSetTag toDelete = tags.iterator().next();
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
             assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
-                    .contains(toDelete);
+                    .as("Wrong tag found").contains(toDelete);
         }
 
         // delete
         tagManagement.deleteDistributionSetTag(tags.iterator().next().getName());
 
         // check
-        assertThat(distributionSetTagRepository.findOne(toDelete.getId())).isNull();
-        assertThat(tagManagement.findAllDistributionSetTags()).hasSize(19);
+        assertThat(distributionSetTagRepository.findOne(toDelete.getId())).as("Deleted tag should be null").isNull();
+        assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags after deletion").hasSize(19);
         for (final DistributionSet set : distributionSetRepository.findAll()) {
             assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
-                    .doesNotContain(toDelete);
+                    .as("Wrong found tags").doesNotContain(toDelete);
         }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameException() {
         tagManagement.createTargetTag(new TargetTag("A"));
-        tagManagement.createTargetTag(new TargetTag("A"));
+        try {
+            tagManagement.createTargetTag(new TargetTag("A"));
+            fail("Expected EntityAlreadyExistsException");
+        } catch (final EntityAlreadyExistsException e) {
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         tagManagement.createTargetTag(new TargetTag("A"));
         final TargetTag tag = tagManagement.createTargetTag(new TargetTag("B"));
         tag.setName("A");
-        tagManagement.updateTargetTag(tag);
+        try {
+            tagManagement.updateTargetTag(tag);
+            fail("Expected EntityAlreadyExistsException");
+        } catch (final EntityAlreadyExistsException e) {
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameException() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
-        tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+        try {
+            tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+            fail("Expected EntityAlreadyExistsException");
+        } catch (final EntityAlreadyExistsException e) {
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
         final DistributionSetTag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("B"));
         tag.setName("A");
-        tagManagement.updateDistributionSetTag(tag);
+        try {
+            tagManagement.updateDistributionSetTag(tag);
+            fail("Expected EntityAlreadyExistsException");
+        } catch (final EntityAlreadyExistsException e) {
+        }
     }
 
     @Test
     @Description("Tests the name update of a target tag.")
     public void updateDistributionSetTag() {
-        assertThat(distributionSetTagRepository.findAll()).isEmpty();
 
         // create test data
         final List<DistributionSetTag> tags = createDsSetsWithTags();
@@ -317,20 +325,19 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.updateDistributionSetTag(savedAssigned);
 
         // check data
-        assertThat(tagManagement.findAllDistributionSetTags()).hasSize(tags.size());
-        assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).isEqualTo("test123");
+        assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of ds tags").hasSize(tags.size());
+        assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).as("Wrong ds tag found")
+                .isEqualTo("test123");
     }
 
     @Test
     @Description("Ensures that all tags are retrieved through repository.")
     public void findDistributionSetTagsAll() {
-        assertThat(distributionSetTagRepository.findAll()).isEmpty();
-
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
         // test
-        assertThat(tagManagement.findAllDistributionSetTags()).hasSize(tags.size());
-        assertThat(distributionSetTagRepository.findAll()).hasSize(20);
+        assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags").hasSize(tags.size());
+        assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags").hasSize(20);
     }
 
     private List<TargetTag> createTargetsWithTags() {
