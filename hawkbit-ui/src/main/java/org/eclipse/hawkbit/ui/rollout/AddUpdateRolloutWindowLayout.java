@@ -130,7 +130,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private Button saveRolloutBtn;
 
-    private Button discardRolllout;
+    private Button discardRollloutBtn;
 
     private OptionGroup errorThresholdOptionGroup;
 
@@ -138,7 +138,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private Window addUpdateRolloutWindow;
 
-    private Boolean editRolloutBtn;
+    private Boolean editRolloutEnabled;
 
     private Rollout rolloutForEdit;
 
@@ -167,7 +167,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
      * Reset the field values.
      */
     public void resetComponents() {
-        editRolloutBtn = Boolean.FALSE;
+        editRolloutEnabled = Boolean.FALSE;
         rolloutName.clear();
         targetFilterQuery.clear();
         resetFields();
@@ -254,9 +254,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     private HorizontalLayout getSaveDiscardButtonLayout() {
         final HorizontalLayout buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
-        buttonsLayout.addComponents(saveRolloutBtn, discardRolllout);
+        buttonsLayout.addComponents(saveRolloutBtn, discardRollloutBtn);
         buttonsLayout.setComponentAlignment(saveRolloutBtn, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(discardRolllout, Alignment.BOTTOM_RIGHT);
+        buttonsLayout.setComponentAlignment(discardRollloutBtn, Alignment.BOTTOM_RIGHT);
         buttonsLayout.addStyleName("window-style");
         return buttonsLayout;
     }
@@ -278,7 +278,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         errorThresholdOptionGroup = createErrorThresholdOptionGroup();
         setDefaultSaveStartGroupOption();
         saveRolloutBtn = createSaveButton();
-        discardRolllout = createDiscardButton();
+        discardRollloutBtn = createDiscardButton();
         actionTypeOptionGroupLayout.selectDefaultOption();
 
         totalTargetsLabel = createTotalTargetsLabel();
@@ -411,7 +411,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private void onRolloutSave() {
-        if (editRolloutBtn) {
+        if (editRolloutEnabled) {
             editRollout();
         } else {
             createRollout();
@@ -742,7 +742,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
      */
     public void populateData(final Long rolloutId) {
         resetComponents();
-        editRolloutBtn = Boolean.TRUE;
+        editRolloutEnabled = Boolean.TRUE;
         rolloutForEdit = rolloutManagement.findRolloutById(rolloutId);
         rolloutName.setValue(rolloutForEdit.getName());
         description.setValue(rolloutForEdit.getDescription());
