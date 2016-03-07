@@ -172,11 +172,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
     public void createTargetTag() {
         final Tag tag = tagManagement.createTargetTag(new TargetTag("kai1", "kai2", "colour"));
 
-        assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag founded")
-                .isEqualTo("kai2");
-        assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag founded").isEqualTo("colour");
-        assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).as("wrong tag founded")
-                .isEqualTo("colour");
+        assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag ed").isEqualTo("kai2");
+        assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(tagManagement.findTargetTagById(tag.getId()).getColour()).as("wrong tag found").isEqualTo("colour");
     }
 
     @Test
@@ -200,7 +198,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
             assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getTags())
                     .doesNotContain(toDelete);
         }
-        assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be founded").isNull();
+        assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
         assertThat(tagManagement.findAllTargetTags()).as("Wrong target tag size").hasSize(19);
     }
 
@@ -229,11 +227,10 @@ public class TagManagementTest extends AbstractIntegrationTest {
     public void createDistributionSetTag() {
         final Tag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("kai1", "kai2", "colour"));
 
-        assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag founded")
+        assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
-        assertThat(tagManagement.findDistributionSetTag("kai1").getColour()).as("wrong tag founded")
-                .isEqualTo("colour");
-        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).as("wrong tag founded")
+        assertThat(tagManagement.findDistributionSetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
+        assertThat(tagManagement.findDistributionSetTagById(tag.getId()).getColour()).as("wrong tag found")
                 .isEqualTo("colour");
     }
 
@@ -254,7 +251,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         for (final DistributionSet set : distributionSetRepository.findAll()) {
             assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
-                    .as("Wrong tag founded").contains(toDelete);
+                    .as("Wrong tag found").contains(toDelete);
         }
 
         // delete
@@ -265,7 +262,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of tags after deletion").hasSize(19);
         for (final DistributionSet set : distributionSetRepository.findAll()) {
             assertThat(distributionSetManagement.findDistributionSetByIdWithDetails(set.getId()).getTags())
-                    .as("Wrong founded tags").doesNotContain(toDelete);
+                    .as("Wrong found tags").doesNotContain(toDelete);
         }
     }
 
@@ -274,7 +271,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.createTargetTag(new TargetTag("A"));
         try {
             tagManagement.createTargetTag(new TargetTag("A"));
-            fail("Excpeted EntityAlreadyExistsException");
+            fail("Expected EntityAlreadyExistsException");
         } catch (final EntityAlreadyExistsException e) {
         }
     }
@@ -286,7 +283,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tag.setName("A");
         try {
             tagManagement.updateTargetTag(tag);
-            fail("Excpeted EntityAlreadyExistsException");
+            fail("Expected EntityAlreadyExistsException");
         } catch (final EntityAlreadyExistsException e) {
         }
     }
@@ -296,7 +293,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
         try {
             tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
-            fail("Excpeted EntityAlreadyExistsException");
+            fail("Expected EntityAlreadyExistsException");
         } catch (final EntityAlreadyExistsException e) {
         }
     }
@@ -308,7 +305,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tag.setName("A");
         try {
             tagManagement.updateDistributionSetTag(tag);
-            fail("Excpeted EntityAlreadyExistsException");
+            fail("Expected EntityAlreadyExistsException");
         } catch (final EntityAlreadyExistsException e) {
         }
     }
@@ -329,7 +326,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
         // check data
         assertThat(tagManagement.findAllDistributionSetTags()).as("Wrong size of ds tags").hasSize(tags.size());
-        assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).as("Wrong ds tag founded")
+        assertThat(distributionSetTagRepository.findOne(savedAssigned.getId()).getName()).as("Wrong ds tag found")
                 .isEqualTo("test123");
     }
 
