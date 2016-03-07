@@ -30,6 +30,63 @@ public final class DistributionBarHelper {
     private DistributionBarHelper() {
     }
 
+    /**
+     * Returns a string with details of status and count .
+     * 
+     * @param statusTotalCountMap
+     *            map with status and count
+     * 
+     * @return string of format "status1:count,status2:count"
+     */
+    public static String getDistributionBarAsHTMLString(Map<Status, Long> statusTotalCountMap) {
+        StringBuilder htmlString = new StringBuilder();
+        Map<Status, Long> statusMapWithNonZeroValues = getStatusMapWithNonZeroValues(statusTotalCountMap);
+        Long totalValue = getTotalSizes(statusTotalCountMap);
+        if (statusMapWithNonZeroValues.size() <= 0) {
+            return getUnintialisedBar();
+        }
+        int partIndex = 1;
+        htmlString.append(getParentDivStart());
+        for (Map.Entry<Status, Long> entry : statusMapWithNonZeroValues.entrySet()) {
+            if (entry.getValue() > 0) {
+                htmlString.append(getPart(partIndex, entry.getKey(), entry.getValue(), totalValue,
+                        statusMapWithNonZeroValues.size()));
+                partIndex++;
+            }
+        }
+        htmlString.append(getParentDivEnd());
+        return htmlString.toString();
+    }
+
+    /**
+     * Returns the map with status having non zero values.
+     * 
+     * @param statusTotalCountMap
+     *            map with status and count
+     * @return map with non zero values
+     */
+    public static Map<Status, Long> getStatusMapWithNonZeroValues(Map<Status, Long> statusTotalCountMap) {
+        return statusTotalCountMap.entrySet().stream().filter(p -> p.getValue() > 0)
+                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+    }
+
+    /**
+     * Returns tool tip for progress bar.
+     * 
+     * @param statusCountMap
+     *            map with status and count details
+     * @return tool tip
+     */
+    public static String getTooltip(Map<Status, Long> statusCountMap) {
+        Map<Status, Long> nonZeroStatusCountMap = DistributionBarHelper.getStatusMapWithNonZeroValues(statusCountMap);
+        StringBuilder tooltip = new StringBuilder();
+        for (Entry<Status, Long> entry : nonZeroStatusCountMap.entrySet()) {
+            tooltip.append(entry.getKey().toString().toLowerCase()).append(" : ").append(entry.getValue())
+                    .append("<br>");
+        }
+        return tooltip.toString();
+    }
+
     private static String getPartStyle(int partIndex, int noOfParts, String customStyle) {
         StringBuilder mainStyle = new StringBuilder();
         StringBuilder styleName = new StringBuilder(GwtDistributionBar.CLASSNAME);
@@ -60,53 +117,9 @@ public final class DistributionBarHelper {
 
     private static String getPart(int partIndex, Status status, Long value, Long totalValue, int noOfParts) {
         String partValue = status.toString().toLowerCase();
-        // return "<div class=\"" + getPartStyle(partIndex, noOfParts,
-        // partValue) + "\" style=\"width: "
-        // + getPartWidth(value, totalValue, noOfParts) + ";\" title = \"" +
-        // partValue + "\"><span class=\""
-        // + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">" + value +
-        // "</span></div>";
         return "<div class=\"" + getPartStyle(partIndex, noOfParts, partValue) + "\" style=\"width: "
                 + getPartWidth(value, totalValue, noOfParts) + ";\"><span class=\""
                 + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">" + value + "</span></div>";
-    }
-
-    public static String getDistributionBarAsHTMLString(Map<Status, Long> statusTotalCountMap) {
-        StringBuilder htmlString = new StringBuilder();
-        htmlString.append(getParentDivStart());
-        Long totalValue = getTotalSizes(statusTotalCountMap);
-        Map<Status, Long> statusMapWithNonZeroValues = getNonZeroStatusList(statusTotalCountMap);
-
-        if (statusMapWithNonZeroValues.size() > 0) {
-            int partIndex = 1;
-            for (Map.Entry<Status, Long> entry : statusMapWithNonZeroValues.entrySet()) {
-                if (entry.getValue() > 0) {
-                    htmlString.append(getPart(partIndex, entry.getKey(), entry.getValue(), totalValue,
-                            statusMapWithNonZeroValues.size()));
-                    partIndex++;
-                }
-            }
-        } else {
-            return getUnintialisedBar();
-        }
-        htmlString.append(getParentDivEnd());
-        return htmlString.toString();
-    }
-
-    public static Map<Status, Long> getNonZeroStatusList(Map<Status, Long> statusTotalCountMap) {
-        return statusTotalCountMap.entrySet().stream().filter(p -> p.getValue() > 0)
-                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
-    }
-
-
-    public static String getTooltip(Map<Status, Long> statusCountMap) {
-        Map<Status, Long> nonZeroStatusCountMap = DistributionBarHelper.getNonZeroStatusList(statusCountMap);
-        StringBuilder tooltip = new StringBuilder();
-        for (Entry<Status, Long> entry : nonZeroStatusCountMap.entrySet()) {
-            tooltip.append(entry.getKey().toString().toLowerCase()).append(" : ").append(entry.getValue())
-                    .append("<br>");
-        }
-        return tooltip.toString();
     }
 
     private static String getUnintialisedBar() {
@@ -130,5 +143,4 @@ public final class DistributionBarHelper {
     private static String getParentDivEnd() {
         return "</div>";
     }
-
 }

@@ -12,17 +12,17 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 
 /**
  * 
- * Renders button with provided HTML content.
- * Used to display button with icons.
+ * Renders button with provided HTML content. Used to display button with icons.
  *
  */
 public class HtmlButtonRenderer extends ButtonRenderer {
     private static final long serialVersionUID = -1242995370043404892L;
+
     public HtmlButtonRenderer() {
         super();
     }
+
     public HtmlButtonRenderer(RendererClickListener listener) {
         super(listener);
     }
-    
 }

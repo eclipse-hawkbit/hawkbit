@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -20,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
+import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -27,6 +30,7 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -61,6 +65,8 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
+    private transient Map<Status, StatusFontIcon> statusIconMap = new EnumMap<>(Status.class);
+
     @Override
     @PostConstruct
     protected void init() {
@@ -75,10 +81,11 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final RolloutEvent event) {
-        if (event == RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS) {
-            ((LazyQueryContainer) getContainerDataSource()).refresh();
-            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS_COUNT);
+        if (RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS != event) {
+            return;
         }
+        ((LazyQueryContainer) getContainerDataSource()).refresh();
+        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS_COUNT);
     }
 
     @Override
@@ -165,20 +172,19 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     @Override
     protected void addColumnRenderes() {
+        createRolloutStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new StatusConverter());
     }
 
     @Override
     protected void setHiddenColumns() {
-        /**
-         * No hidden columns.
-         */
+        // No hidden columns
     }
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
         return cell -> getDescription(cell);
-    };
+    }
 
     private void alignColumns() {
         setCellStyleGenerator(new CellStyleGenerator() {
@@ -218,9 +224,8 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
                 // In these cases display a appropriate status with
                 // description
                 return getStatus();
-            } else {
-                return processActionStatus(status);
             }
+            return processActionStatus(status);
         }
 
         @Override
@@ -236,39 +241,34 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     }
 
     private String processActionStatus(final Status status) {
-        String result = null;
-        switch (status) {
-        case FINISHED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), "statusIconGreen", null);
-            break;
-        case SCHEDULED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.HOURGLASS_1.getCodepoint()), "statusIconPending", null);
-            break;
-        case RUNNING:
-        case RETRIEVED:
-        case WARNING:
-        case DOWNLOAD:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.ADJUST.getCodepoint()), "statusIconYellow", null);
-            break;
-        case CANCELING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), "statusIconPending", null);
-            break;
-        case CANCELED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.TIMES_CIRCLE.getCodepoint()), "statusIconGreen", null);
-            break;
-        case ERROR:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()), "statusIconRed", null);
-            break;
-        default:
-            break;
+        StatusFontIcon statusFontIcon = statusIconMap.get(status);
+        if (statusFontIcon == null) {
+            return null;
         }
-        return result;
+        String codePoint = statusFontIcon.getFontIcon() != null
+                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
+        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
+    }
+
+    private void createRolloutStatusToFontMap() {
+        statusIconMap.put(Status.FINISHED,
+                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(Status.SCHEDULED,
+                new StatusFontIcon(FontAwesome.HOURGLASS_1, SPUIStyleDefinitions.STATUS_ICON_PENDING));
+        statusIconMap.put(Status.RUNNING,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.RETRIEVED,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.WARNING,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.DOWNLOAD,
+                new StatusFontIcon(FontAwesome.ADJUST, SPUIStyleDefinitions.STATUS_ICON_YELLOW));
+        statusIconMap.put(Status.CANCELING,
+                new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_PENDING));
+        statusIconMap.put(Status.CANCELED,
+                new StatusFontIcon(FontAwesome.TIMES_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(Status.ERROR,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
     private String getStatus() {
@@ -287,16 +287,16 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
     }
 
     private String getDescription(CellReference cell) {
-        if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
-            if (null != cell.getProperty().getValue()) {
-                return cell.getProperty().getValue().toString().toLowerCase();
-
-            } else {
-                return getDescriptionWhenNoAction();
-            }
+        if (!SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
+            return null;
         }
-        return null;
+        if (cell.getProperty().getValue() == null) {
+            // status could be null when there is no action.
+            return getDescriptionWhenNoAction();
+        }
+        return cell.getProperty().getValue().toString().toLowerCase();
     }
+       
 
     private String getDescriptionWhenNoAction() {
         final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
@@ -307,8 +307,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
             String ds = rolloutUIState.getRolloutDistributionSet().isPresent()
                     ? rolloutUIState.getRolloutDistributionSet().get() : "";
             return i18n.get("message.dist.already.assigned", new Object[] { ds });
-        } else {
-            return "unknown";
         }
+        return "unknown";
     }
 }

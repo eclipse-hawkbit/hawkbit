@@ -66,5 +66,4 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         }
         return details;
     }
-
 }

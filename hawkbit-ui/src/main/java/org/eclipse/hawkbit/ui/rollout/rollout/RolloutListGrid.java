@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -27,6 +29,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.LinkRenderer;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
+import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -100,6 +103,8 @@ public class RolloutListGrid extends AbstractGrid {
     @Autowired
     private transient SpPermissionChecker permissionChecker;
 
+    private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
+
     @Override
     @PostConstruct
     protected void init() {
@@ -114,9 +119,15 @@ public class RolloutListGrid extends AbstractGrid {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final RolloutEvent event) {
-        if (event == RolloutEvent.FILTER_BY_TEXT || event == RolloutEvent.CREATE_ROLLOUT
-                || event == RolloutEvent.UPDATE_ROLLOUT || event == RolloutEvent.SHOW_ROLLOUTS) {
+        switch (event) {
+        case FILTER_BY_TEXT:
+        case CREATE_ROLLOUT:
+        case UPDATE_ROLLOUT:
+        case SHOW_ROLLOUTS:
             refreshGrid();
+            break;
+        default:
+            return;
         }
     }
 
@@ -129,22 +140,22 @@ public class RolloutListGrid extends AbstractGrid {
     @SuppressWarnings("unchecked")
     @EventBusListenerMethod(scope = EventScope.SESSION)
     public void onEvent(final RolloutChangeEvent rolloutChangeEvent) {
-        if (rolloutUIState.isShowRollOuts()) {
-            final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
-            final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
-            final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
-            final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
-            if (null != item) {
-                item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
-                item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
-                        .setValue(totalTargetCountStatus);
-                final Long groupCount = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
-                        .getValue();
-                if (null != rollout.getRolloutGroups() && groupCount != rollout.getRolloutGroups().size()) {
-                    item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
-                            .setValue(Long.valueOf(rollout.getRolloutGroups().size()));
-                }
-            }
+        if (!rolloutUIState.isShowRollOuts()) {
+            return;
+        }
+        final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
+        final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
+        final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+        final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
+        if (item == null) {
+            return;
+        }
+        item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
+        item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
+        final Long groupCount = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue();
+        if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
+            item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
+                    .setValue(Long.valueOf(rollout.getRolloutGroups().size()));
         }
     }
 
@@ -275,9 +286,30 @@ public class RolloutListGrid extends AbstractGrid {
     protected void addColumnRenderes() {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
+
+        createRolloutStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
+
         getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(event -> onClickOfActionBtn(event)));
         getColumn(SPUILabelDefinitions.VAR_NAME).setRenderer(new LinkRenderer(event -> onClickOfRolloutName(event)));
+    }
+
+    private void createRolloutStatusToFontMap() {
+        statusIconMap.put(RolloutStatus.FINISHED,
+                new StatusFontIcon(FontAwesome.CHECK_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN));
+        statusIconMap.put(RolloutStatus.PAUSED,
+                new StatusFontIcon(FontAwesome.PAUSE, SPUIStyleDefinitions.STATUS_ICON_BLUE));
+        statusIconMap.put(RolloutStatus.RUNNING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_YELLOW));
+        statusIconMap.put(RolloutStatus.READY,
+                new StatusFontIcon(FontAwesome.DOT_CIRCLE_O, SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE));
+        statusIconMap.put(RolloutStatus.STOPPED,
+                new StatusFontIcon(FontAwesome.STOP, SPUIStyleDefinitions.STATUS_ICON_RED));
+        statusIconMap.put(RolloutStatus.CREATING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_GREY));
+        statusIconMap.put(RolloutStatus.STARTING, new StatusFontIcon(null, SPUIStyleDefinitions.STATUS_SPINNER_BLUE));
+        statusIconMap.put(RolloutStatus.ERROR_CREATING,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
+        statusIconMap.put(RolloutStatus.ERROR_STARTING,
+                new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
     private void alignColumns() {
@@ -313,77 +345,57 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private ContextMenu createContextMenu(final Long rolloutId) {
+        final ContextMenu context = new ContextMenu();
+        context.addItemClickListener(event -> menuItemClicked(event));
         final Item row = getContainerDataSource().getItem(rolloutId);
         final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();
-        final ContextMenu context = new ContextMenu();
-        context.addItemClickListener(event -> menuItemClicked(event));
-        if (rolloutStatus == RolloutStatus.READY) {
+
+        switch (rolloutStatus) {
+        case READY:
             final ContextMenuItem startItem = context.addItem(START_OPTION);
             startItem.setData(new ContextMenuData(rolloutId, ACTION.START));
-        } else if (rolloutStatus == RolloutStatus.RUNNING) {
-            final ContextMenuItem pauseItem = context.addItem(PAUSE_OPTION);
-            pauseItem.setData(new ContextMenuData(rolloutId, ACTION.PAUSE));
-        } else if (rolloutStatus == RolloutStatus.PAUSED) {
-            final ContextMenuItem resumeItem = context.addItem(RESUME_OPTION);
-            resumeItem.setData(new ContextMenuData(rolloutId, ACTION.RESUME));
-        } else if (rolloutStatus == RolloutStatus.STARTING || rolloutStatus == RolloutStatus.CREATING) {
-            return context;
-        }
-        if (permissionChecker.hasRolloutUpdatePermission()) {
-            final ContextMenuItem cancelItem = context.addItem(UPDATE_OPTION);
-            cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
-        }
-        return context;
-    }
-
-    private String convertRolloutStatusToString(final RolloutStatus value) {
-        String result = null;
-        switch (value) {
-        case FINISHED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.CHECK_CIRCLE.getCodepoint()), SPUIStyleDefinitions.STATUS_ICON_GREEN,
-                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
-            break;
-        case PAUSED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.PAUSE.getCodepoint()),
-                    SPUIStyleDefinitions.STATUS_ICON_BLUE, SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
             break;
         case RUNNING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, SPUIStyleDefinitions.STATUS_SPINNER_YELLOW,
-                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+            final ContextMenuItem pauseItem = context.addItem(PAUSE_OPTION);
+            pauseItem.setData(new ContextMenuData(rolloutId, ACTION.PAUSE));
             break;
-        case READY:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()),
-                    SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE, SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
-            break;
-        case STOPPED:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(Integer.toString(FontAwesome.STOP.getCodepoint()),
-                    SPUIStyleDefinitions.STATUS_ICON_RED, SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
-            break;
-        case CREATING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, SPUIStyleDefinitions.STATUS_SPINNER_GREY,
-                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+        case PAUSED:
+            final ContextMenuItem resumeItem = context.addItem(RESUME_OPTION);
+            resumeItem.setData(new ContextMenuData(rolloutId, ACTION.RESUME));
             break;
         case STARTING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(null, SPUIStyleDefinitions.STATUS_SPINNER_BLUE,
-                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
-            break;
+        case CREATING:
         case ERROR_CREATING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
-                    SPUIStyleDefinitions.STATUS_ICON_RED, SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
-            break;
         case ERROR_STARTING:
-            result = HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()),
-                    SPUIStyleDefinitions.STATUS_ICON_RED, SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
-            break;
+            // do not provide any action on these statuses
+            return context;
         default:
             break;
         }
-        return result;
+        getUpdateMenuItem(context, rolloutId);
+        return context;
+    }
+
+
+    private void getUpdateMenuItem(final ContextMenu context, final Long rolloutId) {
+        // Add 'Update' option only if user has update permission
+        if (!permissionChecker.hasRolloutUpdatePermission()) {
+            return;
+        }
+        final ContextMenuItem cancelItem = context.addItem(UPDATE_OPTION);
+        cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
+    }
+
+    private String convertRolloutStatusToString(final RolloutStatus value) {
+        StatusFontIcon statusFontIcon = statusIconMap.get(value);
+        if (statusFontIcon == null) {
+            return null;
+        }
+        String codePoint = statusFontIcon.getFontIcon() != null
+                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
+        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
+                SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
     }
 
     private void menuItemClicked(final ContextMenuItemClickEvent event) {
@@ -391,22 +403,33 @@ public class RolloutListGrid extends AbstractGrid {
         final ContextMenuData contextMenuData = (ContextMenuData) item.getData();
         final Item row = getContainerDataSource().getItem(contextMenuData.getRolloutId());
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        if (contextMenuData.getAction() == ACTION.PAUSE) {
+        switch (contextMenuData.getAction()) {
+        case PAUSE:
             rolloutManagement.pauseRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
-        } else if (contextMenuData.getAction() == ACTION.RESUME) {
+            break;
+        case RESUME:
             rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
             uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
-        } else if (contextMenuData.getAction() == ACTION.START) {
+            break;
+        case START:
             rolloutManagement.startRolloutAsync(rolloutManagement.findRolloutByName(rolloutName));
             uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
-        } else if (contextMenuData.getAction() == ACTION.UPDATE) {
-            addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
-            final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
-            addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
-            UI.getCurrent().addWindow(addTargetWindow);
-            addTargetWindow.setVisible(Boolean.TRUE);
+            break;
+        case UPDATE:
+            onUpdate(contextMenuData);
+            break;
+        default:
+            break;
         }
+    }
+
+    private void onUpdate(final ContextMenuData contextMenuData) {
+        addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
+        final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
+        addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
+        UI.getCurrent().addWindow(addTargetWindow);
+        addTargetWindow.setVisible(Boolean.TRUE);
     }
 
     private void refreshGrid() {
@@ -443,9 +466,8 @@ public class RolloutListGrid extends AbstractGrid {
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
             return DistributionBarHelper
                     .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
-        } else {
-            return null;
         }
+        return null;
     }
 
     enum ACTION {
@@ -568,6 +590,6 @@ public class RolloutListGrid extends AbstractGrid {
         public Class<String> getPresentationType() {
             return String.class;
         }
-
     }
+
 }
