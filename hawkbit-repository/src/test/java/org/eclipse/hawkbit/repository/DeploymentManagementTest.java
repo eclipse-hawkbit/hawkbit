@@ -144,7 +144,6 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
-    @Issue("MECS-674")
     public void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
 
         final DistributionSet cancelDs = TestDataUtil.generateDistributionSet("Canceled DS", "1.0", softwareManagement,
@@ -764,17 +763,17 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
         // verifying that the assignment is correct
-        assertThat(deploymentManagement.findActiveActionsByTarget(targ).size()).as("Active action of target")
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).size()).as("Active target actions are wrong")
                 .isEqualTo(1);
-        assertThat(deploymentManagement.findActionsByTarget(targ).size()).as("Action of target").isEqualTo(1);
-        assertThat(targ.getTargetInfo().getUpdateStatus()).as("UpdateStatus of target")
+        assertThat(deploymentManagement.findActionsByTarget(targ).size()).as("Target actions are wrong").isEqualTo(1);
+        assertThat(targ.getTargetInfo().getUpdateStatus()).as("UpdateStatus of target is wrong")
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        assertThat(targ.getAssignedDistributionSet()).as("Assigned distribution set of target").isEqualTo(dsA);
+        assertThat(targ.getAssignedDistributionSet()).as("Assigned distribution set of target is wrong").isEqualTo(dsA);
         assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
-                .as("Distribution set of action").isEqualTo(dsA);
+                .as("Distribution set of actionn is wrong").isEqualTo(dsA);
         assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
-                .as("Installed distribution set of action").isNotNull();
+                .as("Installed distribution set of action should be null").isNotNull();
 
         final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, dsA);
         final Action action = updAct.getContent().get(0);
@@ -800,13 +799,15 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         targ = targs.iterator().next();
 
-        assertEquals(1, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals(TargetUpdateStatus.PENDING,
+        assertEquals("active actions are wrong", 1, deploymentManagement.findActiveActionsByTarget(targ).size());
+        assertEquals("target status is wrong", TargetUpdateStatus.PENDING,
                 targetManagement.findTargetByControllerID(targ.getControllerId()).getTargetInfo().getUpdateStatus());
         assertEquals(dsB, targ.getAssignedDistributionSet());
-        assertEquals(dsA.getId(), targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId())
-                .getTargetInfo().getInstalledDistributionSet().getId());
-        assertEquals(dsB, deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
+        assertEquals("Installed ds is wrong", dsA.getId(),
+                targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId()).getTargetInfo()
+                        .getInstalledDistributionSet().getId());
+        assertEquals("Active ds is wrong", dsB,
+                deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
 
     }
 

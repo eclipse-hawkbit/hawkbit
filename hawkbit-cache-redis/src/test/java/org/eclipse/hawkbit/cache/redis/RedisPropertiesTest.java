@@ -13,6 +13,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.eclipse.hawkbit.cache.RedisProperties;
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Cluster Cache")
+@Stories("Redis Properties Test")
 public class RedisPropertiesTest {
 
     @Test

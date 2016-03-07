@@ -26,8 +26,6 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
  * The spring Redis configuration which is enabled by using the profile
  * {@code redis} to use a Redis server as cache.
  *
- *
- *
  */
 @Configuration
 @EnableConfigurationProperties(RedisProperties.class)

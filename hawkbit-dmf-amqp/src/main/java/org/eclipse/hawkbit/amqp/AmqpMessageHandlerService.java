@@ -12,7 +12,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,8 +49,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
@@ -72,18 +69,13 @@ import com.google.common.eventbus.EventBus;
 
 /**
  *
- * {@link AmqpMessageHandlerService} handles all incoming AMQP messages.
- *
- *
- *
+ * {@link AmqpMessageHandlerService} handles all incoming AMQP messages for the
+ * queue which is configure for the property hawkbit.dmf.rabbitmq.receiverQueue.
  *
  */
-public class AmqpMessageHandlerService {
+public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageHandlerService.class);
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private ControllerManagement controllerManagement;
@@ -105,7 +97,23 @@ public class AmqpMessageHandlerService {
     private HostnameResolver hostnameResolver;
 
     /**
-     * /** Method to handle all incoming amqp messages.
+     * Constructor.
+     * 
+     * @param defaultTemplate
+     *            the configured amqp template.
+     */
+    public AmqpMessageHandlerService(final RabbitTemplate defaultTemplate) {
+        super(defaultTemplate);
+    }
+
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
+    private Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
+            @Header(MessageHeaderKey.TENANT) final String tenant) {
+        return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
+    }
+
+    /**
+     * Method to handle all incoming amqp messages.
      *
      * @param message
      *            incoming message
@@ -115,11 +123,11 @@ public class AmqpMessageHandlerService {
      *            the contentType of the message
      * @param tenant
      *            the contentType of the message
+     * @param virtualHost
+     *            the virtual host
      * @return a message if <null> no message is send back to sender
      */
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
+    public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
@@ -127,7 +135,7 @@ public class AmqpMessageHandlerService {
             switch (messageType) {
             case THING_CREATED:
                 setTenantSecurityContext(tenant);
-                registerTarget(message);
+                registerTarget(message, virtualHost);
                 break;
             case EVENT:
                 setTenantSecurityContext(tenant);
@@ -153,8 +161,8 @@ public class AmqpMessageHandlerService {
         final String sha1 = secruityToken.getSha1();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
-            final LocalArtifact localArtifact = artifactManagement.findFirstLocalArtifactsBySHA1(secruityToken
-                    .getSha1());
+            final LocalArtifact localArtifact = artifactManagement
+                    .findFirstLocalArtifactsBySHA1(secruityToken.getSha1());
             if (localArtifact == null) {
                 throw new EntityNotFoundException();
             }
@@ -177,9 +185,9 @@ public class AmqpMessageHandlerService {
             final String downloadId = UUID.randomUUID().toString();
             final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1);
             cache.put(downloadId, downloadCache);
-            authentificationResponse.setDownloadUrl(UriComponentsBuilder
-                    .fromUri(hostnameResolver.resolveHostname().toURI()).path("/api/v1/downloadserver/downloadId/")
-                    .path(downloadId).build().toUriString());
+            authentificationResponse
+                    .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())
+                            .path("/api/v1/downloadserver/downloadId/").path(downloadId).build().toUriString());
             authentificationResponse.setResponseCode(HttpStatus.OK.value());
         } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
             LOG.error("Login failed", e);
@@ -196,7 +204,7 @@ public class AmqpMessageHandlerService {
             authentificationResponse.setMessage(errorMessage);
         }
 
-        return rabbitTemplate.getMessageConverter().toMessage(authentificationResponse, messageProperties);
+        return getMessageConverter().toMessage(authentificationResponse, messageProperties);
     }
 
     private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
@@ -207,11 +215,6 @@ public class AmqpMessageHandlerService {
         return artifact;
     }
 
-    protected void logAndThrowMessageError(final Message message, final String error) {
-        LOG.error("Error \"{}\" reported by message {}", error, message.getMessageProperties().getMessageId());
-        throw new IllegalArgumentException(error);
-    }
-
     private static void setSecurityContext(final Authentication authentication) {
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
         securityContextImpl.setAuthentication(authentication);
@@ -219,20 +222,11 @@ public class AmqpMessageHandlerService {
     }
 
     private static void setTenantSecurityContext(final String tenantId) {
-        final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(UUID.randomUUID()
-                .toString(), "AMQP-Controller", Collections.singletonList(new SimpleGrantedAuthority(
-                SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
+        final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
+                UUID.randomUUID().toString(), "AMQP-Controller",
+                Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
         setSecurityContext(authenticationToken);
-    }
-
-    private String getStringHeaderKey(final Message message, final String key, final String errorMessageIfNull) {
-        final Map<String, Object> header = message.getMessageProperties().getHeaders();
-        final Object value = header.get(key);
-        if (value == null) {
-            logAndThrowMessageError(message, errorMessageIfNull);
-        }
-        return value.toString();
     }
 
     /**
@@ -243,14 +237,15 @@ public class AmqpMessageHandlerService {
      * @param ip
      *            the ip of the target/thing
      */
-    private void registerTarget(final Message message) {
+    private void registerTarget(final Message message, final String virtualHost) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, "ThingId is null");
         final String replyTo = message.getMessageProperties().getReplyTo();
 
         if (StringUtils.isEmpty(replyTo)) {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing Event.");
         }
-        final URI amqpUri = IpUtil.createAmqpUri(replyTo);
+
+        final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(thingId, amqpUri);
         LOG.debug("Target {} reported online state.", thingId);
 
@@ -267,8 +262,8 @@ public class AmqpMessageHandlerService {
         final DistributionSet distributionSet = action.getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
-        eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(), target
-                .getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
+        eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
+                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
 
     }
 
@@ -281,13 +276,11 @@ public class AmqpMessageHandlerService {
      *            the topic of the event.
      */
     private void handleIncomingEvent(final Message message, final EventTopic topic) {
-        switch (topic) {
-        case UPDATE_ACTION_STATUS:
+        if (EventTopic.UPDATE_ACTION_STATUS.equals(topic)) {
             updateActionStatus(message);
             return;
-        default:
-            logAndThrowMessageError(message, "Got event without appropriate topic.");
         }
+        logAndThrowMessageError(message, "Got event without appropriate topic.");
     }
 
     /**
@@ -336,28 +329,24 @@ public class AmqpMessageHandlerService {
             logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
-        Action addUpdateActionStatus;
-
-        if (!actionStatus.getStatus().equals(Status.CANCELED)) {
-            addUpdateActionStatus = controllerManagement.addUpdateActionStatus(actionStatus, action);
-        } else {
-            addUpdateActionStatus = controllerManagement.addCancelActionStatus(actionStatus, action);
-        }
+        final Action addUpdateActionStatus = getUpdateActionStatus(action, actionStatus);
 
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
     }
 
-    /**
-     * @param message
-     * @param actionUpdateStatus
-     * @return
-     */
+    private Action getUpdateActionStatus(final Action action, final ActionStatus actionStatus) {
+        if (actionStatus.getStatus().equals(Status.CANCELED)) {
+            return controllerManagement.addCancelActionStatus(actionStatus, action);
+        }
+        return controllerManagement.addUpdateActionStatus(actionStatus, action);
+    }
+
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
-        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId, actionUpdateStatus
-                .getActionStatus().name());
+        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
+                actionUpdateStatus.getActionStatus().name());
 
         if (actionId == null) {
             logAndThrowMessageError(message, "Invalid message no action id");
@@ -366,8 +355,8 @@ public class AmqpMessageHandlerService {
         final Action action = controllerManagement.findActionWithDetails(actionId);
 
         if (action == null) {
-            logAndThrowMessageError(message, "Got intermediate notification about action " + actionId
-                    + " but action does not exist");
+            logAndThrowMessageError(message,
+                    "Got intermediate notification about action " + actionId + " but action does not exist");
         }
         return action;
     }
@@ -381,38 +370,12 @@ public class AmqpMessageHandlerService {
             // back to running action status
 
         } else {
-            logAndThrowMessageError(message, "Cancel Recjected message is not allowed, if action is on state: "
-                    + action.getStatus());
+            logAndThrowMessageError(message,
+                    "Cancel recjected message is not allowed, if action is on state: " + action.getStatus());
         }
     }
 
-    /**
-     * Is needed to convert a incoming message to is originally object type.
-     *
-     * @param message
-     *            the message to convert.
-     * @param clazz
-     *            the class of the originally object.
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    private <T> T convertMessage(final Message message, final Class<T> clazz) {
-        message.getMessageProperties().getHeaders()
-                .put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
-        return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
-    }
-
-    /**
-     * Is needed to verify if an incoming message has the content type json.
-     *
-     * @param message
-     *            the to verify
-     * @param contentType
-     *            the content type
-     * @return true if the content type has json, false it not.
-     */
-
-    private static void checkContentTypeJson(final Message message) {
+    private void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;
@@ -426,14 +389,6 @@ public class AmqpMessageHandlerService {
 
     void setHostnameResolver(final HostnameResolver hostnameResolver) {
         this.hostnameResolver = hostnameResolver;
-    }
-
-    void setRabbitTemplate(final RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
-
-    MessageConverter getMessageConverter() {
-        return rabbitTemplate.getMessageConverter();
     }
 
     void setAuthenticationManager(final AmqpControllerAuthentfication authenticationManager) {

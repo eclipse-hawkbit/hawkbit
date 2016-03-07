@@ -34,6 +34,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.google.common.io.BaseEncoding;
 import com.mongodb.gridfs.GridFSDBFile;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Component Tests - Repository")
+@Stories("Artifact Store MongoDB")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { ArtifactStoreAutoConfiguration.class, TestConfiguration.class })
 public class ArtifactStoreTest {
@@ -48,6 +54,7 @@ public class ArtifactStoreTest {
     private GridFsOperations gridFs;
 
     @Test
+    @Description("Ensures that storage in MongoDB is correctly executed.s")
     public void storeArtifactInMongoDB() {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
@@ -60,6 +67,7 @@ public class ArtifactStoreTest {
     }
 
     @Test
+    @Description("Ensures that search by SHA1 hash (which is used by hawkBit as artifact ID) finds the expected results.")
     public void findArtifactBySHA1Hash() throws NoSuchAlgorithmException {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
@@ -72,6 +80,7 @@ public class ArtifactStoreTest {
     }
 
     @Test
+    @Description("Ensures that search by MD5 hash finds the expected results.")
     public void findArtifactByMD5Hash() throws NoSuchAlgorithmException {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
@@ -84,6 +93,7 @@ public class ArtifactStoreTest {
     }
 
     @Test
+    @Description("Ensures that artifact content can be read through InputStream.")
     public void getInputStreamFromArtifact() throws IOException {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
@@ -103,7 +113,8 @@ public class ArtifactStoreTest {
     }
 
     @Test
-    public void deleteArtifactWithOnlyOneTenantLast() throws NoSuchAlgorithmException {
+    @Description("Ensures that artifact delete actually results in deletion from database.")
+    public void deleteArtifact() throws NoSuchAlgorithmException {
         final int filelengthBytes = 128;
         final String filename = "testfile.json";
         final String contentType = "application/json";

@@ -26,10 +26,9 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
- *
+ * Central event processors inside update server.
  *
  */
-
 @Configuration
 @EnableConfigurationProperties(AsyncConfigurerThreadpoolProperties.class)
 public class ExecutorAutoConfiguration {
@@ -40,7 +39,7 @@ public class ExecutorAutoConfiguration {
     private AsyncConfigurerThreadpoolProperties asyncConfigurerProperties;
 
     /**
-     * @return ExecutorService for general pupose multi threaded operations
+     * @return ExecutorService for general purpose multi threaded operations
      */
     @Bean
     @ConditionalOnMissingBean

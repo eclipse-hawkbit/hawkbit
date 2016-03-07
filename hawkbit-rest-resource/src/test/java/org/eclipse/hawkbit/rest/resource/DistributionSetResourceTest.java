@@ -47,7 +47,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.MediaType;
@@ -59,15 +58,8 @@ import com.jayway.jsonpath.JsonPath;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-/**
- *
- *
- *
- */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Distribution Set Resource")
-// TODO: fully document tests -> @Description for long text and reasonable
-// method name as short text
 public class DistributionSetResourceTest extends AbstractIntegrationTest {
 
     @Test
@@ -235,6 +227,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that multi target assignment through API is reflected by the repository.")
     public void assignMultipleTargetsToDistributionSet() throws Exception {
         // prepare distribution set
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
@@ -255,9 +248,13 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.assigned", equalTo(knownTargetIds.length - 1)))
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
+
+        assertThat(targetManagement.findTargetByAssignedDistributionSet(createdDs.getId(), pageReq).getContent())
+                .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
     @Test
+    @Description("Ensures that assigned targets of DS are returned as reflected by the repository.")
     public void getAssignedTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownTargetId = "knownTargetId1";
@@ -273,6 +270,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that assigned targets of DS are returned as persisted in the repository.")
     public void getAssignedTargetsOfDistributionSetIsEmpty() throws Exception {
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
@@ -283,6 +281,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that installed targets of DS are returned as persisted in the repository.")
     public void getInstalledTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownTargetId = "knownTargetId1";
@@ -305,46 +304,50 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that DS in repository are listed with proper paging properties.")
     public void getDistributionSetsWithoutAddtionalRequestParameters() throws Exception {
-        final int modules = 5;
-        createDistributionSetsAlphabetical(modules);
+        final int sets = 5;
+        createDistributionSetsAlphabetical(sets);
         mvc.perform(get(RestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
-                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(modules)))
-                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(modules)));
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(sets)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(sets)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(sets)));
     }
 
     @Test
+    @Description("Ensures that DS in repository are listed with proper paging results with paging limit parameter.")
     public void getDistributionSetsWithPagingLimitRequestParameter() throws Exception {
-        final int modules = 5;
+        final int sets = 5;
         final int limitSize = 1;
-        createDistributionSetsAlphabetical(modules);
+        createDistributionSetsAlphabetical(sets);
         mvc.perform(get(RestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
                 .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(sets)))
                 .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)));
     }
 
     @Test
+    @Description("Ensures that DS in repository are listed with proper paging results with paging limit and offset parameter.")
     public void getDistributionSetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
-        final int modules = 5;
+        final int sets = 5;
         final int offsetParam = 2;
-        final int expectedSize = modules - offsetParam;
-        createDistributionSetsAlphabetical(modules);
+        final int expectedSize = sets - offsetParam;
+        createDistributionSetsAlphabetical(sets);
         mvc.perform(get(RestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
                 .param(RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
-                .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(modules)))
+                .param(RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(sets)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
+                .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(sets)))
                 .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(TargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
     }
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Ensures that multiple DS requested are listed with expected payload.")
     public void getDistributionSets() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
@@ -389,6 +392,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Ensures that single DS requested by ID is listed with expected payload.")
     public void getDistributionSet() throws Exception {
         final DistributionSet set = createTestDistributionSet(softwareManagement, distributionSetManagement);
 
@@ -420,6 +424,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws JSONException, Exception {
         assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
 
@@ -534,7 +539,8 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testDeleteUnassignedistributionSet() throws Exception {
+    @Description("Ensures that DS deletion request to API is reflected by the repository.")
+    public void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
 
@@ -553,7 +559,8 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testDeleteAssignedDistributionSet() throws Exception {
+    @Description("Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.")
+    public void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
 
@@ -574,6 +581,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that DS property update request to API is reflected by the repository.")
     public void updateDistributionSet() throws Exception {
 
         // prepare test data
@@ -601,6 +609,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that the server reacts properly to invalid requests (URI, Media Type, Methods) with correct reponses.")
     public void invalidRequestsOnDistributionSetsResource() throws Exception {
         final DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
@@ -642,6 +651,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that the metadata creation through API is reflected by the repository.")
     public void createMetadata() throws Exception {
         final DistributionSet testDS = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
@@ -674,6 +684,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a metadata update through API is reflected by the repository.")
     public void updateMetadata() throws Exception {
         // prepare and create metadata for update
         final String knownKey = "knownKey";
@@ -700,6 +711,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a metadata entry deletion through API is reflected by the repository.")
     public void deleteMetadata() throws Exception {
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
@@ -722,6 +734,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a metadata entry selection through API reflectes the repository content.")
     public void getSingleMetadata() throws Exception {
         // prepare and create metadata
         final String knownKey = "knownKey";
@@ -737,6 +750,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a metadata entry paged list selection through API reflectes the repository content.")
     public void getPagedListofMetadata() throws Exception {
 
         final int totalMetadata = 10;
@@ -760,6 +774,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a DS search with query parameters returns the expected result.")
     public void searchDistributionSetRsql() throws Exception {
         final String dsSuffix = "test";
         final int amount = 10;
@@ -776,11 +791,13 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
 
     }
 
-    @Ignore
     @Test
+    @Description("Ensures that a DS search with complete==true parameter returns only DS that are actually completely filled with mandatory modules.")
     public void filterDistributionSetComplete() throws Exception {
         final int amount = 10;
         TestDataUtil.generateDistributionSets(amount, softwareManagement, distributionSetManagement);
+        distributionSetManagement.createDistributionSet(new DistributionSet("incomplete", "2", "incomplete",
+                distributionSetManagement.findDistributionSetTypeByKey("ecl_os"), null));
 
         final String rsqlFindLikeDs1OrDs2 = "complete==" + Boolean.TRUE;
 
@@ -790,6 +807,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a DS assigned target search with controllerId==1 parameter returns only the target with the given ID.")
     public void searchDistributionSetAssignedTargetsRsql() throws Exception {
         // prepare distribution set
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
@@ -815,6 +833,7 @@ public class DistributionSetResourceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that a DS metadata filtered query with value==knownValue1 parameter returns only the metadata entries with that value.")
     public void searchDistributionSetMetadataRsql() throws Exception {
         final int totalMetadata = 10;
         final String knownKeyPrefix = "knownKey";

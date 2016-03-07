@@ -28,6 +28,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Security")
+@Stories("Exclude path aware shallow ETag filter")
 @RunWith(MockitoJUnitRunner.class)
 public class ExcludePathAwareShallowETagFilterTest {
 
@@ -56,7 +61,8 @@ public class ExcludePathAwareShallowETagFilterTest {
         filterUnderTest.doFilterInternal(servletRequestMock, servletResponseMock, filterChainMock);
 
         // verify no eTag header is set and response has not been changed
-        assertThat(servletResponseMock.getHeader("ETag")).isNull();
+        assertThat(servletResponseMock.getHeader("ETag"))
+                .as("ETag header should not be set during downloading, too expensive").isNull();
         // the servlet response must be the same mock!
         verify(filterChainMock, times(1)).doFilter(servletRequestMock, servletResponseMock);
     }

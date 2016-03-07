@@ -25,13 +25,11 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -55,7 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(ControllerConstants.ARTIFACTS_V1_REQUEST_MAPPING)
-public class ArtifactStoreController implements EnvironmentAware {
+public class ArtifactStoreController {
     private static final Logger LOG = LoggerFactory.getLogger(ArtifactStoreController.class);
 
     @Autowired
@@ -67,14 +65,8 @@ public class ArtifactStoreController implements EnvironmentAware {
     @Autowired
     private CacheWriteNotify cacheWriteNotify;
 
-    private static final String SP_SERVER_CONFIG_PREFIX = "hawkbit.server.";
-    private RelaxedPropertyResolver environment;
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = new RelaxedPropertyResolver(environment, SP_SERVER_CONFIG_PREFIX);
-
-    }
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
 
     /**
      * Handles GET {@link Artifact} download request. This could be full or
@@ -138,8 +130,8 @@ public class ArtifactStoreController implements EnvironmentAware {
 
     private Action checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
             final LocalArtifact artifact) {
-        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil.getClientIpFromRequest(
-                request, environment.getProperty("security.rp.remote_ip_header", String.class, "X-Forwarded-For")));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid,
+                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());

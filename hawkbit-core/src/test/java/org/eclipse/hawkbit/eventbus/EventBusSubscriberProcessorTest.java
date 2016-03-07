@@ -21,7 +21,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Cluster Event Bus")
+@Stories("EventBus Subscriber Processor Test")
 @RunWith(MockitoJUnitRunner.class)
+// TODO: create description annotations
 public class EventBusSubscriberProcessorTest {
 
     @Mock

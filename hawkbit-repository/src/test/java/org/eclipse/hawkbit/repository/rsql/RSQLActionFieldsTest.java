@@ -26,7 +26,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL filter actions")
 public class RSQLActionFieldsTest extends AbstractIntegrationTest {
 
@@ -72,7 +72,7 @@ public class RSQLActionFieldsTest extends AbstractIntegrationTest {
 
         try {
             assertRSQLQuery(ActionFields.STATUS.name() + "==true", 5);
-            fail();
+            fail("Missing expected RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
     }
