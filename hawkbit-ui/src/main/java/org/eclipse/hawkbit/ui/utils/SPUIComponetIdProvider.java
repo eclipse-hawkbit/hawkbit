@@ -867,6 +867,11 @@ public final class SPUIComponetIdProvider {
      * Action confirmation popup id.
      */
     public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
+    
+    /**
+     * Validation status icon .
+     */
+    public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
      * /* Private Constructor.
