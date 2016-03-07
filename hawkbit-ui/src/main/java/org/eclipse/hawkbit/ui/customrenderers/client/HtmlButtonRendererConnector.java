@@ -8,9 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.customrenderers.client;
 
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
+
 import com.vaadin.client.connectors.ButtonRendererConnector;
 import com.vaadin.shared.ui.Connect;
 
+/**
+ *  A connector for {@link HtmlButtonRenderer}.
+ *
+ */
 @Connect(org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer.class)
 public class HtmlButtonRendererConnector extends ButtonRendererConnector {
     private static final long serialVersionUID = 7987417436367399331L;

@@ -41,6 +41,11 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
+/**
+ * 
+ * Grid component with targets of rollout group.
+ *
+ */
 @SpringComponent
 @ViewScope
 public class RolloutGroupTargetsListGrid extends AbstractGrid {

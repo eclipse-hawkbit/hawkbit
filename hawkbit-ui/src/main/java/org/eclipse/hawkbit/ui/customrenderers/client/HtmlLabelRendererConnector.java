@@ -8,9 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.customrenderers.client;
 
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
+
 import com.vaadin.client.connectors.AbstractRendererConnector;
 import com.vaadin.shared.ui.Connect;
 
+/**
+ * 
+ * A connector for {@link HtmlLabelRenderer}.
+ *
+ */
 @Connect(org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer.class)
 public class HtmlLabelRendererConnector extends AbstractRendererConnector<String> {
 

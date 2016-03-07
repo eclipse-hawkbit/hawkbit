@@ -16,6 +16,11 @@ import com.vaadin.client.renderers.WidgetRenderer;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * 
+ * Renders label with provided value and style.
+ *
+ */
 public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
 
     @Override

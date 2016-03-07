@@ -10,6 +10,11 @@ package org.eclipse.hawkbit.ui.customrenderers.renderers;
 
 import com.vaadin.ui.renderers.ButtonRenderer;
 
+/**
+ * 
+ * Renders link with provided text.
+ *
+ */
 public class LinkRenderer extends ButtonRenderer {
     private static final long serialVersionUID = -1242995370043404892L;
     public LinkRenderer() {

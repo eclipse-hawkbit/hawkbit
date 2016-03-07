@@ -30,8 +30,7 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
- * count message label for the targets of the rollout group.
- *
+ * Count message label for the targets of the rollout group.
  */
 @SpringComponent
 @ViewScope

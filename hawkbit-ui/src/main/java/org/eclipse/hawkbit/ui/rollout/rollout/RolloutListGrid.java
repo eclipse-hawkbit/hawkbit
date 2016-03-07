@@ -60,6 +60,11 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
+/**
+ * 
+ * Rollout list grid component.
+ *
+ */
 @SpringComponent
 @ViewScope
 public class RolloutListGrid extends AbstractGrid {

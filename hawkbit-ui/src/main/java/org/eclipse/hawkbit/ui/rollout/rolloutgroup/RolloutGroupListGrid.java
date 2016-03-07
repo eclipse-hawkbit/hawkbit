@@ -51,6 +51,11 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
+/**
+ * 
+ * Rollout group list grid component.
+ *
+ */
 @SpringComponent
 @ViewScope
 public class RolloutGroupListGrid extends AbstractGrid {

@@ -13,6 +13,11 @@ import com.vaadin.client.renderers.ButtonRenderer;
 import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * 
+ * Renders link with provided text.
+ *
+ */
 public class LinkRenderer extends ButtonRenderer {
     @Override
     public void render(RendererCellReference cell, String text, Button button) {

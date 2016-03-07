@@ -13,6 +13,12 @@ import com.vaadin.client.renderers.ButtonRenderer;
 import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * 
+ * Renders button with provided HTML content.
+ * Used to display button with icons.
+ *
+ */
 public class HtmlButtonRenderer extends ButtonRenderer {
     @Override
     public void render(RendererCellReference cell, String text, Button button) {
