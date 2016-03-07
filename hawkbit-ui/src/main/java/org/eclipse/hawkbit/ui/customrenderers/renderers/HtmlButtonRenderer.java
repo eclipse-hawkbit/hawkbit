@@ -18,10 +18,25 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 public class HtmlButtonRenderer extends ButtonRenderer {
     private static final long serialVersionUID = -1242995370043404892L;
 
+<<<<<<< HEAD
+    /**
+     * Intialize button renderer.
+     */
+=======
+>>>>>>> branch 'Rollout_migrate_table_to_grid_final' of https://github.com/bsinno/hawkbit
     public HtmlButtonRenderer() {
         super();
     }
 
+<<<<<<< HEAD
+    /**
+     * Intialize button renderer with {@link RendererClickListener}
+     * 
+     * @param listener
+     *            RendererClickListener
+     */
+=======
+>>>>>>> branch 'Rollout_migrate_table_to_grid_final' of https://github.com/bsinno/hawkbit
     public HtmlButtonRenderer(RendererClickListener listener) {
         super(listener);
     }

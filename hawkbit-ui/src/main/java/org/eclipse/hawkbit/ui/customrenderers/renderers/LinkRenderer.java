@@ -17,11 +17,25 @@ import com.vaadin.ui.renderers.ButtonRenderer;
  */
 public class LinkRenderer extends ButtonRenderer {
     private static final long serialVersionUID = -1242995370043404892L;
+
+    /**
+     * Intialise link renderer.
+     */
     public LinkRenderer() {
         super();
     }
+
+    /**
+     * Intialise link renderer with {@link RendererClickListener}
+     * 
+     * @param listener
+     *            RendererClickListener
+     */
     public LinkRenderer(RendererClickListener listener) {
         super(listener);
     }
+<<<<<<< HEAD
+=======
     
+>>>>>>> branch 'Rollout_migrate_table_to_grid_final' of https://github.com/bsinno/hawkbit
 }
