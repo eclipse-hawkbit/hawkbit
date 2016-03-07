@@ -34,8 +34,4 @@ public class LinkRenderer extends ButtonRenderer {
     public LinkRenderer(RendererClickListener listener) {
         super(listener);
     }
-<<<<<<< HEAD
-=======
-    
->>>>>>> branch 'Rollout_migrate_table_to_grid_final' of https://github.com/bsinno/hawkbit
 }

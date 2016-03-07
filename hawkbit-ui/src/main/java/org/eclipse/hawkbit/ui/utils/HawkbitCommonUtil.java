@@ -1361,25 +1361,13 @@ public final class HawkbitCommonUtil {
      */
     public static String getFormattedString(Map<Status, Long> details) {
         StringBuilder val = new StringBuilder();
-<<<<<<< HEAD
         if (details == null || details.isEmpty()) {
             return null;
-=======
-        if (null != details && !details.isEmpty()) {
-            for (Entry<Status, Long> entry : details.entrySet()) {
-                val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
-            }
-            return val.substring(0, val.length() - 1);
->>>>>>> branch 'Rollout_migrate_table_to_grid_final' of https://github.com/bsinno/hawkbit
         }
-<<<<<<< HEAD
         for (Entry<Status, Long> entry : details.entrySet()) {
             val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
         }
         return val.substring(0, val.length() - 1);
-=======
-        return null;
->>>>>>> branch 'Rollout_migrate_table_to_grid_final' of https://github.com/bsinno/hawkbit
     }
 
     /**
