@@ -50,7 +50,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Issue;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -781,12 +780,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 
-        assertEquals(0, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals(1, deploymentManagement.findInActiveActionsByTarget(targ).size());
+        assertEquals("active target actions are wrong", 0, deploymentManagement.findActiveActionsByTarget(targ).size());
+        assertEquals("active actions are wrong", 1, deploymentManagement.findInActiveActionsByTarget(targ).size());
 
-        assertEquals(TargetUpdateStatus.IN_SYNC, targ.getTargetInfo().getUpdateStatus());
-        assertEquals(dsA, targ.getAssignedDistributionSet());
-        assertEquals(dsA, targ.getTargetInfo().getInstalledDistributionSet());
+        assertEquals("tagret update status is not correct", TargetUpdateStatus.IN_SYNC,
+                targ.getTargetInfo().getUpdateStatus());
+        assertEquals("wrong assigned ds", dsA, targ.getAssignedDistributionSet());
+        assertEquals("wrong installed ds", dsA, targ.getTargetInfo().getInstalledDistributionSet());
 
         targs = deploymentManagement.assignDistributionSet(dsB.getId(), new String[] { "target-id-A" })
                 .getAssignedTargets();
@@ -796,7 +796,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertEquals("active actions are wrong", 1, deploymentManagement.findActiveActionsByTarget(targ).size());
         assertEquals("target status is wrong", TargetUpdateStatus.PENDING,
                 targetManagement.findTargetByControllerID(targ.getControllerId()).getTargetInfo().getUpdateStatus());
-        assertEquals(dsB, targ.getAssignedDistributionSet());
+        assertEquals("wrong assigned ds", dsB, targ.getAssignedDistributionSet());
         assertEquals("Installed ds is wrong", dsA.getId(),
                 targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId()).getTargetInfo()
                         .getInstalledDistributionSet().getId());

@@ -311,7 +311,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM)).andReturn();
 
-        assertTrue(Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+        assertTrue("Wrong response content", Arrays.equals(result.getResponse().getContentAsByteArray(), random));
 
         final MvcResult result2 = mvc
                 .perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(),
