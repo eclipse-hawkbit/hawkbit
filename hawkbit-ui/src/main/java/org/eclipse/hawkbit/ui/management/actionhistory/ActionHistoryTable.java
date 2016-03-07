@@ -844,7 +844,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         if (actionId != null) {
             final Action activeAction = deploymentManagement.findAction(actionId);
             try {
-                deploymentManagement.forceQuitAction(activeAction, target);
+                deploymentManagement.forceQuitAction(activeAction);
                 return true;
             } catch (final CancelActionNotAllowedException e) {
                 LOG.info("Force Cancel action not allowed exception :{}", e);
