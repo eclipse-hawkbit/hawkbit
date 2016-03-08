@@ -1,6 +1,6 @@
    javax.servlet:javax.servlet-api:jar:3.1.0:provided
-   org.apache.tomcat.embed:tomcat-embed-core:jar:8.0.28:provided
-   org.apache.tomcat.embed:tomcat-embed-el:jar:8.0.28:provided
-   org.apache.tomcat.embed:tomcat-embed-logging-juli:jar:8.0.28:provided
-   org.apache.tomcat.embed:tomcat-embed-websocket:jar:8.0.28:provided
-   org.springframework.boot:spring-boot-starter-tomcat:jar:1.2.7.RELEASE:provided
+   org.apache.tomcat.embed:tomcat-embed-core:jar:8.0.30:provided
+   org.apache.tomcat.embed:tomcat-embed-el:jar:8.0.30:provided
+   org.apache.tomcat.embed:tomcat-embed-logging-juli:jar:8.0.30:provided
+   org.apache.tomcat.embed:tomcat-embed-websocket:jar:8.0.30:provided
+   org.springframework.boot:spring-boot-starter-tomcat:jar:1.2.8.RELEASE:provided
