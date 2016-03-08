@@ -58,8 +58,8 @@ public class BaseAmqpService {
      * @return the converted object
      */
     @SuppressWarnings("unchecked")
-    protected <T> T convertMessage(final Message message, final Class<T> clazz) {
-        if (message == null) {
+    public <T> T convertMessage(final Message message, final Class<T> clazz) {
+        if (message == null || message.getBody() == null) {
             return null;
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
@@ -78,8 +78,8 @@ public class BaseAmqpService {
      * @return the list of converted objects
      */
     @SuppressWarnings("unchecked")
-    protected <T> List<T> convertMessageList(final Message message, final Class<T> clazz) {
-        if (message == null) {
+    public <T> List<T> convertMessageList(final Message message, final Class<T> clazz) {
+        if (message == null || message.getBody() == null) {
             return Collections.emptyList();
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,

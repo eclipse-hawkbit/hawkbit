@@ -116,6 +116,7 @@ public class AmqpMessageHandlerServiceTest {
 
     }
 
+    @Test
     @Description("Tests not allowed content-type in message")
     public void testWrongContentType() {
         final MessageProperties messageProperties = new MessageProperties();
