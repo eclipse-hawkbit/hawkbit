@@ -43,11 +43,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test for {@link SoftwareModuleTypeResource}.
  *
- *
- *
- *
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Software Module Type Resource")
 public class SoftwareModuleTypeResourceTest extends AbstractIntegrationTest {
 

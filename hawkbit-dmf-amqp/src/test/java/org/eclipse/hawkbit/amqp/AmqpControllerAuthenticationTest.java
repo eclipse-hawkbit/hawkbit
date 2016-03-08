@@ -23,8 +23,9 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,11 +46,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  *
- * Test Amqp controller authentfication.
+ * Test Amqp controller authentication.
  */
-@Features("AMQP Authenfication Test")
-@Stories("Tests the authenfication")
-public class AmqpControllerAuthentficationTest {
+@Features("Component Tests - Device Management Federation API")
+@Stories("AmqpController Authentication Test")
+public class AmqpControllerAuthenticationTest {
 
     private static final String TENANT = "DEFAULT";
     private static String CONTROLLLER_ID = "123";
@@ -60,16 +61,18 @@ public class AmqpControllerAuthentficationTest {
 
     @Before
     public void before() throws Exception {
-        amqpMessageHandlerService = new AmqpMessageHandlerService();
         messageConverter = new Jackson2JsonMessageConverter();
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate();
-        rabbitTemplate.setMessageConverter(messageConverter);
-        amqpMessageHandlerService.setRabbitTemplate(rabbitTemplate);
+        final RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
+        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate);
 
         authenticationManager = new AmqpControllerAuthentfication();
         authenticationManager.setControllerManagement(mock(ControllerManagement.class));
-        final SecurityProperties secruityProperties = mock(SecurityProperties.class);
-        when(secruityProperties.getRpSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
+
+        final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
+        final Rp rp = mock(Rp.class);
+        when(secruityProperties.getRp()).thenReturn(rp);
+        when(rp.getSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
         authenticationManager.setSecruityProperties(secruityProperties);
         systemManagement = mock(SystemManagement.class);
         authenticationManager.setSystemManagement(systemManagement);
@@ -78,7 +81,6 @@ public class AmqpControllerAuthentficationTest {
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
         when(controllerManagement.getSecurityTokenByControllerId(anyString())).thenReturn(CONTROLLLER_ID);
         authenticationManager.setControllerManagement(controllerManagement);
-
         amqpMessageHandlerService.setArtifactManagement(mock(ArtifactManagement.class));
 
         authenticationManager.setTenantAware(new SecurityContextTenantAware());
@@ -139,7 +141,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -161,7 +163,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -183,7 +185,7 @@ public class AmqpControllerAuthentficationTest {
 
         // test
         final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT);
+                TENANT, "vHost");
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);

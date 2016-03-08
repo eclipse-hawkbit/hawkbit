@@ -28,7 +28,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL filter distribution set")
 public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
 
@@ -140,7 +140,7 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
         final Page<DistributionSet> find = distributionSetManagement.findDistributionSetsAll(
                 RSQLUtility.parse(rsqlParam, DistributionSetFields.class), new PageRequest(0, 100), false);
         final long countAll = find.getTotalElements();
-        assertThat(find).isNotNull();
-        assertThat(countAll).isEqualTo(excpectedEntity);
+        assertThat(find).as("Founded entity is should not be null").isNotNull();
+        assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);
     }
 }

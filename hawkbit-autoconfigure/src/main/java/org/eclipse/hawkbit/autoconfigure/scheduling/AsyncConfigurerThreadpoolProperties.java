@@ -13,17 +13,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Properties for the async configurer.
  * 
- *
  */
 @ConfigurationProperties("hawkbit.threadpool")
 public class AsyncConfigurerThreadpoolProperties {
 
+    /**
+     * Max queue size for central event executor.
+     */
     private Integer queuesize = 250;
 
+    /**
+     * Core processing threads for central event executor.
+     */
     private Integer corethreads = 5;
 
+    /**
+     * Maximum thread pool size for central event executor.
+     */
     private Integer maxthreads = 50;
 
+    /**
+     * When the number of threads is greater than the core, this is the maximum
+     * time that excess idle threads will wait for new tasks before terminating.
+     */
     private Long idletimeout = 10000L;
 
     public Integer getQueuesize() {

@@ -25,9 +25,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Addition tests next to {@link ArtifactManagementTest} with no running MongoDB
  *
- *
- *
- *
  */
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")

@@ -20,7 +20,12 @@ public enum ActionStatusFields implements FieldNameProvider {
     /**
      * The id field.
      */
-    ID("id");
+    ID("id"),
+
+    /**
+     * The reportedAt field.
+     */
+    REPORTEDAT("createdAt");
 
     private final String fieldName;
 

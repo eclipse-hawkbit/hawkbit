@@ -280,7 +280,7 @@ public class SystemManagement implements EnvironmentAware {
      * @return {@code true} in case the tenant exits or {@code false} if not
      */
     @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator")
-    // MECS-903 set transaction to not supported, due we call this in
+    // set transaction to not supported, due we call this in
     // BaseEntity#prePersist methods
     // and it seems that JPA committing the transaction when executing this
     // transactional method,

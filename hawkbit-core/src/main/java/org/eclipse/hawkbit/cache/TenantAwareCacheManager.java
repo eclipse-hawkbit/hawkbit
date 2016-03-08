@@ -51,7 +51,12 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
 
     @Override
     public Cache getCache(final String name) {
-        final String currentTenant = tenantAware.getCurrentTenant().toUpperCase();
+        String currentTenant = tenantAware.getCurrentTenant();
+        if (currentTenant == null) {
+            return null;
+        }
+
+        currentTenant = currentTenant.toUpperCase();
         if (currentTenant.contains(TENANT_CACHE_DELIMITER)) {
             return null;
         }
@@ -60,7 +65,12 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
 
     @Override
     public Collection<String> getCacheNames() {
-        final String currentTenant = tenantAware.getCurrentTenant().toUpperCase();
+        String currentTenant = tenantAware.getCurrentTenant();
+        if (currentTenant == null) {
+            return null;
+        }
+
+        currentTenant = currentTenant.toUpperCase();
         if (currentTenant.contains(TENANT_CACHE_DELIMITER)) {
             return Collections.emptyList();
         }

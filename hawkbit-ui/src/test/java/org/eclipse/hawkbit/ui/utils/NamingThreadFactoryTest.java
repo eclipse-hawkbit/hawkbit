@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - UI")
+@Features("Unit Tests - Management UI")
 @Stories("Threads with NamingThreadFactory")
 @RunWith(MockitoJUnitRunner.class)
 public class NamingThreadFactoryTest {

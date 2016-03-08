@@ -33,13 +33,11 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -57,7 +55,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 @Service
-public class ControllerManagement implements EnvironmentAware {
+public class ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
     private static final Logger LOG_DOS = LoggerFactory.getLogger("server-security.dos");
 
@@ -85,9 +83,8 @@ public class ControllerManagement implements EnvironmentAware {
     @Autowired
     private ActionStatusRepository actionStatusRepository;
 
-    private Integer maxCount = 1000;
-
-    private Integer maxAttributes = 100;
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
 
     /**
      * Refreshes the time of the last time the controller has been connected to
@@ -379,15 +376,16 @@ public class ControllerManagement implements EnvironmentAware {
     }
 
     private void checkForToManyStatusEntries(final Action action) {
-        if (maxCount > 0) {
+        if (securityProperties.getDos().getMaxStatusEntriesPerAction() > 0) {
 
             final Long statusCount = actionStatusRepository.countByAction(action);
 
-            if (statusCount >= maxCount) {
+            if (statusCount >= securityProperties.getDos().getMaxStatusEntriesPerAction()) {
                 LOG_DOS.error(
                         "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
-                        maxCount);
-                throw new ToManyStatusEntriesException(String.valueOf(maxCount));
+                        securityProperties.getDos().getMaxStatusEntriesPerAction());
+                throw new ToManyStatusEntriesException(
+                        String.valueOf(securityProperties.getDos().getMaxStatusEntriesPerAction()));
             }
         }
     }
@@ -436,28 +434,17 @@ public class ControllerManagement implements EnvironmentAware {
 
         target.getTargetInfo().getControllerAttributes().putAll(data);
 
-        if (target.getTargetInfo().getControllerAttributes().size() > maxAttributes) {
+        if (target.getTargetInfo().getControllerAttributes().size() > securityProperties.getDos()
+                .getMaxAttributeEntriesPerTarget()) {
             LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
-                    maxAttributes);
-            throw new ToManyAttributeEntriesException(String.valueOf(maxAttributes));
+                    securityProperties.getDos().getMaxAttributeEntriesPerTarget());
+            throw new ToManyAttributeEntriesException(
+                    String.valueOf(securityProperties.getDos().getMaxAttributeEntriesPerTarget()));
         }
 
         target.getTargetInfo().setLastTargetQuery(System.currentTimeMillis());
         target.getTargetInfo().setRequestControllerAttributes(false);
         return targetRepository.save(target);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
-     * springframework.core.env. Environment)
-     */
-    @Override
-    public void setEnvironment(final Environment environment) {
-        final RelaxedPropertyResolver env = new RelaxedPropertyResolver(environment, "hawkbit.server.");
-        maxCount = env.getProperty("security.dos.maxStatusEntriesPerAction", Integer.class, 1000);
-        maxAttributes = env.getProperty("security.dos.maxAttributeEntriesPerTarget", Integer.class, 100);
     }
 
     /**

@@ -235,7 +235,7 @@ public class TargetResource implements TargetRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
 
-        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusMessagesByActionInDescOrder(
+        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action, true);
 
         return new ResponseEntity<>(
