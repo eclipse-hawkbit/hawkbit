@@ -50,9 +50,9 @@ public class ArtifactUploadState implements Serializable {
 
     private boolean swTypeFilterClosed = Boolean.FALSE;
 
-    private boolean isSwModuleTableMaximized = Boolean.FALSE;
+    private boolean swModuleTableMaximized = Boolean.FALSE;
 
-    private boolean isArtifactDetailsMaximized = Boolean.FALSE;
+    private boolean artifactDetailsMaximized = Boolean.FALSE;
 
     private final Set<String> selectedDeleteSWModuleTypes = new HashSet<>();
 
@@ -152,15 +152,15 @@ public class ArtifactUploadState implements Serializable {
      * @return the isSwModuleTableMaximized
      */
     public boolean isSwModuleTableMaximized() {
-        return isSwModuleTableMaximized;
+        return swModuleTableMaximized;
     }
 
     /**
      * @param isSwModuleTableMaximized
      *            the isSwModuleTableMaximized to set
      */
-    public void setSwModuleTableMaximized(final boolean isSwModuleTableMaximized) {
-        this.isSwModuleTableMaximized = isSwModuleTableMaximized;
+    public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
+        this.swModuleTableMaximized = swModuleTableMaximized;
     }
 
     public Set<String> getSelectedDeleteSWModuleTypes() {
@@ -171,15 +171,15 @@ public class ArtifactUploadState implements Serializable {
      * @return the isArtifactDetailsMaximized
      */
     public boolean isArtifactDetailsMaximized() {
-        return isArtifactDetailsMaximized;
+        return artifactDetailsMaximized;
     }
 
     /**
      * @param isArtifactDetailsMaximized
      *            the isArtifactDetailsMaximized to set
      */
-    public void setArtifactDetailsMaximized(final boolean isArtifactDetailsMaximized) {
-        this.isArtifactDetailsMaximized = isArtifactDetailsMaximized;
+    public void setArtifactDetailsMaximized(final boolean artifactDetailsMaximized) {
+        this.artifactDetailsMaximized = artifactDetailsMaximized;
     }
 
     /**
