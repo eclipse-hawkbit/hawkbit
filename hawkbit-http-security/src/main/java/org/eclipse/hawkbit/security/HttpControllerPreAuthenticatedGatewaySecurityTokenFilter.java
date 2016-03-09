@@ -30,9 +30,6 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
      * @param tenantConfigurationManagement
      *            the system management service to retrieve configuration
      *            properties
-     * @param systemManagement
-     *            the system management service to retrieve configuration
-     *            properties
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant

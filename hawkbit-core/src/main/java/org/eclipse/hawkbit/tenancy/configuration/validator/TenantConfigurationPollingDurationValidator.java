@@ -29,6 +29,8 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
     private final Duration maxDuration;
 
     /**
+     * Constructor.
+     * 
      * @param properties
      *            property accessor for poll configuration
      */
@@ -46,7 +48,6 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
         final Duration tenantConfigurationValue;
         try {
             tenantConfigurationValue = durationHelper.formattedStringToDuration(tenantConfigurationString);
-
         } catch (final DateTimeParseException ex) {
             throw new TenantConfigurationValidatorException(
                     String.format("The given configuration value is expected as a string in the format %s.",

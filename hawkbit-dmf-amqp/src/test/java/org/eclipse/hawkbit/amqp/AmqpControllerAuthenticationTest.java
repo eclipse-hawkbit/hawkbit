@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,7 +94,10 @@ public class AmqpControllerAuthenticationTest {
         authenticationManager.setControllerManagement(controllerManagement);
         amqpMessageHandlerService.setArtifactManagement(mock(ArtifactManagement.class));
 
-        authenticationManager.setTenantAware(new SecurityContextTenantAware());
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        authenticationManager.setTenantAware(tenantAware);
+        final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
+        authenticationManager.setSystemSecurityContext(systemSecurityContext);
         authenticationManager.postConstruct();
         amqpMessageHandlerService.setAuthenticationManager(authenticationManager);
     }
