@@ -32,30 +32,28 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
-import org.eclipse.hawkbit.security.SecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
 import org.springframework.cache.Cache;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -96,17 +94,11 @@ import org.vaadin.spring.security.web.authentication.VaadinUrlAuthenticationSucc
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
 @EnableWebMvcSecurity
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
-public class SecurityManagedConfiguration implements EnvironmentAware {
+public class SecurityManagedConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
-    private static final String SP_SERVER_CONFIG_PREFIX = "hawkbit.server.";
-    private RelaxedPropertyResolver environment;
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = new RelaxedPropertyResolver(environment, SP_SERVER_CONFIG_PREFIX);
-
-    }
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
 
     /**
      * {@link WebSecurityConfigurer} for the internal SP controller API.
@@ -125,7 +117,7 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
         @Autowired
         private TenantAware tenantAware;
         @Autowired
-        private SecurityProperties securityConfiguration;
+        private DdiSecurityProperties ddiSecurityConfiguration;
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
         @Autowired
@@ -136,8 +128,9 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    securityConfiguration.getRpCnHeader(), securityConfiguration.getRpSslIssuerHashHeader(),
-                    tenantConfigurationManagement, tenantAware, systemSecurityContext);
+                    ddiSecurityConfiguration.getRp().getCnHeader(),
+                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
+                    tenantAware, systemSecurityContext);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
             securityHeaderFilter.setCheckForPrincipalChanges(true);
             securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
@@ -162,7 +155,7 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            if (securityConfiguration.getAnonymousEnabled()) {
+            if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
@@ -181,19 +174,10 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * org.springframework.security.config.annotation.web.configuration.
-         * WebSecurityConfigurerAdapter
-         * #configure(org.springframework.security.config.annotation.
-         * authentication.builders. AuthenticationManagerBuilder)
-         */
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRpTrustedIPs()));
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
     }
 
@@ -208,13 +192,10 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
     public FilterRegistrationBean dosFilter() {
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
-        filterRegBean
-                .setFilter(
-                        new DosFilter(environment.getProperty("security.dos.filter.maxRead", Integer.class, 200),
-                                environment.getProperty("security.dos.filter.maxWrite", Integer.class, 50),
-                                environment.getProperty("security.dos.filter.whitelist"), environment
-                                        .getProperty("security.clients.blacklist"),
-                environment.getProperty("security.rp.remote_ip_header", String.class, "X-Forwarded-For")));
+        filterRegBean.setFilter(new DosFilter(securityProperties.getDos().getFilter().getMaxRead(),
+                securityProperties.getDos().getFilter().getMaxWrite(),
+                securityProperties.getDos().getFilter().getWhitelist(), securityProperties.getClients().getBlacklist(),
+                securityProperties.getClients().getRemoteIpHeader()));
         filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*", "/rest/*");
         return filterRegBean;
     }
@@ -314,8 +295,7 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
     @Configuration
     @Order(400)
     @EnableVaadinSecurity
-    public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter
-            implements EnvironmentAware {
+    public static class UISecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         private static final String XFRAME_OPTION_DENY = "DENY";
         private static final String XFRAME_OPTION_SAMEORIGIN = "SAMEORIGIN";
@@ -324,13 +304,8 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
         private VaadinSecurityContext vaadinSecurityContext;
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
-
-        private RelaxedPropertyResolver environment;
-
-        @Override
-        public void setEnvironment(final Environment environment) {
-            this.environment = new RelaxedPropertyResolver(environment, SP_SERVER_CONFIG_PREFIX);
-        }
+        @Autowired
+        private HawkbitSecurityProperties securityProperties;
 
         /**
          * post construct for setting the authentication success handler for the
@@ -383,13 +358,13 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
         protected void configure(final HttpSecurity http) throws Exception {
 
             // configuration xframe-option
-            final String confXframeOption = environment.getProperty("security.xframe.option", XFRAME_OPTION_DENY);
-            final String confAllowFromUri = environment.getProperty("security.xframe.option.allowfrom");
-            if (confXframeOption.equals(XFAME_OPTION_ALLOW_FROM) && confAllowFromUri == null) {
+            final String confXframeOption = securityProperties.getXframe().getOption();
+            final String confAllowFromUri = securityProperties.getXframe().getAllowfrom();
+            if (confXframeOption.equals(XFAME_OPTION_ALLOW_FROM) && confAllowFromUri.isEmpty()) {
                 // if allow-from option is specified but no allowFromUri throw
                 // exception
                 throw new IllegalStateException("hawkbit.server.security.xframe.option has been specified as ALLOW-FROM"
-                        + " but no hawkbit.server.security.xframe.option.allowfrom has been set, "
+                        + " but no hawkbit.server.security.xframe.allowfrom has been set, "
                         + "please ensure to set allow from URIs");
             }
 
@@ -465,7 +440,7 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
     public static class IdRestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Autowired
-        private SecurityProperties securityConfiguration;
+        private DdiSecurityProperties ddiSecurityConfiguration;
 
         @Autowired
         @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
@@ -487,8 +462,8 @@ public class SecurityManagedConfiguration implements EnvironmentAware {
 
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(securityConfiguration.getRpTrustedIPs()));
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
 
     }

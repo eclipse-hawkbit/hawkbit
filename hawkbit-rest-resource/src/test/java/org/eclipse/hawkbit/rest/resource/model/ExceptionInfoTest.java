@@ -15,10 +15,17 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Management API")
+@Stories("Error Handling")
 public class ExceptionInfoTest {
 
     @Test
-    public void setterAndGetter() {
+    @Description("Ensures that setters and getters match on teh payload.")
+    public void setterAndGetterOnExceptionInfo() {
         final String knownExceptionClass = "hawkbit.test.exception.Class";
         final String knownErrorCode = "hawkbit.error.code.Known";
         final String knownMessage = "a known message";

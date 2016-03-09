@@ -23,6 +23,7 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -121,11 +122,22 @@ public class AmqpConfiguration {
     /**
      * Create amqp handler service bean.
      *
-     * @return
+     * @return handler service bean
      */
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService() {
-        return new AmqpMessageHandlerService();
+        return new AmqpMessageHandlerService(rabbitTemplate);
+    }
+
+    /**
+     * Create default amqp sender service bean.
+     *
+     * @return the default amqp sender service bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AmqpSenderService amqpSenderServiceBean() {
+        return new DefaultAmqpSenderService(rabbitTemplate);
     }
 
     /**

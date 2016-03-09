@@ -21,9 +21,9 @@ import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.PreAuthenficationFilter;
-import org.eclipse.hawkbit.security.SecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class AmqpControllerAuthentfication {
     private TenantAware tenantAware;
 
     @Autowired
-    private SecurityProperties secruityProperties;
+    private DdiSecurityProperties ddiSecruityProperties;
 
     @Autowired
     private SystemSecurityContext systemSecurityContext;
@@ -82,7 +82,7 @@ public class AmqpControllerAuthentfication {
         filterChain.add(gatewaySecurityTokenFilter);
 
         final ControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new ControllerPreAuthenticatedSecurityHeaderFilter(
-                secruityProperties.getRpCnHeader(), secruityProperties.getRpSslIssuerHashHeader(),
+                ddiSecruityProperties.getRp().getCnHeader(), ddiSecruityProperties.getRp().getSslIssuerHashHeader(),
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityHeaderFilter);
 
@@ -131,18 +131,15 @@ public class AmqpControllerAuthentfication {
 
         LOGGER.debug("preAuthenticatedPrincipal = {} trying to authenticate", principal);
 
-        final PreAuthenticatedAuthenticationToken authRequest = new PreAuthenticatedAuthenticationToken(principal,
-                credentials);
-
-        return authRequest;
+        return new PreAuthenticatedAuthenticationToken(principal, credentials);
     }
 
     public void setControllerManagement(final ControllerManagement controllerManagement) {
         this.controllerManagement = controllerManagement;
     }
 
-    public void setSecruityProperties(final SecurityProperties secruityProperties) {
-        this.secruityProperties = secruityProperties;
+    public void setSecruityProperties(final DdiSecurityProperties secruityProperties) {
+        this.ddiSecruityProperties = secruityProperties;
     }
 
     public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {

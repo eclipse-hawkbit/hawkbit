@@ -25,7 +25,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Management UI")
+@Stories("Push Security")
 @RunWith(MockitoJUnitRunner.class)
+// TODO: create description annotations
 public class SpringSecurityAtmosphereInterceptorTest {
 
     @Mock

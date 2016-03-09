@@ -26,6 +26,11 @@ import org.springframework.cache.CacheManager;
 
 import com.google.common.eventbus.EventBus;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Repository")
+@Stories("CacheWriteNotify")
 @RunWith(MockitoJUnitRunner.class)
 public class CacheWriteNotifyTest {
 

@@ -23,11 +23,6 @@ import org.springframework.data.domain.Sort.Direction;
 /**
  * Utility class for for paged body generation.
  *
- *
- *
- *
- *
- *
  */
 public final class PagingUtility {
     /*
@@ -90,8 +85,9 @@ public final class PagingUtility {
         if (sortParam != null) {
             sorting = new Sort(SortUtility.parse(ActionFields.class, sortParam));
         } else {
-            // default sort
-            sorting = new Sort(Direction.ASC, ActionFields.ID.getFieldName());
+            // default sort is DESC in case of action to match behavior
+            // of management UI (last entry on top)
+            sorting = new Sort(Direction.DESC, ActionFields.ID.getFieldName());
         }
         return sorting;
     }
@@ -101,8 +97,9 @@ public final class PagingUtility {
         if (sortParam != null) {
             sorting = new Sort(SortUtility.parse(ActionStatusFields.class, sortParam));
         } else {
-            // default sort
-            sorting = new Sort(Direction.ASC, ActionStatusFields.ID.getFieldName());
+            // default sort is DESC in case of action status to match behavior
+            // of management UI (last entry on top)
+            sorting = new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName());
         }
         return sorting;
     }

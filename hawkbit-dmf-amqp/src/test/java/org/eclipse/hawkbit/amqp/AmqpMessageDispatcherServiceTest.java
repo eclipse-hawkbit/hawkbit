@@ -19,6 +19,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -53,43 +53,44 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @ActiveProfiles({ "test" })
-@Features("AMQP Dispatcher Test")
-@Stories("Tests send messages")
+@Features("Component Tests - Device Management Federation API")
+@Stories("AmqpMessage Dispatcher Service Test")
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
 
     private AmqpMessageDispatcherService amqpMessageDispatcherService;
 
-    private MessageConverter messageConverter;
-
     private RabbitTemplate rabbitTemplate;
+
+    private DefaultAmqpSenderService senderService;
 
     private static final String CONTROLLER_ID = "1";
 
     @Override
     public void before() throws Exception {
         super.before();
-        amqpMessageDispatcherService = new AmqpMessageDispatcherService();
+        this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
+        when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
+        amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate);
         amqpMessageDispatcherService = spy(amqpMessageDispatcherService);
-        messageConverter = new Jackson2JsonMessageConverter();
+
+        senderService = Mockito.mock(DefaultAmqpSenderService.class);
+        amqpMessageDispatcherService.setAmqpSenderService(senderService);
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrl(anyString(), any(), anyObject())).thenReturn("http://mockurl");
 
-        this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
-        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-
-        amqpMessageDispatcherService.setRabbitTemplate(rabbitTemplate);
-        amqpMessageDispatcherService.setTenantAware(tenantAware);
         amqpMessageDispatcherService.setArtifactUrlHandler(artifactUrlHandlerMock);
+
     }
 
     @Test
     @Description("Verfies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, "default", CONTROLLER_ID, 1l, new ArrayList<SoftwareModule>(), IpUtil.createAmqpUri("mytest"));
+                1L, "default", CONTROLLER_ID, 1l, new ArrayList<SoftwareModule>(),
+                IpUtil.createAmqpUri("vHost", "mytest"));
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress().getHost());
+        final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertTrue("No softwaremmodule should be contained in the request",
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
@@ -101,9 +102,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, "default", CONTROLLER_ID, 1l, dsA.getModules(), IpUtil.createAmqpUri("mytest"));
+                1L, "default", CONTROLLER_ID, 1l, dsA.getModules(), IpUtil.createAmqpUri("vHost", "mytest"));
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress().getHost());
+        final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("Expecting a size of 3 software modules in the reuqest", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
@@ -140,9 +141,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, "default", CONTROLLER_ID, 1l, dsA.getModules(), IpUtil.createAmqpUri("mytest"));
+                1L, "default", CONTROLLER_ID, 1l, dsA.getModules(), IpUtil.createAmqpUri("vHost", "mytest"));
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress().getHost());
+        final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
@@ -159,11 +160,10 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Description("Verfies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                1L, "default", CONTROLLER_ID, 1l, IpUtil.createAmqpUri("mytest"));
+                1L, "default", CONTROLLER_ID, 1l, IpUtil.createAmqpUri("vHost", "mytest"));
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getTargetAdress().getHost());
+        final Message sendMessage = createArgumentCapture(cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
         assertCancelMessage(sendMessage);
 
     }
@@ -203,9 +203,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
                 MessageProperties.CONTENT_TYPE_JSON, sendMessage.getMessageProperties().getContentType());
     }
 
-    protected Message createArgumentCapture(final String exchange) {
+    protected Message createArgumentCapture(final URI uri) {
         final ArgumentCaptor<Message> argumentCaptor = ArgumentCaptor.forClass(Message.class);
-        Mockito.verify(amqpMessageDispatcherService).sendMessage(eq(exchange), argumentCaptor.capture());
+        Mockito.verify(senderService).sendMessage(argumentCaptor.capture(), eq(uri));
         return argumentCaptor.getValue();
     }
 

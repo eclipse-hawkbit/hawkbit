@@ -83,10 +83,9 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         gatewayTokenNameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null, "",
                 true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         gatewayTokenNameTextField.setImmediate(true);
-        // hide text field until we support multiple gateway tokens for a tenant
-        // MECS-830
+        // hide text field until we support multiple gateway tokens for a tenan
         gatewayTokenNameTextField.setVisible(false);
-        gatewayTokenNameTextField.addTextChangeListener(event -> keyNameChanged());
+        gatewayTokenNameTextField.addTextChangeListener(event -> doKeyNameChanged());
 
         final Button gatewaytokenBtn = SPUIComponentProvider.getButton("TODO-ID", "Regenerate Key", "",
                 ValoTheme.BUTTON_TINY + " " + "redicon", true, null, SPUIButtonStyleSmall.class);
@@ -116,10 +115,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         }
     }
 
-    /**
-     * @return
-     */
-    private void keyNameChanged() {
+    private void doKeyNameChanged() {
         keyNameChanged = true;
         notifyConfigurationChanged();
     }

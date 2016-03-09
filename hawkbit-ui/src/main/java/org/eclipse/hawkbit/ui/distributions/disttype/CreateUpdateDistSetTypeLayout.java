@@ -555,10 +555,10 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         if (permChecker.hasUpdateDistributionPermission()) {
             optionValues.add(updateDistType.getValue());
         }
-        createOptionGroup(optionValues);
+        createOptionGroupByValues(optionValues);
     }
 
-    private void createOptionGroup(final List<String> typeOptions) {
+    private void createOptionGroupByValues(final List<String> typeOptions) {
         createOptiongroup = new OptionGroup("", typeOptions);
         createOptiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
         createOptiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);

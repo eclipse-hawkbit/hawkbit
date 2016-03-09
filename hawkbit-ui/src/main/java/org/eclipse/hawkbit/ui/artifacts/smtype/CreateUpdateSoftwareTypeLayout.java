@@ -438,17 +438,17 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         if (permChecker.hasUpdateDistributionPermission()) {
             optionValues.add(updateType.getValue());
         }
-        createOptionGroup(optionValues);
+        createOptionGroupByValues(optionValues);
     }
 
     private void singleMultiOptionGroup() {
         final List<String> optionValues = new ArrayList<>();
         optionValues.add(singleAssign.getValue());
         optionValues.add(multiAssign.getValue());
-        assignOptionGroup(optionValues);
+        assignOptionGroupByValues(optionValues);
     }
 
-    private void createOptionGroup(final List<String> tagOptions) {
+    private void createOptionGroupByValues(final List<String> tagOptions) {
         createOptiongroup = new OptionGroup("", tagOptions);
         createOptiongroup.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
         createOptiongroup.addStyleName("custom-option-group");
@@ -458,7 +458,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         }
     }
 
-    private void assignOptionGroup(final List<String> tagOptions) {
+    private void assignOptionGroupByValues(final List<String> tagOptions) {
         assignOptiongroup = new OptionGroup("", tagOptions);
         assignOptiongroup.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
         assignOptiongroup.addStyleName("custom-option-group");

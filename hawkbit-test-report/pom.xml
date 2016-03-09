@@ -18,7 +18,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-test-report</artifactId>
-   <name>Hawkbit :: Test Report</name>
+   <name>hawkBit :: Test Report</name>
 
    <packaging>pom</packaging>
 
@@ -75,8 +75,7 @@
                   </goals>
                </execution>
             </executions>
-         </plugin>
-
+         </plugin>      
       </plugins>
    </build>
 </project>

@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SecurityProperties;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  *
  */
 @Configuration
-@EnableConfigurationProperties(SecurityProperties.class)
+@EnableConfigurationProperties(DdiSecurityProperties.class)
 public class SecurityAutoConfiguration {
 
     /**

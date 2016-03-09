@@ -78,7 +78,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
     }
 
     private TargetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
-        final Set<String> targetList = new HashSet<String>();
+        final Set<String> targetList = new HashSet<>();
         targetList.add(selectedTarget.getControllerId());
         final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
         uinotification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(tagNameSelected, result, i18n));
@@ -102,7 +102,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     /* To Be Done : this implementation will vary in views */
     private List<String> getClickedTagList() {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     @Override
