@@ -39,14 +39,8 @@ import com.vaadin.ui.VerticalLayout;
 public class AuthenticationConfigurationView extends BaseConfigurationView
         implements ConfigurationGroup, ConfigurationItem.ConfigurationItemChangeListener, ValueChangeListener {
 
-    /**
-    *
-    */
     private static final String DIST_CHECKBOX_STYLE = "dist-checkbox-style";
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Autowired
@@ -119,13 +113,6 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         setCompositionRoot(rootPanel);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.tenantconfiguration.ConfigurationGroup#save
-     * ()
-     */
     @Override
     public void save() {
         certificateAuthenticationConfigurationItem.save();
@@ -133,13 +120,6 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         gatewaySecurityTokenAuthenticationConfigurationItem.save();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.tenantconfiguration.ConfigurationGroup#undo
-     * ()
-     */
     @Override
     public void undo() {
         certificateAuthenticationConfigurationItem.undo();
@@ -155,37 +135,32 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         notifyConfigurationChanged();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.data.Property.ValueChangeListener#valueChange(com.vaadin.
-     * data.Property. ValueChangeEvent)
-     */
     @Override
     public void valueChange(final ValueChangeEvent event) {
 
-        if (event.getProperty() instanceof CheckBox) {
-            notifyConfigurationChanged();
+        if (!(event.getProperty() instanceof CheckBox)) {
+            return;
+        }
 
-            CheckBox checkBox = (CheckBox) event.getProperty();
-            AuthenticationConfigurationItem configurationItem = null;
+        notifyConfigurationChanged();
 
-            if (checkBox == gatewaySecTokenCheckBox) {
-                configurationItem = gatewaySecurityTokenAuthenticationConfigurationItem;
-            } else if (checkBox == targetSecTokenCheckBox) {
-                configurationItem = targetSecurityTokenAuthenticationConfigurationItem;
-            } else if (checkBox == certificateAuthCheckbox) {
-                configurationItem = certificateAuthenticationConfigurationItem;
-            } else {
-                return;
-            }
+        final CheckBox checkBox = (CheckBox) event.getProperty();
+        AuthenticationConfigurationItem configurationItem;
 
-            if (checkBox.getValue()) {
-                configurationItem.configEnable();
-            } else {
-                configurationItem.configDisable();
-            }
+        if (checkBox == gatewaySecTokenCheckBox) {
+            configurationItem = gatewaySecurityTokenAuthenticationConfigurationItem;
+        } else if (checkBox == targetSecTokenCheckBox) {
+            configurationItem = targetSecurityTokenAuthenticationConfigurationItem;
+        } else if (checkBox == certificateAuthCheckbox) {
+            configurationItem = certificateAuthenticationConfigurationItem;
+        } else {
+            return;
+        }
 
+        if (checkBox.getValue()) {
+            configurationItem.configEnable();
+        } else {
+            configurationItem.configDisable();
         }
     }
 }

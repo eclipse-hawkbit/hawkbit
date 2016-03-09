@@ -320,22 +320,21 @@ public class TargetInfo implements Persistable<Long>, Serializable {
      *         before this method returns {@code null}
      */
     public PollStatus getPollStatus() {
-        if (lastTargetQuery != null) {
-            final Duration pollTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement
-                    .getInstance().getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class)
-                    .getValue());
-            final Duration overdueTime = durationHelper
-                    .formattedStringToDuration(TenantConfigurationManagement.getInstance()
-                            .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
-                            .getValue());
-            final LocalDateTime currentDate = LocalDateTime.now();
-            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
-                    ZoneId.systemDefault());
-            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
-            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
-            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        if (lastTargetQuery == null) {
+            return null;
         }
-        return null;
+
+        final Duration pollTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement.getInstance()
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+        final Duration overdueTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement
+                .getInstance().getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                .getValue());
+        final LocalDateTime currentDate = LocalDateTime.now();
+        final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
+                ZoneId.systemDefault());
+        final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
+        final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
+        return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
     }
 
     /**
@@ -378,23 +377,14 @@ public class TargetInfo implements Persistable<Long>, Serializable {
             return lastPollDate;
         }
 
-        /**
-         * @return the nextPollDate
-         */
         public LocalDateTime getNextPollDate() {
             return nextPollDate;
         }
 
-        /**
-         * @return the overdueDate
-         */
         public LocalDateTime getOverdueDate() {
             return overdueDate;
         }
 
-        /**
-         * @return the current date
-         */
         public LocalDateTime getCurrentDate() {
             return currentDate;
         }

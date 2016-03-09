@@ -87,9 +87,10 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
 
     @Override
     public void save() {
-        if (configurationEnabledChange) {
-            getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
+        if (!configurationEnabledChange) {
+            return;
         }
+        getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
     }
 
     @Override

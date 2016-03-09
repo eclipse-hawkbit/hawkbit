@@ -108,21 +108,22 @@ public class DurationField extends DateField {
         // method. This method overwrites the super method, which is
         // necessary, that parsing works correctly on pressing enter key
 
-        if (event.getProperty() instanceof DurationField) {
-            final Date value = (Date) event.getProperty().getValue();
+        if (!(event.getProperty() instanceof DurationField)) {
+            return;
+        }
+        final Date value = (Date) event.getProperty().getValue();
 
-            // setValue() calls valueChanged again, when the minimum is greater
-            // than the maximum this can lead to an endless loop
-            if (value != null && minimumDuration != null && maximumDuration != null
-                    && minimumDuration.before(maximumDuration)) {
+        // setValue() calls valueChanged again, when the minimum is greater
+        // than the maximum this can lead to an endless loop
+        if (value != null && minimumDuration != null && maximumDuration != null
+                && minimumDuration.before(maximumDuration)) {
 
-                if (compareTimeOfDates(value, maximumDuration) > 0) {
-                    ((DateField) event.getProperty()).setValue(maximumDuration);
-                }
+            if (compareTimeOfDates(value, maximumDuration) > 0) {
+                ((DateField) event.getProperty()).setValue(maximumDuration);
+            }
 
-                if (compareTimeOfDates(minimumDuration, value) > 0) {
-                    ((DateField) event.getProperty()).setValue(minimumDuration);
-                }
+            if (compareTimeOfDates(minimumDuration, value) > 0) {
+                ((DateField) event.getProperty()).setValue(minimumDuration);
             }
         }
     }

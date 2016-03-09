@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Ab abstract authentication configuration item.
+ * abstract authentication configuration item.
  *
  *
  *
@@ -28,9 +28,6 @@ import com.vaadin.ui.VerticalLayout;
 abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout
         implements AuthenticationConfigurationItem {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private final TenantConfigurationKey configurationKey;
@@ -59,17 +56,9 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
         addComponent(SPUIComponentProvider.getLabel(labelText, SPUILabelDefinitions.SP_LABEL_SIMPLE));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# isConfigEnabled()
-     */
     @Override
     public boolean isConfigEnabled() {
-        final boolean b = tenantConfigurationManagement.getConfigurationValue(configurationKey, Boolean.class)
-                .getValue();
-        return b;
+        return tenantConfigurationManagement.getConfigurationValue(configurationKey, Boolean.class).getValue();
     }
 
     /**
@@ -90,14 +79,6 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
         configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# addConfigurationChangeListener
-     * (hawkbit.server.ui.tenantconfiguration.TenantConfigurationItem.
-     * TenantConfigurationChangeListener)
-     */
     @Override
     public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);
