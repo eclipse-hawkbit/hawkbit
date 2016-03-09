@@ -647,7 +647,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private Container createDsComboContainer() {
-        final BeanQueryFactory<DistBeanQuery> distributionQF = new BeanQueryFactory<>(DistBeanQuery.class);
+        final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
+                DistributionBeanQuery.class);
         return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
