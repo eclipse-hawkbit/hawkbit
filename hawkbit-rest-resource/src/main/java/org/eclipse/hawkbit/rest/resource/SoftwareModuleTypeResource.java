@@ -48,7 +48,7 @@ public class SoftwareModuleTypeResource implements SoftwareModuleTypeRestApi {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
+        final Sort sorting = PagingUtility.sanitizeSoftwareModuleTypeSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 

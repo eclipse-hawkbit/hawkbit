@@ -12,10 +12,12 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
+import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -69,6 +71,17 @@ public final class PagingUtility {
         return sorting;
     }
 
+    static Sort sanitizeSoftwareModuleTypeSortParam(final String sortParam) {
+        final Sort sorting;
+        if (sortParam != null) {
+            sorting = new Sort(SortUtility.parse(SoftwareModuleTypeFields.class, sortParam));
+        } else {
+            // default sort
+            sorting = new Sort(Direction.ASC, SoftwareModuleTypeFields.NAME.getFieldName());
+        }
+        return sorting;
+    }
+
     static Sort sanitizeDistributionSetSortParam(final String sortParam) {
         final Sort sorting;
         if (sortParam != null) {
@@ -76,6 +89,17 @@ public final class PagingUtility {
         } else {
             // default sort
             sorting = new Sort(Direction.ASC, DistributionSetFields.NAME.getFieldName());
+        }
+        return sorting;
+    }
+
+    static Sort sanitizeDistributionSetTypeSortParam(final String sortParam) {
+        final Sort sorting;
+        if (sortParam != null) {
+            sorting = new Sort(SortUtility.parse(DistributionSetTypeFields.class, sortParam));
+        } else {
+            // default sort
+            sorting = new Sort(Direction.ASC, DistributionSetTypeFields.NAME.getFieldName());
         }
         return sorting;
     }

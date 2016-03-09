@@ -64,7 +64,7 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
+        final Sort sorting = PagingUtility.sanitizeDistributionSetTypeSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
