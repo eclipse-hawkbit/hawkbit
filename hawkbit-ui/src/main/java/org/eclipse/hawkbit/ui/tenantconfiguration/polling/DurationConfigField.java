@@ -26,7 +26,7 @@ import com.vaadin.ui.GridLayout;
  * duration in the DurationField or he can configure using the global duration
  * by changing the CheckBox.
  */
-public class DurationConfigField extends GridLayout implements ValueChangeListener, ConfigurationItem {
+public class DurationConfigField extends GridLayout implements ConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,15 +50,11 @@ public class DurationConfigField extends GridLayout implements ValueChangeListen
         this.addComponent(durationField, 1, 0);
         this.setComponentAlignment(durationField, Alignment.MIDDLE_LEFT);
 
-        checkBox.addValueChangeListener(this);
-        durationField.addValueChangeListener(this);
+        checkBox.addValueChangeListener(event->checkBoxChange());
+        durationField.addValueChangeListener(event->notifyConfigurationChanged());
     }
 
-    @Override
-    public void valueChange(final ValueChangeEvent event) {
-        if (event.getProperty() != checkBox) {
-            return;
-        }
+    private void checkBoxChange() {
         durationField.setEnabled(checkBox.getValue());
 
         if (!checkBox.getValue()) {
