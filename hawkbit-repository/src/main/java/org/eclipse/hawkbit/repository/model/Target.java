@@ -69,7 +69,7 @@ import org.springframework.data.domain.Persistable;
         @Index(name = "sp_idx_target_03", columnList = "tenant,controller_id,assigned_distribution_set"),
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "controller_id", "tenant" }, name = "uk_tenant_controller_id") )
+                "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 @NamedEntityGraph(name = "Target.detail", attributeNodes = { @NamedAttributeNode("tags"),
         @NamedAttributeNode(value = "assignedDistributionSet"), @NamedAttributeNode(value = "targetInfo") })
 public class Target extends NamedEntity implements Persistable<Long> {
@@ -81,21 +81,21 @@ public class Target extends NamedEntity implements Persistable<Long> {
     private String controllerId;
 
     @Transient
-    private boolean isNew = false;
+    private boolean entityNew = false;
 
     @ManyToMany(targetEntity = TargetTag.class)
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
-            @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target") ) }, inverseJoinColumns = {
-                    @JoinColumn(name = "tag", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag") ) })
+            @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "tag", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag")) })
     private Set<TargetTag> tags = new HashSet<>();
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.REMOVE })
-    @JoinColumn(name = "target", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ") )
+    @JoinColumn(name = "target", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
     private final List<Action> actions = new ArrayList<>();
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = DistributionSet.class)
-    @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds") )
+    @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
     private DistributionSet assignedDistributionSet;
 
     @CascadeOnDelete
@@ -217,15 +217,15 @@ public class Target extends NamedEntity implements Persistable<Long> {
     @Override
     @Transient
     public boolean isNew() {
-        return isNew;
+        return entityNew;
     }
 
     /**
      * @param isNew
      *            the isNew to set
      */
-    public void setNew(final boolean isNew) {
-        this.isNew = isNew;
+    public void setNew(final boolean entityNew) {
+        this.entityNew = entityNew;
     }
 
     /**
