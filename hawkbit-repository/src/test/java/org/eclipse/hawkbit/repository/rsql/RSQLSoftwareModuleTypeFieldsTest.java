@@ -55,7 +55,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractIntegrationTest {
     @Test
     @Description("Test filter software module test type by max")
     public void testFilterByMaxAssignment() {
-        assertRSQLQuery(SoftwareModuleTypeFields.MAX.name() + "==1", 3);
+        assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "==1", 3);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {

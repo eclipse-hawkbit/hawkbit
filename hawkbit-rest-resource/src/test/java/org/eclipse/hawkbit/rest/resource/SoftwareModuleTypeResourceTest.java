@@ -92,6 +92,46 @@ public class SoftwareModuleTypeResourceTest extends AbstractIntegrationTest {
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with sorting by MAXASSIGNMENTS field.")
+    public void getSoftwareModuleTypesSortedByMaxAssignments() throws Exception {
+        SoftwareModuleType testType = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        testType.setDescription("Desc1234");
+        testType = softwareManagement.updateSoftwareModuleType(testType);
+
+        // descending
+        mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
+                .param(RestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:DESC"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[0].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$content.[0].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$content.[0].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$content.[0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[0].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$content.[0].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[0].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$content.[0].maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$content.[0].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
+
+        // ascending
+        mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
+                .param(RestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:ASC"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[3].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$content.[3].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$content.[3].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$content.[3].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[3].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$content.[3].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[3].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$content.[3].maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$content.[3].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.")
     public void createSoftwareModuleTypes() throws JSONException, Exception {
 
