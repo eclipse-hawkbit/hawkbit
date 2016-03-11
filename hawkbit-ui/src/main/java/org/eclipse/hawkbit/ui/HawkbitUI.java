@@ -61,7 +61,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     private static final String EMPTY_VIEW = "";
 
-    private EventPushStrategy pushStrategy;
+    private transient EventPushStrategy pushStrategy;
 
     @Autowired
     private SpringViewProvider viewProvider;
