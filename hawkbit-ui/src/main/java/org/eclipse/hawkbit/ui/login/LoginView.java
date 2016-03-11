@@ -53,9 +53,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Login view for login credentials.
- *
- *
- *
  */
 @SpringView(name = "")
 @UIScope
@@ -234,10 +231,12 @@ public class LoginView extends VerticalLayout implements View {
         links.addComponent(docuLink);
         docuLink.addStyleName(ValoTheme.LINK_SMALL);
 
-        final Link demoLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DEMO,
-                i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle, true);
-        links.addComponent(demoLink);
-        demoLink.addStyleName(ValoTheme.LINK_SMALL);
+        if (!uiProperties.getDemo().getUser().isEmpty()) {
+            final Link demoLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DEMO,
+                    i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle, true);
+            links.addComponent(demoLink);
+            demoLink.addStyleName(ValoTheme.LINK_SMALL);
+        }
 
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
             final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_REQUESTACCOUNT,
