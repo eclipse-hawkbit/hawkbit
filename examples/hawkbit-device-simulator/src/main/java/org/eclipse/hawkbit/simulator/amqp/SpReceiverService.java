@@ -13,11 +13,8 @@ import java.util.Map;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
-import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
-import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater;
-import org.eclipse.hawkbit.simulator.DeviceSimulatorUpdater.UpdaterCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -139,31 +136,22 @@ public class SpReceiverService extends ReceiverService {
                 DownloadAndUpdateRequest.class);
         final Long actionId = downloadAndUpdateRequest.getActionId();
 
-        try {
-            Thread.sleep(1_000);
-        } catch (final InterruptedException e) {
-            LOGGER.error("Sleep interrupted", e);
-        }
-
-        spSenderService.sendActionStatusMessage(tenant, ActionStatus.RUNNING,
-                "device Simulator retrieved update request. proceeding with simulation.", actionId);
-        deviceUpdater.startUpdate(tenant, thingId, actionId, downloadAndUpdateRequest.getSoftwareModules().get(0)
-                .getModuleVersion(), new UpdaterCallback() {
-            @Override
-            public void updateFinished(final AbstractSimulatedDevice device, final Long actionId) {
-                switch (device.getResponseStatus()) {
-                case SUCCESSFUL:
-                    spSenderService.finishUpdateProcess(new SimulatedUpdate(device.getTenant(), device.getId(),
-                            actionId), "Simulation complete!");
-                    break;
-                case ERROR:
-                    spSenderService.finishUpdateProcessWithError(new SimulatedUpdate(device.getTenant(),
-                            device.getId(), actionId), "Simulation complete with error!");
-                    break;
-                default:
-                    break;
-                }
-            }
-        });
+        deviceUpdater.startUpdate(tenant, thingId, actionId,
+                downloadAndUpdateRequest.getSoftwareModules().get(0).getModuleVersion(), (device, actionId1) -> {
+                    switch (device.getResponseStatus()) {
+                    case SUCCESSFUL:
+                        spSenderService.finishUpdateProcess(
+                                new SimulatedUpdate(device.getTenant(), device.getId(), actionId1),
+                                "Simulation complete!");
+                        break;
+                    case ERROR:
+                        spSenderService.finishUpdateProcessWithError(
+                                new SimulatedUpdate(device.getTenant(), device.getId(), actionId1),
+                                "Simulation complete with error!");
+                        break;
+                    default:
+                        break;
+                    }
+                });
     }
 }
