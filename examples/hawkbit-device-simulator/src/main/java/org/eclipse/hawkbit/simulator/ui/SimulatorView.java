@@ -121,8 +121,8 @@ public class SimulatorView extends VerticalLayout implements View {
         grid.getColumn("swversion").setHeaderCaption("SW Version");
         grid.getColumn("responseStatus").setHeaderCaption("Response Update Status");
         grid.getColumn("progress").setRenderer(new ProgressBarRenderer());
-        grid.getColumn("protocol").setConverter(getProtocolConverter());
-        grid.getColumn("status").setRenderer(new HtmlRenderer(), getStatusConverter());
+        grid.getColumn("protocol").setConverter(createProtocolConverter());
+        grid.getColumn("status").setRenderer(new HtmlRenderer(), createStatusConverter());
         grid.removeColumn("tenant");
 
         // grid combobox
@@ -266,7 +266,7 @@ public class SimulatorView extends VerticalLayout implements View {
         }));
     }
 
-    private Converter<String, Protocol> getProtocolConverter() {
+    private Converter<String, Protocol> createProtocolConverter() {
 
         return new Converter<String, Protocol>() {
 
@@ -304,7 +304,7 @@ public class SimulatorView extends VerticalLayout implements View {
 
     }
 
-    private Converter<String, Status> getStatusConverter() {
+    private Converter<String, Status> createStatusConverter() {
         return new Converter<String, Status>() {
             private static final long serialVersionUID = 1L;
 
@@ -317,32 +317,26 @@ public class SimulatorView extends VerticalLayout implements View {
             @Override
             public String convertToPresentation(final Status value, final Class<? extends String> targetType,
                     final Locale locale) {
-                String style = null;
                 switch (value) {
                 case UNKNWON:
-                    style = "<span class=\"v-icon grayicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                    return "<span class=\"v-icon grayicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
                             + ";\"color\":\"gray\";\">&#x"
                             + Integer.toHexString(FontAwesome.QUESTION_CIRCLE.getCodepoint()) + ";</span>";
-                    break;
                 case PEDNING:
-                    style = "<span class=\"v-icon yellowicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                    return "<span class=\"v-icon yellowicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
                             + ";\"color\":\"yellow\";\">&#x" + Integer.toHexString(FontAwesome.REFRESH.getCodepoint())
                             + ";</span>";
-                    break;
                 case FINISH:
-                    style = "<span class=\"v-icon greenicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                    return "<span class=\"v-icon greenicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
                             + ";\"color\":\"green\";\">&#x"
                             + Integer.toHexString(FontAwesome.CHECK_CIRCLE.getCodepoint()) + ";</span>";
-                    break;
                 case ERROR:
-                    style = "<span class=\"v-icon redicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                    return "<span class=\"v-icon redicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
                             + ";\"color\":\"red\";\">&#x"
                             + Integer.toHexString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()) + ";</span>";
-                    break;
                 default:
                     throw new IllegalStateException("unknown value");
                 }
-                return style;
             }
 
             @Override

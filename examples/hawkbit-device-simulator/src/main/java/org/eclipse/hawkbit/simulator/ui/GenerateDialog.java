@@ -15,16 +15,15 @@ import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.Property;
+import com.vaadin.data.Validator;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.data.validator.RangeValidator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
@@ -44,15 +43,13 @@ public class GenerateDialog extends Window {
 
     private final FormLayout formLayout = new FormLayout();
 
-    private final TextField tf1;
-    private final TextField tf2;
-    private final TextField tf3;
-    private final TextField tf4;
-    private final TextField tf5;
-    private final TextField tf6;
-
+    private final TextField namePrefixTextField;
+    private final TextField amountTextField;
+    private final TextField tenantTextField;
+    private final TextField pollDelayTextField;
+    private final TextField pollUrlTextField;
+    private final TextField gatewayTokenTextField;
     private final OptionGroup protocolGroup;
-
     private final Button buttonOk;
 
     /**
@@ -68,55 +65,44 @@ public class GenerateDialog extends Window {
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
 
-        tf1 = new TextField("name prefix", "dmfSimulated");
-        tf1.setIcon(FontAwesome.INFO);
-        tf1.setRequired(true);
-        tf1.addValidator(new NullValidator("Must be given", false));
+        namePrefixTextField = createRequiredTextfield("name prefix", "dmfSimulated", FontAwesome.INFO, true,
+                new NullValidator("Must be given", false));
 
-        tf2 = new TextField("amount", new ObjectProperty<Integer>(10));
-        tf2.setIcon(FontAwesome.GEAR);
-        tf2.setRequired(true);
-        tf2.addValidator(new RangeValidator<Integer>("Must be between 1 and 30000", Integer.class, 1, 30000));
+        amountTextField = createRequiredTextfield("amount", new ObjectProperty<Integer>(10), FontAwesome.GEAR, true,
+                new RangeValidator<Integer>("Must be between 1 and 30000", Integer.class, 1, 30000));
 
-        tf3 = new TextField("tenant", "default");
-        tf3.setIcon(FontAwesome.USER);
-        tf3.setRequired(true);
-        tf3.addValidator(new NullValidator("Must be given", false));
+        tenantTextField = createRequiredTextfield("tenant", "default", FontAwesome.USER, true,
+                new NullValidator("Must be given", false));
 
-        tf4 = new TextField("poll delay (sec)", new ObjectProperty<Integer>(10));
-        tf4.setIcon(FontAwesome.CLOCK_O);
-        tf4.setRequired(true);
-        tf4.setVisible(false);
-        tf4.addValidator(new RangeValidator<Integer>("Must be between 1 and 60", Integer.class, 1, 60));
+        pollDelayTextField = createRequiredTextfield("poll delay (sec)", new ObjectProperty<Integer>(10),
+                FontAwesome.CLOCK_O, true,
+                new RangeValidator<Integer>("Must be between 1 and 60", Integer.class, 1, 60));
+        pollDelayTextField.setVisible(false);
 
-        tf5 = new TextField("base poll URL endpoint", "http://localhost:8080");
-        tf5.setColumns(50);
-        tf5.setIcon(FontAwesome.FLAG_O);
-        tf5.setRequired(true);
-        tf5.setVisible(false);
-        tf5.addValidator(new RegexpValidator("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
-                "is not an URL"));
+        pollUrlTextField = createRequiredTextfield("base poll URL endpoint", "http://localhost:8080",
+                FontAwesome.FLAG_O, true, new RegexpValidator(
+                        "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "is not an URL"));
+        pollUrlTextField.setColumns(50);
+        pollUrlTextField.setVisible(false);
 
-        tf6 = new TextField("gateway token", "");
-        tf6.setColumns(50);
-        tf6.setIcon(FontAwesome.FLAG_O);
-        tf6.setRequired(true);
-        tf6.setVisible(false);
+        gatewayTokenTextField = createRequiredTextfield("gateway token", "", FontAwesome.FLAG_O, true, null);
+        gatewayTokenTextField.setColumns(50);
+        gatewayTokenTextField.setVisible(false);
 
         protocolGroup = createProtocolGroup();
         buttonOk = createOkButton(callback);
 
-        tf1.addValueChangeListener(event -> checkValid(tf1, tf2, tf3, tf4, buttonOk));
-        tf2.addValueChangeListener(event -> checkValid(tf1, tf2, tf3, tf4, buttonOk));
-        tf3.addValueChangeListener(event -> checkValid(tf1, tf2, tf3, tf4, buttonOk));
+        namePrefixTextField.addValueChangeListener(event -> checkValid());
+        amountTextField.addValueChangeListener(event -> checkValid());
+        tenantTextField.addValueChangeListener(event -> checkValid());
 
-        formLayout.addComponent(tf1);
-        formLayout.addComponent(tf2);
-        formLayout.addComponent(tf3);
+        formLayout.addComponent(namePrefixTextField);
+        formLayout.addComponent(amountTextField);
+        formLayout.addComponent(tenantTextField);
         formLayout.addComponent(protocolGroup);
-        formLayout.addComponent(tf4);
-        formLayout.addComponent(tf5);
-        formLayout.addComponent(tf6);
+        formLayout.addComponent(pollDelayTextField);
+        formLayout.addComponent(pollUrlTextField);
+        formLayout.addComponent(gatewayTokenTextField);
         formLayout.addComponent(buttonOk);
 
         setCaption("Simulate Devices");
@@ -125,9 +111,9 @@ public class GenerateDialog extends Window {
         center();
     }
 
-    private void checkValid(final TextField tf1, final TextField tf2, final TextField tf3, final TextField tf4,
-            final Button buttonOk) {
-        if (tf1.isValid() && tf2.isValid() && tf3.isValid() && tf4.isValid()) {
+    private void checkValid() {
+        if (namePrefixTextField.isValid() && amountTextField.isValid() && tenantTextField.isValid()
+                && pollDelayTextField.isValid()) {
             buttonOk.setEnabled(true);
         } else {
             buttonOk.setEnabled(false);
@@ -209,21 +195,10 @@ public class GenerateDialog extends Window {
         protocolGroup.setItemCaption(Protocol.DDI_HTTP, "Direct Device Interface (HTTP poll)");
         protocolGroup.setNullSelectionAllowed(false);
         protocolGroup.select(Protocol.DMF_AMQP);
-        protocolGroup.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                if (event.getProperty().getValue().equals(Protocol.DDI_HTTP)) {
-                    tf4.setVisible(true);
-                    tf5.setVisible(true);
-                    tf6.setVisible(true);
-                } else {
-                    tf4.setVisible(false);
-                    tf5.setVisible(false);
-                    tf6.setVisible(false);
-                }
-            }
+        protocolGroup.addValueChangeListener(event -> {
+            pollDelayTextField.setVisible(!pollDelayTextField.isVisible());
+            pollUrlTextField.setVisible(!pollUrlTextField.isVisible());
+            gatewayTokenTextField.setVisible(!gatewayTokenTextField.isVisible());
         });
         return protocolGroup;
     }
@@ -233,25 +208,41 @@ public class GenerateDialog extends Window {
         final Button buttonOk = new Button("generate");
         buttonOk.setImmediate(true);
         buttonOk.setIcon(FontAwesome.GEARS);
-        buttonOk.addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void buttonClick(final ClickEvent event) {
-                try {
-                    callback.okButton(tf1.getValue(), tf3.getValue(),
-                            Integer.valueOf(tf2.getValue().replace(".", "").replace(",", "")),
-                            Integer.valueOf(tf4.getValue().replace(".", "")), new URL(tf5.getValue()), tf6.getValue(),
-                            (Protocol) protocolGroup.getValue());
-                } catch (final NumberFormatException e) {
-                    LOGGER.info(e.getMessage(), e);
-                } catch (final MalformedURLException e) {
-                    LOGGER.info(e.getMessage(), e);
-                }
-                GenerateDialog.this.close();
+        buttonOk.addClickListener(event -> {
+            try {
+                callback.okButton(namePrefixTextField.getValue(), tenantTextField.getValue(),
+                        Integer.valueOf(amountTextField.getValue().replace(".", "").replace(",", "")),
+                        Integer.valueOf(pollDelayTextField.getValue().replace(".", "")),
+                        new URL(pollUrlTextField.getValue()), gatewayTokenTextField.getValue(),
+                        (Protocol) protocolGroup.getValue());
+            } catch (final NumberFormatException e) {
+                LOGGER.info(e.getMessage(), e);
+            } catch (final MalformedURLException e) {
+                LOGGER.info(e.getMessage(), e);
             }
+            GenerateDialog.this.close();
         });
         return buttonOk;
+    }
+
+    private TextField createRequiredTextfield(final String caption, final String value, final Resource icon,
+            final boolean required, final Validator validator) {
+        final TextField textField = new TextField(caption, value);
+        textField.setIcon(icon);
+        textField.setRequired(required);
+        textField.addValidator(validator);
+        return textField;
+
+    }
+
+    private TextField createRequiredTextfield(final String caption, final Property dataSource, final Resource icon,
+            final boolean required, final Validator validator) {
+        final TextField textField = new TextField(caption, dataSource);
+        textField.setIcon(icon);
+        textField.setRequired(required);
+        textField.addValidator(validator);
+        return textField;
+
     }
 
 }

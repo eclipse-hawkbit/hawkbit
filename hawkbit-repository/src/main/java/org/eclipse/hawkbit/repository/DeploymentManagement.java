@@ -389,19 +389,19 @@ public class DeploymentManagement {
                         softwareModules));
     }
 
-    private Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final Target t,
+    private Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final Target target,
             final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
-        final Action tAction = new Action();
-        final TargetWithActionType targetWithActionType = targetsWithActionMap.get(t.getControllerId());
-        tAction.setActionType(targetWithActionType.getActionType());
-        tAction.setForcedTime(targetWithActionType.getForceTime());
-        tAction.setActive(true);
-        tAction.setStatus(Status.RUNNING);
-        tAction.setTarget(t);
-        tAction.setDistributionSet(set);
-        tAction.setRollout(rollout);
-        tAction.setRolloutGroup(rolloutGroup);
-        return tAction;
+        final Action actionForTarget = new Action();
+        final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
+        actionForTarget.setActionType(targetWithActionType.getActionType());
+        actionForTarget.setForcedTime(targetWithActionType.getForceTime());
+        actionForTarget.setActive(true);
+        actionForTarget.setStatus(Status.RUNNING);
+        actionForTarget.setTarget(target);
+        actionForTarget.setDistributionSet(set);
+        actionForTarget.setRollout(rollout);
+        actionForTarget.setRolloutGroup(rolloutGroup);
+        return actionForTarget;
     }
 
     /**
