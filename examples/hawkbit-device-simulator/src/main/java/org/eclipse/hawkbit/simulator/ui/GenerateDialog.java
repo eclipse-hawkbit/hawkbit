@@ -44,6 +44,17 @@ public class GenerateDialog extends Window {
 
     private final FormLayout formLayout = new FormLayout();
 
+    private final TextField tf1;
+    private final TextField tf2;
+    private final TextField tf3;
+    private final TextField tf4;
+    private final TextField tf5;
+    private final TextField tf6;
+
+    private final OptionGroup protocolGroup;
+
+    private final Button buttonOk;
+
     /**
      * Creates a new pop window for setting the configuration of simulating
      * devices.
@@ -57,28 +68,28 @@ public class GenerateDialog extends Window {
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
 
-        final TextField tf1 = new TextField("name prefix", "dmfSimulated");
+        tf1 = new TextField("name prefix", "dmfSimulated");
         tf1.setIcon(FontAwesome.INFO);
         tf1.setRequired(true);
         tf1.addValidator(new NullValidator("Must be given", false));
 
-        final TextField tf2 = new TextField("amount", new ObjectProperty<Integer>(10));
+        tf2 = new TextField("amount", new ObjectProperty<Integer>(10));
         tf2.setIcon(FontAwesome.GEAR);
         tf2.setRequired(true);
         tf2.addValidator(new RangeValidator<Integer>("Must be between 1 and 30000", Integer.class, 1, 30000));
 
-        final TextField tf3 = new TextField("tenant", "default");
+        tf3 = new TextField("tenant", "default");
         tf3.setIcon(FontAwesome.USER);
         tf3.setRequired(true);
         tf3.addValidator(new NullValidator("Must be given", false));
 
-        final TextField tf4 = new TextField("poll delay (sec)", new ObjectProperty<Integer>(10));
+        tf4 = new TextField("poll delay (sec)", new ObjectProperty<Integer>(10));
         tf4.setIcon(FontAwesome.CLOCK_O);
         tf4.setRequired(true);
         tf4.setVisible(false);
         tf4.addValidator(new RangeValidator<Integer>("Must be between 1 and 60", Integer.class, 1, 60));
 
-        final TextField tf5 = new TextField("base poll URL endpoint", "http://localhost:8080");
+        tf5 = new TextField("base poll URL endpoint", "http://localhost:8080");
         tf5.setColumns(50);
         tf5.setIcon(FontAwesome.FLAG_O);
         tf5.setRequired(true);
@@ -86,57 +97,14 @@ public class GenerateDialog extends Window {
         tf5.addValidator(new RegexpValidator("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
                 "is not an URL"));
 
-        final TextField tf6 = new TextField("gateway token", "");
+        tf6 = new TextField("gateway token", "");
         tf6.setColumns(50);
         tf6.setIcon(FontAwesome.FLAG_O);
         tf6.setRequired(true);
         tf6.setVisible(false);
 
-        final OptionGroup protocolGroup = new OptionGroup("Simulated Device Protocol");
-        protocolGroup.addItem(Protocol.DMF_AMQP);
-        protocolGroup.addItem(Protocol.DDI_HTTP);
-        protocolGroup.setItemCaption(Protocol.DMF_AMQP, "Device Management Federation API (AMQP push)");
-        protocolGroup.setItemCaption(Protocol.DDI_HTTP, "Direct Device Interface (HTTP poll)");
-        protocolGroup.setNullSelectionAllowed(false);
-        protocolGroup.select(Protocol.DMF_AMQP);
-        protocolGroup.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                if (event.getProperty().getValue().equals(Protocol.DDI_HTTP)) {
-                    tf4.setVisible(true);
-                    tf5.setVisible(true);
-                    tf6.setVisible(true);
-                } else {
-                    tf4.setVisible(false);
-                    tf5.setVisible(false);
-                    tf6.setVisible(false);
-                }
-            }
-        });
-
-        final Button buttonOk = new Button("generate");
-        buttonOk.setImmediate(true);
-        buttonOk.setIcon(FontAwesome.GEARS);
-        buttonOk.addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void buttonClick(final ClickEvent event) {
-                try {
-                    callback.okButton(tf1.getValue(), tf3.getValue(),
-                            Integer.valueOf(tf2.getValue().replace(".", "").replace(",", "")),
-                            Integer.valueOf(tf4.getValue().replace(".", "")), new URL(tf5.getValue()), tf6.getValue(),
-                            (Protocol) protocolGroup.getValue());
-                } catch (final NumberFormatException e) {
-                    LOGGER.info(e.getMessage(), e);
-                } catch (final MalformedURLException e) {
-                    LOGGER.info(e.getMessage(), e);
-                }
-                GenerateDialog.this.close();
-            }
-        });
+        protocolGroup = createProtocolGroup();
+        buttonOk = createOkButton(callback);
 
         tf1.addValueChangeListener(event -> checkValid(tf1, tf2, tf3, tf4, buttonOk));
         tf2.addValueChangeListener(event -> checkValid(tf1, tf2, tf3, tf4, buttonOk));
@@ -231,4 +199,59 @@ public class GenerateDialog extends Window {
         void okButton(final String namePrefix, final String tenant, final int amount, final int pollDelay,
                 final URL basePollURL, final String gatewayToken, final Protocol protocol);
     }
+
+    private OptionGroup createProtocolGroup() {
+
+        final OptionGroup protocolGroup = new OptionGroup("Simulated Device Protocol");
+        protocolGroup.addItem(Protocol.DMF_AMQP);
+        protocolGroup.addItem(Protocol.DDI_HTTP);
+        protocolGroup.setItemCaption(Protocol.DMF_AMQP, "Device Management Federation API (AMQP push)");
+        protocolGroup.setItemCaption(Protocol.DDI_HTTP, "Direct Device Interface (HTTP poll)");
+        protocolGroup.setNullSelectionAllowed(false);
+        protocolGroup.select(Protocol.DMF_AMQP);
+        protocolGroup.addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(final ValueChangeEvent event) {
+                if (event.getProperty().getValue().equals(Protocol.DDI_HTTP)) {
+                    tf4.setVisible(true);
+                    tf5.setVisible(true);
+                    tf6.setVisible(true);
+                } else {
+                    tf4.setVisible(false);
+                    tf5.setVisible(false);
+                    tf6.setVisible(false);
+                }
+            }
+        });
+        return protocolGroup;
+    }
+
+    private Button createOkButton(final GenerateDialogCallback callback) {
+
+        final Button buttonOk = new Button("generate");
+        buttonOk.setImmediate(true);
+        buttonOk.setIcon(FontAwesome.GEARS);
+        buttonOk.addClickListener(new ClickListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void buttonClick(final ClickEvent event) {
+                try {
+                    callback.okButton(tf1.getValue(), tf3.getValue(),
+                            Integer.valueOf(tf2.getValue().replace(".", "").replace(",", "")),
+                            Integer.valueOf(tf4.getValue().replace(".", "")), new URL(tf5.getValue()), tf6.getValue(),
+                            (Protocol) protocolGroup.getValue());
+                } catch (final NumberFormatException e) {
+                    LOGGER.info(e.getMessage(), e);
+                } catch (final MalformedURLException e) {
+                    LOGGER.info(e.getMessage(), e);
+                }
+                GenerateDialog.this.close();
+            }
+        });
+        return buttonOk;
+    }
+
 }
