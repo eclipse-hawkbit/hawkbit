@@ -11,7 +11,6 @@ package org.eclipse.hawkbit;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -31,6 +30,7 @@ import org.eclipse.hawkbit.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.SoftwareModuleRepository;
@@ -190,6 +190,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
     @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;
 
+    @Autowired
+    protected RolloutRepository rolloutRepository;
+
     protected MockMvc mvc;
 
     @Autowired
@@ -208,23 +211,6 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     private static CIMySqlTestDatabase tesdatabase;
 
-    static {
-        final Properties props = System.getProperties();
-
-        // if( props.getProperty( SuiteEmbeddedConfiguration.IM_HOME ) == null )
-        // {
-        // props.setProperty( SuiteEmbeddedConfiguration.IM_HOME,
-        // "./src/test/resources/im" );
-        // }
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
-     * springframework.core.env. Environment)
-     */
     @Override
     public void setEnvironment(final Environment environment) {
         this.environment = environment;
@@ -287,6 +273,8 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         assertThat(softwareModuleTypeRepository.findAll()).isEmpty();
         assertThat(distributionSetTypeRepository.findAll()).isEmpty();
         assertThat(tenantMetaDataRepository.findAll()).isEmpty();
+        assertThat(rolloutGroupRepository.findAll()).isEmpty();
+        assertThat(rolloutRepository.findAll()).isEmpty();
     }
 
     @Transactional
