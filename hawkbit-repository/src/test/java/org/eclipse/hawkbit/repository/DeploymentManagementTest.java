@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -50,7 +49,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
-import ru.yandex.qatools.allure.annotations.Issue;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
@@ -313,7 +311,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         deploymentManagement.cancelAction(assigningAction, target);
         assigningAction = deploymentManagement.findActionWithDetails(assigningAction.getId());
 
-        deploymentManagement.forceQuitAction(assigningAction, target);
+        deploymentManagement.forceQuitAction(assigningAction);
 
         assigningAction = deploymentManagement.findActionWithDetails(assigningAction.getId());
 
@@ -351,8 +349,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         // force quit assignment
         try {
-            deploymentManagement.forceQuitAction(assigningAction,
-                    targetManagement.findTargetByControllerID(target.getControllerId()));
+            deploymentManagement.forceQuitAction(assigningAction);
             fail("expected ForceQuitActionNotAllowedException");
         } catch (final ForceQuitActionNotAllowedException ex) {
         }
@@ -765,13 +762,16 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
 
         // verifying that the assignment is correct
-        assertEquals("Active target actions are wrong", 1, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals("Target actions are wrong", 1, deploymentManagement.findActionsByTarget(targ).size());
-        assertEquals("Target status is wrong", TargetUpdateStatus.PENDING, targ.getTargetInfo().getUpdateStatus());
-        assertEquals("Assigned ds is wrong", dsA, targ.getAssignedDistributionSet());
-        assertEquals("Active ds is wrong", dsA,
-                deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet());
-        assertNull("Installed ds should be null", targ.getTargetInfo().getInstalledDistributionSet());
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).size()).as("Active target actions are wrong")
+                .isEqualTo(1);
+        assertThat(deploymentManagement.findActionsByTarget(targ).size()).as("Target actions are wrong").isEqualTo(1);
+        assertThat(targ.getTargetInfo().getUpdateStatus()).as("UpdateStatus of target is wrong")
+                .isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targ.getAssignedDistributionSet()).as("Assigned distribution set of target is wrong").isEqualTo(dsA);
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
+                .as("Distribution set of actionn is wrong").isEqualTo(dsA);
+        assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
+                .as("Installed distribution set of action should be null").isNotNull();
 
         final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, dsA);
         final Action action = updAct.getContent().get(0);
@@ -781,12 +781,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 
-        assertEquals(0, deploymentManagement.findActiveActionsByTarget(targ).size());
-        assertEquals(1, deploymentManagement.findInActiveActionsByTarget(targ).size());
+        assertEquals("active target actions are wrong", 0, deploymentManagement.findActiveActionsByTarget(targ).size());
+        assertEquals("active actions are wrong", 1, deploymentManagement.findInActiveActionsByTarget(targ).size());
 
-        assertEquals(TargetUpdateStatus.IN_SYNC, targ.getTargetInfo().getUpdateStatus());
-        assertEquals(dsA, targ.getAssignedDistributionSet());
-        assertEquals(dsA, targ.getTargetInfo().getInstalledDistributionSet());
+        assertEquals("tagret update status is not correct", TargetUpdateStatus.IN_SYNC,
+                targ.getTargetInfo().getUpdateStatus());
+        assertEquals("wrong assigned ds", dsA, targ.getAssignedDistributionSet());
+        assertEquals("wrong installed ds", dsA, targ.getTargetInfo().getInstalledDistributionSet());
 
         targs = deploymentManagement.assignDistributionSet(dsB.getId(), new String[] { "target-id-A" })
                 .getAssignedTargets();
@@ -796,7 +797,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertEquals("active actions are wrong", 1, deploymentManagement.findActiveActionsByTarget(targ).size());
         assertEquals("target status is wrong", TargetUpdateStatus.PENDING,
                 targetManagement.findTargetByControllerID(targ.getControllerId()).getTargetInfo().getUpdateStatus());
-        assertEquals(dsB, targ.getAssignedDistributionSet());
+        assertEquals("wrong assigned ds", dsB, targ.getAssignedDistributionSet());
         assertEquals("Installed ds is wrong", dsA.getId(),
                 targetManagement.findTargetByControllerIDWithDetails(targ.getControllerId()).getTargetInfo()
                         .getInstalledDistributionSet().getId());

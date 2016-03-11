@@ -38,11 +38,9 @@ public class ProxyTarget extends Target {
 
     private TargetIdName targetIdName;
 
-    private Long createdAt;
+    private String assignedDistNameVersion;
 
-    private String assignedDistNameVersion = null;
-
-    private String installedDistNameVersion = null;
+    private String installedDistNameVersion;
 
     private String pollStatusToolTip;
 
@@ -249,22 +247,6 @@ public class ProxyTarget extends Target {
      */
     public void setInstalledDistributionSet(final DistributionSet installedDistributionSet) {
         this.installedDistributionSet = installedDistributionSet;
-    }
-
-    /**
-     * @return the createdAt
-     */
-    @Override
-    public Long getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * @param createdAt
-     *            the createdAt to set
-     */
-    public void setCreatedAt(final Long createdAt) {
-        this.createdAt = createdAt;
     }
 
     /**
