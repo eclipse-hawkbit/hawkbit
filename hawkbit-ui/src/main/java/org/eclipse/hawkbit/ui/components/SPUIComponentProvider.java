@@ -47,10 +47,6 @@ import com.vaadin.ui.themes.ValoTheme;
  * Approach to create necessary UI component which are decorated Aspect of fine
  * tuning the component or extending the component is separated.
  *
- *
- *
- *
- *
  */
 public final class SPUIComponentProvider {
     private static final Logger LOG = LoggerFactory.getLogger(SPUIComponentProvider.class);
@@ -408,6 +404,24 @@ public final class SPUIComponentProvider {
             link.setStyleName(style);
         }
 
+        return link;
+
+    }
+
+    /**
+     * Generates help/documentation links from within management UI.
+     * 
+     * @param uri
+     *            to documentation site
+     * 
+     * @return generated link
+     */
+    public static Link getHelpLink(final String uri) {
+
+        final Link link = new Link("", new ExternalResource(uri));
+        link.setTargetName("_blank");
+        link.setIcon(FontAwesome.QUESTION_CIRCLE);
+        link.setDescription("Documentation");
         return link;
 
     }
