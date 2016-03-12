@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -151,13 +150,15 @@ public final class DashboardMenu extends CustomComponent {
         links.addStyleName("links");
         final String linkStyle = "v-link";
 
-        final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENATION,
-                i18n.get("link.documentation.name"), "../" + DocumentationPageLink.ROOT_VIEW.getPath(),
-                FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
-        docuLink.setDescription(i18n.get("link.documentation.name"));
-        docuLink.setSizeFull();
-        links.addComponent(docuLink);
-        links.setComponentAlignment(docuLink, Alignment.BOTTOM_CENTER);
+        if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
+            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENATION,
+                    i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
+                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
+            docuLink.setDescription(i18n.get("link.documentation.name"));
+            docuLink.setSizeFull();
+            links.addComponent(docuLink);
+            links.setComponentAlignment(docuLink, Alignment.BOTTOM_CENTER);
+        }
 
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
             final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_USERMANAGEMENT,

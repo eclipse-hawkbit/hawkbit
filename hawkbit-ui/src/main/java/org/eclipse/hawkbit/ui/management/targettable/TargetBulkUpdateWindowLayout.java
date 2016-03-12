@@ -18,9 +18,9 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
@@ -88,6 +88,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     @Autowired
     private transient DeploymentManagement deploymentManagement;
 
+    @Autowired
+    private transient UiProperties uiproperties;
+
     private static final long serialVersionUID = -6659290471705262389L;
     private VerticalLayout tokenVerticalLayout;
     private TextArea descTextArea;
@@ -141,7 +144,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         progressBar = creatreProgressBar();
         targetsCountLabel = getStatusCountLabel();
         bulkUploader = getBulkUploadHandler();
-        linkToSystemConfigHelp = DocumentationPageLink.DEPLOYMENT_VIEW.getLink();
+        linkToSystemConfigHelp = SPUIComponentProvider
+                .getHelpLink(uiproperties.getLinks().getDocumentation().getDeploymentView());
         windowCaption = new Label(i18n.get("caption.bulk.upload.targets"));
         minimizeButton = getMinimizeButton();
         closeButton = getCloseButton();
