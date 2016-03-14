@@ -74,7 +74,7 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Ensures that target poll request does not change audit data on the entity.")
     @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
-            SpPermission.CREATE_TARGET })
+            SpPermission.CREATE_TARGET }, allSpPermissions = false)
     public void targetPollDoesNotModifyAuditData() throws Exception {
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
@@ -135,16 +135,25 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test
-    @Description("Ensures that tenant polling time, which is save in the db, exists.")
-    public void testModifyGloablPollingTime() throws Exception {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
-                "00:02:00");
+    @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
+    @WithUser(principal = "knownpricipal", allSpPermissions = false)
+    public void pollWithModifiedGloablPollingTime() throws Exception {
+        securityRule.runAs(
+                WithSpringAuthorityRule.withUser("tenantadmin", SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION),
+                () -> {
+                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                            "00:02:00");
+                    return null;
+                });
 
-        mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:02:00")));
-
+        securityRule.runAs(
+                WithSpringAuthorityRule.withUser("controller", SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
+                            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                            .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                            .andExpect(jsonPath("$config.polling.sleep", equalTo("00:02:00")));
+                    return null;
+                });
     }
 
     @Test
