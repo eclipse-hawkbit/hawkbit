@@ -47,7 +47,7 @@ import com.mongodb.MongoClientOptions;
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
-@EnableConfigurationProperties({ DdiSecurityProperties.class, ControllerPollProperties.class })
+@EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class })
 @Profile("test")
 public class TestConfiguration implements AsyncConfigurer {
 

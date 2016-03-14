@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -62,12 +61,12 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     private VerticalLayout detailLayout;
 
     /**
-     * @param configurationKey
-     * @param systemManagement
+     * @param tenantConfigurationManagement
      */
     @Autowired
-    public GatewaySecurityTokenAuthenticationConfigurationItem(final SystemManagement systemManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, systemManagement);
+    public GatewaySecurityTokenAuthenticationConfigurationItem(
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        super(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement);
     }
 
     /**
@@ -163,13 +162,13 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     }
 
     private String getSecurityTokenName() {
-        return getSystemManagement().getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class);
+        return getTenantConfigurationManagement().getConfigurationValue(
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME, String.class).getValue();
     }
 
     private String getSecurityTokenKey() {
-        return getSystemManagement().getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+        return getTenantConfigurationManagement().getConfigurationValue(
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
     }
 
     @Override
@@ -184,20 +183,19 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     @Override
     public void save() {
         if (configurationEnabledChange) {
-            getSystemManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED.getKeyName(),
-                    String.valueOf(configurationEnabled)));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, configurationEnabled);
         }
 
         if (keyNameChanged) {
-            getSystemManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME.getKeyName(),
-                    gatewayTokenNameTextField.getValue()));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME,
+                    gatewayTokenNameTextField.getValue());
         }
         if (keyChanged) {
-            getSystemManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY.getKeyName(),
-                    gatewayTokenkeyLabel.getValue()));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                    gatewayTokenkeyLabel.getValue());
         }
     }
 

@@ -33,7 +33,9 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
+import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +87,33 @@ public class ControllerManagement {
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
+
+    @Autowired
+    private TenantConfigurationRepository tenantConfigurationRepository;
+
+    @Autowired
+    private TenantConfigurationManagement tenantConfigurationManagement;
+
+    /**
+     * Retrieves all {@link SoftwareModule}s which are assigned to the given
+     * {@link DistributionSet}.
+     *
+     * @param distributionSet
+     *            the distribution set which should be assigned to the returned
+     *            {@link SoftwareModule}s
+     * @return a list of {@link SoftwareModule}s assigned to given
+     *         {@code distributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    public String findPollingTime() {
+        final TenantConfigurationKey configurationKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final Class<String> propertyType = String.class;
+        tenantConfigurationManagement.validateTenantConfigurationDataType(configurationKey, propertyType);
+        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
+                .findByKey(configurationKey.getKeyName());
+        return tenantConfigurationManagement
+                .buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration).getValue();
+    }
 
     /**
      * Refreshes the time of the last time the controller has been connected to

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.rest.resource.model.system;
+package org.eclipse.hawkbit.rest.resource.model.systemmanagement;
 
 import java.util.List;
 

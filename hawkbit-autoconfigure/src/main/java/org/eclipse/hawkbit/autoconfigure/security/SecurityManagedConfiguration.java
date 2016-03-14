@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationTok
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSource;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurit
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,33 +113,36 @@ public class SecurityManagedConfiguration {
         @Autowired
         private ControllerManagement controllerManagement;
         @Autowired
-        private SystemManagement systemManagement;
+        private TenantConfigurationManagement tenantConfigurationManagement;
         @Autowired
         private TenantAware tenantAware;
         @Autowired
         private DdiSecurityProperties ddiSecurityConfiguration;
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
+        @Autowired
+        private SystemSecurityContext systemSecurityContext;
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(),
-                    systemManagement, tenantAware);
+                    ddiSecurityConfiguration.getRp().getCnHeader(),
+                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
+                    tenantAware, systemSecurityContext);
             securityHeaderFilter.setAuthenticationManager(authenticationManager());
             securityHeaderFilter.setCheckForPrincipalChanges(true);
             securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
-                    systemManagement, tenantAware, controllerManagement);
+                    tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
             securityTokenFilter.setAuthenticationManager(authenticationManager());
             securityTokenFilter.setCheckForPrincipalChanges(true);
             securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                    systemManagement, tenantAware);
+                    tenantConfigurationManagement, tenantAware, systemSecurityContext);
             gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager());
             gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
             gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
@@ -169,19 +174,10 @@ public class SecurityManagedConfiguration {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * org.springframework.security.config.annotation.web.configuration.
-         * WebSecurityConfigurerAdapter
-         * #configure(org.springframework.security.config.annotation.
-         * authentication.builders. AuthenticationManagerBuilder)
-         */
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()));
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
     }
 
@@ -466,8 +462,8 @@ public class SecurityManagedConfiguration {
 
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(
-                    new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()));
+            auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
+                    ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
 
     }

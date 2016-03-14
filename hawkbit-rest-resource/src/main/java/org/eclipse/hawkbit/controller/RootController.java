@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.controller.model.ActionFeedback;
@@ -77,8 +76,6 @@ public class RootController {
     private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
 
-    private static final String SP_SERVER_CONFIG_PREFIX = "hawkbit.server.";
-
     @Autowired
     private ControllerManagement controllerManagement;
 
@@ -87,9 +84,6 @@ public class RootController {
 
     @Autowired
     private ArtifactManagement artifactManagement;
-
-    @Autowired
-    private ControllerPollProperties controllerPollProperties;
 
     @Autowired
     private CacheWriteNotify cacheWriteNotify;
@@ -156,7 +150,7 @@ public class RootController {
 
         return new ResponseEntity<>(
                 DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
-                        controllerPollProperties.getPollingTime(), tenantAware),
+                        controllerManagement.findPollingTime(), tenantAware),
                 HttpStatus.OK);
     }
 

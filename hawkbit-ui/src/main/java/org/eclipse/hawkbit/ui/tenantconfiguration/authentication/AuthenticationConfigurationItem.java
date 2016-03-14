@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
-import java.io.Serializable;
+import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem;
 
 import com.vaadin.ui.Component;
 
@@ -20,7 +20,7 @@ import com.vaadin.ui.Component;
  *
  *
  */
-public interface TenantConfigurationItem extends Component {
+public interface AuthenticationConfigurationItem extends Component, ConfigurationItem {
 
     /**
      * @return {@code true} if configuration is enabled, otherwise {@code false}
@@ -47,28 +47,4 @@ public interface TenantConfigurationItem extends Component {
      */
     void undo();
 
-    /**
-     * Adds a configuration change listener to notify about configuration
-     * changes.
-     *
-     * @param listener
-     *            the listener to be notified in case the item changes some
-     *            configuration
-     */
-    void addConfigurationChangeListener(TenantConfigurationChangeListener listener);
-
-    /**
-     * Configuration Change Listener to be notified about configuration changes
-     * in configuration item.
-     *
-     *
-     *
-     */
-    @FunctionalInterface
-    interface TenantConfigurationChangeListener extends Serializable {
-        /**
-         * called to notify about configuration has been changed.
-         */
-        void configurationHasChanged();
-    }
 }

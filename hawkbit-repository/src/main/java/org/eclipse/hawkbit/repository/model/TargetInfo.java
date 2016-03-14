@@ -38,7 +38,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +112,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
             @JoinColumn(name = "target_id") }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     // use deprecated annotation until HHH-8862 is fixed
-    @SuppressWarnings("deprecation")
+
     // @org.hibernate.annotations.ForeignKey( name = "fk_targ_attrib_target" )
     private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
 
@@ -119,6 +121,9 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     // time
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
+
+    @Transient
+    private final DurationHelper durationHelper = new DurationHelper();
 
     /**
      * Constructor for {@link TargetStatus}.
@@ -181,7 +186,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     }
 
     /**
-     * @param ipAddress
+     * @param address
      *            the ipAddress to set
      *
      * @throws IllegalArgumentException
@@ -315,17 +320,21 @@ public class TargetInfo implements Persistable<Long>, Serializable {
      *         before this method returns {@code null}
      */
     public PollStatus getPollStatus() {
-        if (lastTargetQuery != null) {
-            final Duration pollTime = PollConfigurationHelper.getInstance().getPollTimeInterval();
-            final Duration overdueTime = PollConfigurationHelper.getInstance().getOverduePollTimeInterval();
-            final LocalDateTime currentDate = LocalDateTime.now();
-            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
-                    ZoneId.systemDefault());
-            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
-            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
-            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        if (lastTargetQuery == null) {
+            return null;
         }
-        return null;
+
+        final Duration pollTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement.getInstance()
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+        final Duration overdueTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement
+                .getInstance().getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                .getValue());
+        final LocalDateTime currentDate = LocalDateTime.now();
+        final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
+                ZoneId.systemDefault());
+        final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
+        final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
+        return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
     }
 
     /**
@@ -368,16 +377,10 @@ public class TargetInfo implements Persistable<Long>, Serializable {
             return lastPollDate;
         }
 
-        /**
-         * @return the nextPollDate
-         */
         public LocalDateTime getNextPollDate() {
             return nextPollDate;
         }
 
-        /**
-         * @return the overdueDate
-         */
         public LocalDateTime getOverdueDate() {
             return overdueDate;
         }

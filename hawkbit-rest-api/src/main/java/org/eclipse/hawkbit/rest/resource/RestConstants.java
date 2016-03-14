@@ -116,6 +116,8 @@ public final class RestConstants {
      * The target URL mapping rest resource.
      */
     public static final String TARGET_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targets";
+
+    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/system";
     /**
      * The software module URL mapping rest resource.
      */

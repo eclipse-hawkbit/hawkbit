@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -29,7 +26,6 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -43,7 +39,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SpringComponent
 @ViewScope
-public class DefaultDistributionSetTypeLayout extends CustomComponent implements ConfigurationGroup {
+public class DefaultDistributionSetTypeLayout extends BaseConfigurationView implements ConfigurationGroup {
 
     private static final long serialVersionUID = 17896542758L;
 
@@ -65,8 +61,6 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent implements
     private ComboBox combobox;
 
     private Label changeIcon;
-
-    private final List<ConfigurationGroupChangeListener> configurationChangeListeners = new ArrayList<>();
 
     /**
      * Initialize Default Distribution Set layout.
@@ -162,14 +156,5 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent implements
         } else {
             changeIcon.setVisible(false);
         }
-    }
-
-    private void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(listener -> listener.configurationChanged());
-    }
-
-    @Override
-    public void addChangeListener(final ConfigurationGroupChangeListener listener) {
-        configurationChangeListeners.add(listener);
     }
 }

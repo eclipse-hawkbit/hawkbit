@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -56,18 +56,20 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * @param caAuthorityNameHeader
      *            the http-header which holds the ca-authority name of the
      *            certificate
-     * @param systemManagement
-     *            the system management service to retrieve configuration
-     *            properties to check if the header authentication is enabled
-     *            for this tenant
+     * @param tenantConfigurationManagement
+     *            the tenant management service to retrieve configuration
+     *            properties
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            the system security context to get access to tenant
+     *            configuration
      */
     public ControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
-            final String caAuthorityNameHeader, final SystemManagement systemManagement,
-            final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+            final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.caCommonNameHeader = caCommonNameHeader;
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
     }
@@ -142,8 +144,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     private final class GetSecurityAuthorityNameTenantRunner implements TenantAware.TenantRunner<String> {
         @Override
         public String run() {
-            return systemManagement.getConfigurationValue(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class);
+            return tenantConfigurationManagement.getConfigurationValue(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue();
         }
     }
 }

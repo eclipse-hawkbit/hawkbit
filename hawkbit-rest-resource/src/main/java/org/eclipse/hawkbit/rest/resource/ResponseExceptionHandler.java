@@ -65,6 +65,8 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_TENANT_NOT_EXISTS, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ENTITY_LOCKED, HttpStatus.LOCKED);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ROLLOUT_ILLEGAL_STATE, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_INVALID, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_KEY_INVALID, HttpStatus.BAD_REQUEST);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {

@@ -8,11 +8,19 @@
  */
 package org.eclipse.hawkbit;
 
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.stereotype.Component;
 
 /**
- * Defines the polling time for the controllers in HH:MM:SS notation.
+ * Defines global configuration for the controllers/clients on the provisioning
+ * targets/devices.
+ * 
+ * 
+ * Note: many of the controller related properties can be overridden on tenant
+ * level. As a result they are not defined here but in
+ * {@link TenantConfigurationKey} and injected using {@link EnvironmentAware}.
  * 
  */
 @Component
@@ -20,31 +28,31 @@ import org.springframework.stereotype.Component;
 public class ControllerPollProperties {
 
     /**
-     * Recommended target polling time for DDI API. Final choice is up to the
-     * target.
+     * Maximum polling time that can be configured by a tenant in HH:MM:SS
+     * notation.
      */
-    private String pollingTime = "00:05:00";
+    private String maxPollingTime = "23:59:00";
 
     /**
-     * Assumed time frame where the target is considered overdue when no DDI
-     * polling has been registered by the update server.
+     * Minimum polling time that can be configured by a tenant in HH:MM:SS
+     * notation.
      */
-    private String pollingOverdueTime = "00:05:00";
+    private String minPollingTime = "00:00:30";
 
-    public String getPollingTime() {
-        return pollingTime;
+    public String getMaxPollingTime() {
+        return maxPollingTime;
     }
 
-    public void setPollingTime(final String pollingTime) {
-        this.pollingTime = pollingTime;
+    public void setMaxPollingTime(final String maxPollingTime) {
+        this.maxPollingTime = maxPollingTime;
     }
 
-    public String getPollingOverdueTime() {
-        return pollingOverdueTime;
+    public String getMinPollingTime() {
+        return minPollingTime;
     }
 
-    public void setPollingOverdueTime(final String pollingOverdue) {
-        this.pollingOverdueTime = pollingOverdue;
+    public void setMinPollingTime(final String minPollingTime) {
+        this.minPollingTime = minPollingTime;
     }
 
 }

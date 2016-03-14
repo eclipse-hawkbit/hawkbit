@@ -74,6 +74,9 @@ public abstract class SpServerRtException extends RuntimeException {
         this.error = error;
     }
 
+    /**
+     * @return the SpServerError which is wrapped by this exception
+     */
     public SpServerError getError() {
         return error;
     }

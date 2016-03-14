@@ -11,45 +11,33 @@ package org.eclipse.hawkbit.rest.resource.model.system;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Response body for tenant configuration requests.
- *
+ * A json annotated rest model for System Configuration for PUT.
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TenantConfigurationRest {
+public class TenantConfigurationValueRequest {
 
-    private String key;
-    private String value;
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
+    @JsonProperty(required = true)
+    private Object value;
 
     /**
-     * @param key
-     *            the key to set
+     * 
+     * @return the value of the TenantConfigurationValueRequest
      */
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    /**
-     * @return the value
-     */
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
     /**
+     * Sets the TenantConfigurationValueRequest
+     * 
      * @param value
-     *            the value to set
      */
-    public void setValue(final String value) {
+    public void setValue(final Object value) {
         this.value = value;
     }
+
 }
