@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.controller.model.ActionFeedback;
@@ -31,6 +30,7 @@ import org.eclipse.hawkbit.controller.model.Result.FinalResult;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -77,8 +78,6 @@ public class RootController {
     private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
 
-    private static final String SP_SERVER_CONFIG_PREFIX = "hawkbit.server.";
-
     @Autowired
     private ControllerManagement controllerManagement;
 
@@ -89,13 +88,13 @@ public class RootController {
     private ArtifactManagement artifactManagement;
 
     @Autowired
-    private ControllerPollProperties controllerPollProperties;
-
-    @Autowired
     private CacheWriteNotify cacheWriteNotify;
 
     @Autowired
     private TenantAware tenantAware;
+
+    @Autowired
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
@@ -154,10 +153,11 @@ public class RootController {
                     IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
         }
 
-        return new ResponseEntity<>(
-                DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
-                        controllerPollProperties.getPollingTime(), tenantAware),
-                HttpStatus.OK);
+        final String pollingTime = tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue();
+
+        return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
+                controllerManagement.findActionByTargetAndActive(target), pollingTime, tenantAware), HttpStatus.OK);
     }
 
     /**

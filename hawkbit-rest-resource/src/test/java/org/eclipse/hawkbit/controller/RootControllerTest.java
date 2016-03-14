@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.resource.JsonBuilder;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
@@ -131,6 +132,19 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
 
         mvc.perform(delete("/default-tenant/controller/v1/4711")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    @Description("Ensures that tenant polling time, which is save in the db, exists.")
+    public void testModifyGloablPollingTime() throws Exception {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                "00:02:00");
+
+        mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andExpect(jsonPath("$config.polling.sleep", equalTo("00:02:00")));
+
     }
 
     @Test

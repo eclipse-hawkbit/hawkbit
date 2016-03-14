@@ -23,37 +23,21 @@ public class ControllerPollProperties {
      * Recommended target polling time for DDI API. Final choice is up to the
      * target.
      */
-    private String pollingTime = "00:05:00";
+    private String pollingTime;
 
     /**
      * Assumed time frame where the target is considered overdue when no DDI
      * polling has been registered by the update server.
      */
-    private String pollingOverdueTime = "00:05:00";
+    private String pollingOverdueTime;
     private String maxPollingTime = "23:59:00";
     private String minPollingTime = "00:00:30";
-
-    public String getPollingTime() {
-        return pollingTime;
-    }
-
-    public void setPollingTime(final String pollingTime) {
-        this.pollingTime = pollingTime;
-    }
-
-    public String getPollingOverdueTime() {
-        return pollingOverdueTime;
-    }
-
-    public void setPollingOverdueTime(final String pollingOverdue) {
-        this.pollingOverdueTime = pollingOverdue;
-    }
 
     public String getMaxPollingTime() {
         return maxPollingTime;
     }
 
-    public void setMaxPollingTime(String maxPollingTime) {
+    public void setMaxPollingTime(final String maxPollingTime) {
         this.maxPollingTime = maxPollingTime;
     }
 
@@ -61,7 +45,7 @@ public class ControllerPollProperties {
         return minPollingTime;
     }
 
-    public void setMinPollingTime(String minPollingTime) {
+    public void setMinPollingTime(final String minPollingTime) {
         this.minPollingTime = minPollingTime;
     }
 
