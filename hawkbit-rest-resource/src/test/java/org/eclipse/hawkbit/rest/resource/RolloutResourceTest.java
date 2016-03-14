@@ -453,8 +453,8 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         // check if running
-        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 5000, 100)).isNotNull();
-
+        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 60_000, 100))
+                .isNotNull();
     }
 
     @Test

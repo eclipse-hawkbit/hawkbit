@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationGroup.ConfigurationGroupChangeListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -53,6 +53,9 @@ public class TenantConfigurationDashboardView extends CustomComponent
 
     @Autowired
     private I18N i18n;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     @Autowired
     private transient UINotification uINotification;
@@ -101,7 +104,9 @@ public class TenantConfigurationDashboardView extends CustomComponent
         undoConfigurationBtn.addClickListener(event -> undoConfiguration());
         hlayout.addComponent(undoConfigurationBtn);
 
-        final Link linkToSystemConfigHelp = DocumentationPageLink.SYSTEM_CONFIGURATION_VIEW.getLink();
+        final Link linkToSystemConfigHelp = SPUIComponentProvider
+                .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
+        ;
         hlayout.addComponent(linkToSystemConfigHelp);
 
         return hlayout;

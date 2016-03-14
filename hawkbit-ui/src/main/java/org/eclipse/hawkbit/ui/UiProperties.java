@@ -44,16 +44,16 @@ public class UiProperties {
         /**
          * Demo tenant.
          */
-        private String tenant = "DEFAULT";
+        private String tenant = "";
         /**
          * Demo user name.
          */
-        private String user = "admin";
+        private String user = "";
 
         /**
          * Demo user password.
          */
-        private String password = "admin";
+        private String password = "";
 
         public String getTenant() {
             return tenant;
@@ -82,10 +82,13 @@ public class UiProperties {
     }
 
     /**
-     * Links to potentially other systems (e.g. support, user management etc.).
+     * Links to potentially other systems (e.g. support, user management,
+     * documentation etc.).
      *
      */
     public static class Links {
+        private final Documentation documentation = new Documentation();
+
         /**
          * Link to product support.
          */
@@ -95,6 +98,121 @@ public class UiProperties {
          * Link to request a system account, access.
          */
         private String requestAccount = "";
+
+        public Documentation getDocumentation() {
+            return documentation;
+        }
+
+        /**
+         * Configuration of UI documentation links.
+         *
+         */
+        public static class Documentation {
+            /**
+             * Link to root of documentation and user guides.
+             */
+            private String root = "";
+
+            /**
+             * Link to documentation of deployment view.
+             */
+            private String deploymentView = "";
+
+            /**
+             * Link to documentation of distribution view.
+             */
+            private String distributionView = "";
+
+            /**
+             * Link to documentation of upload view.
+             */
+            private String uploadView = "";
+
+            /**
+             * Link to documentation of system configuration view.
+             */
+            private String systemConfigurationView = "";
+
+            /**
+             * Link to security related documentation.
+             */
+            private String security = "";
+
+            /**
+             * Link to target filter view.
+             */
+            private String targetfilterView = "";
+
+            /**
+             * Link to documentation of rollout view.
+             */
+            private String rolloutView = "";
+
+            public String getDeploymentView() {
+                return deploymentView;
+            }
+
+            public void setDeploymentView(final String deploymentView) {
+                this.deploymentView = deploymentView;
+            }
+
+            public String getDistributionView() {
+                return distributionView;
+            }
+
+            public void setDistributionView(final String distributionView) {
+                this.distributionView = distributionView;
+            }
+
+            public String getUploadView() {
+                return uploadView;
+            }
+
+            public void setUploadView(final String uploadView) {
+                this.uploadView = uploadView;
+            }
+
+            public String getSystemConfigurationView() {
+                return systemConfigurationView;
+            }
+
+            public void setSystemConfigurationView(final String systemConfigurationView) {
+                this.systemConfigurationView = systemConfigurationView;
+            }
+
+            public String getSecurity() {
+                return security;
+            }
+
+            public void setSecurity(final String security) {
+                this.security = security;
+            }
+
+            public String getTargetfilterView() {
+                return targetfilterView;
+            }
+
+            public void setTargetfilterView(final String targetfilterView) {
+                this.targetfilterView = targetfilterView;
+            }
+
+            public String getRolloutView() {
+                return rolloutView;
+            }
+
+            public void setRolloutView(final String rolloutView) {
+                this.rolloutView = rolloutView;
+            }
+
+            public String getRoot() {
+                return root;
+            }
+
+            public void setRoot(final String root) {
+                this.root = root;
+            }
+
+        }
 
         /**
          * Link to user management.

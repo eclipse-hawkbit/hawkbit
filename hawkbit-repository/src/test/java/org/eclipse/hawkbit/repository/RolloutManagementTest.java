@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
@@ -34,6 +35,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.utils.MultipleInvokeHelper;
+import org.eclipse.hawkbit.repository.utils.SuccessCondition;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -859,7 +862,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verify the creation and the start of a rollout in asynchronous mode.")
-    public void createAndStartRolloutInAsync() {
+    public void createAndStartRolloutInAsync() throws Exception {
 
         final int amountTargetsForRollout = 500;
         final int amountGroups = 5;
@@ -883,31 +886,18 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
 
         myRollout = rolloutManagement.createRolloutAsync(myRollout, amountGroups, conditions);
 
-        int counter = 1;
-        int counterMax = 10;
-        while (!isRolloutInGivenStatus(myRollout.getId(), RolloutStatus.READY) && (counter <= counterMax)) {
-            try {
-                Thread.sleep(500);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
-            counter++;
-        }
+        SuccessConditionRolloutStatus conditionRolloutTargetCount = new SuccessConditionRolloutStatus(
+                RolloutStatus.READY);
+        assertThat(MultipleInvokeHelper.doWithTimeout(new RolloutStatusCallable(myRollout.getId()),
+                conditionRolloutTargetCount, 15000, 500)).as("Rollout status").isNotNull();
 
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
         rolloutManagement.startRolloutAsync(myRollout);
 
-        counter = 1;
-        counterMax = 10;
-        while (!isRolloutInGivenStatus(myRollout.getId(), RolloutStatus.RUNNING) && counter <= counterMax) {
-            try {
-                Thread.sleep(500);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
-            counter++;
-        }
+        conditionRolloutTargetCount = new SuccessConditionRolloutStatus(RolloutStatus.RUNNING);
+        assertThat(MultipleInvokeHelper.doWithTimeout(new RolloutStatusCallable(myRollout.getId()),
+                conditionRolloutTargetCount, 15000, 500)).as("Rollout status").isNotNull();
 
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
@@ -915,14 +905,6 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 100L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 400L);
         validateRolloutActionStatus(myRollout.getId(), expectedTargetCountStatus);
-    }
-
-    private boolean isRolloutInGivenStatus(final Long rolloutID, final RolloutStatus status) {
-        final Rollout myRollout = rolloutManagement.findRolloutById(rolloutID);
-        if (myRollout.getStatus() == status) {
-            return true;
-        }
-        return false;
     }
 
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
@@ -1019,6 +1001,37 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
             map.put(status, 0L);
         }
         return map;
+    }
+
+    private static class SuccessConditionRolloutStatus implements SuccessCondition<RolloutStatus> {
+
+        private final RolloutStatus rolloutStatus;
+
+        public SuccessConditionRolloutStatus(final RolloutStatus rolloutStatus) {
+            this.rolloutStatus = rolloutStatus;
+        }
+
+        @Override
+        public boolean success(final RolloutStatus result) {
+            return result.equals(rolloutStatus);
+        }
+    }
+
+    private class RolloutStatusCallable implements Callable<RolloutStatus> {
+
+        final Long rolloutId;
+
+        RolloutStatusCallable(final Long rolloutId) {
+            this.rolloutId = rolloutId;
+        }
+
+        @Override
+        public RolloutStatus call() throws Exception {
+
+            final Rollout myRollout = rolloutManagement.findRolloutById(rolloutId);
+            return myRollout.getStatus();
+
+        }
     }
 
 }

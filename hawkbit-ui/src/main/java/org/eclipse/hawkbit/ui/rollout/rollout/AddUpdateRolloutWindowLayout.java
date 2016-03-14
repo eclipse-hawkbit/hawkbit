@@ -26,9 +26,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
@@ -103,6 +103,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     @Autowired
     private UINotification uiNotification;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     @Autowired
     private I18N i18n;
@@ -284,7 +287,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         totalTargetsLabel = createTotalTargetsLabel();
         targetFilterQuery = createTargetFilterQuery();
 
-        linkToHelp = DocumentationPageLink.ROLLOUT_VIEW.getLink();
+        linkToHelp = SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
     }

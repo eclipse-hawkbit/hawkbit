@@ -16,10 +16,10 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -85,6 +85,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     @Autowired
     private UINotification notification;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     @Autowired
     @Qualifier("uiExecutor")
@@ -212,7 +215,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         validationIcon = createStatusIcon();
         saveButton = createSaveButton();
 
-        helpLink = DocumentationPageLink.TARGET_FILTER_VIEW.getLink();
+        helpLink = SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getTargetfilterView());
 
         closeIcon = createSearchResetIcon();
     }
