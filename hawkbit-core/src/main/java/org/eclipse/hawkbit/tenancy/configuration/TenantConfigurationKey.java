@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.tenancy.configuration;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationBooleanValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationPollingDurationValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
@@ -20,7 +21,8 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * An enum which defines the tenant specific configurations which can be
- * configured for each tenant seperately.
+ * configured for each tenant separately. The non overridable properties are
+ * configured in {@link ControllerPollProperties} instead.
  *
  */
 public enum TenantConfigurationKey {
@@ -28,54 +30,40 @@ public enum TenantConfigurationKey {
     /**
      * boolean value {@code true} {@code false}.
      */
-    AUTHENTICATION_MODE_HEADER_ENABLED("authentication.header.enabled",
-            "hawkbit.server.ddi.security.authentication.header.enabled", Boolean.class, Boolean.FALSE.toString(),
-            TenantConfigurationBooleanValidator.class),
+    AUTHENTICATION_MODE_HEADER_ENABLED("authentication.header.enabled", "hawkbit.server.ddi.security.authentication.header.enabled", Boolean.class, Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
     /**
     *
     */
-    AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME("authentication.header.authority",
-            "hawkbit.server.ddi.security.authentication.header.authority", String.class, Boolean.FALSE.toString(),
-            TenantConfigurationStringValidator.class),
+    AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME("authentication.header.authority", "hawkbit.server.ddi.security.authentication.header.authority", String.class, Boolean.FALSE.toString(), TenantConfigurationStringValidator.class),
     /**
      * boolean value {@code true} {@code false}.
      */
-    AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED("authentication.targettoken.enabled",
-            "hawkbit.server.ddi.security.authentication.targettoken.enabled", Boolean.class, Boolean.FALSE.toString(),
-            TenantConfigurationBooleanValidator.class),
+    AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED("authentication.targettoken.enabled", "hawkbit.server.ddi.security.authentication.targettoken.enabled", Boolean.class, Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
 
     /**
      * boolean value {@code true} {@code false}.
      */
-    AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED("authentication.gatewaytoken.enabled",
-            "hawkbit.server.ddi.security.authentication.gatewaytoken.enabled", Boolean.class, Boolean.FALSE.toString(),
-            TenantConfigurationBooleanValidator.class),
+    AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED("authentication.gatewaytoken.enabled", "hawkbit.server.ddi.security.authentication.gatewaytoken.enabled", Boolean.class, Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class),
     /**
      * string value which holds the name of the security token key.
      */
-    AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME("authentication.gatewaytoken.name",
-            "hawkbit.server.ddi.security.authentication.gatewaytoken.name", String.class, null,
-            TenantConfigurationStringValidator.class),
+    AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME("authentication.gatewaytoken.name", "hawkbit.server.ddi.security.authentication.gatewaytoken.name", String.class, null, TenantConfigurationStringValidator.class),
 
     /**
      * string value which holds the actual security-key of the gateway security
      * token.
      */
-    AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY("authentication.gatewaytoken.key",
-            "hawkbit.server.ddi.security.authentication.gatewaytoken.key", String.class, null,
-            TenantConfigurationStringValidator.class),
+    AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY("authentication.gatewaytoken.key", "hawkbit.server.ddi.security.authentication.gatewaytoken.key", String.class, null, TenantConfigurationStringValidator.class),
 
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
-    POLLING_TIME_INTERVAL("pollingOverdueTime", "hawkbit.controller.pollingOverdueTime", String.class, null,
-            TenantConfigurationPollingDurationValidator.class),
+    POLLING_TIME_INTERVAL("pollingOverdueTime", "hawkbit.controller.pollingOverdueTime", String.class, null, TenantConfigurationPollingDurationValidator.class),
 
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
-    POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null,
-            TenantConfigurationPollingDurationValidator.class);
+    POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null, TenantConfigurationPollingDurationValidator.class);
 
     private final String keyName;
     private final String defaultKeyName;
