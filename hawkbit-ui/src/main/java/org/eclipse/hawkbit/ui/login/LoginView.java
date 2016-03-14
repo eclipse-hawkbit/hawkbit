@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.slf4j.Logger;
@@ -53,9 +52,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Login view for login credentials.
- *
- *
- *
  */
 @SpringView(name = "")
 @UIScope
@@ -228,16 +224,20 @@ public class LoginView extends VerticalLayout implements View {
         links.addStyleName("links");
         final String linkStyle = "v-link";
 
-        final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENATION,
-                i18n.get("link.documentation.name"), "../" + DocumentationPageLink.ROOT_VIEW.getPath(),
-                FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
-        links.addComponent(docuLink);
-        docuLink.addStyleName(ValoTheme.LINK_SMALL);
+        if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
+            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENATION,
+                    i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
+                    FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
+            links.addComponent(docuLink);
+            docuLink.addStyleName(ValoTheme.LINK_SMALL);
+        }
 
-        final Link demoLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DEMO,
-                i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle, true);
-        links.addComponent(demoLink);
-        demoLink.addStyleName(ValoTheme.LINK_SMALL);
+        if (!uiProperties.getDemo().getUser().isEmpty()) {
+            final Link demoLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DEMO,
+                    i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle, true);
+            links.addComponent(demoLink);
+            demoLink.addStyleName(ValoTheme.LINK_SMALL);
+        }
 
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
             final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_REQUESTACCOUNT,

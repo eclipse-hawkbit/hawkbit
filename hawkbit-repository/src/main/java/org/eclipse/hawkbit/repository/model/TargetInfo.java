@@ -75,11 +75,11 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     private Long targetId;
 
     @Transient
-    private boolean isNew = false;
+    private boolean entityNew = false;
 
     @CascadeOnDelete
     @OneToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY, targetEntity = Target.class)
-    @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_stat_targ") )
+    @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_stat_targ"))
     @MapsId
     // use deprecated annotation until HHH-8862 is fixed
     // @SuppressWarnings( "deprecation" )
@@ -100,7 +100,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "installed_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds") )
+    @JoinColumn(name = "installed_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds"))
     private DistributionSet installedDistributionSet;
 
     /**
@@ -110,7 +110,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @Column(name = "attribute_value", length = 128)
     @MapKeyColumn(name = "attribute_key", nullable = false, length = 32)
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
-            @JoinColumn(name = "target_id") }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target") )
+            @JoinColumn(name = "target_id") }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     // use deprecated annotation until HHH-8862 is fixed
 
     // @org.hibernate.annotations.ForeignKey( name = "fk_targ_attrib_target" )
@@ -159,15 +159,15 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @Override
     @Transient
     public boolean isNew() {
-        return isNew;
+        return entityNew;
     }
 
     /**
      * @param isNew
      *            the isNew to set
      */
-    public void setNew(final boolean isNew) {
-        this.isNew = isNew;
+    public void setNew(final boolean entityNew) {
+        this.entityNew = entityNew;
     }
 
     /**

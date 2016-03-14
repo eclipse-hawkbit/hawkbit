@@ -14,9 +14,9 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.documentation.DocumentationPageLink;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -38,7 +38,7 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Main UI for the system configuration view.
- * 
+ *
  *
  *
  */
@@ -62,12 +62,15 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private I18N i18n;
 
     @Autowired
+    private transient UiProperties uiProperties;
+
+    @Autowired
     private transient UINotification uINotification;
 
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
 
-    private final List<ConfigurationGroup> configurationViews = new ArrayList<ConfigurationGroup>();
+    private final List<ConfigurationGroup> configurationViews = new ArrayList<>();
 
     /**
      * init method adds all Configuration Views to the list of Views.
@@ -119,7 +122,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         undoConfigurationBtn.addClickListener(event -> undoConfiguration());
         hlayout.addComponent(undoConfigurationBtn);
 
-        final Link linkToSystemConfigHelp = DocumentationPageLink.SYSTEM_CONFIGURATION_VIEW.getLink();
+        final Link linkToSystemConfigHelp = SPUIComponentProvider
+                .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
+        ;
         hlayout.addComponent(linkToSystemConfigHelp);
 
         return hlayout;
@@ -152,7 +157,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.tenantconfiguration.ConfigurationGroup.
      * ConfigurationGroupChangeListener #configurationChanged()

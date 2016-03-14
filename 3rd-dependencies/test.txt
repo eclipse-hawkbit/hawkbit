@@ -1,55 +1,36 @@
-   com.fasterxml.jackson.core:jackson-core:jar:2.5.0:test
-   com.fasterxml.jackson.core:jackson-databind:jar:2.5.0:test
    com.github.fge:btf:jar:1.2:test
    com.github.fge:jackson-coreutils:jar:1.6:test
    com.github.fge:json-patch:jar:1.7:test
    com.github.fge:msg-simple:jar:1.1:test
    com.google.code.findbugs:jsr305:jar:2.0.1:test
-   com.h2database:h2:jar:1.4.186:test
-   com.jayway.jsonpath:json-path:jar:0.9.1:test
+   com.sun.jersey:jersey-client:jar:1.18.1:test
+   com.sun.jersey:jersey-core:jar:1.13:test
    commons-beanutils:commons-beanutils-core:jar:1.8.3:test
-   commons-io:commons-io:jar:2.4:test
    commons-logging:commons-logging:jar:1.1.1:test
-   de.flapdoodle.embed:de.flapdoodle.embed.mongo:jar:1.50.0:test
-   de.flapdoodle.embed:de.flapdoodle.embed.process:jar:1.50.0:test
-   io.swagger:swagger-annotations:jar:1.5.0:test
+   de.flapdoodle.embed:de.flapdoodle.embed.mongo:jar:1.50.2:test
+   de.flapdoodle.embed:de.flapdoodle.embed.process:jar:1.50.1:test
    javax.el:javax.el-api:jar:2.2.4:test
    junit:junit:jar:4.12:test
    net.java.dev.jna:jna-platform:jar:4.0.0:test
-   net.java.dev.jna:jna:jar:3.3.0:test
    net.java.dev.jna:jna:jar:4.0.0:test
-   net.java.dev.jna:jna:jar:platform:3.3.0:test
-   net.minidev:json-smart:jar:1.2:test
    org.apache.commons:commons-compress:jar:1.3:test
-   org.apache.commons:commons-lang3:jar:3.1:test
    org.apache.tika:tika-core:jar:1.7:test
-   org.aspectj:aspectjrt:jar:1.8.5:test
    org.atteo:evo-inflector:jar:1.2.1:test
    org.easytesting:fest-assert-core:jar:2.0M10:test
    org.easytesting:fest-assert:jar:1.4:test
    org.easytesting:fest-util:jar:1.2.5:test
    org.hamcrest:hamcrest-core:jar:1.3:test
    org.hamcrest:hamcrest-library:jar:1.3:test
-   org.json:json:jar:20141113:test
    org.jvnet.jaxb2_commons:jaxb2-basics-runtime:jar:0.9.3:test
-   org.mariadb.jdbc:mariadb-java-client:jar:1.2.3:test
+   org.mariadb.jdbc:mariadb-java-client:jar:1.3.5:test
    org.mockito:mockito-core:jar:1.10.19:test
-   org.objenesis:objenesis:jar:2.1:test
-   org.springframework.boot:spring-boot-starter-test:jar:1.2.7.RELEASE:test
+   org.springframework.boot:spring-boot-starter-test:jar:1.2.8.RELEASE:test
    org.springframework.data:spring-data-rest-core:jar:2.3.1.RELEASE:test
    org.springframework.data:spring-data-rest-webmvc:jar:2.3.1.RELEASE:test
-   org.springframework.hateoas:spring-hateoas:jar:0.16.0.RELEASE:test
-   org.springframework.plugin:spring-plugin-core:jar:1.1.0.RELEASE:test
-   org.springframework.security:spring-security-aspects:jar:3.2.8.RELEASE:test
-   org.springframework.security:spring-security-config:jar:3.2.8.RELEASE:test
-   org.springframework.security:spring-security-web:jar:3.2.8.RELEASE:test
-   org.springframework:spring-context-support:jar:4.1.8.RELEASE:test
-   org.springframework:spring-test:jar:4.1.8.RELEASE:test
-   org.springframework:spring-web:jar:4.1.8.RELEASE:test
-   org.springframework:spring-webmvc:jar:4.1.8.RELEASE:test
-   ru.yandex.qatools.allure:allure-java-adaptor-api:jar:1.4.15:test
-   ru.yandex.qatools.allure:allure-java-annotations:jar:1.4.15:test
-   ru.yandex.qatools.allure:allure-java-aspects:jar:1.4.15:test
-   ru.yandex.qatools.allure:allure-junit-adaptor:jar:1.4.15:test
-   ru.yandex.qatools.allure:allure-model:jar:1.4.15:test
+   org.springframework:spring-test:jar:4.1.9.RELEASE:test
+   ru.yandex.qatools.allure:allure-java-adaptor-api:jar:1.4.22:test
+   ru.yandex.qatools.allure:allure-java-annotations:jar:1.4.22:test
+   ru.yandex.qatools.allure:allure-java-aspects:jar:1.4.22:test
+   ru.yandex.qatools.allure:allure-junit-adaptor:jar:1.4.22:test
+   ru.yandex.qatools.allure:allure-model:jar:1.4.22:test
    ru.yandex.qatools.properties:properties-loader:jar:1.5:test
