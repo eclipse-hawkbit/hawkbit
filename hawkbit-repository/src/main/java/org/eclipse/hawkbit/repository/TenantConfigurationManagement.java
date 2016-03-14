@@ -85,16 +85,47 @@ public class TenantConfigurationManagement implements EnvironmentAware {
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey,
             final Class<T> propertyType) {
+        validateTenantConfigurationDataType(configurationKey, propertyType);
 
+        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
+                .findByKey(configurationKey.getKeyName());
+
+        return buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration);
+    }
+
+    /**
+     * Validates the data type of the tenant configuration. If it is possible to
+     * cast to the given data type.
+     * 
+     * @param configurationKey
+     *            the key
+     * @param propertyType
+     *            the class
+     */
+    protected <T> void validateTenantConfigurationDataType(final TenantConfigurationKey configurationKey,
+            final Class<T> propertyType) {
         if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
             throw new TenantConfigurationValidatorException(
                     String.format("Cannot parse the database value of type %s into the type %s.",
                             configurationKey.getDataType(), propertyType));
         }
+    }
 
-        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
-                .findByKey(configurationKey.getKeyName());
-
+    /**
+     * Build the tenant configuration by the given key
+     * 
+     * @param configurationKey
+     *            the key
+     * @param propertyType
+     *            the property type
+     * @param tenantConfiguration
+     *            the configuration
+     * @return <null> if no default value is set and no database value available
+     *         or returns the tenant configuration value
+     */
+    protected <T> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(
+            final TenantConfigurationKey configurationKey, final Class<T> propertyType,
+            final TenantConfiguration tenantConfiguration) {
         if (tenantConfiguration != null) {
             return TenantConfigurationValue.<T> builder().isGlobal(false).createdBy(tenantConfiguration.getCreatedBy())
                     .createdAt(tenantConfiguration.getCreatedAt())

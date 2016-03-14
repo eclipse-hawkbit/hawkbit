@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.controller.model.Result.FinalResult;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -43,7 +42,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -92,9 +90,6 @@ public class RootController {
 
     @Autowired
     private TenantAware tenantAware;
-
-    @Autowired
-    private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
@@ -153,11 +148,10 @@ public class RootController {
                     IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
         }
 
-        final String pollingTime = tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue();
-
-        return new ResponseEntity<>(DataConversionHelper.fromTarget(target,
-                controllerManagement.findActionByTargetAndActive(target), pollingTime, tenantAware), HttpStatus.OK);
+        return new ResponseEntity<>(
+                DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
+                        controllerManagement.findPollingTime(), tenantAware),
+                HttpStatus.OK);
     }
 
     /**
