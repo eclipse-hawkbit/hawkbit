@@ -867,6 +867,16 @@ public final class SPUIComponetIdProvider {
      * Rollout group targets count message label.
      */
     public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
+    
+    /**
+     * Action confirmation popup id.
+     */
+    public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
+    
+    /**
+     * Validation status icon .
+     */
+    public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
      * /* Private Constructor.

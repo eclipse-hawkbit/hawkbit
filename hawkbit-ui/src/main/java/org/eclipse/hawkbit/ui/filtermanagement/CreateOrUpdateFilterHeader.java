@@ -191,6 +191,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         statusIcon.setContentMode(ContentMode.HTML);
         statusIcon.setSizeFull();
         setInitialStatusIconStyle(statusIcon);
+        statusIcon.setId(SPUIComponetIdProvider.VALIDATION_STATUS_ICON_ID);
         return statusIcon;
     }
 
