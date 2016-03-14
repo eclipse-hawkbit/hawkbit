@@ -106,7 +106,6 @@ public class TenantConfigurationDashboardView extends CustomComponent
 
         final Link linkToSystemConfigHelp = SPUIComponentProvider
                 .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
-        ;
         hlayout.addComponent(linkToSystemConfigHelp);
 
         return hlayout;

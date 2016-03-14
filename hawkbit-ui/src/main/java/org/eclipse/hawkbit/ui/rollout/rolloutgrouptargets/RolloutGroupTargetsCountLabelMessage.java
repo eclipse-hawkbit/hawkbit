@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -30,23 +30,19 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
 
 /**
- * count message label for the targets of the rollout group.
- *
+ * Count message label for the targets of the rollout group.
  */
 @SpringComponent
 @ViewScope
 public class RolloutGroupTargetsCountLabelMessage extends Label {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -3876685878918411453L;
 
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
     @Autowired
-    private transient RolloutGroupTargetsListTable rolloutGroupTargetsListTable;
+    private transient RolloutGroupTargetsListGrid rolloutGroupTargetsListGrid;
 
     @Autowired
     private I18N i18n;
@@ -93,7 +89,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
     }
 
     private void displayRolloutGroupTargetMessage() {
-        long totalTargetTableEnteries = rolloutGroupTargetsListTable.size();
+        long totalTargetTableEnteries = rolloutGroupTargetsListGrid.getContainerDataSource().size();
         if (rolloutUIState.getRolloutGroupTargetsTruncated() != null) {
             // set the icon
             setIcon(FontAwesome.INFO_CIRCLE);
@@ -113,7 +109,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
             message.append(SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
         } else {
             message.append(i18n.get("label.filter.shown"));
-            message.append(rolloutGroupTargetsListTable.size());
+            message.append(rolloutGroupTargetsListGrid.getContainerDataSource().size());
         }
         message.append(HawkbitCommonUtil.SP_STRING_SPACE);
         setCaption(message.toString());

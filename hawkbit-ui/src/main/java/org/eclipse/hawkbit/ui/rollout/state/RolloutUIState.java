@@ -44,6 +44,8 @@ public class RolloutUIState implements Serializable {
 
     private long rolloutGroupTargetsTotalCount;
 
+    private String rolloutDistributionSet;
+
     /**
      * @return the searchText
      */
@@ -177,5 +179,21 @@ public class RolloutUIState implements Serializable {
      */
     public void setRolloutGroupTargetsTotalCount(final long rolloutGroupTargetsTotalCount) {
         this.rolloutGroupTargetsTotalCount = rolloutGroupTargetsTotalCount;
+    }
+
+    /**
+     * @return rolloutDistributionSet
+     */
+    public Optional<String>  getRolloutDistributionSet() {
+        return rolloutDistributionSet == null ? Optional.empty() : Optional.of(rolloutDistributionSet);
+    }
+
+    /**
+     * 
+     * @param rolloutDistributionSet
+     *            the distribution set of the rollout
+     */
+    public void setRolloutDistributionSet(String rolloutDistributionSet) {
+        this.rolloutDistributionSet = rolloutDistributionSet;
     }
 }

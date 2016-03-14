@@ -6,10 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -23,7 +24,7 @@ import com.vaadin.ui.Label;
  */
 @SpringComponent
 @ViewScope
-public class RolloutListView extends AbstractSimpleTableLayout {
+public class RolloutListView extends AbstractGridLayout {
 
     private static final long serialVersionUID = -2703552177439393208L;
 
@@ -31,24 +32,21 @@ public class RolloutListView extends AbstractSimpleTableLayout {
     private RolloutListHeader rolloutListHeader;
 
     @Autowired
-    private RolloutListTable rolloutListTable;
+    private RolloutListGrid rolloutListGrid;
 
     @PostConstruct
     void init() {
-        super.init(rolloutListHeader, rolloutListTable);
+        super.init(rolloutListHeader, rolloutListGrid);
     }
 
-    
     @Override
     protected boolean hasCountMessage() {
-       
         return false;
     }
 
-   
     @Override
     protected Label getCountMessageLabel() {
-        
+
         return null;
     }
 

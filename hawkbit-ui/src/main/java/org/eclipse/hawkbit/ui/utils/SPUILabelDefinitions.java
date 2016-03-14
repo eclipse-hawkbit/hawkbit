@@ -539,6 +539,27 @@ public final class SPUILabelDefinitions {
      * Total target coulmn property name.
      */
     public static final String VAR_TOTAL_TARGETS = "totalTargetsCount";
+    
+    
+    /**
+     * Total target count status coulmn property name.
+     */
+    public static final String VAR_TOTAL_TARGETS_COUNT_STATUS = "totalTargetCountStatus";
+    
+    /**
+     * Rollout group started date column property.
+     */
+    public static final String ROLLOUT_GROUP_ERROR_THRESHOLD = "errorConditionExp";
+
+    /**
+     * Rollout group started date column property.
+     */
+    public static final String ROLLOUT_GROUP_THRESHOLD = "successConditionExp";
+
+    /**
+     * Rollout group installed percentage column property.
+     */
+    public static final String ROLLOUT_GROUP_INSTALLED_PERCENTAGE = "finishedPercentage";
 
     /**
      * Constructor.

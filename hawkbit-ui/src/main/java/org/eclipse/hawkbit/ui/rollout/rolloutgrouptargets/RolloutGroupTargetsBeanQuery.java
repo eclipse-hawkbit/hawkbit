@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,8 @@ import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
 /**
- * @author gah6kor
- *
+ * Simple implementation of generics bean query which dynamically loads a batch
+ * of {@link ProxyTarget} beans.
  */
 public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 
@@ -83,8 +83,9 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
         if (startIndex == 0 && firstPageTargetSets != null) {
             rolloutGroupTargetsList = firstPageTargetSets.getContent();
         } else if (null != rolloutGroup) {
-            rolloutGroupTargetsList = getRolloutGroupManagement().findAllTargetsWithActionStatus(
-                    new PageRequest(startIndex / count, count), rolloutGroup).getContent();
+            rolloutGroupTargetsList = getRolloutGroupManagement()
+                    .findAllTargetsWithActionStatus(new PageRequest(startIndex / count, count), rolloutGroup)
+                    .getContent();
         }
         return getProxyRolloutGroupTargetsList(rolloutGroupTargetsList);
     }
@@ -113,8 +114,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
             prxyTarget.setTargetInfo(targ.getTargetInfo());
             prxyTarget.setId(targ.getId());
             if (targ.getAssignedDistributionSet() != null) {
-                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(targ
-                        .getAssignedDistributionSet().getName(), targ.getAssignedDistributionSet().getVersion()));
+                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
+                        targ.getAssignedDistributionSet().getName(), targ.getAssignedDistributionSet().getVersion()));
             }
             proxyTargetBeans.add(prxyTarget);
 
@@ -133,8 +134,8 @@ public class RolloutGroupTargetsBeanQuery extends AbstractBeanQuery<ProxyTarget>
     public int size() {
         long size = 0;
         if (null != rolloutGroup) {
-            firstPageTargetSets = getRolloutGroupManagement().findAllTargetsWithActionStatus(
-                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
+            firstPageTargetSets = getRolloutGroupManagement()
+                    .findAllTargetsWithActionStatus(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), rolloutGroup);
             size = firstPageTargetSets.getTotalElements();
         }
         getRolloutUIState().setRolloutGroupTargetsTotalCount(size);

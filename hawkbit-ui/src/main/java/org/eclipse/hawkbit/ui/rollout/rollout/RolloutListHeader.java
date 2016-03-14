@@ -6,11 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
@@ -35,7 +36,7 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class RolloutListHeader extends AbstractSimpleTableHeader {
+public class RolloutListHeader extends AbstractGridHeader {
     private static final long serialVersionUID = 2365400733081333174L;
 
     @Autowired

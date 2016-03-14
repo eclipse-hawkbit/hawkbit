@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -34,7 +34,7 @@ import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
  * Bean query for distribution set combo.
  *
  */
-public class DistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
+public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
 
     private static final long serialVersionUID = 5176481314404662215L;
     private Sort sort = new Sort(Direction.ASC, "name", "version");
@@ -53,7 +53,7 @@ public class DistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
      * @param sortStates
      *            as Sort status
      */
-    public DistBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
+    public DistributionBeanQuery(final QueryDefinition definition, final Map<String, Object> queryConfig,
             final Object[] sortPropertyIds, final boolean[] sortStates) {
         super(definition, queryConfig, sortPropertyIds, sortStates);
 

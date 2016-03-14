@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.rollout;
+package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -650,7 +650,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private Container createDsComboContainer() {
-        final BeanQueryFactory<DistBeanQuery> distributionQF = new BeanQueryFactory<>(DistBeanQuery.class);
+        final BeanQueryFactory<DistributionBeanQuery> distributionQF = new BeanQueryFactory<>(
+                DistributionBeanQuery.class);
         return new LazyQueryContainer(
                 new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
                 distributionQF);
