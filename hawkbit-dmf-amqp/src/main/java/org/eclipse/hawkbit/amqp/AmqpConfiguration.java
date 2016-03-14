@@ -21,7 +21,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,8 +29,6 @@ import org.springframework.context.annotation.Bean;
 /**
  * The spring AMQP configuration which is enabled by using the profile
  * {@code amqp} to use a AMQP for communication with SP enabled devices.
- *
- *
  *
  */
 @EnableConfigurationProperties(AmqpProperties.class)
@@ -43,19 +40,16 @@ public class AmqpConfiguration {
     @Autowired
     private ConnectionFactory connectionFactory;
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
     /**
      * Method to set the Jackson2JsonMessageConverter.
      *
      * @return the Jackson2JsonMessageConverter
      */
     @Bean
-    public MessageConverter jsonMessageConverter() {
-        final Jackson2JsonMessageConverter jackson2JsonMessageConverter = new Jackson2JsonMessageConverter();
-        rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter);
-        return jackson2JsonMessageConverter;
+    public RabbitTemplate rabbitTemplate() {
+        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        return rabbitTemplate;
     }
 
     /**
@@ -126,7 +120,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public AmqpMessageHandlerService amqpMessageHandlerService() {
-        return new AmqpMessageHandlerService(rabbitTemplate);
+        return new AmqpMessageHandlerService(rabbitTemplate());
     }
 
     /**
@@ -137,7 +131,7 @@ public class AmqpConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AmqpSenderService amqpSenderServiceBean() {
-        return new DefaultAmqpSenderService(rabbitTemplate);
+        return new DefaultAmqpSenderService(rabbitTemplate());
     }
 
     /**
