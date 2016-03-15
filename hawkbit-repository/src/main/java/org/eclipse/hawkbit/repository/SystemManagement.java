@@ -22,10 +22,8 @@ import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,12 +31,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.support.ConfigurableConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -53,7 +46,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 @Service
-public class SystemManagement implements EnvironmentAware {
+public class SystemManagement {
     @Autowired
     private EntityManager entityManager;
 
@@ -112,10 +105,6 @@ public class SystemManagement implements EnvironmentAware {
     private TenancyCacheManager cacheManager;
 
     private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
-
-    private final ConfigurableConversionService conversionService = new DefaultConversionService();
-
-    private Environment environment;
 
     /**
      * Calculated system usage statistics, both overall for the entire system
@@ -280,7 +269,7 @@ public class SystemManagement implements EnvironmentAware {
      * @return {@code true} in case the tenant exits or {@code false} if not
      */
     @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator")
-    // MECS-903 set transaction to not supported, due we call this in
+    // set transaction to not supported, due we call this in
     // BaseEntity#prePersist methods
     // and it seems that JPA committing the transaction when executing this
     // transactional method,
@@ -318,88 +307,6 @@ public class SystemManagement implements EnvironmentAware {
         }
 
         return tenantMetaDataRepository.save(metaData);
-    }
-
-    /**
-     * Retrieves a configuration value from the e.g. tenant overwritten
-     * configuration values or in case the tenant does not a have a specific
-     * configuration the global default value hold in the {@link Environment}.
-     *
-     * @param configurationKey
-     *            the key of the configuration
-     * @param propertyType
-     *            the type of the configuration value, e.g. {@code String.class}
-     *            , {@code Integer.class}, etc
-     * @return the converted configuration value either from the tenant specific
-     *         configuration stored or from the fallback default values or
-     *         {@code null} in case key has not been configured and not default
-     *         value exists
-     * @throws ConversionFailedException
-     *             if the property cannot be converted to the given
-     *             {@code propertyType}
-     */
-    @Cacheable(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    public <T> T getConfigurationValue(final TenantConfigurationKey configurationKey, final Class<T> propertyType) {
-        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
-                .findByKey(configurationKey.getKeyName());
-        if (tenantConfiguration != null) {
-            return conversionService.convert(tenantConfiguration.getValue(), propertyType);
-        } else if (configurationKey.getDefaultKeyName() != null) {
-            final T defaultKeyNameValue = environment.getProperty(configurationKey.getDefaultKeyName(), propertyType);
-            return defaultKeyNameValue != null ? defaultKeyNameValue
-                    : conversionService.convert(configurationKey.getDefaultValue(), propertyType);
-        }
-        return null;
-    }
-
-    /**
-     * Adds or updates a specific configuration for a specific tenant.
-     *
-     * @param tenantConf
-     *            the tenant configuration object which contains the key and
-     *            value of the specific configuration to update
-     * @return the added or updated TenantConfiguration
-     */
-    @CacheEvict(value = "tenantConfiguration", key = "#tenantConf.getKey()")
-    @Transactional
-    @Modifying
-    public TenantConfiguration addOrUpdateConfiguration(final TenantConfiguration tenantConf) {
-        TenantConfiguration tenantConfiguration = tenantConfigurationRepository.findByKey(tenantConf.getKey());
-        if (tenantConfiguration != null) {
-            tenantConfiguration.setValue(tenantConf.getValue());
-        } else {
-            tenantConfiguration = new TenantConfiguration(tenantConf.getKey(), tenantConf.getValue());
-        }
-        return tenantConfigurationRepository.save(tenantConfiguration);
-    }
-
-    /**
-     * Deletes a specific configuration for the current tenant.
-     *
-     * @param configurationKey
-     *            the configuration key to be deleted
-     */
-    @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    @Transactional
-    @Modifying
-    public void deleteConfiguration(final TenantConfigurationKey configurationKey) {
-        tenantConfigurationRepository.deleteByKey(configurationKey.getKeyName());
-    }
-
-    @Transactional
-    public List<TenantConfiguration> getTenantConfigurations() {
-        return tenantConfigurationRepository.findAll();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
-     * springframework.core.env. Environment)
-     */
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = environment;
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
@@ -458,7 +365,5 @@ public class SystemManagement implements EnvironmentAware {
             return SimpleKeyGenerator.generateKey(initialTenantCreation.toUpperCase(),
                     initialTenantCreation.toUpperCase());
         }
-
     }
-
 }

@@ -62,8 +62,9 @@ public class DeviceSimulatorUpdater {
         device.setProgress(0.0);
         device.setSwversion(swVersion);
         eventbus.post(new InitUpdate(device));
+
         threadPool.schedule(new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback),
-                2000, TimeUnit.MILLISECONDS);
+                2_000, TimeUnit.MILLISECONDS);
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
@@ -91,7 +92,7 @@ public class DeviceSimulatorUpdater {
             if (newProgress < 1.0) {
                 threadPool.schedule(
                         new DeviceSimulatorUpdateThread(device, spSenderService, actionId, eventbus, callback),
-                        rndSleep.nextInt(3000), TimeUnit.MILLISECONDS);
+                        rndSleep.nextInt(5_000), TimeUnit.MILLISECONDS);
             } else {
                 callback.updateFinished(device, actionId);
             }

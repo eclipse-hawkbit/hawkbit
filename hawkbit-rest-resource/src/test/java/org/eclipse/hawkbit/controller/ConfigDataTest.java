@@ -35,7 +35,7 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @ActiveProfiles({ "im", "test" })
-@Features("Component Tests - Controller RESTful API")
+@Features("Component Tests - Direct Device Integration API")
 @Stories("Config Data Resource")
 public class ConfigDataTest extends AbstractIntegrationTest {
 

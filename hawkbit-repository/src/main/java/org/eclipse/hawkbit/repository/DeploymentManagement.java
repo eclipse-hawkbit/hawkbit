@@ -365,7 +365,7 @@ public class DeploymentManagement {
         }).collect(Collectors.toList())).stream()
                 .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
-        // MECS-720 create initial action status when action is created so we
+        // create initial action status when action is created so we
         // remember the initial
         // running status because we will change the status of the action itself
         // and with this action
@@ -572,7 +572,7 @@ public class DeploymentManagement {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public Action forceQuitAction(@NotNull final Action action, @NotNull final Target target) {
+    public Action forceQuitAction(@NotNull final Action action) {
         final Action mergedAction = entityManager.merge(action);
 
         if (!mergedAction.isCancelingOrCanceled()) {
@@ -925,7 +925,7 @@ public class DeploymentManagement {
 
     /**
      * retrieves all the {@link ActionStatus} entries of the given
-     * {@link Action} and {@link Target} in the order latest first.
+     * {@link Action} and {@link Target}.
      *
      * @param pageReq
      *            pagination parameter
@@ -937,12 +937,12 @@ public class DeploymentManagement {
      * @return the corresponding {@link Page} of {@link ActionStatus}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Page<ActionStatus> findActionStatusMessagesByActionInDescOrder(final Pageable pageReq, final Action action,
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Action action,
             final boolean withMessages) {
         if (withMessages) {
-            return actionStatusRepository.getByActionOrderByIdDesc(pageReq, action);
+            return actionStatusRepository.getByAction(pageReq, action);
         } else {
-            return actionStatusRepository.findByActionOrderByIdDesc(pageReq, action);
+            return actionStatusRepository.findByAction(pageReq, action);
         }
     }
 

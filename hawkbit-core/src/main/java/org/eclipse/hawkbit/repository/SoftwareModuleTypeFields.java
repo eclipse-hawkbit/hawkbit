@@ -36,7 +36,7 @@ public enum SoftwareModuleTypeFields implements FieldNameProvider {
     /**
      * The max ds assignments field.
      */
-    MAX("maxAssignments");
+    MAXASSIGNMENTS("maxAssignments");
 
     private final String fieldName;
 

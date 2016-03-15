@@ -18,8 +18,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "hawkbit")
 public class ClientConfigurationProperties {
 
+    /**
+     * Update server URI.
+     */
     private String url = "localhost:8080";
+
+    /**
+     * Update server user name.
+     */
     private String username = "admin";
+
+    /**
+     * Update server password.
+     */
     private String password = "admin"; // NOSONAR this password is only used for
                                        // examples
 

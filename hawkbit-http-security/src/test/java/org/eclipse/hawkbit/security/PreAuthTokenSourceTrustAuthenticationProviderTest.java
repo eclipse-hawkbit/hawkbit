@@ -20,7 +20,13 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Security")
+@Stories("PreAuthToken Source TrustAuthentication Provider Test")
 @RunWith(MockitoJUnitRunner.class)
+// TODO: create description annotations
 public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     private static final String REQUEST_SOURCE_IP = "127.0.0.1";

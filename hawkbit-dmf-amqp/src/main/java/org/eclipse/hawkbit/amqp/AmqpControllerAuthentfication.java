@@ -16,14 +16,15 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.PreAuthenficationFilter;
-import org.eclipse.hawkbit.security.SecurityProperties;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +50,16 @@ public class AmqpControllerAuthentfication {
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private SystemManagement systemManagement;
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
     private TenantAware tenantAware;
 
     @Autowired
-    private SecurityProperties secruityProperties;
+    private DdiSecurityProperties ddiSecruityProperties;
+
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
 
     /**
      * Constructor.
@@ -74,16 +78,16 @@ public class AmqpControllerAuthentfication {
 
     private void addFilter() {
         final ControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new ControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                systemManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(gatewaySecurityTokenFilter);
 
         final ControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new ControllerPreAuthenticatedSecurityHeaderFilter(
-                secruityProperties.getRpCnHeader(), secruityProperties.getRpSslIssuerHashHeader(), systemManagement,
-                tenantAware);
+                ddiSecruityProperties.getRp().getCnHeader(), ddiSecruityProperties.getRp().getSslIssuerHashHeader(),
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityHeaderFilter);
 
         final ControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new ControllerPreAuthenticateSecurityTokenFilter(
-                systemManagement, controllerManagement, tenantAware);
+                tenantConfigurationManagement, controllerManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityTokenFilter);
 
         filterChain.add(new CoapAnonymousPreAuthenticatedFilter());
@@ -127,26 +131,26 @@ public class AmqpControllerAuthentfication {
 
         LOGGER.debug("preAuthenticatedPrincipal = {} trying to authenticate", principal);
 
-        final PreAuthenticatedAuthenticationToken authRequest = new PreAuthenticatedAuthenticationToken(principal,
-                credentials);
-
-        return authRequest;
+        return new PreAuthenticatedAuthenticationToken(principal, credentials);
     }
 
     public void setControllerManagement(final ControllerManagement controllerManagement) {
         this.controllerManagement = controllerManagement;
     }
 
-    public void setSecruityProperties(final SecurityProperties secruityProperties) {
-        this.secruityProperties = secruityProperties;
+    public void setSecruityProperties(final DdiSecurityProperties secruityProperties) {
+        this.ddiSecruityProperties = secruityProperties;
     }
 
-    public void setSystemManagement(final SystemManagement systemManagement) {
-        this.systemManagement = systemManagement;
+    public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     public void setTenantAware(final TenantAware tenantAware) {
         this.tenantAware = tenantAware;
     }
 
+    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
+        this.systemSecurityContext = systemSecurityContext;
+    }
 }

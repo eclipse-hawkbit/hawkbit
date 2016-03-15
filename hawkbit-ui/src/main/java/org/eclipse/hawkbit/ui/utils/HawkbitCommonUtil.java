@@ -1361,14 +1361,13 @@ public final class HawkbitCommonUtil {
      */
     public static String getFormattedString(Map<Status, Long> details) {
         StringBuilder val = new StringBuilder();
-        String finalVal = null;
-        if (null != details && !details.isEmpty()) {
-            for (Entry<Status, Long> entry : details.entrySet()) {
-                val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
-            }
-            finalVal = val.substring(0, val.length() - 1);
+        if (details == null || details.isEmpty()) {
+            return null;
         }
-        return finalVal;
+        for (Entry<Status, Long> entry : details.entrySet()) {
+            val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
+        }
+        return val.substring(0, val.length() - 1);
     }
     
     /**

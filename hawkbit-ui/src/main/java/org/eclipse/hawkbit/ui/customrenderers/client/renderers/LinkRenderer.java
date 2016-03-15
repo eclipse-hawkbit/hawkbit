@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
 import java.util.HashMap;
@@ -5,8 +13,14 @@ import java.util.Map;
 
 import com.google.gwt.user.client.ui.Button;
 import com.vaadin.client.renderers.ButtonRenderer;
+import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * 
+ * Renders link with provided text.
+ *
+ */
 public class LinkRenderer extends ButtonRenderer {
     @Override
     public void render(RendererCellReference cell, String text, Button button) {
@@ -29,12 +43,15 @@ public class LinkRenderer extends ButtonRenderer {
     }
 
     private void applystyle(Button button) {
-        button.setStylePrimaryName("v-button");
-        button.setStyleName("borderless v-button-borderless");
-        button.addStyleName("small v-button-small");
-        button.addStyleName("on-focus-no-border v-button-on-focus-no-border");
+        button.setStyleName(VButton.CLASSNAME);
+        button.addStyleName(getStyle("borderless"));
+        button.addStyleName(getStyle("small"));
+        button.addStyleName(getStyle("on-focus-no-border"));
     }
 
+ private String getStyle(final String style) {
+        return new StringBuilder(style).append(" ").append(VButton.CLASSNAME).append("-").append(style).toString();
+    }
     private Map<String, String> formatNameStatusData(String input) {
         Map<String, String> details = new HashMap<>();
         String[] tempData = input.split(",");

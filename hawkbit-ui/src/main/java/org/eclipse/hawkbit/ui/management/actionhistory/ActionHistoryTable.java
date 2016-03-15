@@ -16,6 +16,7 @@ import java.util.StringJoiner;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -43,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -417,10 +420,10 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final org.eclipse.hawkbit.repository.model.Action action = deploymentManagement
                     .findActionWithDetails(actionId);
-            final Pageable pageReq = new PageRequest(0, 1000);
-            final Page<ActionStatus> actionStatusList = deploymentManagement
-                    .findActionStatusMessagesByActionInDescOrder(pageReq, action,
-                            managementUIState.isActionHistoryMaximized());
+            final Pageable pageReq = new PageRequest(0, 1000,
+                    new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
+            final Page<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action,
+                    managementUIState.isActionHistoryMaximized());
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
              * Since the recent action status and messages are already
@@ -524,7 +527,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         } else if (Action.Status.SCHEDULED == status) {
             label.setStyleName(statusIconPending);
             label.setDescription(i18n.get("label.scheduled"));
-            label.setValue(FontAwesome.BULLSEYE.getHtml());
+            label.setValue(FontAwesome.HOURGLASS_1.getHtml());
         } else {
             label.setDescription("");
             label.setValue("");
@@ -575,7 +578,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         label.setContentMode(ContentMode.HTML);
         if (SPUIDefinitions.SCHEDULED.equals(activeValue)) {
             label.setDescription("Scheduled");
-            label.setValue(FontAwesome.BULLSEYE.getHtml());
+            label.setValue(FontAwesome.HOURGLASS_1.getHtml());
         } else if (SPUIDefinitions.ACTIVE.equals(activeValue)) {
             label.setDescription("Active");
             label.setStyleName("statusIconActive");
@@ -841,7 +844,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
         if (actionId != null) {
             final Action activeAction = deploymentManagement.findAction(actionId);
             try {
-                deploymentManagement.forceQuitAction(activeAction, target);
+                deploymentManagement.forceQuitAction(activeAction);
                 return true;
             } catch (final CancelActionNotAllowedException e) {
                 LOG.info("Force Cancel action not allowed exception :{}", e);

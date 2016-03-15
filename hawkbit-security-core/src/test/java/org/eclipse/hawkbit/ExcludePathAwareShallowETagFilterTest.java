@@ -28,6 +28,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Security")
+@Stories("Exclude path aware shallow ETag filter")
 @RunWith(MockitoJUnitRunner.class)
 public class ExcludePathAwareShallowETagFilterTest {
 

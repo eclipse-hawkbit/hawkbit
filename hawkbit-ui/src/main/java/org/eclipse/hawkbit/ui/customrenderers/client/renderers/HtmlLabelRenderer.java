@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
 import java.util.HashMap;
@@ -8,6 +16,11 @@ import com.vaadin.client.renderers.WidgetRenderer;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * 
+ * Renders label with provided value and style.
+ *
+ */
 public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
 
     @Override
@@ -24,8 +37,7 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
 
         if (value != null) {
             label.setHTML("<span>&#x" + Integer.toHexString(Integer.parseInt(value)) + ";</span>");
-        }
-        else{
+        } else {
             label.setHTML("<span></span>");
         }
         applyStyle(label, style);
@@ -33,12 +45,16 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
     }
 
     private void applyStyle(VLabel label, String style) {
-        label.setStylePrimaryName("v-label");
-        label.setStyleName("small v-label-small");
-        label.addStyleName("font-icon v-label-font-icon");
+        label.setStyleName(VLabel.CLASSNAME);
+        label.addStyleName(getStyle("small"));
+        label.addStyleName(getStyle("font-icon"));
         if (style != null) {
-            label.addStyleName(style + " v-label-" + style);
+            label.addStyleName(getStyle(style));
         }
+    }
+
+    private String getStyle(final String style) {
+        return new StringBuilder(style).append(" ").append(VLabel.CLASSNAME).append("-").append(style).toString();
     }
 
     private Map<String, String> formatInput(String input) {
@@ -50,5 +66,4 @@ public class HtmlLabelRenderer extends WidgetRenderer<String, VLabel> {
         }
         return details;
     }
-
 }

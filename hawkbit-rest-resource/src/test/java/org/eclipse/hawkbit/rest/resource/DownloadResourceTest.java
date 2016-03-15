@@ -30,11 +30,7 @@ import org.springframework.context.annotation.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-/**
- *
- *
- */
-@Features("Component Tests- Download Restful API")
+@Features("Component Tests - Management API")
 @Stories("Download Resource")
 public class DownloadResourceTest extends AbstractIntegrationTestWithMongoDB {
 

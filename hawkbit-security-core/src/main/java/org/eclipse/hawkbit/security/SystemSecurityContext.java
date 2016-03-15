@@ -15,7 +15,6 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.TenantAware.TenantRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,30 +29,36 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Throwables;
 
 /**
- * @author Michael Hirsch
- *
+ * 
  */
 @Service
 public class SystemSecurityContext {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemSecurityContext.class);
 
+    private final TenantAware tenantAware;
+
+    /**
+     * Autowired constructor.
+     * 
+     * @param tenantAware
+     *            the tenant aware bean to retrieve the current tenant
+     */
     @Autowired
-    private TenantAware tenantAware;
+    public SystemSecurityContext(final TenantAware tenantAware) {
+        this.tenantAware = tenantAware;
+    }
 
     public <T> T runAsSystem(final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
             logger.debug("entering system code execution");
-            return tenantAware.runAsTenant(tenantAware.getCurrentTenant(), new TenantRunner<T>() {
-                @Override
-                public T run() {
-                    try {
-                        setSystemContext();
-                        return callable.call();
-                    } catch (final Exception e) {
-                        throw Throwables.propagate(e);
-                    }
+            return tenantAware.runAsTenant(tenantAware.getCurrentTenant(), () -> {
+                try {
+                    setSystemContext();
+                    return callable.call();
+                } catch (final Exception e) {
+                    throw Throwables.propagate(e);
                 }
             });
 
@@ -106,7 +111,8 @@ public class SystemSecurityContext {
         }
 
         @Override
-        public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
+        public void setAuthenticated(final boolean isAuthenticated) {
+            // not needed
         }
     }
 }

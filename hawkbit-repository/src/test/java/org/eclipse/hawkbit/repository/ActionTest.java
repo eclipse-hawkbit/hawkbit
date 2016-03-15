@@ -14,10 +14,16 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Repository")
+@Stories("Deployment Management")
 public class ActionTest {
 
-    // issue MECS-670 timeforced update and eTAG calculation
     @Test
+    @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
     public void timeforcedHitNewHasCodeIsGenerated() throws InterruptedException {
 
         final boolean active = true;

@@ -1,9 +1,24 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
 import com.google.gwt.user.client.ui.Button;
 import com.vaadin.client.renderers.ButtonRenderer;
+import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * 
+ * Renders button with provided HTML content.
+ * Used to display button with icons.
+ *
+ */
 public class HtmlButtonRenderer extends ButtonRenderer {
     @Override
     public void render(RendererCellReference cell, String text, Button button) {
@@ -17,10 +32,15 @@ public class HtmlButtonRenderer extends ButtonRenderer {
     }
 
     private void applystyles(Button button) {
-        button.setStylePrimaryName("v-button");
-        button.setStyleName("tiny v-button-tiny");
-        button.addStyleName("borderless v-button-borderless");
-        button.addStyleName("icon-only v-button-icon-only");
-        button.addStyleName("button-no-border v-button-button-no-border");
+        button.setStyleName(VButton.CLASSNAME);
+        button.addStyleName(getStyle("tiny"));
+        button.addStyleName(getStyle("borderless"));
+        button.addStyleName(getStyle("icon-only"));
+        button.addStyleName(getStyle("button-no-border"));
+    }
+    
+    
+    private String getStyle(final String style) {
+        return new StringBuilder(style).append(" ").append(VButton.CLASSNAME).append("-").append(style).toString();
     }
 }

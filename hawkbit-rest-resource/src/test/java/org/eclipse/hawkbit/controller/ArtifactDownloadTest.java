@@ -60,7 +60,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 
 @ActiveProfiles({ "im", "test" })
-@Features("Component Tests - Controller RESTful API")
+@Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
 public class ArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
 

@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -54,8 +53,9 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
      *            the system management to retrie the configuration
      */
     @Autowired
-    public CertificateAuthenticationConfigurationItem(final SystemManagement systemManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, systemManagement);
+    public CertificateAuthenticationConfigurationItem(
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        super(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, tenantConfigurationManagement);
     }
 
     /**
@@ -133,13 +133,12 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
     @Override
     public void save() {
         if (configurationEnabledChange) {
-            getSystemManagement().addOrUpdateConfiguration(
-                    new TenantConfiguration(getConfigurationKey().getKeyName(), String.valueOf(configurationEnabled)));
+            getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
         }
         if (configurationCaRootAuthorityChanged) {
             final String value = caRootAuthorityTextField.getValue() != null ? caRootAuthorityTextField.getValue() : "";
-            getSystemManagement().addOrUpdateConfiguration(new TenantConfiguration(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME.getKeyName(), value));
+            getTenantConfigurationManagement()
+                    .addOrUpdateConfiguration(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, value);
         }
     }
 
@@ -153,13 +152,15 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         configurationEnabledChange = false;
         configurationCaRootAuthorityChanged = false;
 
-        configurationEnabled = getSystemManagement().getConfigurationValue(getConfigurationKey(), Boolean.class);
+        configurationEnabled = getTenantConfigurationManagement()
+                .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
         caRootAuthorityTextField.setValue(getCaRootAuthorityValue());
     }
 
     private String getCaRootAuthorityValue() {
-        return getSystemManagement()
-                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class);
+        return getTenantConfigurationManagement()
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class)
+                .getValue();
     }
 
     private void setDetailVisible(final boolean visible) {

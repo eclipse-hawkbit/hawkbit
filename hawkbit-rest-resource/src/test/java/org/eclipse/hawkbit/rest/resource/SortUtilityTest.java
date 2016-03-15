@@ -24,7 +24,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  *
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Sorting parameter")
 public class SortUtilityTest {
     private static final String SORT_PARAM_1 = "NAME:ASC";

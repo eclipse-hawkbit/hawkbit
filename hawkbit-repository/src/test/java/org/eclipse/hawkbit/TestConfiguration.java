@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SecurityProperties;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -47,7 +47,7 @@ import com.mongodb.MongoClientOptions;
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
-@EnableConfigurationProperties({ SecurityProperties.class, ControllerPollProperties.class })
+@EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class })
 @Profile("test")
 public class TestConfiguration implements AsyncConfigurer {
 

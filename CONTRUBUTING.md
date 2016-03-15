@@ -4,7 +4,9 @@
 
 Please read this if you intend to contribute to the project.
 
-## Code Conventions
+## Conventions
+
+### Code Style
 
 * Java files:
   * we follow the standard eclipse IDE (built in) code formatter with the following changes:
@@ -18,6 +20,37 @@ Please read this if you intend to contribute to the project.
     * disabled rules: ImportantRule, PropertySortOrder
 * Sonarqube:
   * Our rule set is defined [here](http://sonar.eu-gb.mybluemix.net)
+
+### Test documentation
+
+Please documented the test cases that you contribute by means of [Allure](http://allure.qatools.ru) annotations and proper test method naming.
+
+All test classes are documented with [Allure's](https://github.com/allure-framework/allure-core/wiki/Features-and-Stories) **@Features** and **@Stories** annotations in the following format:
+```
+@Features("TEST_TYPE - HAWKBIT_COMPONENT")
+@Stories("Test class description")
+```
+
+Test types are:
+* Unit Tests - for single units tests with a mocked environment
+* Component Tests - for complete components including lower layers, e.g. Spring MVC test on rest API including repository and database.
+* Integration Tests - including clients, e.g. Selenium UI tests with various browsers.
+* System Tests - on target environments, e.g. Cloud Foundry.
+
+Examples for hawkBit components:
+* Management API
+* Direct Device Integration API
+* Device Management Federation API
+* Management UI
+* Repository
+* Security
+
+```
+@Features("Component Tests - Management API")
+@Stories("Distribution Set Type Resource")
+```
+
+In addition all test method's name describes in **camel case** what the test is all about and has a long description aith Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
 
