@@ -20,7 +20,7 @@ import java.time.temporal.TemporalAccessor;
  * {@link #DURATION_FORMAT}.
  *
  */
-public class DurationHelper {
+public final class DurationHelper {
 
     private DurationHelper() {
         // utility class
