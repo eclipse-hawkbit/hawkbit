@@ -24,7 +24,16 @@
   		width:0px !important;
   	}
   	
-  	.v-context-menu, .v-context-menu .v-context-menu-item-basic{
+  	.v-context-menu .v-context-menu-item-basic{
+  		background-color: #feffff !important;
+  		border-radius: 4px;
+  		font-family : $app-font-family;
+  		font-size : $app-text-font-size;
+  		font-weight : normal;
+  		font-style : normal; 		
+  	}
+  	
+  	.v-context-menu{
   		background-color: #feffff !important;
   		border-radius: 4px;
   	}
@@ -33,6 +42,7 @@
   	 	@include valo-gradient($color: $hawkbit-primary-color);
 		background-color: $hawkbit-primary-color !important;
 		color: #e8eef3;
+		height: 30px;
 		text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
 	}
 	

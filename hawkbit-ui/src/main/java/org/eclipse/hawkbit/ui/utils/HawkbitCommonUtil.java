@@ -1370,6 +1370,24 @@ public final class HawkbitCommonUtil {
         }
         return finalVal;
     }
+    
+    /**
+     * Get the formatted string of status and target name.
+     * @param details
+     *          details of status and name
+     * @return
+     */
+    public static String getNameStatusFormattedString(Map<String, String> details) {
+        StringBuilder val = new StringBuilder();
+        String finalVal = null;
+        if (null != details && !details.isEmpty()) {
+            for (Entry<String, String> entry : details.entrySet()) {
+                val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
+            }
+            finalVal = val.substring(0, val.length() - 1);
+        }
+        return finalVal;
+    }
 
     /**
      * Returns a formatted string as needed by label custom render .This string

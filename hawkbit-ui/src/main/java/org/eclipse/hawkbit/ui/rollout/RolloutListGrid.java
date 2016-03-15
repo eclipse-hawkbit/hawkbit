@@ -2,8 +2,10 @@ package org.eclipse.hawkbit.ui.rollout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -40,6 +42,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.AbstractClientConnector;
@@ -113,7 +116,8 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         if (rolloutUIState.isShowRollOuts()) {
             final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
             final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
-            final LazyQueryContainer rolloutContainer = (LazyQueryContainer) getContainerDataSource();
+            final LazyQueryContainer rolloutContainer = ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
+                    .getWrappedContainer()));
             final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
             if (null != item) {
                 item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
@@ -121,10 +125,15 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
                         .setValue(totalTargetCountStatus);
                 final Long groupCount = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
                         .getValue();
-                if (null != rollout.getRolloutGroups() && groupCount != rollout.getRolloutGroups().size()) {
+                final int groupsCreated = rollout.getRolloutGroupsCreated();
+                if (groupsCreated != 0) {
+                    item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
+                            .setValue(Long.valueOf(groupsCreated));
+                } else if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
                     item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
                             .setValue(Long.valueOf(rollout.getRolloutGroups().size()));
                 }
+
             }
         }
     }
@@ -132,13 +141,14 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     @Override
     protected Container createContainer() {
         final BeanQueryFactory<RolloutBeanQuery> rolloutQf = new BeanQueryFactory<>(RolloutBeanQuery.class);
-        return new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf);
+        return new GeneratedPropertyContainer(new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_ID), rolloutQf));
     }
 
     @Override
     protected void addContainerProperties() {
-        final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) getContainerDataSource();
+        final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
+                .getWrappedContainer());
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
@@ -154,7 +164,7 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null, false,
                 false);
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, Integer.class, 0, false,
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, Long.class, 0, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS, String.class, "0", false,
                 false);
@@ -164,6 +174,7 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.ACTION, String.class,
                 FontAwesome.CIRCLE_O.getHtml(), false, false);
 
+        addGeneratedProperties();
     }
 
     @Override
@@ -229,6 +240,7 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         columnList.add(SPUILabelDefinitions.VAR_DESC);
         setColumnOrder(columnList.toArray());
         alignColumns();
+
     }
 
     private void alignColumns() {
@@ -253,17 +265,62 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         addStatusCoulmn();
         getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(event -> onClickOfActionBtn(event)));
         getColumn(SPUILabelDefinitions.VAR_NAME).setRenderer(new LinkRenderer(event -> onClickOfRolloutName(event)));
+
+    }
+
+    private void addGeneratedProperties() {
+        GeneratedPropertyContainer gpContainer = (GeneratedPropertyContainer) getContainerDataSource();
+        gpContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME, new PropertyValueGenerator<String>() {
+            private static final long serialVersionUID = -9203261132281441831L;
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                String statusVal = (String) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue().toString();
+                String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue().toString();
+                Map<String, String> nameStatusMap = new HashMap<>();
+                nameStatusMap.put("name", name);
+                nameStatusMap.put("status", statusVal);
+                return HawkbitCommonUtil.getNameStatusFormattedString(nameStatusMap);
+
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+
     }
 
     private void onClickOfRolloutName(RendererClickEvent event) {
-        rolloutUIState.setRolloutId((long) event.getItemId());
-        final String rolloutName = (String) getContainerDataSource().getItem(event.getItemId())
-                .getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        rolloutUIState.setRolloutName(rolloutName);
-        String ds = (String) getContainerDataSource().getItem(event.getItemId())
-                .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).getValue();
-        rolloutUIState.setRolloutDistributionSet(ds);
-        eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
+        final String rolloutName = getRolloutName((String) getContainerDataSource().getItem(event.getItemId())
+                .getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue());
+        final String status = (String) getContainerDataSource().getItem(event.getItemId())
+                .getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue().toString();
+        if (null != status && !status.equalsIgnoreCase("CREATING")) {
+            rolloutUIState.setRolloutId((long) event.getItemId());
+            rolloutUIState.setRolloutName(rolloutName);
+            String ds = (String) getContainerDataSource().getItem(event.getItemId())
+                    .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).getValue();
+            rolloutUIState.setRolloutDistributionSet(ds);
+            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
+        }
+    }
+
+    private String getRolloutName(final String text) {
+        String nameSequence = null;
+        String name = null;
+        if (null != text) {
+            final String[] strArray = text.split(",");
+            if (strArray.length > 0) {
+                nameSequence = strArray[0];
+                final String[] nameArray = nameSequence.split(":");
+                if (nameArray.length > 0) {
+                    name = nameArray[1];
+                }
+            }
+        }
+        return name;
     }
 
     private void onClickOfActionBtn(RendererClickEvent event) {
@@ -298,6 +355,35 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     }
 
     private void addDetailStatusColumn() {
+
+        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setConverter(new Converter<String, Long>() {
+
+            @Override
+            public Long convertToModel(String value, Class<? extends Long> targetType, Locale locale)
+                    throws com.vaadin.data.util.converter.Converter.ConversionException {
+                return null;
+            }
+
+            @Override
+            public String convertToPresentation(Long value, Class<? extends String> targetType, Locale locale)
+                    throws com.vaadin.data.util.converter.Converter.ConversionException {
+                if (value == 0) {
+                    return "";
+                }
+                return value.toString();
+            }
+
+            @Override
+            public Class<Long> getModelType() {
+                return Long.class;
+            }
+
+            @Override
+            public Class<String> getPresentationType() {
+                return String.class;
+            }
+        });
+
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(
                 new org.eclipse.hawkbit.ui.customrenderers.renderers.StringDistributionBarRenderer(),
                 new Converter<String, TotalTargetCountStatus>() {
@@ -306,14 +392,14 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
                     @Override
                     public TotalTargetCountStatus convertToModel(String value,
                             Class<? extends TotalTargetCountStatus> targetType, Locale locale)
-                                    throws com.vaadin.data.util.converter.Converter.ConversionException {
+                            throws com.vaadin.data.util.converter.Converter.ConversionException {
                         return null;
                     }
 
                     @Override
                     public String convertToPresentation(TotalTargetCountStatus value,
                             Class<? extends String> targetType, Locale locale)
-                                    throws com.vaadin.data.util.converter.Converter.ConversionException {
+                            throws com.vaadin.data.util.converter.Converter.ConversionException {
                         return HawkbitCommonUtil.getFormattedString(value.getStatusTotalCountMap());
                     }
 
@@ -410,7 +496,8 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     private void menuItemClicked(final ContextMenuItemClickEvent event) {
         final ContextMenuItem item = (ContextMenuItem) event.getSource();
         final ContextMenuData contextMenuData = (ContextMenuData) item.getData();
-        final Item row = getContainerDataSource().getItem(contextMenuData.getRolloutId());
+        final Item row = ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
+                .getWrappedContainer())).getItem(contextMenuData.getRolloutId());
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         if (contextMenuData.getAction() == ACTION.PAUSE) {
             rolloutManagement.pauseRollout(rolloutManagement.findRolloutById(contextMenuData.getRolloutId()));
@@ -431,7 +518,8 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
     }
 
     private void refreshTable() {
-        ((LazyQueryContainer) getContainerDataSource()).refresh();
+        ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource()).getWrappedContainer()))
+                .refresh();
     }
 
     public final class FontIconGenerator extends PropertyValueGenerator<String> {
@@ -493,10 +581,22 @@ public class RolloutListGrid extends AbstractSimpleGrid implements BrowserWindow
         } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
             return SPUILabelDefinitions.ACTION.toLowerCase();
         } else if (SPUILabelDefinitions.VAR_NAME.equals(cell.getPropertyId())) {
-            return cell.getProperty().getValue().toString();
+            return getNameToolTip(cell.getProperty().getValue().toString());
         } else {
             return null;
         }
+    }
+
+    private String getNameToolTip(final String text) {
+        String name = null;
+        String[] tempData = text.split(",");
+        for (String nameStatus : tempData) {
+            String[] nameWithStatusList = nameStatus.split(":");
+            if (nameWithStatusList[0].equalsIgnoreCase("name")) {
+                name = nameWithStatusList[1];
+            }
+        }
+        return name;
     }
 
 }
