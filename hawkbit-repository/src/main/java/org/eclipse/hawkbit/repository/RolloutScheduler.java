@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.RolloutProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;

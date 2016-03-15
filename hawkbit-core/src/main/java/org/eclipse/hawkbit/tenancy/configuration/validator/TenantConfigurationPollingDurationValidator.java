@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class TenantConfigurationPollingDurationValidator implements TenantConfigurationValidator {
 
-    private final DurationHelper durationHelper = new DurationHelper();
-
     private final Duration minDuration;
 
     private final Duration maxDuration;
@@ -36,8 +34,8 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
      */
     @Autowired
     public TenantConfigurationPollingDurationValidator(final ControllerPollProperties properties) {
-        minDuration = durationHelper.formattedStringToDuration(properties.getMinPollingTime());
-        maxDuration = durationHelper.formattedStringToDuration(properties.getMaxPollingTime());
+        minDuration = DurationHelper.formattedStringToDuration(properties.getMinPollingTime());
+        maxDuration = DurationHelper.formattedStringToDuration(properties.getMaxPollingTime());
     }
 
     @Override
@@ -47,18 +45,19 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
 
         final Duration tenantConfigurationValue;
         try {
-            tenantConfigurationValue = durationHelper.formattedStringToDuration(tenantConfigurationString);
+            tenantConfigurationValue = DurationHelper.formattedStringToDuration(tenantConfigurationString);
         } catch (final DateTimeParseException ex) {
             throw new TenantConfigurationValidatorException(
                     String.format("The given configuration value is expected as a string in the format %s.",
-                            DurationHelper.DURATION_FORMAT));
+                            DurationHelper.DURATION_FORMAT),
+                    ex);
         }
 
-        if (!durationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(tenantConfigurationValue)) {
+        if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(tenantConfigurationValue)) {
             throw new TenantConfigurationValidatorException(
                     String.format("The given configuration value is not in the allowed range from %s to %s.",
-                            durationHelper.durationToFormattedString(minDuration),
-                            durationHelper.durationToFormattedString(maxDuration)));
+                            DurationHelper.durationToFormattedString(minDuration),
+                            DurationHelper.durationToFormattedString(maxDuration)));
         }
     }
 

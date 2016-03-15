@@ -22,6 +22,10 @@ import java.time.temporal.TemporalAccessor;
  */
 public class DurationHelper {
 
+    private DurationHelper() {
+        // utility class
+    }
+
     /**
      * Format of the String expected in configuration file and in the database.
      */
@@ -35,7 +39,7 @@ public class DurationHelper {
      * @return String in the duration format, specified at
      *         {@link #DURATION_FORMAT}
      */
-    public String durationToFormattedString(final Duration duration) {
+    public static String durationToFormattedString(final Duration duration) {
         if (duration == null) {
             return null;
         }
@@ -52,7 +56,7 @@ public class DurationHelper {
      * @throws DateTimeParseException
      *             when String is in wrong format
      */
-    public Duration formattedStringToDuration(final String formattedDuration) throws DateTimeParseException {
+    public static Duration formattedStringToDuration(final String formattedDuration) {
         if (formattedDuration == null) {
             return null;
         }
@@ -72,11 +76,11 @@ public class DurationHelper {
      *            count of seconds
      * @return duration
      */
-    public Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
+    public static Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
     }
 
-    public DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
+    public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
         return new DurationRangeValidator(min, max);
     }
 
