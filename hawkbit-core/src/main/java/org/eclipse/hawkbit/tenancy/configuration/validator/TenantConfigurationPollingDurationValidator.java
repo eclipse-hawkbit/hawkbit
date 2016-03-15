@@ -49,8 +49,7 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
         } catch (final DateTimeParseException ex) {
             throw new TenantConfigurationValidatorException(
                     String.format("The given configuration value is expected as a string in the format %s.",
-                            DurationHelper.DURATION_FORMAT),
-                    ex);
+                            DurationHelper.DURATION_FORMAT));
         }
 
         if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(tenantConfigurationValue)) {
