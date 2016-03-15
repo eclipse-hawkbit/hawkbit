@@ -22,14 +22,28 @@ import java.time.temporal.TemporalAccessor;
  */
 public final class DurationHelper {
 
-    private DurationHelper() {
-        // utility class
+    public static class DurationRangeValidator {
+        final Duration min;
+        final Duration max;
+
+        private DurationRangeValidator(final Duration min, final Duration max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public boolean isWithinRange(final Duration duration) {
+            return duration.compareTo(min) > 0 && duration.compareTo(max) < 0;
+        }
     }
 
     /**
      * Format of the String expected in configuration file and in the database.
      */
     public static final String DURATION_FORMAT = "HH:mm:ss";
+
+    public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
+        return new DurationRangeValidator(min, max);
+    }
 
     /**
      * Converts a Duration into a formatted String
@@ -80,21 +94,7 @@ public final class DurationHelper {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
     }
 
-    public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
-        return new DurationRangeValidator(min, max);
-    }
-
-    public static class DurationRangeValidator {
-        final Duration min;
-        final Duration max;
-
-        private DurationRangeValidator(final Duration min, final Duration max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        public boolean isWithinRange(final Duration duration) {
-            return duration.compareTo(min) > 0 && duration.compareTo(max) < 0;
-        }
+    private DurationHelper() {
+        // utility class
     }
 }
