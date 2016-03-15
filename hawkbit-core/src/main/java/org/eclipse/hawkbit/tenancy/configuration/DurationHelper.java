@@ -22,6 +22,11 @@ import java.time.temporal.TemporalAccessor;
  */
 public final class DurationHelper {
 
+    /**
+     * Duration validation utility class. Checks if the requested duration is in
+     * the defined min/max range.
+     *
+     */
     public static class DurationRangeValidator {
         final Duration min;
         final Duration max;
@@ -41,6 +46,19 @@ public final class DurationHelper {
      */
     public static final String DURATION_FORMAT = "HH:mm:ss";
 
+    private DurationHelper() {
+        // utility class
+    }
+
+    /**
+     * Creates a {@link DurationRangeValidator}.
+     * 
+     * @param min
+     *            imum of range.
+     * @param max
+     *            imum of range.
+     * @return {@link DurationRangeValidator} range.
+     */
     public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
         return new DurationRangeValidator(min, max);
     }
@@ -94,7 +112,4 @@ public final class DurationHelper {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
     }
 
-    private DurationHelper() {
-        // utility class
-    }
 }
