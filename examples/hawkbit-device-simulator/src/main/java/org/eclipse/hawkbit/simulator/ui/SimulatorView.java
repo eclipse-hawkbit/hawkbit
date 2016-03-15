@@ -28,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.converter.Converter;
@@ -130,15 +128,9 @@ public class SimulatorView extends VerticalLayout implements View {
         responseComboBox.setItemIcon(ResponseStatus.ERROR, FontAwesome.EXCLAMATION_CIRCLE);
         responseComboBox.setNullSelectionAllowed(false);
         responseComboBox.setValue(ResponseStatus.SUCCESSFUL);
-        responseComboBox.addValueChangeListener(new ValueChangeListener() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId)
-                        .getItemProperty("responseStatus").setValue(event.getProperty().getValue()));
-            }
+        responseComboBox.addValueChangeListener(valueChangeEvent -> {
+            beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId).getItemProperty("responseStatus")
+                    .setValue(valueChangeEvent.getProperty().getValue()));
         });
 
         // add all components

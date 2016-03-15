@@ -65,27 +65,26 @@ public class GenerateDialog extends Window {
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
 
-        namePrefixTextField = createRequiredTextfield("name prefix", "dmfSimulated", FontAwesome.INFO, true,
+        namePrefixTextField = createRequiredTextfield("name prefix", "dmfSimulated", FontAwesome.INFO,
                 new NullValidator("Must be given", false));
 
-        amountTextField = createRequiredTextfield("amount", new ObjectProperty<Integer>(10), FontAwesome.GEAR, true,
+        amountTextField = createRequiredTextfield("amount", new ObjectProperty<Integer>(10), FontAwesome.GEAR,
                 new RangeValidator<Integer>("Must be between 1 and 30000", Integer.class, 1, 30000));
 
-        tenantTextField = createRequiredTextfield("tenant", "default", FontAwesome.USER, true,
+        tenantTextField = createRequiredTextfield("tenant", "default", FontAwesome.USER,
                 new NullValidator("Must be given", false));
 
         pollDelayTextField = createRequiredTextfield("poll delay (sec)", new ObjectProperty<Integer>(10),
-                FontAwesome.CLOCK_O, true,
-                new RangeValidator<Integer>("Must be between 1 and 60", Integer.class, 1, 60));
+                FontAwesome.CLOCK_O, new RangeValidator<Integer>("Must be between 1 and 60", Integer.class, 1, 60));
         pollDelayTextField.setVisible(false);
 
         pollUrlTextField = createRequiredTextfield("base poll URL endpoint", "http://localhost:8080",
-                FontAwesome.FLAG_O, true, new RegexpValidator(
+                FontAwesome.FLAG_O, new RegexpValidator(
                         "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "is not an URL"));
         pollUrlTextField.setColumns(50);
         pollUrlTextField.setVisible(false);
 
-        gatewayTokenTextField = createRequiredTextfield("gateway token", "", FontAwesome.FLAG_O, true, null);
+        gatewayTokenTextField = createRequiredTextfield("gateway token", "", FontAwesome.FLAG_O, null);
         gatewayTokenTextField.setColumns(50);
         gatewayTokenTextField.setVisible(false);
 
@@ -112,12 +111,9 @@ public class GenerateDialog extends Window {
     }
 
     private void checkValid() {
-        if (namePrefixTextField.isValid() && amountTextField.isValid() && tenantTextField.isValid()
-                && pollDelayTextField.isValid()) {
-            buttonOk.setEnabled(true);
-        } else {
-            buttonOk.setEnabled(false);
-        }
+        buttonOk.setEnabled(namePrefixTextField.isValid() && amountTextField.isValid() && tenantTextField.isValid()
+                && pollDelayTextField.isValid());
+
     }
 
     @Override
@@ -196,9 +192,10 @@ public class GenerateDialog extends Window {
         protocolGroup.setNullSelectionAllowed(false);
         protocolGroup.select(Protocol.DMF_AMQP);
         protocolGroup.addValueChangeListener(event -> {
-            pollDelayTextField.setVisible(!pollDelayTextField.isVisible());
-            pollUrlTextField.setVisible(!pollUrlTextField.isVisible());
-            gatewayTokenTextField.setVisible(!gatewayTokenTextField.isVisible());
+            final boolean directDeviceOptionSelected = event.getProperty().getValue().equals(Protocol.DDI_HTTP);
+            pollDelayTextField.setVisible(directDeviceOptionSelected);
+            pollUrlTextField.setVisible(directDeviceOptionSelected);
+            gatewayTokenTextField.setVisible(directDeviceOptionSelected);
         });
         return protocolGroup;
     }
@@ -226,23 +223,24 @@ public class GenerateDialog extends Window {
     }
 
     private TextField createRequiredTextfield(final String caption, final String value, final Resource icon,
-            final boolean required, final Validator validator) {
+            final Validator validator) {
         final TextField textField = new TextField(caption, value);
-        textField.setIcon(icon);
-        textField.setRequired(required);
-        textField.addValidator(validator);
-        return textField;
-
+        return addTextFieldValues(textField, icon, validator);
     }
 
     private TextField createRequiredTextfield(final String caption, final Property dataSource, final Resource icon,
-            final boolean required, final Validator validator) {
+            final Validator validator) {
         final TextField textField = new TextField(caption, dataSource);
-        textField.setIcon(icon);
-        textField.setRequired(required);
-        textField.addValidator(validator);
-        return textField;
+        return addTextFieldValues(textField, icon, validator);
+    }
 
+    private TextField addTextFieldValues(final TextField textField, final Resource icon, final Validator validator) {
+        textField.setIcon(icon);
+        textField.setRequired(true);
+        if (validator != null) {
+            textField.addValidator(validator);
+        }
+        return textField;
     }
 
 }
