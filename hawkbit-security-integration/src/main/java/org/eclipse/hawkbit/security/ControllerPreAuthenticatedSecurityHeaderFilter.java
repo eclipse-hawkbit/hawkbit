@@ -144,8 +144,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     private final class GetSecurityAuthorityNameTenantRunner implements TenantAware.TenantRunner<String> {
         @Override
         public String run() {
-            return tenantConfigurationManagement.getConfigurationValue(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue();
+            return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(
+                    TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue());
         }
     }
 }
