@@ -106,7 +106,7 @@ public class RolloutListGrid extends AbstractGrid {
     private transient SpPermissionChecker permissionChecker;
 
     private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
-    
+
     private final String name = "name";
 
     @Override
@@ -338,25 +338,28 @@ public class RolloutListGrid extends AbstractGrid {
 
     private void addGeneratedProperties() {
         GeneratedPropertyContainer generatedPropertyContainer = (GeneratedPropertyContainer) getContainerDataSource();
-        generatedPropertyContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME, new PropertyValueGenerator<String>() {
-            private static final long serialVersionUID = -9203261132281441831L;
+        generatedPropertyContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME,
+                new PropertyValueGenerator<String>() {
+                    private static final long serialVersionUID = -9203261132281441831L;
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                String statusValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue().toString();
-                String nameValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue().toString();
-                Map<String, String> nameStatusMap = new HashMap<>();
-                nameStatusMap.put(name, nameValue);
-                nameStatusMap.put("status", statusValue);
-                return HawkbitCommonUtil.getNameStatusFormattedString(nameStatusMap);
+                    @Override
+                    public String getValue(Item item, Object itemId, Object propertyId) {
+                        String statusValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue()
+                                .toString();
+                        String nameValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue()
+                                .toString();
+                        Map<String, String> nameStatusMap = new HashMap<>();
+                        nameStatusMap.put(name, nameValue);
+                        nameStatusMap.put("status", statusValue);
+                        return HawkbitCommonUtil.getNameStatusFormattedString(nameStatusMap);
 
-            }
+                    }
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
+                    @Override
+                    public Class<String> getType() {
+                        return String.class;
+                    }
+                });
 
     }
 
@@ -372,18 +375,23 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String getRolloutName(final String text) {
+        final String[] nameArray = getReformatData(text);
+        if (nameArray != null && nameArray.length > 0) {
+            return nameArray[1];
+        }
+        return "";
+    }
+
+    private String[] getReformatData(final String text) {
         String nameSequence;
         if (text != null) {
             final String[] strArray = text.split(",");
             if (strArray.length > 0) {
                 nameSequence = strArray[0];
-                final String[] nameArray = nameSequence.split(":");
-                if (nameArray.length > 0) {
-                   return nameArray[1];
-                }
+                return nameSequence.split(":");
             }
         }
-        return "";
+        return null;
     }
 
     private void onClickOfActionBtn(RendererClickEvent event) {
@@ -518,12 +526,9 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String getNameToolTip(final String text) {
-        String[] tempData = text.split(",");
-        for (String nameStatus : tempData) {
-            String[] nameWithStatusList = nameStatus.split(":");
-            if (name.equalsIgnoreCase(nameWithStatusList[0])) {
-                return nameWithStatusList[1];
-            }
+        String[] nameWithStatusList = getReformatData(text);
+        if (nameWithStatusList != null && name.equalsIgnoreCase(nameWithStatusList[0])) {
+            return nameWithStatusList[1];
         }
         return "";
     }
