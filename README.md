@@ -28,17 +28,17 @@ $ mvn clean install
 #### Start hawkBit example app
 [Example Application](examples/hawkbit-example-app)
 ```
-$ java –jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.jar
+$ java -jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.jar
 ```
 #### Start hawkBit device simulator
 [Device Simulator](examples/hawkbit-device-simulator)
 ```
-$ java –jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+$ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 #### Generate Getting Started data
 [Example Management API Client](examples/hawkbit-mgmt-api-client)
 ```
-$ java –jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#version#.jar
+$ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#version#.jar
 ```
 
 # Releases and Roadmap
