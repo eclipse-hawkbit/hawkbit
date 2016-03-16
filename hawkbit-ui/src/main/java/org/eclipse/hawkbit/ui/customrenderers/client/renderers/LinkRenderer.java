@@ -36,9 +36,9 @@ public class LinkRenderer extends ButtonRenderer {
          * checking target Status for applying button style. If target status is
          * not "CREATING", then the Rollout button is applying hyperlink style
          */
-        button.getElement().setAttribute("enabled",
-                targetStatus != null && "CREATING".equalsIgnoreCase(targetStatus) ? "false" : "true");
-        button.addStyleName(targetStatus != null && "CREATING".equalsIgnoreCase(targetStatus) ? getStyle("link") : "");
+        final boolean isStatusCreate = targetStatus != null && "CREATING".equalsIgnoreCase(targetStatus);
+        button.getElement().setAttribute("enabled", isStatusCreate ? "false" : "true");
+        button.addStyleName(isStatusCreate ? getStyle("link") : "");
     }
 
     private void applystyle(Button button) {

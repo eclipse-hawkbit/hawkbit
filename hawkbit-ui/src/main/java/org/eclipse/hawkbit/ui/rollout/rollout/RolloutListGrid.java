@@ -383,13 +383,12 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String[] getReformatData(final String text) {
-        String nameSequence;
-        if (text != null) {
-            final String[] strArray = text.split(",");
-            if (strArray.length > 0) {
-                nameSequence = strArray[0];
-                return nameSequence.split(":");
-            }
+        if (text == null) {
+            return null;
+        }
+        final String[] strArray = text.split(",");
+        if (strArray.length > 0) {
+            return strArray[0].split(":");
         }
         return null;
     }

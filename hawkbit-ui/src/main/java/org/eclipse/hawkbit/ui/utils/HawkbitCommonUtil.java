@@ -1351,25 +1351,7 @@ public final class HawkbitCommonUtil {
     private static Long getStatusCount(final String propertName, final Item item) {
         return (Long) item.getItemProperty(propertName).getValue();
     }
-
-    /**
-     * Get the formatted string of status and target count details.
-     * 
-     * @param details
-     *            details of status and count
-     * @return String
-     */
-    public static String getFormattedString(Map<Status, Long> details) {
-        StringBuilder val = new StringBuilder();
-        if (details == null || details.isEmpty()) {
-            return null;
-        }
-        for (Entry<Status, Long> entry : details.entrySet()) {
-            val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
-        }
-        return val.substring(0, val.length() - 1);
-    }
-
+    
     /**
      * Get the formatted string of status and target name.
      * 
