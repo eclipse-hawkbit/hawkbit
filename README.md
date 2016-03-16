@@ -22,6 +22,7 @@ We are not providing an off the shelf installation ready hawkBit update server. 
 #### Clone and build hawkBit
 ```
 $ git clone https://github.com/eclipse/hawkbit.git
+$ cd hawkbit
 $ mvn clean install
 ```
 #### Start hawkBit example app
