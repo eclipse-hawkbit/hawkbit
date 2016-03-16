@@ -106,6 +106,8 @@ public class RolloutListGrid extends AbstractGrid {
     private transient SpPermissionChecker permissionChecker;
 
     private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
+    
+    private final String name = "name";
 
     @Override
     @PostConstruct
@@ -147,8 +149,7 @@ public class RolloutListGrid extends AbstractGrid {
         }
         final Rollout rollout = rolloutManagement.findRolloutWithDetailedStatus(rolloutChangeEvent.getRolloutId());
         final TotalTargetCountStatus totalTargetCountStatus = rollout.getTotalTargetCountStatus();
-        final LazyQueryContainer rolloutContainer = ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
-                .getWrappedContainer()));
+        final LazyQueryContainer rolloutContainer = getLazyQueryContainer();
         final Item item = rolloutContainer.getItem(rolloutChangeEvent.getRolloutId());
         if (item == null) {
             return;
@@ -174,8 +175,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void addContainerProperties() {
-        final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
-                .getWrappedContainer());
+        final LazyQueryContainer rolloutGridContainer = getLazyQueryContainer();
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
@@ -337,17 +337,17 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void addGeneratedProperties() {
-        GeneratedPropertyContainer gpContainer = (GeneratedPropertyContainer) getContainerDataSource();
-        gpContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME, new PropertyValueGenerator<String>() {
+        GeneratedPropertyContainer generatedPropertyContainer = (GeneratedPropertyContainer) getContainerDataSource();
+        generatedPropertyContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME, new PropertyValueGenerator<String>() {
             private static final long serialVersionUID = -9203261132281441831L;
 
             @Override
             public String getValue(Item item, Object itemId, Object propertyId) {
-                String statusVal = (String) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue().toString();
-                String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue().toString();
+                String statusValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).getValue().toString();
+                String nameValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue().toString();
                 Map<String, String> nameStatusMap = new HashMap<>();
-                nameStatusMap.put("name", name);
-                nameStatusMap.put("status", statusVal);
+                nameStatusMap.put(name, nameValue);
+                nameStatusMap.put("status", statusValue);
                 return HawkbitCommonUtil.getNameStatusFormattedString(nameStatusMap);
 
             }
@@ -372,19 +372,18 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String getRolloutName(final String text) {
-        String nameSequence = null;
-        String name = null;
-        if (null != text) {
+        String nameSequence;
+        if (text != null) {
             final String[] strArray = text.split(",");
             if (strArray.length > 0) {
                 nameSequence = strArray[0];
                 final String[] nameArray = nameSequence.split(":");
                 if (nameArray.length > 0) {
-                    name = nameArray[1];
+                   return nameArray[1];
                 }
             }
         }
-        return name;
+        return "";
     }
 
     private void onClickOfActionBtn(RendererClickEvent event) {
@@ -449,8 +448,7 @@ public class RolloutListGrid extends AbstractGrid {
     private void menuItemClicked(final ContextMenuItemClickEvent event) {
         final ContextMenuItem item = (ContextMenuItem) event.getSource();
         final ContextMenuData contextMenuData = (ContextMenuData) item.getData();
-        final Item row = ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
-                .getWrappedContainer())).getItem(contextMenuData.getRolloutId());
+        final Item row = getLazyQueryContainer().getItem(contextMenuData.getRolloutId());
         final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         switch (contextMenuData.getAction()) {
         case PAUSE:
@@ -482,8 +480,7 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void refreshGrid() {
-        ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource()).getWrappedContainer()))
-                .refresh();
+        getLazyQueryContainer().refresh();
     }
 
     public final class FontIconGenerator extends PropertyValueGenerator<String> {
@@ -521,15 +518,18 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private String getNameToolTip(final String text) {
-        String name = null;
         String[] tempData = text.split(",");
         for (String nameStatus : tempData) {
             String[] nameWithStatusList = nameStatus.split(":");
-            if (nameWithStatusList[0].equalsIgnoreCase("name")) {
-                name = nameWithStatusList[1];
+            if (name.equalsIgnoreCase(nameWithStatusList[0])) {
+                return nameWithStatusList[1];
             }
         }
-        return name;
+        return "";
+    }
+
+    private LazyQueryContainer getLazyQueryContainer() {
+        return ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource()).getWrappedContainer()));
     }
 
     enum ACTION {

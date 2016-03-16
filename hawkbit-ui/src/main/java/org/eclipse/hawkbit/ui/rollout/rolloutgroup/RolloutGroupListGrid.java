@@ -87,6 +87,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
     private transient SpPermissionChecker permissionChecker;
 
     private transient Map<RolloutGroupStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutGroupStatus.class);
+    
+    private final String name = "name";
 
     @Override
     @PostConstruct
@@ -105,8 +107,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         if (RolloutEvent.SHOW_ROLLOUT_GROUPS != event) {
             return;
         }
-        ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource()).getWrappedContainer()))
-                .refresh();
+        getLazyQueryContainer().refresh();
     }
 
     /**
@@ -126,8 +127,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         }
         final RolloutGroup rolloutGroup = rolloutGroupManagement
                 .findRolloutGroupWithDetailedStatus(rolloutGroupChangeEvent.getRolloutGroupId());
-        final LazyQueryContainer rolloutContainer = ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
-                                                        .getWrappedContainer()));
+        final LazyQueryContainer rolloutContainer = getLazyQueryContainer();
         final Item item = rolloutContainer.getItem(rolloutGroup.getId());
         if (item == null) {
             return;
@@ -153,8 +153,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected void addContainerProperties() {
-        final LazyQueryContainer rolloutGroupGridContainer = (LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource())
-                                                                    .getWrappedContainer());
+        final LazyQueryContainer rolloutGroupGridContainer = getLazyQueryContainer();
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutGroupStatus.class, null,
@@ -190,9 +189,9 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
             @Override
             public String getValue(Item item, Object itemId, Object propertyId) {
-                String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue().toString();
+                String nameValue = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue().toString();
                 Map<String, String> nameStatusMap = new HashMap<>();
-                nameStatusMap.put("name", name);
+                nameStatusMap.put(name, nameValue);
                 return HawkbitCommonUtil.getNameStatusFormattedString(nameStatusMap);
 
             }
@@ -352,12 +351,11 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
     
     private String getNameToolTip(final String text) {
-        String name = null;
         String[] nameList = text.split(":");
-        if (nameList[0].equalsIgnoreCase("name")) {
-            name = nameList[1];
+        if (nameList[0].equalsIgnoreCase(name)) {
+            return nameList[1];
         }
-        return name;
+        return "";
     }
 
     private void alignColumns() {
@@ -374,6 +372,10 @@ public class RolloutGroupListGrid extends AbstractGrid {
                 return null;
             }
         });
+    }
+    
+    private LazyQueryContainer getLazyQueryContainer() {
+        return ((LazyQueryContainer) (((GeneratedPropertyContainer) getContainerDataSource()).getWrappedContainer()));
     }
 
     /**

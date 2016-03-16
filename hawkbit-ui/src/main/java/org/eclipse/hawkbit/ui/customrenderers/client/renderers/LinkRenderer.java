@@ -24,7 +24,7 @@ import com.vaadin.client.widget.grid.RendererCellReference;
 public class LinkRenderer extends ButtonRenderer {
     @Override
     public void render(RendererCellReference cell, String text, Button button) {
-        Map<String, String> nameStatusMap = formatNameStatusData(text);
+        Map<String, String> nameStatusMap = formatData(text);
         final String targetName = nameStatusMap.get("name");
         final String targetStatus = nameStatusMap.get("status");
         button.setText(targetName);
@@ -32,14 +32,13 @@ public class LinkRenderer extends ButtonRenderer {
         // this is to allow the button to disappear, if the text is null
         button.setVisible(targetName != null);
         button.getElement().setId(new StringBuilder("link").append(".").append(targetName).toString());
-
-        if (null != targetStatus && targetStatus.equalsIgnoreCase("CREATING")) {
-            button.getElement().setAttribute("enabled", "false");
-        } else {
-            button.getElement().setAttribute("enabled", "true");
-            button.addStyleName("link v-button-link");
-        }
-
+        /*
+         * checking target Status for applying button style. If target status is
+         * not "CREATING", then the Rollout button is applying hyperlink style
+         */
+        button.getElement().setAttribute("enabled",
+                targetStatus != null && "CREATING".equalsIgnoreCase(targetStatus) ? "false" : "true");
+        button.addStyleName(targetStatus != null && "CREATING".equalsIgnoreCase(targetStatus) ? getStyle("link") : "");
     }
 
     private void applystyle(Button button) {
@@ -49,15 +48,16 @@ public class LinkRenderer extends ButtonRenderer {
         button.addStyleName(getStyle("on-focus-no-border"));
     }
 
- private String getStyle(final String style) {
+    private String getStyle(final String style) {
         return new StringBuilder(style).append(" ").append(VButton.CLASSNAME).append("-").append(style).toString();
     }
-    private Map<String, String> formatNameStatusData(String input) {
+
+    private Map<String, String> formatData(String input) {
         Map<String, String> details = new HashMap<>();
         String[] tempData = input.split(",");
-        for (String statusWithCount : tempData) {
-            String[] statusWithCountList = statusWithCount.split(":");
-            details.put(statusWithCountList[0], statusWithCountList[1]);
+        for (String targetData : tempData) {
+            String[] targetDataList = targetData.split(":");
+            details.put(targetDataList[0], targetDataList[1]);
         }
         return details;
     }
