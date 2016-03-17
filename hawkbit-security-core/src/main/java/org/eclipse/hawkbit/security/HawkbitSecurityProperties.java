@@ -142,6 +142,11 @@ public class HawkbitSecurityProperties {
             this.maxAttributeEntriesPerTarget = maxAttributeEntriesPerTarget;
         }
 
+        /**
+         * Configuration for hawkBits DOS prevention filter. This is usually an
+         * infrastructure topic but might be useful in some cases.
+         *
+         */
         public static class Filter {
 
             /**

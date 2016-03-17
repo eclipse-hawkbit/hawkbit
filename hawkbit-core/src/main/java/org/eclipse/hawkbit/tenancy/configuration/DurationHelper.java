@@ -20,12 +20,48 @@ import java.time.temporal.TemporalAccessor;
  * {@link #DURATION_FORMAT}.
  *
  */
-public class DurationHelper {
+public final class DurationHelper {
+
+    /**
+     * Duration validation utility class. Checks if the requested duration is in
+     * the defined min/max range.
+     *
+     */
+    public static class DurationRangeValidator {
+        final Duration min;
+        final Duration max;
+
+        private DurationRangeValidator(final Duration min, final Duration max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public boolean isWithinRange(final Duration duration) {
+            return duration.compareTo(min) > 0 && duration.compareTo(max) < 0;
+        }
+    }
 
     /**
      * Format of the String expected in configuration file and in the database.
      */
     public static final String DURATION_FORMAT = "HH:mm:ss";
+
+    private DurationHelper() {
+        // utility class
+    }
+
+    /**
+     * Creates a {@link DurationRangeValidator}.
+     * 
+     * @param min
+     *            imum of range.
+     * @param max
+     *            imum of range.
+     * @return {@link DurationRangeValidator} range.
+     */
+    public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
+        return new DurationRangeValidator(min, max);
+    }
 
     /**
      * Converts a Duration into a formatted String
@@ -35,7 +71,7 @@ public class DurationHelper {
      * @return String in the duration format, specified at
      *         {@link #DURATION_FORMAT}
      */
-    public String durationToFormattedString(final Duration duration) {
+    public static String durationToFormattedString(final Duration duration) {
         if (duration == null) {
             return null;
         }
@@ -52,7 +88,7 @@ public class DurationHelper {
      * @throws DateTimeParseException
      *             when String is in wrong format
      */
-    public Duration formattedStringToDuration(final String formattedDuration) throws DateTimeParseException {
+    public static Duration formattedStringToDuration(final String formattedDuration) {
         if (formattedDuration == null) {
             return null;
         }
@@ -72,25 +108,8 @@ public class DurationHelper {
      *            count of seconds
      * @return duration
      */
-    public Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
+    public static Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
     }
 
-    public DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
-        return new DurationRangeValidator(min, max);
-    }
-
-    public static class DurationRangeValidator {
-        final Duration min;
-        final Duration max;
-
-        private DurationRangeValidator(final Duration min, final Duration max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        public boolean isWithinRange(final Duration duration) {
-            return duration.compareTo(min) > 0 && duration.compareTo(max) < 0;
-        }
-    }
 }

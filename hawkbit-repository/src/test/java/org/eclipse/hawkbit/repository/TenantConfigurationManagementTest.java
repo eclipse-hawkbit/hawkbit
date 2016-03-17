@@ -31,8 +31,6 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Tenant Configuration Management")
 public class TenantConfigurationManagementTest extends AbstractIntegrationTestWithMongoDB {
 
-    final DurationHelper durationHelper = new DurationHelper();
-
     @Test
     @Description("Tests that tenant specific configuration can be persisted and in case the tenant does not have specific configuration the default from environment is used instead.")
     public void storeTenantSpecificConfigurationAsString() {
@@ -167,8 +165,8 @@ public class TenantConfigurationManagementTest extends AbstractIntegrationTestWi
     public void storesTooSmallDurationAsPollingInterval() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
 
-        final String tooSmallDuration = durationHelper
-                .durationToFormattedString(durationHelper.getDurationByTimeValues(0, 0, 1));
+        final String tooSmallDuration = DurationHelper
+                .durationToFormattedString(DurationHelper.getDurationByTimeValues(0, 0, 1));
         tenantConfigurationManagement.addOrUpdateConfiguration(configKey, tooSmallDuration);
     }
 
@@ -177,15 +175,15 @@ public class TenantConfigurationManagementTest extends AbstractIntegrationTestWi
     public void storesCorrectDurationAsPollingInterval() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
 
-        final Duration duration = durationHelper.getDurationByTimeValues(1, 2, 0);
+        final Duration duration = DurationHelper.getDurationByTimeValues(1, 2, 0);
         assertThat(duration).isEqualTo(Duration.ofHours(1).plusMinutes(2));
 
         tenantConfigurationManagement.addOrUpdateConfiguration(configKey,
-                durationHelper.durationToFormattedString(duration));
+                DurationHelper.durationToFormattedString(duration));
 
         final String storedDurationString = tenantConfigurationManagement.getConfigurationValue(configKey, String.class)
                 .getValue();
-        assertThat(duration).isEqualTo(durationHelper.formattedStringToDuration(storedDurationString));
+        assertThat(duration).isEqualTo(DurationHelper.formattedStringToDuration(storedDurationString));
     }
 
     @Test
