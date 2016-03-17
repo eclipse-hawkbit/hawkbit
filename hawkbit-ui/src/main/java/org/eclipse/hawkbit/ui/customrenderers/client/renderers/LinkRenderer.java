@@ -66,7 +66,9 @@ public class LinkRenderer extends ButtonRenderer {
         String[] tempData = input.split(",");
         for (String targetData : tempData) {
             String[] targetDataList = targetData.split(":");
-            details.put(targetDataList[0], targetDataList[1]);
+            if(targetDataList!=null && targetDataList.length==2){
+                details.put(targetDataList[0], targetDataList[1]);
+            }    
         }
         return details;
     }
