@@ -302,13 +302,10 @@ public class DeploymentManagement {
                 .collect(Collectors.toMap(TargetWithActionType::getTargetId, Function.identity()));
 
         // split tIDs length into max entries in-statement because many database
-        // have constraint of
-        // max entries in in-statements e.g. Oracle with maximum 1000 elements,
-        // so we need to split
-        // the entries here and execute multiple statements
-        // we take the target only into account if the requested operation is no
-        // duplicate of a
-        // previous one
+        // have constraint of max entries in in-statements e.g. Oracle with
+        // maximum 1000 elements, so we need to split the entries here and
+        // execute multiple statements we take the target only into account if
+        // the requested operation is no duplicate of a previous one
         final List<Target> targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository
                         .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId())))
@@ -326,10 +323,9 @@ public class DeploymentManagement {
                 targets.stream().map(Target::getId).collect(Collectors.toList()), Constants.MAX_ENTRIES_IN_STATEMENT);
 
         // override all active actions and set them into canceling state, we
-        // need to remember which
-        // one we have been switched to canceling state because for targets
-        // which we have changed to
-        // canceling we don't want to publish the new action update event.
+        // need to remember which one we have been switched to canceling state
+        // because for targets which we have changed to canceling we don't want
+        // to publish the new action update event.
         final Set<Long> targetIdsCancellList = new HashSet<>();
         targetIds.forEach(ids -> targetIdsCancellList.addAll(overrideObsoleteUpdateActions(ids)));
 
@@ -349,27 +345,15 @@ public class DeploymentManagement {
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSet(set, System.currentTimeMillis(),
                 currentUser, tIds));
         targetIds.forEach(tIds -> targetInfoRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
+        final Map<String, Action> targetIdsToActions = actionRepository
+                .save(targets.stream().map(t -> createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup))
+                        .collect(Collectors.toList()))
+                .stream().collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
-        final Map<String, Action> targetIdsToActions = actionRepository.save(targets.stream().map(t -> {
-            final Action tAction = new Action();
-            final TargetWithActionType targetWithActionType = targetsWithActionMap.get(t.getControllerId());
-            tAction.setActionType(targetWithActionType.getActionType());
-            tAction.setForcedTime(targetWithActionType.getForceTime());
-            tAction.setActive(true);
-            tAction.setStatus(Status.RUNNING);
-            tAction.setTarget(t);
-            tAction.setDistributionSet(set);
-            tAction.setRollout(rollout);
-            tAction.setRolloutGroup(rolloutGroup);
-            return tAction;
-        }).collect(Collectors.toList())).stream()
-                .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
-
-        // create initial action status when action is created so we
-        // remember the initial
-        // running status because we will change the status of the action itself
-        // and with this action
-        // status we have a nicer action history.
+        // create initial action status when action is created so we remember
+        // the initial running status because we will change the status
+        // of the action itself and with this action status we have a nicer
+        // action history.
         targetIdsToActions.values().forEach(action -> {
             final ActionStatus actionStatus = new ActionStatus();
             actionStatus.setAction(action);
@@ -403,6 +387,21 @@ public class DeploymentManagement {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
                 .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
                         softwareModules));
+    }
+
+    private Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final Target target,
+            final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
+        final Action actionForTarget = new Action();
+        final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
+        actionForTarget.setActionType(targetWithActionType.getActionType());
+        actionForTarget.setForcedTime(targetWithActionType.getForceTime());
+        actionForTarget.setActive(true);
+        actionForTarget.setStatus(Status.RUNNING);
+        actionForTarget.setTarget(target);
+        actionForTarget.setDistributionSet(set);
+        actionForTarget.setRollout(rollout);
+        actionForTarget.setRolloutGroup(rolloutGroup);
+        return actionForTarget;
     }
 
     /**

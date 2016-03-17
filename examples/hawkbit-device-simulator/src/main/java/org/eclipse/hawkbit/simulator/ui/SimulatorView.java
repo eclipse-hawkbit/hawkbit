@@ -28,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.converter.Converter;
@@ -76,8 +74,8 @@ public class SimulatorView extends VerticalLayout implements View {
     private final Label caption = new Label("DMF/DDI Simulated Devices");
     private final HorizontalLayout toolbar = new HorizontalLayout();
     private final Grid grid = new Grid();
-    private final ComboBox responseComboBox = new ComboBox("", Lists.newArrayList(ResponseStatus.SUCCESSFUL,
-            ResponseStatus.ERROR));
+    private final ComboBox responseComboBox = new ComboBox("",
+            Lists.newArrayList(ResponseStatus.SUCCESSFUL, ResponseStatus.ERROR));
 
     private BeanContainer<String, AbstractSimulatedDevice> beanContainer;
 
@@ -97,6 +95,9 @@ public class SimulatorView extends VerticalLayout implements View {
 
         grid.setSizeFull();
         grid.setCellStyleGenerator(new CellStyleGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             public String getStyle(final CellReference cellReference) {
                 return cellReference.getPropertyId().equals("status") ? "centeralign" : null;
@@ -118,86 +119,8 @@ public class SimulatorView extends VerticalLayout implements View {
         grid.getColumn("swversion").setHeaderCaption("SW Version");
         grid.getColumn("responseStatus").setHeaderCaption("Response Update Status");
         grid.getColumn("progress").setRenderer(new ProgressBarRenderer());
-        grid.getColumn("protocol").setConverter(new Converter<String, Protocol>() {
-            @Override
-            public Protocol convertToModel(final String value, final Class<? extends Protocol> targetType,
-                    final Locale locale) {
-                return null;
-            }
-
-            @Override
-            public String convertToPresentation(final Protocol value, final Class<? extends String> targetType,
-                    final Locale locale) {
-                switch (value) {
-                case DDI_HTTP:
-                    return "DDI API (http)";
-                case DMF_AMQP:
-                    return "DMF API (amqp)";
-                default:
-                    return "unknown";
-                }
-            }
-
-            @Override
-            public Class<Protocol> getModelType() {
-                return Protocol.class;
-            }
-
-            @Override
-            public Class<String> getPresentationType() {
-                return String.class;
-            }
-        });
-        grid.getColumn("status").setRenderer(new HtmlRenderer(), new Converter<String, Status>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Status convertToModel(final String value, final Class<? extends Status> targetType,
-                    final Locale locale) {
-                return null;
-            }
-
-            @Override
-            public String convertToPresentation(final Status value, final Class<? extends String> targetType,
-                    final Locale locale) {
-                String style = null;
-                switch (value) {
-                case UNKNWON:
-                    style = "<span class=\"v-icon grayicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"gray\";\">&#x"
-                            + Integer.toHexString(FontAwesome.QUESTION_CIRCLE.getCodepoint()) + ";</span>";
-                    break;
-                case PEDNING:
-                    style = "<span class=\"v-icon yellowicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"yellow\";\">&#x" + Integer.toHexString(FontAwesome.REFRESH.getCodepoint())
-                            + ";</span>";
-                    break;
-                case FINISH:
-                    style = "<span class=\"v-icon greenicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"green\";\">&#x"
-                            + Integer.toHexString(FontAwesome.CHECK_CIRCLE.getCodepoint()) + ";</span>";
-                    break;
-                case ERROR:
-                    style = "<span class=\"v-icon redicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
-                            + ";\"color\":\"red\";\">&#x"
-                            + Integer.toHexString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()) + ";</span>";
-                    break;
-                default:
-                    throw new IllegalStateException("unknown value");
-                }
-                return style;
-            }
-
-            @Override
-            public Class<Status> getModelType() {
-                return Status.class;
-            }
-
-            @Override
-            public Class<String> getPresentationType() {
-                return String.class;
-            }
-        });
+        grid.getColumn("protocol").setConverter(createProtocolConverter());
+        grid.getColumn("status").setRenderer(new HtmlRenderer(), createStatusConverter());
         grid.removeColumn("tenant");
 
         // grid combobox
@@ -205,13 +128,9 @@ public class SimulatorView extends VerticalLayout implements View {
         responseComboBox.setItemIcon(ResponseStatus.ERROR, FontAwesome.EXCLAMATION_CIRCLE);
         responseComboBox.setNullSelectionAllowed(false);
         responseComboBox.setValue(ResponseStatus.SUCCESSFUL);
-        responseComboBox.addValueChangeListener(new ValueChangeListener() {
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                beanContainer.getItemIds().forEach(
-                        itemId -> beanContainer.getItem(itemId).getItemProperty("responseStatus")
-                                .setValue(event.getProperty().getValue()));
-            }
+        responseComboBox.addValueChangeListener(valueChangeEvent -> {
+            beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId).getItemProperty("responseStatus")
+                    .setValue(valueChangeEvent.getProperty().getValue()));
         });
 
         // add all components
@@ -338,4 +257,90 @@ public class SimulatorView extends VerticalLayout implements View {
             }
         }));
     }
+
+    private Converter<String, Protocol> createProtocolConverter() {
+
+        return new Converter<String, Protocol>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Protocol convertToModel(final String value, final Class<? extends Protocol> targetType,
+                    final Locale locale) {
+                return null;
+            }
+
+            @Override
+            public String convertToPresentation(final Protocol value, final Class<? extends String> targetType,
+                    final Locale locale) {
+                switch (value) {
+                case DDI_HTTP:
+                    return "DDI API (http)";
+                case DMF_AMQP:
+                    return "DMF API (amqp)";
+                default:
+                    return "unknown";
+                }
+            }
+
+            @Override
+            public Class<Protocol> getModelType() {
+                return Protocol.class;
+            }
+
+            @Override
+            public Class<String> getPresentationType() {
+                return String.class;
+            }
+        };
+
+    }
+
+    private Converter<String, Status> createStatusConverter() {
+        return new Converter<String, Status>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Status convertToModel(final String value, final Class<? extends Status> targetType,
+                    final Locale locale) {
+                return null;
+            }
+
+            @Override
+            public String convertToPresentation(final Status value, final Class<? extends String> targetType,
+                    final Locale locale) {
+                switch (value) {
+                case UNKNWON:
+                    return "<span class=\"v-icon grayicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                            + ";\"color\":\"gray\";\">&#x"
+                            + Integer.toHexString(FontAwesome.QUESTION_CIRCLE.getCodepoint()) + ";</span>";
+                case PEDNING:
+                    return "<span class=\"v-icon yellowicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                            + ";\"color\":\"yellow\";\">&#x" + Integer.toHexString(FontAwesome.REFRESH.getCodepoint())
+                            + ";</span>";
+                case FINISH:
+                    return "<span class=\"v-icon greenicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                            + ";\"color\":\"green\";\">&#x"
+                            + Integer.toHexString(FontAwesome.CHECK_CIRCLE.getCodepoint()) + ";</span>";
+                case ERROR:
+                    return "<span class=\"v-icon redicon\" style=\"font-family: " + FontAwesome.FONT_FAMILY
+                            + ";\"color\":\"red\";\">&#x"
+                            + Integer.toHexString(FontAwesome.EXCLAMATION_CIRCLE.getCodepoint()) + ";</span>";
+                default:
+                    throw new IllegalStateException("unknown value");
+                }
+            }
+
+            @Override
+            public Class<Status> getModelType() {
+                return Status.class;
+            }
+
+            @Override
+            public Class<String> getPresentationType() {
+                return String.class;
+            }
+        };
+    }
+
 }
