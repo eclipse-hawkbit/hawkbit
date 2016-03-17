@@ -1021,8 +1021,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     }
 
     private static class EventHandlerMock {
-        private final List<TargetAssignDistributionSetEvent> events = Collections
-                .synchronizedList(new LinkedList<TargetAssignDistributionSetEvent>());
+        private final List<TargetAssignDistributionSetEvent> events = Collections.synchronizedList(new LinkedList<>());
         private final CountDownLatch latch;
         private final int expectedNumberOfEvents;
 
@@ -1050,8 +1049,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     }
 
     private static class CancelEventHandlerMock {
-        private final List<CancelTargetAssignmentEvent> events = Collections
-                .synchronizedList(new LinkedList<CancelTargetAssignmentEvent>());
+        private final List<CancelTargetAssignmentEvent> events = Collections.synchronizedList(new LinkedList<>());
         private final CountDownLatch latch;
         private final int expectedNumberOfEvents;
 
