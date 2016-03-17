@@ -64,13 +64,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Artifact Download Resource")
 public class ArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
 
-    private static final String AUTH_ANOYM = "ROLE_CONTROLLER_ANONYMOUS";
-
     public ArtifactDownloadTest() {
         LOG = LoggerFactory.getLogger(ArtifactDownloadTest.class);
     }
 
-    private int downLoadProgress = 0;
+    private volatile int downLoadProgress = 0;
 
     @Autowired
     private EventBus eventBus;
@@ -364,7 +362,7 @@ public class ArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
         // create target
         Target target = new Target("4712");
         target = targetManagement.createTarget(target);
-        final List<Target> targets = new ArrayList();
+        final List<Target> targets = new ArrayList<>();
         targets.add(target);
 
         // create ds
