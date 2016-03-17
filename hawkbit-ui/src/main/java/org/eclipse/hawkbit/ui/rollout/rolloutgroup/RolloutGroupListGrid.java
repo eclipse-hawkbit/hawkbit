@@ -183,8 +183,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
     }
     
     private void addGeneratedProperties() {
-        GeneratedPropertyContainer gpContainer = (GeneratedPropertyContainer) getContainerDataSource();
-        gpContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME, new PropertyValueGenerator<String>() {
+        GeneratedPropertyContainer generatedPropertyContainer = (GeneratedPropertyContainer) getContainerDataSource();
+        generatedPropertyContainer.addGeneratedProperty(SPUILabelDefinitions.VAR_NAME, new PropertyValueGenerator<String>() {
             private static final long serialVersionUID = -9203261132281441831L;
 
             @Override

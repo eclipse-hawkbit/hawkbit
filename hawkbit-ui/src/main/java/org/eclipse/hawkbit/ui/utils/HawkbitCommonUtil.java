@@ -1351,7 +1351,7 @@ public final class HawkbitCommonUtil {
     private static Long getStatusCount(final String propertName, final Item item) {
         return (Long) item.getItemProperty(propertName).getValue();
     }
-    
+
     /**
      * Get the formatted string of status and target name.
      * 
@@ -1361,13 +1361,13 @@ public final class HawkbitCommonUtil {
      */
     public static String getNameStatusFormattedString(Map<String, String> details) {
         StringBuilder val = new StringBuilder();
-        if (details != null && !details.isEmpty()) {
-            for (Entry<String, String> entry : details.entrySet()) {
-                val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
-            }
-            return val.substring(0, val.length() - 1);
+        if (details == null || details.isEmpty()) {
+            return null;
         }
-        return "";
+        for (Entry<String, String> entry : details.entrySet()) {
+            val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
+        }
+        return val.substring(0, val.length() - 1);
     }
 
     /**

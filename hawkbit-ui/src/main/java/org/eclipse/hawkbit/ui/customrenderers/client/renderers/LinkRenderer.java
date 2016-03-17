@@ -24,6 +24,7 @@ import com.vaadin.client.widget.grid.RendererCellReference;
 public class LinkRenderer extends ButtonRenderer {
     @Override
     public void render(RendererCellReference cell, String text, Button button) {
+        final String creating = "CREATING";
         Map<String, String> nameStatusMap = formatData(text);
         final String targetName = nameStatusMap.get("name");
         final String targetStatus = nameStatusMap.get("status");
@@ -33,10 +34,10 @@ public class LinkRenderer extends ButtonRenderer {
         button.setVisible(targetName != null);
         button.getElement().setId(new StringBuilder("link").append(".").append(targetName).toString());
         /*
-         * checking target Status for applying button style. If target status is
+         * checking Rollout Status for applying button style. If Rollout status is
          * not "CREATING", then the Rollout button is applying hyperlink style
          */
-        final boolean isStatusCreate = targetStatus != null && "CREATING".equalsIgnoreCase(targetStatus);
+        final boolean isStatusCreate = targetStatus != null && creating.equalsIgnoreCase(targetStatus);
         button.getElement().setAttribute("enabled", isStatusCreate ? "false" : "true");
         button.addStyleName(isStatusCreate ? getStyle("link") : "");
     }
@@ -52,6 +53,14 @@ public class LinkRenderer extends ButtonRenderer {
         return new StringBuilder(style).append(" ").append(VButton.CLASSNAME).append("-").append(style).toString();
     }
 
+    /**
+     * Returns a Map with contains splitted values of Rollout name and status.
+     * 
+     * @param input
+     *        String value 
+     * @return
+     *        Map 
+     */
     private Map<String, String> formatData(String input) {
         Map<String, String> details = new HashMap<>();
         String[] tempData = input.split(",");
