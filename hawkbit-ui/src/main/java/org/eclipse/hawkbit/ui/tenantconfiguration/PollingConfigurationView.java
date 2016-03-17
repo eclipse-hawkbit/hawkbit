@@ -43,7 +43,7 @@ public class PollingConfigurationView extends BaseConfigurationView
     private I18N i18n;
 
     @Autowired
-    private ControllerPollProperties controllerPollProperties;
+    private transient ControllerPollProperties controllerPollProperties;
 
     @Autowired
     private transient TenantConfigurationManagement tenantConfigurationManagement;
@@ -59,31 +59,29 @@ public class PollingConfigurationView extends BaseConfigurationView
     private Duration tenantPollTime = null;
     private Duration tenantOverdueTime = null;
 
-    private final DurationHelper durationHelper = new DurationHelper();
-
     /**
      * Initialize Authentication Configuration layout.
      */
     @PostConstruct
     public void init() {
 
-        minDuration = durationHelper.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
-        maxDuration = durationHelper.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
-        globalPollTime = durationHelper.formattedStringToDuration(tenantConfigurationManagement
+        minDuration = DurationHelper.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
+        maxDuration = DurationHelper.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
+        globalPollTime = DurationHelper.formattedStringToDuration(tenantConfigurationManagement
                 .getGlobalConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class));
-        globalOverdueTime = durationHelper.formattedStringToDuration(tenantConfigurationManagement
+        globalOverdueTime = DurationHelper.formattedStringToDuration(tenantConfigurationManagement
                 .getGlobalConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class));
 
         final TenantConfigurationValue<String> pollTimeConfValue = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class);
         if (!pollTimeConfValue.isGlobal()) {
-            tenantPollTime = durationHelper.formattedStringToDuration(pollTimeConfValue.getValue());
+            tenantPollTime = DurationHelper.formattedStringToDuration(pollTimeConfValue.getValue());
         }
 
         final TenantConfigurationValue<String> overdueTimeConfValue = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class);
         if (!overdueTimeConfValue.isGlobal()) {
-            tenantOverdueTime = durationHelper.formattedStringToDuration(overdueTimeConfValue.getValue());
+            tenantOverdueTime = DurationHelper.formattedStringToDuration(overdueTimeConfValue.getValue());
         }
 
         final Panel rootPanel = new Panel();
@@ -133,7 +131,7 @@ public class PollingConfigurationView extends BaseConfigurationView
             tenantConfigurationManagement.deleteConfiguration(key);
         } else {
             tenantConfigurationManagement.addOrUpdateConfiguration(key,
-                    durationHelper.durationToFormattedString(duration));
+                    DurationHelper.durationToFormattedString(duration));
         }
     }
 

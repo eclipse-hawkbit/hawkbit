@@ -19,22 +19,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("hawkbit.server.ui")
 public class UiProperties {
 
-    private final Links links = new Links();
-    private final Login login = new Login();
-    private final Demo demo = new Demo();
-
-    public Login getLogin() {
-        return login;
-    }
-
-    public Links getLinks() {
-        return links;
-    }
-
-    public Demo getDemo() {
-        return demo;
-    }
-
     /**
      * Demo account login information.
      *
@@ -55,54 +39,37 @@ public class UiProperties {
          */
         private String password = "";
 
-        public String getTenant() {
-            return tenant;
+        public String getPassword() {
+            return password;
         }
 
-        public void setTenant(final String tenant) {
-            this.tenant = tenant;
+        public String getTenant() {
+            return tenant;
         }
 
         public String getUser() {
             return user;
         }
 
-        public void setUser(final String user) {
-            this.user = user;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
         public void setPassword(final String password) {
             this.password = password;
         }
 
-    }
+        public void setTenant(final String tenant) {
+            this.tenant = tenant;
+        }
 
+        public void setUser(final String user) {
+            this.user = user;
+        }
+
+    }
     /**
      * Links to potentially other systems (e.g. support, user management,
      * documentation etc.).
      *
      */
     public static class Links {
-        private final Documentation documentation = new Documentation();
-
-        /**
-         * Link to product support.
-         */
-        private String support = "";
-
-        /**
-         * Link to request a system account, access.
-         */
-        private String requestAccount = "";
-
-        public Documentation getDocumentation() {
-            return documentation;
-        }
-
         /**
          * Configuration of UI documentation links.
          *
@@ -152,91 +119,107 @@ public class UiProperties {
                 return deploymentView;
             }
 
-            public void setDeploymentView(final String deploymentView) {
-                this.deploymentView = deploymentView;
-            }
-
             public String getDistributionView() {
                 return distributionView;
-            }
-
-            public void setDistributionView(final String distributionView) {
-                this.distributionView = distributionView;
-            }
-
-            public String getUploadView() {
-                return uploadView;
-            }
-
-            public void setUploadView(final String uploadView) {
-                this.uploadView = uploadView;
-            }
-
-            public String getSystemConfigurationView() {
-                return systemConfigurationView;
-            }
-
-            public void setSystemConfigurationView(final String systemConfigurationView) {
-                this.systemConfigurationView = systemConfigurationView;
-            }
-
-            public String getSecurity() {
-                return security;
-            }
-
-            public void setSecurity(final String security) {
-                this.security = security;
-            }
-
-            public String getTargetfilterView() {
-                return targetfilterView;
-            }
-
-            public void setTargetfilterView(final String targetfilterView) {
-                this.targetfilterView = targetfilterView;
             }
 
             public String getRolloutView() {
                 return rolloutView;
             }
 
-            public void setRolloutView(final String rolloutView) {
-                this.rolloutView = rolloutView;
-            }
-
             public String getRoot() {
                 return root;
+            }
+
+            public String getSecurity() {
+                return security;
+            }
+
+            public String getSystemConfigurationView() {
+                return systemConfigurationView;
+            }
+
+            public String getTargetfilterView() {
+                return targetfilterView;
+            }
+
+            public String getUploadView() {
+                return uploadView;
+            }
+
+            public void setDeploymentView(final String deploymentView) {
+                this.deploymentView = deploymentView;
+            }
+
+            public void setDistributionView(final String distributionView) {
+                this.distributionView = distributionView;
+            }
+
+            public void setRolloutView(final String rolloutView) {
+                this.rolloutView = rolloutView;
             }
 
             public void setRoot(final String root) {
                 this.root = root;
             }
 
+            public void setSecurity(final String security) {
+                this.security = security;
+            }
+
+            public void setSystemConfigurationView(final String systemConfigurationView) {
+                this.systemConfigurationView = systemConfigurationView;
+            }
+
+            public void setTargetfilterView(final String targetfilterView) {
+                this.targetfilterView = targetfilterView;
+            }
+
+            public void setUploadView(final String uploadView) {
+                this.uploadView = uploadView;
+            }
+
         }
+
+        private final Documentation documentation = new Documentation();
+
+        /**
+         * Link to product support.
+         */
+        private String support = "";
+
+        /**
+         * Link to request a system account, access.
+         */
+        private String requestAccount = "";
 
         /**
          * Link to user management.
          */
         private String userManagement = "";
 
-        public String getSupport() {
-            return support;
-        }
-
-        public void setSupport(final String support) {
-            this.support = support;
+        public Documentation getDocumentation() {
+            return documentation;
         }
 
         public String getRequestAccount() {
             return requestAccount;
         }
 
-        public void setRequestAccount(final String requestAccount) {
-            this.requestAccount = requestAccount;
+        public String getSupport() {
+            return support;
         }
 
         public String getUserManagement() {
             return userManagement;
+        }
+
+        public void setRequestAccount(final String requestAccount) {
+            this.requestAccount = requestAccount;
+        }
+
+        public void setSupport(final String support) {
+            this.support = support;
         }
 
         public void setUserManagement(final String userManagement) {
@@ -244,18 +227,11 @@ public class UiProperties {
         }
 
     }
-
     /**
      * Configuration of login view.
      *
      */
     public static class Login {
-
-        private final Cookie cookie = new Cookie();
-
-        public Cookie getCookie() {
-            return cookie;
-        }
 
         /**
          * Cookie configuration for login credential cookie.
@@ -275,6 +251,30 @@ public class UiProperties {
                 this.secure = secure;
             }
         }
+
+        private final Cookie cookie = new Cookie();
+
+        public Cookie getCookie() {
+            return cookie;
+        }
+    }
+
+    private final Links links = new Links();
+
+    private final Login login = new Login();
+
+    private final Demo demo = new Demo();
+
+    public Demo getDemo() {
+        return demo;
+    }
+
+    public Links getLinks() {
+        return links;
+    }
+
+    public Login getLogin() {
+        return login;
     }
 
 }

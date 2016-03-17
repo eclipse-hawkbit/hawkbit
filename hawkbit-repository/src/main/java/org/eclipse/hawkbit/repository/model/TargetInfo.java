@@ -122,9 +122,6 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
 
-    @Transient
-    private final DurationHelper durationHelper = new DurationHelper();
-
     /**
      * Constructor for {@link TargetStatus}.
      * 
@@ -324,9 +321,9 @@ public class TargetInfo implements Persistable<Long>, Serializable {
             return null;
         }
 
-        final Duration pollTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement.getInstance()
+        final Duration pollTime = DurationHelper.formattedStringToDuration(TenantConfigurationManagement.getInstance()
                 .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
-        final Duration overdueTime = durationHelper.formattedStringToDuration(TenantConfigurationManagement
+        final Duration overdueTime = DurationHelper.formattedStringToDuration(TenantConfigurationManagement
                 .getInstance().getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
                 .getValue());
         final LocalDateTime currentDate = LocalDateTime.now();
