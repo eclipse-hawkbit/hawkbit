@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -69,9 +69,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Autowired
     private ManagementUIState managementUIState;
-
-    @Autowired
-    private transient TagManagement tagMgmtService;
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
@@ -139,10 +136,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
-        final TargetTag newTagClickedObj = tagMgmtService.findTargetTagById(buttonId);
-        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null && managementUIState
-                .getTargetTableFilters().getClickedTargetTags().contains(newTagClickedObj.getName());
+    protected boolean isClickedByDefault(final String tagName) {
+        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null
+                && managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName);
     }
 
     @Override

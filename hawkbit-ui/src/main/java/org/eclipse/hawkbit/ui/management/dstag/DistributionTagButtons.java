@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PreDestroy;
@@ -16,7 +17,6 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -57,9 +57,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Autowired
     private DistributionTagDropEvent spDistTagDropEvent;
-
-    @Autowired
-    private transient TagManagement tagMgmtService;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -121,10 +118,9 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
-        final DistributionSetTag dsTagObject = tagMgmtService.findDistributionSetTagById(buttonId);
+    protected boolean isClickedByDefault(final String tagName) {
         return null != managementUIState.getDistributionTableFilters().getDistSetTags()
-                && managementUIState.getDistributionTableFilters().getDistSetTags().contains(dsTagObject.getName());
+                && managementUIState.getDistributionTableFilters().getDistSetTags().contains(tagName);
     }
 
     @Override

@@ -79,10 +79,9 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
-
+    protected boolean isClickedByDefault(final String typeName) {
         return manageDistUIState.getManageDistFilters().getClickedDistSetType() != null
-                && manageDistUIState.getManageDistFilters().getClickedDistSetType().getId().equals(buttonId);
+                && manageDistUIState.getManageDistFilters().getClickedDistSetType().getName().equals(typeName);
     }
 
     @Override
