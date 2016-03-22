@@ -63,7 +63,12 @@ public enum TenantConfigurationKey {
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
-    POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null, TenantConfigurationPollingDurationValidator.class);
+    POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null, TenantConfigurationPollingDurationValidator.class),
+
+    /**
+     * boolean value {@code true} {@code false}.
+     */
+    ANONYMOUS_DOWNLOAD_MODE_ENABLED("anonymous.download.enabled", "hawkbit.server.download.anonymous.enabled", Boolean.class, Boolean.FALSE.toString(), TenantConfigurationBooleanValidator.class);
 
     private final String keyName;
     private final String defaultKeyName;
