@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication.Anonymous;
 import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -80,8 +81,14 @@ public class AmqpControllerAuthenticationTest {
 
         final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
         final Rp rp = mock(Rp.class);
+        final org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication ddiAuthentication = mock(
+                org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication.class);
+        final Anonymous anonymous = mock(Anonymous.class);
         when(secruityProperties.getRp()).thenReturn(rp);
         when(rp.getSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
+        when(secruityProperties.getAuthentication()).thenReturn(ddiAuthentication);
+        when(ddiAuthentication.getAnonymous()).thenReturn(anonymous);
+        when(anonymous.isEnabled()).thenReturn(false);
         authenticationManager.setSecruityProperties(secruityProperties);
 
         tenantConfigurationManagement = mock(TenantConfigurationManagement.class);

@@ -404,7 +404,7 @@ public class ArtifactManagement {
      *             if file could not be found in store
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
+            + SpringEvalExpressions.HAS_CONTROLLER_DOWNLOAD)
     public DbArtifact loadLocalArtifactBinary(@NotNull final LocalArtifact artifact) {
         final DbArtifact result = artifactRepository.getArtifactBySha1(artifact.getGridFsFileName());
         if (result == null) {

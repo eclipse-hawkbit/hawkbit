@@ -103,7 +103,7 @@ public class TenantSecurityToken {
         @JsonProperty(required = false)
         private String filename;
         @JsonProperty(required = false)
-        private Long artifactId;
+        private SoftwareModuleFilenameResource softwareModuleFilenameResource;
 
         public String getSha1() {
             return sha1;
@@ -121,12 +121,13 @@ public class TenantSecurityToken {
             this.filename = filename;
         }
 
-        public Long getArtifactId() {
-            return artifactId;
+        public SoftwareModuleFilenameResource getSoftwareModuleFilenameResource() {
+            return softwareModuleFilenameResource;
         }
 
-        public void setArtifactId(final Long artifactId) {
-            this.artifactId = artifactId;
+        public void setSoftwareModuleFilenameResource(
+                final SoftwareModuleFilenameResource softwareModuleFilenameResource) {
+            this.softwareModuleFilenameResource = softwareModuleFilenameResource;
         }
 
         /**
@@ -156,21 +157,62 @@ public class TenantSecurityToken {
         }
 
         /**
-         * factory method to create a file resource for an artifactId lookup.
+         * factory method to create a file resource for an softwaremodule +
+         * filename lookup, because an filename is not globally unique but
+         * within a softwaremodule.
          * 
-         * @param artifactId
-         *            the artifactId of the file to obtain
+         * @param softwareModuleId
+         *            the ID of the software module which contains the artifact
+         * @param filename
+         *            the name of file to obtain within the software module
          * @return the {@link FileResource} with artifactId set
          */
-        public static FileResource artifactId(final Long artifactId) {
+        public static FileResource softwareModuleFilename(final Long softwareModuleId, final String filename) {
             final FileResource resource = new FileResource();
-            resource.artifactId = artifactId;
+            resource.softwareModuleFilenameResource = new SoftwareModuleFilenameResource(softwareModuleId, filename);
             return resource;
         }
 
         @Override
         public String toString() {
             return "FileResource [sha1=" + sha1 + ", filename=" + filename + "]";
+        }
+
+        /**
+         * Inner class which holds the pointer to an artifact based on the
+         * softwaremoduleId and the filename.
+         */
+        @JsonInclude(Include.NON_NULL)
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class SoftwareModuleFilenameResource {
+            @JsonProperty(required = false)
+            private final Long softwareModuleId;
+            @JsonProperty(required = false)
+            private final String filename;
+
+            /**
+             * Constructor.
+             * 
+             * @param softwareModuleId
+             *            the ID of the softwaremodule
+             * @param filename
+             *            the name of the file of the artifact within the
+             *            softwaremodule
+             */
+            @JsonCreator
+            public SoftwareModuleFilenameResource(@JsonProperty("softwareModuleId") final Long softwareModuleId,
+                    @JsonProperty("filename") final String filename) {
+                this.softwareModuleId = softwareModuleId;
+                this.filename = filename;
+            }
+
+            public Long getSoftwareModuleId() {
+                return softwareModuleId;
+            }
+
+            public String getFilename() {
+                return filename;
+            }
         }
     }
 }

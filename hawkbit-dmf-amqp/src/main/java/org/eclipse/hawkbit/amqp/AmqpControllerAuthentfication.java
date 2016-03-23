@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousDownload;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -90,6 +92,11 @@ public class AmqpControllerAuthentfication {
                 tenantConfigurationManagement, controllerManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityTokenFilter);
 
+        final ControllerPreAuthenticatedAnonymousDownload anonymousDownloadFilter = new ControllerPreAuthenticatedAnonymousDownload(
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
+        filterChain.add(anonymousDownloadFilter);
+
+        filterChain.add(new ControllerPreAuthenticatedAnonymousFilter(ddiSecruityProperties));
         filterChain.add(new CoapAnonymousPreAuthenticatedFilter());
     }
 

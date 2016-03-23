@@ -27,9 +27,9 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
+import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
-import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -158,8 +158,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private Message handleAuthentifiactionMessage(final Message message) {
         final DownloadResponse authentificationResponse = new DownloadResponse();
         final MessageProperties messageProperties = message.getMessageProperties();
-        final TenantSecurityToken secruityToken = convertMessage(message,
-                TenantSecurityToken.class);
+        final TenantSecurityToken secruityToken = convertMessage(message, TenantSecurityToken.class);
         final FileResource fileResource = secruityToken.getFileResource();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
@@ -221,12 +220,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         } else if (fileResource.getFilename() != null) {
             localArtifact = artifactManagement.findLocalArtifactByFilename(fileResource.getFilename()).stream()
                     .findFirst().orElse(null);
-        } else if (fileResource.getArtifactId() != null) {
-            final org.eclipse.hawkbit.repository.model.Artifact artifact = artifactManagement
-                    .findArtifact(fileResource.getArtifactId());
-            if (artifact instanceof LocalArtifact) {
-                localArtifact = (LocalArtifact) artifact;
-            }
+        } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
+            localArtifact = artifactManagement
+                    .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),
+                            fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId())
+                    .stream().findFirst().orElse(null);
         }
         return localArtifact;
     }

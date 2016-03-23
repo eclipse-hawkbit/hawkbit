@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.FilterChain;
@@ -16,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
@@ -23,8 +26,11 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.AntPathMatcher;
 
 import com.google.common.collect.Iterators;
@@ -80,14 +86,6 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         pathExtractor = new AntPathMatcher();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.security.web.authentication.preauth.
-     * AbstractPreAuthenticatedProcessingFilter
-     * #doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse,
-     * javax.servlet.FilterChain)
-     */
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -112,6 +110,18 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
     }
 
     protected abstract PreAuthenficationFilter createControllerAuthenticationFilter();
+
+    @Override
+    protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response,
+            final Authentication authResult) {
+        final Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.addAll(authResult.getAuthorities());
+        authorities.addAll(abstractControllerAuthenticationFilter.getSuccessfulAuthenticationAuthorities());
+        final PreAuthenticatedAuthenticationToken authTokenWithGrantedAuthorities = new PreAuthenticatedAuthenticationToken(
+                authResult.getPrincipal(), authResult.getCredentials(), authorities);
+        authTokenWithGrantedAuthorities.setDetails(authResult.getDetails());
+        super.successfulAuthentication(request, response, authTokenWithGrantedAuthorities);
+    }
 
     /**
      * Extracts tenant and controllerId from the request URI as path variables.

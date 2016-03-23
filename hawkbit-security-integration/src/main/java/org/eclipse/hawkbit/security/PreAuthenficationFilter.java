@@ -8,7 +8,12 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Interface for Pre Authenfication.
@@ -44,5 +49,17 @@ public interface PreAuthenficationFilter {
      * @return the extracted tenant and controller id
      */
     HeaderAuthentication getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
+
+    /**
+     * Allows to add additional authorities to the successful authenticated
+     * token.
+     * 
+     * @return the authorities granted to the principal, or an empty collection
+     *         if the token has not been authenticated. Never null.
+     * @see Authentication#getAuthorities()
+     */
+    default Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
+        return Collections.emptyList();
+    };
 
 }
