@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PreDestroy;

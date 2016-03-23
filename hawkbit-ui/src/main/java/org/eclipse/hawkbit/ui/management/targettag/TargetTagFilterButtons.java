@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
