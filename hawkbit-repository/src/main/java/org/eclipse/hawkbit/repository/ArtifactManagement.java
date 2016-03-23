@@ -321,7 +321,8 @@ public class ArtifactManagement {
         }
 
         boolean artifactIsOnlyUsedByOneSoftwareModule = true;
-        for (LocalArtifact lArtifact : localArtifactRepository.findByGridFsFileName(existing.getGridFsFileName())) {
+        for (final LocalArtifact lArtifact : localArtifactRepository
+                .findByGridFsFileName(existing.getGridFsFileName())) {
             if (!lArtifact.getSoftwareModule().isDeleted()
                     && lArtifact.getSoftwareModule().getId() != existing.getSoftwareModule().getId()) {
                 artifactIsOnlyUsedByOneSoftwareModule = false;

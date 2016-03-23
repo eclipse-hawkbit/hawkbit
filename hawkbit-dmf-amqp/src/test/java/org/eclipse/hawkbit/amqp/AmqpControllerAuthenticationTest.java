@@ -19,7 +19,8 @@ import static org.mockito.Mockito.when;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -105,7 +106,8 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication manager without principal")
     public void testAuthenticationeBadCredantialsWithoutPricipal() {
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
+                FileResource.sha1("12345"));
         try {
             authenticationManager.doAuthenticate(securityToken);
             fail("BadCredentialsException was excepeted since principal was missing");
@@ -118,11 +120,12 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication manager without wrong credential")
     public void testAuthenticationBadCredantialsWithWrongCredential() {
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
+                FileResource.sha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
+        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
         try {
             authenticationManager.doAuthenticate(securityToken);
             fail("BadCredentialsException was excepeted due to wrong credential");
@@ -135,11 +138,12 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication successfull")
     public void testSuccessfullAuthentication() {
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
+                FileResource.sha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLLER_ID);
+        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLLER_ID);
         final Authentication authentication = authenticationManager.doAuthenticate(securityToken);
         assertThat(authentication).isNotNull();
     }
@@ -149,7 +153,8 @@ public class AmqpControllerAuthenticationTest {
     public void testAuthenticationMessageBadCredantialsWithoutPricipal() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
 
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
+                FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -167,11 +172,12 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message without wrong credential")
     public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
+                FileResource.sha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
+        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -189,11 +195,12 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication message successfull")
     public void testSuccessfullMessageAuthentication() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, CONTROLLLER_ID, "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
+                FileResource.sha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        securityToken.getHeaders().put(TenantSecruityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLLER_ID);
+        securityToken.getHeaders().put(TenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 

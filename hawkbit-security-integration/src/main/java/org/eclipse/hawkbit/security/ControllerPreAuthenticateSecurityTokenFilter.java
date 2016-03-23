@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -67,8 +67,8 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecruityToken secruityToken) {
-        final String authHeader = secruityToken.getHeader(TenantSecruityToken.AUTHORIZATION_HEADER);
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+        final String authHeader = secruityToken.getHeader(TenantSecurityToken.AUTHORIZATION_HEADER);
         if ((authHeader != null) && authHeader.startsWith(TARGET_SECURITY_TOKEN_AUTH_SCHEME)) {
             LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
                     TARGET_SECURITY_TOKEN_AUTH_SCHEME);
@@ -81,7 +81,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecruityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
         final String securityToken = tenantAware.runAsTenant(secruityToken.getTenant(),
                 new GetSecurityTokenTenantRunner(secruityToken.getTenant(), secruityToken.getControllerId()));
         return new HeaderAuthentication(secruityToken.getControllerId(), securityToken);

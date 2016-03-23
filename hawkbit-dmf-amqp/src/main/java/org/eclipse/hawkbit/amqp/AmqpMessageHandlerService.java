@@ -27,8 +27,9 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.Artifact;
 import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -157,25 +158,29 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private Message handleAuthentifiactionMessage(final Message message) {
         final DownloadResponse authentificationResponse = new DownloadResponse();
         final MessageProperties messageProperties = message.getMessageProperties();
-        final TenantSecruityToken secruityToken = convertMessage(message, TenantSecruityToken.class);
-        final String sha1 = secruityToken.getSha1();
+        final TenantSecurityToken secruityToken = convertMessage(message,
+                TenantSecurityToken.class);
+        final FileResource fileResource = secruityToken.getFileResource();
         try {
             SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
-            final LocalArtifact localArtifact = artifactManagement
-                    .findFirstLocalArtifactsBySHA1(secruityToken.getSha1());
+
+            final LocalArtifact localArtifact = findLocalArtifactByFileResource(fileResource);
+
             if (localArtifact == null) {
                 throw new EntityNotFoundException();
             }
 
             // check action for this download purposes, the method will throw an
             // EntityNotFoundException in case the controller is not allowed to
-            // download this file
-            // because it's not assigned to an action and not assigned to this
-            // controller.
-            final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(
-                    secruityToken.getControllerId(), localArtifact.getSoftwareModule());
-            LOG.info("Found action for download authentication request action: {}, sha1: {}", action,
-                    secruityToken.getSha1());
+            // download this file because it's not assigned to an action and not
+            // assigned to this controller. Otherwise no controllerId is set =
+            // anonymous download
+            if (secruityToken.getControllerId() != null) {
+                final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(
+                        secruityToken.getControllerId(), localArtifact.getSoftwareModule());
+                LOG.info("Found action for download authentication request action: {}, resource: {}", action,
+                        secruityToken.getFileResource());
+            }
 
             final Artifact artifact = convertDbArtifact(artifactManagement.loadLocalArtifactBinary(localArtifact));
             if (artifact == null) {
@@ -183,7 +188,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             }
             authentificationResponse.setArtifact(artifact);
             final String downloadId = UUID.randomUUID().toString();
-            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1, sha1);
+            // SHA1 key is set, download by SHA1
+            final DownloadArtifactCache downloadCache = new DownloadArtifactCache(DownloadType.BY_SHA1,
+                    localArtifact.getSha1Hash());
             cache.put(downloadId, downloadCache);
             authentificationResponse
                     .setDownloadUrl(UriComponentsBuilder.fromUri(hostnameResolver.resolveHostname().toURI())
@@ -198,13 +205,30 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             authentificationResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             authentificationResponse.setMessage("Building download URI failed");
         } catch (final EntityNotFoundException e) {
-            final String errorMessage = "Artifact with sha1 " + sha1 + "not found ";
+            final String errorMessage = "Artifact for resource " + fileResource + "not found ";
             LOG.warn(errorMessage, e);
             authentificationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
             authentificationResponse.setMessage(errorMessage);
         }
 
         return getMessageConverter().toMessage(authentificationResponse, messageProperties);
+    }
+
+    private LocalArtifact findLocalArtifactByFileResource(final FileResource fileResource) {
+        LocalArtifact localArtifact = null;
+        if (fileResource.getSha1() != null) {
+            localArtifact = artifactManagement.findFirstLocalArtifactsBySHA1(fileResource.getSha1());
+        } else if (fileResource.getFilename() != null) {
+            localArtifact = artifactManagement.findLocalArtifactByFilename(fileResource.getFilename()).stream()
+                    .findFirst().orElse(null);
+        } else if (fileResource.getArtifactId() != null) {
+            final org.eclipse.hawkbit.repository.model.Artifact artifact = artifactManagement
+                    .findArtifact(fileResource.getArtifactId());
+            if (artifact instanceof LocalArtifact) {
+                localArtifact = (LocalArtifact) artifact;
+            }
+        }
+        return localArtifact;
     }
 
     private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {

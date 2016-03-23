@@ -13,7 +13,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -100,7 +100,7 @@ public class AmqpControllerAuthentfication {
      *            the authentication request object
      * @return the authentfication object
      */
-    public Authentication doAuthenticate(final TenantSecruityToken secruityToken) {
+    public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
         for (final PreAuthenficationFilter filter : filterChain) {
             final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, secruityToken);
@@ -115,7 +115,7 @@ public class AmqpControllerAuthentfication {
     }
 
     private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthenficationFilter filter,
-            final TenantSecruityToken secruityToken) {
+            final TenantSecurityToken secruityToken) {
 
         if (!filter.isEnable(secruityToken)) {
             return null;
