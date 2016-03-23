@@ -20,19 +20,18 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * A list representation with meta data for pagination, e.g. containing the
- * total elements. The content of the acutal list is stored in the
- * {@link #content} field.
+ * total elements and size of content. The content of the actual list is stored
+ * in the {@link #content} field.
  *
  * @param <T>
  *            the type of elements in this list
- *
- *
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class PagedList<T> extends ResourceSupport {
 
+    private final List<T> content;
     private final long totalElements;
     private final int size;
 
@@ -50,6 +49,7 @@ public class PagedList<T> extends ResourceSupport {
     public PagedList(@NotNull final List<T> content, final long total) {
         this.size = content.size();
         this.totalElements = total;
+        this.content = content;
     }
 
     /**
@@ -65,4 +65,9 @@ public class PagedList<T> extends ResourceSupport {
     public long getTotal() {
         return totalElements;
     }
+
+    public List<T> getContent() {
+        return content;
+    }
+
 }

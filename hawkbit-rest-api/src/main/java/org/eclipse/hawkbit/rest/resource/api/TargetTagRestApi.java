@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -129,7 +129,7 @@ public interface TargetTagRestApi {
      *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = RestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
-    public ResponseEntity<TargetsRest> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
+    public ResponseEntity<List<TargetRest>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
 
     /**
      * Handles the POST request to toggle the assignment of targets by the given
@@ -163,7 +163,7 @@ public interface TargetTagRestApi {
      *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = RestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
-    public ResponseEntity<TargetsRest> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
+    public ResponseEntity<List<TargetRest>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<AssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**

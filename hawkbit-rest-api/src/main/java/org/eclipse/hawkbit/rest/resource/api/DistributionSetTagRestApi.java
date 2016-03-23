@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.rest.resource.api;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedDistributionSetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
@@ -137,7 +137,7 @@ public interface DistributionSetTagRestApi {
      *             exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = RestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
-    public ResponseEntity<DistributionSetsRest> getAssignedDistributionSets(
+    public ResponseEntity<List<DistributionSetRest>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId);
 
     /**
@@ -175,7 +175,7 @@ public interface DistributionSetTagRestApi {
      *             exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = RestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
-    public ResponseEntity<DistributionSetsRest> assignDistributionSets(
+    public ResponseEntity<List<DistributionSetRest>> assignDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final List<AssignedDistributionSetRequestBody> assignedDSRequestBodies);
 

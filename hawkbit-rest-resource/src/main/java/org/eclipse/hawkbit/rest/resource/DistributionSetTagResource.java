@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetTagRestApi;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedDistributionSetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
@@ -121,7 +121,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<DistributionSetsRest> getAssignedDistributionSets(final Long distributionsetTagId) {
+    public ResponseEntity<List<DistributionSetRest>> getAssignedDistributionSets(final Long distributionsetTagId) {
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
         return new ResponseEntity<>(
                 DistributionSetMapper.toResponseDistributionSets(tag.getAssignedToDistributionSet()), HttpStatus.OK);
@@ -151,7 +151,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<DistributionSetsRest> assignDistributionSets(final Long distributionsetTagId,
+    public ResponseEntity<List<DistributionSetRest>> assignDistributionSets(final Long distributionsetTagId,
             final List<AssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         LOG.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);

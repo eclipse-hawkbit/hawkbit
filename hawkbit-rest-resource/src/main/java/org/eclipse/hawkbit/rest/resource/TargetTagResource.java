@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +118,7 @@ public class TargetTagResource implements TargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TargetsRest> getAssignedTargets(final Long targetTagId) {
+    public ResponseEntity<List<TargetRest>> getAssignedTargets(final Long targetTagId) {
         final TargetTag targetTag = findTargetTagById(targetTagId);
         return new ResponseEntity<>(TargetMapper.toResponseWithLinksAndPollStatus(targetTag.getAssignedToTargets()),
                 HttpStatus.OK);
@@ -140,7 +140,7 @@ public class TargetTagResource implements TargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TargetsRest> assignTargets(final Long targetTagId,
+    public ResponseEntity<List<TargetRest>> assignTargets(final Long targetTagId,
             final List<AssignedTargetRequestBody> assignedTargetRequestBodies) {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);

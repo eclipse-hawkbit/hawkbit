@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.rest.resource;
 
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.rest.resource.model.BaseEntityRest;
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
 

@@ -34,16 +34,15 @@ import org.eclipse.hawkbit.rest.resource.api.DistributionSetRestApi;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetPagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleAssigmentRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulePagedList;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
+import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +80,7 @@ public class DistributionSetResource implements DistributionSetRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<DistributionSetPagedList> getDistributionSets(final int pagingOffsetParam,
+    public ResponseEntity<PagedList<DistributionSetRest>> getDistributionSets(final int pagingOffsetParam,
             final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -98,7 +97,7 @@ public class DistributionSetResource implements DistributionSetRestApi {
         }
 
         final List<DistributionSetRest> rest = DistributionSetMapper.toResponseFromDsList(findDsPage.getContent());
-        return new ResponseEntity<>(new DistributionSetPagedList(rest, findDsPage.getTotalElements()), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, findDsPage.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
@@ -109,7 +108,7 @@ public class DistributionSetResource implements DistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<DistributionSetsRest> createDistributionSets(
+    public ResponseEntity<List<DistributionSetRest>> createDistributionSets(
             final List<DistributionSetRequestBodyPost> sets) {
 
         LOG.debug("creating {} distribution sets", sets.size());
@@ -155,8 +154,8 @@ public class DistributionSetResource implements DistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<TargetPagedList> getAssignedTargets(final Long distributionSetId, final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<TargetRest>> getAssignedTargets(final Long distributionSetId,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         // check if distribution set exists otherwise throw exception
         // immediately
@@ -175,12 +174,12 @@ public class DistributionSetResource implements DistributionSetRestApi {
             targetsAssignedDS = this.targetManagement.findTargetByAssignedDistributionSet(distributionSetId, pageable);
         }
 
-        return new ResponseEntity<>(new TargetPagedList(TargetMapper.toResponse(targetsAssignedDS.getContent()),
+        return new ResponseEntity<>(new PagedList<>(TargetMapper.toResponse(targetsAssignedDS.getContent()),
                 targetsAssignedDS.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<TargetPagedList> getInstalledTargets(final Long distributionSetId,
+    public ResponseEntity<PagedList<TargetRest>> getInstalledTargets(final Long distributionSetId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
@@ -200,7 +199,7 @@ public class DistributionSetResource implements DistributionSetRestApi {
                     pageable);
         }
 
-        return new ResponseEntity<>(new TargetPagedList(TargetMapper.toResponse(targetsInstalledDS.getContent()),
+        return new ResponseEntity<>(new PagedList<TargetRest>(TargetMapper.toResponse(targetsInstalledDS.getContent()),
                 targetsInstalledDS.getTotalElements()), HttpStatus.OK);
     }
 
@@ -323,7 +322,7 @@ public class DistributionSetResource implements DistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<SoftwareModulePagedList> getAssignedSoftwareModules(final Long distributionSetId,
+    public ResponseEntity<PagedList<SoftwareModuleRest>> getAssignedSoftwareModules(final Long distributionSetId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
@@ -334,10 +333,8 @@ public class DistributionSetResource implements DistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<SoftwareModule> softwaremodules = this.softwareManagement.findSoftwareModuleByAssignedTo(pageable,
                 foundDs);
-        return new ResponseEntity<>(
-                new SoftwareModulePagedList(SoftwareModuleMapper.toResponse(softwaremodules.getContent()),
-                        softwaremodules.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(SoftwareModuleMapper.toResponse(softwaremodules.getContent()),
+                softwaremodules.getTotalElements()), HttpStatus.OK);
     }
 
     private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {

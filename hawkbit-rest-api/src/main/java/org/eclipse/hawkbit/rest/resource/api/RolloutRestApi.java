@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.rest.resource.api;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
-import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupResponseBody;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -154,7 +154,8 @@ public interface RolloutRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<RolloutGroupPagedList> getRolloutGroups(@PathVariable("rolloutId") final Long rolloutId,
+    public ResponseEntity<PagedList<RolloutGroupResponseBody>> getRolloutGroups(
+            @PathVariable("rolloutId") final Long rolloutId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -200,7 +201,7 @@ public interface RolloutRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}/targets", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<TargetPagedList> getRolloutGroupTargets(@PathVariable("rolloutId") final Long rolloutId,
+    public ResponseEntity<PagedList<TargetRest>> getRolloutGroupTargets(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,

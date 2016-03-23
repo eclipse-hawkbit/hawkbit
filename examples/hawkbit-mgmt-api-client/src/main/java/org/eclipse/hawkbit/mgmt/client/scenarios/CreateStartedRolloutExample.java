@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.client.scenarios;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetResourceClient;
 import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetTypeResourceClient;
 import org.eclipse.hawkbit.mgmt.client.resource.RolloutResourceClient;
@@ -21,10 +23,10 @@ import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentB
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.TargetBuilder;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutResponseBody;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulesRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
+import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
+import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -65,8 +67,9 @@ public class CreateStartedRolloutExample {
     public void run() {
 
         // create three SoftwareModuleTypes
-        final SoftwareModuleTypesRest createdSoftwareModuleTypes = softwareModuleTypeResource.createSoftwareModuleTypes(
-                new SoftwareModuleTypeBuilder().key(SM_MODULE_TYPE).name(SM_MODULE_TYPE).maxAssignments(1).build())
+        final List<SoftwareModuleTypeRest> createdSoftwareModuleTypes = softwareModuleTypeResource
+                .createSoftwareModuleTypes(new SoftwareModuleTypeBuilder().key(SM_MODULE_TYPE).name(SM_MODULE_TYPE)
+                        .maxAssignments(1).build())
                 .getBody();
 
         // create one DistributionSetType
@@ -75,12 +78,12 @@ public class CreateStartedRolloutExample {
                 .getBody();
 
         // create one DistributionSet
-        final DistributionSetsRest distributionSetsRest = distributionSetResource.createDistributionSets(
+        final List<DistributionSetRest> distributionSetsRest = distributionSetResource.createDistributionSets(
                 new DistributionSetBuilder().name("rollout-example").version("1.0.0").type(DS_MODULE_TYPE).build())
                 .getBody();
 
         // create three SoftwareModules
-        final SoftwareModulesRest softwareModulesRest = softwareModuleResource
+        final List<SoftwareModuleRest> softwareModulesRest = softwareModuleResource
                 .createSoftwareModules(
                         new SoftwareModuleBuilder().name("firmware").version("1.0.0").type(SM_MODULE_TYPE).build())
                 .getBody();
