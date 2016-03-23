@@ -107,10 +107,10 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
 
     @Override
     public void undo() {
-        anonymousDownloadEnabled = tenantConfigurationManagement
-                .getGlobalConfigurationValue(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, Boolean.class);
+        final TenantConfigurationValue<Boolean> value = tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, Boolean.class);
+        anonymousDownloadEnabled = value.getValue();
         downloadAnonymousCheckBox.setValue(anonymousDownloadEnabled);
-
     }
 
 }
