@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -141,8 +140,6 @@ public class TargetTable extends AbstractTable implements Handler {
     private Boolean isTargetPinned = Boolean.FALSE;
     private ShortcutAction actionSelectAll;
     private ShortcutAction actionUnSelectAll;
-    
-     
 
     @Override
     @PostConstruct
@@ -349,7 +346,8 @@ public class TargetTable extends AbstractTable implements Handler {
     @Override
     protected Object getItemIdToSelect() {
         if (managementUIState.getSelectedTargetIdName().isPresent()) {
-            setCurrentPageFirstItemId(managementUIState.getLastSelectedTargetIdName());
+            LOG.info("****** getItemIdToSelect *********");
+            // setCurrentPageFirstItemId(managementUIState.getLastSelectedTargetIdName());
             return managementUIState.getSelectedTargetIdName().get();
         }
         return null;
