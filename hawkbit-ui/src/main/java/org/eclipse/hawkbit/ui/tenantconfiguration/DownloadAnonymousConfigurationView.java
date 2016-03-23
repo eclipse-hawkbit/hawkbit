@@ -28,10 +28,8 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * @author Jonathan Knoblauch
- *
+ * View to enable anonymous download.
  */
-
 @SpringComponent
 @ViewScope
 public class DownloadAnonymousConfigurationView extends BaseConfigurationView
@@ -42,7 +40,7 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
     private static final long serialVersionUID = 1L;
 
     @Autowired
-    private I18N i18n; // TODO
+    private I18N i18n;
 
     @Autowired
     private transient TenantConfigurationManagement tenantConfigurationManagement;
@@ -52,7 +50,7 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
     private CheckBox downloadAnonymousCheckBox;
 
     /**
-     * Initialize Default Distribution Set layout.
+     * Initialize Default Download Anonymous layout.
      */
     @PostConstruct
     public void init() {
@@ -81,7 +79,6 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
 
         downloadAnonymousCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         downloadAnonymousCheckBox.setValue(anonymousDownloadEnabled);
-        downloadAnonymousCheckBox.setId("TODO");
         downloadAnonymousCheckBox.addValueChangeListener(event -> configurationHasChanged());
         gridLayout.addComponent(downloadAnonymousCheckBox);
 
@@ -94,7 +91,6 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
 
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
-
     }
 
     @Override
@@ -107,15 +103,14 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
     public void save() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 downloadAnonymousCheckBox.getValue());
-        // TODO notification Download server
     }
 
     @Override
     public void undo() {
-        anonymousDownloadEnabled = tenantConfigurationManagement
-                .getGlobalConfigurationValue(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, Boolean.class);
+        final TenantConfigurationValue<Boolean> value = tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, Boolean.class);
+        anonymousDownloadEnabled = value.getValue();
         downloadAnonymousCheckBox.setValue(anonymousDownloadEnabled);
-
     }
 
 }

@@ -38,9 +38,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Main UI for the system configuration view.
- *
- *
- *
  */
 @SpringView(name = TenantConfigurationDashboardView.VIEW_NAME, ui = HawkbitUI.class)
 @ViewScope
@@ -76,7 +73,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private final List<ConfigurationGroup> configurationViews = new ArrayList<>();
 
     /**
-     * init method adds all Configuration Views to the list of Views.
+     * Init method adds all Configuration Views to the list of Views.
      */
     @PostConstruct
     public void init() {
@@ -158,13 +155,6 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         undoConfigurationBtn.setEnabled(false);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.tenantconfiguration.ConfigurationGroup.
-     * ConfigurationGroupChangeListener #configurationChanged()
-     */
     @Override
     public void configurationHasChanged() {
         saveConfigurationBtn.setEnabled(true);

@@ -30,9 +30,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * View to configure the authentication mode.
- *
- *
- *
  */
 @SpringComponent
 @ViewScope
