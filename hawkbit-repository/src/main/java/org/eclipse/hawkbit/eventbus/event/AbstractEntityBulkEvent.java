@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.eventbus.event;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
  * 
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
  * 
  * @param <E>
  */
-public abstract class AbstractEntityBulkEvent<E extends BaseEntity> implements EntityBulkEvent<E> {
+public abstract class AbstractEntityBulkEvent<E extends TenantAwareBaseEntity> implements EntityBulkEvent<E> {
 
     private static final long serialVersionUID = 1L;
 

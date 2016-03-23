@@ -12,7 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 /**
- * {@link BaseEntity} extension for all entities that are named in addition to
+ * {@link TenantAwareBaseEntity} extension for all entities that are named in addition to
  * their technical ID.
  *
  *
@@ -22,7 +22,7 @@ import javax.persistence.MappedSuperclass;
  *
  */
 @MappedSuperclass
-public abstract class NamedEntity extends BaseEntity {
+public abstract class NamedEntity extends TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", nullable = false, length = 64)

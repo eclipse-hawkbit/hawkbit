@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.rest.resource;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.rest.resource.model.BaseEntityRest;
 import org.eclipse.hawkbit.rest.resource.model.NamedEntityRest;
@@ -28,7 +28,7 @@ final class RestModelMapper {
 
     }
 
-    static void mapBaseToBase(final BaseEntityRest response, final BaseEntity base) {
+    static void mapBaseToBase(final BaseEntityRest response, final TenantAwareBaseEntity base) {
         response.setCreatedBy(base.getCreatedBy());
         response.setLastModifiedBy(base.getLastModifiedBy());
         if (base.getCreatedAt() != null) {
