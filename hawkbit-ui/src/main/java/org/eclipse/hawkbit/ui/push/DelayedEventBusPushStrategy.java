@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.push;
 
-import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -21,9 +20,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
-import org.eclipse.hawkbit.eventbus.event.Event;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.ui.EventProvider;
+import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;
@@ -66,7 +64,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     private ScheduledFuture<?> jobHandle;
 
-    private final EventProvider eventProvider;
+    private final UIEventProvider eventProvider;
 
     /**
      * Constructor.
@@ -78,7 +76,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      *            back-end
      */
     public DelayedEventBusPushStrategy(final SessionEventBus eventBus,
-            final com.google.common.eventbus.EventBus systemEventBus, final EventProvider eventProvider) {
+            final com.google.common.eventbus.EventBus systemEventBus, final UIEventProvider eventProvider) {
         this.eventBus = eventBus;
         this.systemEventBus = systemEventBus;
         this.eventProvider = eventProvider;
@@ -153,9 +151,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
         return false;
     }
 
-    private static int addAccess = 0;
-    private static int startAccess = 0;
-
     private final class DispatchRunnable implements Runnable {
 
         private final UI vaadinUI;
@@ -211,41 +206,21 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             try {
                 SecurityContextHolder.setContext(userContext);
 
-                // TODO viele kleine access?
-                addAccess++;
-                final int endAddAccess = addAccess;
-                LOG.info("Add Access to runnable{}", addAccess);
                 vaadinUI.access(() -> {
-                    startAccess++;
-                    final int currentAccess = startAccess;
-                    LOG.info("Started Access {}", currentAccess);
-                    final Instant startAcess = Instant.now();
-
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
                     }
                     fowardSingleEvents(events, userContext);
                     fowardBulkEvents(events, userContext);
-                    berechneDauer(startAcess, "End Access " + currentAccess);
                 });
-
-                LOG.info("End add Access to runnable{}", endAddAccess);
             } finally {
                 SecurityContextHolder.setContext(oldContext);
             }
         }
 
-        private void berechneDauer(final Instant start, final String methode) {
-            final Instant end = Instant.now();
-            final long second = end.getEpochSecond() - start.getEpochSecond();
-            LOG.info("Dauer {} {} sekunden.", methode, second);
-        }
-
         private void fowardBulkEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
                 final SecurityContext userContext) {
-            final Set<Class<?>> filterBulkEvenTypes = events.stream().map(Event::getClass)
-                    .filter(eventClass -> eventProvider.getBulkEvents().contains(eventClass))
-                    .collect(Collectors.toSet());
+            final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
             publishBulkEvent(events, userContext, filterBulkEvenTypes);
         }
 
@@ -257,7 +232,6 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
                                 && bulkType.isInstance(event))
                         .collect(Collectors.toList());
                 if (!listBulkEvents.isEmpty()) {
-                    LOG.info("Publish bulk event");
                     eventBus.publish(vaadinUI, listBulkEvents);
                 }
             }
@@ -265,11 +239,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
         private void fowardSingleEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
                 final SecurityContext userContext) {
-            events.stream().filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
-                    && eventProvider.getSingleEvents().contains(event.getClass())).forEach(event -> {
-                        LOG.info("Publish single event");
-                        eventBus.publish(vaadinUI, event);
-                    });
+            events.stream()
+                    .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
+                            && eventProvider.getSingleEvents().contains(event.getClass()))
+                    .forEach(event -> eventBus.publish(vaadinUI, event));
         }
     }
 

@@ -104,11 +104,10 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class TargetTable extends AbstractTable implements Handler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
     private static final String TARGET_PINNED = "targetPinned";
 
     private static final long serialVersionUID = -2300392868806614568L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
 
     private static final int PROPERTY_DEPT = 3;
     private static final String ITEMID = "itemId";
@@ -326,39 +325,20 @@ public class TargetTable extends AbstractTable implements Handler {
                 (source, itemId, columnId) -> getTagetPollTime(itemId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * isFirstRowSelectedOnLoad ()
-     */
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
         return !managementUIState.getSelectedTargetIdName().isPresent()
                 || managementUIState.getSelectedTargetIdName().get().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
-     */
     @Override
     protected Object getItemIdToSelect() {
         if (managementUIState.getSelectedTargetIdName().isPresent()) {
-            LOG.info("****** getItemIdToSelect *********");
-            // setCurrentPageFirstItemId(managementUIState.getLastSelectedTargetIdName());
             return managementUIState.getSelectedTargetIdName().get();
         }
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
-     */
     @Override
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
@@ -378,23 +358,11 @@ public class TargetTable extends AbstractTable implements Handler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
-     */
     @Override
     protected boolean isMaximized() {
         return managementUIState.isTargetTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
-     * ()
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
@@ -451,14 +419,13 @@ public class TargetTable extends AbstractTable implements Handler {
             } else {
                 shouldRefreshTargets = true;
             }
-            unselect(targetIdName);
         }
+
         if (shouldRefreshTargets) {
             refreshOnDelete();
-        } else {
-            targetContainer.commit();
-            selectRow();
         }
+
+        unSelectAll();
     }
 
     private void refreshOnDelete() {
