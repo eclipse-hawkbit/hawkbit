@@ -423,6 +423,8 @@ public class TargetTable extends AbstractTable implements Handler {
 
         if (shouldRefreshTargets) {
             refreshOnDelete();
+        } else {
+            targetContainer.commit();
         }
 
         unSelectAll();
