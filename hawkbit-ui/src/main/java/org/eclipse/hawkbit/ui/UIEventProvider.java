@@ -49,8 +49,7 @@ public interface UIEventProvider {
      *         be null
      */
     default Set<Class<?>> getFilteredBulkEventsType(final List<Event> allEvents) {
-        return allEvents.stream().map(Event::getClass).filter(eventClass -> getBulkEvents().contains(eventClass))
-                .collect(Collectors.toSet());
+        return allEvents.stream().map(Event::getClass).filter(getBulkEvents()::contains).collect(Collectors.toSet());
     }
 
 }
