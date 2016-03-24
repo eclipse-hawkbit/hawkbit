@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.ui;
 import org.eclipse.hawkbit.DistributedResourceBundleMessageSource;
 import org.eclipse.hawkbit.ui.HawkbitEventProvider;
 import org.eclipse.hawkbit.ui.UIEventProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.vaadin.spring.annotation.EnableVaadinExtensions;
@@ -42,6 +43,7 @@ public class UIAutoConfiguration {
      * @return the provider bean
      */
     @Bean
+    @ConditionalOnMissingBean
     public UIEventProvider eventProvider() {
         return new HawkbitEventProvider();
     }
