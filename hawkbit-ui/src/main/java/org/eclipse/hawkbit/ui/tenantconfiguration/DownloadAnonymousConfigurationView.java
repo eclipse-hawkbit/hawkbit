@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,6 +81,8 @@ public class DownloadAnonymousConfigurationView extends BaseConfigurationView
         downloadAnonymousCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         downloadAnonymousCheckBox.setValue(anonymousDownloadEnabled);
         downloadAnonymousCheckBox.addValueChangeListener(event -> configurationHasChanged());
+        downloadAnonymousCheckBox.setId(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_ANONYMOUS_DOWNLOAD_CHECKBOX);
+
         gridLayout.addComponent(downloadAnonymousCheckBox);
 
         final Label configurationLabel = SPUIComponentProvider.getLabel(i18n.get("enonymous.download.label"),
