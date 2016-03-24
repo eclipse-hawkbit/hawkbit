@@ -426,8 +426,23 @@ public class TargetTable extends AbstractTable implements Handler {
         } else {
             targetContainer.commit();
         }
+        reSelectItemsAfterDeletionEvent();
+    }
 
+    private void reSelectItemsAfterDeletionEvent() {
+        Set<Object> values = new HashSet<>();
+        if (isMultiSelect()) {
+            values = new HashSet<>((Set<?>) getValue());
+        } else {
+            values.add(getValue());
+        }
         unSelectAll();
+
+        for (final Object value : values) {
+            if (getVisibleItemIds().contains(value)) {
+                select(value);
+            }
+        }
     }
 
     private void refreshOnDelete() {
