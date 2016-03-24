@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -54,25 +56,25 @@ public class RolloutScheduler {
      */
     @Scheduled(initialDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void rolloutScheduler() {
-        // logger.debug("rollout schedule checker has been triggered.");
-        // // run this code in system code privileged to have the necessary
-        // // permission to query and create entities.
-        // systemSecurityContext.runAsSystem(() -> {
-        // // workaround eclipselink that is currently not possible to
-        // // execute a query without multitenancy if MultiTenant
-        // // annotation is used.
-        // // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
-        // // iterate through all tenants and execute the rollout check for
-        // // each tenant seperately.
-        // final List<String> tenants = systemManagement.findTenants();
-        // logger.info("Checking rollouts for {} tenants", tenants.size());
-        // for (final String tenant : tenants) {
-        // tenantAware.runAsTenant(tenant, () -> {
-        // rolloutManagement.checkRunningRollouts(rolloutProperties.getScheduler().getFixedDelay());
-        // return null;
-        // });
-        // }
-        // return null;
-        // });
+        logger.debug("rollout schedule checker has been triggered.");
+        // run this code in system code privileged to have the necessary
+        // permission to query and create entities.
+        systemSecurityContext.runAsSystem(() -> {
+            // workaround eclipselink that is currently not possible to
+            // execute a query without multitenancy if MultiTenant
+            // annotation is used.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for
+            // each tenant seperately.
+            final List<String> tenants = systemManagement.findTenants();
+            logger.info("Checking rollouts for {} tenants", tenants.size());
+            for (final String tenant : tenants) {
+                tenantAware.runAsTenant(tenant, () -> {
+                    rolloutManagement.checkRunningRollouts(rolloutProperties.getScheduler().getFixedDelay());
+                    return null;
+                });
+            }
+            return null;
+        });
     }
 }
