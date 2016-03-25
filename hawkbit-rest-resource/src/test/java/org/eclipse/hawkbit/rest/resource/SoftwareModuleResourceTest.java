@@ -930,8 +930,8 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final SoftwareModuleMetadata metaKey1 = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey1));
-        final SoftwareModuleMetadata metaKey2 = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey2));
+        final SoftwareModuleMetadata metaKey1 = softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sm, knownKey1));
+        final SoftwareModuleMetadata metaKey2 = softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sm, knownKey2));
 
         assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
@@ -957,7 +957,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final SoftwareModuleMetadata assertDS = softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey));
+        final SoftwareModuleMetadata assertDS = softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sm, knownKey));
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
     }
 
@@ -976,7 +976,7 @@ public class SoftwareModuleResourceTest extends AbstractIntegrationTestWithMongo
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         try {
-            softwareManagement.findOne(new SwMetadataCompositeKey(sm, knownKey));
+            softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sm, knownKey));
             fail("expected EntityNotFoundException but didn't throw");
         } catch (final EntityNotFoundException e) {
             // ok as expected

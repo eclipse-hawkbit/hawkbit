@@ -81,6 +81,8 @@ public interface SoftwareModuleRepository
     Page<SoftwareModule> findByAssignedTo(Pageable pageable, DistributionSet set);
 
     /**
+     * 
+     * 
      * @param set
      *            to search for
      * @return all {@link SoftwareModule}s that are assigned to given

@@ -22,8 +22,6 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -79,9 +77,8 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         final Slice<CustomSoftwareModule> swModuleBeans;
         final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<>();
 
-        swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderByDistribution(
-                new OffsetBasedPageRequest(startIndex, count, new Sort(Direction.ASC, "name", "version")),
-                orderByDistId, searchText, type);
+        swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc(
+                new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type);
 
         for (final CustomSoftwareModule swModule : swModuleBeans) {
             proxyBeans.add(getProxyBean(swModule));
