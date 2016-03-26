@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -141,8 +140,6 @@ public class TargetTable extends AbstractTable implements Handler {
     private Boolean isTargetPinned = Boolean.FALSE;
     private ShortcutAction actionSelectAll;
     private ShortcutAction actionUnSelectAll;
-    
-     
 
     @Override
     @PostConstruct
@@ -1038,7 +1035,7 @@ public class TargetTable extends AbstractTable implements Handler {
         final String[] tagArray = tagList.toArray(new String[tagList.size()]);
 
         List<TargetIdName> targetIdList;
-        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, filterByDistId, statusList, searchText,
+        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, statusList, searchText, filterByDistId,
                 noTagSelected, tagList.toArray(tagArray));
         Collections.reverse(targetIdList);
         return targetIdList;

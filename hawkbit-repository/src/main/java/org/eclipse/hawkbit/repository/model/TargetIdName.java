@@ -13,19 +13,12 @@ import java.io.Serializable;
 /**
  * ID class of the {@link Target} which contains the
  * {@link Target#getControllerId()} and the {@link Target#getName()} in one
- * object. Often it's necessary to remeber the IDs of the {@link Target} and the
- * resolve for e.g. the UI the name of the target, this is very costly
+ * object. Often it's necessary to remember the IDs of the {@link Target} and
+ * the resolve for e.g. the UI the name of the target, this is very costly
  * operation, so it's much better if the ID and the name of the {@link Target}
  * is already in memory available.
- *
- *
- *
- *
  */
 public class TargetIdName implements Serializable {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private final long targetId;

@@ -15,18 +15,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- *
+ * Stored target filter.
  *
  */
 @Entity
 @Table(name = "sp_target_filter_query", indexes = {
         @Index(name = "sp_idx_target_filter_query_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_tenant_custom_filter_name") )
+                "name", "tenant" }, name = "uk_tenant_custom_filter_name"))
 public class TargetFilterQuery extends TenantAwareBaseEntity {
-    /**
-     * 
-     * 
-     */
     private static final long serialVersionUID = 7493966984413479089L;
 
     @Column(name = "name", length = 64)
@@ -36,8 +32,7 @@ public class TargetFilterQuery extends TenantAwareBaseEntity {
     private String query;
 
     public TargetFilterQuery() {
-        name = null;
-        query = null;
+        // Default constructor for JPA.
     }
 
     public TargetFilterQuery(final String name, final String query) {
@@ -45,32 +40,18 @@ public class TargetFilterQuery extends TenantAwareBaseEntity {
         this.query = query;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param name
-     *            the name to set
-     */
     public void setName(final String name) {
         this.name = name;
     }
 
-    /**
-     * @return the query
-     */
     public String getQuery() {
         return query;
     }
 
-    /**
-     * @param query
-     *            the query to set
-     */
     public void setQuery(final String query) {
         this.query = query;
     }

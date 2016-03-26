@@ -203,6 +203,12 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that repositoy returns null if given controller ID does not exist without exception.")
+    public void findTargetByControllerIDWithDetailsReturnsNullForNonexisting() {
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd")).as("Expected as").isNull();
+    }
+
+    @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if the targets with the same controller ID are created twice.")
     public void createMultipleTargetsDuplicate() {
         final List<Target> targets = TestDataUtil.buildTargetFixtures(5, "mySimpleTargs", "my simple targets");
