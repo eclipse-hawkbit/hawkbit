@@ -534,7 +534,6 @@ public class DeploymentManagement {
             return saveAction;
         } else {
             throw new CancelActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not active and cannot be canceled");
         }
     }
 

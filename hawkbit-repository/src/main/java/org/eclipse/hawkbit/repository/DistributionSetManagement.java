@@ -915,7 +915,7 @@ public class DistributionSetManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSetType> createDistributionSetTypes(@NotNull final Collection<DistributionSetType> types) {
-        return types.stream().map(type -> createDistributionSetType(type)).collect(Collectors.toList());
+        return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
     }
 
     /**

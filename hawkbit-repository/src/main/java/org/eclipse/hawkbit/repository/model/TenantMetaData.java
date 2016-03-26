@@ -78,4 +78,41 @@ public class TenantMetaData extends BaseEntity {
         this.tenant = tenant;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((defaultDsType == null) ? 0 : defaultDsType.hashCode());
+        result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TenantMetaData other = (TenantMetaData) obj;
+        if (defaultDsType == null) {
+            if (other.defaultDsType != null) {
+                return false;
+            }
+        } else if (!defaultDsType.equals(other.defaultDsType)) {
+            return false;
+        }
+        if (tenant == null) {
+            if (other.tenant != null) {
+                return false;
+            }
+        } else if (!tenant.equals(other.tenant)) {
+            return false;
+        }
+        return true;
+    }
 }

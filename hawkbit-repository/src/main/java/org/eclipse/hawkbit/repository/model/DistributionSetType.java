@@ -38,10 +38,6 @@ import javax.persistence.UniqueConstraint;
                 @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
                 @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
 public class DistributionSetType extends NamedEntity {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @OneToMany(targetEntity = DistributionSetTypeElement.class, cascade = {
@@ -256,17 +252,10 @@ public class DistributionSetType extends NamedEntity {
         return this;
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
@@ -282,19 +271,10 @@ public class DistributionSetType extends NamedEntity {
                 .containsAll(getMandatoryModuleTypes());
     }
 
-    /**
-     *
-     * @return the DistributionSet type color
-     */
     public String getColour() {
         return colour;
     }
 
-    /**
-     *
-     * @param colour
-     *            the col
-     */
     public void setColour(final String colour) {
         this.colour = colour;
     }
@@ -303,14 +283,58 @@ public class DistributionSetType extends NamedEntity {
         return elements;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "DistributionSetType [key=" + key + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((colour == null) ? 0 : colour.hashCode());
+        result = prime * result + (deleted ? 1231 : 1237);
+        result = prime * result + ((elements == null) ? 0 : elements.hashCode());
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DistributionSetType other = (DistributionSetType) obj;
+        if (colour == null) {
+            if (other.colour != null) {
+                return false;
+            }
+        } else if (!colour.equals(other.colour)) {
+            return false;
+        }
+        if (deleted != other.deleted) {
+            return false;
+        }
+        if (elements == null) {
+            if (other.elements != null) {
+                return false;
+            }
+        } else if (!elements.equals(other.elements)) {
+            return false;
+        }
+        if (key == null) {
+            if (other.key != null) {
+                return false;
+            }
+        } else if (!key.equals(other.key)) {
+            return false;
+        }
+        return true;
+    }
 }

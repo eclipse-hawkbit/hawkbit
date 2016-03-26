@@ -32,9 +32,6 @@ import com.google.common.base.Splitter;
 
 /**
  * Entity to store the status for a specific action.
- * 
- *
- *
  */
 @Table(name = "sp_action_status", indexes = { @Index(name = "sp_idx_action_status_01", columnList = "tenant,action"),
         @Index(name = "sp_idx_action_status_02", columnList = "tenant,action,status"),
@@ -42,10 +39,6 @@ import com.google.common.base.Splitter;
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })
 @Entity
 public class ActionStatus extends TenantAwareBaseEntity {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Column(name = "target_occurred_at")
@@ -146,4 +139,55 @@ public class ActionStatus extends TenantAwareBaseEntity {
     public void setStatus(final Status status) {
         this.status = status;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
+        result = prime * result + ((messages == null) ? 0 : messages.hashCode());
+        result = prime * result + ((occurredAt == null) ? 0 : occurredAt.hashCode());
+        result = prime * result + ((status == null) ? 0 : status.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ActionStatus other = (ActionStatus) obj;
+        if (action == null) {
+            if (other.action != null) {
+                return false;
+            }
+        } else if (!action.equals(other.action)) {
+            return false;
+        }
+        if (messages == null) {
+            if (other.messages != null) {
+                return false;
+            }
+        } else if (!messages.equals(other.messages)) {
+            return false;
+        }
+        if (occurredAt == null) {
+            if (other.occurredAt != null) {
+                return false;
+            }
+        } else if (!occurredAt.equals(other.occurredAt)) {
+            return false;
+        }
+        if (status != other.status) {
+            return false;
+        }
+        return true;
+    }
+
 }

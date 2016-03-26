@@ -376,16 +376,10 @@ public class ControllerManagement {
         switch (actionStatus.getStatus()) {
         case ERROR:
             mergedTarget = deploymentManagement.updateTargetInfo(mergedTarget, TargetUpdateStatus.ERROR, false);
-            // set action inactive
-            mergedAction.setActive(false);
-            mergedAction.setStatus(Status.ERROR);
-            mergedTarget.setAssignedDistributionSet(null);
-            targetManagement.updateTarget(mergedTarget);
+            handleErrorOnAction(mergedAction, mergedTarget);
             break;
         case FINISHED:
-            // set action inactive
-            mergedAction.setActive(false);
-            mergedAction.setStatus(Status.FINISHED);
+
             handleFinishedAndStoreInTargetStatus(mergedTarget, mergedAction);
             break;
         case CANCELED:
@@ -404,6 +398,14 @@ public class ControllerManagement {
         return actionRepository.save(mergedAction);
     }
 
+    private void handleErrorOnAction(final Action mergedAction, final Target mergedTarget) {
+        // set action inactive
+        mergedAction.setActive(false);
+        mergedAction.setStatus(Status.ERROR);
+        mergedTarget.setAssignedDistributionSet(null);
+        targetManagement.updateTarget(mergedTarget);
+    }
+
     private void checkForToManyStatusEntries(final Action action) {
         if (securityProperties.getDos().getMaxStatusEntriesPerAction() > 0) {
 
@@ -420,6 +422,8 @@ public class ControllerManagement {
     }
 
     private void handleFinishedAndStoreInTargetStatus(final Target target, final Action action) {
+        action.setActive(false);
+        action.setStatus(Status.FINISHED);
         final TargetInfo targetInfo = target.getTargetInfo();
         final DistributionSet ds = entityManager.merge(action.getDistributionSet());
         targetInfo.setInstalledDistributionSet(ds);

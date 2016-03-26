@@ -50,7 +50,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
         @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
 @NamedEntityGraphs({ @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
-                @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet") ) ) })
+                @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
 @Entity
 public class Action extends TenantAwareBaseEntity implements Comparable<Action> {
     private static final long serialVersionUID = 1L;
@@ -64,11 +64,11 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
      * the {@link DistributionSet} which should be installed by this action.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds") )
+    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
     private DistributionSet distributionSet;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target") )
+    @JoinColumn(name = "target", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
     private Target target;
 
     @Column(name = "active")
@@ -90,11 +90,11 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
     private List<ActionStatus> actionStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rolloutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup") )
+    @JoinColumn(name = "rolloutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
     private RolloutGroup rolloutGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout") )
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private Rollout rollout;
 
     /**
@@ -305,21 +305,11 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
         return actionType == ActionType.FORCED;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Action [distributionSet=" + distributionSet + ", getId()=" + getId() + "]";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
@@ -332,11 +322,6 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
 

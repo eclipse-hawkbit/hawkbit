@@ -74,8 +74,6 @@ import com.google.common.eventbus.EventBus;
 /**
  * Business service facade for managing {@link Target}s.
  *
- *
- *
  */
 @Transactional(readOnly = true)
 @Validated

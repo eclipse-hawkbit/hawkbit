@@ -13,11 +13,7 @@ import javax.persistence.MappedSuperclass;
 
 /**
  * Tenant specific locally stored artifact representation that is used by
- * {@link SoftwareModule} .
- *
- *
- *
- *
+ * {@link SoftwareModule}.
  */
 @MappedSuperclass
 public abstract class Artifact extends TenantAwareBaseEntity {
@@ -34,49 +30,73 @@ public abstract class Artifact extends TenantAwareBaseEntity {
 
     public abstract SoftwareModule getSoftwareModule();
 
-    /**
-     * @return the md5Hash
-     */
     public String getMd5Hash() {
         return md5Hash;
     }
 
-    /**
-     * @return the sha1Hash
-     */
     public String getSha1Hash() {
         return sha1Hash;
     }
 
-    /**
-     * @param md5Hash
-     *            the md5Hash to set
-     */
     public void setMd5Hash(final String md5Hash) {
         this.md5Hash = md5Hash;
     }
 
-    /**
-     * @param sha1Hash
-     *            the sha1Hash to set
-     */
     public void setSha1Hash(final String sha1Hash) {
         this.sha1Hash = sha1Hash;
     }
 
-    /**
-     * @return the size
-     */
     public Long getSize() {
         return size;
     }
 
-    /**
-     * @param size
-     *            the size to set
-     */
     public void setSize(final Long size) {
         this.size = size;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((md5Hash == null) ? 0 : md5Hash.hashCode());
+        result = prime * result + ((sha1Hash == null) ? 0 : sha1Hash.hashCode());
+        result = prime * result + ((size == null) ? 0 : size.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Artifact other = (Artifact) obj;
+        if (md5Hash == null) {
+            if (other.md5Hash != null) {
+                return false;
+            }
+        } else if (!md5Hash.equals(other.md5Hash)) {
+            return false;
+        }
+        if (sha1Hash == null) {
+            if (other.sha1Hash != null) {
+                return false;
+            }
+        } else if (!sha1Hash.equals(other.sha1Hash)) {
+            return false;
+        }
+        if (size == null) {
+            if (other.size != null) {
+                return false;
+            }
+        } else if (!size.equals(other.size)) {
+            return false;
+        }
+        return true;
+    }
 }

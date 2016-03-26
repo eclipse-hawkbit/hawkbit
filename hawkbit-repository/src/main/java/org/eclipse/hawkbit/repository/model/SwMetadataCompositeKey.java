@@ -11,16 +11,10 @@ package org.eclipse.hawkbit.repository.model;
 import java.io.Serializable;
 
 /**
- * The Software Module Metadata composite key which contains the meta data key
+ * The Software Module meta data composite key which contains the meta data key
  * and the ID of the software module itself.
- * 
- *
- *
  */
 public final class SwMetadataCompositeKey implements Serializable {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private String key;
@@ -28,9 +22,10 @@ public final class SwMetadataCompositeKey implements Serializable {
     private Long softwareModule;
 
     /**
-    *
-    */
+     * Default constructor for JPA.
+     */
     public SwMetadataCompositeKey() {
+        // Default constructor for JPA.
     }
 
     /**
