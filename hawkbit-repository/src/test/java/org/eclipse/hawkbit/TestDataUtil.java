@@ -143,7 +143,7 @@ public class TestDataUtil {
     }
 
     public static List<DistributionSetTag> generateDistributionSetTags(final int number) {
-        final List<DistributionSetTag> result = new ArrayList<DistributionSetTag>();
+        final List<DistributionSetTag> result = new ArrayList<>();
 
         for (int i = 0; i < number; i++) {
             result.add(new DistributionSetTag("tag" + i, "tagdesc" + i, "" + i));

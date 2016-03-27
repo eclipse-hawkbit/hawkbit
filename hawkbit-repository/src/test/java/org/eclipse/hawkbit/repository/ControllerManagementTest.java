@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
                 distributionSetManagement);
         Target savedTarget = targetManagement.createTarget(target);
 
-        final List<Target> toAssign = new ArrayList<Target>();
+        final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
 
         assertThat(savedTarget.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
@@ -74,8 +73,8 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
                 .isEqualTo(3);
     }
 
-    @Test
-    @Description("Register a controller which not exist")
+    @Test(expected = ConstraintViolationException.class)
+    @Description("Register a controller which does not exist")
     public void testfindOrRegisterTargetIfItDoesNotexist() {
         final Target target = controllerManagament.findOrRegisterTargetIfItDoesNotexist("AA", null);
         assertThat(target).as("target should not be null").isNotNull();
@@ -84,12 +83,8 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         assertThat(target).as("Target should be the equals").isEqualTo(sameTarget);
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
-        try {
-            controllerManagament.findOrRegisterTargetIfItDoesNotexist("", null);
-            fail("target with empty controller id should not be registred");
-        } catch (final ConstraintViolationException e) {
-            // ok
-        }
+        // throws exception
+        controllerManagament.findOrRegisterTargetIfItDoesNotexist("", null);
     }
 
     @Test
@@ -101,7 +96,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<Target>();
+        final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
         savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedTargets().iterator().next();
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
@@ -124,7 +119,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         final ActionStatus actionStatusMessage3 = new ActionStatus(savedAction, Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage3.addMessage("finish");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage3, savedAction);
+        controllerManagament.addUpdateActionStatus(actionStatusMessage3, savedAction);
 
         targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus();
 

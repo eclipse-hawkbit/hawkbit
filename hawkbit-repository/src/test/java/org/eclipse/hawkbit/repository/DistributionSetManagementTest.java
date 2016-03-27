@@ -44,15 +44,12 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- * {@link SoftwareManagement} test focused on {@link DistributionSet} and
- * {@link DistributionSetType} related stuff.
- *
- *
+ * {@link DistributionSetManagement} tests.
  *
  */
 @Features("Component Tests - Repository")
-@Stories("Software Management")
-public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
+@Stories("DistributionSet Management")
+public class DistributionSetManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
@@ -158,8 +155,6 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         distributionSetManagement.deleteDistributionSetType(softDelete);
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
     }
-
-    // TODO: kzimmerm: test N+1
 
     @Test(expected = EntityAlreadyExistsException.class)
     @Description("Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).")

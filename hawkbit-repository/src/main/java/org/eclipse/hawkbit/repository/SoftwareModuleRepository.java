@@ -43,15 +43,19 @@ public interface SoftwareModuleRepository
     Long countByType(SoftwareModuleType type);
 
     /**
-     * Retrieves {@link SoftwareModule}s by filtering on name AND version.
+     * Retrieves {@link SoftwareModule} by filtering on name AND version AND
+     * type (which is unique per tenant.
      * 
      * @param name
      *            to be filtered on
      * @param version
      *            to be filtered on
-     * @return the found {@link SoftwareModule}s with the given name AND verion
+     * @param type
+     *            to be filtered on
+     * @return the found {@link SoftwareModule} with the given name AND version
+     *         AND type
      */
-    List<SoftwareModule> findByNameAndVersion(String name, String version);
+    SoftwareModule findOneByNameAndVersionAndType(String name, String version, SoftwareModuleType type);
 
     /**
      * deletes the {@link SoftwareModule}s with the given IDs.

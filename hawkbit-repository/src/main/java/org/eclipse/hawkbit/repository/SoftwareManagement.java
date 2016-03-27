@@ -258,10 +258,6 @@ public class SoftwareManagement {
         return artifactManagement.findSoftwareModuleById(id);
     }
 
-    // TODO: discuss this method, does not seem to make sense to search by name
-    // and version without type. It also makes no sense to return collection
-    // here. It should be a single result based on ytpe,name,version (like the
-    // constraint).
     /**
      * retrieves {@link SoftwareModule}s by their name AND version.
      *
@@ -269,13 +265,15 @@ public class SoftwareManagement {
      *            of the {@link SoftwareModule}
      * @param version
      *            of the {@link SoftwareModule}
-     * @return the found {@link SoftwareModule}s
+     * @param type
+     *            of the {@link SoftwareModule}
+     * @return the found {@link SoftwareModule} or <code>null</code>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public List<SoftwareModule> findSoftwareModuleByNameAndVersion(@NotEmpty final String name,
-            @NotEmpty final String version) {
+    public SoftwareModule findSoftwareModuleByNameAndVersion(@NotEmpty final String name,
+            @NotEmpty final String version, @NotNull final SoftwareModuleType type) {
 
-        return softwareModuleRepository.findByNameAndVersion(name, version);
+        return softwareModuleRepository.findOneByNameAndVersionAndType(name, version, type);
     }
 
     /**

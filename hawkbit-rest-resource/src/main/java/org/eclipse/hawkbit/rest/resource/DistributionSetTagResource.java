@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetTagRestApi;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
@@ -135,7 +135,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
 
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
-        final DistributionSetTagAssigmentResult assigmentResult = this.distributionSetManagement
+        final DistributionSetTagAssignmentResult assigmentResult = this.distributionSetManagement
                 .toggleTagAssignment(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
 
         final DistributionSetTagAssigmentResultRest tagAssigmentResultRest = new DistributionSetTagAssigmentResultRest();
