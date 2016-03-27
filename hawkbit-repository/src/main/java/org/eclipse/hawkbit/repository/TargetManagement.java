@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetInfo_;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
@@ -534,7 +534,7 @@ public class TargetManagement {
     @Transactional
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public TargetTagAssigmentResult toggleTagAssignment(@NotEmpty final List<Target> targets,
+    public TargetTagAssignmentResult toggleTagAssignment(@NotEmpty final List<Target> targets,
             @NotNull final TargetTag tag) {
         return toggleTagAssignment(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), tag.getName());
@@ -556,7 +556,7 @@ public class TargetManagement {
     @Transactional
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public TargetTagAssigmentResult toggleTagAssignment(@NotEmpty final Collection<String> targetIds,
+    public TargetTagAssignmentResult toggleTagAssignment(@NotEmpty final Collection<String> targetIds,
             @NotNull final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
         final List<Target> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName, targetIds);
@@ -566,7 +566,7 @@ public class TargetManagement {
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
             alreadyAssignedTargets.forEach(target -> target.getTags().remove(tag));
-            final TargetTagAssigmentResult result = new TargetTagAssigmentResult(0, 0, alreadyAssignedTargets.size(),
+            final TargetTagAssignmentResult result = new TargetTagAssignmentResult(0, 0, alreadyAssignedTargets.size(),
                     Collections.emptyList(), alreadyAssignedTargets, tag);
 
             afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
@@ -576,7 +576,7 @@ public class TargetManagement {
         allTargets.removeAll(alreadyAssignedTargets);
         // some or none are assigned -> assign
         allTargets.forEach(target -> target.getTags().add(tag));
-        final TargetTagAssigmentResult result = new TargetTagAssigmentResult(alreadyAssignedTargets.size(),
+        final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
                 allTargets.size(), 0, targetRepository.save(allTargets), Collections.emptyList(), tag);
 
         afterCommit.afterCommit(() -> eventBus.post(new TargetTagAssigmentResultEvent(result)));
@@ -607,7 +607,7 @@ public class TargetManagement {
         final List<Target> save = targetRepository.save(allTargets);
 
         afterCommit.afterCommit(() -> {
-            final TargetTagAssigmentResult assigmentResult = new TargetTagAssigmentResult(0, save.size(), 0, save,
+            final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, save.size(), 0, save,
                     Collections.emptyList(), tag);
             eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
         });
@@ -620,7 +620,7 @@ public class TargetManagement {
 
         final List<Target> save = targetRepository.save(targets);
         afterCommit.afterCommit(() -> {
-            final TargetTagAssigmentResult assigmentResult = new TargetTagAssigmentResult(0, 0, save.size(),
+            final TargetTagAssignmentResult assigmentResult = new TargetTagAssignmentResult(0, 0, save.size(),
                     Collections.emptyList(), save, tag);
             eventBus.post(new TargetTagAssigmentResultEvent(assigmentResult));
         });

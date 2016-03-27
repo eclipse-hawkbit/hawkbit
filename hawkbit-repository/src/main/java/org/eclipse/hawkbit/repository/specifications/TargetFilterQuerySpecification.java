@@ -8,17 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.specifications;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- *
+ * Specifications class for {@link TargetFilterQuery}s. The class provides
+ * Spring Data JPQL Specifications.
  *
  */
 public class TargetFilterQuerySpecification {
@@ -27,16 +23,9 @@ public class TargetFilterQuerySpecification {
     }
 
     public static Specification<TargetFilterQuery> likeName(final String searchText) {
-        final Specification<TargetFilterQuery> spec = new Specification<TargetFilterQuery>() {
-            @Override
-            public Predicate toPredicate(final Root<TargetFilterQuery> targetFilterQueryRoot,
-                    final CriteriaQuery<?> query, final CriteriaBuilder cb) {
-                final String searchTextToLower = searchText.toLowerCase();
-                final Predicate predicate = cb.like(cb.lower(targetFilterQueryRoot.get(TargetFilterQuery_.name)),
-                        searchTextToLower);
-                return predicate;
-            }
+        return (targetFilterQueryRoot, query, cb) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            return cb.like(cb.lower(targetFilterQueryRoot.get(TargetFilterQuery_.name)), searchTextToLower);
         };
-        return spec;
     }
 }
