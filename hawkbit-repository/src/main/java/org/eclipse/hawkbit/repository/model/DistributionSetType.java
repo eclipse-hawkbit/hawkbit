@@ -27,9 +27,6 @@ import javax.persistence.UniqueConstraint;
  * A distribution set type defines which software module types can or have to be
  * {@link DistributionSet}.
  *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_distribution_set_type", indexes = {
@@ -55,7 +52,7 @@ public class DistributionSetType extends NamedEntity {
     private boolean deleted = false;
 
     public DistributionSetType() {
-        // default public constructor
+        // default public constructor for JPA
     }
 
     /**
@@ -307,7 +304,7 @@ public class DistributionSetType extends NamedEntity {
         if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof DistributionSetType)) {
             return false;
         }
         final DistributionSetType other = (DistributionSetType) obj;
@@ -337,4 +334,5 @@ public class DistributionSetType extends NamedEntity {
         }
         return true;
     }
+
 }

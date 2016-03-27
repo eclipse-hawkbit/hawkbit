@@ -25,17 +25,10 @@ import javax.persistence.Table;
  * Relation element between a {@link DistributionSetType} and its
  * {@link SoftwareModuleType} elements.
  *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_ds_type_element")
 public class DistributionSetTypeElement implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
@@ -46,18 +39,16 @@ public class DistributionSetTypeElement implements Serializable {
 
     @MapsId("dsType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_dstype") )
+    @JoinColumn(name = "distribution_set_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_dstype"))
     private DistributionSetType dsType;
 
     @MapsId("smType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "software_module_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype") )
+    @JoinColumn(name = "software_module_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
     private SoftwareModuleType smType;
 
-    /**
-     * Default constructor.
-     */
     public DistributionSetTypeElement() {
+        // Default constructor for JPA
     }
 
     /**
@@ -106,6 +97,40 @@ public class DistributionSetTypeElement implements Serializable {
      */
     public DistributionSetTypeElementCompositeKey getKey() {
         return key;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + (mandatory ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DistributionSetTypeElement)) {
+            return false;
+        }
+        final DistributionSetTypeElement other = (DistributionSetTypeElement) obj;
+        if (key == null) {
+            if (other.key != null) {
+                return false;
+            }
+        } else if (!key.equals(other.key)) {
+            return false;
+        }
+        if (mandatory != other.mandatory) {
+            return false;
+        }
+        return true;
     }
 
 }

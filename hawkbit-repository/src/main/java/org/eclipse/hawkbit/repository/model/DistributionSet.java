@@ -67,14 +67,14 @@ public class DistributionSet extends NamedVersionedEntity {
 
     @ManyToMany(targetEntity = SoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(name = "sp_ds_module", joinColumns = {
-            @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds") ) }, inverseJoinColumns = {
-                    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module") ) })
+            @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private final Set<SoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = DistributionSetTag.class)
     @JoinTable(name = "sp_ds_dstag", joinColumns = {
-            @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds") ) }, inverseJoinColumns = {
-                    @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag") ) })
+            @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 
     @Column(name = "deleted")
@@ -95,7 +95,7 @@ public class DistributionSet extends NamedVersionedEntity {
     private final List<DistributionSetMetadata> metadata = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds") )
+    @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     private DistributionSetType type;
 
     @Column(name = "complete")
@@ -130,7 +130,9 @@ public class DistributionSet extends NamedVersionedEntity {
         if (moduleList != null) {
             moduleList.forEach(this::addModule);
         }
-        complete = type.checkComplete(this);
+        if (this.type != null) {
+            complete = this.type.checkComplete(this);
+        }
     }
 
     public Set<DistributionSetTag> getTags() {

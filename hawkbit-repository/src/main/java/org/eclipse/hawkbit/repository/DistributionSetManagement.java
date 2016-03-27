@@ -188,11 +188,12 @@ public class DistributionSetManagement {
                     toBeChangedDSs.add(set);
                 }
             }
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0, toBeChangedDSs.size(),
-                    Collections.emptyList(), distributionSetRepository.save(toBeChangedDSs), myTag);
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
+                    toBeChangedDSs.size(), Collections.emptyList(), distributionSetRepository.save(toBeChangedDSs),
+                    myTag);
         } else {
-            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(), 0,
-                    distributionSetRepository.save(toBeChangedDSs), Collections.emptyList(), myTag);
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
+                    0, distributionSetRepository.save(toBeChangedDSs), Collections.emptyList(), myTag);
         }
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
@@ -348,6 +349,9 @@ public class DistributionSetManagement {
     public List<DistributionSet> createDistributionSets(@NotNull final Iterable<DistributionSet> distributionSets) {
         for (final DistributionSet ds : distributionSets) {
             prepareDsSave(ds);
+            if (ds.getType() == null) {
+                ds.setType(systemManagement.getTenantMetadata().getDefaultDsType());
+            }
         }
         return distributionSetRepository.save(distributionSets);
     }

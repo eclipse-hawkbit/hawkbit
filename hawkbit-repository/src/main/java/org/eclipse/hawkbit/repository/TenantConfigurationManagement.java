@@ -150,7 +150,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      * @param configurationKey
      *            the key of the configuration
      * @return the converted configuration value either from the tenant specific
-     *         configuration stored or from the fallback default values or
+     *         configuration stored or from the fall back default values or
      *         {@code null} in case key has not been configured and not default
      *         value exists
      * @throws TenantConfigurationValidatorException
