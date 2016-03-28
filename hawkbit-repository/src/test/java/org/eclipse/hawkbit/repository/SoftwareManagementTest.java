@@ -638,14 +638,14 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         softwareManagement.deleteSoftwareModule(deleted);
 
         // with filter on name, version and module type
-        assertThat(softwareManagement.findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc(pageReq,
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
                 set.getId(), "found", testType).getContent())
                         .as("Found modules with given name, given module type and the assigned ones first")
                         .containsExactly(new CustomSoftwareModule(one, true), new CustomSoftwareModule(two, true),
                                 new CustomSoftwareModule(unassigned, false));
 
         // with filter on module type only
-        assertThat(softwareManagement.findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc(pageReq,
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
                 set.getId(), null, testType).getContent())
                         .as("Found modules with given module type and the assigned ones first").containsExactly(
                                 new CustomSoftwareModule(differentName, true), new CustomSoftwareModule(one, true),
@@ -653,7 +653,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // without any filter
         assertThat(softwareManagement
-                .findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc(pageReq, set.getId(), null, null)
+                .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq, set.getId(), null, null)
                 .getContent()).as("Found modules with the assigned ones first").containsExactly(
                         new CustomSoftwareModule(differentName, true), new CustomSoftwareModule(one, true),
                         new CustomSoftwareModule(two, true), new CustomSoftwareModule(four, true),

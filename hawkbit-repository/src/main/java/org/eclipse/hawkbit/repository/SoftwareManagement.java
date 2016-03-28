@@ -508,13 +508,13 @@ public class SoftwareManagement {
      * @param orderByDistributionId
      *            the ID of distribution set to be ordered on top
      * @param searchText
-     *            to be filtered as "like" on {@link SoftwareModule#getName()}
+     *            filtered as "like" on {@link SoftwareModule#getName()}
      * @param type
-     *            to be filtered as "like" on {@link SoftwareModule#getType()}
+     *            filtered as "equal" on {@link SoftwareModule#getType()}
      * @return the page of found {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public Slice<CustomSoftwareModule> findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc(
+    public Slice<CustomSoftwareModule> findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
             @NotNull final Pageable pageable, @NotNull final Long orderByDistributionId, final String searchText,
             final SoftwareModuleType type) {
 
