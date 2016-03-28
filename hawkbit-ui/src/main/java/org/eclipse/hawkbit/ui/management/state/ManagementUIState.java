@@ -35,17 +35,19 @@ public class ManagementUIState implements Serializable {
 
     private static final long serialVersionUID = 7301409196969723794L;
 
+    private final transient Set<Object> expandParentActionRowId = new HashSet<>();
+
     @Autowired
     private DistributionTableFilters distributionTableFilters;
 
     @Autowired
     private TargetTableFilters targetTableFilters;
 
-    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<TargetIdName, DistributionSetIdName>();
+    private final Map<TargetIdName, DistributionSetIdName> assignedList = new HashMap<>();
 
-    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<DistributionSetIdName>();
+    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
-    private final Set<TargetIdName> deletedTargetList = new HashSet<TargetIdName>();
+    private final Set<TargetIdName> deletedTargetList = new HashSet<>();
 
     private Boolean targetTagLayoutVisible = Boolean.TRUE;
 
@@ -60,28 +62,26 @@ public class ManagementUIState implements Serializable {
 
     private boolean distTagFilterClosed = true;
 
-    private Long targetsTruncated = null;
+    private Long targetsTruncated;
 
     private final AtomicLong targetsCountAll = new AtomicLong();
 
-    private boolean isDsTableMaximized = Boolean.FALSE;
+    private boolean dsTableMaximized = Boolean.FALSE;
 
     // Contains ID and NAme of last selected target
     private DistributionSetIdName lastSelectedDsIdName;
     // Contains list of ID and Names of all the selected Targets
     private Set<DistributionSetIdName> selectedDsIdName = Collections.emptySet();
 
-    private boolean isTargetTableMaximized = Boolean.FALSE;
+    private boolean targetTableMaximized = Boolean.FALSE;
 
-    private boolean isActionHistoryMaximized = Boolean.FALSE;
+    private boolean actionHistoryMaximized = Boolean.FALSE;
 
     private boolean noDataAvilableTarget = Boolean.FALSE;
 
     private boolean noDataAvailableDistribution = Boolean.FALSE;
 
-    private final Set<String> canceledTargetName = new HashSet<String>();
-
-    private final Set<Object> expandParentActionRowId = new HashSet<Object>();
+    private final Set<String> canceledTargetName = new HashSet<>();
 
     private boolean customFilterSelected;
 
@@ -114,7 +114,7 @@ public class ManagementUIState implements Serializable {
      *            the isCustomFilterSelected to set
      */
     public void setCustomFilterSelected(final boolean isCustomFilterSelected) {
-        this.customFilterSelected = isCustomFilterSelected;
+        customFilterSelected = isCustomFilterSelected;
     }
 
     public Set<Object> getExpandParentActionRowId() {
@@ -134,7 +134,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public void setTargetTagLayoutVisible(final Boolean targetTagVisible) {
-        this.targetTagLayoutVisible = targetTagVisible;
+        targetTagLayoutVisible = targetTagVisible;
     }
 
     public Boolean getTargetTagLayoutVisible() {
@@ -241,25 +241,25 @@ public class ManagementUIState implements Serializable {
      * increments the targets all counter.
      */
     public void incrementTargetsCountAll() {
-        this.targetsCountAll.incrementAndGet();
+        targetsCountAll.incrementAndGet();
     }
 
     /**
      * decrement the targets all counter.
      */
     public void decrementTargetsCountAll() {
-        final long decrementAndGet = this.targetsCountAll.decrementAndGet();
+        final long decrementAndGet = targetsCountAll.decrementAndGet();
         if (decrementAndGet < 0) {
-            this.targetsCountAll.set(0);
+            targetsCountAll.set(0);
         }
     }
 
     public boolean isDsTableMaximized() {
-        return isDsTableMaximized;
+        return dsTableMaximized;
     }
 
     public void setDsTableMaximized(final boolean isDsTableMaximized) {
-        this.isDsTableMaximized = isDsTableMaximized;
+        this.dsTableMaximized = isDsTableMaximized;
     }
 
     public DistributionSetIdName getLastSelectedDsIdName() {
@@ -282,7 +282,7 @@ public class ManagementUIState implements Serializable {
      * @return the isTargetTableMaximized
      */
     public boolean isTargetTableMaximized() {
-        return isTargetTableMaximized;
+        return targetTableMaximized;
     }
 
     /**
@@ -290,14 +290,14 @@ public class ManagementUIState implements Serializable {
      *            the isTargetTableMaximized to set
      */
     public void setTargetTableMaximized(final boolean isTargetTableMaximized) {
-        this.isTargetTableMaximized = isTargetTableMaximized;
+        this.targetTableMaximized = isTargetTableMaximized;
     }
 
     /**
      * @return the isActionHistoryMaximized
      */
     public boolean isActionHistoryMaximized() {
-        return isActionHistoryMaximized;
+        return actionHistoryMaximized;
     }
 
     /**
@@ -305,7 +305,7 @@ public class ManagementUIState implements Serializable {
      *            the isActionHistoryMaximized to set
      */
     public void setActionHistoryMaximized(final boolean isActionHistoryMaximized) {
-        this.isActionHistoryMaximized = isActionHistoryMaximized;
+        this.actionHistoryMaximized = isActionHistoryMaximized;
     }
 
     /**

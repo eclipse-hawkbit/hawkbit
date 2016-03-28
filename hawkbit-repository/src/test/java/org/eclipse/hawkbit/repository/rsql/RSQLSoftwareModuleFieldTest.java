@@ -23,7 +23,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL filter software module")
 public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
 
@@ -61,6 +61,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
     public void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub*", 2);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub*", 2);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=in=(agent-hub,notexist)", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=out=(agent-hub,notexist)", 3);
@@ -94,12 +95,12 @@ public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("")
+    @Description("Test filter software module by metadata")
     public void testFilterByMetadata() {
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==*v*", 2);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==noExist*", 0);
-        assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=in=(metaValue,notexist)", 1);
+        assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=in=(metaValue,value)", 2);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".notExist==metaValue", 0);
 

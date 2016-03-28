@@ -73,8 +73,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Distribution set table.
- * 
- *
  *
  */
 @SpringComponent
@@ -136,52 +134,36 @@ public class DistributionSetTable extends AbstractTable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
-     */
     @Override
     protected String getTableId() {
         return SPUIComponetIdProvider.DIST_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
-     * )
-     */
     @Override
     protected Container createContainer() {
 
-        final Map<String, Object> queryConfiguration = new HashMap<String, Object>();
+        final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
+        final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<>(ManageDistBeanQuery.class);
+
+        distributionQF.setQueryConfiguration(queryConfiguration);
+        return new LazyQueryContainer(
+                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
+                distributionQF);
+    }
+
+    private Map<String, Object> prepareQueryConfigFilters() {
+        final Map<String, Object> queryConfig = new HashMap<>();
         manageDistUIState.getManageDistFilters().getSearchText()
-                .ifPresent(value -> queryConfiguration.put(SPUIDefinitions.FILTER_BY_TEXT, value));
+                .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
 
         if (null != manageDistUIState.getManageDistFilters().getClickedDistSetType()) {
-            queryConfiguration.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
+            queryConfig.put(SPUIDefinitions.FILTER_BY_DISTRIBUTION_SET_TYPE,
                     manageDistUIState.getManageDistFilters().getClickedDistSetType());
         }
 
-        final BeanQueryFactory<ManageDistBeanQuery> distributionQF = new BeanQueryFactory<ManageDistBeanQuery>(
-                ManageDistBeanQuery.class);
-        distributionQF.setQueryConfiguration(queryConfiguration);
-        final LazyQueryContainer distContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, SPUIDefinitions.PAGE_SIZE, SPUILabelDefinitions.VAR_DIST_ID_NAME),
-                distributionQF);
-
-        return distContainer;
+        return queryConfig;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties
-     * (com.vaadin.data.Container )
-     */
     @Override
     protected void addContainerProperties(final Container container) {
         HawkbitCommonUtil.getDsTableColumnProperties(container);
@@ -189,12 +171,6 @@ public class DistributionSetTable extends AbstractTable {
                 Boolean.class, null, false, true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * addCustomGeneratedColumns ()
-     */
     @Override
     protected void addCustomGeneratedColumns() {
         /**
@@ -202,23 +178,12 @@ public class DistributionSetTable extends AbstractTable {
          */
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * isFirstRowSelectedOnLoad ()
-     */
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
         return !manageDistUIState.getSelectedDistributions().isPresent()
                 || manageDistUIState.getSelectedDistributions().get().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
-     */
     @Override
     protected Object getItemIdToSelect() {
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
@@ -227,12 +192,6 @@ public class DistributionSetTable extends AbstractTable {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
-     */
     @Override
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
@@ -267,33 +226,16 @@ public class DistributionSetTable extends AbstractTable {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
-     */
     @Override
     protected boolean isMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
-     * ()
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         return HawkbitCommonUtil.getTableVisibleColumns(isMaximized(), false, i18n);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
-     */
     @Override
     protected DropHandler getTableDropHandler() {
         return new DropHandler() {
@@ -317,7 +259,7 @@ public class DistributionSetTable extends AbstractTable {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final Table source = transferable.getSourceComponent();
         final Set<Long> softwareModuleSelected = (Set<Long>) source.getValue();
-        final Set<Long> softwareModulesIdList = new HashSet<Long>();
+        final Set<Long> softwareModulesIdList = new HashSet<>();
 
         if (!softwareModuleSelected.contains(transferable.getData("itemId"))) {
             softwareModulesIdList.add((Long) transferable.getData("itemId"));
@@ -345,11 +287,11 @@ public class DistributionSetTable extends AbstractTable {
         final String distVersion = (String) item.getItemProperty("version").getValue();
         final DistributionSetIdName distributionSetIdName = new DistributionSetIdName(distId, distName, distVersion);
 
-        final Map<Long, Set<SoftwareModuleIdName>> map;
+        final HashMap<Long, HashSet<SoftwareModuleIdName>> map;
         if (manageDistUIState.getConsolidatedDistSoftwarewList().containsKey(distributionSetIdName)) {
             map = manageDistUIState.getConsolidatedDistSoftwarewList().get(distributionSetIdName);
         } else {
-            map = new HashMap<Long, Set<SoftwareModuleIdName>>();
+            map = new HashMap<>();
             manageDistUIState.getConsolidatedDistSoftwarewList().put(distributionSetIdName, map);
         }
 
@@ -382,7 +324,8 @@ public class DistributionSetTable extends AbstractTable {
             }
         }
 
-        final Set<SoftwareModuleIdName> softwareModules = new HashSet<SoftwareModuleIdName>();
+        // hashset is seriablizable
+        final HashSet<SoftwareModuleIdName> softwareModules = new HashSet<>();
         map.keySet().forEach(typeId -> softwareModules.addAll(map.get(typeId)));
 
         updateDropedDetails(distributionSetIdName, softwareModules);
@@ -405,8 +348,8 @@ public class DistributionSetTable extends AbstractTable {
      * @param softwareModule
      * @param softwareModuleIdName
      */
-    private void handleFirmwareCase(final Map<Long, Set<SoftwareModuleIdName>> map, final SoftwareModule softwareModule,
-            final SoftwareModuleIdName softwareModuleIdName) {
+    private void handleFirmwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
+            final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
         if (softwareModule.getType().getMaxAssignments() == 1) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
@@ -423,8 +366,8 @@ public class DistributionSetTable extends AbstractTable {
      * @param softwareModule
      * @param softwareModuleIdName
      */
-    private void handleSoftwareCase(final Map<Long, Set<SoftwareModuleIdName>> map, final SoftwareModule softwareModule,
-            final SoftwareModuleIdName softwareModuleIdName) {
+    private void handleSoftwareCase(final Map<Long, HashSet<SoftwareModuleIdName>> map,
+            final SoftwareModule softwareModule, final SoftwareModuleIdName softwareModuleIdName) {
         if (softwareModule.getType().getMaxAssignments() == Integer.MAX_VALUE) {
             if (!map.containsKey(softwareModule.getType().getId())) {
                 map.put(softwareModule.getType().getId(), new HashSet<SoftwareModuleIdName>());
@@ -434,7 +377,7 @@ public class DistributionSetTable extends AbstractTable {
     }
 
     private void updateDropedDetails(final DistributionSetIdName distributionSetIdName,
-            final Set<SoftwareModuleIdName> softwareModules) {
+            final HashSet<SoftwareModuleIdName> softwareModules) {
         LOG.debug("Adding a log to check if distributionSetIdName is null : {} ", distributionSetIdName);
         manageDistUIState.getAssignedList().put(distributionSetIdName, softwareModules);
 
@@ -487,20 +430,20 @@ public class DistributionSetTable extends AbstractTable {
     }
 
     private boolean isSoftwareModuleDragged(final Long distId, final SoftwareModule sm) {
-        for (final Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : manageDistUIState.getAssignedList()
-                .entrySet()) {
-            if (distId.equals(entry.getKey().getId())) {
-                final Set<SoftwareModuleIdName> swModuleIdNames = entry.getValue();
-                for (final SoftwareModuleIdName swModuleIdName : swModuleIdNames) {
-
-                    if ((sm.getName().concat(":" + sm.getVersion())).equals(swModuleIdName.getName())) {
-                        notification.displayValidationError(i18n.get("message.software.already.dragged",
-                                HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
-                        return false;
-                    }
-                }
-
+        for (final Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : manageDistUIState
+                .getAssignedList().entrySet()) {
+            if (!distId.equals(entry.getKey().getId())) {
+                continue;
             }
+            final Set<SoftwareModuleIdName> swModuleIdNames = entry.getValue();
+            for (final SoftwareModuleIdName swModuleIdName : swModuleIdNames) {
+                if ((sm.getName().concat(":" + sm.getVersion())).equals(swModuleIdName.getName())) {
+                    notification.displayValidationError(i18n.get("message.software.already.dragged",
+                            HawkbitCommonUtil.concatStrings(":", sm.getName(), sm.getVersion())));
+                    return false;
+                }
+            }
+
         }
         return true;
     }
@@ -564,21 +507,18 @@ public class DistributionSetTable extends AbstractTable {
     }
 
     private void addTableStyleGenerator() {
-        setCellStyleGenerator(new Table.CellStyleGenerator() {
-            @Override
-            public String getStyle(final Table source, final Object itemId, final Object propertyId) {
-                if (propertyId == null) {
-                    // Styling for row
-                    final Item item = getItem(itemId);
-                    final Boolean isComplete = (Boolean) item
-                            .getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).getValue();
-                    if (!isComplete) {
-                        return SPUIDefinitions.DISABLE_DISTRIBUTION;
-                    }
-                    return null;
-                } else {
-                    return null;
+        setCellStyleGenerator((source, itemId, propertyId) -> {
+            if (propertyId == null) {
+                // Styling for row
+                final Item item = getItem(itemId);
+                final Boolean isComplete = (Boolean) item
+                        .getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).getValue();
+                if (!isComplete) {
+                    return SPUIDefinitions.DISABLE_DISTRIBUTION;
                 }
+                return null;
+            } else {
+                return null;
             }
         });
     }
@@ -603,7 +543,7 @@ public class DistributionSetTable extends AbstractTable {
 
     /**
      * DistributionTableFilterEvent.
-     * 
+     *
      * @param event
      *            as instance of {@link DistributionTableFilterEvent}
      */

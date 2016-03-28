@@ -65,6 +65,7 @@ public enum SpServerError {
     */
     SP_REST_SORT_PARAM_INVALID_DIRECTION("hawkbit.server.error.rest.param.invalidDirection",
             "The given sort parameter direction does not exist"),
+
     /**
     *
     */
@@ -174,7 +175,23 @@ public enum SpServerError {
     *
     */
     SP_REPO_ENTITY_READ_ONLY("hawkbit.server.error.entityreadonly",
-            "The given entity is read only and the change cannot be completed.");
+            "The given entity is read only and the change cannot be completed."),
+
+    /**
+     * 
+     */
+    SP_CONFIGURATION_VALUE_INVALID("hawkbit.server.error.configValueInvalid",
+            "The given configuration value is invalid."),
+    /**
+     * 
+     */
+    SP_CONFIGURATION_KEY_INVALID("hawkbit.server.error.configKeyInvalid", "The given configuration key is invalid."),
+
+    /**
+     * 
+     */
+    SP_ROLLOUT_ILLEGAL_STATE("hawkbit.server.error.rollout.illegalstate",
+            "The rollout is currently in the wrong state for the current operation");
 
     private final String key;
     private final String message;

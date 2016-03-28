@@ -40,11 +40,11 @@ public class ManageDistUIState implements Serializable {
     @Autowired
     private ManageSoftwareModuleFilters softwareModuleFilters;
 
-    private final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = new HashMap<DistributionSetIdName, Set<SoftwareModuleIdName>>();
+    private final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = new HashMap<>();
 
-    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<DistributionSetIdName>();
+    private final Set<DistributionSetIdName> deletedDistributionList = new HashSet<>();
 
-    private Set<DistributionSetIdName> selectedDistributions = new HashSet<DistributionSetIdName>();
+    private Set<DistributionSetIdName> selectedDistributions = new HashSet<>();
 
     private DistributionSetIdName lastSelectedDistribution;
 
@@ -62,13 +62,13 @@ public class ManageDistUIState implements Serializable {
 
     private final Map<Long, String> deleteSofwareModulesList = new HashMap<>();
 
-    private boolean isSwModuleTableMaximized = Boolean.FALSE;
+    private boolean swModuleTableMaximized = Boolean.FALSE;
 
-    private boolean isDsTableMaximized = Boolean.FALSE;
+    private boolean dsTableMaximized = Boolean.FALSE;
 
-    private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<String, SoftwareModuleIdName>();
+    private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<>();
 
-    private final Map<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>>();
+    private final Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> consolidatedDistSoftwarewList = new HashMap<>();
 
     private boolean noDataAvilableSwModule = Boolean.FALSE;
 
@@ -89,10 +89,11 @@ public class ManageDistUIState implements Serializable {
     }
 
     /**
-     * 
+     * Need HashSet because the Set have to be serializable
+     *
      * @return the assignedList
      */
-    public Map<DistributionSetIdName, Set<SoftwareModuleIdName>> getAssignedList() {
+    public Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> getAssignedList() {
         return assignedList;
     }
 
@@ -119,7 +120,7 @@ public class ManageDistUIState implements Serializable {
     }
 
     public void setSelectedDistributions(final Set<DistributionSetIdName> slectedDistributions) {
-        this.selectedDistributions = slectedDistributions;
+        selectedDistributions = slectedDistributions;
     }
 
     /**
@@ -140,7 +141,7 @@ public class ManageDistUIState implements Serializable {
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return this.selectedBaseSwModuleId != null ? Optional.of(this.selectedBaseSwModuleId) : Optional.empty();
+        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
     }
 
     /**
@@ -214,20 +215,20 @@ public class ManageDistUIState implements Serializable {
 
     /**
      * Get isSwModuleTableMaximized.
-     * 
+     *
      * @return boolean
      */
     public boolean isDsTableMaximized() {
-        return isDsTableMaximized;
+        return dsTableMaximized;
     }
 
     /***
      * Set isDsModuleTableMaximized.
-     * 
+     *
      * @param isDsModuleTableMaximized
      */
-    public void setDsTableMaximized(final boolean isDsModuleTableMaximized) {
-        this.isDsTableMaximized = isDsModuleTableMaximized;
+    public void setDsTableMaximized(final boolean dsModuleTableMaximized) {
+        dsTableMaximized = dsModuleTableMaximized;
     }
 
     public Map<String, SoftwareModuleIdName> getAssignedSoftwareModuleDetails() {
@@ -238,15 +239,15 @@ public class ManageDistUIState implements Serializable {
      * @return the isSwModuleTableMaximized
      */
     public boolean isSwModuleTableMaximized() {
-        return isSwModuleTableMaximized;
+        return swModuleTableMaximized;
     }
 
     /**
      * @param isSwModuleTableMaximized
      *            the isSwModuleTableMaximized to set
      */
-    public void setSwModuleTableMaximized(final boolean isSwModuleTableMaximized) {
-        this.isSwModuleTableMaximized = isSwModuleTableMaximized;
+    public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
+        this.swModuleTableMaximized = swModuleTableMaximized;
     }
 
     /**
@@ -279,7 +280,12 @@ public class ManageDistUIState implements Serializable {
         this.noDataAvailableDist = noDataAvailableDist;
     }
 
-    public Map<DistributionSetIdName, Map<Long, Set<SoftwareModuleIdName>>> getConsolidatedDistSoftwarewList() {
+    /**
+     * Need HashSet because the Set have to be serializable
+     *
+     * @return map
+     */
+    public Map<DistributionSetIdName, HashMap<Long, HashSet<SoftwareModuleIdName>>> getConsolidatedDistSoftwarewList() {
         return consolidatedDistSoftwarewList;
     }
 

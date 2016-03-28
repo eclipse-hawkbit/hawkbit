@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.report.model;
 
+import java.io.Serializable;
+
 /**
  * An data report series item which contains a type and a value.
  *
@@ -16,8 +18,9 @@ package org.eclipse.hawkbit.report.model;
  * @param <T>
  *            the type of the report series item
  */
-public class DataReportSeriesItem<T extends Object> {
+public class DataReportSeriesItem<T extends Serializable> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final T type;
     private final Number data;
 

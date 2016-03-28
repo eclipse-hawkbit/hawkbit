@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ import com.vaadin.ui.Window;
 
 /**
  * Distribution set details layout.
- * 
+ *
  *
  *
  */
@@ -153,12 +154,13 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     @SuppressWarnings("unchecked")
     private void showUnsavedAssignment() {
         Item item;
-        final Map<DistributionSetIdName, Set<SoftwareModuleIdName>> assignedList = manageDistUIState.getAssignedList();
+        final Map<DistributionSetIdName, HashSet<SoftwareModuleIdName>> assignedList = manageDistUIState
+                .getAssignedList();
         final Long selectedDistId = manageDistUIState.getLastSelectedDistribution().isPresent()
                 ? manageDistUIState.getLastSelectedDistribution().get().getId() : null;
         Set<SoftwareModuleIdName> softwareModuleIdNameList = null;
 
-        for (final Map.Entry<DistributionSetIdName, Set<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
+        for (final Map.Entry<DistributionSetIdName, HashSet<SoftwareModuleIdName>> entry : assignedList.entrySet()) {
             if (entry.getKey().getId().equals(selectedDistId)) {
                 softwareModuleIdNameList = entry.getValue();
                 break;
@@ -321,7 +323,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onEdit(com.vaadin.ui .Button.ClickEvent)
      */
@@ -336,7 +338,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getEditButtonId()
      */
@@ -347,7 +349,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onLoadIsSwModuleSelected ()
      */
@@ -359,7 +361,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * onLoadIsTableMaximized ()
      */
@@ -370,7 +372,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * populateDetailsWidget()
      */
@@ -381,7 +383,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getDefaultCaption()
      */
@@ -392,7 +394,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * addTabs(com.vaadin. ui.TabSheet)
      */
@@ -407,7 +409,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * clearDetails()
      */
@@ -418,7 +420,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * hasEditSoftwareModulePermission()
      */
@@ -507,7 +509,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
      * getTabSheetId()
      */

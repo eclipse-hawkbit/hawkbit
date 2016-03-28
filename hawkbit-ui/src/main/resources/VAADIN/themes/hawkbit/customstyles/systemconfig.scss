@@ -44,5 +44,11 @@
       bottom: 13px;
       color: $button-icon-color;
     }
+
+  }
+    
+  .durationfield .v-datefield-calendarpanel-header,
+  .durationfield .v-datefield-calendarpanel-body {
+    display: none;
   }
 }

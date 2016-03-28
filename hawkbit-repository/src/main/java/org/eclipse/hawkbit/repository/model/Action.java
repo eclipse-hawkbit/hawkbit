@@ -24,6 +24,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedEntityGraphs;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -34,28 +35,22 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * <p>
- * Applicable transition changes of the software {@link SoftwareModule} state of
- * a {@link Target}, e.g. install, uninstall, update, start, stop, and
- * preparations for the transition change, i.e. download.
+ * Applicable transition changes of the {@link SoftwareModule}s state of a
+ * {@link Target}, e.g. install, uninstall, update and preparations for the
+ * transition change, i.e. download.
  * </p>
  *
  * <p>
- * Actions are managed by the SP server (SPS) and applied to the edge controller
- * by the SP controller (SPC). Actions may also be value added commands that are
- * nor directly related to SP, e.g. factory reset.
+ * Actions are managed by the SP server and applied to the targets by the
+ * client.
  * <p>
- *
- *
- *
- *
- *
  */
 @Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
         @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
         @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
 @NamedEntityGraphs({ @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
-                @NamedAttributeNode("target") }) })
+                @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet") ) ) })
 @Entity
 public class Action extends BaseEntity implements Comparable<Action> {
     private static final long serialVersionUID = 1L;
@@ -93,6 +88,14 @@ public class Action extends BaseEntity implements Comparable<Action> {
     @OneToMany(mappedBy = "action", targetEntity = ActionStatus.class, fetch = FetchType.LAZY, cascade = {
             CascadeType.REMOVE })
     private List<ActionStatus> actionStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rolloutgroup", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup") )
+    private RolloutGroup rolloutGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout") )
+    private Rollout rollout;
 
     /**
      * Note: filled only in {@link Status#DOWNLOAD}.
@@ -219,6 +222,36 @@ public class Action extends BaseEntity implements Comparable<Action> {
      */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
+    }
+
+    /**
+     * @return the rolloutGroup
+     */
+    public RolloutGroup getRolloutGroup() {
+        return rolloutGroup;
+    }
+
+    /**
+     * @param rolloutGroup
+     *            the rolloutGroup to set
+     */
+    public void setRolloutGroup(final RolloutGroup rolloutGroup) {
+        this.rolloutGroup = rolloutGroup;
+    }
+
+    /**
+     * @return the rollout
+     */
+    public Rollout getRollout() {
+        return rollout;
+    }
+
+    /**
+     * @param rollout
+     *            the rollout to set
+     */
+    public void setRollout(final Rollout rollout) {
+        this.rollout = rollout;
     }
 
     @Override
@@ -379,7 +412,13 @@ public class Action extends BaseEntity implements Comparable<Action> {
         /**
          * Action needs download by this target which has now started.
          */
-        DOWNLOAD;
+        DOWNLOAD,
+
+        /**
+         * Action is in waiting state, e.g. the action is scheduled in a rollout
+         * but not yet activated.
+         */
+        SCHEDULED;
     }
 
     /**

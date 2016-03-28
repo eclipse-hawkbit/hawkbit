@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.rsql;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
@@ -27,7 +28,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL filter distribution set")
 public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
 
@@ -43,7 +44,7 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
         final DistributionSet ds2 = TestDataUtil
                 .generateDistributionSets("NewDS", 3, softwareManagement, distributionSetManagement).get(0);
 
-        ds2.setDescription("DS2");
+        ds2.setDescription("DS%");
         ds2.getMetadata().add(new DistributionSetMetadata("metaKey", ds2, "value"));
         distributionSetManagement.updateDistributionSet(ds2);
 
@@ -76,6 +77,7 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     public void testFilterByParameterDescription() {
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS*", 2);
+        assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS%", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "=in=(DS,notexist)", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "=out=(DS,notexist)", 3);
@@ -94,7 +96,11 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     @Description("Test filter distribution set by complete property")
     public void testFilterByAttribute() {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 4);
-        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
+        try {
+            assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
+            fail("Expected RSQLParameterSyntaxException");
+        } catch (final RSQLParameterSyntaxException e) {
+        }
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 0);
     }
@@ -134,7 +140,7 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
         final Page<DistributionSet> find = distributionSetManagement.findDistributionSetsAll(
                 RSQLUtility.parse(rsqlParam, DistributionSetFields.class), new PageRequest(0, 100), false);
         final long countAll = find.getTotalElements();
-        assertThat(find).isNotNull();
-        assertThat(countAll).isEqualTo(excpectedEntity);
+        assertThat(find).as("Founded entity is should not be null").isNotNull();
+        assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);
     }
 }

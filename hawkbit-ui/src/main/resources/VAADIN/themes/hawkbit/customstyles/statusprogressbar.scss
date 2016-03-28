@@ -1,0 +1,53 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+@mixin statusprogressbar {
+  .alump-dbar {
+    .status-bar-part-scheduled {
+      background-color: $progress-bar-scheduled-part !important;
+    }
+
+    .status-bar-part-running {
+      background-color: $progress-bar-running-part !important;
+    }
+
+    .status-bar-part-error {
+      background-color: $progress-bar-error-part !important;
+    }
+
+    .status-bar-part-finished {
+      background-color: $progress-bar-finished-part !important;
+    }
+
+    .status-bar-part-cancelled {
+      background-color: $progress-bar-cancelled-part !important;
+    }
+
+    .status-bar-part-notstarted {
+      background-color: $progress-bar-notstarted-part !important;
+    }
+    
+    .alump-dbar-left {
+      padding: 3px 0px 3px 0px !important;
+    }
+
+    .alump-dbar-middle {
+      padding: 3px 0px 3px 0px !important;
+    }
+
+    .alump-dbar-right {
+      padding: 3px 0px 3px 0px !important;
+    }
+
+    .alump-dbar-only {
+      padding: 3px 0px 3px 0px !important;
+    }
+    
+  }
+
+}

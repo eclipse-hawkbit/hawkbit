@@ -46,11 +46,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test for {@link DistributionSetTypeResource}.
  *
- *
- *
- *
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Distribution Set Type Resource")
 public class DistributionSetTypeResourceTest extends AbstractIntegrationTest {
 
@@ -90,6 +87,43 @@ public class DistributionSetTypeResourceTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$content.[?(@.key==test123)][0]._links.optionalmodules.href", equalTo(
                         "http://localhost/rest/v1/distributionsettypes/" + testType.getId() + "/optionalmoduletypes")))
                 .andExpect(jsonPath("$total", equalTo(4)));
+    }
+
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with sorting by KEY.")
+    public void getDistributionSetTypesSortedByKey() throws Exception {
+
+        DistributionSetType testType = distributionSetManagement
+                .createDistributionSetType(new DistributionSetType("zzzzz", "TestName123", "Desc123"));
+        testType.setDescription("Desc1234");
+        testType = distributionSetManagement.updateDistributionSetType(testType);
+
+        // descending
+        mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
+                .param(RestConstants.REQUEST_PARAMETER_SORTING, "KEY:DESC")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[0].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$content.[0].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$content.[0].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$content.[0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[0].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$content.[0].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[0].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$content.[0].key", equalTo("zzzzz"))).andExpect(jsonPath("$total", equalTo(4)));
+
+        // ascending
+        mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
+                .param(RestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC")).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$content.[3].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$content.[3].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$content.[3].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$content.[3].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[3].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$content.[3].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[3].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$content.[3].key", equalTo("zzzzz"))).andExpect(jsonPath("$total", equalTo(4)));
     }
 
     @Test

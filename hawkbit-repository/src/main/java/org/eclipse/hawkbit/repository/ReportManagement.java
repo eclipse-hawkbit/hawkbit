@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,14 +54,10 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Service layer for generating SP reportings.
  *
- *
- *
- *
  */
 @Transactional(readOnly = true)
 @Validated
 @Service
-@ConfigurationProperties
 public class ReportManagement {
 
     @Value("${spring.jpa.database}")
@@ -213,8 +208,8 @@ public class ReportManagement {
      *         count
      */
     @Cacheable("targetsCreatedOverPeriod")
-    public <T> DataReportSeries<T> targetsCreatedOverPeriod(final DateType<T> dateType, final LocalDateTime from,
-            final LocalDateTime to) {
+    public <T extends Serializable> DataReportSeries<T> targetsCreatedOverPeriod(final DateType<T> dateType,
+            final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager
                 .createNativeQuery(getTargetsCreatedQueryTemplate(dateType, from, to));
         final List<Object[]> resultList = createNativeQuery.getResultList();
@@ -223,8 +218,7 @@ public class ReportManagement {
                 .map(r -> new DataReportSeriesItem<>(dateType.format((String) r[0]), ((Number) r[1]).longValue()))
                 .collect(Collectors.toList());
 
-        final DataReportSeries<T> report = new DataReportSeries<>("CreatedTargets", reportItems);
-        return report;
+        return new DataReportSeries<>("CreatedTargets", reportItems);
     }
 
     private String getTargetsCreatedQueryTemplate(final DateType<?> dateType, final LocalDateTime from,
@@ -276,8 +270,8 @@ public class ReportManagement {
      *         count
      */
     @Cacheable("feedbackReceivedOverTime")
-    public <T> DataReportSeries<T> feedbackReceivedOverTime(final DateType<T> dateType, final LocalDateTime from,
-            final LocalDateTime to) {
+    public <T extends Serializable> DataReportSeries<T> feedbackReceivedOverTime(final DateType<T> dateType,
+            final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager
                 .createNativeQuery(getFeedbackReceivedQueryTemplate(dateType, from, to));
         final List<Object[]> resultList = createNativeQuery.getResultList();
@@ -286,8 +280,7 @@ public class ReportManagement {
                 .map(r -> new DataReportSeriesItem<>(dateType.format((String) r[0]), ((Number) r[1]).longValue()))
                 .collect(Collectors.toList());
 
-        final DataReportSeries<T> report = new DataReportSeries<>("FeedbackRecieved", reportItems);
-        return report;
+        return new DataReportSeries<>("FeedbackRecieved", reportItems);
     }
 
     /**
@@ -433,7 +426,7 @@ public class ReportManagement {
         }
 
         private DataReportSeriesItem<String> toItem() {
-            return new DataReportSeriesItem<String>(name.getName() != null ? name.getName() : "misc", count);
+            return new DataReportSeriesItem<>(name.getName() != null ? name.getName() : "misc", count);
         }
     }
 

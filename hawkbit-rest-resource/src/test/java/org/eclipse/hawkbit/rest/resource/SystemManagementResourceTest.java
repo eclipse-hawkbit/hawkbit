@@ -40,7 +40,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  *
  *
  */
-@Features("Component Tests - System Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("System Management Resource")
 public class SystemManagementResourceTest extends AbstractIntegrationTestWithMongoDB {
 

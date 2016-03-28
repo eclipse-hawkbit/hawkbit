@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.specifications.TargetSpecifications;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,6 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -508,39 +508,18 @@ public class TargetManagement {
      * @return the page with the found {@link Target}
      */
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<Target>> specList) {
-        final Specifications<Target> specs = creatingTargetSpecifications(specList);
-
-        if (specs == null) {
+        if (specList == null || specList.isEmpty()) {
             return criteriaNoCountDao.findAll(pageable, Target.class);
-        } else {
-            return criteriaNoCountDao.findAll(specs, pageable, Target.class);
         }
-
+        return criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, Target.class);
     }
 
     private Long countByCriteriaAPI(final List<Specification<Target>> specList) {
-        final Specifications<Target> specs = creatingTargetSpecifications(specList);
-
-        if (specs == null) {
+        if (specList == null || specList.isEmpty()) {
             return targetRepository.count();
-        } else {
-            return targetRepository.count(specs);
         }
 
-    }
-
-    private static Specifications<Target> creatingTargetSpecifications(final List<Specification<Target>> specList) {
-        Specifications<Target> specs = null;
-        if (!specList.isEmpty()) {
-            specs = Specifications.where(specList.get(0));
-        }
-        if (specList.size() > 1) {
-            specList.remove(0);
-            for (final Specification<Target> s : specList) {
-                specs = specs.and(s);
-            }
-        }
-        return specs;
+        return targetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     /**
@@ -1010,7 +989,7 @@ public class TargetManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final List<Target> targets) {
-        if (targetRepository.countByControllerIdIn(
+        if (!targets.isEmpty() && targetRepository.countByControllerIdIn(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
         }

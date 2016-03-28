@@ -56,9 +56,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Target table header layout.
- *
- *
- *
  */
 @SpringComponent
 @ViewScope
@@ -92,9 +89,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     private Boolean isComplexFilterViewDisplayed = Boolean.FALSE;
 
-    /**
-     * Initialization of Target Header Component.
-     */
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -258,8 +253,10 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected void resetSearchText() {
-        managementUIState.getTargetTableFilters().setSearchText(null);
-        eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
+        if (managementUIState.getTargetTableFilters().getSearchText().isPresent()) {
+            managementUIState.getTargetTableFilters().setSearchText(null);
+            eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_TEXT);
+        }
     }
 
     private String getSearchText() {
@@ -335,6 +332,11 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     protected DropHandler getDropFilterHandler() {
         return new DropHandler() {
+            /**
+             * 
+             */
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void drop(final DragAndDropEvent event) {
                 filterByDroppedDist(event);
@@ -393,10 +395,9 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
-        @SuppressWarnings("unchecked")
         final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil
                 .getSelectedDSDetails(transferable.getSourceComponent());
-        final Set<DistributionSetIdName> distributionIdSet = new HashSet<DistributionSetIdName>();
+        final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
         if (!distSelected.contains(transferable.getData("itemId"))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));
         } else {
@@ -441,12 +442,6 @@ public class TargetTableHeader extends AbstractTableHeader {
         eventBus.publish(this, TargetFilterEvent.REMOVE_FILTER_BY_DISTRIBUTION);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * displayFilterDropedInfoOnLoad()
-     */
     @Override
     protected void displayFilterDropedInfoOnLoad() {
         if (managementUIState.getTargetTableFilters().getDistributionSet().isPresent()) {
@@ -454,23 +449,11 @@ public class TargetTableHeader extends AbstractTableHeader {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableHeader#
-     * getFilterIconStyle()
-     */
     @Override
     protected String getFilterIconStyle() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.ui.common.table.AbstractTableHeader#
-     * isBulkUploadInProgress()
-     */
     @Override
     protected boolean isBulkUploadInProgress() {
         return managementUIState.getTargetTableFilters().getBulkUpload().getSucessfulUploadCount() != 0

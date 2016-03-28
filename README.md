@@ -4,20 +4,42 @@ Build: [![Circle CI](https://circleci.com/gh/eclipse/hawkbit.svg?style=svg)](htt
 
 [hawkBit](https://projects.eclipse.org/projects/iot.hawkbit) is an domain independent back end solution for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
+# Documentation
+
+see [hawkBit Wiki](https://github.com/eclipse/hawkbit/wiki)
+
 # Contact us
 
 * Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
 * You can also check out our [Project Homepage](https://projects.eclipse.org/projects/iot.hawkbit) for further contact options.
 
 
-# Compile
-```
-mvn install
-```
-
-# Run and use
+# Compile, Run and Getting Started
 
 We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit.
+
+#### Clone and build hawkBit
+```
+$ git clone https://github.com/eclipse/hawkbit.git
+$ cd hawkbit
+$ mvn clean install
+```
+#### Start hawkBit example app
+[Example Application](examples/hawkbit-example-app)
+```
+$ java -jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.jar
+```
+#### Start hawkBit device simulator
+[Device Simulator](examples/hawkbit-device-simulator)
+```
+$ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+```
+#### Generate Getting Started data
+[Example Management API Client](examples/hawkbit-mgmt-api-client)
+```
+$ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#version#.jar
+```
 
 # Releases and Roadmap
 
@@ -28,12 +50,6 @@ We are not providing an off the shelf installation ready hawkBit update server. 
   * Upgrade of Spring Boot and Vaadin depedencies.
   * And of course tons of usability improvements and bug fixes.
 
-
-## Try out examples
-#### Standalone Test Application Server
-[Example Application](examples/hawkbit-example-app)
-#### Device Simulator using the DMF AMQP API
-[Device Simulator](examples/hawkbit-device-simulator)
 
 # Modules
 `hawkbit-core` : core elements.  
@@ -49,9 +65,3 @@ We are not providing an off the shelf installation ready hawkBit update server. 
 `hawkbit-rest-resource` : HTTP REST endpoints for the Management and the Direct Device API.  
 `hawkbit-ui` : Vaadin UI.  
 `hawkbit-cache-redis` : spring cache manager configuration and implementation with redis, distributed cache and distributed events.
-
-
-# Device Integration
-There are two device integration APIs provided by the hawkbit update server.
-* [Direct Device Integration API (HTTP)](DDIA.md)
-* [Device Management Federation API (AMQP)](DMFA.md)

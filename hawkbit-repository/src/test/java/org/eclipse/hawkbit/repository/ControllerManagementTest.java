@@ -9,9 +9,12 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
@@ -67,8 +70,26 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
-        assertThat(deploymentManagement.findActionStatusMessagesByActionInDescOrder(pageReq, savedAction, false)
-                .getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction, false).getNumberOfElements())
+                .isEqualTo(3);
+    }
+
+    @Test
+    @Description("Register a controller which not exist")
+    public void testfindOrRegisterTargetIfItDoesNotexist() {
+        final Target target = controllerManagament.findOrRegisterTargetIfItDoesNotexist("AA", null);
+        assertThat(target).as("target should not be null").isNotNull();
+
+        final Target sameTarget = controllerManagament.findOrRegisterTargetIfItDoesNotexist("AA", null);
+        assertThat(target).as("Target should be the equals").isEqualTo(sameTarget);
+        assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
+
+        try {
+            controllerManagament.findOrRegisterTargetIfItDoesNotexist("", null);
+            fail("target with empty controller id should not be registred");
+        } catch (final ConstraintViolationException e) {
+            // ok
+        }
     }
 
     @Test

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.components;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
@@ -23,7 +24,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.sass.internal.util.StringUtil;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
@@ -46,10 +46,6 @@ import com.vaadin.ui.themes.ValoTheme;
  * Util class to get the Vaadin UI components for the SP-OS main UI. Factory
  * Approach to create necessary UI component which are decorated Aspect of fine
  * tuning the component or extending the component is separated.
- *
- *
- *
- *
  *
  */
 public final class SPUIComponentProvider {
@@ -108,16 +104,16 @@ public final class SPUIComponentProvider {
             final Class<? extends SPUIHeaderLayoutDecorator> tableHeaderLayoutDecorator) {
         // Do we really need this???
         HorizontalLayout hLayout = getHorizontalLayout(new SPUIHorizontalLayout().getUiHorizontalLayout().getClass());
+
+        if (tableHeaderLayoutDecorator == null) {
+            return hLayout;
+        }
+
         try {
-            SPUIHeaderLayoutDecorator layoutDecorator = null;
-            if (tableHeaderLayoutDecorator != null) {
-                layoutDecorator = tableHeaderLayoutDecorator.newInstance();
-                hLayout = layoutDecorator.decorate(hLayout);
-            }
-        } catch (final InstantiationException exception) {
-            LOG.error("Error occured while creating horizontal decorator " + SPUIHeaderLayoutDecorator.class,
-                    exception);
-        } catch (final IllegalAccessException exception) {
+            final SPUIHeaderLayoutDecorator layoutDecorator = tableHeaderLayoutDecorator.newInstance();
+            hLayout = layoutDecorator.decorate(hLayout);
+
+        } catch (final InstantiationException | IllegalAccessException exception) {
             LOG.error("Error occured while creating horizontal decorator " + SPUIHeaderLayoutDecorator.class,
                     exception);
         }
@@ -324,7 +320,7 @@ public final class SPUIComponentProvider {
      * @return Label
      */
     public static Label createNameValueLabel(final String label, final String... values) {
-        final String valueStr = StringUtil.collectionToDelimitedString(Arrays.asList(values), " ");
+        final String valueStr = StringUtils.join(Arrays.asList(values), " ");
         final Label nameValueLabel = new Label(getBoldHTMLText(label) + valueStr, ContentMode.HTML);
         nameValueLabel.setSizeFull();
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
@@ -408,6 +404,24 @@ public final class SPUIComponentProvider {
             link.setStyleName(style);
         }
 
+        return link;
+
+    }
+
+    /**
+     * Generates help/documentation links from within management UI.
+     * 
+     * @param uri
+     *            to documentation site
+     * 
+     * @return generated link
+     */
+    public static Link getHelpLink(final String uri) {
+
+        final Link link = new Link("", new ExternalResource(uri));
+        link.setTargetName("_blank");
+        link.setIcon(FontAwesome.QUESTION_CIRCLE);
+        link.setDescription("Documentation");
         return link;
 
     }

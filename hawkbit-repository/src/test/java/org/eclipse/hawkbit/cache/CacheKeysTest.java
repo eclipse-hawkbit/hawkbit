@@ -12,6 +12,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Repository")
+@Stories("CacheKeys")
 public class CacheKeysTest {
 
     @Test
@@ -21,5 +26,4 @@ public class CacheKeysTest {
         final String entitySpecificCacheKey = CacheKeys.entitySpecificCacheKey(knownEntityId, knownCacheKey);
         assertThat(entitySpecificCacheKey).isEqualTo(knownEntityId + "." + knownCacheKey);
     }
-
 }

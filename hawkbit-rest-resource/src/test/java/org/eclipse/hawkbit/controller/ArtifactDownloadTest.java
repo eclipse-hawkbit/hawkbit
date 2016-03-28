@@ -57,13 +57,10 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test artifact downloads from the controller.
  *
- *
- *
- *
  */
 
 @ActiveProfiles({ "im", "test" })
-@Features("Component Tests - Controller RESTful API")
+@Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
 public class ArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
 
@@ -285,7 +282,8 @@ public class ArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
                 .andExpect(header().string("Content-Disposition", "attachment;filename=" + artifact.getFilename()))
                 .andReturn();
 
-        assertTrue(Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+        assertTrue("The same file that was uploaded is expected when downloaded",
+                Arrays.equals(result.getResponse().getContentAsByteArray(), random));
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
@@ -393,7 +391,8 @@ public class ArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
                 .andExpect(header().longValue("Last-Modified", artifact.getCreatedAt()))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1")).andReturn();
 
-        assertTrue(Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+        assertTrue("The same file that was uploaded is expected when downloaded",
+                Arrays.equals(result.getResponse().getContentAsByteArray(), random));
 
         // one (update) action
         assertThat(actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent()).hasSize(1);

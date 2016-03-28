@@ -63,20 +63,20 @@ public final class FilterQueryValidation {
             setExceptionDetails(new Exception(ex.getCause().getCause()), expectedTokens, result, tokenDesc);
             result.setMessage(getCustomMessage(ex.getCause().getMessage(), result.getExpectedTokens()));
             result.setIsValidationFailed(Boolean.TRUE);
-            LOGGER.info("Syntax exception on parsing :", ex);
+            LOGGER.trace("Syntax exception on parsing :", ex);
         } catch (final RSQLParserException ex) {
             setExceptionDetails(ex, expectedTokens, result, tokenDesc);
             result.setMessage(getCustomMessage(ex.getMessage(), result.getExpectedTokens()));
             result.setIsValidationFailed(Boolean.TRUE);
-            LOGGER.info("Exception on parsing :", ex);
+            LOGGER.trace("Exception on parsing :", ex);
         } catch (final IllegalArgumentException ex) {
             result.setMessage(getCustomMessage(ex.getMessage(), null));
             result.setIsValidationFailed(Boolean.TRUE);
-            LOGGER.info("Illegal argument on parsing :", ex);
+            LOGGER.trace("Illegal argument on parsing :", ex);
         } catch (final RSQLParameterUnsupportedFieldException ex) {
             result.setMessage(getCustomMessage(ex.getMessage(), null));
             result.setIsValidationFailed(Boolean.TRUE);
-            LOGGER.info("Unsupported field on parsing :", ex);
+            LOGGER.trace("Unsupported field on parsing :", ex);
         }
         return result;
 

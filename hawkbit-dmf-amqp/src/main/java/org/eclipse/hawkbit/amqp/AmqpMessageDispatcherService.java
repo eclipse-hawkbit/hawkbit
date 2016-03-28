@@ -25,34 +25,42 @@ import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.ArtifactUrlHandler;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.eventbus.Subscribe;
 
 /**
- * {@link AmqpMessageDispatcherService} handles all outgoing AMQP messages.
- *
- *
+ * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
+ * delegate the messages to a {@link AmqpSenderService}.
+ * 
+ * Additionally the dispatcher listener/subscribe for some target events e.g.
+ * assignment.
  *
  */
 @EventSubscriber
-public class AmqpMessageDispatcherService {
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private TenantAware tenantAware;
+public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     @Autowired
     private ArtifactUrlHandler artifactUrlHandler;
+
+    @Autowired
+    private AmqpSenderService amqpSenderService;
+
+    /**
+     * Constructor.
+     * 
+     * @param messageConverter
+     *            message converter
+     */
+    @Autowired
+    public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate) {
+        super(rabbitTemplate);
+    }
 
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution
@@ -79,9 +87,10 @@ public class AmqpMessageDispatcherService {
             downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
         }
 
-        final Message message = rabbitTemplate.getMessageConverter().toMessage(downloadAndUpdateRequest,
-                createConnectorMessageProperties(controllerId, EventTopic.DOWNLOAD_AND_INSTALL));
-        sendMessage(targetAdress.getHost(), message);
+        final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
+                createConnectorMessageProperties(targetAssignDistributionSetEvent.getTenant(), controllerId,
+                        EventTopic.DOWNLOAD_AND_INSTALL));
+        amqpSenderService.sendMessage(message, targetAdress);
     }
 
     /**
@@ -96,32 +105,19 @@ public class AmqpMessageDispatcherService {
             final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent) {
         final String controllerId = cancelTargetAssignmentDistributionSetEvent.getControllerId();
         final Long actionId = cancelTargetAssignmentDistributionSetEvent.getActionId();
-        final Message message = rabbitTemplate.getMessageConverter().toMessage(actionId,
-                createConnectorMessageProperties(controllerId, EventTopic.CANCEL_DOWNLOAD));
+        final Message message = getMessageConverter().toMessage(actionId, createConnectorMessageProperties(
+                cancelTargetAssignmentDistributionSetEvent.getTenant(), controllerId, EventTopic.CANCEL_DOWNLOAD));
 
-        sendMessage(cancelTargetAssignmentDistributionSetEvent.getTargetAdress().getHost(), message);
+        amqpSenderService.sendMessage(message, cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
 
     }
 
-    /**
-     * Send message to exchange.
-     *
-     * @param exchange
-     *            the exchange
-     * @param message
-     *            the message
-     */
-    public void sendMessage(final String exchange, final Message message) {
-        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
-        rabbitTemplate.setExchange(exchange);
-        rabbitTemplate.send(message);
-    }
-
-    private MessageProperties createConnectorMessageProperties(final String controllerId, final EventTopic topic) {
+    private MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId,
+            final EventTopic topic) {
         final MessageProperties messageProperties = createMessageProperties();
         messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TENANT, tenantAware.getCurrentTenant());
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
         messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
         return messageProperties;
     }
@@ -150,9 +146,8 @@ public class AmqpMessageDispatcherService {
             return Collections.emptyList();
         }
 
-        final List<Artifact> convertedArtifacts = localArtifacts.stream()
-                .map(localArtifact -> convertArtifact(targetId, localArtifact)).collect(Collectors.toList());
-        return convertedArtifacts;
+        return localArtifacts.stream().map(localArtifact -> convertArtifact(targetId, localArtifact))
+                .collect(Collectors.toList());
     }
 
     private Artifact convertArtifact(final String targetId, final LocalArtifact localArtifact) {
@@ -170,15 +165,11 @@ public class AmqpMessageDispatcherService {
         return artifact;
     }
 
-    public void setTenantAware(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
-
-    public void setRabbitTemplate(final RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
-
     public void setArtifactUrlHandler(final ArtifactUrlHandler artifactUrlHandler) {
         this.artifactUrlHandler = artifactUrlHandler;
+    }
+
+    public void setAmqpSenderService(final AmqpSenderService amqpSenderService) {
+        this.amqpSenderService = amqpSenderService;
     }
 }

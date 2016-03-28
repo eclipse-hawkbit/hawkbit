@@ -18,7 +18,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +55,9 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     private static final String CONTROLLER_DL_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER
             + "}/controller/artifacts/v1/**";
-    protected SystemManagement systemManagement;
+    protected TenantConfigurationManagement tenantConfigurationManagement;
     protected TenantAware tenantAware;
+    protected SystemSecurityContext systemSecurityContext;
 
     private final AntPathMatcher pathExtractor;
 
@@ -70,10 +71,11 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      * @param tenantAware
      *            the tenant aware service
      */
-    public AbstractHttpControllerAuthenticationFilter(final SystemManagement systemManagement,
-            final TenantAware tenantAware) {
-        this.systemManagement = systemManagement;
+    public AbstractHttpControllerAuthenticationFilter(final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantAware = tenantAware;
+        this.systemSecurityContext = systemSecurityContext;
         pathExtractor = new AntPathMatcher();
     }
 

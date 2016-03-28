@@ -44,9 +44,9 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract layout of confirm actions window.
- * 
  *
- * 
+ *
+ *
  */
 @SpringComponent
 @ViewScope
@@ -84,13 +84,13 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.confirmwindow.layout.
      * AbstractConfirmationWindowLayout# getConfimrationTabs()
      */
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
-        final Map<String, ConfirmationTab> tabs = new HashMap<String, ConfirmationTab>();
+        final Map<String, ConfirmationTab> tabs = new HashMap<>();
         if (!artifactUploadState.getDeleteSofwareModules().isEmpty()) {
             tabs.put(i18n.get("caption.delete.swmodule.accordion.tab"), createSMDeleteConfirmationTab());
         }
@@ -145,7 +145,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
     /**
      * Get SWModule table container.
-     * 
+     *
      * @return IndexedContainer
      */
     @SuppressWarnings("unchecked")
@@ -153,9 +153,8 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty("SWModuleId", String.class, "");
         swcontactContainer.addContainerProperty(SW_MODULE_NAME_MSG, String.class, "");
-        Item item = null;
         for (final Long swModuleID : artifactUploadState.getDeleteSofwareModules().keySet()) {
-            item = swcontactContainer.addItem(swModuleID);
+            final Item item = swcontactContainer.addItem(swModuleID);
             item.getItemProperty("SWModuleId").setValue(swModuleID.toString());
             item.getItemProperty(SW_MODULE_NAME_MSG)
                     .setValue(artifactUploadState.getDeleteSofwareModules().get(swModuleID));
@@ -197,7 +196,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
             for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
                 final String swNameVersion = HawkbitCommonUtil.getFormattedNameVersion(
                         customFile.getBaseSoftwareModuleName(), customFile.getBaseSoftwareModuleVersion());
-                if (HawkbitCommonUtil.bothSame(deleteSoftwareNameVersion, swNameVersion)) {
+                if (deleteSoftwareNameVersion != null && deleteSoftwareNameVersion.equals(swNameVersion)) {
                     tobeRemoved.add(customFile);
                 }
             }

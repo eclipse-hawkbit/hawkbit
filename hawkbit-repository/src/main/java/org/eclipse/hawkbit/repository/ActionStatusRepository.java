@@ -21,45 +21,47 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * {@link ActionStatus} repository.
  *
- *
- *
- *
  */
 @Transactional(readOnly = true)
 public interface ActionStatusRepository
         extends BaseEntityRepository<ActionStatus, Long>, JpaSpecificationExecutor<ActionStatus> {
 
     /**
-     * @param target
+     * Counts {@link ActionStatus} entries of given {@link Action} in
+     * repository.
+     *
      * @param action
-     * @return
+     *            to count status entries
+     * @return number of actions in repository
      */
     Long countByAction(Action action);
 
     /**
+     * Counts {@link ActionStatus} entries of given {@link Action} with given
+     * {@link Status} in repository.
+     * 
      * @param action
-     * @param retrieved
-     * @return
+     *            to count status entries
+     * @param status
+     *            to filter for
+     * @return number of actions in repository
      */
-    Long countByActionAndStatus(Action action, Status retrieved);
+    Long countByActionAndStatus(Action action, Status status);
 
     /**
+     * Retrieves all {@link ActionStatus} entries from repository of given
+     * {@link Action}.
+     * 
      * @param pageReq
+     *            parameters
      * @param action
-     * @return
+     *            of the status entries
+     * @return pages list of {@link ActionStatus} entries
      */
     Page<ActionStatus> findByAction(Pageable pageReq, Action action);
 
     /**
-     * @param pageReq
-     * @param action
-     * @return
-     */
-    Page<ActionStatus> findByActionOrderByIdDesc(Pageable pageReq, Action action);
-
-    /**
-     * Finds all status updates for the defined action and target order by
-     * {@link ActionStatus#getId()} desc including
+     * Finds all status updates for the defined action and target including
      * {@link ActionStatus#getMessages()}.
      *
      * @param pageReq
@@ -71,6 +73,6 @@ public interface ActionStatusRepository
      * @return Page with found targets
      */
     @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
-    Page<ActionStatus> getByActionOrderByIdDesc(Pageable pageReq, Action action);
+    Page<ActionStatus> getByAction(Pageable pageReq, Action action);
 
 }

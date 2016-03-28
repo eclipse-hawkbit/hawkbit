@@ -16,8 +16,13 @@
 *.jar
 *.war
 
-# Eclipse IDE
+# Sonar
+.sonar_lock
 
+# Created by spring-boot-configuration-processor
+.factorypath
+
+# Eclipse IDE
 *.pydevproject
 .project
 .metadata

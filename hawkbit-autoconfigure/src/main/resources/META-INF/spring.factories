@@ -11,5 +11,4 @@ org.eclipse.hawkbit.autoconfigure.eventbus.EventBusAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.cache.RedisAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration,\
-org.eclipse.hawkbit.autoconfigure.conf.ControllerPollAutoConfiguration,\
 org.eclipse.hawkbit.autoconfigure.amqp.AmqpAutoConfiguration

@@ -11,24 +11,30 @@ package org.eclipse.hawkbit.ui.utils;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.slf4j.Logger;
@@ -40,7 +46,9 @@ import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
+import org.vaadin.alump.distributionbar.DistributionBar;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.server.Sizeable.Unit;
@@ -259,14 +267,13 @@ public final class HawkbitCommonUtil {
     public static String concatStrings(final String delimiter, final String... texts) {
         final String delim = delimiter == null ? SP_STRING_EMPTY : delimiter;
         final StringBuilder conCatStrBldr = new StringBuilder();
-        String conCatedStr = null;
         if (null != texts) {
             for (final String text : texts) {
                 conCatStrBldr.append(delim);
                 conCatStrBldr.append(text);
             }
         }
-        conCatedStr = conCatStrBldr.toString();
+        final String conCatedStr = conCatStrBldr.toString();
         return delim.length() > 0 && conCatedStr.startsWith(delim) ? conCatedStr.substring(1) : conCatedStr;
     }
 
@@ -337,31 +344,6 @@ public final class HawkbitCommonUtil {
         labelId.append('.');
         labelId.append(version);
         return labelId.toString();
-    }
-
-    /**
-     * Check if two objects are same or not.
-     *
-     * @param obj1
-     *            as reference
-     * @param obj2
-     *            as reference
-     * @return true if both obj1 & obj2 are null (or) if the .equals() method
-     *         return true. false if only either one of obj1 & obj2 is null (or)
-     *         if .equals() method return false.
-     */
-    public static boolean bothSame(final Object obj1, final Object obj2) {
-        boolean result = false;
-        if (obj1 == null && obj2 == null) {
-            result = true;
-        } else if (obj1 == null && obj2 != null) {
-            result = false;
-        } else if (obj1 != null && obj2 == null) {
-            result = false;
-        } else {
-            result = obj2.equals(obj1);
-        }
-        return result;
     }
 
     /**
@@ -459,13 +441,16 @@ public final class HawkbitCommonUtil {
      * @return String formatted text
      */
     public static String getFormattedText(final String orgText) {
-        String formtdTxt = orgText == null ? "" : orgText;
-        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
-        if (formtdTxt.length() > txtLengthAllowed) {
-            formtdTxt = new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
+        if (orgText == null) {
+            return StringUtils.EMPTY;
         }
 
-        return formtdTxt;
+        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
+        if (orgText.length() > txtLengthAllowed) {
+            return new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
+        }
+
+        return orgText;
     }
 
     /**
@@ -721,7 +706,7 @@ public final class HawkbitCommonUtil {
             final UserDetailsService idManagement = SpringContextHelper.getBean(UserDetailsService.class);
             try {
                 imReslovedUser = HawkbitCommonUtil.getFormattedName(idManagement.loadUserByUsername(uuid));
-            } catch (final UsernameNotFoundException e) {
+            } catch (final UsernameNotFoundException e) { // NOSONAR
                 // nope not need to handle
             }
             // If Null display the UID
@@ -978,12 +963,10 @@ public final class HawkbitCommonUtil {
      * @return instance of {@link LazyQueryContainer}.
      */
     public static LazyQueryContainer createLazyQueryContainer(
-            final BeanQueryFactory<? extends AbstractBeanQuery> queryFactory) {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+            final BeanQueryFactory<? extends AbstractBeanQuery<?>> queryFactory) {
+        final Map<String, Object> queryConfig = new HashMap<>();
         queryFactory.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer typeContainer = new LazyQueryContainer(
-                new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
-        return typeContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, 20, SPUILabelDefinitions.VAR_NAME), queryFactory);
     }
 
     /**
@@ -994,12 +977,10 @@ public final class HawkbitCommonUtil {
      * @return LazyQueryContainer
      */
     public static LazyQueryContainer createDSLazyQueryContainer(
-            final BeanQueryFactory<? extends AbstractBeanQuery> queryFactory) {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+            final BeanQueryFactory<? extends AbstractBeanQuery<?>> queryFactory) {
+        final Map<String, Object> queryConfig = new HashMap<>();
         queryFactory.setQueryConfiguration(queryConfig);
-        final LazyQueryContainer typeContainer = new LazyQueryContainer(new LazyQueryDefinition(true, 20, "tagIdName"),
-                queryFactory);
-        return typeContainer;
+        return new LazyQueryContainer(new LazyQueryDefinition(true, 20, "tagIdName"), queryFactory);
     }
 
     /**
@@ -1033,7 +1014,7 @@ public final class HawkbitCommonUtil {
      */
     public static List<TableColumn> getTableVisibleColumns(final Boolean isMaximized, final Boolean isShowPinColumn,
             final I18N i18n) {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         if (isMaximized) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.2f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.1f));
@@ -1256,6 +1237,161 @@ public final class HawkbitCommonUtil {
                 pinBtn.addStyleName("statusIconLightBlue");
             }
         }
+    }
+
+    /**
+     * Set status progress bar value.
+     * 
+     * @param bar
+     *            DistributionBar
+     * @param statusName
+     *            status name
+     * @param count
+     *            target counts in a status
+     * @param index
+     *            bar part index
+     */
+    public static void setBarPartSize(final DistributionBar bar, final String statusName, final int count,
+            final int index) {
+        bar.setPartSize(index, count);
+        bar.setPartTooltip(index, statusName);
+        bar.setPartStyleName(index, "status-bar-part-" + statusName);
+    }
+
+    /**
+     * Initialize status progress bar with values and number of parts on load.
+     * 
+     * @param bar
+     *            DistributionBar
+     * @param item
+     *            row of a table
+     */
+    public static void initialiseProgressBar(final DistributionBar bar, final Item item) {
+        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
+        final Long runningTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item);
+        final Long scheduledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item);
+        final Long errorTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item);
+        final Long finishedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item);
+        final Long cancelledTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item);
+        if (isNoTargets(errorTargetsCount, notStartedTargetsCount, runningTargetsCount, scheduledTargetsCount,
+                finishedTargetsCount, cancelledTargetsCount)) {
+            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(), 0,
+                    0);
+            HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(), 0,
+                    1);
+
+        } else {
+            bar.setNumberOfParts(6);
+            setProgressBarDetails(bar, item);
+        }
+    }
+
+    /**
+     * Formats the finished percentage of a rollout group into a string with one
+     * digit after comma.
+     * 
+     * @param rolloutGroup
+     *            the rollout group
+     * @param finishedPercentage
+     *            the calculated finished percentage of the rolloutgroup
+     * @return formatted String value
+     */
+    public static String formattingFinishedPercentage(final RolloutGroup rolloutGroup, final float finishedPercentage) {
+        float tmpFinishedPercentage = 0;
+        switch (rolloutGroup.getStatus()) {
+        case READY:
+        case SCHEDULED:
+        case ERROR:
+            tmpFinishedPercentage = 0.0F;
+            break;
+        case FINISHED:
+            tmpFinishedPercentage = 100.0F;
+            break;
+        case RUNNING:
+            tmpFinishedPercentage = finishedPercentage;
+            break;
+        default:
+            break;
+        }
+        return String.format("%.1f", tmpFinishedPercentage);
+    }
+
+    /**
+     * Reset the values of status progress bar on change of values.
+     * 
+     * @param bar
+     *            DistributionBar
+     * @param item
+     *            row of the table
+     */
+    private static void setProgressBarDetails(final DistributionBar bar, final Item item) {
+        bar.setNumberOfParts(6);
+        final Long notStartedTargetsCount = getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_NOT_STARTED, item);
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.NOTSTARTED.toString().toLowerCase(),
+                notStartedTargetsCount.intValue(), 0);
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.SCHEDULED.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_SCHEDULED, item).intValue(), 1);
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.RUNNING.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_RUNNING, item).intValue(), 2);
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.ERROR.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_ERROR, item).intValue(), 3);
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.FINISHED.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_FINISHED, item).intValue(), 4);
+        HawkbitCommonUtil.setBarPartSize(bar, TotalTargetCountStatus.Status.CANCELLED.toString().toLowerCase(),
+                getStatusCount(SPUILabelDefinitions.VAR_COUNT_TARGETS_CANCELLED, item).intValue(), 5);
+    }
+
+    private static boolean isNoTargets(final Long... statusCount) {
+        if (Arrays.asList(statusCount).stream().filter(value -> value > 0).toArray().length > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    private static Long getStatusCount(final String propertName, final Item item) {
+        return (Long) item.getItemProperty(propertName).getValue();
+    }
+
+    /**
+     * Get the formatted string of status and target count details.
+     * 
+     * @param details
+     *            details of status and count
+     * @return String
+     */
+    public static String getFormattedString(Map<Status, Long> details) {
+        StringBuilder val = new StringBuilder();
+        if (details == null || details.isEmpty()) {
+            return null;
+        }
+        for (Entry<Status, Long> entry : details.entrySet()) {
+            val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
+        }
+        return val.substring(0, val.length() - 1);
+    }
+
+    /**
+     * Returns a formatted string as needed by label custom render .This string
+     * holds the properties of a status label.
+     * 
+     * @param value
+     *            label value
+     * @param style
+     *            label style
+     * @param id
+     *            label id
+     * @return
+     */
+    public static String getStatusLabelDetailsInString(String value, String style, String id) {
+        StringBuilder val = new StringBuilder();
+        if (!Strings.isNullOrEmpty(value)) {
+            val.append("value:").append(value).append(",");
+        }
+        if (!Strings.isNullOrEmpty(style)) {
+            val.append("style:").append(style).append(",");
+        }
+        val.append("id:").append(id);
+        return val.toString();
     }
 
 }

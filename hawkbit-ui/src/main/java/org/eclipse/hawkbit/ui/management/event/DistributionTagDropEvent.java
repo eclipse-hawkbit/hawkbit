@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
-import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -69,9 +68,6 @@ public class DistributionTagDropEvent implements DropHandler {
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
-    @Autowired
-    private ManagementUIState managementUIState;
-
     private static final String ITEMID = "itemId";
 
     @Override
@@ -97,13 +93,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * Validate the drop.
-     *
-     * @param event
-     *            DragAndDropEvent reference
-     * @return Boolean
-     */
     private Boolean validate(final DragAndDropEvent event) {
         final Component compsource = event.getTransferable().getSourceComponent();
         if (!(compsource instanceof Table)) {
@@ -120,11 +109,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * validate the update permission.
-     *
-     * @return boolean
-     */
     private boolean checkForDSUpdatePermission() {
         if (!permChecker.hasUpdateDistributionPermission()) {
 
@@ -135,13 +119,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * validate the source tables.
-     *
-     * @param source
-     *            table
-     * @return boolean
-     */
     private boolean validateIfSourceIsDs(final Table source) {
         if (!source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
             notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
@@ -150,12 +127,6 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    /**
-     * Process target Drop event.
-     *
-     * @param event
-     *            DragAndDropEvent
-     */
     private void processDistributionDrop(final DragAndDropEvent event) {
 
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
@@ -165,7 +136,7 @@ public class DistributionTagDropEvent implements DropHandler {
 
         @SuppressWarnings("unchecked")
         final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) source.getValue();
-        final Set<Long> distributionList = new HashSet<Long>();
+        final Set<Long> distributionList = new HashSet<>();
         if (!distSelected.contains(transferable.getData(ITEMID))) {
             distributionList.add(((DistributionSetIdName) transferable.getData(ITEMID)).getId());
         } else {

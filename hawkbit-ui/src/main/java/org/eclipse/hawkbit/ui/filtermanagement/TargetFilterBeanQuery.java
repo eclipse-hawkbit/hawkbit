@@ -34,7 +34,6 @@ import com.google.common.base.Strings;
  *
  *
  */
-
 public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> {
 
     private static final long serialVersionUID = 1845964596238990987L;
@@ -76,8 +75,8 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
 
     @Override
     protected List<ProxyTargetFilter> loadBeans(final int startIndex, final int count) {
-        Slice<TargetFilterQuery> targetFilterQuery = null;
-        final List<ProxyTargetFilter> proxyTargetFilter = new ArrayList<ProxyTargetFilter>();
+        Slice<TargetFilterQuery> targetFilterQuery;
+        final List<ProxyTargetFilter> proxyTargetFilter = new ArrayList<>();
         if (startIndex == 0 && firstPageTargetFilter != null) {
             targetFilterQuery = firstPageTargetFilter;
         } else if (Strings.isNullOrEmpty(searchText)) {
@@ -97,6 +96,7 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTarFilter.setCreatedBy(HawkbitCommonUtil.getIMUser(tarFilterQuery.getCreatedBy()));
             proxyTarFilter.setModifiedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getLastModifiedAt()));
             proxyTarFilter.setLastModifiedBy(HawkbitCommonUtil.getIMUser(tarFilterQuery.getLastModifiedBy()));
+            proxyTarFilter.setQuery(tarFilterQuery.getQuery());
             proxyTargetFilter.add(proxyTarFilter);
         }
         return proxyTargetFilter;

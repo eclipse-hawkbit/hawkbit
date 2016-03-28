@@ -11,6 +11,7 @@ package org.eclipse.hawkbit;
 import javax.persistence.EntityManager;
 import javax.transaction.Transaction;
 
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -25,8 +26,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link JpaTransactionManager} that sets the
  * {@link TenantAware#getCurrentTenant()} in the eclipselink session. This has
  * to be done in eclipselink after a {@link Transaction} has been started.
- *
- *
  *
  */
 public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
@@ -43,10 +42,8 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
                 .getResource(getEntityManagerFactory());
         final EntityManager em = emHolder.getEntityManager();
 
-        if (!definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".findTenants")
-                && !definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".deleteTenant")
-                && !definition.getName()
-                        .startsWith(SystemManagement.class.getCanonicalName() + ".currentTenantKeyGenerator")) {
+        if (notTenantManagement(definition) && notCurrentTenantKeyGenerator(definition)
+                && notRolloutScheduler(definition) && notGetOrCreateTenantMetadata(definition)) {
 
             final String currentTenant = tenantAware.getCurrentTenant();
             if (currentTenant == null) {
@@ -55,5 +52,24 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
 
             em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
         }
+    }
+
+    private boolean notGetOrCreateTenantMetadata(final TransactionDefinition definition) {
+        return !definition.getName()
+                .startsWith(SystemManagement.class.getCanonicalName() + ".getOrCreateTenantMetadata");
+    }
+
+    private boolean notRolloutScheduler(final TransactionDefinition definition) {
+        return !definition.getName().startsWith(RolloutManagement.class.getCanonicalName() + ".rolloutScheduler");
+    }
+
+    private boolean notCurrentTenantKeyGenerator(final TransactionDefinition definition) {
+        return !definition.getName()
+                .startsWith(SystemManagement.class.getCanonicalName() + ".currentTenantKeyGenerator");
+    }
+
+    private boolean notTenantManagement(final TransactionDefinition definition) {
+        return !definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".deleteTenant")
+                && !definition.getName().startsWith(SystemManagement.class.getCanonicalName() + ".findTenants");
     }
 }

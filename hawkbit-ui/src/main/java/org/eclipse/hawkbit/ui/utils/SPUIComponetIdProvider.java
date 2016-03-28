@@ -707,6 +707,11 @@ public final class SPUIComponetIdProvider {
     public static final String BULK_UPLOAD_STATUS_BUTTON = "bulk.upload.notification.id";
 
     /**
+     * Target Filter Status button id.
+     */
+    public static final String TARGET_FILTER_STATUS_BUTTON = "target.filter.status.button.id";
+
+    /**
      * Target bulk upload minimize button id.
      */
     public static final String BULK_UPLOAD_MINIMIZE_BUTTON_ID = "bulk.upload.minimize.button.id";
@@ -716,6 +721,162 @@ public final class SPUIComponetIdProvider {
      */
 
     public static final String BULK_UPLOAD_CLOSE_BUTTON_ID = "bulk.upload.close.button.id";
+
+    /**
+     * Rollout list view - search box id.
+     */
+    public static final String ROLLOUT_LIST_SEARCH_BOX_ID = "rollout.list.search.id";
+
+    /**
+     * Rollout list view - search reset icon id.
+     */
+    public static final String ROLLOUT_LIST_SEARCH_RESET_ICON_ID = "rollout.list.search.reset.icon.id";
+
+    /**
+     * Rollout list view - add icon id.
+     */
+    public static final String ROLLOUT_ADD_ICON_ID = "rollout.add.button.id";
+
+    /**
+     * Rollout list grid id.
+     */
+    public static final String ROLLOUT_LIST_GRID_ID = "rollout.grid.id";
+
+    /**
+     * Rollout group list grid id.
+     */
+    public static final String ROLLOUT_GROUP_LIST_GRID_ID = "rollout.group.grid.id";
+
+    /**
+     * Rollout group list grid id.
+     */
+    public static final String ROLLOUT_GROUP_TARGETS_LIST_GRID_ID = "rollout.group.targets.grid.id";
+
+    /**
+     * Rollout delete button id.
+     */
+    public static final String ROLLOUT_DELETE_ICON = "rollout.delete.button.id";
+
+    /**
+     * Rollout text field name id.
+     */
+    public static final String ROLLOUT_NAME_FIELD_ID = "rollout.name.field.id";
+    /**
+     * Rollout number of groups id.
+     */
+    public static final String ROLLOUT_NO_OF_GROUPS_ID = "rollout.no.ofgroups.id";
+
+    /**
+     * Rollout trigger threshold field if.
+     */
+    public static final String ROLLOUT_TRIGGER_THRESOLD_ID = "rollout.trigger.thresold.id";
+
+    /**
+     * Rollout error thresold field id.
+     */
+    public static final String ROLLOUT_ERROR_THRESOLD_ID = "rollout.error.thresold.id";
+
+    /**
+     * Rollout distribution set combo id.
+     */
+    public static final String ROLLOUT_DS_ID = "rollout.ds.id";
+    /**
+     * Rollout description field id.
+     */
+    public static final String ROLLOUT_DESCRIPTION_ID = "rollout.description.id";
+    /**
+     * Rollout create update window - save buttopn id.
+     */
+    public static final String ROLLOUT_CREATE_UPDATE_SAVE_ID = "rollout.create.update.save.id";
+
+    /**
+     * Rollout create update - discard button id.
+     */
+    public static final String ROLLOUT_CREATE_UPDATE_DISCARD_ID = "rollout.create.update.discard.id";
+    /**
+     * Rollout name link id.
+     */
+    public static final String ROLLOUT_NAME_LINK_ID = "rollout.name.link";
+    /**
+     * Rollout Group name link id.
+     */
+    public static final String ROLLOUT_GROUP_NAME_LINK_ID = "rollout.group.name.link";
+    /**
+     * Rollout target filter query combo id.
+     */
+    public static final String ROLLOUT_TARGET_FILTER_COMBO_ID = "rollout.target.filter.combo.id";
+    /**
+     * Rollout action button id.
+     */
+    public static final String ROLLOUT_ACTION_BUTTON_ID = "rollout.action.button.id";
+    /**
+     * Rollout pause button id.
+     */
+    public static final String ROLLOUT_PAUSE_BUTTON_ID = "rollout.pause.button.id";
+
+    /**
+     * Rollout resume button id.
+     */
+    public static final String ROLLOUT_RESUME_BUTTON_ID = "rollout.resume.button.id";
+
+    /**
+     * Rollout save or start option group id.
+     */
+    public static final String ROLLOUT_SAVESTARTOPTION_ID = "rollout.savestartoption.id";
+    /**
+     * Rollout status label id.
+     */
+    public static final String ROLLOUT_STATUS_LABEL_ID = "rollout.status.id";
+    
+    /**
+     * Rollout group status label id.
+     */
+    public static final String ROLLOUT_GROUP_STATUS_LABEL_ID = "rollout.group.status.id";
+
+    /**
+     * Rollout % or count option group id.
+     */
+    public static final String ROLLOUT_ERROR_THRESOLD_OPTION_ID = "rollout.error.thresold.option.id";
+
+    /**
+     * Rollout target filter query value text area id.
+     */
+    public static final String ROLLOUT_TARGET_FILTER_QUERY_FIELD = "rollout.target.filter.query.field.id";
+
+    /**
+     * Rollout target view- close button id.
+     */
+    public static final String ROLLOUT_TARGET_VIEW_CLOSE_BUTTON_ID = "rollout.group.target.close.id";
+    /**
+     * Rollout status progress bar id.
+     */
+    public static final String ROLLOUT_PROGRESS_BAR = "rollout.status.progress.bar.id";
+    /**
+     * Rollout group header caption.
+     */
+    public static final String ROLLOUT_GROUP_HEADER_CAPTION = "rollout.group.header.caption";
+    /**
+     * Rollout group target header caption.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_HEADER_CAPTION = "rollout.group.header.target.caption";
+    /**
+     * Rollout group close id.
+     */
+    public static final String ROLLOUT_GROUP_CLOSE = "rollout.group.close.id";
+    /**
+     * Rollout group targets count message label.
+     */
+    public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
+    
+    /**
+     * Action confirmation popup id.
+     */
+    public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
+    
+    /**
+     * Validation status icon .
+     */
+    public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
      * /* Private Constructor.

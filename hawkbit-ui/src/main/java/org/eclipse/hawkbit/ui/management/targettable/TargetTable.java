@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -104,6 +105,8 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class TargetTable extends AbstractTable implements Handler {
 
+    private static final String TARGET_PINNED = "targetPinned";
+
     private static final long serialVersionUID = -2300392868806614568L;
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
@@ -138,6 +141,8 @@ public class TargetTable extends AbstractTable implements Handler {
     private Boolean isTargetPinned = Boolean.FALSE;
     private ShortcutAction actionSelectAll;
     private ShortcutAction actionUnSelectAll;
+    
+     
 
     @Override
     @PostConstruct
@@ -249,7 +254,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
      */
@@ -260,7 +265,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
      * )
@@ -271,7 +276,7 @@ public class TargetTable extends AbstractTable implements Handler {
         final Map<String, Object> queryConfig = prepareQueryConfigFilters();
 
         // Create TargetBeanQuery factory with the query config.
-        final BeanQueryFactory<TargetBeanQuery> targetQF = new BeanQueryFactory<TargetBeanQuery>(TargetBeanQuery.class);
+        final BeanQueryFactory<TargetBeanQuery> targetQF = new BeanQueryFactory<>(TargetBeanQuery.class);
         targetQF.setQueryConfiguration(queryConfig);
 
         // create lazy query container with lazy defination and query
@@ -285,7 +290,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#addContainerProperties
      * (com.vaadin.data.Container )
      */
@@ -312,7 +317,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
      * addCustomGeneratedColumns ()
      */
@@ -326,7 +331,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
      * isFirstRowSelectedOnLoad ()
      */
@@ -338,7 +343,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
      */
     @Override
@@ -352,7 +357,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
      */
@@ -377,7 +382,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
      */
@@ -388,13 +393,13 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
      * ()
      */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         if (isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
@@ -415,7 +420,7 @@ public class TargetTable extends AbstractTable implements Handler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
      */
     @Override
@@ -469,7 +474,7 @@ public class TargetTable extends AbstractTable implements Handler {
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        final Map<String, Object> queryConfig = new HashMap<>();
         managementUIState.getTargetTableFilters().getSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         managementUIState.getTargetTableFilters().getDistributionSet()
@@ -481,7 +486,7 @@ public class TargetTable extends AbstractTable implements Handler {
         queryConfig.put(SPUIDefinitions.FILTER_BY_NO_TAG, managementUIState.getTargetTableFilters().isNoTagSelected());
 
         if (isFilteredByTags()) {
-            final List<String> list = new ArrayList<String>();
+            final List<String> list = new ArrayList<>();
             list.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
             queryConfig.put(SPUIDefinitions.FILTER_BY_TAG, list.toArray(new String[list.size()]));
         }
@@ -522,7 +527,7 @@ public class TargetTable extends AbstractTable implements Handler {
         pinBtn.setId(SPUIComponetIdProvider.TARGET_PIN_ICON + "." + itemId);
         pinBtn.addClickListener(event -> addPinClickListener(event));
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
-            pinBtn.addStyleName("targetPinned");
+            pinBtn.addStyleName(TARGET_PINNED);
             isTargetPinned = Boolean.TRUE;
             targetPinnedBtn = pinBtn;
             eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
@@ -533,7 +538,7 @@ public class TargetTable extends AbstractTable implements Handler {
     }
 
     private boolean isPinned(final String targetId) {
-        boolean result = false;
+        boolean result;
         if (managementUIState.getDistributionTableFilters().getPinnedTargetId().isPresent()
                 && targetId.equals(managementUIState.getDistributionTableFilters().getPinnedTargetId().get())) {
             result = true;
@@ -594,7 +599,7 @@ public class TargetTable extends AbstractTable implements Handler {
         eventBus.publish(this, PinUnpinEvent.PIN_TARGET);
         /* change target table styling */
         styleTargetTable();
-        eventBtn.addStyleName("targetPinned");
+        eventBtn.addStyleName(TARGET_PINNED);
         isTargetPinned = Boolean.FALSE;
     }
 
@@ -605,7 +610,7 @@ public class TargetTable extends AbstractTable implements Handler {
     }
 
     private void resetPinStyle(final Button pinBtn) {
-        pinBtn.removeStyleName("targetPinned");
+        pinBtn.removeStyleName(TARGET_PINNED);
         pinBtn.addStyleName(SPUIStyleDefinitions.TARGET_STATUS_PIN_TOGGLE);
         HawkbitCommonUtil.applyStatusLblStyle(this, pinBtn, pinBtn.getData());
     }
@@ -644,7 +649,7 @@ public class TargetTable extends AbstractTable implements Handler {
         final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
         final Table targetTable = (Table) taregtDet.getTarget();
         final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(targetTable);
-        final Set<String> targetList = new HashSet<String>();
+        final Set<String> targetList = new HashSet<>();
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
         if (!targetSelected.contains(targetItemId)) {
@@ -701,9 +706,8 @@ public class TargetTable extends AbstractTable implements Handler {
 
     private static Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
             final Table source) {
-        @SuppressWarnings("unchecked")
         final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(source);
-        final Set<DistributionSetIdName> distributionIdSet = new HashSet<DistributionSetIdName>();
+        final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
         if (!distSelected.contains(transferable.getData(ITEMID))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData(ITEMID));
         } else {
@@ -828,15 +832,11 @@ public class TargetTable extends AbstractTable implements Handler {
         }
     }
 
-    /**
-     * @param filterEvent
-     * @return
-     */
-    private boolean checkFilterEvent(final TargetFilterEvent filterEvent) {
-        boolean isFilterEvent = false;
-        boolean isFilter = false;
-        boolean isRemoveFilters = false;
-        boolean isStatusFilter = false;
+    private static boolean checkFilterEvent(final TargetFilterEvent filterEvent) {
+        boolean isFilterEvent;
+        boolean isFilter;
+        boolean isRemoveFilters;
+        boolean isStatusFilter;
         isFilter = filterEvent == TargetFilterEvent.FILTER_BY_TEXT || filterEvent == TargetFilterEvent.FILTER_BY_TAG
                 || filterEvent == TargetFilterEvent.FILTER_BY_DISTRIBUTION
                 || filterEvent == TargetFilterEvent.FILTER_BY_TARGET_FILTER_QUERY;
@@ -1020,11 +1020,11 @@ public class TargetTable extends AbstractTable implements Handler {
     private List<TargetIdName> getTargetIdsBySimpleFilters(final PageRequest pageRequest) {
         final Long filterByDistId = managementUIState.getTargetTableFilters().getDistributionSet().isPresent()
                 ? managementUIState.getTargetTableFilters().getDistributionSet().get().getId() : null;
-        final List<TargetUpdateStatus> statusList = new ArrayList<TargetUpdateStatus>();
+        final List<TargetUpdateStatus> statusList = new ArrayList<>();
         if (isFilteredByStatus()) {
             statusList.addAll(managementUIState.getTargetTableFilters().getClickedStatusTargetTags());
         }
-        final List<String> tagList = new ArrayList<String>();
+        final List<String> tagList = new ArrayList<>();
         if (isFilteredByTags()) {
             tagList.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
         }
@@ -1081,7 +1081,7 @@ public class TargetTable extends AbstractTable implements Handler {
         String[] targetTags = null;
         Long distributionId = null;
         String searchText = null;
-        Boolean noTagClicked = Boolean.FALSE;
+        Boolean noTagClicked;
         Long pinnedDistId = null;
 
         if (isFilteredByTags()) {
@@ -1129,13 +1129,13 @@ public class TargetTable extends AbstractTable implements Handler {
                 && !Strings.isNullOrEmpty(managementUIState.getTargetTableFilters().getSearchText().get());
     }
 
-    private Boolean anyFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
+    private static Boolean anyFilterSelected(final Collection<TargetUpdateStatus> status, final Long distributionId,
             final Boolean noTagClicked, final String[] targetTags, final String searchText) {
         return status == null && distributionId == null && Strings.isNullOrEmpty(searchText)
                 && !isTagSelected(targetTags, noTagClicked);
     }
 
-    private Boolean isTagSelected(final String[] targetTags, final Boolean noTagClicked) {
+    private static Boolean isTagSelected(final String[] targetTags, final Boolean noTagClicked) {
         return targetTags == null && !noTagClicked;
     }
 
@@ -1154,5 +1154,4 @@ public class TargetTable extends AbstractTable implements Handler {
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
-
 }

@@ -84,16 +84,18 @@ public class TargetFilterTable extends Table {
      */
     @PostConstruct
     public void init() {
-        addCustomGeneratedColumns();
-        populateTableData();
         setStyleName("sp-table");
+        setSizeFull();
+        setImmediate(true);
+        setHeight(100.0f, Unit.PERCENTAGE);
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
+        addCustomGeneratedColumns();
+        populateTableData();
         setColumnCollapsingAllowed(true);
         setColumnProperties();
         setId(SPUIComponetIdProvider.TAEGET_FILTER_TABLE_ID);
         eventBus.subscribe(this);
-        setSizeFull();
     }
 
     @PreDestroy
@@ -103,25 +105,17 @@ public class TargetFilterTable extends Table {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final CustomFilterUIEvent filterEvent) {
-        UI.getCurrent().access(() -> {
-            if (filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT
-                    || filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE
-                    || filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY
-                    || filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
-                refreshContainer();
-            }
-        });
+        if (filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT
+                || filterEvent == CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE
+                || filterEvent == CustomFilterUIEvent.CREATE_TARGET_FILTER_QUERY
+                || filterEvent == CustomFilterUIEvent.UPDATED_TARGET_FILTER_QUERY) {
+            UI.getCurrent().access(() -> refreshContainer());
+        }
     }
 
-    /**
-     * Create a empty HierarchicalContainer.
-     * 
-     * 
-     */
     private Container createContainer() {
         final Map<String, Object> queryConfig = prepareQueryConfigFilters();
-        final BeanQueryFactory<TargetFilterBeanQuery> targetQF = new BeanQueryFactory<TargetFilterBeanQuery>(
-                TargetFilterBeanQuery.class);
+        final BeanQueryFactory<TargetFilterBeanQuery> targetQF = new BeanQueryFactory<>(TargetFilterBeanQuery.class);
 
         targetQF.setQueryConfiguration(queryConfig);
         // create lazy query container with lazy defination and query
@@ -134,15 +128,12 @@ public class TargetFilterTable extends Table {
     }
 
     private Map<String, Object> prepareQueryConfigFilters() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
+        final Map<String, Object> queryConfig = new HashMap<>();
         filterManagementUIState.getCustomFilterSearchText()
                 .ifPresent(value -> queryConfig.put(SPUIDefinitions.FILTER_BY_TEXT, value));
         return queryConfig;
     }
 
-    /**
-     * Create a empty HierarchicalContainer.
-     */
     private void addContainerproperties() {
         /* Create HierarchicalContainer container */
         container.addContainerProperty(SPUILabelDefinitions.NAME, Link.class, null);
@@ -153,7 +144,7 @@ public class TargetFilterTable extends Table {
     }
 
     private List<TableColumn> getVisbleColumns() {
-        final List<TableColumn> columnList = new ArrayList<TableColumn>();
+        final List<TableColumn> columnList = new ArrayList<>();
         columnList.add(new TableColumn(SPUILabelDefinitions.NAME, i18n.get("header.name"), 0.2F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_USER, i18n.get("header.createdBy"), 0.15F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.2F));
@@ -164,7 +155,6 @@ public class TargetFilterTable extends Table {
 
     }
 
-    /* re -create the container and get the data and set it to the table */
     private void refreshContainer() {
         populateTableData();
 
@@ -186,10 +176,6 @@ public class TargetFilterTable extends Table {
                 .toString();
     }
 
-    /**
-     * @param event
-     * @return
-     */
     private void onDelete(final ClickEvent event) {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.filter.delete.confirmbox"),
@@ -235,10 +221,6 @@ public class TargetFilterTable extends Table {
         return updateIcon;
     }
 
-    /**
-     * @param event
-     * @return
-     */
     private void onClickOfDetailButton(final ClickEvent event) {
         final String targetFilterName = (String) ((Button) event.getComponent()).getData();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement

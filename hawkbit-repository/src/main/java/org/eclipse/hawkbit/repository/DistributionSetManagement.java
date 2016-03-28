@@ -22,10 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
@@ -53,13 +49,13 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.specifications.DistributionSetTypeSpecification;
+import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -203,7 +199,8 @@ public class DistributionSetManagement {
         }
 
         final DistributionSetTagAssigmentResult resultAssignment = result;
-        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
+        afterCommit
+                .afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -263,7 +260,7 @@ public class DistributionSetManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteDistributionSet(@NotNull final DistributionSet set) {
-        this.deleteDistributionSet(set.getId());
+        deleteDistributionSet(set.getId());
     }
 
     /**
@@ -297,8 +294,7 @@ public class DistributionSetManagement {
         // hard delete the rest if exixts
         if (!toHardDelete.isEmpty()) {
             // don't give the delete statement an empty list, JPA/Oracle cannot
-            // handle the empty list,
-            // see MECS-403
+            // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
         }
     }
@@ -321,14 +317,10 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSet createDistributionSet(@NotNull final DistributionSet dSet) {
         prepareDsSave(dSet);
-
         if (dSet.getType() == null) {
             dSet.setType(systemManagement.getTenantMetadata().getDefaultDsType());
         }
-
-        final DistributionSet result = distributionSetRepository.save(dSet);
-
-        return result;
+        return distributionSetRepository.save(dSet);
     }
 
     private void prepareDsSave(final DistributionSet dSet) {
@@ -400,7 +392,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSet unassignSoftwareModule(@NotNull final DistributionSet ds,
             final SoftwareModule softwareModule) {
-        final Set<SoftwareModule> softwareModules = new HashSet<SoftwareModule>();
+        final Set<SoftwareModule> softwareModules = new HashSet<>();
         softwareModules.add(softwareModule);
         ds.removeModule(softwareModule);
         checkDistributionSetSoftwareModulesIsAllowedToModify(ds, softwareModules);
@@ -491,20 +483,11 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     private DistributionSet findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
             final DistributionSetFilter distributionSetFilter) {
-
         final List<Specification<DistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
-
-        Specifications<DistributionSet> specs = null;
-        if (!specList.isEmpty()) {
-            specs = Specifications.where(specList.get(0));
+        if (specList == null || specList.isEmpty()) {
+            return null;
         }
-        if (specList.size() > 1) {
-            specList.remove(0);
-            for (final Specification<DistributionSet> s : specList) {
-                specs = specs.and(s);
-            }
-        }
-        return distributionSetRepository.findOne(specs);
+        return distributionSetRepository.findOne(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     /**
@@ -531,7 +514,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSet> findDistributionSetsAll(@NotNull final Pageable pageReq, final Boolean deleted,
             final Boolean complete) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
 
         if (deleted != null) {
             final Specification<DistributionSet> spec = DistributionSetSpecification.isDeleted(deleted);
@@ -563,7 +546,7 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSet> findDistributionSetsAll(@NotNull final Specification<DistributionSet> spec,
             @NotNull final Pageable pageReq, final Boolean deleted) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
         if (deleted != null) {
             specList.add(DistributionSetSpecification.isDeleted(deleted));
         }
@@ -635,17 +618,6 @@ public class DistributionSetManagement {
         return new PageImpl<>(resultSet, pageable, findDistributionSetsByFilters.getTotalElements());
     }
 
-    private Long countDistributionSetByCriteriaAPI(@NotEmpty final List<Specification<DistributionSet>> specList) {
-        Specifications<DistributionSet> specs = Specifications.where(specList.get(0));
-        if (specList.size() > 1) {
-            for (final Specification<DistributionSet> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
-        }
-
-        return distributionSetRepository.count(specs);
-    }
-
     /**
      * Find distribution set by name and version.
      *
@@ -689,12 +661,12 @@ public class DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Long countDistributionSetsAll() {
 
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
 
         final Specification<DistributionSet> spec = DistributionSetSpecification.isDeleted(Boolean.FALSE);
         specList.add(spec);
 
-        return countDistributionSetByCriteriaAPI(specList);
+        return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     /**
@@ -869,17 +841,10 @@ public class DistributionSetManagement {
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(
             @NotNull final Long distributionSetId, @NotNull final Pageable pageable) {
 
-        return distributionSetMetadataRepository.findAll(new Specification<DistributionSetMetadata>() {
-            @Override
-            public Predicate toPredicate(final Root<DistributionSetMetadata> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                final Predicate predicate = cb.equal(
-                        root.get(DistributionSetMetadata_.distributionSet).get(DistributionSet_.id), distributionSetId);
-
-                return predicate;
-            }
-        }, pageable);
+        return distributionSetMetadataRepository.findAll(
+                (Specification<DistributionSetMetadata>) (root, query, cb) -> cb.equal(
+                        root.get(DistributionSetMetadata_.distributionSet).get(DistributionSet_.id), distributionSetId),
+                pageable);
 
     }
 
@@ -899,14 +864,14 @@ public class DistributionSetManagement {
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(
             @NotNull final Long distributionSetId, @NotNull final Specification<DistributionSetMetadata> spec,
             @NotNull final Pageable pageable) {
-        return distributionSetMetadataRepository.findAll(new Specification<DistributionSetMetadata>() {
-            @Override
-            public Predicate toPredicate(final Root<DistributionSetMetadata> root, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                return cb.and(cb.equal(root.get(DistributionSetMetadata_.distributionSet).get(DistributionSet_.id),
-                        distributionSetId), spec.toPredicate(root, query, cb));
-            }
-        }, pageable);
+        return distributionSetMetadataRepository
+                .findAll(
+                        (Specification<DistributionSetMetadata>) (root, query,
+                                cb) -> cb.and(
+                                        cb.equal(root.get(DistributionSetMetadata_.distributionSet)
+                                                .get(DistributionSet_.id), distributionSetId),
+                                spec.toPredicate(root, query, cb)),
+                        pageable);
     }
 
     /**
@@ -956,7 +921,7 @@ public class DistributionSetManagement {
 
     /**
      * Checking Distribution Set is already using while assign Software module.
-     * 
+     *
      * @param distributionSet
      * @param softwareModules
      */
@@ -969,9 +934,9 @@ public class DistributionSetManagement {
 
     private List<Specification<DistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<Specification<DistributionSet>>();
+        final List<Specification<DistributionSet>> specList = new ArrayList<>();
 
-        Specification<DistributionSet> spec = null;
+        Specification<DistributionSet> spec;
 
         if (null != distributionSetFilter.getIsComplete()) {
             spec = DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete());
@@ -1053,21 +1018,12 @@ public class DistributionSetManagement {
      */
     private Page<DistributionSet> findByCriteriaAPI(@NotNull final Pageable pageable,
             final List<Specification<DistributionSet>> specList) {
-        Specifications<DistributionSet> specs = null;
-        if (!specList.isEmpty()) {
-            specs = Specifications.where(specList.get(0));
-        }
-        if (specList.size() > 1) {
-            for (final Specification<DistributionSet> s : specList.subList(1, specList.size())) {
-                specs = specs.and(s);
-            }
+
+        if (specList == null || specList.isEmpty()) {
+            return distributionSetRepository.findAll(pageable);
         }
 
-        if (specs == null) {
-            return distributionSetRepository.findAll(pageable);
-        } else {
-            return distributionSetRepository.findAll(specs, pageable);
-        }
+        return distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable);
     }
 
     private void checkAndThrowAlreadyIfDistributionSetMetadataExists(final DsMetadataCompositeKey metadataId) {

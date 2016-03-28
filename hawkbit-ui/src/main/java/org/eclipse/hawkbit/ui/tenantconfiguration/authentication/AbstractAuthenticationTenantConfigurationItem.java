@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -19,34 +19,33 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Ab abstract authentication configuration item.
+ * abstract authentication configuration item.
  *
  *
  *
  *
  */
-abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout implements TenantConfigurationItem {
+abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLayout
+        implements AuthenticationConfigurationItem {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private final TenantConfigurationKey configurationKey;
-    private final transient SystemManagement systemManagement;
+    private final transient TenantConfigurationManagement tenantConfigurationManagement;
 
-    private final List<TenantConfigurationChangeListener> configurationChangeListeners = new ArrayList<>();
+    private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
 
     /**
      * @param configurationKey
      *            the key for this configuration
-     * @param systemManagement
-     *            the system management to retrive the configuration value
+     * @param tenantConfigurationManagement
+     *            the tenant configuration management to retrieve the
+     *            configuration value
      */
     public AbstractAuthenticationTenantConfigurationItem(final TenantConfigurationKey configurationKey,
-            final SystemManagement systemManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         this.configurationKey = configurationKey;
-        this.systemManagement = systemManagement;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     /**
@@ -57,22 +56,16 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
         addComponent(SPUIComponentProvider.getLabel(labelText, SPUILabelDefinitions.SP_LABEL_SIMPLE));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# isConfigEnabled()
-     */
     @Override
     public boolean isConfigEnabled() {
-        return systemManagement.getConfigurationValue(configurationKey, Boolean.class);
+        return tenantConfigurationManagement.getConfigurationValue(configurationKey, Boolean.class).getValue();
     }
 
     /**
      * @return the systemManagement
      */
-    protected SystemManagement getSystemManagement() {
-        return systemManagement;
+    protected TenantConfigurationManagement getTenantConfigurationManagement() {
+        return tenantConfigurationManagement;
     }
 
     /**
@@ -86,16 +79,13 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
         configurationChangeListeners.forEach(listener -> listener.configurationHasChanged());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# addConfigurationChangeListener
-     * (hawkbit.server.ui.tenantconfiguration.TenantConfigurationItem.
-     * TenantConfigurationChangeListener)
-     */
     @Override
-    public void addConfigurationChangeListener(final TenantConfigurationChangeListener listener) {
+    public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);
+    }
+
+    @Override
+    public boolean isUserInputValid() {
+        return true;
     }
 }

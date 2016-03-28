@@ -23,13 +23,16 @@ import org.junit.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
 /**
  * Tests {@link SoftwareModuleResource} in case of missing MongoDB connection.
  *
- *
- *
- *
  */
+@Features("Component Tests - Management API")
+@Stories("Download Resource")
 public class SMRessourceMisingMongoDbConnectionTest extends AbstractIntegrationTest {
 
     @BeforeClass
@@ -40,7 +43,8 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractIntegrationT
     }
 
     @Test
-    public void testMissingMongoDbConnection() throws Exception {
+    @Description("Ensures that the correct error code is returned in case MongoDB unavailable.")
+    public void missingMongoDbConnectionResultsInErrorAtUpload() throws Exception {
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);

@@ -116,6 +116,8 @@ public final class RestConstants {
      * The target URL mapping rest resource.
      */
     public static final String TARGET_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targets";
+
+    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/system";
     /**
      * The software module URL mapping rest resource.
      */
@@ -153,6 +155,16 @@ public final class RestConstants {
      * The software module URL mapping rest resource.
      */
     public static final String DISTRIBUTIONSET_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/distributionsets";
+
+    /**
+     * The rollout URL mapping rest resource.
+     */
+    public static final String ROLLOUT_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/rollouts";
+
+    /**
+     * Request parameter for async
+     */
+    public static final String REQUEST_PARAMETER_ASYNC = "async";
 
     /**
      * The target URL mapping, href link for artifact download.

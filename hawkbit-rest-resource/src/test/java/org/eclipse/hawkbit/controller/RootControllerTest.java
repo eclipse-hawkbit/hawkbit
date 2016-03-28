@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.resource.JsonBuilder;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
@@ -45,13 +46,11 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @ActiveProfiles({ "im", "test" })
-@Features("Component Tests - Controller RESTful API")
+@Features("Component Tests - Direct Device Integration API")
 @Stories("Root Poll Resource")
-// TODO: fully document tests -> @Description for long text and reasonable
-// method name as short text
 public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
 
-    @Test()
+    @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
     @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = "ROLE_CONTROLLER", autoCreateTenant = false)
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
@@ -73,8 +72,9 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test
+    @Description("Ensures that target poll request does not change audit data on the entity.")
     @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET,
-            SpPermission.CREATE_TARGET })
+            SpPermission.CREATE_TARGET }, allSpPermissions = false)
     public void targetPollDoesNotModifyAuditData() throws Exception {
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
@@ -104,11 +104,13 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test
+    @Description("Ensures that server returns a not found response in case of empty controlloer ID.")
     public void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/")).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
     @Test
+    @Description("Ensures that the system creates a new target in plug and play manner, i.e. target is authenticated but does not exist yet.")
     public void rootRsPlugAndPlay() throws Exception {
 
         final long current = System.currentTimeMillis();
@@ -133,6 +135,29 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test
+    @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
+    @WithUser(principal = "knownpricipal", allSpPermissions = false)
+    public void pollWithModifiedGloablPollingTime() throws Exception {
+        securityRule.runAs(
+                WithSpringAuthorityRule.withUser("tenantadmin", SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION),
+                () -> {
+                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
+                            "00:02:00");
+                    return null;
+                });
+
+        securityRule.runAs(
+                WithSpringAuthorityRule.withUser("controller", SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
+                            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                            .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                            .andExpect(jsonPath("$config.polling.sleep", equalTo("00:02:00")));
+                    return null;
+                });
+    }
+
+    @Test
+    @Description("Ensures that etag check results in not modified response if provided etag by client is identical to entity in repository.")
     public void rootRsNotModified() throws Exception {
         final String etag = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -197,6 +222,8 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test
+    @Description("Ensures that the target state machine of a precomissioned target switches from "
+            + "UNKNOWN to REGISTERED when the target polls for the first time.")
     public void rootRsPrecommissioned() throws Exception {
         final Target target = new Target("4711");
         targetManagement.createTarget(target);
@@ -219,6 +246,7 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     @Test
+    @Description("Ensures that the source IP address of the polling target is correctly stored in repository")
     public void rootRsPlugAndPlayIpAddress() throws Exception {
         // test
         final String knownControllerId1 = "0815";

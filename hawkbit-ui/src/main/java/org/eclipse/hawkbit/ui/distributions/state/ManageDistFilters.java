@@ -20,8 +20,6 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
  * Distribution table filter state.
- *
- *
  */
 @SpringComponent
 @VaadinSessionScope
@@ -31,9 +29,9 @@ public class ManageDistFilters implements Serializable {
 
     private String searchText;
 
-    private List<String> distSetTags = new ArrayList<String>();
+    private List<String> distSetTags = new ArrayList<>();
 
-    private List<String> clickedDistSetTags = new ArrayList<String>();
+    private List<String> clickedDistSetTags = new ArrayList<>();
 
     private DistributionSetType clickedDistSetType;
 
@@ -61,17 +59,10 @@ public class ManageDistFilters implements Serializable {
         this.clickedDistSetTags = clickedDistSetTags;
     }
 
-    /**
-     * @return the searchText
-     */
     public Optional<String> getSearchText() {
         return searchText == null ? Optional.empty() : Optional.of(searchText);
     }
 
-    /**
-     * @param searchText
-     *            the searchText to set
-     */
     public void setSearchText(final String searchText) {
         this.searchText = searchText;
     }

@@ -64,7 +64,9 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_TYPE_UNDEFINED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_TENANT_NOT_EXISTS, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ENTITY_LOCKED, HttpStatus.LOCKED);
-
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ROLLOUT_ILLEGAL_STATE, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_INVALID, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_KEY_INVALID, HttpStatus.BAD_REQUEST);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {
@@ -84,8 +86,7 @@ public class ResponseExceptionHandler {
      *         as entity.
      */
     @ExceptionHandler(SpServerRtException.class)
-    public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request,
-            final Exception ex) {
+    public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request, final Exception ex) {
         LOG.debug("Handling exception of request {}", request.getRequestURL());
         final ExceptionInfo response = new ExceptionInfo();
         final HttpStatus responseStatus;

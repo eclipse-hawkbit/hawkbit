@@ -54,6 +54,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -93,8 +94,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     @Autowired
     private transient TenantMetaDataRepository tenantMetaDataRepository;
 
-    private Button saveDistribution;
-    private Button discardDistribution;
+    private Button saveDistributionBtn;
+    private Button discardDistributionBtn;
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private Label madatoryLabel;
@@ -102,14 +103,14 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
     private boolean editDistribution = Boolean.FALSE;
-    private Long editDistId = null;
+    private Long editDistId;
     private Window addDistributionWindow;
     private String originalDistName;
     private String originalDistVersion;
     private String originalDistDescription;
     private Boolean originalReqMigStep;
     private String originalDistSetType;
-    private final List<Object> changedComponents = new ArrayList<Object>();
+    private final List<Component> changedComponents = new ArrayList<>();
     private ValueChangeListener reqMigStepCheckboxListerner;
     private TextChangeListener descTextAreaListener;
     private TextChangeListener distNameTextFieldListener;
@@ -130,9 +131,9 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         final HorizontalLayout buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
         buttonsLayout.setStyleName("dist-buttons-horz-layout");
-        buttonsLayout.addComponents(saveDistribution, discardDistribution);
-        buttonsLayout.setComponentAlignment(saveDistribution, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(discardDistribution, Alignment.BOTTOM_RIGHT);
+        buttonsLayout.addComponents(saveDistributionBtn, discardDistributionBtn);
+        buttonsLayout.setComponentAlignment(saveDistributionBtn, Alignment.BOTTOM_LEFT);
+        buttonsLayout.setComponentAlignment(discardDistributionBtn, Alignment.BOTTOM_RIGHT);
         buttonsLayout.addStyleName("window-style");
 
         /*
@@ -185,24 +186,24 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         reqMigStepCheckbox.setId(SPUIComponetIdProvider.DIST_ADD_MIGRATION_CHECK);
 
         /* save or update button */
-        saveDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
+        saveDistributionBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveDistribution.addClickListener(event -> saveDistribution());
+        saveDistributionBtn.addClickListener(event -> saveDistribution());
 
         /* close button */
-        discardDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardDistribution.addClickListener(event -> discardDistribution());
+        discardDistributionBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "",
+                true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        discardDistributionBtn.addClickListener(event -> discardDistribution());
     }
 
     /**
      * Get the LazyQueryContainer instance for DistributionSetTypes.
-     * 
+     *
      * @return
      */
     private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
-        final Map<String, Object> queryConfig = new HashMap<String, Object>();
-        final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<DistributionSetTypeBeanQuery>(
+        final Map<String, Object> queryConfig = new HashMap<>();
+        final BeanQueryFactory<DistributionSetTypeBeanQuery> dtQF = new BeanQueryFactory<>(
                 DistributionSetTypeBeanQuery.class);
         dtQF.setQueryConfiguration(queryConfig);
 
@@ -215,7 +216,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void enableSaveButton() {
-        saveDistribution.setEnabled(true);
+        saveDistributionBtn.setEnabled(true);
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
@@ -225,7 +226,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void disableSaveButton() {
-        saveDistribution.setEnabled(false);
+        saveDistributionBtn.setEnabled(false);
     }
 
     private void saveDistribution() {
@@ -341,15 +342,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         distributionSet.setRequiredMigrationStep(isMigStepReq);
     }
 
-    /**
-     * Duplicate check-Name and version for {@link DistributionSet} unique.
-     *
-     * @param name
-     *            as String
-     * @param version
-     *            as String
-     * @return
-     */
     private boolean duplicateCheck(final String name, final String version) {
         final DistributionSet existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name, version);
         /*
@@ -358,7 +350,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
          * (or) when the "existingDs" is not null and it is edit window and the
          * distribution Id of the edit window is different then the "existingDs"
          */
-        if (existingDs != null && (!editDistribution || editDistribution && !existingDs.getId().equals(editDistId))) {
+        if (existingDs != null && !existingDs.getId().equals(editDistId)) {
             distNameTextField.addStyleName("v-textfield-error");
             distVersionTextField.addStyleName("v-textfield-error");
             notificationMessage.displayValidationError(
@@ -423,7 +415,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-        saveDistribution.setEnabled(true);
+        saveDistributionBtn.setEnabled(true);
         removeListeners();
         changedComponents.clear();
     }
@@ -499,13 +491,13 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
     /**
      * populate data.
-     * 
+     *
      * @param editDistId
      */
     public void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
         editDistribution = Boolean.TRUE;
-        saveDistribution.setEnabled(false);
+        saveDistributionBtn.setEnabled(false);
         final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
         if (distSet != null) {
             distNameTextField.setValue(distSet.getName());

@@ -14,12 +14,11 @@ import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
-import org.eclipse.hawkbit.eventbus.event.EntityEvent;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.ui.components.SPUIErrorHandler;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
+import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -28,14 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.vaadin.spring.events.EventBus;
-import org.vaadin.spring.events.EventBus.SessionEventBus;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
-import com.google.common.eventbus.Subscribe;
 import com.vaadin.annotations.Title;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -45,9 +38,6 @@ import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.server.VaadinSession.State;
-import com.vaadin.server.WrappedSession;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
@@ -71,11 +61,13 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     private static final String EMPTY_VIEW = "";
 
+    private transient EventPushStrategy pushStrategy;
+
     @Autowired
     private SpringViewProvider viewProvider;
 
     @Autowired
-    private ApplicationContext context;
+    private transient ApplicationContext context;
 
     @Autowired
     private I18N i18n;
@@ -89,65 +81,40 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     private ErrorView errorview;
 
     @Autowired
-    protected EventBus.SessionEventBus eventBus;
+    protected transient EventBus.SessionEventBus eventBus;
 
     /**
-     * An {@link com.google.common.eventbus.EventBus} subscriber which
-     * subscribes {@link EntityEvent} from the repository to dispatch these
-     * events to the UI {@link SessionEventBus}.
-     * 
-     * @param event
-     *            the entity event which has been published from the repository
+     * Default constructor.
      */
-    @Subscribe
-    @AllowConcurrentEvents
-    public void dispatch(final org.eclipse.hawkbit.eventbus.event.Event event) {
-        final VaadinSession session = getSession();
-        if (session != null && session.getState() == State.OPEN) {
-            final WrappedSession wrappedSession = session.getSession();
-            if (wrappedSession != null) {
-                final SecurityContext userContext = (SecurityContext) wrappedSession
-                        .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-                if (eventSecurityCheck(userContext, event)) {
-                    final SecurityContext oldContext = SecurityContextHolder.getContext();
-                    try {
-                        access(new DispatcherRunnable(eventBus, session, userContext, event));
-                    } finally {
-                        SecurityContextHolder.setContext(oldContext);
-                    }
-                }
-            }
-        }
+    public HawkbitUI() {
+        // is empty, is ok.
     }
 
-    protected boolean eventSecurityCheck(final SecurityContext userContext,
-            final org.eclipse.hawkbit.eventbus.event.Event event) {
-        if (userContext != null && userContext.getAuthentication() != null) {
-            final Object tenantAuthenticationDetails = userContext.getAuthentication().getDetails();
-            if (tenantAuthenticationDetails instanceof TenantAwareAuthenticationDetails) {
-                return ((TenantAwareAuthenticationDetails) tenantAuthenticationDetails).getTenant()
-                        .equalsIgnoreCase(event.getTenant());
-            }
-        }
-        return false;
+    /**
+     * Constructor taking the push strategy.
+     * 
+     * @param pushStrategy
+     *            the strategy to push events from the backend to the UI
+     */
+    public HawkbitUI(final EventPushStrategy pushStrategy) {
+        this.pushStrategy = pushStrategy;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.server.ClientConnector.DetachListener#detach(com.vaadin.server
-     * .ClientConnector. DetachEvent)
-     */
     @Override
     public void detach(final DetachEvent event) {
         LOG.info("ManagementUI is detached uiid - {}", getUIId());
-
+        eventBus.unsubscribe(this);
+        if (pushStrategy != null) {
+            pushStrategy.clean();
+        }
     }
 
     @Override
     protected void init(final VaadinRequest vaadinRequest) {
         LOG.info("ManagementUI init starts uiid - {}", getUI().getUIId());
+        if (pushStrategy != null) {
+            pushStrategy.init(getUI());
+        }
         addDetachListener(this);
         SpringContextHelper.setContext(context);
 
@@ -210,7 +177,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         navigator.addView(EMPTY_VIEW, new Navigator.EmptyView());
         // set locale is required for I18N class also, to get the locale from
         // cookie
-        final String locale = getLocaleId(SPUIDefinitions.AVAILABLE_LOCALES);
+        final String locale = getLocaleId(SPUIDefinitions.getAvailableLocales());
         setLocale(new Locale(locale));
 
         UI.getCurrent().setErrorHandler(new SPUIErrorHandler());
@@ -225,7 +192,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
 
     /**
      * Get Specific Locale.
-     * 
+     *
      * @param availableLocalesInApp
      *            as set
      * @return String as preferred locale

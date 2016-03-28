@@ -23,8 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
  * The Permissions cover CRUD for two data areas of SP:<br/>
  * <br/>
  * XX_Target_CRUD which covers the following entities: {@link Target} entities
- * including metadata, {@link TargetTag}s, {@link Action}s,
- * {@link TargetRegistrationRule}s<br/>
+ * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s<br/>
  * XX_Repository CRUD which covers: {@link DistributionSet}s,
  * {@link SoftwareModule}s, DS Tags<br/>
  * </p>
@@ -131,6 +130,11 @@ public final class SpPermission {
      */
     public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
 
+    /**
+     * Permission to administrate a rollout management.
+     */
+    public static final String ROLLOUT_MANAGEMENT = "ROLLOUT_MANAGEMENT";
+
     private SpPermission() {
         // Constants only
     }
@@ -177,6 +181,12 @@ public final class SpPermission {
          * controller is authenticated but only as anonymous.
          */
         public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
+
+        /**
+         * The role which contains the spring security context in case the
+         * system is executing code which is necessary to be privileged.
+         */
+        public static final String SYSTEM_ROLE = "ROLE_SYSTEM_CODE";
 
         /**
          * The spring security eval expression operator {@code or}.
@@ -265,8 +275,15 @@ public final class SpPermission {
          * context contains the anoynmous role or the controller specific role
          * {@link SpPermission#CONTROLLER_ROLE}.
          */
-        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE
-                + "')";
+        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '"
+                + CONTROLLER_ROLE + "')";
+
+        /**
+         * Spring security eval hasAnyRole expression to check if the spring
+         * context contains system code role
+         * {@link SpringEvalExpressions#SYSTEM_ROLE}.
+         */
+        public static final String IS_SYSTEM_CODE = HAS_AUTH_PREFIX + SYSTEM_ROLE + HAS_AUTH_SUFFIX;
 
         /**
          * Spring security eval hasAuthority expression to check if spring
@@ -275,6 +292,28 @@ public final class SpPermission {
          */
         public static final String HAS_AUTH_CREATE_REPOSITORY_AND_CREATE_TARGET = HAS_AUTH_PREFIX + CREATE_REPOSITORY
                 + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT}
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
+                + HAS_AUTH_SUFFIX;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
+         * {@link SpPermission#UPDATE_TARGET}.
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT
+                + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#TENANT_CONFIGURATION}
+         */
+        public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION
+                + HAS_AUTH_SUFFIX;
 
         private SpringEvalExpressions() {
             // utility class

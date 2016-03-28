@@ -13,17 +13,16 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
-import org.eclipse.hawkbit.repository.model.helper.PollConfigurationHelper;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -39,10 +38,6 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 /**
  * General configuration for the SP Repository.
  *
- *
- *
- *
- *
  */
 @EnableJpaRepositories(basePackages = { "org.eclipse.hawkbit.repository" })
 @EnableTransactionManagement
@@ -54,21 +49,13 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
-     * @return simple default {@link AsyncUncaughtExceptionHandler}
-     *         implementation
-     * @Bean public SimpleAsyncUncaughtExceptionHandler
-     *       simpleAsyncUncaughtExceptionHandler() { return new
-     *       SimpleAsyncUncaughtExceptionHandler(); }
-     *
-     *       /**
-     * @return the {@link PollConfigurationHelper} singleton bean which holds
-     *         the polling and polling overdue configuration and make it
-     *         accessible in beans which cannot not be autowired or retrieve
-     *         environment variables due {@link EnvironmentAware} interface.
+     * @return the {@link TenantConfigurationManagement} singleton bean which
+     *         make it accessible in beans which cannot access the service
+     *         directly, e.g. JPA entities.
      */
     @Bean
-    public PollConfigurationHelper pollConfigurationHelper() {
-        return PollConfigurationHelper.getInstance();
+    public TenantConfigurationManagement tenantConfigurationManagement() {
+        return TenantConfigurationManagement.getInstance();
     }
 
     /**
@@ -113,6 +100,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
+     * 
+     * @return the singleton instance of the
+     *         {@link AfterTransactionCommitExecutorHolder}
+     */
+    @Bean
+    public AfterTransactionCommitExecutorHolder afterTransactionCommitExecutorHolder() {
+        return AfterTransactionCommitExecutorHolder.getInstance();
+    }
+
+    /**
      * Defines the validation processor bean.
      *
      * @return the {@link MethodValidationPostProcessor}
@@ -150,7 +147,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = new HashMap<>();
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put("eclipselink.weaving", "false");
         // needed for reports
@@ -174,5 +171,4 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     public PlatformTransactionManager transactionManager() {
         return new MultiTenantJpaTransactionManager();
     }
-
 }

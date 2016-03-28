@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.footer;
 
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
@@ -27,7 +26,7 @@ public final class DeleteActionsLayoutHelper {
 
     /**
      * Checks if component is a target tag.
-     * 
+     *
      * @param source
      *            Component dropped
      * @return true if it component is target tag
@@ -45,7 +44,7 @@ public final class DeleteActionsLayoutHelper {
 
     /**
      * Checks if component is distribution tag.
-     * 
+     *
      * @param source
      *            component dropped
      * @return true if it component is distribution tag
@@ -63,29 +62,29 @@ public final class DeleteActionsLayoutHelper {
 
     /**
      * Checks if component is target table.
-     * 
+     *
      * @param source
      *            component dropped
      * @return true if it component is target table
      */
     public static boolean isTargetTable(final Component source) {
-        return HawkbitCommonUtil.bothSame(source.getId(), SPUIComponetIdProvider.TARGET_TABLE_ID);
+        return SPUIComponetIdProvider.TARGET_TABLE_ID.equalsIgnoreCase(source.getId());
     }
 
     /**
      * Checks id component is distribution table.
-     * 
+     *
      * @param source
      *            component dropped
      * @return true if it component is distribution table
      */
     public static boolean isDistributionTable(final Component source) {
-        return HawkbitCommonUtil.bothSame(source.getId(), SPUIComponetIdProvider.DIST_TABLE_ID);
+        return SPUIComponetIdProvider.DIST_TABLE_ID.equalsIgnoreCase(source.getId());
     }
 
     /**
      * Check if dropped component can be deleted.
-     * 
+     *
      * @param source
      *            component dropped
      * @return true if component can be deleted
