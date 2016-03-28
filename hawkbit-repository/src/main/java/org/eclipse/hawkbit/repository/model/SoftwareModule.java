@@ -33,12 +33,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
- * the edge controller, e.g. OS, JVM, AgentHub
- *
- *
- *
- *
- *
+ * the edge controller, e.g. OS, JVM, AgentHub.
  *
  */
 @Entity

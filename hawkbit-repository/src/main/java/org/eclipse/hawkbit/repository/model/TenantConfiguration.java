@@ -19,9 +19,6 @@ import javax.persistence.UniqueConstraint;
 /**
  * A JPA entity which stores the tenant specific configuration.
  *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
@@ -88,31 +85,23 @@ public class TenantConfiguration extends TenantAwareBaseEntity implements Serial
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + (key == null ? 0 : key.hashCode());
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-                                              // code
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof TenantConfiguration)) {
             return false;
         }
-        final TenantConfiguration other = (TenantConfiguration) obj;
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
+
         return true;
     }
 

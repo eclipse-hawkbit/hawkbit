@@ -22,11 +22,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
- * External artifact representation with all the necessray informattion to
+ * External artifact representation with all the necessary information to
  * generate an artifact {@link URL} at runtime.
- *
- *
- *
  *
  */
 @Table(name = "sp_external_artifact", indexes = {

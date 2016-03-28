@@ -46,10 +46,6 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  * A {@link Target} has exactly one target {@link DistributionSet} assigned.
  * </p>
  *
- *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_distribution_set", uniqueConstraints = {

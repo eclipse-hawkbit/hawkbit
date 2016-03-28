@@ -14,8 +14,6 @@ import java.io.Serializable;
  * The DistributionSet Metadata composite key which contains the meta data key
  * and the ID of the DistributionSet itself.
  *
- *
- *
  */
 public final class DsMetadataCompositeKey implements Serializable {
     private static final long serialVersionUID = 1L;

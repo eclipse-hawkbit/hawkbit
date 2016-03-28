@@ -131,6 +131,12 @@ public class Target extends NamedEntity implements Persistable<Long> {
         securityToken = null;
     }
 
+    /**
+     * Note: For Target we extended the general strategy by adding controllerId
+     * as well.
+     * 
+     * @see org.eclipse.hawkbit.repository.model.BaseEntity#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(final Object obj) {// NOSONAR - as this is generated
         if (this == obj) {

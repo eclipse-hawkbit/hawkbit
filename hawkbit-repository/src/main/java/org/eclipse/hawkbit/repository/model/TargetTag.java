@@ -21,11 +21,6 @@ import javax.persistence.UniqueConstraint;
  * A {@link TargetTag} is used to describe Target attributes and use them also
  * for filtering the target list.
  *
- *
- *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_target_tag", indexes = {

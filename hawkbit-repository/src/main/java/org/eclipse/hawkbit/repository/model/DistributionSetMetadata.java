@@ -23,10 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- * Metadata for {@link DistributionSet}.
- *
- *
- *
+ * Meta data for {@link DistributionSet}.
  *
  */
 @IdClass(DsMetadataCompositeKey.class)

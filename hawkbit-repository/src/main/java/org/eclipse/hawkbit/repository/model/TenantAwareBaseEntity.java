@@ -75,6 +75,14 @@ public abstract class TenantAwareBaseEntity extends BaseEntity {
         return "BaseEntity [id=" + super.getId() + "]";
     }
 
+    /**
+     * Tenant aware entities extend the equals/hashcode strategy with the tenant
+     * name. That would allow for instance in a multi-schema based data
+     * separation setup to have the same primary key for different entities of
+     * different tenants.
+     * 
+     * @see org.eclipse.hawkbit.repository.model.BaseEntity#hashCode()
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -83,6 +91,14 @@ public abstract class TenantAwareBaseEntity extends BaseEntity {
         return result;
     }
 
+    /**
+     * Tenant aware entities extend the equals/hashcode strategy with the tenant
+     * name. That would allow for instance in a multi-schema based data
+     * separation setup to have the same primary key for different entities of
+     * different tenants.
+     * 
+     * @see org.eclipse.hawkbit.repository.model.BaseEntity#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
