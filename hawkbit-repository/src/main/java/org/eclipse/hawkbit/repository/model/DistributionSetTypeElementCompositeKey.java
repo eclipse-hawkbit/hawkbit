@@ -61,43 +61,4 @@ public class DistributionSetTypeElementCompositeKey implements Serializable {
     public void setSmType(final Long smType) {
         this.smType = smType;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((dsType == null) ? 0 : dsType.hashCode());
-        result = prime * result + ((smType == null) ? 0 : smType.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof DistributionSetTypeElementCompositeKey)) {
-            return false;
-        }
-        final DistributionSetTypeElementCompositeKey other = (DistributionSetTypeElementCompositeKey) obj;
-        if (dsType == null) {
-            if (other.dsType != null) {
-                return false;
-            }
-        } else if (!dsType.equals(other.dsType)) {
-            return false;
-        }
-        if (smType == null) {
-            if (other.smType != null) {
-                return false;
-            }
-        } else if (!smType.equals(other.smType)) {
-            return false;
-        }
-        return true;
-    }
-
 }

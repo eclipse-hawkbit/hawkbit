@@ -56,11 +56,6 @@ import org.springframework.data.domain.Persistable;
  * {@link TargetStatus#REGISTERED}, i.e. a target {@link DistributionSet} .
  * </p>
  *
- *
- *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_target", indexes = {
@@ -117,7 +112,7 @@ public class Target extends NamedEntity implements Persistable<Long> {
 
     /**
      * Constructor.
-     * 
+     *
      * @param controllerId
      *            controller ID of the {@link Target}
      */
@@ -182,25 +177,14 @@ public class Target extends NamedEntity implements Persistable<Long> {
         this.assignedDistributionSet = assignedDistributionSet;
     }
 
-    /**
-     * @param controllerId
-     *            the controllerId to set
-     */
     public void setControllerId(final String controllerId) {
         this.controllerId = controllerId;
     }
 
-    /**
-     * @param tags
-     *            the tags to set
-     */
     public void setTags(final Set<TargetTag> tags) {
         this.tags = tags;
     }
 
-    /**
-     * @return the actions
-     */
     public List<Action> getActions() {
         return actions;
     }
@@ -209,11 +193,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
         return new TargetIdName(getId(), getControllerId(), getName());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.domain.Persistable#isNew()
-     */
     @Override
     @Transient
     public boolean isNew() {
@@ -263,7 +242,7 @@ public class Target extends NamedEntity implements Persistable<Long> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

@@ -58,9 +58,7 @@ public abstract class Artifact extends TenantAwareBaseEntity {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((md5Hash == null) ? 0 : md5Hash.hashCode());
-        result = prime * result + ((sha1Hash == null) ? 0 : sha1Hash.hashCode());
-        result = prime * result + ((size == null) ? 0 : size.hashCode());
+        result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
 
@@ -72,31 +70,10 @@ public abstract class Artifact extends TenantAwareBaseEntity {
         if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Artifact)) {
             return false;
         }
-        final Artifact other = (Artifact) obj;
-        if (md5Hash == null) {
-            if (other.md5Hash != null) {
-                return false;
-            }
-        } else if (!md5Hash.equals(other.md5Hash)) {
-            return false;
-        }
-        if (sha1Hash == null) {
-            if (other.sha1Hash != null) {
-                return false;
-            }
-        } else if (!sha1Hash.equals(other.sha1Hash)) {
-            return false;
-        }
-        if (size == null) {
-            if (other.size != null) {
-                return false;
-            }
-        } else if (!size.equals(other.size)) {
-            return false;
-        }
+
         return true;
     }
 }

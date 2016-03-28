@@ -27,10 +27,6 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
         "tenant" }, name = "uk_tenant_key"))
 public class TenantConfiguration extends TenantAwareBaseEntity implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Column(name = "conf_key", length = 128)
@@ -89,24 +85,14 @@ public class TenantConfiguration extends TenantAwareBaseEntity implements Serial
         this.value = value;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + (key == null ? 0 : key.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
                                               // code

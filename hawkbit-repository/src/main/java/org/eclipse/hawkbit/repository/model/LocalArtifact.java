@@ -46,7 +46,7 @@ public class LocalArtifact extends Artifact {
     private String filename;
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm") )
+    @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm"))
     private SoftwareModule softwareModule;
 
     /**
@@ -73,11 +73,6 @@ public class LocalArtifact extends Artifact {
         this.filename = filename;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
@@ -86,11 +81,6 @@ public class LocalArtifact extends Artifact {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
         if (this == obj) {
@@ -106,33 +96,20 @@ public class LocalArtifact extends Artifact {
         return true;
     }
 
-    /**
-     * @return the softwareModule
-     */
     @Override
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
     }
 
-    /**
-     * @param softwareModule
-     *            the softwareModule to set
-     */
     public final void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
         this.softwareModule.addArtifact(this);
     }
 
-    /**
-     * @return the gridFsFileName
-     */
     public String getGridFsFileName() {
         return gridFsFileName;
     }
 
-    /**
-     * @return the filename
-     */
     public String getFilename() {
         return filename;
     }

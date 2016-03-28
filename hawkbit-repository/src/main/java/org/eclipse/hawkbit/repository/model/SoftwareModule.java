@@ -241,8 +241,8 @@ public class SoftwareModule extends NamedVersionedEntity {
 
     @Override
     public String toString() {
-        return "SoftwareModule [deleted=" + deleted + ", getVersion()=" + getVersion() + ", getOptLockRevision()="
-                + getOptLockRevision() + ", getId()=" + getId() + ", getType()=" + getType().getName() + "]";
+        return "SoftwareModule [deleted=" + deleted + ", name=" + getName() + ", version=" + getVersion()
+                + ", revision=" + getOptLockRevision() + ", Id=" + getId() + ", type=" + getType().getName() + "]";
     }
 
     @Override

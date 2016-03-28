@@ -33,12 +33,10 @@ public class ActionTest {
         final Action timeforcedAction = new Action();
         timeforcedAction.setActionType(ActionType.TIMEFORCED);
         timeforcedAction.setForcedTime(timeForceTimeAt);
-        final int knownHashCode = timeforcedAction.hashCode();
         assertThat(timeforcedAction.isForce()).isFalse();
 
         // wait until timeforce time is hit
         Thread.sleep(sleepTime + 100);
         assertThat(timeforcedAction.isForce()).isTrue();
-        assertThat(timeforcedAction.hashCode()).isNotEqualTo(knownHashCode);
     }
 }

@@ -127,55 +127,30 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
         return status == Status.CANCELING || status == Status.CANCELED;
     }
 
-    /**
-     * @param active
-     *            the active to set
-     */
     public void setActive(final boolean active) {
         this.active = active;
     }
 
-    /**
-     * @return the status
-     */
     public Status getStatus() {
         return status;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final Status status) {
         this.status = status;
     }
 
-    /**
-     * @return the downloadProgressPercent
-     */
     public int getDownloadProgressPercent() {
         return downloadProgressPercent;
     }
 
-    /**
-     * @param downloadProgressPercent
-     *            the downloadProgressPercent to set
-     */
     public void setDownloadProgressPercent(final int downloadProgressPercent) {
         this.downloadProgressPercent = downloadProgressPercent;
     }
 
-    /**
-     * @return the active
-     */
     public boolean isActive() {
         return active;
     }
 
-    /**
-     * @param actionType
-     *            the actionType to set
-     */
     public void setActionType(final ActionType actionType) {
         this.actionType = actionType;
     }
@@ -187,69 +162,38 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
         return actionType;
     }
 
-    /**
-     * @return the actionStatus
-     */
     public List<ActionStatus> getActionStatus() {
         return actionStatus;
     }
 
-    /**
-     * @param target
-     *            the target to set
-     */
     public void setTarget(final Target target) {
         this.target = target;
     }
 
-    /**
-     * @return the target
-     */
     public Target getTarget() {
         return target;
     }
 
-    /**
-     * @return the forcedTime
-     */
     public long getForcedTime() {
         return forcedTime;
     }
 
-    /**
-     * @param forcedTime
-     *            the forcedTime to set
-     */
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
     }
 
-    /**
-     * @return the rolloutGroup
-     */
     public RolloutGroup getRolloutGroup() {
         return rolloutGroup;
     }
 
-    /**
-     * @param rolloutGroup
-     *            the rolloutGroup to set
-     */
     public void setRolloutGroup(final RolloutGroup rolloutGroup) {
         this.rolloutGroup = rolloutGroup;
     }
 
-    /**
-     * @return the rollout
-     */
     public Rollout getRollout() {
         return rollout;
     }
 
-    /**
-     * @param rollout
-     *            the rollout to set
-     */
     public void setRollout(final Rollout rollout) {
         this.rollout = rollout;
     }
@@ -311,42 +255,25 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
     }
 
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
+    public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((actionType == null) ? 0 : actionType.hashCode());
-        result = prime * result + (active ? 1231 : 1237);
-        result = prime * result + (int) (forcedTime ^ (forcedTime >>> 32));
-        result = prime * result + ((status == null) ? 0 : status.hashCode());
-        result = prime * result + (isHitAutoForceTime(System.currentTimeMillis()) ? 1231 : 1237);
+        result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Action)) {
             return false;
         }
-        final Action other = (Action) obj;
-        if (actionType != other.actionType) {
-            return false;
-        }
-        if (active != other.active) {
-            return false;
-        }
-        if (forcedTime != other.forcedTime) {
-            return false;
-        }
-        if (status != other.status) {
-            return false;
-        }
+
         return true;
     }
 
@@ -408,9 +335,6 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
 
     /**
      * The action type for this action relation.
-     *
-     *
-     *
      *
      */
     public enum ActionType {

@@ -29,10 +29,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "sp_sw_metadata")
 public class SoftwareModuleMetadata implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -106,9 +102,9 @@ public class SoftwareModuleMetadata implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
-        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + (key == null ? 0 : key.hashCode());
+        result = prime * result + (softwareModule == null ? 0 : softwareModule.hashCode());
+        result = prime * result + (value == null ? 0 : value.hashCode());
         return result;
     }
 

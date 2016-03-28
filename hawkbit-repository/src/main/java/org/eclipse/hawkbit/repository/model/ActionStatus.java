@@ -60,7 +60,7 @@ public class ActionStatus extends TenantAwareBaseEntity {
 
     /**
      * Creates a new {@link ActionStatus} object.
-     * 
+     *
      * @param action
      *            the action for this action status
      * @param status
@@ -76,7 +76,7 @@ public class ActionStatus extends TenantAwareBaseEntity {
 
     /**
      * Creates a new {@link ActionStatus} object.
-     * 
+     *
      * @param action
      *            the action for this action status
      * @param status
@@ -144,10 +144,7 @@ public class ActionStatus extends TenantAwareBaseEntity {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((action == null) ? 0 : action.hashCode());
-        result = prime * result + ((messages == null) ? 0 : messages.hashCode());
-        result = prime * result + ((occurredAt == null) ? 0 : occurredAt.hashCode());
-        result = prime * result + ((status == null) ? 0 : status.hashCode());
+        result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
 
@@ -159,34 +156,10 @@ public class ActionStatus extends TenantAwareBaseEntity {
         if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof ActionStatus)) {
             return false;
         }
-        final ActionStatus other = (ActionStatus) obj;
-        if (action == null) {
-            if (other.action != null) {
-                return false;
-            }
-        } else if (!action.equals(other.action)) {
-            return false;
-        }
-        if (messages == null) {
-            if (other.messages != null) {
-                return false;
-            }
-        } else if (!messages.equals(other.messages)) {
-            return false;
-        }
-        if (occurredAt == null) {
-            if (other.occurredAt != null) {
-                return false;
-            }
-        } else if (!occurredAt.equals(other.occurredAt)) {
-            return false;
-        }
-        if (status != other.status) {
-            return false;
-        }
+
         return true;
     }
 

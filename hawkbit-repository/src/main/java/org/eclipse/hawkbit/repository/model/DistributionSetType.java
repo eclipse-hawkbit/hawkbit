@@ -84,7 +84,7 @@ public class DistributionSetType extends NamedEntity {
     public DistributionSetType(final String key, final String name, final String description, final String color) {
         super(name, description);
         this.key = key;
-        this.colour = color;
+        colour = color;
     }
 
     /**
@@ -289,10 +289,7 @@ public class DistributionSetType extends NamedEntity {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((colour == null) ? 0 : colour.hashCode());
-        result = prime * result + (deleted ? 1231 : 1237);
-        result = prime * result + ((elements == null) ? 0 : elements.hashCode());
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
 
@@ -307,31 +304,7 @@ public class DistributionSetType extends NamedEntity {
         if (!(obj instanceof DistributionSetType)) {
             return false;
         }
-        final DistributionSetType other = (DistributionSetType) obj;
-        if (colour == null) {
-            if (other.colour != null) {
-                return false;
-            }
-        } else if (!colour.equals(other.colour)) {
-            return false;
-        }
-        if (deleted != other.deleted) {
-            return false;
-        }
-        if (elements == null) {
-            if (other.elements != null) {
-                return false;
-            }
-        } else if (!elements.equals(other.elements)) {
-            return false;
-        }
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
+
         return true;
     }
 

@@ -65,7 +65,7 @@ public class DistributionSetTypeElement implements Serializable {
     public DistributionSetTypeElement(final DistributionSetType dsType, final SoftwareModuleType smType,
             final boolean mandatory) {
         super();
-        this.key = new DistributionSetTypeElementCompositeKey(dsType, smType);
+        key = new DistributionSetTypeElementCompositeKey(dsType, smType);
         this.dsType = dsType;
         this.smType = smType;
         this.mandatory = mandatory;
@@ -100,37 +100,7 @@ public class DistributionSetTypeElement implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
-        result = prime * result + (mandatory ? 1231 : 1237);
-        return result;
+    public String toString() {
+        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof DistributionSetTypeElement)) {
-            return false;
-        }
-        final DistributionSetTypeElement other = (DistributionSetTypeElement) obj;
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
-        if (mandatory != other.mandatory) {
-            return false;
-        }
-        return true;
-    }
-
 }

@@ -13,9 +13,6 @@ import java.io.Serializable;
 /**
  * Use to display software modules for the selected distribution.
  *
- *
- *
- *
  */
 public class CustomSoftwareModule implements Serializable {
 
@@ -39,16 +36,10 @@ public class CustomSoftwareModule implements Serializable {
         this.assigned = assigned;
     }
 
-    /**
-     * @return the softwareModule
-     */
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
     }
 
-    /**
-     * @return the assigned
-     */
     public boolean isAssigned() {
         return assigned;
     }
@@ -63,7 +54,7 @@ public class CustomSoftwareModule implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (assigned ? 1231 : 1237);
-        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
+        result = prime * result + (softwareModule == null ? 0 : softwareModule.hashCode());
         return result;
     }
 
@@ -75,7 +66,7 @@ public class CustomSoftwareModule implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof CustomSoftwareModule)) {
             return false;
         }
         final CustomSoftwareModule other = (CustomSoftwareModule) obj;

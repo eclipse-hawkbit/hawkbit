@@ -76,22 +76,22 @@ public abstract class TenantAwareBaseEntity extends BaseEntity {
     }
 
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
+    public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+        result = prime * result + (tenant == null ? 0 : tenant.hashCode());
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (!super.equals(obj)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof TenantAwareBaseEntity)) {
             return false;
         }
         final TenantAwareBaseEntity other = (TenantAwareBaseEntity) obj;

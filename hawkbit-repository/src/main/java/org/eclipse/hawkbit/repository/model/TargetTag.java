@@ -30,7 +30,7 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "sp_target_tag", indexes = {
         @Index(name = "sp_idx_target_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_targ_tag") )
+                "name", "tenant" }, name = "uk_targ_tag"))
 public class TargetTag extends Tag {
     private static final long serialVersionUID = 1L;
 
@@ -65,18 +65,10 @@ public class TargetTag extends Tag {
         super();
     }
 
-    /**
-     * @return the assignedToTargets
-     */
     public List<Target> getAssignedToTargets() {
         return assignedToTargets;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -85,11 +77,6 @@ public class TargetTag extends Tag {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
