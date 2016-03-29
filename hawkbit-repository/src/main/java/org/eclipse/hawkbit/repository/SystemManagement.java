@@ -339,18 +339,8 @@ public class SystemManagement {
      * default types we need to use the tenant the current tenant which is
      * currently created and not the one currently in the {@link TenantAware}.
      *
-     *
-     *
      */
     private class CurrentTenantKeyGenerator implements KeyGenerator {
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * org.springframework.cache.interceptor.KeyGenerator#generate(java.lang
-         * .Object, java.lang.reflect.Method, java.lang.Object[])
-         */
         @Override
         public Object generate(final Object target, final Method method, final Object... params) {
             final String initialTenantCreation = createInitialTenant.get();

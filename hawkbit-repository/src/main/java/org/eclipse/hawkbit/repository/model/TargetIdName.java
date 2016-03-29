@@ -59,11 +59,6 @@ public class TargetIdName implements Serializable {
         return targetId;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;

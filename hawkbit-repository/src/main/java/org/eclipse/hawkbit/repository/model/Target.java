@@ -246,11 +246,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
         this.securityToken = securityToken;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Target [controllerId=" + controllerId + ", getId()=" + getId() + "]";

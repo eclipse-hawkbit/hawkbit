@@ -167,11 +167,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.core.Ordered#getOrder()
-     */
     @Override
     public int getOrder() {
         return 1;

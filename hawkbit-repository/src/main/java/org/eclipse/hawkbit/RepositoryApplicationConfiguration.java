@@ -13,8 +13,8 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
@@ -127,23 +127,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new ExceptionMappingAspectHandler();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#
-     * createJpaVendorAdapter()
-     */
     @Override
     protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
         return new EclipseLinkJpaVendorAdapter();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#
-     * getVendorProperties()
-     */
     @Override
     protected Map<String, Object> getVendorProperties() {
 
