@@ -19,17 +19,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
-import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.RolloutGroupChangeEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,7 +30,6 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.SessionEventBus;
 
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.vaadin.server.VaadinSession;
@@ -51,15 +42,15 @@ import com.vaadin.ui.UI;
  * {@link com.google.common.eventbus.EventBus} and store them first in an queue
  * where they will dispatched every 2 seconds to the {@link EventBus} in a
  * Vaadin access thread {@link UI#access(Runnable)}.
- * 
+ *
  * This strategy avoids blocking UIs when too many events are fired and
  * dispatched to the UI thread. The UI will freeze in the time. To avoid that
  * all events are collected first and same events are merged to a list of events
  * before they dispatched to the UI thread.
- * 
+ *
  * The strategy also verifies the current tenant in the session with the tenant
  * in the event and only forwards event from the right tenant to the UI.
- * 
+ *
  */
 public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
@@ -73,16 +64,11 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     private ScheduledFuture<?> jobHandle;
 
-    /**
-     * only events defined in the set are dispatched to the session event bus.
-     */
-    private static final Set<Class<?>> UI_EVENTS = Sets.newHashSet(TargetInfoUpdateEvent.class,
-            TargetCreatedEvent.class, TargetDeletedEvent.class, RolloutChangeEvent.class, RolloutGroupChangeEvent.class,
-            TargetTagCreatedBulkEvent.class, DistributionSetTagCreatedBulkEvent.class,TargetTagDeletedEvent.class,DistributionSetTagDeletedEvent.class);
+    private final UIEventProvider eventProvider;
 
     /**
      * Constructor.
-     * 
+     *
      * @param eventBus
      *            the session event bus to where the events should be dispatched
      * @param systemEventBus
@@ -90,9 +76,10 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      *            back-end
      */
     public DelayedEventBusPushStrategy(final SessionEventBus eventBus,
-            final com.google.common.eventbus.EventBus systemEventBus) {
+            final com.google.common.eventbus.EventBus systemEventBus, final UIEventProvider eventProvider) {
         this.eventBus = eventBus;
         this.systemEventBus = systemEventBus;
+        this.eventProvider = eventProvider;
     }
 
     /**
@@ -107,10 +94,20 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     @AllowConcurrentEvents
     public void dispatch(final org.eclipse.hawkbit.eventbus.event.Event event) {
         // to dispatch too many events which are not interested on the UI
-        if (UI_EVENTS.contains(event.getClass()) && !queue.offer(event)) {
+        if (!isEventProvided(event)) {
+            LOG.trace("Event is not supported in the UI!!! Dropped event is {}", event);
+            return;
+        }
+
+        if (!queue.offer(event)) {
             LOG.warn("Deque limit is reached, cannot add more events!!! Dropped event is {}", event);
             return;
         }
+    }
+
+    private boolean isEventProvided(final org.eclipse.hawkbit.eventbus.event.Event event) {
+        return eventProvider.getSingleEvents().contains(event.getClass())
+                || eventProvider.getBulkEvents().contains(event.getClass());
     }
 
     @Override
@@ -133,7 +130,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     /**
      * Checks if the tenant within the event is equal with the current tenant in
      * the context.
-     * 
+     *
      * @param userContext
      *            the security context of the current session
      * @param event
@@ -208,37 +205,43 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
             final SecurityContext oldContext = SecurityContextHolder.getContext();
             try {
                 SecurityContextHolder.setContext(userContext);
+
                 vaadinUI.access(() -> {
                     if (vaadinSession.getState() != State.OPEN) {
                         return;
                     }
-                    fowardEvents(events, userContext);
-
-                    // send a list of events, because ui performance issues
-                    publishEventAsList(events, userContext, TargetInfoUpdateEvent.class);
-                    publishEventAsList(events, userContext, TargetCreatedEvent.class);
-                    publishEventAsList(events, userContext, TargetDeletedEvent.class);
+                    fowardSingleEvents(events, userContext);
+                    fowardBulkEvents(events, userContext);
                 });
             } finally {
                 SecurityContextHolder.setContext(oldContext);
             }
         }
 
-        private void publishEventAsList(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
-                final SecurityContext userContext, final Class<?> eventType) {
-            final List<org.eclipse.hawkbit.eventbus.event.Event> bulkEvents = events.stream()
-                    .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
-                            && eventType.isInstance(event))
-                    .collect(Collectors.toList());
-            if (bulkEvents.isEmpty()) {
-                return;
-            }
-            eventBus.publish(vaadinUI, bulkEvents);
+        private void fowardBulkEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+                final SecurityContext userContext) {
+            final Set<Class<?>> filterBulkEvenTypes = eventProvider.getFilteredBulkEventsType(events);
+            publishBulkEvent(events, userContext, filterBulkEvenTypes);
         }
 
-        private void fowardEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+        private void publishBulkEvent(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
+                final SecurityContext userContext, final Set<Class<?>> filterBulkEvenTypes) {
+            for (final Class<?> bulkType : filterBulkEvenTypes) {
+                final List<org.eclipse.hawkbit.eventbus.event.Event> listBulkEvents = events.stream()
+                        .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
+                                && bulkType.isInstance(event))
+                        .collect(Collectors.toList());
+                if (!listBulkEvents.isEmpty()) {
+                    eventBus.publish(vaadinUI, listBulkEvents);
+                }
+            }
+        }
+
+        private void fowardSingleEvents(final List<org.eclipse.hawkbit.eventbus.event.Event> events,
                 final SecurityContext userContext) {
-            events.stream().filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event))
+            events.stream()
+                    .filter(event -> DelayedEventBusPushStrategy.this.eventSecurityCheck(userContext, event)
+                            && eventProvider.getSingleEvents().contains(event.getClass()))
                     .forEach(event -> eventBus.publish(vaadinUI, event));
         }
     }
