@@ -186,9 +186,9 @@ public class TenantSecurityToken {
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class SoftwareModuleFilenameResource {
             @JsonProperty(required = false)
-            private final Long softwareModuleId;
+            private Long softwareModuleId;
             @JsonProperty(required = false)
-            private final String filename;
+            private String filename;
 
             /**
              * Constructor.
@@ -212,6 +212,14 @@ public class TenantSecurityToken {
 
             public String getFilename() {
                 return filename;
+            }
+
+            public void setSoftwareModuleId(final Long softwareModuleId) {
+                this.softwareModuleId = softwareModuleId;
+            }
+
+            public void setFilename(final String filename) {
+                this.filename = filename;
             }
         }
     }
