@@ -42,15 +42,15 @@ import com.vaadin.ui.UI;
  * {@link com.google.common.eventbus.EventBus} and store them first in an queue
  * where they will dispatched every 2 seconds to the {@link EventBus} in a
  * Vaadin access thread {@link UI#access(Runnable)}.
- * 
+ *
  * This strategy avoids blocking UIs when too many events are fired and
  * dispatched to the UI thread. The UI will freeze in the time. To avoid that
  * all events are collected first and same events are merged to a list of events
  * before they dispatched to the UI thread.
- * 
+ *
  * The strategy also verifies the current tenant in the session with the tenant
  * in the event and only forwards event from the right tenant to the UI.
- * 
+ *
  */
 public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
@@ -68,7 +68,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
 
     /**
      * Constructor.
-     * 
+     *
      * @param eventBus
      *            the session event bus to where the events should be dispatched
      * @param systemEventBus
@@ -130,7 +130,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
     /**
      * Checks if the tenant within the event is equal with the current tenant in
      * the context.
-     * 
+     *
      * @param userContext
      *            the security context of the current session
      * @param event

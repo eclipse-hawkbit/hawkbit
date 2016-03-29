@@ -97,9 +97,9 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
+    protected boolean isClickedByDefault(final String typeName) {
         return artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent() && artifactUploadState
-                .getSoftwareModuleFilters().getSoftwareModuleType().get().getId().equals(buttonId);
+                .getSoftwareModuleFilters().getSoftwareModuleType().get().getName().equals(typeName);
     }
 
     @Override

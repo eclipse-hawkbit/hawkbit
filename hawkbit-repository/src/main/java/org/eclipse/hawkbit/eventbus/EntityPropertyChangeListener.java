@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.eventbus.event.RolloutGroupPropertyChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
@@ -83,7 +83,7 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         }
     }
 
-    private <T extends BaseEntity> Map<String, AbstractPropertyChangeEvent<T>.Values> getChangeSet(
+    private <T extends TenantAwareBaseEntity> Map<String, AbstractPropertyChangeEvent<T>.Values> getChangeSet(
             final Class<T> clazz, final DescriptorEvent event) {
         final T rolloutGroup = clazz.cast(event.getObject());
         final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();

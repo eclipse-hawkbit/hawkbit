@@ -19,9 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A json annotated rest model for SoftwareModuleType to RESTful API
  * representation.
  *
- *
- *
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)

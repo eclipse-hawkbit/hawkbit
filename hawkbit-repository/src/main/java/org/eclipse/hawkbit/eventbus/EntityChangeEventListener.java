@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -31,7 +31,7 @@ import com.google.common.eventbus.EventBus;
 
 /**
  * An aspect implementation which wraps the necessary repository services for
- * saving {@link BaseEntity}s to publish create or update events.
+ * saving {@link TenantAwareBaseEntity}s to publish create or update events.
  *
  *
  *

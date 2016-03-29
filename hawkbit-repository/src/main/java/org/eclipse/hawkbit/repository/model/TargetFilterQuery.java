@@ -22,7 +22,7 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "sp_target_filter_query", indexes = {
         @Index(name = "sp_idx_target_filter_query_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_tenant_custom_filter_name") )
-public class TargetFilterQuery extends BaseEntity {
+public class TargetFilterQuery extends TenantAwareBaseEntity {
     /**
      * 
      * 

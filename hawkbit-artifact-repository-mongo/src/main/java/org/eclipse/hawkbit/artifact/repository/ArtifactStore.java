@@ -38,10 +38,7 @@ import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
 /**
- * The file management which looks up all the file in the filestore.
- *
- *
- *
+ * The file management which looks up all the file in the file tore.
  *
  */
 public class ArtifactStore implements ArtifactRepository {
@@ -60,7 +57,7 @@ public class ArtifactStore implements ArtifactRepository {
     private static final String MD5 = "md5";
 
     /**
-     * The mongoDB field which holds the SHA1 hash, stored in the metadata
+     * The mongoDB field which holds the SHA1 hash, stored in the meta data
      * object.
      */
     private static final String SHA1 = "sha1";
@@ -75,11 +72,10 @@ public class ArtifactStore implements ArtifactRepository {
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's SHA1 hash.
      *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
      * @param sha1Hash
      *            the sha1-hash of the file to lookup.
-     * @return The gridfs file object or {@code null} if no file exists.
+     * 
+     * @return The DbArtifact object or {@code null} if no file exists.
      */
     @Override
     public DbArtifact getArtifactBySha1(final String sha1Hash) {
@@ -226,8 +222,7 @@ public class ArtifactStore implements ArtifactRepository {
      * @return a paged list of artifacts mapped from the given dbFiles
      */
     private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
-        final List<DbArtifact> collect = dbFiles.stream().map(dbFile -> map(dbFile)).collect(Collectors.toList());
-        return collect;
+        return dbFiles.stream().map(dbFile -> map(dbFile)).collect(Collectors.toList());
     }
 
     /**
@@ -238,7 +233,7 @@ public class ArtifactStore implements ArtifactRepository {
      *            the tenant to retrieve the artifacts from, ignore case.
      * @param sha1Hashes
      *            the sha1-hashes of the files to lookup.
-     * @return list of artfiacts
+     * @return list of artifacts
      */
     @Override
     public List<DbArtifact> getArtifactsBySha1(final List<String> sha1Hashes) {

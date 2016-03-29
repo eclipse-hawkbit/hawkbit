@@ -10,14 +10,14 @@ package org.eclipse.hawkbit.eventbus.event;
 
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
  * Property change event.
  *
  * @param <E>
  */
-public class AbstractPropertyChangeEvent<E extends BaseEntity> extends AbstractBaseEntityEvent<E> {
+public class AbstractPropertyChangeEvent<E extends TenantAwareBaseEntity> extends AbstractBaseEntityEvent<E> {
 
     private static final long serialVersionUID = -3671601415138242311L;
     private final transient Map<String, Values> changeSet;

@@ -25,8 +25,8 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
-        "tenant" }, name = "uk_tenant_key") )
-public class TenantConfiguration extends BaseEntity implements Serializable {
+        "tenant" }, name = "uk_tenant_key"))
+public class TenantConfiguration extends TenantAwareBaseEntity implements Serializable {
 
     /**
     *
@@ -44,7 +44,7 @@ public class TenantConfiguration extends BaseEntity implements Serializable {
      * JPA default constructor.
      */
     public TenantConfiguration() {
-
+        // JPA default constructor.
     }
 
     /**

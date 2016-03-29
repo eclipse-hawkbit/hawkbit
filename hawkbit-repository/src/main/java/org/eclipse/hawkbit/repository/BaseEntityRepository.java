@@ -10,14 +10,14 @@ package org.eclipse.hawkbit.repository;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Command repository operations for all {@link BaseEntity}s.
+ * Command repository operations for all {@link TenantAwareBaseEntity}s.
  *
  *
  *
@@ -29,11 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @NoRepositoryBean
 @Transactional(readOnly = true)
-public interface BaseEntityRepository<T extends BaseEntity, I extends Serializable>
+public interface BaseEntityRepository<T extends TenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I> {
 
     /**
-     * Deletes all {@link BaseEntity} of a given tenant.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant.
      *
      * @param tenant
      *            to delete data from
