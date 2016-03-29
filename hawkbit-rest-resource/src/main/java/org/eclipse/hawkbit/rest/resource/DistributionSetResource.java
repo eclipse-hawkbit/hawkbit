@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetRestApi;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
-import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPut;
@@ -218,8 +217,8 @@ public class DistributionSetResource implements DistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MetadataRestPageList> getMetadata(final Long distributionSetId, final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(final Long distributionSetId,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         // check if distribution set exists otherwise throw exception
         // immediately
@@ -241,7 +240,7 @@ public class DistributionSetResource implements DistributionSetRestApi {
         }
 
         return new ResponseEntity<>(
-                new MetadataRestPageList(DistributionSetMapper.toResponseDsMetadata(metaDataPage.getContent()),
+                new PagedList<>(DistributionSetMapper.toResponseDsMetadata(metaDataPage.getContent()),
                         metaDataPage.getTotalElements()),
                 HttpStatus.OK);
 

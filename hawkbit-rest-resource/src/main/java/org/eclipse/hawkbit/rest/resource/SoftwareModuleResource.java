@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleRestAPI;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
-import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPost;
@@ -191,7 +190,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
     }
 
     @Override
-    public ResponseEntity<MetadataRestPageList> getMetadata(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(@PathVariable final Long softwareModuleId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -215,7 +214,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
         }
 
         return new ResponseEntity<>(
-                new MetadataRestPageList(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
+                new PagedList<>(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
                         metaDataPage.getTotalElements()),
                 HttpStatus.OK);
     }

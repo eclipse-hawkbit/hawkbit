@@ -20,8 +20,8 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.TargetTagRestApi;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedTargetRequestBody;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
@@ -54,7 +54,7 @@ public class TargetTagResource implements TargetTagRestApi {
     private TargetManagement targetManagement;
 
     @Override
-    public ResponseEntity<TagPagedList> getTargetTags(final int pagingOffsetParam, final int pagingLimitParam,
+    public ResponseEntity<PagedList<TagRest>> getTargetTags(final int pagingOffsetParam, final int pagingLimitParam,
             final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -77,7 +77,7 @@ public class TargetTagResource implements TargetTagRestApi {
         }
 
         final List<TagRest> rest = TagMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new TagPagedList(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override

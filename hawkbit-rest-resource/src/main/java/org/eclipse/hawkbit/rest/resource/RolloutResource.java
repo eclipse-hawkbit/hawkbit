@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.RolloutRestApi;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupResponseBody;
@@ -63,8 +62,8 @@ public class RolloutResource implements RolloutRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<RolloutPagedList> getRollouts(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<RolloutResponseBody>> getRollouts(final int pagingOffsetParam,
+            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -81,7 +80,7 @@ public class RolloutResource implements RolloutRestApi {
         }
 
         final List<RolloutResponseBody> rest = RolloutMapper.toResponseRollout(findModulesAll.getContent());
-        return new ResponseEntity<>(new RolloutPagedList(rest, findModulesAll.getTotalElements()), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, findModulesAll.getTotalElements()), HttpStatus.OK);
     }
 
     @Override

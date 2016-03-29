@@ -9,26 +9,21 @@
 package org.eclipse.hawkbit.repository.model;
 
 import javax.persistence.Column;
-import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 
-import org.eclipse.hawkbit.eventbus.CacheFieldEntityListener;
-import org.eclipse.hawkbit.eventbus.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantAwareHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Holder of the base attributes common to all tenant aware entities.
  *
  */
 @MappedSuperclass
-@EntityListeners({ AuditingEntityListener.class, CacheFieldEntityListener.class, EntityPropertyChangeListener.class })
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
 public abstract class TenantAwareBaseEntity extends BaseEntity {

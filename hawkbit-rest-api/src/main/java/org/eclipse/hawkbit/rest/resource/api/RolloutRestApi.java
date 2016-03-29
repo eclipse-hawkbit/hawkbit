@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.rest.resource.api;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
-import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupResponseBody;
@@ -50,7 +49,7 @@ public interface RolloutRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<RolloutPagedList> getRollouts(
+    public ResponseEntity<PagedList<RolloutResponseBody>> getRollouts(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
