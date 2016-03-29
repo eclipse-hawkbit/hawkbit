@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.rest.resource.model.tag.AssignedTargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.slf4j.Logger;
@@ -87,7 +86,7 @@ public class TargetTagResource implements TargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TagsRest> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
+    public ResponseEntity<List<TagRest>> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
                 .createTargetTags(TagMapper.mapTargeTagFromRequest(tags));

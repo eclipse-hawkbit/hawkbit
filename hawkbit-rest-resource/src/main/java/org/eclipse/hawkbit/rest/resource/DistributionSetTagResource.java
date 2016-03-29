@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentRe
 import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +85,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TagsRest> createDistributionSetTags(final List<TagRequestBodyPut> tags) {
+    public ResponseEntity<List<TagRest>> createDistributionSetTags(final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
