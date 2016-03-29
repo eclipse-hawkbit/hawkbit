@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -141,38 +142,60 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(updated.getVendor()).as("Updated vendor is").isEqualTo("changed");
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Create Software Module call fails when called for existing entity.")
     public void createModuleCallFailsForExistingModule() {
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
-        softwareManagement.createSoftwareModule(ah);
+        try {
+            softwareManagement.createSoftwareModule(ah);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Create Software Modules call fails when called for existing entities.")
     public void createModulesCallFailsForExistingModule() {
         final List<SoftwareModule> modules = softwareManagement.createSoftwareModule(
                 Lists.newArrayList(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"),
                         new SoftwareModule(appType, "agent-hub", "1.0.2", "test desc", "test vendor")));
-        softwareManagement.createSoftwareModule(modules);
+        try {
+            softwareManagement.createSoftwareModule(modules);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Create Software Module Type call fails when called for existing entity.")
     public void createModuleTypeCallFailsForExistingType() {
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
-        softwareManagement.createSoftwareModuleType(created);
+
+        try {
+            softwareManagement.createSoftwareModuleType(created);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Create Software Module Types call fails when called for existing entities.")
     public void createModuleTypesCallFailsForExistingTypes() {
         final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
-                Lists.newArrayList(new SoftwareModuleType("test-key", "test-name", "test-desc", 1),
-                        new SoftwareModuleType("test-key2", "test-name", "test-desc", 1)));
-        softwareManagement.createSoftwareModuleType(created);
+                Lists.newArrayList(new SoftwareModuleType("test-key-bumlux", "test-name", "test-desc", 1),
+                        new SoftwareModuleType("test-key-bumlux2", "test-name2", "test-desc", 1)));
+
+        try {
+            softwareManagement.createSoftwareModuleType(created);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test
@@ -652,9 +675,8 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
                                 new CustomSoftwareModule(two, true), new CustomSoftwareModule(unassigned, false));
 
         // without any filter
-        assertThat(softwareManagement
-                .findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq, set.getId(), null, null)
-                .getContent()).as("Found modules with the assigned ones first").containsExactly(
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+                set.getId(), null, null).getContent()).as("Found modules with the assigned ones first").containsExactly(
                         new CustomSoftwareModule(differentName, true), new CustomSoftwareModule(one, true),
                         new CustomSoftwareModule(two, true), new CustomSoftwareModule(four, true),
                         new CustomSoftwareModule(unassigned, false));
@@ -731,21 +753,32 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
                 .isEqualTo(found);
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Verfies that it is not possible to create a type that alrady exists.")
     public void createSoftwareModuleTypeFailsWithExistingEntity() {
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
-        softwareManagement.createSoftwareModuleType(created);
+        try {
+            softwareManagement.createSoftwareModuleType(created);
+            fail("should not have worked as module type already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
+
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Verfies that it is not possible to create a list of types where one already exists.")
     public void createSoftwareModuleTypesFailsWithExistingEntity() {
         final SoftwareModuleType created = softwareManagement
                 .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
-        softwareManagement.createSoftwareModuleType(
-                Lists.newArrayList(created, new SoftwareModuleType("anothertype", "anothername", "desc", 100)));
+        try {
+            softwareManagement.createSoftwareModuleType(
+                    Lists.newArrayList(created, new SoftwareModuleType("anothertype", "anothername", "desc", 100)));
+            fail("should not have worked as module type already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test
@@ -819,7 +852,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(softwareModuleMetadata.get(0).getSoftwareModule().getId()).isEqualTo(ah.getId());
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Checks that metadata for a software module cannot be created for an existing key.")
     public void createSoftwareModuleMetadataFailsIfKeyExists() {
 
@@ -832,7 +865,12 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
-        softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue2));
+        try {
+            softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue2));
+            fail("should not have worked as module metadata already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test
@@ -902,7 +940,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
                 .isEmpty();
     }
 
-    @Test(expected = EntityNotFoundException.class)
+    @Test
     @Description("Verfies that non existing metadata find results in exception.")
     public void findSoftwareModuleMetadataFailsIfEntryDoesNotExist() {
         final String knownKey1 = "myKnownKey1";
@@ -914,8 +952,12 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         ah = softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1))
                 .getSoftwareModule();
 
-        softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(ah, "doesnotexist"));
+        try {
+            softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(ah, "doesnotexist"));
+            fail("should not have worked as module metadata with that key does not exist");
+        } catch (final EntityNotFoundException e) {
 
+        }
     }
 
     @Test

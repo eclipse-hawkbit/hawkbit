@@ -54,11 +54,16 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractIntegrationTest {
 
-    @Test(expected = TenantNotExistException.class)
+    @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists.")
     @WithUser(tenantId = "tenantWhichDoesNotExists", allSpPermissions = true, autoCreateTenant = false)
     public void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
-        targetManagement.createTarget(new Target("targetId123"));
+        try {
+            targetManagement.createTarget(new Target("targetId123"));
+            fail("should not be possible as the tenant does not exist");
+        } catch (final TenantNotExistException e) {
+            // ok
+        }
     }
 
     @Test

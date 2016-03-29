@@ -100,7 +100,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                 .isEqualTo("test123");
     }
 
-    @Test(expected = EntityReadOnlyException.class)
+    @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module addition).")
     public void addModuleToAssignedDistributionSetTypeFails() {
         final DistributionSetType nonUpdatableType = distributionSetManagement
@@ -111,10 +111,17 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                 .createDistributionSet(new DistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
 
         nonUpdatableType.addMandatoryModuleType(osType);
-        distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+
+        try {
+            distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+            fail("Should not have worked as DS is in use.");
+        } catch (final EntityReadOnlyException e) {
+
+        }
+
     }
 
-    @Test(expected = EntityReadOnlyException.class)
+    @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module removal).")
     public void removeModuleToAssignedDistributionSetTypeFails() {
         DistributionSetType nonUpdatableType = distributionSetManagement
@@ -128,7 +135,12 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                 .createDistributionSet(new DistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
 
         nonUpdatableType.removeModuleType(osType.getId());
-        nonUpdatableType = distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+        try {
+            distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+            fail("Should not have worked as DS is in use.");
+        } catch (final EntityReadOnlyException e) {
+
+        }
     }
 
     @Test
@@ -156,13 +168,17 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).")
     public void createDuplicateDistributionSetsFailsWithException() {
         TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
 
-        TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+        try {
+            TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+            fail("Should not have worked as DS with same UK already exists.");
+        } catch (final EntityAlreadyExistsException e) {
 
+        }
     }
 
     @Test
@@ -196,13 +212,18 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
 
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Verfies that a DS entity cannot be used for creation.")
     public void createDistributionSetFailsOnExistingEntity() {
         final DistributionSet set = distributionSetManagement
                 .createDistributionSet(new DistributionSet("newtypesoft", "1", "", null, null));
-        distributionSetManagement.createDistributionSet(set);
 
+        try {
+            distributionSetManagement.createDistributionSet(set);
+            fail("Should not have worked to create based on a persisted entity.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test
@@ -279,17 +300,22 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         }
     }
 
-    @Test(expected = DistributionSetTypeUndefinedException.class)
+    @Test
     @Description("Ensures that it is not possible to add a software module to a set that has no type defined.")
     public void updateDistributionSetModuleWithUndefinedTypeFails() {
         final DistributionSet testSet = new DistributionSet();
         final SoftwareModule module = new SoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
 
         // update data
-        testSet.addModule(module);
+        try {
+            testSet.addModule(module);
+            fail("Should not have worked as DS type is undefined.");
+        } catch (final DistributionSetTypeUndefinedException e) {
+
+        }
     }
 
-    @Test(expected = UnsupportedSoftwareModuleForThisDistributionSetException.class)
+    @Test
     @Description("Ensures that it is not possible to add a software module that is not defined of the DS's type.")
     public void updateDistributionSetUnsupportedModuleFails() {
         final DistributionSet set = new DistributionSet("agent-hub2", "1.0.5", "desc",
@@ -297,7 +323,12 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         final SoftwareModule module = new SoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
 
         // update data
-        set.addModule(module);
+        try {
+            set.addModule(module);
+            fail("Should not have worked as module type is not in DS type.");
+        } catch (final UnsupportedSoftwareModuleForThisDistributionSetException e) {
+
+        }
     }
 
     @Test
@@ -596,7 +627,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
         // combine deleted and complete and type
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE)
@@ -605,7 +636,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(200)
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsDeleted);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setType(standardDsType).setIsDeleted(Boolean.TRUE);
@@ -618,7 +649,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         assertThat(distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsNewType);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(newType);
         assertThat(distributionSetManagement
@@ -626,7 +657,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
         // combine deleted and complete and type and text
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setType(standardDsType).setSearchText("%test2");
@@ -650,7 +681,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
         // combine deleted and complete and type and text and tag
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setType(standardDsType)
                 .setSearchText("%test2").setTagNames(Lists.newArrayList(dsTagA.getName()));
@@ -672,7 +703,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
 
     private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
             final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<Target>();
+        final List<Target> result = new ArrayList<>();
         for (final Target t : targs) {
             final List<Action> findByTarget = actionRepository.findByTarget(t);
             for (final Action action : findByTarget) {

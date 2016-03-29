@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -37,15 +38,20 @@ public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
                 targetFilterQueryManagement.findTargetFilterQueryByName(filterName));
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if a targetfilterquery with the same name are created more than once.")
     public void createDuplicateTargetFilterQuery() {
         final String filterName = "new target filter duplicate";
         targetFilterQueryManagement
                 .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
 
-        targetFilterQueryManagement
-                .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+        try {
+            targetFilterQueryManagement
+                    .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+            fail("should not have worked as query already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test

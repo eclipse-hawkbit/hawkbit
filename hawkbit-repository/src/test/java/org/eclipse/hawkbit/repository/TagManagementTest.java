@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -362,38 +363,59 @@ public class TagManagementTest extends AbstractIntegrationTest {
         }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameException() {
         tagManagement.createTargetTag(new TargetTag("A"));
-        tagManagement.createTargetTag(new TargetTag("A"));
+
+        try {
+            tagManagement.createTargetTag(new TargetTag("A"));
+            fail("should not have worked as tag already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         tagManagement.createTargetTag(new TargetTag("A"));
         final TargetTag tag = tagManagement.createTargetTag(new TargetTag("B"));
         tag.setName("A");
 
-        tagManagement.updateTargetTag(tag);
+        try {
+            tagManagement.updateTargetTag(tag);
+            fail("should not have worked as tag already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameException() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
-        tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+        try {
+            tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+            fail("should not have worked as tag already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
         final DistributionSetTag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("B"));
         tag.setName("A");
 
-        tagManagement.updateDistributionSetTag(tag);
+        try {
+            tagManagement.updateDistributionSetTag(tag);
+            fail("should not have worked as tag already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test

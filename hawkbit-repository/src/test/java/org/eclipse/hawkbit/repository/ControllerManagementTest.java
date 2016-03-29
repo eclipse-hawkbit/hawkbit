@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
                 .isEqualTo(3);
     }
 
-    @Test(expected = ConstraintViolationException.class)
+    @Test
     @Description("Register a controller which does not exist")
     public void testfindOrRegisterTargetIfItDoesNotexist() {
         final Target target = controllerManagament.findOrRegisterTargetIfItDoesNotexist("AA", null);
@@ -84,7 +85,12 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
 
         // throws exception
-        controllerManagament.findOrRegisterTargetIfItDoesNotexist("", null);
+        try {
+            controllerManagament.findOrRegisterTargetIfItDoesNotexist("", null);
+            fail("should fail as target does not exist");
+        } catch (final ConstraintViolationException e) {
+
+        }
     }
 
     @Test
