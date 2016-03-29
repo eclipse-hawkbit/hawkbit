@@ -85,9 +85,9 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(remoteAddress);
 
         // test, should throw authentication exception
-        final Authentication authenticate = underTestWithSourceIpCheck.authenticate(token);
+
         try {
-            assertThat(authenticate.isAuthenticated()).isTrue();
+            underTestWithSourceIpCheck.authenticate(token);
             fail("as source is not trusted.");
         } catch (final InsufficientAuthenticationException e) {
 

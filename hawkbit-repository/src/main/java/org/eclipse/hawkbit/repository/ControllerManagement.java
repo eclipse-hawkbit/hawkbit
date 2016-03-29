@@ -379,7 +379,6 @@ public class ControllerManagement {
             handleErrorOnAction(mergedAction, mergedTarget);
             break;
         case FINISHED:
-
             handleFinishedAndStoreInTargetStatus(mergedTarget, mergedAction);
             break;
         case CANCELED:
@@ -399,7 +398,6 @@ public class ControllerManagement {
     }
 
     private void handleErrorOnAction(final Action mergedAction, final Target mergedTarget) {
-        // set action inactive
         mergedAction.setActive(false);
         mergedAction.setStatus(Status.ERROR);
         mergedTarget.setAssignedDistributionSet(null);
