@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.EntityEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupChangeEvent;
@@ -27,6 +28,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +78,7 @@ public class DelayedEventBusPushStrategy implements EventPushStrategy {
      */
     private static final Set<Class<?>> UI_EVENTS = Sets.newHashSet(TargetInfoUpdateEvent.class,
             TargetCreatedEvent.class, TargetDeletedEvent.class, RolloutChangeEvent.class, RolloutGroupChangeEvent.class,
-            TargetTagCreatedBulkEvent.class, DistributionSetTagCreatedBulkEvent.class);
+            TargetTagCreatedBulkEvent.class, DistributionSetTagCreatedBulkEvent.class,TargetTagDeletedEvent.class,DistributionSetTagDeletedEvent.class);
 
     /**
      * Constructor.
