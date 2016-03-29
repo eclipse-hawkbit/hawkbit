@@ -27,7 +27,8 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
  */
 public class HawkbitEventProvider implements UIEventProvider {
 
-    private static final Set<Class<? extends Event>> SINGLE_EVENTS = new HashSet<>();
+    private static final Set<Class<? extends Event>> SINGLE_EVENTS = new HashSet<>(6);
+    private static final Set<Class<? extends Event>> BULK_EVENTS = new HashSet<>(3);
 
     static {
         SINGLE_EVENTS.add(TargetTagCreatedBulkEvent.class);
@@ -36,11 +37,7 @@ public class HawkbitEventProvider implements UIEventProvider {
         SINGLE_EVENTS.add(DistributionSetTagUpdateEvent.class);
         SINGLE_EVENTS.add(RolloutGroupChangeEvent.class);
         SINGLE_EVENTS.add(RolloutChangeEvent.class);
-    }
 
-    private static final Set<Class<? extends Event>> BULK_EVENTS = new HashSet<>();
-
-    static {
         BULK_EVENTS.add(TargetCreatedEvent.class);
         BULK_EVENTS.add(TargetInfoUpdateEvent.class);
         BULK_EVENTS.add(TargetDeletedEvent.class);
