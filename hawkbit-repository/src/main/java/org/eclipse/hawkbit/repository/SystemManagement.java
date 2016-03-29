@@ -327,13 +327,11 @@ public class SystemManagement {
                 "Standard Edge Controller Linux distribution set type. OS only.").addMandatoryModuleType(eclOs)
                         .addOptionalModuleType(eclApp));
 
-        final DistributionSetType defaultType = distributionSetTypeRepository
+        return distributionSetTypeRepository
                 .save(new DistributionSetType("ecl_os_app_jvm", "OS with optional app and jvm",
                         "Standard Edge Controller Linux distribution set type. OS with optional application.")
                                 .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp)
                                 .addOptionalModuleType(eclJvm));
-
-        return defaultType;
     }
 
     /**

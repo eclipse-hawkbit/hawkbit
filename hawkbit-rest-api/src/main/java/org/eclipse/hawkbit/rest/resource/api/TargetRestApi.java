@@ -11,16 +11,14 @@ package org.eclipse.hawkbit.rest.resource.api;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionPagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusPagedList;
+import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.target.DistributionSetAssigmentRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetAttributes;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,7 +68,7 @@ public interface TargetRestApi {
      */
 
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetPagedList> getTargets(
+    public ResponseEntity<PagedList<TargetRest>> getTargets(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -89,7 +87,7 @@ public interface TargetRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TargetsRest> createTargets(@RequestBody final List<TargetRequestBody> targets);
+    public ResponseEntity<List<TargetRest>> createTargets(@RequestBody final List<TargetRequestBody> targets);
 
     /**
      * Handles the PUT request of updating a target. The ID is within the URL
@@ -160,7 +158,7 @@ public interface TargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionPagedList> getActionHistory(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<PagedList<ActionRest>> getActionHistory(@PathVariable("targetId") final String targetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -225,8 +223,8 @@ public interface TargetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/actions/{actionId}/status", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ActionStatusPagedList> getActionStatusList(@PathVariable("targetId") final String targetId,
-            @PathVariable("actionId") final Long actionId,
+    public ResponseEntity<PagedList<ActionStatusRest>> getActionStatusList(
+            @PathVariable("targetId") final String targetId, @PathVariable("actionId") final Long actionId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam);

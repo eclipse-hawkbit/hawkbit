@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.tag;
 
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
+import java.util.List;
+
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,24 +27,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DistributionSetTagAssigmentResultRest {
 
     @JsonProperty
-    private DistributionSetsRest assignedDistributionSets;
+    private List<DistributionSetRest> assignedDistributionSets;
 
     @JsonProperty
-    private DistributionSetsRest unassignedDistributionSets;
+    private List<DistributionSetRest> unassignedDistributionSets;
 
-    public DistributionSetsRest getAssignedDistributionSets() {
+    public List<DistributionSetRest> getAssignedDistributionSets() {
         return assignedDistributionSets;
     }
 
-    public DistributionSetsRest getUnassignedDistributionSets() {
+    public List<DistributionSetRest> getUnassignedDistributionSets() {
         return unassignedDistributionSets;
     }
 
-    public void setAssignedDistributionSets(final DistributionSetsRest assignedDistributionSets) {
+    public void setAssignedDistributionSets(final List<DistributionSetRest> assignedDistributionSets) {
         this.assignedDistributionSets = assignedDistributionSets;
     }
 
-    public void setUnassignedDistributionSets(final DistributionSetsRest unassignedDistributionSets) {
+    public void setUnassignedDistributionSets(final List<DistributionSetRest> unassignedDistributionSets) {
         this.unassignedDistributionSets = unassignedDistributionSets;
     }
 

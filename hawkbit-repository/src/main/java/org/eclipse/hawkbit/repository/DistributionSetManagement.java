@@ -176,7 +176,7 @@ public class DistributionSetManagement {
         final Iterable<DistributionSet> sets = findDistributionSetListWithDetails(dsIds);
         final DistributionSetTag myTag = tagManagement.findDistributionSetTag(tagName);
 
-        DistributionSetTagAssigmentResult result = null;
+        DistributionSetTagAssigmentResult result;
         final List<DistributionSet> allDSs = new ArrayList<>();
         for (final DistributionSet set : sets) {
             if (set.getTags().add(myTag)) {
@@ -199,8 +199,7 @@ public class DistributionSetManagement {
         }
 
         final DistributionSetTagAssigmentResult resultAssignment = result;
-        afterCommit
-                .afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
+        afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
 
         // no reason to persist the tag
         entityManager.detach(myTag);
@@ -870,7 +869,7 @@ public class DistributionSetManagement {
                                 cb) -> cb.and(
                                         cb.equal(root.get(DistributionSetMetadata_.distributionSet)
                                                 .get(DistributionSet_.id), distributionSetId),
-                                spec.toPredicate(root, query, cb)),
+                                        spec.toPredicate(root, query, cb)),
                         pageable);
     }
 

@@ -8,18 +8,18 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- * An abstract definition class for {@link EntityEvent} for {@link BaseEntity}s,
- * which holds the {@link BaseEntity}.
+ * An abstract definition class for {@link EntityEvent} for {@link TenantAwareBaseEntity}s,
+ * which holds the {@link TenantAwareBaseEntity}.
  *
  *
  *
  * @param <E>
- *            the type of the {@link BaseEntity}
+ *            the type of the {@link TenantAwareBaseEntity}
  */
-public abstract class AbstractBaseEntityEvent<E extends BaseEntity> extends AbstractDistributedEvent
+public abstract class AbstractBaseEntityEvent<E extends TenantAwareBaseEntity> extends AbstractDistributedEvent
         implements EntityEvent {
 
     /**

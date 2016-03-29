@@ -18,11 +18,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleTypeRestApi;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypePagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +42,8 @@ public class SoftwareModuleTypeResource implements SoftwareModuleTypeRestApi {
     private SoftwareManagement softwareManagement;
 
     @Override
-    public ResponseEntity<SoftwareModuleTypePagedList> getTypes(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<SoftwareModuleTypeRest>> getTypes(final int pagingOffsetParam,
+            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -65,7 +64,7 @@ public class SoftwareModuleTypeResource implements SoftwareModuleTypeRestApi {
 
         final List<SoftwareModuleTypeRest> rest = SoftwareModuleTypeMapper
                 .toListResponse(findModuleTypessAll.getContent());
-        return new ResponseEntity<>(new SoftwareModuleTypePagedList(rest, countModulesAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countModulesAll), HttpStatus.OK);
     }
 
     @Override
@@ -99,7 +98,7 @@ public class SoftwareModuleTypeResource implements SoftwareModuleTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<SoftwareModuleTypesRest> createSoftwareModuleTypes(
+    public ResponseEntity<List<SoftwareModuleTypeRest>> createSoftwareModuleTypes(
             final List<SoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
         final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement

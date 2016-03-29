@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.rest.resource.model.tag;
 
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
+import java.util.List;
+
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,24 +27,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class TargetTagAssigmentResultRest {
 
     @JsonProperty
-    private TargetsRest assignedTargets;
+    private List<TargetRest> assignedTargets;
 
     @JsonProperty
-    private TargetsRest unassignedTargets;
+    private List<TargetRest> unassignedTargets;
 
-    public void setAssignedTargets(final TargetsRest assignedTargets) {
+    public void setAssignedTargets(final List<TargetRest> assignedTargets) {
         this.assignedTargets = assignedTargets;
     }
 
-    public TargetsRest getAssignedTargets() {
+    public List<TargetRest> getAssignedTargets() {
         return assignedTargets;
     }
 
-    public void setUnassignedTargets(final TargetsRest unassignedTargets) {
+    public void setUnassignedTargets(final List<TargetRest> unassignedTargets) {
         this.unassignedTargets = unassignedTargets;
     }
 
-    public TargetsRest getUnassignedTargets() {
+    public List<TargetRest> getUnassignedTargets() {
         return unassignedTargets;
     }
 

@@ -20,7 +20,7 @@ import javax.persistence.MappedSuperclass;
  *
  */
 @MappedSuperclass
-public abstract class Artifact extends BaseEntity {
+public abstract class Artifact extends TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "sha1_hash", length = 40, nullable = true)

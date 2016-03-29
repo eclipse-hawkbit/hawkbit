@@ -52,7 +52,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet") ) ) })
 @Entity
-public class Action extends BaseEntity implements Comparable<Action> {
+public class Action extends TenantAwareBaseEntity implements Comparable<Action> {
     private static final long serialVersionUID = 1L;
 
     /**

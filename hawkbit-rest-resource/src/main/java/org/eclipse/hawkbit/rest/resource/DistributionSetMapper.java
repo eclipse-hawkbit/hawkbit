@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.rest.resource.api.DistributionSetTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentResponseBody;
 
 /**
@@ -193,8 +192,8 @@ public final class DistributionSetMapper {
         return result;
     }
 
-    static DistributionSetsRest toResponseDistributionSets(final Iterable<DistributionSet> sets) {
-        final DistributionSetsRest response = new DistributionSetsRest();
+    static List<DistributionSetRest> toResponseDistributionSets(final Iterable<DistributionSet> sets) {
+        final List<DistributionSetRest> response = new ArrayList<>();
         if (sets != null) {
 
             for (final DistributionSet set : sets) {
