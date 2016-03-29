@@ -310,8 +310,6 @@ public class SystemManagement {
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
-
-        // Edge Controller Linux standard setup
         final SoftwareModuleType eclApp = softwareModuleTypeRepository.save(new SoftwareModuleType("application",
                 "ECL Application", "Edge Controller Linux base application type", 1));
         final SoftwareModuleType eclOs = softwareModuleTypeRepository

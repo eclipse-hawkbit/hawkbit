@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 
 /**
  * A event for assignment target tag.
  */
 public class DistributionSetTagAssigmentResultEvent {
 
-    private final DistributionSetTagAssigmentResult assigmentResult;
+    private final DistributionSetTagAssignmentResult assigmentResult;
 
     /**
      * Constructor.
@@ -23,11 +23,11 @@ public class DistributionSetTagAssigmentResultEvent {
      * @param assigmentResult
      *            the assignment result-
      */
-    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssigmentResult assigmentResult) {
+    public DistributionSetTagAssigmentResultEvent(final DistributionSetTagAssignmentResult assigmentResult) {
         this.assigmentResult = assigmentResult;
     }
 
-    public DistributionSetTagAssigmentResult getAssigmentResult() {
+    public DistributionSetTagAssignmentResult getAssigmentResult() {
         return assigmentResult;
     }
 

@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -100,7 +100,7 @@ public class DistributionTagToken extends AbstractTagToken {
     @Override
     protected void assignTag(final String tagNameSelected) {
         if (tagNameSelected != null) {
-            final DistributionSetTagAssigmentResult result = toggleAssignment(tagNameSelected);
+            final DistributionSetTagAssignmentResult result = toggleAssignment(tagNameSelected);
             if (result.getAssigned() >= 1 && NOTAGS_SELECTED) {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG);
             }
@@ -109,10 +109,10 @@ public class DistributionTagToken extends AbstractTagToken {
         }
     }
 
-    private DistributionSetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
+    private DistributionSetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final Set<Long> distributionList = new HashSet<>();
         distributionList.add(selectedDS.getId());
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
+        final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
                 tagNameSelected);
         uinotification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(tagNameSelected, result, i18n));
         return result;
@@ -120,7 +120,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @Override
     protected void unassignTag(final String tagName) {
-        final DistributionSetTagAssigmentResult result = toggleAssignment(tagName);
+        final DistributionSetTagAssignmentResult result = toggleAssignment(tagName);
         if (result.getUnassigned() >= 1 && (isClickedTagListEmpty() || getClickedTagList().contains(tagName))) {
             eventBus.publish(this, ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG);
         }
@@ -202,7 +202,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetTagAssigmentResultEvent(final DistributionSetTagAssigmentResultEvent event) {
-        final DistributionSetTagAssigmentResult assignmentResult = event.getAssigmentResult();
+        final DistributionSetTagAssignmentResult assignmentResult = event.getAssigmentResult();
         final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
         if (isAssign(assignmentResult)) {
             addNewToken(tag.getId());
@@ -212,7 +212,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     }
 
-    protected boolean isAssign(final DistributionSetTagAssigmentResult assignmentResult) {
+    protected boolean isAssign(final DistributionSetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getAssigned() > 0) {
             final List<Long> assignedDsNames = assignmentResult.getAssignedDs().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
@@ -223,7 +223,7 @@ public class DistributionTagToken extends AbstractTagToken {
         return false;
     }
 
-    protected boolean isUnassign(final DistributionSetTagAssigmentResult assignmentResult) {
+    protected boolean isUnassign(final DistributionSetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getUnassigned() > 0) {
             final List<Long> assignedDsNames = assignmentResult.getUnassignedDs().stream().map(t -> t.getId())
                     .collect(Collectors.toList());

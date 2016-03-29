@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
@@ -360,7 +360,7 @@ public class DistributionTable extends AbstractTable {
         final String distTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distList,
+        final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distList,
                 distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
@@ -564,7 +564,7 @@ public class DistributionTable extends AbstractTable {
                 .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();
         final Button pinBtn = getPinBtn(itemId, dist.getName(), dist.getVersion());
         saveDistributionPinnedBtn(pinBtn);
-        pinBtn.addClickListener(event -> addPinClickListener(event));
+        pinBtn.addClickListener(this::addPinClickListener);
         rePinDistribution(pinBtn, dist.getId());
         return pinBtn;
     }

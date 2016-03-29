@@ -24,7 +24,7 @@ import javax.persistence.UniqueConstraint;
  * Tenant entity with meta data that is configured globally for the entire
  * tenant. This entity is not tenant aware to allow the system to access it
  * through the {@link EntityManager} even before the actual tenant exists.
- * 
+ *
  * Entities owned by the tenant are based on {@link TenantAwareBaseEntity}.
  *
  */
@@ -78,4 +78,26 @@ public class TenantMetaData extends BaseEntity {
         this.tenant = tenant;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof TenantMetaData)) {
+            return false;
+        }
+
+        return true;
+    }
 }

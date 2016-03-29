@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetTypeElement;
 import org.eclipse.hawkbit.repository.model.DistributionSet_;
@@ -67,9 +67,6 @@ import com.google.common.eventbus.EventBus;
 
 /**
  * Business facade for managing the {@link DistributionSet}s.
- *
- *
- *
  *
  */
 @Transactional(readOnly = true)
@@ -140,15 +137,15 @@ public class DistributionSetManagement {
      * @param sets
      *            to toggle for
      * @param tag
-     *            to toogle
-     * @return {@link DistributionSetTagAssigmentResult} with all metadata of
+     *            to toggle
+     * @return {@link DistributionSetTagAssignmentResult} with all meta data of
      *         the assignment outcome.
      */
     @Modifying
     @Transactional
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    public DistributionSetTagAssigmentResult toggleTagAssignment(@NotEmpty final List<DistributionSet> sets,
+    public DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty final List<DistributionSet> sets,
             @NotNull final DistributionSetTag tag) {
         return toggleTagAssignment(sets.stream().map(ds -> ds.getId()).collect(Collectors.toList()), tag.getName());
     }
@@ -163,42 +160,43 @@ public class DistributionSetManagement {
      *            to toggle for
      * @param tagName
      *            to toggle
-     * @return {@link DistributionSetTagAssigmentResult} with all metadata of
+     * @return {@link DistributionSetTagAssignmentResult} with all meta data of
      *         the assignment outcome.
      */
     @Modifying
     @Transactional
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    public DistributionSetTagAssigmentResult toggleTagAssignment(@NotEmpty final Collection<Long> dsIds,
+    public DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty final Collection<Long> dsIds,
             @NotNull final String tagName) {
 
         final Iterable<DistributionSet> sets = findDistributionSetListWithDetails(dsIds);
         final DistributionSetTag myTag = tagManagement.findDistributionSetTag(tagName);
 
-        DistributionSetTagAssigmentResult result;
-        final List<DistributionSet> allDSs = new ArrayList<>();
+        DistributionSetTagAssignmentResult result;
+        final List<DistributionSet> toBeChangedDSs = new ArrayList<>();
         for (final DistributionSet set : sets) {
             if (set.getTags().add(myTag)) {
-                allDSs.add(set);
+                toBeChangedDSs.add(set);
             }
         }
 
-        // unassigment case
-        if (allDSs.isEmpty()) {
+        // un-assignment case
+        if (toBeChangedDSs.isEmpty()) {
             for (final DistributionSet set : sets) {
                 if (set.getTags().remove(myTag)) {
-                    allDSs.add(set);
+                    toBeChangedDSs.add(set);
                 }
             }
-            result = new DistributionSetTagAssigmentResult(dsIds.size() - allDSs.size(), 0, allDSs.size(),
-                    Collections.emptyList(), distributionSetRepository.save(allDSs), myTag);
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
+                    toBeChangedDSs.size(), Collections.emptyList(), distributionSetRepository.save(toBeChangedDSs),
+                    myTag);
         } else {
-            result = new DistributionSetTagAssigmentResult(dsIds.size() - allDSs.size(), allDSs.size(), 0,
-                    distributionSetRepository.save(allDSs), Collections.emptyList(), myTag);
+            result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
+                    0, distributionSetRepository.save(toBeChangedDSs), Collections.emptyList(), myTag);
         }
 
-        final DistributionSetTagAssigmentResult resultAssignment = result;
+        final DistributionSetTagAssignmentResult resultAssignment = result;
         afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagAssigmentResultEvent(resultAssignment)));
 
         // no reason to persist the tag
@@ -351,6 +349,9 @@ public class DistributionSetManagement {
     public List<DistributionSet> createDistributionSets(@NotNull final Iterable<DistributionSet> distributionSets) {
         for (final DistributionSet ds : distributionSets) {
             prepareDsSave(ds);
+            if (ds.getType() == null) {
+                ds.setType(systemManagement.getTenantMetadata().getDefaultDsType());
+            }
         }
         return distributionSetRepository.save(distributionSets);
     }
@@ -436,7 +437,7 @@ public class DistributionSetManagement {
      * @param spec
      *            of the search
      * @param pageable
-     *            parametsr for paging
+     *            parameter for paging
      *
      * @return the found {@link SoftwareModuleType}s
      */
@@ -915,7 +916,7 @@ public class DistributionSetManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSetType> createDistributionSetTypes(@NotNull final Collection<DistributionSetType> types) {
-        return types.stream().map(type -> createDistributionSetType(type)).collect(Collectors.toList());
+        return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
     }
 
     /**
@@ -1059,7 +1060,7 @@ public class DistributionSetManagement {
 
         afterCommit.afterCommit(() -> {
 
-            final DistributionSetTagAssigmentResult result = new DistributionSetTagAssigmentResult(0, save.size(), 0,
+            final DistributionSetTagAssignmentResult result = new DistributionSetTagAssignmentResult(0, save.size(), 0,
                     save, Collections.emptyList(), tag);
             eventBus.post(new DistributionSetTagAssigmentResultEvent(result));
         });

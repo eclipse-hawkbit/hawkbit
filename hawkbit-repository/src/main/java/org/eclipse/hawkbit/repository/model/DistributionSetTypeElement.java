@@ -25,17 +25,10 @@ import javax.persistence.Table;
  * Relation element between a {@link DistributionSetType} and its
  * {@link SoftwareModuleType} elements.
  *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_ds_type_element")
 public class DistributionSetTypeElement implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
@@ -46,18 +39,16 @@ public class DistributionSetTypeElement implements Serializable {
 
     @MapsId("dsType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_dstype") )
+    @JoinColumn(name = "distribution_set_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_dstype"))
     private DistributionSetType dsType;
 
     @MapsId("smType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "software_module_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype") )
+    @JoinColumn(name = "software_module_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
     private SoftwareModuleType smType;
 
-    /**
-     * Default constructor.
-     */
     public DistributionSetTypeElement() {
+        // Default constructor for JPA
     }
 
     /**
@@ -74,7 +65,7 @@ public class DistributionSetTypeElement implements Serializable {
     public DistributionSetTypeElement(final DistributionSetType dsType, final SoftwareModuleType smType,
             final boolean mandatory) {
         super();
-        this.key = new DistributionSetTypeElementCompositeKey(dsType, smType);
+        key = new DistributionSetTypeElementCompositeKey(dsType, smType);
         this.dsType = dsType;
         this.smType = smType;
         this.mandatory = mandatory;
@@ -108,4 +99,8 @@ public class DistributionSetTypeElement implements Serializable {
         return key;
     }
 
+    @Override
+    public String toString() {
+        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
+    }
 }

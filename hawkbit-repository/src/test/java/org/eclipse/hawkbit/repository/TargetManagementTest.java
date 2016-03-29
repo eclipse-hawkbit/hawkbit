@@ -54,15 +54,11 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractIntegrationTest {
 
-    @Test
+    @Test(expected = TenantNotExistException.class)
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists.")
     @WithUser(tenantId = "tenantWhichDoesNotExists", allSpPermissions = true, autoCreateTenant = false)
     public void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
-        try {
-            targetManagement.createTarget(new Target("targetId123"));
-            fail("tenant not exist");
-        } catch (final TenantNotExistException e) {
-        }
+        targetManagement.createTarget(new Target("targetId123"));
     }
 
     @Test
@@ -204,6 +200,12 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).as("Installed ds is wrong")
                 .isEqualTo(set.getId());
 
+    }
+
+    @Test
+    @Description("Ensures that repositoy returns null if given controller ID does not exist without exception.")
+    public void findTargetByControllerIDWithDetailsReturnsNullForNonexisting() {
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd")).as("Expected as").isNull();
     }
 
     @Test

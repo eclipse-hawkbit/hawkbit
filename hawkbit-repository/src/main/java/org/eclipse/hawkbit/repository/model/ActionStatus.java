@@ -32,9 +32,6 @@ import com.google.common.base.Splitter;
 
 /**
  * Entity to store the status for a specific action.
- * 
- *
- *
  */
 @Table(name = "sp_action_status", indexes = { @Index(name = "sp_idx_action_status_01", columnList = "tenant,action"),
         @Index(name = "sp_idx_action_status_02", columnList = "tenant,action,status"),
@@ -42,10 +39,6 @@ import com.google.common.base.Splitter;
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })
 @Entity
 public class ActionStatus extends TenantAwareBaseEntity {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Column(name = "target_occurred_at")
@@ -67,7 +60,7 @@ public class ActionStatus extends TenantAwareBaseEntity {
 
     /**
      * Creates a new {@link ActionStatus} object.
-     * 
+     *
      * @param action
      *            the action for this action status
      * @param status
@@ -83,7 +76,7 @@ public class ActionStatus extends TenantAwareBaseEntity {
 
     /**
      * Creates a new {@link ActionStatus} object.
-     * 
+     *
      * @param action
      *            the action for this action status
      * @param status
@@ -146,4 +139,28 @@ public class ActionStatus extends TenantAwareBaseEntity {
     public void setStatus(final Status status) {
         this.status = status;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof ActionStatus)) {
+            return false;
+        }
+
+        return true;
+    }
+
 }

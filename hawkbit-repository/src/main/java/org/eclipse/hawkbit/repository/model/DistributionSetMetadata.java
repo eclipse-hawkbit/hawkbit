@@ -23,20 +23,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- * Metadata for {@link DistributionSet}.
- *
- *
- *
+ * Meta data for {@link DistributionSet}.
  *
  */
 @IdClass(DsMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_ds_metadata")
 public class DistributionSetMetadata implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -49,11 +42,11 @@ public class DistributionSetMetadata implements Serializable {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds") )
+    @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds"))
     private DistributionSet distributionSet;
 
     public DistributionSetMetadata() {
-
+        // Default constructor for JPA.
     }
 
     /**
@@ -73,49 +66,74 @@ public class DistributionSetMetadata implements Serializable {
         return new DsMetadataCompositeKey(distributionSet, key);
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
 
-    /**
-     * @param distributionSet
-     *            the distributionSet to set
-     */
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = distributionSet;
     }
 
-    /**
-     * @return the value
-     */
     public String getValue() {
         return value;
     }
 
-    /**
-     * @param value
-     *            the value to set
-     */
     public void setValue(final String value) {
         this.value = value;
     }
 
-    /**
-     * @return the distributionSet
-     */
     public DistributionSet getDistributionSet() {
         return distributionSet;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (distributionSet == null ? 0 : distributionSet.hashCode());
+        result = prime * result + (key == null ? 0 : key.hashCode());
+        result = prime * result + (value == null ? 0 : value.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DistributionSetMetadata)) {
+            return false;
+        }
+        final DistributionSetMetadata other = (DistributionSetMetadata) obj;
+        if (distributionSet == null) {
+            if (other.distributionSet != null) {
+                return false;
+            }
+        } else if (!distributionSet.equals(other.distributionSet)) {
+            return false;
+        }
+        if (key == null) {
+            if (other.key != null) {
+                return false;
+            }
+        } else if (!key.equals(other.key)) {
+            return false;
+        }
+        if (value == null) {
+            if (other.value != null) {
+                return false;
+            }
+        } else if (!value.equals(other.value)) {
+            return false;
+        }
+        return true;
     }
 
 }

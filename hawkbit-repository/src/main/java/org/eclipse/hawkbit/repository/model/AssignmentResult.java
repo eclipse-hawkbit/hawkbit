@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 /**
- * Generic assigment result bean.
- *
- *
- *
+ * Generic assignment result bean.
  *
  */
 public class AssignmentResult {
@@ -36,23 +33,14 @@ public class AssignmentResult {
         total = assigned + alreadyAssigned;
     }
 
-    /**
-     * @return the assignedTargets
-     */
     public int getAssigned() {
         return assigned;
     }
 
-    /**
-     * @return the total
-     */
     public int getTotal() {
         return total;
     }
 
-    /**
-     * @return the alreadyAssigned
-     */
     public int getAlreadyAssigned() {
         return alreadyAssigned;
     }

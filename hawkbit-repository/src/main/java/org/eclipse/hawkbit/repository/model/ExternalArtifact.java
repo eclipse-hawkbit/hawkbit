@@ -22,11 +22,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
- * External artifact representation with all the necessray informattion to
+ * External artifact representation with all the necessary information to
  * generate an artifact {@link URL} at runtime.
- *
- *
- *
  *
  */
 @Table(name = "sp_external_artifact", indexes = {
@@ -36,7 +33,7 @@ public class ExternalArtifact extends Artifact {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    @JoinColumn(name = "provider", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_art_to_ext_provider") )
+    @JoinColumn(name = "provider", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_art_to_ext_provider"))
     private ExternalArtifactProvider externalArtifactProvider;
 
     @Column(name = "url_suffix", length = 512)
@@ -44,7 +41,7 @@ public class ExternalArtifact extends Artifact {
 
     // CascadeType.PERSIST as we register ourself at the BSM
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_external_assigned_sm") )
+    @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_external_assigned_sm"))
     private SoftwareModule softwareModule;
 
     /**
@@ -127,11 +124,6 @@ public class ExternalArtifact extends Artifact {
         this.urlSuffix = urlSuffix;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
@@ -140,11 +132,6 @@ public class ExternalArtifact extends Artifact {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
         if (this == obj) {

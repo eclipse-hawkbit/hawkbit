@@ -15,9 +15,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
  * Custom JPA Model for querying {@link Action} include the count of the
  * action's {@link ActionStatus}.
  *
- *
- *
- *
  */
 public class ActionWithStatusCount {
     private final Long actionStatusCount;
@@ -37,7 +34,7 @@ public class ActionWithStatusCount {
     /**
      * JPA constructor, the parameter are the result set columns of the custom
      * query.
-     * 
+     *
      * @param actionId
      *            the ID of the action
      * @param actionType
@@ -70,9 +67,9 @@ public class ActionWithStatusCount {
             final String rolloutName) {
         this.actionId = actionId;
         this.actionType = actionType;
-        this.actionActive = active;
-        this.actionForceTime = forcedTime;
-        this.actionStatus = status;
+        actionActive = active;
+        actionForceTime = forcedTime;
+        actionStatus = status;
         this.actionCreatedAt = actionCreatedAt;
         this.actionLastModifiedAt = actionLastModifiedAt;
         this.dsId = dsId;
@@ -81,12 +78,12 @@ public class ActionWithStatusCount {
         this.actionStatusCount = actionStatusCount;
         this.rolloutName = rolloutName;
 
-        this.action = new Action();
-        this.action.setActionType(actionType);
-        this.action.setActive(actionActive);
-        this.action.setForcedTime(actionForceTime);
-        this.action.setStatus(actionStatus);
-        this.action.setId(actionId);
+        action = new Action();
+        action.setActionType(actionType);
+        action.setActive(actionActive);
+        action.setForcedTime(actionForceTime);
+        action.setStatus(actionStatus);
+        action.setId(actionId);
     }
 
     /**

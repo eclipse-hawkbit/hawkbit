@@ -225,7 +225,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
         // check if distribution set exists otherwise throw exception
         // immediately
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final SoftwareModuleMetadata findOne = softwareManagement.findOne(new SwMetadataCompositeKey(sw, metadataKey));
+        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sw, metadataKey));
         return ResponseEntity.<MetadataRest> ok(SoftwareModuleMapper.toResponseSwMetadata(findOne));
     }
 

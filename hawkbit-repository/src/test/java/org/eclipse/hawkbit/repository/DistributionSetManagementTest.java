@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,15 +45,12 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- * {@link SoftwareManagement} test focused on {@link DistributionSet} and
- * {@link DistributionSetType} related stuff.
- *
- *
+ * {@link DistributionSetManagement} tests.
  *
  */
 @Features("Component Tests - Repository")
-@Stories("Software Management")
-public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
+@Stories("DistributionSet Management")
+public class DistributionSetManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
@@ -152,14 +150,11 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .createDistributionSetType(new DistributionSetType("softdeleted", "to be deletd", ""));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(softDelete);
-        final DistributionSet dsNewType = distributionSetManagement
-                .createDistributionSet(new DistributionSet("newtypesoft", "1", "", softDelete, null));
+        distributionSetManagement.createDistributionSet(new DistributionSet("newtypesoft", "1", "", softDelete, null));
 
         distributionSetManagement.deleteDistributionSetType(softDelete);
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
     }
-
-    // TODO: kzimmerm: test N+1
 
     @Test(expected = EntityAlreadyExistsException.class)
     @Description("Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).")
@@ -167,6 +162,46 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
 
         TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+
+    }
+
+    @Test
+    @Description("Verfies that a DS is of default type if not specified explicitly at creation time.")
+    public void createDistributionSetWithImplicitType() {
+        final DistributionSet set = distributionSetManagement
+                .createDistributionSet(new DistributionSet("newtypesoft", "1", "", null, null));
+
+        assertThat(set.getType()).as("Type should be equal to default type of tenant")
+                .isEqualTo(systemManagement.getTenantMetadata().getDefaultDsType());
+
+    }
+
+    @Test
+    @Description("Verfies that multiple DS are of default type if not specified explicitly at creation time.")
+    public void createMultipleDistributionSetsWithImplicitType() {
+
+        List<DistributionSet> sets = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            sets.add(new DistributionSet("another DS" + i, "X" + i, "", null, null));
+        }
+
+        sets = distributionSetManagement.createDistributionSets(sets);
+
+        assertThat(sets).as("Type should be equal to default type of tenant").are(new Condition<DistributionSet>() {
+            @Override
+            public boolean matches(final DistributionSet value) {
+                return value.getType().equals(systemManagement.getTenantMetadata().getDefaultDsType());
+            }
+        });
+
+    }
+
+    @Test(expected = EntityAlreadyExistsException.class)
+    @Description("Verfies that a DS entity cannot be used for creation.")
+    public void createDistributionSetFailsOnExistingEntity() {
+        final DistributionSet set = distributionSetManagement
+                .createDistributionSet(new DistributionSet("newtypesoft", "1", "", null, null));
+        distributionSetManagement.createDistributionSet(set);
 
     }
 
@@ -730,7 +765,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 dsAssigned.getVersion());
         final Target target = new Target("4712");
         final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<Target>();
+        final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
         deploymentManagement.assignDistributionSet(dsAssigned, toAssign);
 
@@ -742,38 +777,6 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         assertThat(distributionSetRepository.findAll()).hasSize(3);
         assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, Boolean.FALSE, Boolean.TRUE)
                 .getTotalElements()).isEqualTo(2);
-    }
-
-    /**
-     * helper method which re-orders a list as expected. Re-orders the given
-     * distribution set in the order as given and returns a new list with the
-     * new order.
-     * 
-     * @param dsThree
-     * @param buildDistributionSets
-     * @return
-     */
-    private List<DistributionSet> reOrderDSList(final Iterable<DistributionSet> buildDistributionSets,
-            final DistributionSet... ds) {
-        final List<DistributionSet> reOrderedList = new ArrayList<>();
-
-        final Iterator<DistributionSet> iterator = buildDistributionSets.iterator();
-        while (iterator.hasNext()) {
-            final DistributionSet next = iterator.next();
-            int reorder = -1;
-            for (int index = 0; index < ds.length; index++) {
-                if (next.equals(ds[index])) {
-                    reorder = index;
-                }
-            }
-            if (reorder >= 0) {
-                reOrderedList.add(reorder, next);
-            } else {
-                reOrderedList.add(next);
-            }
-        }
-
-        return reOrderedList;
     }
 
     private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
