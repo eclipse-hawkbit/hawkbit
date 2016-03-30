@@ -139,6 +139,9 @@ public class DistributionSet extends NamedVersionedEntity {
         return deleted;
     }
 
+    /**
+     * @return immutable list of meta data elements.
+     */
     public List<DistributionSetMetadata> getMetadata() {
         return Collections.unmodifiableList(metadata);
     }

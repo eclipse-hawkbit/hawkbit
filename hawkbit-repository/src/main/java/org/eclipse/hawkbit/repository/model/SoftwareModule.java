@@ -220,6 +220,9 @@ public class SoftwareModule extends NamedVersionedEntity {
         this.type = type;
     }
 
+    /**
+     * @return immutable list of meta data elements.
+     */
     public List<SoftwareModuleMetadata> getMetadata() {
         return Collections.unmodifiableList(metadata);
     }

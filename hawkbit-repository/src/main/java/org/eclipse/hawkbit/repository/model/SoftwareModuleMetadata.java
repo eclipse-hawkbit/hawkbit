@@ -102,9 +102,8 @@ public class SoftwareModuleMetadata implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (key == null ? 0 : key.hashCode());
-        result = prime * result + (softwareModule == null ? 0 : softwareModule.hashCode());
-        result = prime * result + (value == null ? 0 : value.hashCode());
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
         return result;
     }
 
@@ -116,7 +115,7 @@ public class SoftwareModuleMetadata implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof SoftwareModuleMetadata)) {
             return false;
         }
         final SoftwareModuleMetadata other = (SoftwareModuleMetadata) obj;
@@ -132,13 +131,6 @@ public class SoftwareModuleMetadata implements Serializable {
                 return false;
             }
         } else if (!softwareModule.equals(other.softwareModule)) {
-            return false;
-        }
-        if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!value.equals(other.value)) {
             return false;
         }
         return true;
