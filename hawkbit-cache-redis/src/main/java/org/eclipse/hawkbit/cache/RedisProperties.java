@@ -14,14 +14,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Bean which holds the necessary properties for configuring the Redis
  * connection.
  *
- *
- *
- *
  */
 @ConfigurationProperties("hawkbit.server.redis")
 public class RedisProperties {
 
+    /**
+     * Redis server hostname.
+     */
     private String host;
+
+    /**
+     * Redis server port.
+     */
     private int port;
 
     /**

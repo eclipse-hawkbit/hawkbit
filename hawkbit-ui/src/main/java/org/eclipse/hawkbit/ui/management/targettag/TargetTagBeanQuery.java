@@ -75,7 +75,7 @@ public class TargetTagBeanQuery extends AbstractBeanQuery<ProxyTag> {
     @Override
     protected List<ProxyTag> loadBeans(final int startIndex, final int count) {
         Page<TargetTag> targetTagBeans;
-        final List<ProxyTag> targetTagList = new ArrayList<ProxyTag>();
+        final List<ProxyTag> targetTagList = new ArrayList<>();
         if (startIndex == 0 && firstPageTargetTag != null) {
             targetTagBeans = firstPageTargetTag;
         } else {

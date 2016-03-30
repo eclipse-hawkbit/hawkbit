@@ -24,7 +24,16 @@
   		width:0px !important;
   	}
   	
-  	.v-context-menu, .v-context-menu .v-context-menu-item-basic{
+  	.v-context-menu .v-context-menu-item-basic{
+  		background-color: #feffff !important;
+  		border-radius: 4px;
+  		font-family : $app-font-family;
+  		font-size : $app-text-font-size;
+  		font-weight : normal;
+  		font-style : normal; 		
+  	}
+  	
+  	.v-context-menu{
   		background-color: #feffff !important;
   		border-radius: 4px;
   	}
@@ -33,6 +42,7 @@
   	 	@include valo-gradient($color: $hawkbit-primary-color);
 		background-color: $hawkbit-primary-color !important;
 		color: #e8eef3;
+		height: 30px;
 		text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
 	}
 	
@@ -56,5 +66,26 @@
       }
 	}
 	
+	.v-grid-cell.centeralign {
+       text-align: center;
+   }
+   
+   .v-grid-cell {
+       font-size: $v-font-size--small !important;
+       height: 34px !important; 
+   }
+   
+   .v-grid-row{
+   	   height: 34px !important; 
+   }
+   
+   .v-grid-cell.frozen{
+   	   box-shadow: none !important;
+   }
+   
+   .v-grid-cell.frozen + th{
+   	   border-left: $v-grid-border-size solid $widget-border-color ;
+   }
+   
 }
    

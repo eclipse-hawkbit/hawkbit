@@ -62,9 +62,9 @@ public class ManageDistUIState implements Serializable {
 
     private final Map<Long, String> deleteSofwareModulesList = new HashMap<>();
 
-    private boolean isSwModuleTableMaximized = Boolean.FALSE;
+    private boolean swModuleTableMaximized = Boolean.FALSE;
 
-    private boolean isDsTableMaximized = Boolean.FALSE;
+    private boolean dsTableMaximized = Boolean.FALSE;
 
     private final Map<String, SoftwareModuleIdName> assignedSoftwareModuleDetails = new HashMap<>();
 
@@ -219,7 +219,7 @@ public class ManageDistUIState implements Serializable {
      * @return boolean
      */
     public boolean isDsTableMaximized() {
-        return isDsTableMaximized;
+        return dsTableMaximized;
     }
 
     /***
@@ -227,8 +227,8 @@ public class ManageDistUIState implements Serializable {
      *
      * @param isDsModuleTableMaximized
      */
-    public void setDsTableMaximized(final boolean isDsModuleTableMaximized) {
-        isDsTableMaximized = isDsModuleTableMaximized;
+    public void setDsTableMaximized(final boolean dsModuleTableMaximized) {
+        dsTableMaximized = dsModuleTableMaximized;
     }
 
     public Map<String, SoftwareModuleIdName> getAssignedSoftwareModuleDetails() {
@@ -239,15 +239,15 @@ public class ManageDistUIState implements Serializable {
      * @return the isSwModuleTableMaximized
      */
     public boolean isSwModuleTableMaximized() {
-        return isSwModuleTableMaximized;
+        return swModuleTableMaximized;
     }
 
     /**
      * @param isSwModuleTableMaximized
      *            the isSwModuleTableMaximized to set
      */
-    public void setSwModuleTableMaximized(final boolean isSwModuleTableMaximized) {
-        this.isSwModuleTableMaximized = isSwModuleTableMaximized;
+    public void setSwModuleTableMaximized(final boolean swModuleTableMaximized) {
+        this.swModuleTableMaximized = swModuleTableMaximized;
     }
 
     /**

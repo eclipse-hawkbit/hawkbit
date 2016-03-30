@@ -45,8 +45,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Implementation of target/ds tag token layout.
- * 
- *
  *
  */
 @SpringComponent
@@ -80,6 +78,7 @@ public class DistributionTagToken extends AbstractTagToken {
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
 
+    @Override
     @PostConstruct
     protected void init() {
         super.init();
@@ -88,34 +87,16 @@ public class DistributionTagToken extends AbstractTagToken {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagDetails.AbstractTagToken#getTagStyleName
-     * ()
-     */
     @Override
     protected String getTagStyleName() {
         return "distribution-tag-";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagDetails.AbstractTagToken#
-     * getTokenInputPrompt()
-     */
     @Override
     protected String getTokenInputPrompt() {
         return i18n.get("combo.type.tag.name");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagDetails.AbstractTagToken#assignTag(java.
-     * lang.String)
-     */
     @Override
     protected void assignTag(final String tagNameSelected) {
         if (tagNameSelected != null) {
@@ -129,7 +110,7 @@ public class DistributionTagToken extends AbstractTagToken {
     }
 
     private DistributionSetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
-        final Set<Long> distributionList = new HashSet<Long>();
+        final Set<Long> distributionList = new HashSet<>();
         distributionList.add(selectedDS.getId());
         final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
                 tagNameSelected);
@@ -137,12 +118,6 @@ public class DistributionTagToken extends AbstractTagToken {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.tagDetails.AbstractTagToken#unassignTag(
-     * java.lang.String)
-     */
     @Override
     protected void unassignTag(final String tagName) {
         final DistributionSetTagAssigmentResult result = toggleAssignment(tagName);
@@ -160,26 +135,14 @@ public class DistributionTagToken extends AbstractTagToken {
 
     /* To Be Done : this implementation will vary in views */
     private List<String> getClickedTagList() {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagDetails.AbstractTagToken#
-     * hasUpdatePermission()
-     */
     @Override
     protected Boolean isToggleTagAssignmentAllowed() {
         return spChecker.hasUpdateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagDetails.AbstractTagToken#
-     * displayAlreadyAssignedTags()
-     */
     @Override
     public void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
@@ -190,12 +153,6 @@ public class DistributionTagToken extends AbstractTagToken {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.common.tagDetails.AbstractTagToken#
-     * populateContainer()
-     */
     @Override
     protected void populateContainer() {
         container.removeAllItems();

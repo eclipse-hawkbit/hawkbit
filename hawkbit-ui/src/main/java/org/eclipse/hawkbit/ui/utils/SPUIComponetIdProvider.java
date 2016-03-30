@@ -738,19 +738,19 @@ public final class SPUIComponetIdProvider {
     public static final String ROLLOUT_ADD_ICON_ID = "rollout.add.button.id";
 
     /**
-     * Rollout list table id.
+     * Rollout list grid id.
      */
-    public static final String ROLLOUT_LIST_TABLE_ID = "rollout.table.id";
+    public static final String ROLLOUT_LIST_GRID_ID = "rollout.grid.id";
 
     /**
-     * Rollout group list table id.
+     * Rollout group list grid id.
      */
-    public static final String ROLLOUT_GROUP_LIST_TABLE_ID = "rollout.group.table.id";
+    public static final String ROLLOUT_GROUP_LIST_GRID_ID = "rollout.group.grid.id";
 
     /**
-     * Rollout group list table id.
+     * Rollout group list grid id.
      */
-    public static final String ROLLOUT_GROUP_TARGETS_LIST_TABLE_ID = "rollout.group.targets.table.id";
+    public static final String ROLLOUT_GROUP_TARGETS_LIST_GRID_ID = "rollout.group.targets.grid.id";
 
     /**
      * Rollout delete button id.
@@ -827,6 +827,11 @@ public final class SPUIComponetIdProvider {
      * Rollout status label id.
      */
     public static final String ROLLOUT_STATUS_LABEL_ID = "rollout.status.id";
+    
+    /**
+     * Rollout group status label id.
+     */
+    public static final String ROLLOUT_GROUP_STATUS_LABEL_ID = "rollout.group.status.id";
 
     /**
      * Rollout % or count option group id.
@@ -862,6 +867,16 @@ public final class SPUIComponetIdProvider {
      * Rollout group targets count message label.
      */
     public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
+    
+    /**
+     * Action confirmation popup id.
+     */
+    public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
+    
+    /**
+     * Validation status icon .
+     */
+    public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
      * /* Private Constructor.

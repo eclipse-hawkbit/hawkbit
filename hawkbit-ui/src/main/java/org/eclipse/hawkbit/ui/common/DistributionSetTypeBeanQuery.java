@@ -83,7 +83,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
     @Override
     protected List<DistributionSetType> loadBeans(final int startIndex, final int count) {
         Page<DistributionSetType> typeBeans;
-        final List<DistributionSetType> distSetTypeList = new ArrayList<DistributionSetType>();
+        final List<DistributionSetType> distSetTypeList = new ArrayList<>();
         if (startIndex == 0 && firstPageDistSetType != null) {
             typeBeans = firstPageDistSetType;
         } else {

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 
 /**
@@ -35,18 +35,20 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
      * @param caAuthorityNameHeader
      *            the http-header which holds the ca-authority name of the
      *            certificate
-     * @param systemManagement
-     *            the system management service to retrieve configuration
-     *            properties to check if the header authentication is enabled
-     *            for this tenant
+     * @param tenantConfigurationManagement
+     *            the tenant configuration management service to retrieve
+     *            configuration properties to check if the header authentication
+     *            is enabled for this tenant
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            the system security context
      */
     public HttpControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
-            final String caAuthorityNameHeader, final SystemManagement systemManagement,
-            final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+            final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.caCommonNameHeader = caCommonNameHeader;
         this.caAuthorityNameHeader = caAuthorityNameHeader;
     }
@@ -54,7 +56,7 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
         return new ControllerPreAuthenticatedSecurityHeaderFilter(caCommonNameHeader, caAuthorityNameHeader,
-                systemManagement, tenantAware);
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
 }

@@ -15,10 +15,17 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Management API")
+@Stories("Error Handling")
 public class ExceptionInfoTest {
 
     @Test
-    public void setterAndGetter() {
+    @Description("Ensures that setters and getters match on teh payload.")
+    public void setterAndGetterOnExceptionInfo() {
         final String knownExceptionClass = "hawkbit.test.exception.Class";
         final String knownErrorCode = "hawkbit.error.code.Known";
         final String knownMessage = "a known message";
@@ -32,10 +39,15 @@ public class ExceptionInfoTest {
         underTest.setMessage(knownMessage);
         underTest.setParameters(knownParameters);
 
-        assertThat(underTest.getErrorCode()).isEqualTo(knownErrorCode);
-        assertThat(underTest.getExceptionClass()).isEqualTo(knownExceptionClass);
-        assertThat(underTest.getMessage()).isEqualTo(knownMessage);
-        assertThat(underTest.getParameters()).isEqualTo(knownParameters);
+        assertThat(underTest.getErrorCode()).as("The error code should match with the known error code in the test")
+                .isEqualTo(knownErrorCode);
+        assertThat(underTest.getExceptionClass())
+                .as("The exception class should match with the known error code in the test")
+                .isEqualTo(knownExceptionClass);
+        assertThat(underTest.getMessage()).as("The message should match with the known error code in the test")
+                .isEqualTo(knownMessage);
+        assertThat(underTest.getParameters()).as("The parameters should match with the known error code in the test")
+                .isEqualTo(knownParameters);
     }
 
 }

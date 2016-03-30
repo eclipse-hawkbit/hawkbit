@@ -20,9 +20,6 @@ import com.google.common.net.HttpHeaders;
 /**
  * A utility which determines the correct IP of a connected {@link Target}. E.g
  * from a {@link HttpServletRequest}.
- * 
- *
- *
  *
  */
 public final class IpUtil {
@@ -95,7 +92,6 @@ public final class IpUtil {
         if (isIpV6) {
             return URI.create(scheme + SCHEME_SEPERATOR + "[" + host + "]");
         }
-
         return URI.create(scheme + SCHEME_SEPERATOR + host);
     }
 
@@ -104,12 +100,14 @@ public final class IpUtil {
      * 
      * @param host
      *            the host
+     * @param exchange
+     *            the exchange will store in the path
      * @return the {@link URI}
      * @throws IllegalArgumentException
      *             If the given string not parsable
      */
-    public static URI createAmqpUri(final String host) {
-        return createUri(AMPQP_SCHEME, host);
+    public static URI createAmqpUri(final String host, final String exchange) {
+        return createUri(AMPQP_SCHEME, host).resolve("/" + exchange);
     }
 
     /**

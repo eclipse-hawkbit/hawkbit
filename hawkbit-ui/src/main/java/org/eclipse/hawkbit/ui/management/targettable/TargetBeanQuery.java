@@ -39,10 +39,6 @@ import com.google.common.base.Strings;
  * Simple implementation of generics bean query which dynamically loads a batch
  * of beans.
  *
- *
- *
- *
- *
  */
 public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     private static final long serialVersionUID = -5645680058303167558L;
@@ -105,7 +101,7 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
     @Override
     protected List<ProxyTarget> loadBeans(final int startIndex, final int count) {
         Slice<Target> targetBeans;
-        final List<ProxyTarget> proxyTargetBeans = new ArrayList<ProxyTarget>();
+        final List<ProxyTarget> proxyTargetBeans = new ArrayList<>();
         if (pinnedDistId != null) {
             targetBeans = getTargetManagement().findTargetsAllOrderByLinkedDistributionSet(
                     new OffsetBasedPageRequest(startIndex, SPUIDefinitions.PAGE_SIZE, sort), pinnedDistId,

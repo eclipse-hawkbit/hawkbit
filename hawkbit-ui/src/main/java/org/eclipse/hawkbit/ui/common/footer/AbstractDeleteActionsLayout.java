@@ -189,6 +189,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
                     SPUIComponetIdProvider.SAVE_ACTIONS_POPUP, SPUIDefinitions.CONFIRMATION_WINDOW);
             unsavedActionsWindow.addCloseListener(event -> unsavedActionsWindowClosed());
             unsavedActionsWindow.setContent(getUnsavedActionsWindowContent());
+            unsavedActionsWindow.setId(SPUIComponetIdProvider.CONFIRMATION_POPUP_ID);
             UI.getCurrent().addWindow(unsavedActionsWindow);
         }
     }

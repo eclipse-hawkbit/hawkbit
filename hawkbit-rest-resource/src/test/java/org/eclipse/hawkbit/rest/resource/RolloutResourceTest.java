@@ -47,7 +47,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Tests for covering the {@link RolloutResource}.
  */
-@Features("Component Tests - Management RESTful API")
+@Features("Component Tests - Management API")
 @Stories("Rollout Resource")
 public class RolloutResourceTest extends AbstractIntegrationTest {
 
@@ -99,7 +99,7 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andReturn();
     }
 
-    @Description("TODO")
+    @Description("Ensures that the repository refuses to create rollout without a defined target filter set.")
     public void missingTargetFilterQueryInRollout() throws Exception {
 
         final String targetFilterQuery = null;
@@ -435,7 +435,6 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$content", hasSize(5))).andExpect(jsonPath("$total", equalTo(5)));
     }
 
-    // TODO
     @Test
     @Description("Start the rollout in async mode")
     public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
@@ -454,8 +453,8 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk());
 
         // check if running
-        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 5000, 100)).isNotNull();
-
+        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), result -> success(result), 60_000, 100))
+                .isNotNull();
     }
 
     @Test
@@ -528,7 +527,6 @@ public class RolloutResourceTest extends AbstractIntegrationTest {
 
     }
 
-    // TODO copied code from sp-bic-test
     protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
             final long timeout, final long pollInterval) throws Exception // NOPMD
     {

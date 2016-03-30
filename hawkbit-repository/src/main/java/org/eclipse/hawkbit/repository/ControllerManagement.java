@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
@@ -34,13 +33,13 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
+import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,7 +57,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 @Service
-public class ControllerManagement implements EnvironmentAware {
+public class ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
     private static final Logger LOG_DOS = LoggerFactory.getLogger("server-security.dos");
 
@@ -86,9 +85,35 @@ public class ControllerManagement implements EnvironmentAware {
     @Autowired
     private ActionStatusRepository actionStatusRepository;
 
-    private Integer maxCount = 1000;
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
 
-    private Integer maxAttributes = 100;
+    @Autowired
+    private TenantConfigurationRepository tenantConfigurationRepository;
+
+    @Autowired
+    private TenantConfigurationManagement tenantConfigurationManagement;
+
+    /**
+     * Retrieves all {@link SoftwareModule}s which are assigned to the given
+     * {@link DistributionSet}.
+     *
+     * @param distributionSet
+     *            the distribution set which should be assigned to the returned
+     *            {@link SoftwareModule}s
+     * @return a list of {@link SoftwareModule}s assigned to given
+     *         {@code distributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    public String findPollingTime() {
+        final TenantConfigurationKey configurationKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final Class<String> propertyType = String.class;
+        tenantConfigurationManagement.validateTenantConfigurationDataType(configurationKey, propertyType);
+        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
+                .findByKey(configurationKey.getKeyName());
+        return tenantConfigurationManagement
+                .buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration).getValue();
+    }
 
     /**
      * Refreshes the time of the last time the controller has been connected to
@@ -212,14 +237,9 @@ public class ControllerManagement implements EnvironmentAware {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    public Target findOrRegisterTargetIfItDoesNotexist(@NotNull final String targetid, final URI address) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                return cb.equal(targetRoot.get(Target_.controllerId), targetid);
-            }
-        };
+    public Target findOrRegisterTargetIfItDoesNotexist(@NotEmpty final String targetid, final URI address) {
+        final Specification<Target> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(Target_.controllerId),
+                targetid);
 
         Target target = targetRepository.findOne(spec);
 
@@ -229,9 +249,9 @@ public class ControllerManagement implements EnvironmentAware {
             target.setName(targetid);
             return targetManagement.createTarget(target, TargetUpdateStatus.REGISTERED, System.currentTimeMillis(),
                     address);
-        } else {
-            return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
         }
+
+        return updateLastTargetQuery(target.getTargetInfo(), address).getTarget();
     }
 
     /**
@@ -385,15 +405,16 @@ public class ControllerManagement implements EnvironmentAware {
     }
 
     private void checkForToManyStatusEntries(final Action action) {
-        if (maxCount > 0) {
+        if (securityProperties.getDos().getMaxStatusEntriesPerAction() > 0) {
 
             final Long statusCount = actionStatusRepository.countByAction(action);
 
-            if (statusCount >= maxCount) {
+            if (statusCount >= securityProperties.getDos().getMaxStatusEntriesPerAction()) {
                 LOG_DOS.error(
                         "Potential denial of service (DOS) attack identfied. More status entries in the system than permitted ({})!",
-                        maxCount);
-                throw new ToManyStatusEntriesException(String.valueOf(maxCount));
+                        securityProperties.getDos().getMaxStatusEntriesPerAction());
+                throw new ToManyStatusEntriesException(
+                        String.valueOf(securityProperties.getDos().getMaxStatusEntriesPerAction()));
             }
         }
     }
@@ -442,28 +463,17 @@ public class ControllerManagement implements EnvironmentAware {
 
         target.getTargetInfo().getControllerAttributes().putAll(data);
 
-        if (target.getTargetInfo().getControllerAttributes().size() > maxAttributes) {
+        if (target.getTargetInfo().getControllerAttributes().size() > securityProperties.getDos()
+                .getMaxAttributeEntriesPerTarget()) {
             LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
-                    maxAttributes);
-            throw new ToManyAttributeEntriesException(String.valueOf(maxAttributes));
+                    securityProperties.getDos().getMaxAttributeEntriesPerTarget());
+            throw new ToManyAttributeEntriesException(
+                    String.valueOf(securityProperties.getDos().getMaxAttributeEntriesPerTarget()));
         }
 
         target.getTargetInfo().setLastTargetQuery(System.currentTimeMillis());
         target.getTargetInfo().setRequestControllerAttributes(false);
         return targetRepository.save(target);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.context.EnvironmentAware#setEnvironment(org.
-     * springframework.core.env. Environment)
-     */
-    @Override
-    public void setEnvironment(final Environment environment) {
-        final RelaxedPropertyResolver env = new RelaxedPropertyResolver(environment, "hawkbit.server.");
-        maxCount = env.getProperty("security.dos.maxStatusEntriesPerAction", Integer.class, 1000);
-        maxAttributes = env.getProperty("security.dos.maxAttributeEntriesPerTarget", Integer.class, 100);
     }
 
     /**

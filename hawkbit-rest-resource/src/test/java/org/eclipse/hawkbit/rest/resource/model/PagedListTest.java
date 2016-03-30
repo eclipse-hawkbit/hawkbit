@@ -15,36 +15,46 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
+@Features("Unit Tests - Management API")
+@Stories("Paged List Handling")
 public class PagedListTest {
 
     @Test(expected = NullPointerException.class)
+    @Description("Ensures that a null payload entitiy throws an exception.")
     public void createListWithNullContentThrowsException() {
         new PagedList<>(null, 0);
     }
 
     @Test
+    @Description("Create list with payload and verify content.")
     public void createListWithContent() {
         final long knownTotal = 2;
         final List<String> knownContentList = new ArrayList<>();
         knownContentList.add("content1");
         knownContentList.add("content2");
 
-        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
+        assertListSize(knownTotal, knownContentList);
+    }
 
-        assertThat(pagedList.getTotal()).isEqualTo(knownTotal);
-        assertThat(pagedList.getSize()).isEqualTo(knownContentList.size());
+    private void assertListSize(final long knownTotal, final List<String> knownContentList) {
+        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
+        assertThat(pagedList.getTotal()).as("total size is wrong").isEqualTo(knownTotal);
+        assertThat(pagedList.getSize()).as("list size is wrong").isEqualTo(knownContentList.size());
     }
 
     @Test
+    @Description("Create list with payload and verify size values.")
     public void createListWithSmallerTotalThanContentSizeIsOk() {
         final long knownTotal = 0;
         final List<String> knownContentList = new ArrayList<>();
         knownContentList.add("content1");
         knownContentList.add("content2");
 
-        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
-        assertThat(pagedList.getTotal()).isEqualTo(knownTotal);
-        assertThat(pagedList.getSize()).isEqualTo(knownContentList.size());
+        assertListSize(knownTotal, knownContentList);
 
     }
 }

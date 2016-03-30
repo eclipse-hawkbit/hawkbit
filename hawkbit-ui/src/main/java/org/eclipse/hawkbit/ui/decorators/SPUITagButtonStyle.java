@@ -16,27 +16,10 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Style for button: Tag.
- * 
- *
- * 
- *
- * 
- *
  */
 public class SPUITagButtonStyle implements SPUIButtonDecorator {
-    /**
-     * Decorate Button and return.
-     * 
-     * @param button
-     *            as Button
-     * @param style
-     *            as String
-     * @param setStyle
-     *            as String
-     * @param icon
-     *            as resource
-     * @return Button
-     */
+
+    @Override
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
 
         /**

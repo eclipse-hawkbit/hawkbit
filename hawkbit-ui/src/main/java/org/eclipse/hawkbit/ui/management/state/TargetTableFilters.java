@@ -22,9 +22,6 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
 
 /**
  * Target Table Filters.
- * 
- *
- *
  */
 @VaadinSessionScope
 @SpringComponent
@@ -32,8 +29,8 @@ public class TargetTableFilters implements Serializable {
 
     private static final long serialVersionUID = -5251492630546463593L;
 
-    private final List<String> clickedTargetTags = new ArrayList<String>();
-    private final List<TargetUpdateStatus> clickedStatusTargetTags = new ArrayList<TargetUpdateStatus>();
+    private final List<String> clickedTargetTags = new ArrayList<>();
+    private final List<TargetUpdateStatus> clickedStatusTargetTags = new ArrayList<>();
     private String searchText;
     private DistributionSetIdName distributionSet;
     private Long pinnedDistId;

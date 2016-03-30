@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 
 /**
@@ -27,21 +27,25 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
     /**
      * Constructor.
      * 
-     * @param systemManagement
+     * @param tenantConfigurationManagement
      *            the system management service to retrieve configuration
      *            properties
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            * @param systemSecurityContext the system security context
      */
-    public HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(final SystemManagement systemManagement,
-            final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+    public HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
     @Override
     protected PreAuthenficationFilter createControllerAuthenticationFilter() {
-        return new ControllerPreAuthenticatedGatewaySecurityTokenFilter(systemManagement, tenantAware);
+        return new ControllerPreAuthenticatedGatewaySecurityTokenFilter(tenantConfigurationManagement, tenantAware,
+                systemSecurityContext);
     }
 
 }

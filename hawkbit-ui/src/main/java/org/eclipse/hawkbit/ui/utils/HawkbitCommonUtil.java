@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.slf4j.Logger;
@@ -46,6 +48,7 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
 import org.vaadin.alump.distributionbar.DistributionBar;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.server.Sizeable.Unit;
@@ -1348,4 +1351,47 @@ public final class HawkbitCommonUtil {
     private static Long getStatusCount(final String propertName, final Item item) {
         return (Long) item.getItemProperty(propertName).getValue();
     }
+
+    /**
+     * Get the formatted string of status and target name.
+     * 
+     * @param details
+     *            details of status and name
+     * @return
+     */
+    public static String getNameStatusFormattedString(Map<String, String> details) {
+        StringBuilder val = new StringBuilder();
+        if (details == null || details.isEmpty()) {
+            return null;
+        }
+        for (Entry<String, String> entry : details.entrySet()) {
+            val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
+        }
+        return val.substring(0, val.length() - 1);
+    }
+
+    /**
+     * Returns a formatted string as needed by label custom render .This string
+     * holds the properties of a status label.
+     * 
+     * @param value
+     *            label value
+     * @param style
+     *            label style
+     * @param id
+     *            label id
+     * @return
+     */
+    public static String getStatusLabelDetailsInString(String value, String style, String id) {
+        StringBuilder val = new StringBuilder();
+        if (!Strings.isNullOrEmpty(value)) {
+            val.append("value:").append(value).append(",");
+        }
+        if (!Strings.isNullOrEmpty(style)) {
+            val.append("style:").append(style).append(",");
+        }
+        val.append("id:").append(id);
+        return val.toString();
+    }
+
 }

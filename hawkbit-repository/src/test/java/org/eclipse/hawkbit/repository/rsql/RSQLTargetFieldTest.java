@@ -30,7 +30,7 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL filter target")
 public class RSQLTargetFieldTest extends AbstractIntegrationTest {
 
@@ -114,8 +114,9 @@ public class RSQLTargetFieldTest extends AbstractIntegrationTest {
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "!=pending", 3);
         try {
             assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "==noExist*", 0);
-            fail();
+            fail("RSQLParameterUnsupportedFieldException was expected since update status unknown");
         } catch (final RSQLParameterUnsupportedFieldException e) {
+            // test ok - exception was excepted
         }
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=in=(pending,error)", 1);
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=out=(pending,error)", 3);

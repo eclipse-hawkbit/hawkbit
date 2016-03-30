@@ -40,7 +40,7 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 @RunWith(MockitoJUnitRunner.class)
-@Features("Component Tests - RSQL filtering")
+@Features("Component Tests - Repository")
 @Stories("RSQL search utility")
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
@@ -63,7 +63,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, SoftwareModuleFields.class).toPredicate(baseSoftwareModuleRootMock,
                     criteriaQueryMock, criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterSyntaxException e) {
         }
     }
@@ -75,7 +75,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, SoftwareModuleFields.class).toPredicate(baseSoftwareModuleRootMock,
                     criteriaQueryMock, criteriaBuilderMock);
-            fail();
+            fail("Missing an expected RSQLParameterUnsupportedFieldException because of unknown RSQL field");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -87,7 +87,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class).toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock,
                     criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -95,7 +95,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class).toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock,
                     criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -103,7 +103,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, DistributionSetFields.class).toPredicate(baseSoftwareModuleRootMock,
                     criteriaQueryMock, criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -115,7 +115,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class).toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock,
                     criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -123,7 +123,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class).toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock,
                     criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
 
@@ -131,7 +131,7 @@ public class RSQLUtilityTest {
         try {
             RSQLUtility.parse(wrongRSQL, TargetFields.class).toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock,
                     criteriaBuilderMock);
-            fail();
+            fail("Missing expected RSQLParameterSyntaxException because of wrong RSQL syntax");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
     }

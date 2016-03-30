@@ -19,12 +19,15 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 
+import ru.yandex.qatools.allure.annotations.Features;
+import ru.yandex.qatools.allure.annotations.Stories;
+
 /**
  * Unit Test block for UI Component provider. Dynamic Factory Testing.
  * 
- *
- *
  */
+@Features("Unit Tests - Management UI")
+@Stories("UI components")
 public class SPUIComponentProviderTest {
     /**
      * Test case for check button factory.

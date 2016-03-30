@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public interface FieldNameProvider {
     /**
-     * Seperator for the sub attributes
+     * Separator for the sub attributes
      */
     public static final String SUB_ATTRIBUTE_SEPERATOR = ".";
 

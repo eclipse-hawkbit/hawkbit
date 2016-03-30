@@ -302,13 +302,10 @@ public class DeploymentManagement {
                 .collect(Collectors.toMap(TargetWithActionType::getTargetId, Function.identity()));
 
         // split tIDs length into max entries in-statement because many database
-        // have constraint of
-        // max entries in in-statements e.g. Oracle with maximum 1000 elements,
-        // so we need to split
-        // the entries here and execute multiple statements
-        // we take the target only into account if the requested operation is no
-        // duplicate of a
-        // previous one
+        // have constraint of max entries in in-statements e.g. Oracle with
+        // maximum 1000 elements, so we need to split the entries here and
+        // execute multiple statements we take the target only into account if
+        // the requested operation is no duplicate of a previous one
         final List<Target> targets = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository
                         .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, set.getId())))
@@ -326,11 +323,10 @@ public class DeploymentManagement {
                 targets.stream().map(Target::getId).collect(Collectors.toList()), Constants.MAX_ENTRIES_IN_STATEMENT);
 
         // override all active actions and set them into canceling state, we
-        // need to remember which
-        // one we have been switched to canceling state because for targets
-        // which we have changed to
-        // canceling we don't want to publish the new action update event.
-        final Set<Long> targetIdsCancellList = new HashSet<Long>();
+        // need to remember which one we have been switched to canceling state
+        // because for targets which we have changed to canceling we don't want
+        // to publish the new action update event.
+        final Set<Long> targetIdsCancellList = new HashSet<>();
         targetIds.forEach(ids -> targetIdsCancellList.addAll(overrideObsoleteUpdateActions(ids)));
 
         // cancel all scheduled actions which are in-active, these actions were
@@ -349,27 +345,15 @@ public class DeploymentManagement {
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSet(set, System.currentTimeMillis(),
                 currentUser, tIds));
         targetIds.forEach(tIds -> targetInfoRepository.setTargetUpdateStatus(TargetUpdateStatus.PENDING, tIds));
+        final Map<String, Action> targetIdsToActions = actionRepository
+                .save(targets.stream().map(t -> createTargetAction(targetsWithActionMap, t, set, rollout, rolloutGroup))
+                        .collect(Collectors.toList()))
+                .stream().collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
 
-        final Map<String, Action> targetIdsToActions = actionRepository.save(targets.stream().map(t -> {
-            final Action tAction = new Action();
-            final TargetWithActionType targetWithActionType = targetsWithActionMap.get(t.getControllerId());
-            tAction.setActionType(targetWithActionType.getActionType());
-            tAction.setForcedTime(targetWithActionType.getForceTime());
-            tAction.setActive(true);
-            tAction.setStatus(Status.RUNNING);
-            tAction.setTarget(t);
-            tAction.setDistributionSet(set);
-            tAction.setRollout(rollout);
-            tAction.setRolloutGroup(rolloutGroup);
-            return tAction;
-        }).collect(Collectors.toList())).stream()
-                .collect(Collectors.toMap(a -> a.getTarget().getControllerId(), Function.identity()));
-
-        // MECS-720 create initial action status when action is created so we
-        // remember the initial
-        // running status because we will change the status of the action itself
-        // and with this action
-        // status we have a nicer action history.
+        // create initial action status when action is created so we remember
+        // the initial running status because we will change the status
+        // of the action itself and with this action status we have a nicer
+        // action history.
         targetIdsToActions.values().forEach(action -> {
             final ActionStatus actionStatus = new ActionStatus();
             actionStatus.setAction(action);
@@ -378,11 +362,13 @@ public class DeploymentManagement {
             actionStatusRepository.save(actionStatus);
         });
 
-        // select updated targets in order to return them
+        // flush to get action IDs
+        entityManager.flush();
+        // collect updated target and actions IDs in order to return them
         final DistributionSetAssignmentResult result = new DistributionSetAssignmentResult(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), targets.size(),
-                controllerIDs.size() - targets.size(), Lists.newArrayList(targetIdsToActions.values()),
-                targetManagement);
+                controllerIDs.size() - targets.size(),
+                targetIdsToActions.values().stream().map(Action::getId).collect(Collectors.toList()), targetManagement);
 
         LOG.debug("assignDistribution({}) finished {}", set, result);
 
@@ -391,13 +377,31 @@ public class DeploymentManagement {
         // detaching as it is not necessary to persist the set itself
         entityManager.detach(set);
 
-        // send distribution set assignment event
+        sendDistributionSetAssignmentEvent(targets, targetIdsCancellList, targetIdsToActions, softwareModules);
 
+        return result;
+    }
+
+    private void sendDistributionSetAssignmentEvent(final List<Target> targets, final Set<Long> targetIdsCancellList,
+            final Map<String, Action> targetIdsToActions, final List<SoftwareModule> softwareModules) {
         targets.stream().filter(t -> !!!targetIdsCancellList.contains(t.getId()))
                 .forEach(t -> assignDistributionSetEvent(t, targetIdsToActions.get(t.getControllerId()).getId(),
                         softwareModules));
+    }
 
-        return result;
+    private Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final Target target,
+            final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
+        final Action actionForTarget = new Action();
+        final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
+        actionForTarget.setActionType(targetWithActionType.getActionType());
+        actionForTarget.setForcedTime(targetWithActionType.getForceTime());
+        actionForTarget.setActive(true);
+        actionForTarget.setStatus(Status.RUNNING);
+        actionForTarget.setTarget(target);
+        actionForTarget.setDistributionSet(set);
+        actionForTarget.setRollout(rollout);
+        actionForTarget.setRolloutGroup(rolloutGroup);
+        return actionForTarget;
     }
 
     /**
@@ -430,7 +434,7 @@ public class DeploymentManagement {
      */
     private Set<Long> overrideObsoleteUpdateActions(final List<Long> targetsIds) {
 
-        final Set<Long> cancelledTargetIds = new HashSet<Long>();
+        final Set<Long> cancelledTargetIds = new HashSet<>();
 
         // Figure out if there are potential target/action combinations that
         // need to be considered
@@ -567,7 +571,7 @@ public class DeploymentManagement {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public Action forceQuitAction(@NotNull final Action action, @NotNull final Target target) {
+    public Action forceQuitAction(@NotNull final Action action) {
         final Action mergedAction = entityManager.merge(action);
 
         if (!mergedAction.isCancelingOrCanceled()) {
@@ -709,8 +713,8 @@ public class DeploymentManagement {
     }
 
     /**
-     * Get the {@link Action} entity for given actionId with all lazy
-     * attributes.
+     * Get the {@link Action} entity for given actionId with all lazy attributes
+     * (i.e. distributionSet, target, target.assignedDs).
      *
      * @param actionId
      *            to be id of the action
@@ -774,8 +778,7 @@ public class DeploymentManagement {
         multiselect.where(cb.equal(actionRoot.get(Action_.target), target));
         multiselect.orderBy(cb.desc(actionRoot.get(Action_.id)));
         multiselect.groupBy(actionRoot.get(Action_.id));
-        final List<ActionWithStatusCount> resultList = entityManager.createQuery(multiselect).getResultList();
-        return resultList;
+        return entityManager.createQuery(multiselect).getResultList();
     }
 
     /**
@@ -921,7 +924,7 @@ public class DeploymentManagement {
 
     /**
      * retrieves all the {@link ActionStatus} entries of the given
-     * {@link Action} and {@link Target} in the order latest first.
+     * {@link Action} and {@link Target}.
      *
      * @param pageReq
      *            pagination parameter
@@ -933,12 +936,12 @@ public class DeploymentManagement {
      * @return the corresponding {@link Page} of {@link ActionStatus}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Page<ActionStatus> findActionStatusMessagesByActionInDescOrder(final Pageable pageReq, final Action action,
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Action action,
             final boolean withMessages) {
         if (withMessages) {
-            return actionStatusRepository.getByActionOrderByIdDesc(pageReq, action);
+            return actionStatusRepository.getByAction(pageReq, action);
         } else {
-            return actionStatusRepository.findByActionOrderByIdDesc(pageReq, action);
+            return actionStatusRepository.findByAction(pageReq, action);
         }
     }
 

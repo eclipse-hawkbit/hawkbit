@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.filtermanagement.footer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -29,6 +28,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 
 /**
  * @author Venugopal Boodidadinne(RBEI/BSJ)
@@ -44,9 +44,6 @@ public class TargetFilterCountMessageLabel extends Label {
 
     @Autowired
     private FilterManagementUIState filterManagementUIState;
-
-    @Autowired
-    private transient TargetManagement targetManagement;
 
     @Autowired
     private I18N i18n;
@@ -71,11 +68,11 @@ public class TargetFilterCountMessageLabel extends Label {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final CustomFilterUIEvent custFUIEvent) {
-        if (custFUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY
-                || custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
+        if (custFUIEvent == CustomFilterUIEvent.TARGET_DETAILS_VIEW
                 || custFUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
-                || custFUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW) {
-            displayTargetFilterMessage();
+                || custFUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW
+                || custFUIEvent == CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON) {
+            UI.getCurrent().access(() -> displayTargetFilterMessage());
         }
     }
 
@@ -89,8 +86,7 @@ public class TargetFilterCountMessageLabel extends Label {
         long totalTargets = 0;
         if (filterManagementUIState.isCreateFilterViewDisplayed() || filterManagementUIState.isEditViewDisplayed()) {
             if (null != filterManagementUIState.getFilterQueryValue()) {
-                totalTargets = targetManagement.countTargetByTargetFilterQuery(filterManagementUIState
-                        .getFilterQueryValue());
+                totalTargets = filterManagementUIState.getTargetsCountAll().get();
             }
             final StringBuilder targetMessage = new StringBuilder(i18n.get("label.target.filtered.total"));
             if (filterManagementUIState.getTargetsTruncated() != null) {

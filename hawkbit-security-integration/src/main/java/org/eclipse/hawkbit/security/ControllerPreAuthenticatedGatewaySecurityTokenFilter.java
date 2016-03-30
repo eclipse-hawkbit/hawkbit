@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
-import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -39,16 +39,20 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
     /**
      * Constructor.
      * 
-     * @param systemManagement
-     *            the system management service to retrieve configuration
+     * @param tenantConfigurationManagement
+     *            the tenant management service to retrieve configuration
      *            properties
      * @param tenantAware
      *            the tenant aware service to get configuration for the specific
      *            tenant
+     * @param systemSecurityContext
+     *            the system security context to get access to tenant
+     *            configuration
      */
-    public ControllerPreAuthenticatedGatewaySecurityTokenFilter(final SystemManagement systemManagement,
-            final TenantAware tenantAware) {
-        super(systemManagement, tenantAware);
+    public ControllerPreAuthenticatedGatewaySecurityTokenFilter(
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
+        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
     @Override
@@ -84,8 +88,12 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
         public String run() {
             LOGGER.trace("retrieving configuration value for configuration key {}",
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY);
-            return systemManagement.getConfigurationValue(
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+
+            return systemSecurityContext
+                    .runAsSystem(() -> tenantConfigurationManagement
+                            .getConfigurationValue(
+                                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class)
+                            .getValue());
         }
     }
 

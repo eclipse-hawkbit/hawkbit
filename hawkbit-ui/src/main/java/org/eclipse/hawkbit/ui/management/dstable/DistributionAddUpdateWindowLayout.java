@@ -94,8 +94,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     @Autowired
     private transient TenantMetaDataRepository tenantMetaDataRepository;
 
-    private Button saveDistribution;
-    private Button discardDistribution;
+    private Button saveDistributionBtn;
+    private Button discardDistributionBtn;
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private Label madatoryLabel;
@@ -103,7 +103,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
     private boolean editDistribution = Boolean.FALSE;
-    private Long editDistId = null;
+    private Long editDistId;
     private Window addDistributionWindow;
     private String originalDistName;
     private String originalDistVersion;
@@ -131,9 +131,9 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         final HorizontalLayout buttonsLayout = new HorizontalLayout();
         buttonsLayout.setSizeFull();
         buttonsLayout.setStyleName("dist-buttons-horz-layout");
-        buttonsLayout.addComponents(saveDistribution, discardDistribution);
-        buttonsLayout.setComponentAlignment(saveDistribution, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(discardDistribution, Alignment.BOTTOM_RIGHT);
+        buttonsLayout.addComponents(saveDistributionBtn, discardDistributionBtn);
+        buttonsLayout.setComponentAlignment(saveDistributionBtn, Alignment.BOTTOM_LEFT);
+        buttonsLayout.setComponentAlignment(discardDistributionBtn, Alignment.BOTTOM_RIGHT);
         buttonsLayout.addStyleName("window-style");
 
         /*
@@ -186,14 +186,14 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         reqMigStepCheckbox.setId(SPUIComponetIdProvider.DIST_ADD_MIGRATION_CHECK);
 
         /* save or update button */
-        saveDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
+        saveDistributionBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveDistribution.addClickListener(event -> saveDistribution());
+        saveDistributionBtn.addClickListener(event -> saveDistribution());
 
         /* close button */
-        discardDistribution = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardDistribution.addClickListener(event -> discardDistribution());
+        discardDistributionBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "",
+                true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        discardDistributionBtn.addClickListener(event -> discardDistribution());
     }
 
     /**
@@ -216,7 +216,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void enableSaveButton() {
-        saveDistribution.setEnabled(true);
+        saveDistributionBtn.setEnabled(true);
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
@@ -226,7 +226,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void disableSaveButton() {
-        saveDistribution.setEnabled(false);
+        saveDistributionBtn.setEnabled(false);
     }
 
     private void saveDistribution() {
@@ -344,21 +344,22 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
     private boolean duplicateCheck(final String name, final String version) {
         final DistributionSet existingDs = distributionSetManagement.findDistributionSetByNameAndVersion(name, version);
+        /*
+         * Distribution should not exists with the same name & version. Display
+         * error message, when the "existingDs" is not null and it is add window
+         * (or) when the "existingDs" is not null and it is edit window and the
+         * distribution Id of the edit window is different then the "existingDs"
+         */
+        if (existingDs != null && !existingDs.getId().equals(editDistId)) {
+            distNameTextField.addStyleName("v-textfield-error");
+            distVersionTextField.addStyleName("v-textfield-error");
+            notificationMessage.displayValidationError(
+                    i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
 
-        if (existingDs == null) {
+            return false;
+        } else {
             return true;
         }
-
-        if (editDistribution && !existingDs.getId().equals(editDistId)) {
-            return true;
-        }
-
-        distNameTextField.addStyleName("v-textfield-error");
-        distVersionTextField.addStyleName("v-textfield-error");
-        notificationMessage.displayValidationError(
-                i18n.get("message.duplicate.dist", new Object[] { existingDs.getName(), existingDs.getVersion() }));
-
-        return false;
     }
 
     /**
@@ -414,7 +415,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-        saveDistribution.setEnabled(true);
+        saveDistributionBtn.setEnabled(true);
         removeListeners();
         changedComponents.clear();
     }
@@ -496,7 +497,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     public void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
         editDistribution = Boolean.TRUE;
-        saveDistribution.setEnabled(false);
+        saveDistributionBtn.setEnabled(false);
         final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
         if (distSet != null) {
             distNameTextField.setValue(distSet.getName());

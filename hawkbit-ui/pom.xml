@@ -58,26 +58,24 @@
                </execution>
             </executions>
          </plugin>
-         <plugin>
-            <groupId>net.alchim31.maven</groupId>
-            <artifactId>yuicompressor-maven-plugin</artifactId>
-            <version>1.5.0</version>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>compress</goal>
-                  </goals>
-               </execution>
-            </executions>
-            <configuration>
-               <includes>
-                  <include>**/*.css</include>
-               </includes>
-               <excludeResources>true</excludeResources>
-               <outputDirectory>${basedir}/src/main/resources/VAADIN/themes/hawkbit/styles.css</outputDirectory>
-               <nosuffix>true</nosuffix>
-            </configuration>
-         </plugin>
+		 <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<configuration>
+				<archive>
+					<index>true</index>
+					<manifest>
+						<addClasspath>true</addClasspath>
+						<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+					</manifest>
+					<manifestEntries>
+						<Implementation-Title>CustomRenderers</Implementation-Title>
+						<Vaadin-Package-Version>1</Vaadin-Package-Version>
+						<Vaadin-Widgetsets>org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet</Vaadin-Widgetsets>
+					</manifestEntries>
+				</archive>
+			</configuration>
+		</plugin>
       </plugins>
       <pluginManagement>
          <plugins>
@@ -115,7 +113,7 @@
                            <pluginExecutionFilter>
                               <groupId>com.vaadin</groupId>
                               <artifactId>vaadin-maven-plugin</artifactId>
-                              <versionRange>[7.5.2,)</versionRange>
+                              <versionRange>[7.6.3,)</versionRange>
                               <goals>
                                  <goal>compile-theme</goal>
                               </goals>
@@ -173,8 +171,11 @@
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-server</artifactId>
       </dependency>
-
-      <dependency>
+	  <dependency>
+		 <groupId>com.vaadin</groupId>
+		 <artifactId>vaadin-client</artifactId>
+	  </dependency>
+	  <dependency>
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-push</artifactId>
       </dependency>
@@ -213,7 +214,6 @@
          <groupId>org.vaadin.addons</groupId>
          <artifactId>tokenfield</artifactId>
       </dependency>
-      <!-- To be mentioned in release notes -->
       <dependency>
          <groupId>org.vaadin.alump.distributionbar</groupId>
          <artifactId>dbar-addon</artifactId>
@@ -222,7 +222,11 @@
          <groupId>org.vaadin.addons</groupId>
          <artifactId>contextmenu</artifactId>
       </dependency>
-      <!-- To be mentioned in release notes -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-configuration-processor</artifactId>
+         <optional>true</optional>
+      </dependency>
 
       <!-- Test -->
       <dependency>

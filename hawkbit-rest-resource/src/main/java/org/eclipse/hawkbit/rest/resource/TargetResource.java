@@ -209,7 +209,7 @@ public class TargetResource implements TargetRestApi {
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
         if (force) {
-            this.deploymentManagement.forceQuitAction(action, target);
+            this.deploymentManagement.forceQuitAction(action);
         } else {
             this.deploymentManagement.cancelAction(action, target);
         }
@@ -235,7 +235,7 @@ public class TargetResource implements TargetRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
 
-        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusMessagesByActionInDescOrder(
+        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action, true);
 
         return new ResponseEntity<>(

@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import java.io.Serializable;
+import com.vaadin.ui.Component;
 
 /**
  *
  *
  *
  */
-public interface ConfigurationGroup {
+public interface ConfigurationGroup extends Component, ConfigurationItem {
 
     /**
      * called to store any configuration changes.
@@ -26,29 +26,4 @@ public interface ConfigurationGroup {
      * called to rollback any configuration changes.
      */
     void undo();
-
-    /**
-     * Adds a configuration change listener to notify about configuration
-     * changes.
-     * 
-     * @param listener
-     *            the listener to be notified in case the item changes some
-     *            configuration
-     */
-    void addChangeListener(ConfigurationGroupChangeListener listener);
-
-    /**
-     * Configuration Change Listener to be notified about configuration changes
-     * in configuration group.
-     * 
-     *
-     *
-     */
-    interface ConfigurationGroupChangeListener extends Serializable {
-        /**
-         * called to notify about configuration has been changed.
-         */
-        void configurationChanged();
-    }
-
 }
