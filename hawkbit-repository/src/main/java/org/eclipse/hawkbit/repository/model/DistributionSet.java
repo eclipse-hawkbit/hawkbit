@@ -293,7 +293,7 @@ public class DistributionSet extends NamedVersionedEntity {
      * Searches through modules for the given type.
      *
      * @param type
-     *            to seach for
+     *            to search for
      * @return SoftwareModule of given type or <code>null</code> if not in the
      *         list.
      */
@@ -308,26 +308,15 @@ public class DistributionSet extends NamedVersionedEntity {
         return null;
     }
 
-    /**
-     * @return the type
-     */
     public DistributionSetType getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final DistributionSetType type) {
         this.type = type;
     }
 
-    /**
-     * @return the complete
-     */
     public boolean isComplete() {
         return complete;
     }
-
 }

@@ -96,7 +96,6 @@ public class DistributionSetMetadata implements Serializable {
         int result = 1;
         result = prime * result + (distributionSet == null ? 0 : distributionSet.hashCode());
         result = prime * result + (key == null ? 0 : key.hashCode());
-        result = prime * result + (value == null ? 0 : value.hashCode());
         return result;
     }
 
@@ -124,13 +123,6 @@ public class DistributionSetMetadata implements Serializable {
                 return false;
             }
         } else if (!key.equals(other.key)) {
-            return false;
-        }
-        if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!value.equals(other.value)) {
             return false;
         }
         return true;
