@@ -50,9 +50,6 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Vaadin management UI.
  *
- *
- *
- *
  */
 @SuppressWarnings("serial")
 @Title("hawkBit Update Server")
