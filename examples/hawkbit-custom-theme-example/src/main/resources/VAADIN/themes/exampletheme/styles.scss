@@ -1,0 +1,10 @@
+@import "../hawkbit/customstyles/hawkbitvariables";
+@import "customstyles/examplevariables";
+@import "../hawkbit/hawkbittheme";
+@import "addons";
+
+// This file prefixes all rules with the theme name to avoid causing conflicts with other themes.
+.exampletheme {
+  @include addons;
+  @include hawkbittheme;
+}
