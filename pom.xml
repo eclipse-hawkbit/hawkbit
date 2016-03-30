@@ -84,6 +84,7 @@
       <!-- Vaadin versions - END -->
 
       <!-- Misc libraries versions - START -->
+      <validation-api.version>1.1.0.Final</validation-api.version>
       <fest-assert.version>1.4</fest-assert.version>
       <org.easytesting.version>2.0M10</org.easytesting.version>
       <allure.version>1.4.22</allure.version>
@@ -419,6 +420,11 @@
          </dependency>
 
          <!-- Misc -->
+         <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${validation-api.version}</version>
+         </dependency>
          <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
