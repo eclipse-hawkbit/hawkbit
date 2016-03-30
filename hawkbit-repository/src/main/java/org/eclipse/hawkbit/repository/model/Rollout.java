@@ -242,9 +242,6 @@ public class Rollout extends NamedEntity {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

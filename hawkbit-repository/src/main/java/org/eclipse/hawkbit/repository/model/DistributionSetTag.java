@@ -74,9 +74,6 @@ public class DistributionSetTag extends Tag {
 
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

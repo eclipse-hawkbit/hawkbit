@@ -135,23 +135,14 @@ public class DistributionSet extends NamedVersionedEntity {
         return tags;
     }
 
-    /**
-     * @return the deleted
-     */
     public boolean isDeleted() {
         return deleted;
     }
 
-    /**
-     * @return the metadata
-     */
     public List<DistributionSetMetadata> getMetadata() {
         return metadata;
     }
 
-    /**
-     * @return the actions
-     */
     public List<Action> getActions() {
         return actions;
     }
@@ -166,9 +157,6 @@ public class DistributionSet extends NamedVersionedEntity {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

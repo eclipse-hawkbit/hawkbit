@@ -92,9 +92,6 @@ public class TenantConfiguration extends TenantAwareBaseEntity implements Serial
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

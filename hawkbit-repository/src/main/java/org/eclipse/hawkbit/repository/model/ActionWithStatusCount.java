@@ -86,93 +86,54 @@ public class ActionWithStatusCount {
         action.setId(actionId);
     }
 
-    /**
-     * @return the action
-     */
     public Action getAction() {
         return action;
     }
 
-    /**
-     * @return the actionId
-     */
     public Long getActionId() {
         return actionId;
     }
 
-    /**
-     * @return the actionType
-     */
     public ActionType getActionType() {
         return actionType;
     }
 
-    /**
-     * @return the actionActive
-     */
     public boolean isActionActive() {
         return actionActive;
     }
 
-    /**
-     * @return the actionForceTime
-     */
     public long getActionForceTime() {
         return actionForceTime;
     }
 
-    /**
-     * @return the actionStatus
-     */
     public Status getActionStatus() {
         return actionStatus;
     }
 
-    /**
-     * @return the actionCreatedAt
-     */
     public Long getActionCreatedAt() {
         return actionCreatedAt;
     }
 
-    /**
-     * @return the actionLastModifiedAt
-     */
     public Long getActionLastModifiedAt() {
         return actionLastModifiedAt;
     }
 
-    /**
-     * @return the dsId
-     */
     public Long getDsId() {
         return dsId;
     }
 
-    /**
-     * @return the dsName
-     */
     public String getDsName() {
         return dsName;
     }
 
-    /**
-     * @return the dsVersion
-     */
     public String getDsVersion() {
         return dsVersion;
     }
 
-    /**
-     * @return the actionStatusCount
-     */
     public Long getActionStatusCount() {
         return actionStatusCount;
     }
 
-    /**
-     * @return the rolloutName
-     */
     public String getRolloutName() {
         return rolloutName;
     }

@@ -139,13 +139,10 @@ public class Target extends NamedEntity implements Persistable<Long> {
      */
     @Override
     public boolean equals(final Object obj) {// NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Target)) {
             return false;
         }
         final Target other = (Target) obj;

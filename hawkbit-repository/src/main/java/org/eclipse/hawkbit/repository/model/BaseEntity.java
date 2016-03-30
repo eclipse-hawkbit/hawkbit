@@ -154,7 +154,7 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof BaseEntity)) {
             return false;
         }
         final BaseEntity other = (BaseEntity) obj;

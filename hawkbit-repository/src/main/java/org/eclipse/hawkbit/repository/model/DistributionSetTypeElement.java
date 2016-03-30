@@ -71,30 +71,18 @@ public class DistributionSetTypeElement implements Serializable {
         this.mandatory = mandatory;
     }
 
-    /**
-     * @return the mandatory
-     */
     public boolean isMandatory() {
         return mandatory;
     }
 
-    /**
-     * @return the dsType
-     */
     public DistributionSetType getDsType() {
         return dsType;
     }
 
-    /**
-     * @return the smType
-     */
     public SoftwareModuleType getSmType() {
         return smType;
     }
 
-    /**
-     * @return the key
-     */
     public DistributionSetTypeElementCompositeKey getKey() {
         return key;
     }

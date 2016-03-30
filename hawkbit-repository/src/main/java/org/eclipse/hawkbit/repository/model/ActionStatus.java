@@ -150,9 +150,6 @@ public class ActionStatus extends TenantAwareBaseEntity {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

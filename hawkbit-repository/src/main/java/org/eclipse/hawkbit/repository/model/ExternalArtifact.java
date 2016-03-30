@@ -81,18 +81,11 @@ public class ExternalArtifact extends Artifact {
         return softwareModule;
     }
 
-    /**
-     * @param softwareModule
-     *            the softwareModule to set
-     */
     public final void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
         this.softwareModule.addArtifact(this);
     }
 
-    /**
-     * @return the externalArtifactProvider
-     */
     public ExternalArtifactProvider getExternalArtifactProvider() {
         return externalArtifactProvider;
     }
@@ -101,17 +94,10 @@ public class ExternalArtifact extends Artifact {
         return new StringBuilder().append(externalArtifactProvider.getBasePath()).append(urlSuffix).toString();
     }
 
-    /**
-     * @return the urlSuffix
-     */
     public String getUrlSuffix() {
         return urlSuffix;
     }
 
-    /**
-     * @param externalArtifactProvider
-     *            the externalArtifactProvider to set
-     */
     public void setExternalArtifactProvider(final ExternalArtifactProvider externalArtifactProvider) {
         this.externalArtifactProvider = externalArtifactProvider;
     }
@@ -134,9 +120,6 @@ public class ExternalArtifact extends Artifact {
 
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

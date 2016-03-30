@@ -12,14 +12,9 @@ import java.io.Serializable;
 
 /**
  * Combined unique key of the table {@link RolloutTargetGroup}.
- * 
- * @author Michael Hirsch
  *
  */
 public class RolloutTargetGroupId implements Serializable {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     private Long rolloutGroup;

@@ -208,17 +208,10 @@ public class SoftwareModule extends NamedVersionedEntity {
         return type;
     }
 
-    /**
-     * @return the deleted
-     */
     public boolean isDeleted() {
         return deleted;
     }
 
-    /**
-     * @param deleted
-     *            the deleted to set
-     */
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
@@ -227,9 +220,6 @@ public class SoftwareModule extends NamedVersionedEntity {
         this.type = type;
     }
 
-    /**
-     * @return the metadata
-     */
     public List<SoftwareModuleMetadata> getMetadata() {
         return metadata;
     }
@@ -250,9 +240,6 @@ public class SoftwareModule extends NamedVersionedEntity {
 
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }
