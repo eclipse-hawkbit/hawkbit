@@ -13,11 +13,7 @@ import javax.persistence.MappedSuperclass;
 
 /**
  * Tenant specific locally stored artifact representation that is used by
- * {@link SoftwareModule} .
- *
- *
- *
- *
+ * {@link SoftwareModule}.
  */
 @MappedSuperclass
 public abstract class Artifact extends TenantAwareBaseEntity {
@@ -34,49 +30,47 @@ public abstract class Artifact extends TenantAwareBaseEntity {
 
     public abstract SoftwareModule getSoftwareModule();
 
-    /**
-     * @return the md5Hash
-     */
     public String getMd5Hash() {
         return md5Hash;
     }
 
-    /**
-     * @return the sha1Hash
-     */
     public String getSha1Hash() {
         return sha1Hash;
     }
 
-    /**
-     * @param md5Hash
-     *            the md5Hash to set
-     */
     public void setMd5Hash(final String md5Hash) {
         this.md5Hash = md5Hash;
     }
 
-    /**
-     * @param sha1Hash
-     *            the sha1Hash to set
-     */
     public void setSha1Hash(final String sha1Hash) {
         this.sha1Hash = sha1Hash;
     }
 
-    /**
-     * @return the size
-     */
     public Long getSize() {
         return size;
     }
 
-    /**
-     * @param size
-     *            the size to set
-     */
     public void setSize(final Long size) {
         this.size = size;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof Artifact)) {
+            return false;
+        }
+
+        return true;
+    }
 }

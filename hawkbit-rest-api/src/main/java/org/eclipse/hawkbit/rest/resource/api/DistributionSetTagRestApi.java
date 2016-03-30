@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.rest.resource.model.tag.AssignedDistributionSetReques
 import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,7 +86,7 @@ public interface DistributionSetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TagsRest> createDistributionSetTags(@RequestBody final List<TagRequestBodyPut> tags);
+    public ResponseEntity<List<TagRest>> createDistributionSetTags(@RequestBody final List<TagRequestBodyPut> tags);
 
     /**
      *

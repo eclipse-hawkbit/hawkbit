@@ -458,11 +458,6 @@ public class ReportManagement {
             return name;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#hashCode()
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -471,11 +466,6 @@ public class ReportManagement {
             return result;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
         @Override
         public boolean equals(final Object obj) { // NOSONAR - as this is
                                                   // generated
@@ -499,11 +489,6 @@ public class ReportManagement {
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
             return "DSName [name=" + name + "]";
@@ -523,9 +508,6 @@ public class ReportManagement {
 
     /**
      * Return DateTypes.
-     *
-     *
-     *
      */
     public static final class DateTypes implements Serializable {
         /**
@@ -585,12 +567,6 @@ public class ReportManagement {
         private static final long serialVersionUID = 1L;
         private static final String DATE_PATTERN = "yyyy-MM";
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.eclipse.hawkbit.server.repository.ReportManagement.DateType#
-         * format(java. lang.String)
-         */
         @Override
         public LocalDate format(final String s) {
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
@@ -598,23 +574,11 @@ public class ReportManagement {
             return ym.atDay(1);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.eclipse.hawkbit.server.repository.ReportManagement.DateType#
-         * h2Format()
-         */
         @Override
         public String h2Format() {
             return DATE_PATTERN;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.eclipse.hawkbit.server.repository.ReportManagement.DateType#
-         * mySqlFormat( )
-         */
         @Override
         public String mySqlFormat() {
             return "%Y-%m";

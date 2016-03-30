@@ -15,11 +15,8 @@ import javax.persistence.Table;
 
 /**
  * External repositories for artifact storage. The SP server provides URLs for
- * the targets to download rom these external ressources but does not access
- * thenm itself.
- *
- *
- *
+ * the targets to download from these external resources but does not access
+ * them itself.
  *
  */
 @Table(name = "sp_external_provider", indexes = {
@@ -60,41 +57,22 @@ public class ExternalArtifactProvider extends NamedEntity {
         basePath = "";
     }
 
-    /**
-     * @return the basePath
-     */
     public String getBasePath() {
         return basePath;
     }
 
-    /**
-     * @return the defaultSuffix
-     */
     public String getDefaultSuffix() {
         return defaultSuffix;
     }
 
-    /**
-     * @param basePath
-     *            the basePath to set
-     */
     public void setBasePath(final String basePath) {
         this.basePath = basePath;
     }
 
-    /**
-     * @param defaultSuffix
-     *            the defaultSuffix to set
-     */
     public void setDefaultSuffix(final String defaultSuffix) {
         this.defaultSuffix = defaultSuffix;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
@@ -103,16 +81,8 @@ public class ExternalArtifactProvider extends NamedEntity {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

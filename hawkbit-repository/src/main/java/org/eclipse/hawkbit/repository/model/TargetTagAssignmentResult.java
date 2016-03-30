@@ -11,13 +11,10 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 
 /**
- * Result object for {@link TargetTag} assigments.
- *
- *
- *
+ * Result object for {@link TargetTag} assignments.
  *
  */
-public class TargetTagAssigmentResult extends AssignmentResult {
+public class TargetTagAssignmentResult extends AssignmentResult {
 
     private final int unassigned;
     private final List<Target> assignedTargets;
@@ -40,7 +37,7 @@ public class TargetTagAssigmentResult extends AssignmentResult {
      * @param targetTag
      *            the assigned or unassigned tag
      */
-    public TargetTagAssigmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
+    public TargetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
             final List<Target> assignedTargets, final List<Target> unassignedTargets, final TargetTag targetTag) {
         super(assigned, alreadyAssigned);
         this.unassigned = unassigned;
@@ -49,23 +46,14 @@ public class TargetTagAssigmentResult extends AssignmentResult {
         this.targetTag = targetTag;
     }
 
-    /**
-     * @return the unassigned
-     */
     public int getUnassigned() {
         return unassigned;
     }
 
-    /**
-     * @return the assignedTargets
-     */
     public List<Target> getAssignedTargets() {
         return assignedTargets;
     }
 
-    /**
-     * @return the unassignedTargets
-     */
     public List<Target> getUnassignedTargets() {
         return unassignedTargets;
     }

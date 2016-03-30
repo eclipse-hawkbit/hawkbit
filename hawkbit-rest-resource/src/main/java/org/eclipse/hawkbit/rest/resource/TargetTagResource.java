@@ -17,14 +17,13 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.TargetTagRestApi;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedTargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.slf4j.Logger;
@@ -87,7 +86,7 @@ public class TargetTagResource implements TargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TagsRest> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
+    public ResponseEntity<List<TagRest>> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
                 .createTargetTags(TagMapper.mapTargeTagFromRequest(tags));
@@ -130,7 +129,7 @@ public class TargetTagResource implements TargetTagRestApi {
         LOG.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        final TargetTagAssigmentResult assigmentResult = this.targetManagement
+        final TargetTagAssignmentResult assigmentResult = this.targetManagement
                 .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
 
         final TargetTagAssigmentResultRest tagAssigmentResultRest = new TargetTagAssigmentResultRest();

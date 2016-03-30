@@ -33,17 +33,12 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
- * the edge controller, e.g. OS, JVM, AgentHub
- *
- *
- *
- *
- *
+ * the edge controller, e.g. OS, JVM, AgentHub.
  *
  */
 @Entity
 @Table(name = "sp_base_software_module", uniqueConstraints = @UniqueConstraint(columnNames = { "module_type", "name",
-        "version", "tenant" }, name = "uk_base_sw_mod") , indexes = {
+        "version", "tenant" }, name = "uk_base_sw_mod"), indexes = {
                 @Index(name = "sp_idx_base_sw_module_01", columnList = "tenant,deleted,name,version"),
                 @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
                 @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
@@ -52,7 +47,7 @@ public class SoftwareModule extends NamedVersionedEntity {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    @JoinColumn(name = "module_type", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type") )
+    @JoinColumn(name = "module_type", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
     private SoftwareModuleType type;
 
     @ManyToMany(mappedBy = "modules", targetEntity = DistributionSet.class, fetch = FetchType.LAZY)
@@ -213,17 +208,10 @@ public class SoftwareModule extends NamedVersionedEntity {
         return type;
     }
 
-    /**
-     * @return the deleted
-     */
     public boolean isDeleted() {
         return deleted;
     }
 
-    /**
-     * @param deleted
-     *            the deleted to set
-     */
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
@@ -233,29 +221,18 @@ public class SoftwareModule extends NamedVersionedEntity {
     }
 
     /**
-     * @return the metadata
+     * @return immutable list of meta data elements.
      */
     public List<SoftwareModuleMetadata> getMetadata() {
-        return metadata;
+        return Collections.unmodifiableList(metadata);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        return "SoftwareModule [type=" + type + ", deleted=" + deleted + ", getVersion()=" + getVersion()
-                + ", getOptLockRevision()=" + getOptLockRevision() + ", getId()=" + getId() + ", getType()="
-                + getType().getName() + "]";
+        return "SoftwareModule [deleted=" + deleted + ", name=" + getName() + ", version=" + getVersion()
+                + ", revision=" + getOptLockRevision() + ", Id=" + getId() + ", type=" + getType().getName() + "]";
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() { // NOSONAR - as this is generated
         final int prime = 31;
@@ -264,16 +241,8 @@ public class SoftwareModule extends NamedVersionedEntity {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
             return false;
         }

@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.eventbus.event.RolloutGroupPropertyChangeEvent;
 import org.eclipse.hawkbit.eventbus.event.RolloutPropertyChangeEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.helper.EventBusHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
@@ -36,13 +36,7 @@ import com.google.common.eventbus.EventBus;
  *
  */
 public class EntityPropertyChangeListener extends DescriptorEventAdapter {
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.persistence.descriptors.DescriptorEventAdapter#postInsert
-     * (org.eclipse.persistence.descriptors.DescriptorEvent)
-     */
+
     @Override
     public void postInsert(final DescriptorEvent event) {
         if (event.getObject().getClass().equals(Action.class)) {
@@ -56,30 +50,18 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.persistence.descriptors.DescriptorEventAdapter#postUpdate
-     * (org.eclipse.persistence.descriptors.DescriptorEvent)
-     */
     @Override
     public void postUpdate(final DescriptorEvent event) {
         if (event.getObject().getClass().equals(Action.class)) {
-            getAfterTransactionCommmitExecutor().afterCommit(
-                    () -> getEventBus()
-                            .post(new ActionPropertyChangeEvent((Action) event.getObject(), getChangeSet(Action.class,
-                                    event))));
+            getAfterTransactionCommmitExecutor().afterCommit(() -> getEventBus().post(
+                    new ActionPropertyChangeEvent((Action) event.getObject(), getChangeSet(Action.class, event))));
         } else if (event.getObject().getClass().equals(Rollout.class)) {
-            getAfterTransactionCommmitExecutor().afterCommit(
-                    () -> getEventBus().post(
-                            new RolloutPropertyChangeEvent((Rollout) event.getObject(), getChangeSet(Rollout.class,
-                                    event))));
+            getAfterTransactionCommmitExecutor().afterCommit(() -> getEventBus().post(
+                    new RolloutPropertyChangeEvent((Rollout) event.getObject(), getChangeSet(Rollout.class, event))));
         } else if (event.getObject().getClass().equals(RolloutGroup.class)) {
             getAfterTransactionCommmitExecutor().afterCommit(
-                    () -> getEventBus().post(
-                            new RolloutGroupPropertyChangeEvent((RolloutGroup) event.getObject(), getChangeSet(
-                                    RolloutGroup.class, event))));
+                    () -> getEventBus().post(new RolloutGroupPropertyChangeEvent((RolloutGroup) event.getObject(),
+                            getChangeSet(RolloutGroup.class, event))));
         }
     }
 
@@ -87,14 +69,11 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
             final Class<T> clazz, final DescriptorEvent event) {
         final T rolloutGroup = clazz.cast(event.getObject());
         final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        return changeSet
-                .getChanges()
-                .stream()
-                .filter(record -> record instanceof DirectToFieldChangeRecord)
+        return changeSet.getChanges().stream().filter(record -> record instanceof DirectToFieldChangeRecord)
                 .map(record -> (DirectToFieldChangeRecord) record)
-                .collect(
-                        Collectors.toMap(record -> record.getAttribute(), record -> new AbstractPropertyChangeEvent<T>(
-                                rolloutGroup, null).new Values(record.getOldValue(), record.getNewValue())));
+                .collect(Collectors.toMap(record -> record.getAttribute(),
+                        record -> new AbstractPropertyChangeEvent<T>(rolloutGroup, null).new Values(
+                                record.getOldValue(), record.getNewValue())));
     }
 
     private AfterTransactionCommitExecutor getAfterTransactionCommmitExecutor() {

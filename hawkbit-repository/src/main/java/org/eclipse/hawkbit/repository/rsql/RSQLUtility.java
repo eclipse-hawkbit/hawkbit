@@ -139,14 +139,6 @@ public final class RSQLUtility {
             this.enumType = enumType;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.springframework.data.jpa.domain.Specification#toPredicate(javax.
-         * persistence.criteria .Root, javax.persistence.criteria.CriteriaQuery,
-         * javax.persistence.criteria.CriteriaBuilder)
-         */
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
 

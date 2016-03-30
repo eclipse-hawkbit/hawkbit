@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.rest.resource.model;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Paged List Handling")
 public class PagedListTest {
 
-    @Test(expected = NullPointerException.class)
+    @Test
     @Description("Ensures that a null payload entitiy throws an exception.")
     public void createListWithNullContentThrowsException() {
-        new PagedList<>(null, 0);
+        try {
+            new PagedList<>(null, 0);
+            fail("as content is null");
+        } catch (final NullPointerException e) {
+        }
     }
 
     @Test

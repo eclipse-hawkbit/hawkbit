@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -243,7 +243,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
             final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
 
-            final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+            final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
             notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
 
             if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
