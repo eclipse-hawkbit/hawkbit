@@ -71,11 +71,6 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-dmf-amqp</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ui</artifactId>
          <version>${project.version}</version>
       </dependency>
