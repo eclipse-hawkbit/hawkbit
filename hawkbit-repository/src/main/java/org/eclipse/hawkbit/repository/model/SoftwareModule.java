@@ -221,7 +221,7 @@ public class SoftwareModule extends NamedVersionedEntity {
     }
 
     public List<SoftwareModuleMetadata> getMetadata() {
-        return metadata;
+        return Collections.unmodifiableList(metadata);
     }
 
     @Override

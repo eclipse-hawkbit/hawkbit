@@ -762,7 +762,7 @@ public class DistributionSetManagement {
         if (distributionSetMetadataRepository.exists(metadata.getId())) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
-        // merge base software module so optLockRevision gets updated and audit
+        // merge base distribution set so optLockRevision gets updated and audit
         // log written because
         // modifying metadata is modifying the base distribution set itself for
         // auditing purposes.

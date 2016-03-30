@@ -140,7 +140,7 @@ public class DistributionSet extends NamedVersionedEntity {
     }
 
     public List<DistributionSetMetadata> getMetadata() {
-        return metadata;
+        return Collections.unmodifiableList(metadata);
     }
 
     public List<Action> getActions() {
@@ -171,10 +171,6 @@ public class DistributionSet extends NamedVersionedEntity {
         return requiredMigrationStep;
     }
 
-    /**
-     * @param deleted
-     *            the deleted to set
-     */
     public DistributionSet setDeleted(final boolean deleted) {
         this.deleted = deleted;
         return this;
@@ -185,10 +181,6 @@ public class DistributionSet extends NamedVersionedEntity {
         return this;
     }
 
-    /**
-     * @param tags
-     *            the tags to set
-     */
     public DistributionSet setTags(final Set<DistributionSetTag> tags) {
         this.tags = tags;
         return this;
