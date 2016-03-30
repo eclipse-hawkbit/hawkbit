@@ -66,11 +66,6 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-rest-resource</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ui</artifactId>
          <version>${project.version}</version>
       </dependency>
