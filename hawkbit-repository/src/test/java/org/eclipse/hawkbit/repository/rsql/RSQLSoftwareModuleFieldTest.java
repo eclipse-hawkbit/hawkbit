@@ -28,8 +28,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
 
     @Before
-    public void seuptBeforeTest() {
-
+    public void setupBeforeTest() {
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "agent-hub", ""));
         softwareManagement.createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", "aa", ""));
@@ -40,14 +39,9 @@ public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
 
         final SoftwareModuleMetadata softwareModuleMetadata = new SoftwareModuleMetadata("metaKey", ah, "metaValue");
         softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata);
-        ah.getMetadata().add(softwareModuleMetadata);
-        softwareManagement.updateSoftwareModule(ah);
 
         final SoftwareModuleMetadata softwareModuleMetadata2 = new SoftwareModuleMetadata("metaKey", ah2, "value");
         softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata2);
-        ah2.getMetadata().add(softwareModuleMetadata2);
-        softwareManagement.updateSoftwareModule(ah2);
-
     }
 
     @Test

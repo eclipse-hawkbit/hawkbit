@@ -17,9 +17,6 @@ import javax.persistence.UniqueConstraint;
 /**
  * Type of a software modules.
  *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_software_module_type", indexes = {
@@ -28,9 +25,6 @@ import javax.persistence.UniqueConstraint;
                 @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_smt_type_key"),
                 @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_smt_name") })
 public class SoftwareModuleType extends NamedEntity {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Column(name = "type_key", nullable = false, length = 64)
@@ -92,48 +86,26 @@ public class SoftwareModuleType extends NamedEntity {
         super();
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @return the max
-     */
     public int getMaxAssignments() {
         return maxAssignments;
     }
 
-    /**
-     * @return the deleted
-     */
     public boolean isDeleted() {
         return deleted;
     }
 
-    /**
-     * @param deleted
-     *            the deleted to set
-     */
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
 
-    /**
-     *
-     * @return the software type color
-     */
     public String getColour() {
         return colour;
     }
 
-    /**
-     *
-     * @param colour
-     *            the col
-     */
     public void setColour(final String colour) {
         this.colour = colour;
     }
@@ -143,4 +115,23 @@ public class SoftwareModuleType extends NamedEntity {
         return "SoftwareModuleType [key=" + key + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof SoftwareModuleType)) {
+            return false;
+        }
+
+        return true;
+    }
 }

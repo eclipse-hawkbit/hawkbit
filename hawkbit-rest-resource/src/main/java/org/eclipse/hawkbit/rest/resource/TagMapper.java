@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.rest.resource.api.DistributionSetTagRestApi;
 import org.eclipse.hawkbit.rest.resource.api.TargetTagRestApi;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -33,8 +32,8 @@ final class TagMapper {
         // Utility class
     }
 
-    static TagsRest toResponse(final List<TargetTag> targetTags) {
-        final TagsRest tagsRest = new TagsRest();
+    static List<TagRest> toResponse(final List<TargetTag> targetTags) {
+        final List<TagRest> tagsRest = new ArrayList<>();
         if (targetTags == null) {
             return tagsRest;
         }
@@ -63,8 +62,8 @@ final class TagMapper {
         return response;
     }
 
-    static TagsRest toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
-        final TagsRest tagsRest = new TagsRest();
+    static List<TagRest> toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
+        final List<TagRest> tagsRest = new ArrayList<>();
         if (distributionSetTags == null) {
             return tagsRest;
         }
@@ -131,7 +130,5 @@ final class TagMapper {
         if (response.getName() != null) {
             tag.setName(response.getName());
         }
-
     }
-
 }

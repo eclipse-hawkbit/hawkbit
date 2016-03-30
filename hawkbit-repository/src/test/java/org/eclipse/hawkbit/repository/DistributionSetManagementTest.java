@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,15 +45,12 @@ import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
- * {@link SoftwareManagement} test focused on {@link DistributionSet} and
- * {@link DistributionSetType} related stuff.
- *
- *
+ * {@link DistributionSetManagement} tests.
  *
  */
 @Features("Component Tests - Repository")
-@Stories("Software Management")
-public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
+@Stories("DistributionSet Management")
+public class DistributionSetManagementTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
@@ -102,7 +100,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .isEqualTo("test123");
     }
 
-    @Test(expected = EntityReadOnlyException.class)
+    @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module addition).")
     public void addModuleToAssignedDistributionSetTypeFails() {
         final DistributionSetType nonUpdatableType = distributionSetManagement
@@ -113,10 +111,17 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .createDistributionSet(new DistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
 
         nonUpdatableType.addMandatoryModuleType(osType);
-        distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+
+        try {
+            distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+            fail("Should not have worked as DS is in use.");
+        } catch (final EntityReadOnlyException e) {
+
+        }
+
     }
 
-    @Test(expected = EntityReadOnlyException.class)
+    @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module removal).")
     public void removeModuleToAssignedDistributionSetTypeFails() {
         DistributionSetType nonUpdatableType = distributionSetManagement
@@ -130,7 +135,12 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .createDistributionSet(new DistributionSet("newtypesoft", "1", "", nonUpdatableType, null));
 
         nonUpdatableType.removeModuleType(osType.getId());
-        nonUpdatableType = distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+        try {
+            distributionSetManagement.updateDistributionSetType(nonUpdatableType);
+            fail("Should not have worked as DS is in use.");
+        } catch (final EntityReadOnlyException e) {
+
+        }
     }
 
     @Test
@@ -152,22 +162,68 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .createDistributionSetType(new DistributionSetType("softdeleted", "to be deletd", ""));
 
         assertThat(distributionSetTypeRepository.findAll()).contains(softDelete);
-        final DistributionSet dsNewType = distributionSetManagement
-                .createDistributionSet(new DistributionSet("newtypesoft", "1", "", softDelete, null));
+        distributionSetManagement.createDistributionSet(new DistributionSet("newtypesoft", "1", "", softDelete, null));
 
         distributionSetManagement.deleteDistributionSetType(softDelete);
         assertThat(distributionSetManagement.findDistributionSetTypeByKey("softdeleted").isDeleted()).isEqualTo(true);
     }
 
-    // TODO: kzimmerm: test N+1
-
-    @Test(expected = EntityAlreadyExistsException.class)
+    @Test
     @Description("Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).")
     public void createDuplicateDistributionSetsFailsWithException() {
         TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
 
-        TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+        try {
+            TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+            fail("Should not have worked as DS with same UK already exists.");
+        } catch (final EntityAlreadyExistsException e) {
 
+        }
+    }
+
+    @Test
+    @Description("Verfies that a DS is of default type if not specified explicitly at creation time.")
+    public void createDistributionSetWithImplicitType() {
+        final DistributionSet set = distributionSetManagement
+                .createDistributionSet(new DistributionSet("newtypesoft", "1", "", null, null));
+
+        assertThat(set.getType()).as("Type should be equal to default type of tenant")
+                .isEqualTo(systemManagement.getTenantMetadata().getDefaultDsType());
+
+    }
+
+    @Test
+    @Description("Verfies that multiple DS are of default type if not specified explicitly at creation time.")
+    public void createMultipleDistributionSetsWithImplicitType() {
+
+        List<DistributionSet> sets = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            sets.add(new DistributionSet("another DS" + i, "X" + i, "", null, null));
+        }
+
+        sets = distributionSetManagement.createDistributionSets(sets);
+
+        assertThat(sets).as("Type should be equal to default type of tenant").are(new Condition<DistributionSet>() {
+            @Override
+            public boolean matches(final DistributionSet value) {
+                return value.getType().equals(systemManagement.getTenantMetadata().getDefaultDsType());
+            }
+        });
+
+    }
+
+    @Test
+    @Description("Verfies that a DS entity cannot be used for creation.")
+    public void createDistributionSetFailsOnExistingEntity() {
+        final DistributionSet set = distributionSetManagement
+                .createDistributionSet(new DistributionSet("newtypesoft", "1", "", null, null));
+
+        try {
+            distributionSetManagement.createDistributionSet(set);
+            fail("Should not have worked to create based on a persisted entity.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test
@@ -244,17 +300,22 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         }
     }
 
-    @Test(expected = DistributionSetTypeUndefinedException.class)
+    @Test
     @Description("Ensures that it is not possible to add a software module to a set that has no type defined.")
     public void updateDistributionSetModuleWithUndefinedTypeFails() {
         final DistributionSet testSet = new DistributionSet();
         final SoftwareModule module = new SoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
 
         // update data
-        testSet.addModule(module);
+        try {
+            testSet.addModule(module);
+            fail("Should not have worked as DS type is undefined.");
+        } catch (final DistributionSetTypeUndefinedException e) {
+
+        }
     }
 
-    @Test(expected = UnsupportedSoftwareModuleForThisDistributionSetException.class)
+    @Test
     @Description("Ensures that it is not possible to add a software module that is not defined of the DS's type.")
     public void updateDistributionSetUnsupportedModuleFails() {
         final DistributionSet set = new DistributionSet("agent-hub2", "1.0.5", "desc",
@@ -262,7 +323,12 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         final SoftwareModule module = new SoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
 
         // update data
-        set.addModule(module);
+        try {
+            set.addModule(module);
+            fail("Should not have worked as module type is not in DS type.");
+        } catch (final UnsupportedSoftwareModuleForThisDistributionSetException e) {
+
+        }
     }
 
     @Test
@@ -561,7 +627,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
         // combine deleted and complete and type
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group1);
         expected.addAll(ds100Group2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE)
@@ -570,7 +636,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(200)
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsDeleted);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setType(standardDsType).setIsDeleted(Boolean.TRUE);
@@ -583,7 +649,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         assertThat(distributionSetManagement
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.add(dsNewType);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(newType);
         assertThat(distributionSetManagement
@@ -591,7 +657,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                         .containsOnly(expected.toArray(new DistributionSet[0]));
 
         // combine deleted and complete and type and text
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setType(standardDsType).setSearchText("%test2");
@@ -615,7 +681,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 .findDistributionSetsByFilters(pageReq, distributionSetFilterBuilder.build()).getContent()).hasSize(0);
 
         // combine deleted and complete and type and text and tag
-        expected = new ArrayList<DistributionSet>();
+        expected = new ArrayList<>();
         expected.addAll(ds100Group2);
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true).setType(standardDsType)
                 .setSearchText("%test2").setTagNames(Lists.newArrayList(dsTagA.getName()));
@@ -637,7 +703,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
 
     private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
             final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<Target>();
+        final List<Target> result = new ArrayList<>();
         for (final Target t : targs) {
             final List<Action> findByTarget = actionRepository.findByTarget(t);
             for (final Action action : findByTarget) {
@@ -730,7 +796,7 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
                 dsAssigned.getVersion());
         final Target target = new Target("4712");
         final Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<Target>();
+        final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
         deploymentManagement.assignDistributionSet(dsAssigned, toAssign);
 
@@ -742,38 +808,6 @@ public class SoftwareManagementForDSTest extends AbstractIntegrationTest {
         assertThat(distributionSetRepository.findAll()).hasSize(3);
         assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, Boolean.FALSE, Boolean.TRUE)
                 .getTotalElements()).isEqualTo(2);
-    }
-
-    /**
-     * helper method which re-orders a list as expected. Re-orders the given
-     * distribution set in the order as given and returns a new list with the
-     * new order.
-     * 
-     * @param dsThree
-     * @param buildDistributionSets
-     * @return
-     */
-    private List<DistributionSet> reOrderDSList(final Iterable<DistributionSet> buildDistributionSets,
-            final DistributionSet... ds) {
-        final List<DistributionSet> reOrderedList = new ArrayList<>();
-
-        final Iterator<DistributionSet> iterator = buildDistributionSets.iterator();
-        while (iterator.hasNext()) {
-            final DistributionSet next = iterator.next();
-            int reorder = -1;
-            for (int index = 0; index < ds.length; index++) {
-                if (next.equals(ds[index])) {
-                    reorder = index;
-                }
-            }
-            if (reorder >= 0) {
-                reOrderedList.add(reorder, next);
-            } else {
-                reOrderedList.add(next);
-            }
-        }
-
-        return reOrderedList;
     }
 
     private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedTargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.http.MediaType;
@@ -85,7 +84,7 @@ public interface TargetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TagsRest> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags);
+    public ResponseEntity<List<TagRest>> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags);
 
     /**
      *

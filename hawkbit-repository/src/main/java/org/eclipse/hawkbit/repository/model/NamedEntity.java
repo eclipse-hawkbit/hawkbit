@@ -12,14 +12,8 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 /**
- * {@link TenantAwareBaseEntity} extension for all entities that are named in addition to
- * their technical ID.
- *
- *
- *
- *
- *
- *
+ * {@link TenantAwareBaseEntity} extension for all entities that are named in
+ * addition to their technical ID.
  */
 @MappedSuperclass
 public abstract class NamedEntity extends TenantAwareBaseEntity {
@@ -40,7 +34,7 @@ public abstract class NamedEntity extends TenantAwareBaseEntity {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param name
      *            of the {@link NamedEntity}
      * @param description
@@ -67,4 +61,23 @@ public abstract class NamedEntity extends TenantAwareBaseEntity {
         this.name = name;
     }
 
+    @Override
+    public int hashCode() { // NOSONAR - as this is generated
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) { // NOSONAR - as this is generated
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof NamedEntity)) {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
@@ -641,7 +641,7 @@ public class TargetTable extends AbstractTable implements Handler {
         }
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
-        final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
 
         final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
         notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
@@ -1020,7 +1020,7 @@ public class TargetTable extends AbstractTable implements Handler {
         final String[] tagArray = tagList.toArray(new String[tagList.size()]);
 
         List<TargetIdName> targetIdList;
-        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, filterByDistId, statusList, searchText,
+        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, statusList, searchText, filterByDistId,
                 noTagSelected, tagList.toArray(tagArray));
         Collections.reverse(targetIdList);
         return targetIdList;

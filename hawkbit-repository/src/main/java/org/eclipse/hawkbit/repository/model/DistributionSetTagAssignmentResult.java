@@ -11,10 +11,10 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 
 /**
- * Result object for {@link DistributionSetTag} assigments.
+ * Result object for {@link DistributionSetTag} assignments.
  *
  */
-public class DistributionSetTagAssigmentResult extends AssignmentResult {
+public class DistributionSetTagAssignmentResult extends AssignmentResult {
 
     private final int unassigned;
     private final List<DistributionSet> assignedDs;
@@ -37,7 +37,7 @@ public class DistributionSetTagAssigmentResult extends AssignmentResult {
      * @param distributionSetTag
      *            the assigned or unassigned tag
      */
-    public DistributionSetTagAssigmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
+    public DistributionSetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
             final List<DistributionSet> assignedDs, final List<DistributionSet> unassignedDs,
             final DistributionSetTag distributionSetTag) {
         super(assigned, alreadyAssigned);
@@ -47,30 +47,18 @@ public class DistributionSetTagAssigmentResult extends AssignmentResult {
         this.distributionSetTag = distributionSetTag;
     }
 
-    /**
-     * @return the unassigned
-     */
     public int getUnassigned() {
         return unassigned;
     }
 
-    /**
-     * @return the distributionSetTag
-     */
     public DistributionSetTag getDistributionSetTag() {
         return distributionSetTag;
     }
 
-    /**
-     * @return the assignedDs
-     */
     public List<DistributionSet> getAssignedDs() {
         return assignedDs;
     }
 
-    /**
-     * @return the unassignedDs
-     */
     public List<DistributionSet> getUnassignedDs() {
         return unassignedDs;
     }

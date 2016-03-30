@@ -102,7 +102,7 @@ public class SoftwareModuleTypeResource implements SoftwareModuleTypeRestApi {
             final List<SoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
         final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement
-                .createSoftwareModuleTypes(SoftwareModuleTypeMapper.smFromRequest(softwareModuleTypes));
+                .createSoftwareModuleType(SoftwareModuleTypeMapper.smFromRequest(softwareModuleTypes));
 
         return new ResponseEntity<>(SoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules),
                 HttpStatus.CREATED);

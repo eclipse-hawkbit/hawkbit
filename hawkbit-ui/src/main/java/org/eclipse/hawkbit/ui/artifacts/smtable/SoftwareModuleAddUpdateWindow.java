@@ -28,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -245,27 +243,21 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
     }
 
     private void addDescriptionTextChangeListener() {
-        descTextArea.addTextChangeListener(new TextChangeListener() {
-            @Override
-            public void textChange(final TextChangeEvent event) {
-                if (event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue)) {
-                    saveSoftware.setEnabled(false);
-                } else {
-                    saveSoftware.setEnabled(true);
-                }
+        descTextArea.addTextChangeListener(event -> {
+            if (event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue)) {
+                saveSoftware.setEnabled(false);
+            } else {
+                saveSoftware.setEnabled(true);
             }
         });
     }
 
     private void addVendorTextChangeListener() {
-        vendorTextField.addTextChangeListener(new TextChangeListener() {
-            @Override
-            public void textChange(final TextChangeEvent event) {
-                if (event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue)) {
-                    saveSoftware.setEnabled(false);
-                } else {
-                    saveSoftware.setEnabled(true);
-                }
+        vendorTextField.addTextChangeListener(event -> {
+            if (event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue)) {
+                saveSoftware.setEnabled(false);
+            } else {
+                saveSoftware.setEnabled(true);
             }
         });
     }
@@ -280,7 +272,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
         if (mandatoryCheck(name, version, type)) {
-            if (HawkbitCommonUtil.isDuplicate(name, version)) {
+            if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
                 uiNotifcation.displayValidationError(
                         i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
             } else {

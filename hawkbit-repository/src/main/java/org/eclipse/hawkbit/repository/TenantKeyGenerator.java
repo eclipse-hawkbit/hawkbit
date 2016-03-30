@@ -18,9 +18,6 @@ import org.springframework.stereotype.Service;
 /**
  * {@link KeyGenerator} for tenant related caches.
  *
- *
- *
- *
  */
 @Service
 public class TenantKeyGenerator implements KeyGenerator {
@@ -28,13 +25,6 @@ public class TenantKeyGenerator implements KeyGenerator {
     @Autowired
     private TenantAware tenantAware;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.cache.interceptor.KeyGenerator#generate(java.lang.
-     * Object, java.lang.reflect.Method, java.lang.Object[])
-     */
     @Override
     public Object generate(final Object target, final Method method, final Object... params) {
         return tenantAware.getCurrentTenant().toUpperCase();

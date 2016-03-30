@@ -60,8 +60,9 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     public void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
         try {
             targetManagement.createTarget(new Target("targetId123"));
-            fail("tenant not exist");
+            fail("should not be possible as the tenant does not exist");
         } catch (final TenantNotExistException e) {
+            // ok
         }
     }
 
@@ -204,6 +205,12 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).as("Installed ds is wrong")
                 .isEqualTo(set.getId());
 
+    }
+
+    @Test
+    @Description("Ensures that repositoy returns null if given controller ID does not exist without exception.")
+    public void findTargetByControllerIDWithDetailsReturnsNullForNonexisting() {
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd")).as("Expected as").isNull();
     }
 
     @Test

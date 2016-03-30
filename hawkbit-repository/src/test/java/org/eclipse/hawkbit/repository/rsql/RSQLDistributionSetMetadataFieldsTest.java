@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.rsql;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -35,13 +38,13 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractIntegrationTe
         final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("DS", softwareManagement,
                 distributionSetManagement);
         distributionSetId = distributionSet.getId();
+
+        final List<DistributionSetMetadata> metadata = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            final DistributionSetMetadata distributionSetMetadata = new DistributionSetMetadata("" + i, distributionSet,
-                    "" + i);
-            distributionSet.getMetadata().add(distributionSetMetadata);
+            metadata.add(new DistributionSetMetadata("" + i, distributionSet, "" + i));
         }
 
-        distributionSetManagement.updateDistributionSet(distributionSet);
+        distributionSetManagement.createDistributionSetMetadata(metadata);
     }
 
     @Test

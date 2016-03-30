@@ -122,6 +122,13 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         this.id = id;
     }
 
+    /**
+     * Defined equals/hashcode strategy for the repository in general is that an
+     * entity is equal if it has the same {@link #getId()} and
+     * {@link #getOptLockRevision()} and class.
+     * 
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() { // NOSONAR - as this is generated code
         final int prime = 31;
@@ -131,6 +138,13 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         return result;
     }
 
+    /**
+     * Defined equals/hashcode strategy for the repository in general is that an
+     * entity is equal if it has the same {@link #getId()} and
+     * {@link #getOptLockRevision()} and class.
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
                                               // code
@@ -140,7 +154,7 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof BaseEntity)) {
             return false;
         }
         final BaseEntity other = (BaseEntity) obj;

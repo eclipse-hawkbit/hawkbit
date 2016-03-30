@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetTagRestApi;
 import org.eclipse.hawkbit.rest.resource.model.PagedList;
@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.rest.resource.model.tag.AssignedDistributionSetReques
 import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentResultRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +85,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TagsRest> createDistributionSetTags(final List<TagRequestBodyPut> tags) {
+    public ResponseEntity<List<TagRest>> createDistributionSetTags(final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
@@ -135,7 +134,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
 
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
-        final DistributionSetTagAssigmentResult assigmentResult = this.distributionSetManagement
+        final DistributionSetTagAssignmentResult assigmentResult = this.distributionSetManagement
                 .toggleTagAssignment(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
 
         final DistributionSetTagAssigmentResultRest tagAssigmentResultRest = new DistributionSetTagAssigmentResultRest();

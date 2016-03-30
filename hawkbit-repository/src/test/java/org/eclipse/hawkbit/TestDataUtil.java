@@ -95,7 +95,7 @@ public class TestDataUtil {
         return distributionSetManagement.createDistributionSet(
                 buildDistributionSet(suffix != null && suffix.length() > 0 ? suffix : "DS", version,
                         findOrCreateDistributionSetType(distributionSetManagement, "ecl_os_app_jvm",
-                                "OC mandatory App/JVM optional", mand, opt),
+                                "OS mandatory App/JVM optional", mand, opt),
                         os, jvm, ah).setRequiredMigrationStep(isRequiredMigrationStep));
     }
 
@@ -143,7 +143,7 @@ public class TestDataUtil {
     }
 
     public static List<DistributionSetTag> generateDistributionSetTags(final int number) {
-        final List<DistributionSetTag> result = new ArrayList<DistributionSetTag>();
+        final List<DistributionSetTag> result = new ArrayList<>();
 
         for (int i = 0; i < number; i++) {
             result.add(new DistributionSetTag("tag" + i, "tagdesc" + i, "" + i));

@@ -27,9 +27,6 @@ import javax.persistence.UniqueConstraint;
  * A distribution set type defines which software module types can or have to be
  * {@link DistributionSet}.
  *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_distribution_set_type", indexes = {
@@ -38,10 +35,6 @@ import javax.persistence.UniqueConstraint;
                 @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
                 @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
 public class DistributionSetType extends NamedEntity {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @OneToMany(targetEntity = DistributionSetTypeElement.class, cascade = {
@@ -59,7 +52,7 @@ public class DistributionSetType extends NamedEntity {
     private boolean deleted = false;
 
     public DistributionSetType() {
-        // default public constructor
+        // default public constructor for JPA
     }
 
     /**
@@ -91,7 +84,7 @@ public class DistributionSetType extends NamedEntity {
     public DistributionSetType(final String key, final String name, final String description, final String color) {
         super(name, description);
         this.key = key;
-        this.colour = color;
+        colour = color;
     }
 
     /**
@@ -256,17 +249,10 @@ public class DistributionSetType extends NamedEntity {
         return this;
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
@@ -282,19 +268,10 @@ public class DistributionSetType extends NamedEntity {
                 .containsAll(getMandatoryModuleTypes());
     }
 
-    /**
-     *
-     * @return the DistributionSet type color
-     */
     public String getColour() {
         return colour;
     }
 
-    /**
-     *
-     * @param colour
-     *            the col
-     */
     public void setColour(final String colour) {
         this.colour = colour;
     }
@@ -303,14 +280,29 @@ public class DistributionSetType extends NamedEntity {
         return elements;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "DistributionSetType [key=" + key + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + this.getClass().getName().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof DistributionSetType)) {
+            return false;
+        }
+
+        return true;
     }
 
 }

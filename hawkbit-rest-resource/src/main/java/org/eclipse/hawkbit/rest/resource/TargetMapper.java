@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.rest.resource.api.TargetRestApi;
 import org.eclipse.hawkbit.rest.resource.model.PollStatusRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusRest;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionsRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 
@@ -214,8 +213,8 @@ public final class TargetMapper {
         return result;
     }
 
-    static ActionsRest toResponse(final String targetId, final List<Action> actions) {
-        final ActionsRest mappedList = new ActionsRest();
+    static List<ActionRest> toResponse(final String targetId, final List<Action> actions) {
+        final List<ActionRest> mappedList = new ArrayList<>();
 
         for (final Action action : actions) {
             final ActionRest response = toResponse(targetId, action, action.isActive());
