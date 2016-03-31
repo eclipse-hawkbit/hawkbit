@@ -109,6 +109,14 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         both.add(TargetUpdateStatus.UNKNOWN);
         both.add(TargetUpdateStatus.PENDING);
 
+        // get final updated version of targets
+        targAs = targetManagement.findTargetByControllerID(
+                targAs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+        targBs = targetManagement.findTargetByControllerID(
+                targBs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+        targCs = targetManagement.findTargetByControllerID(
+                targCs.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+
         // try to find several targets with different filter settings
         verifyThatRepositoryContains400Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
@@ -708,10 +716,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final DistributionSet assignedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        final List<Target> assignedtargets = targetManagement
-                .createTargets(TestDataUtil.generateTargets(10, "assigned"));
+        List<Target> assignedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
 
         deploymentManagement.assignDistributionSet(assignedSet, assignedtargets);
+
+        // get final updated version of targets
+        assignedtargets = targetManagement.findTargetByControllerID(
+                assignedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
         assertThat(targetManagement.findTargetByAssignedDistributionSet(assignedSet.getId(), pageReq))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
@@ -727,8 +738,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
                 distributionSetManagement);
         targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        final List<Target> assignedtargets = targetManagement
-                .createTargets(TestDataUtil.generateTargets(10, "assigned"));
+        List<Target> assignedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
 
         // set on installed and assign another one
         deploymentManagement.assignDistributionSet(installedSet, assignedtargets).getActions().forEach(actionId -> {
@@ -739,11 +749,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         });
         deploymentManagement.assignDistributionSet(assignedSet, assignedtargets);
 
+        assignedtargets = targetManagement.findTargetByControllerID(
+                assignedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+
         assertThat(targetManagement.findTargetByAssignedDistributionSet(assignedSet.getId(),
                 TargetSpecifications.hasInstalledDistributionSet(installedSet.getId()), pageReq))
                         .as("Contains the assigned targets").containsAll(assignedtargets)
                         .as("and that means the following expected amount").hasSize(10);
-
     }
 
     @Test
@@ -754,8 +766,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
                 distributionSetManagement);
         targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        final List<Target> installedtargets = targetManagement
-                .createTargets(TestDataUtil.generateTargets(10, "assigned"));
+        List<Target> installedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
 
         // set on installed and assign another one
         deploymentManagement.assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {
@@ -765,6 +776,10 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                     new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
         });
         deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
+
+        // get final updated version of targets
+        installedtargets = targetManagement.findTargetByControllerID(
+                installedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
         assertThat(targetManagement.findTargetByInstalledDistributionSet(installedSet.getId(), pageReq))
                 .as("Contains the assigned targets").containsAll(installedtargets)
@@ -780,8 +795,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
                 distributionSetManagement);
         targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        final List<Target> installedtargets = targetManagement
-                .createTargets(TestDataUtil.generateTargets(10, "assigned"));
+        List<Target> installedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
 
         // set on installed and assign another one
         deploymentManagement.assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {
@@ -791,6 +805,10 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                     new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
         });
         deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
+
+        // get final updated version of targets
+        installedtargets = targetManagement.findTargetByControllerID(
+                installedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
         assertThat(targetManagement.findTargetByInstalledDistributionSet(installedSet.getId(),
                 TargetSpecifications.hasAssignedDistributionSet(assignedSet.getId()), pageReq))
