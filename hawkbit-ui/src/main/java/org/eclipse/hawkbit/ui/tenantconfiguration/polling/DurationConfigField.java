@@ -14,8 +14,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
@@ -50,8 +48,8 @@ public class DurationConfigField extends GridLayout implements ConfigurationItem
         this.addComponent(durationField, 1, 0);
         this.setComponentAlignment(durationField, Alignment.MIDDLE_LEFT);
 
-        checkBox.addValueChangeListener(event->checkBoxChange());
-        durationField.addValueChangeListener(event->notifyConfigurationChanged());
+        checkBox.addValueChangeListener(event -> checkBoxChange());
+        durationField.addValueChangeListener(event -> notifyConfigurationChanged());
     }
 
     private void checkBoxChange() {
@@ -72,16 +70,16 @@ public class DurationConfigField extends GridLayout implements ConfigurationItem
      * @param globalDuration
      *            duration value which is stored in the global configuration
      */
-    private void init(final Duration globalDuration, final Duration tenantDuration) {
+    protected void init(final Duration globalDuration, final Duration tenantDuration) {
         this.globalDuration = globalDuration;
         this.setValue(tenantDuration);
     }
 
-    private void setCheckBoxTooltip(final String label) {
+    protected void setCheckBoxTooltip(final String label) {
         checkBox.setDescription(label);
     }
 
-    private void setAllowedRange(final Duration minimumDuration, final Duration maximumDuration) {
+    protected void setAllowedRange(final Duration minimumDuration, final Duration maximumDuration) {
         durationField.setMinimumDuration(minimumDuration);
         durationField.setMaximumDuration(maximumDuration);
     }

@@ -215,13 +215,18 @@ public class UploadLayout extends VerticalLayout {
                 hasDirectory = Boolean.TRUE;
             }
         }
-    }
 
-    private static boolean isDirectory(final Html5File file) {
-        if (Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0) {
-            return true;
+        private StreamVariable createStreamVariable(final Html5File file) {
+            return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this, uploadInfoWindow,
+                    spInfo.getMaxArtifactFileSize(), null, file.getType());
         }
-        return false;
+
+        private boolean isDirectory(final Html5File file) {
+            if (Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0) {
+                return true;
+            }
+            return false;
+        }
     }
 
     private void displayCompositeMessage() {
@@ -280,11 +285,6 @@ public class UploadLayout extends VerticalLayout {
         discardBtn.setIcon(FontAwesome.TRASH_O);
         discardBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         discardBtn.addClickListener(event -> discardUploadData(event));
-    }
-
-    private StreamVariable createStreamVariable(final Html5File file) {
-        return new UploadHandler(file.getFileName(), file.getFileSize(), this, uploadInfoWindow,
-                spInfo.getMaxArtifactFileSize(), null, file.getType());
     }
 
     boolean checkForDuplicate(final String filename) {
@@ -349,17 +349,17 @@ public class UploadLayout extends VerticalLayout {
         }
     }
 
-    Boolean validate(DragAndDropEvent event) {
+    Boolean validate(final DragAndDropEvent event) {
         // check if drop is valid.If valid ,check if software module is
         // selected.
-        if(!isFilesDropped(event)){
+        if (!isFilesDropped(event)) {
             uiNotification.displayValidationError(i18n.get("message.action.not.allowed"));
             return false;
         }
         return checkIfSoftwareModuleIsSelected();
     }
 
-    private boolean isFilesDropped(DragAndDropEvent event) {
+    private boolean isFilesDropped(final DragAndDropEvent event) {
         if (event.getTransferable() instanceof WrapperTransferable) {
             final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
             // other components can also be wrapped in WrapperTransferable , so
@@ -448,7 +448,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private String getDuplicateFileValidationMessage() {
-        StringBuilder message = new StringBuilder();
+        final StringBuilder message = new StringBuilder();
         if (!duplicateFileNamesList.isEmpty()) {
             final String fileNames = StringUtils.collectionToCommaDelimitedString(duplicateFileNamesList);
             if (duplicateFileNamesList.size() == 1) {
@@ -655,8 +655,7 @@ public class UploadLayout extends VerticalLayout {
         return uiNotification;
     }
 
-    
-    public void setHasDirectory(Boolean hasDirectory) {
+    public void setHasDirectory(final Boolean hasDirectory) {
         this.hasDirectory = hasDirectory;
     }
 }

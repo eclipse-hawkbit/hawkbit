@@ -245,7 +245,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnProperties() {
-        List<Object> columnList = new ArrayList<>();
+        final List<Object> columnList = new ArrayList<>();
         columnList.add(SPUILabelDefinitions.VAR_NAME);
         columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
         columnList.add(SPUILabelDefinitions.VAR_STATUS);
@@ -265,13 +265,13 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void setHiddenColumns() {
-        List<Object> columnsToBeHidden = new ArrayList<>();
+        final List<Object> columnsToBeHidden = new ArrayList<>();
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
-        for (Object propertyId : columnsToBeHidden) {
+        for (final Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
 
@@ -318,7 +318,7 @@ public class RolloutListGrid extends AbstractGrid {
 
             @Override
             public String getStyle(final CellReference cellReference) {
-                String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS, SPUILabelDefinitions.ACTION };
+                final String[] coulmnNames = { SPUILabelDefinitions.VAR_STATUS, SPUILabelDefinitions.ACTION };
                 if (Arrays.asList(coulmnNames).contains(cellReference.getPropertyId())) {
                     return "centeralign";
                 }
@@ -327,18 +327,18 @@ public class RolloutListGrid extends AbstractGrid {
         });
     }
 
-    private void onClickOfRolloutName(RendererClickEvent event) {
+    private void onClickOfRolloutName(final RendererClickEvent event) {
         rolloutUIState.setRolloutId((long) event.getItemId());
         final String rolloutName = (String) getContainerDataSource().getItem(event.getItemId())
                 .getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
         rolloutUIState.setRolloutName(rolloutName);
-        String ds = (String) getContainerDataSource().getItem(event.getItemId())
+        final String ds = (String) getContainerDataSource().getItem(event.getItemId())
                 .getItemProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).getValue();
         rolloutUIState.setRolloutDistributionSet(ds);
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUPS);
     }
 
-    private void onClickOfActionBtn(RendererClickEvent event) {
+    private void onClickOfActionBtn(final RendererClickEvent event) {
         final ContextMenu contextMenu = createContextMenu((Long) event.getItemId());
         contextMenu.setAsContextMenuOf((AbstractClientConnector) event.getComponent());
         contextMenu.open(event.getClientX(), event.getClientY());
@@ -377,7 +377,6 @@ public class RolloutListGrid extends AbstractGrid {
         return context;
     }
 
-
     private void getUpdateMenuItem(final ContextMenu context, final Long rolloutId) {
         // Add 'Update' option only if user has update permission
         if (!permissionChecker.hasRolloutUpdatePermission()) {
@@ -385,17 +384,6 @@ public class RolloutListGrid extends AbstractGrid {
         }
         final ContextMenuItem cancelItem = context.addItem(UPDATE_OPTION);
         cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
-    }
-
-    private String convertRolloutStatusToString(final RolloutStatus value) {
-        StatusFontIcon statusFontIcon = statusIconMap.get(value);
-        if (statusFontIcon == null) {
-            return null;
-        }
-        String codePoint = statusFontIcon.getFontIcon() != null
-                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
-        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
     }
 
     private void menuItemClicked(final ContextMenuItemClickEvent event) {
@@ -441,12 +429,12 @@ public class RolloutListGrid extends AbstractGrid {
         private static final long serialVersionUID = 2544026030795375748L;
         private final FontAwesome fontIcon;
 
-        public FontIconGenerator(FontAwesome icon) {
+        public FontIconGenerator(final FontAwesome icon) {
             this.fontIcon = icon;
         }
 
         @Override
-        public String getValue(Item item, Object itemId, Object propertyId) {
+        public String getValue(final Item item, final Object itemId, final Object propertyId) {
             return fontIcon.getHtml();
         }
 
@@ -456,7 +444,7 @@ public class RolloutListGrid extends AbstractGrid {
         }
     }
 
-    private String getDescription(CellReference cell) {
+    private String getDescription(final CellReference cell) {
         if (SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             return cell.getProperty().getValue().toString().toLowerCase();
         } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
@@ -558,6 +546,17 @@ public class RolloutListGrid extends AbstractGrid {
         public Class<String> getPresentationType() {
             return String.class;
         }
+
+        private String convertRolloutStatusToString(final RolloutStatus value) {
+            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            if (statusFontIcon == null) {
+                return null;
+            }
+            final String codePoint = statusFontIcon.getFontIcon() != null
+                    ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+        }
     }
 
     /**
@@ -570,14 +569,16 @@ public class RolloutListGrid extends AbstractGrid {
         private static final long serialVersionUID = -5794528427855153924L;
 
         @Override
-        public TotalTargetCountStatus convertToModel(String value, Class<? extends TotalTargetCountStatus> targetType,
-                Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public TotalTargetCountStatus convertToModel(final String value,
+                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
-        public String convertToPresentation(TotalTargetCountStatus value, Class<? extends String> targetType,
-                Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public String convertToPresentation(final TotalTargetCountStatus value,
+                final Class<? extends String> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 

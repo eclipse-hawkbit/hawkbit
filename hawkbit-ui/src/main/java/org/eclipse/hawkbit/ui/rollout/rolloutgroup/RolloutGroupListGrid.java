@@ -273,17 +273,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
     }
 
-    private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
-        StatusFontIcon statusFontIcon = statusIconMap.get(value);
-        if (statusFontIcon == null) {
-            return null;
-        }
-        String codePoint = statusFontIcon.getFontIcon() != null
-                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
-        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
-
-    }
+   
 
     private void createRolloutGroupStatusToFontMap() {
         statusIconMap.put(RolloutGroupStatus.FINISHED,
@@ -390,6 +380,18 @@ public class RolloutGroupListGrid extends AbstractGrid {
         @Override
         public Class<String> getPresentationType() {
             return String.class;
+        }
+        
+        private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
+            StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            if (statusFontIcon == null) {
+                return null;
+            }
+            String codePoint = statusFontIcon.getFontIcon() != null
+                    ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
+                    SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+
         }
 
     }
