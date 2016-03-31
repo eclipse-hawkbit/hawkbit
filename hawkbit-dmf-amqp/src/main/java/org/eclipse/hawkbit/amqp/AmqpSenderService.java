@@ -24,10 +24,10 @@ public interface AmqpSenderService {
      * 
      * @param message
      *            the amqp message
-     * @param uri
+     * @param replyTo
      *            the reply to uri
      */
-    void sendMessage(Message message, URI uri);
+    void sendMessage(Message message, URI replyTo);
 
     /**
      * Extract the exchange from the uri. Default implementation removes the
