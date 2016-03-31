@@ -58,12 +58,12 @@ public enum TenantConfigurationKey {
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
-    POLLING_TIME_INTERVAL("pollingOverdueTime", "hawkbit.controller.pollingTime", String.class, null, TenantConfigurationPollingDurationValidator.class),
+    POLLING_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingTime", String.class, null, TenantConfigurationPollingDurationValidator.class),
 
     /**
      * string value which holds the polling time interval in the format HH:mm:ss
      */
-    POLLING_OVERDUE_TIME_INTERVAL("pollingTime", "hawkbit.controller.pollingOverdueTime", String.class, null, TenantConfigurationPollingDurationValidator.class);
+    POLLING_OVERDUE_TIME_INTERVAL("pollingOverdueTime", "hawkbit.controller.pollingOverdueTime", String.class, null, TenantConfigurationPollingDurationValidator.class);
 
     private final String keyName;
     private final String defaultKeyName;
