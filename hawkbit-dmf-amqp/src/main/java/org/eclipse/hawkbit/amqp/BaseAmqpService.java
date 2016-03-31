@@ -109,7 +109,7 @@ public class BaseAmqpService {
     }
 
     protected final void logAndThrowMessageError(final Message message, final String error) {
-        LOGGER.error("Error \"{}\" reported by message {}", error, message.getMessageProperties().getMessageId());
+        LOGGER.warn("Error \"{}\" reported by message: {}", error, message);
         throw new IllegalArgumentException(error);
     }
 
