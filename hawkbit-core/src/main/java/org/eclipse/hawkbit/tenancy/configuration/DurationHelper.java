@@ -37,7 +37,7 @@ public final class DurationHelper {
         }
 
         public boolean isWithinRange(final Duration duration) {
-            return duration.compareTo(min) > 0 && duration.compareTo(max) < 0;
+            return duration.compareTo(min) >= 0 && duration.compareTo(max) <= 0;
         }
     }
 
