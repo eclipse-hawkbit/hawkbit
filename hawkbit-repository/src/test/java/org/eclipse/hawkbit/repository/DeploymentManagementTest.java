@@ -611,8 +611,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final List<Target> deployResWithDsBTargets = targetManagement.findTargetByControllerID(deployResWithDsB
                 .getDeployedTargets().stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
-        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsB.getDeployedTargets());
-        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsB.getDeployedTargets());
+        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsBTargets);
+        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsBTargets);
 
         for (final Target t_ : deployed2DS) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId());
