@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.controller.model.ActionFeedback;
@@ -94,6 +95,9 @@ public class RootController {
     @Autowired
     private HawkbitSecurityProperties securityProperties;
 
+    @Autowired
+    private ArtifactUrlHandler artifactUrlHandler;
+
     /**
      * Returns all artifacts of a given software module and target.
      *
@@ -118,7 +122,8 @@ public class RootController {
 
         }
 
-        return new ResponseEntity<>(DataConversionHelper.createArtifacts(targetid, softwareModule, tenantAware),
+        return new ResponseEntity<>(
+                DataConversionHelper.createArtifacts(targetid, softwareModule, tenantAware, artifactUrlHandler),
                 HttpStatus.OK);
     }
 
@@ -307,7 +312,8 @@ public class RootController {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, tenantAware);
+            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, tenantAware,
+                    artifactUrlHandler);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
