@@ -56,7 +56,8 @@ public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
     public void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareManagement
                 .createSoftwareModuleType(new SoftwareModuleType("test", "test", "test", 1));
-        assertThat(type).isNotEqualTo(new SoftwareModuleType("test", "test", "test", 1));
+        assertThat(type).as("persited entity is not equal to regular object")
+                .isNotEqualTo(new SoftwareModuleType("test", "test", "test", 1));
 
         type.setDescription("another");
         final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type);
@@ -84,7 +85,8 @@ public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
     public void updatedEntitiesHaveDifferentHashcodes() {
         final SoftwareModuleType type = softwareManagement
                 .createSoftwareModuleType(new SoftwareModuleType("test", "test", "test", 1));
-        assertThat(type.hashCode()).isNotEqualTo(new SoftwareModuleType("test", "test", "test", 1).hashCode());
+        assertThat(type.hashCode()).as("persited entity does not have same hashcode as regular object")
+                .isNotEqualTo(new SoftwareModuleType("test", "test", "test", 1).hashCode());
 
         final int beforeChange = type.hashCode();
         type.setDescription("another");
