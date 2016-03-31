@@ -36,6 +36,13 @@ public final class DurationHelper {
             this.max = max;
         }
 
+        /**
+         * Checks if the requested duration is in the defined min/max range.
+         * 
+         * @param duration
+         *            to checked
+         * @return <code>true</code> if in time range
+         */
         public boolean isWithinRange(final Duration duration) {
             return duration.compareTo(min) >= 0 && duration.compareTo(max) <= 0;
         }
