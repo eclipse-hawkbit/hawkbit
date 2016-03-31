@@ -52,7 +52,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
 @Entity
-public class Action extends TenantAwareBaseEntity implements Comparable<Action> {
+public class Action extends TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -198,14 +198,6 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
         this.rollout = rollout;
     }
 
-    @Override
-    public int compareTo(final Action o) {
-        if (super.getId() == null || o == null || o.getId() == null) {
-            return 0;
-        }
-        return super.getId().compareTo(o.getId());
-    }
-
     /**
      * checks if the {@link #forcedTime} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
@@ -252,26 +244,6 @@ public class Action extends TenantAwareBaseEntity implements Comparable<Action> 
     @Override
     public String toString() {
         return "Action [distributionSet=" + distributionSet + ", getId()=" + getId() + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof Action)) {
-            return false;
-        }
-
-        return true;
     }
 
     /**

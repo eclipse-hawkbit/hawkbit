@@ -99,9 +99,6 @@ public abstract class TenantAwareBaseEntity extends BaseEntity {
         if (!super.equals(obj)) {
             return false;
         }
-        if (!(obj instanceof TenantAwareBaseEntity)) {
-            return false;
-        }
         final TenantAwareBaseEntity other = (TenantAwareBaseEntity) obj;
         if (tenant == null) {
             if (other.tenant != null) {

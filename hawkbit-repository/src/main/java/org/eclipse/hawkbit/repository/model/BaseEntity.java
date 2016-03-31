@@ -108,6 +108,11 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         return optLockRevision;
     }
 
+    // for test purposes only
+    void setOptLockRevision(final long optLockRevision) {
+        this.optLockRevision = optLockRevision;
+    }
+
     @Override
     public Long getId() {
         return id;
@@ -135,6 +140,7 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         int result = 1;
         result = prime * result + (id == null ? 0 : id.hashCode());
         result = prime * result + (int) (optLockRevision ^ optLockRevision >>> 32);
+        result = prime * result + this.getClass().getName().hashCode();
         return result;
     }
 
@@ -154,7 +160,7 @@ public abstract class BaseEntity implements Serializable, Identifiable<Long> {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof BaseEntity)) {
+        if (!(this.getClass().isInstance(obj))) {
             return false;
         }
         final BaseEntity other = (BaseEntity) obj;

@@ -131,31 +131,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
         securityToken = null;
     }
 
-    /**
-     * Note: For Target we extended the general strategy by adding controllerId
-     * as well.
-     * 
-     * @see org.eclipse.hawkbit.repository.model.BaseEntity#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(final Object obj) {// NOSONAR - as this is generated
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Target)) {
-            return false;
-        }
-        final Target other = (Target) obj;
-        if (controllerId == null) {
-            if (other.controllerId != null) {
-                return false;
-            }
-        } else if (!controllerId.equals(other.controllerId)) {
-            return false;
-        }
-        return true;
-    }
-
     public DistributionSet getAssignedDistributionSet() {
         return assignedDistributionSet;
     }
@@ -166,14 +141,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
 
     public Set<TargetTag> getTags() {
         return tags;
-    }
-
-    @Override
-    public int hashCode() { // NOSONAR - as this is generated
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (controllerId == null ? 0 : controllerId.hashCode());
-        return result;
     }
 
     public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {

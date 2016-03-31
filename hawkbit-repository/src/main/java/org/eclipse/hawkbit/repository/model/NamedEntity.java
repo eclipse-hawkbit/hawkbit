@@ -60,24 +60,4 @@ public abstract class NamedEntity extends TenantAwareBaseEntity {
     public void setName(final String name) {
         this.name = name;
     }
-
-    @Override
-    public int hashCode() { // NOSONAR - as this is generated
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof NamedEntity)) {
-            return false;
-        }
-
-        return true;
-    }
 }
