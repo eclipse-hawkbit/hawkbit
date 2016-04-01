@@ -809,7 +809,7 @@ public final class HawkbitCommonUtil {
     public static boolean isDuplicate(final String name, final String version, final String type) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
         final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
-                swMgmtService.findSoftwareModuleTypeByKey(type));
+                swMgmtService.findSoftwareModuleTypeByName(type));
         boolean duplicate = false;
         if (swModule != null) {
             duplicate = true;
