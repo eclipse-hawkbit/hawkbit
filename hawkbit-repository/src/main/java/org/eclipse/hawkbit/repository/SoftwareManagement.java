@@ -259,7 +259,7 @@ public class SoftwareManagement {
     }
 
     /**
-     * retrieves {@link SoftwareModule}s by their name AND version.
+     * retrieves {@link SoftwareModule} by their name AND version AND type..
      *
      * @param name
      *            of the {@link SoftwareModule}
