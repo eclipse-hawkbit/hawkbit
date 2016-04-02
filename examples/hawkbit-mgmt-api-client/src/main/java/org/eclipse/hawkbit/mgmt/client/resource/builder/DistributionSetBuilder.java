@@ -16,11 +16,7 @@ import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRe
 import com.google.common.collect.Lists;
 
 /**
- * 
  * Builder pattern for building {@link DistributionSetRequestBodyPost}.
- * 
- * @author Jonathan Knoblauch
- *
  */
 public class DistributionSetBuilder {
 

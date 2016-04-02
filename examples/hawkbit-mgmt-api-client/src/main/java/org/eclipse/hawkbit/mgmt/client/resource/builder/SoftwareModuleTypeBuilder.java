@@ -19,8 +19,6 @@ import com.google.common.collect.Lists;
 /**
  * 
  * Builder pattern for building {@link SoftwareModuleRequestBodyPost}.
- * 
- * @author Jonathan Knoblauch
  *
  */
 public class SoftwareModuleTypeBuilder {

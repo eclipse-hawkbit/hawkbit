@@ -15,8 +15,6 @@ import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
 /**
  * 
  * Builder pattern for building {@link RolloutRestRequestBody}.
- * 
- * @author Jonathan Knoblauch
  *
  */
 public class RolloutBuilder {
