@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SpReceiverService extends ReceiverService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
     public static final String SOFTWARE_MODULE_FIRMWARE = "firmware";
