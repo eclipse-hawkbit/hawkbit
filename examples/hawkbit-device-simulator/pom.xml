@@ -44,6 +44,9 @@
       </plugins>
       <resources>
          <resource>
+            <directory>src/main/resources</directory>
+         </resource>
+         <resource>
             <directory>cf</directory>
             <filtering>true</filtering>
             <targetPath>${project.build.directory}</targetPath>
