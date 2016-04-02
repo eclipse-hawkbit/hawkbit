@@ -59,7 +59,8 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the receiver queue from sp. Receive messages from sp.
+     * Creates the receiver queue from update server for receiving message from
+     * update server.
      *
      * @return the queue
      */
@@ -70,7 +71,7 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the recevier exchange. Sp send messages to this exchange.
+     * Creates the receiver exchange for sending messages to update server.
      *
      * @return the exchange
      */

@@ -39,6 +39,17 @@
             </executions>
          </plugin>
       </plugins>
+      <resources>
+         <resource>
+            <directory>cf</directory>
+            <filtering>true</filtering>
+            <targetPath>${project.build.directory}</targetPath>
+            <includes>
+               <include>manifest.yml</include>
+               <include>manifest-simple.yml</include>
+            </includes>
+         </resource>
+      </resources>
    </build>
 
    <dependencies>
