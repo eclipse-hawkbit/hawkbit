@@ -233,26 +233,6 @@ public class SoftwareModule extends NamedVersionedEntity {
                 + ", revision=" + getOptLockRevision() + ", Id=" + getId() + ", type=" + getType().getName() + "]";
     }
 
-    @Override
-    public int hashCode() { // NOSONAR - as this is generated
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof SoftwareModule)) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * @return the assignedTo
      */

@@ -1,0 +1,1 @@
+Theme customization example for Eclipse hawkBit. See wiki for the theme customization guide.
