@@ -14,7 +14,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  * Client binding for the Target resource of the management API.
  */
-@FeignClient(url = "${hawkbit.endpoint.url:localhost:8080}/rest/v1/targets")
+@FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/targets")
 public interface TargetResourceClient extends TargetRestApi {
 
 }

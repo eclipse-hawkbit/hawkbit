@@ -41,7 +41,7 @@ public class CreateStartedRolloutExample {
     private static final String SM_MODULE_TYPE = "firmware";
 
     /* known distribution set type name and key */
-    private static final String DS_MODULE_TYPE = "firmware";
+    private static final String DS_MODULE_TYPE = SM_MODULE_TYPE;
 
     @Autowired
     private DistributionSetResourceClient distributionSetResource;

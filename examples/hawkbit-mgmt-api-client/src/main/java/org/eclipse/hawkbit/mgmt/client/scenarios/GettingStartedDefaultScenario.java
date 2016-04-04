@@ -41,13 +41,13 @@ public class GettingStartedDefaultScenario {
     private static final String SM_MODULE_TYPE = "gettingstarted";
 
     /* known distribution set type name and key */
-    private static final String DS_MODULE_TYPE = "gettingstarted";
+    private static final String DS_MODULE_TYPE = SM_MODULE_TYPE;
 
     /* known distribution name of this getting started example */
     private static final String SM_EXAMPLE_NAME = "gettingstarted-example";
 
     /* known distribution name of this getting started example */
-    private static final String DS_EXAMPLE_NAME = "gettingstarted-example";
+    private static final String DS_EXAMPLE_NAME = SM_EXAMPLE_NAME;
 
     @Autowired
     private DistributionSetResourceClient distributionSetResource;

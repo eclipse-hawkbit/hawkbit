@@ -14,7 +14,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  * Client binding for the SoftwareModule resource of the management API.
  */
-@FeignClient(url = "${hawkbit.endpoint.url:localhost:8080}/rest/v1/softwaremodules")
+@FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/softwaremodules")
 public interface SoftwareModuleResourceClient extends SoftwareModuleRestAPI {
 
 }
