@@ -90,10 +90,10 @@ public class RootController {
     private CacheWriteNotify cacheWriteNotify;
 
     @Autowired
-    private TenantAware tenantAware;
+    private HawkbitSecurityProperties securityProperties;
 
     @Autowired
-    private HawkbitSecurityProperties securityProperties;
+    private TenantAware tenantAware;
 
     @Autowired
     private ArtifactUrlHandler artifactUrlHandler;
@@ -122,8 +122,7 @@ public class RootController {
 
         }
 
-        return new ResponseEntity<>(
-                DataConversionHelper.createArtifacts(targetid, softwareModule, tenantAware, artifactUrlHandler),
+        return new ResponseEntity<>(DataConversionHelper.createArtifacts(targetid, softwareModule, artifactUrlHandler),
                 HttpStatus.OK);
     }
 
@@ -312,8 +311,7 @@ public class RootController {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, tenantAware,
-                    artifactUrlHandler);
+            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, artifactUrlHandler);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

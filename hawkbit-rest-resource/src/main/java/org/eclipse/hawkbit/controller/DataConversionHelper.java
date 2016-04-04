@@ -49,11 +49,11 @@ public final class DataConversionHelper {
 
     }
 
-    static List<Chunk> createChunks(final String targetid, final Action uAction, final TenantAware tenantAware,
+    static List<Chunk> createChunks(final String targetid, final Action uAction,
             final ArtifactUrlHandler artifactUrlHandler) {
         return uAction.getDistributionSet().getModules().stream()
                 .map(module -> new Chunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
-                        module.getName(), createArtifacts(targetid, module, tenantAware, artifactUrlHandler)))
+                        module.getName(), createArtifacts(targetid, module, artifactUrlHandler)))
                 .collect(Collectors.toList());
 
     }
@@ -76,12 +76,10 @@ public final class DataConversionHelper {
      *            of the target
      * @param module
      *            the software module
-     * @param tenantAware
-     *            of the tenant
      * @return a list of artifacts or a empty list. Cannot be <null>.
      */
     public static List<Artifact> createArtifacts(final String targetid,
-            final org.eclipse.hawkbit.repository.model.SoftwareModule module, final TenantAware tenantAware,
+            final org.eclipse.hawkbit.repository.model.SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler) {
         final List<Artifact> files = new ArrayList<>();
         module.getLocalArtifacts().forEach(artifact -> {
@@ -94,9 +92,9 @@ public final class DataConversionHelper {
             final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
                     artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
             file.add(new Link(linkHttps).withRel("download"));
-            file.add(new Link(linkHttps + ".MD5SUM").withRel("md5sum"));
+            file.add(new Link(linkHttps + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
             file.add(new Link(linkHttp).withRel("download-http"));
-            file.add(new Link(linkHttp + ".MD5SUM").withRel("md5sum-http"));
+            file.add(new Link(linkHttp + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
 
             files.add(file);
         });
