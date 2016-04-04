@@ -70,16 +70,16 @@ public class DurationConfigField extends GridLayout implements ConfigurationItem
      * @param globalDuration
      *            duration value which is stored in the global configuration
      */
-    protected void init(final Duration globalDuration, final Duration tenantDuration) {
+    private void init(final Duration globalDuration, final Duration tenantDuration) {
         this.globalDuration = globalDuration;
         this.setValue(tenantDuration);
     }
 
-    protected void setCheckBoxTooltip(final String label) {
+    private void setCheckBoxTooltip(final String label) {
         checkBox.setDescription(label);
     }
 
-    protected void setAllowedRange(final Duration minimumDuration, final Duration maximumDuration) {
+    private void setAllowedRange(final Duration minimumDuration, final Duration maximumDuration) {
         durationField.setMinimumDuration(minimumDuration);
         durationField.setMaximumDuration(maximumDuration);
     }
