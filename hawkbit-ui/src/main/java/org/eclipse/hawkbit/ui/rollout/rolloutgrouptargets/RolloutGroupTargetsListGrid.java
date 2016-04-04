@@ -238,11 +238,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
         private String processActionStatus(final Status status) {
             final StatusFontIcon statusFontIcon = statusIconMap.get(status);
-            if (statusFontIcon == null) {
-                return null;
-            }
-            final String codePoint = statusFontIcon.getFontIcon() != null
-                    ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
+            final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
         }
 

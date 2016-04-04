@@ -325,14 +325,14 @@ public class BulkUploadHandler extends CustomComponent
                             tagData.getName());
                 }
             }
-            if (!deletedTags.isEmpty()) {
-                if (deletedTags.size() == 1) {
-                    return i18n.get("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
-                } else {
-                    return i18n.get("message.bulk.upload.tag.assignments.failed");
-                }
+            if (deletedTags.isEmpty()) {
+                return null;
             }
-            return null;
+            if (deletedTags.size() == 1) {
+                return i18n.get("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
+            } else {
+                return i18n.get("message.bulk.upload.tag.assignments.failed");
+            }
         }
 
         private boolean ifTagsSelected() {

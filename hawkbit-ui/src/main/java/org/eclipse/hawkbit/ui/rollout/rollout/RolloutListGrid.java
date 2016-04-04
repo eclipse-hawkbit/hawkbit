@@ -549,11 +549,7 @@ public class RolloutListGrid extends AbstractGrid {
 
         private String convertRolloutStatusToString(final RolloutStatus value) {
             final StatusFontIcon statusFontIcon = statusIconMap.get(value);
-            if (statusFontIcon == null) {
-                return null;
-            }
-            final String codePoint = statusFontIcon.getFontIcon() != null
-                    ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
+            final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
                     SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
         }
