@@ -254,5 +254,84 @@
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
       </dependency>
-   </dependencies>
+             <dependency>
+                     <groupId>com.vaadin</groupId>
+                     <artifactId>vaadin-client-compiler</artifactId>
+                     <scope>provided</scope>
+                     <version>7.6.3</version>
+                     <exclusions>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-server</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-annotations</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-continuation</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-http</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-io</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-jndi</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-plus</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-security</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-servlet</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-servlets</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-util</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-webapp</artifactId>
+                           </exclusion>
+                           <exclusion>
+                                  <groupId>org.eclipse.jetty</groupId>
+                                  <artifactId>jetty-xml</artifactId>
+                           </exclusion>
+                     </exclusions>
+              </dependency>
+              
+              
+			<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jndi</artifactId>
+			<version>8.1.12.v20130726</version>
+			</dependency>
+       </dependencies>
+
+       <dependencyManagement>
+              <dependencies>
+                     <dependency>
+                           <groupId>com.bosch.test</groupId>
+                           <artifactId>jetty-maven-bom</artifactId>
+                           <version>0.0.1-SNAPSHOT</version>
+                           <type>pom</type>
+                           <scope>import</scope>
+                     </dependency>
+              </dependencies>
+       </dependencyManagement>
 </project>

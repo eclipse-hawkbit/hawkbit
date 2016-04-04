@@ -13,6 +13,7 @@
 <module>
 	<!-- This file is automatically updated based on new dependencies by the 
 		goal "vaadin:update-widgetset". -->
+        <set-configuration-property name="devModeRedirectEnabled" value="true" />
 
 	<!-- Inherit DefaultWidgetSet -->
 	<inherits name="com.vaadin.DefaultWidgetSet" />
