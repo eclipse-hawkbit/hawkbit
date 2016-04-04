@@ -644,7 +644,7 @@ public class TargetTable extends AbstractTable implements Handler {
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
 
         final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
-        notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
+        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {
             refreshFilter();
         }

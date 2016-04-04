@@ -363,7 +363,7 @@ public class DistributionTable extends AbstractTable {
         final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distList,
                 distTagName);
 
-        notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
+        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
         if (result.getAssigned() >= 1 && managementUIState.getDistributionTableFilters().isNoTagSelected()) {
             refreshFilter();
         }

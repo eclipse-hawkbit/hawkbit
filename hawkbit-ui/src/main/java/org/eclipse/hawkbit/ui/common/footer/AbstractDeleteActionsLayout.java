@@ -8,12 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.common.footer;
 
+import javax.annotation.PreDestroy;
+
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
@@ -42,6 +49,18 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     private static final long serialVersionUID = -6047975388519155509L;
 
+    @Autowired
+    protected I18N i18n;
+
+    @Autowired
+    protected SpPermissionChecker permChecker;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    protected transient UINotification notification;
+
     private DragAndDropWrapper deleteWrapper;
 
     private Button noActionBtn;
@@ -59,6 +78,12 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             buildLayout();
             reload();
         }
+        eventBus.subscribe(this);
+    }
+
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
     }
 
     private void reload() {
@@ -311,14 +336,27 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      * 
      * @return the no actions label.
      */
-    protected abstract String getNoActionsButtonLabel();
+    protected String getNoActionsButtonLabel() {
+        return i18n.get("button.no.actions");
+    }
 
     /**
      * Get the pending actions button label.
      * 
      * @return the actions label.
      */
-    protected abstract String getActionsButtonLabel();
+    protected String getActionsButtonLabel() {
+        return i18n.get("button.actions");
+    }
+
+    /**
+     * Get caption of unsaved actions window.
+     * 
+     * @return caption of the window.
+     */
+    protected String getUnsavedActionsWindowCaption() {
+        return i18n.get("caption.save.window");
+    }
 
     /**
      * reload the count value.
@@ -329,13 +367,6 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      * restore the upload status count.
      */
     protected abstract void restoreBulkUploadStatusCount();
-
-    /**
-     * Get caption of unsaved actions window.
-     * 
-     * @return caption of the window.
-     */
-    protected abstract String getUnsavedActionsWindowCaption();
 
     /**
      * This method will be called when unsaved actions window is closed.

@@ -114,7 +114,7 @@ public class DistributionTagToken extends AbstractTagToken {
         distributionList.add(selectedDS.getId());
         final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
                 tagNameSelected);
-        uinotification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(tagNameSelected, result, i18n));
+        uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
 
@@ -214,7 +214,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     protected boolean isAssign(final DistributionSetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getAssigned() > 0) {
-            final List<Long> assignedDsNames = assignmentResult.getAssignedDs().stream().map(t -> t.getId())
+            final List<Long> assignedDsNames = assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
             if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
                 return true;
@@ -225,7 +225,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     protected boolean isUnassign(final DistributionSetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getUnassigned() > 0) {
-            final List<Long> assignedDsNames = assignmentResult.getUnassignedDs().stream().map(t -> t.getId())
+            final List<Long> assignedDsNames = assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
             if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
                 return true;

@@ -48,7 +48,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
 
         assertThat(savedTarget.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
 
-        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedTargets().iterator().next();
+        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
 
         assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).getTargetInfo()
@@ -104,7 +104,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         Target savedTarget = targetManagement.createTarget(target);
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
-        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedTargets().iterator().next();
+        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
 
         // test and verify

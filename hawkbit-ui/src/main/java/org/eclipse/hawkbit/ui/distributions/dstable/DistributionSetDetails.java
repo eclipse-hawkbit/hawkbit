@@ -13,12 +13,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -37,10 +33,8 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayo
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -73,15 +67,6 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     private static final String UNASSIGN_SOFT_MODULE = "unassignSoftModule";
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permissionChecker;
-
-    @Autowired
     private ManageDistUIState manageDistUIState;
 
     @Autowired
@@ -104,21 +89,16 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     private Long dsId;
 
-    private UI ui;
-
     Map<String, StringBuilder> assignedSWModule = new HashMap<>();
 
     /**
      * softwareLayout Initialize the component.
      */
     @Override
-    @PostConstruct
     protected void init() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
         softwareModuleTable.init(i18n, true, permissionChecker, distributionSetManagement, eventBus, manageDistUIState);
         super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
     }
 
     protected VerticalLayout createTagsLayout() {
@@ -321,12 +301,6 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         this.dsId = dsId;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * onEdit(com.vaadin.ui .Button.ClickEvent)
-     */
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
@@ -336,68 +310,32 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         newDistWindow.setVisible(Boolean.TRUE);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getEditButtonId()
-     */
     @Override
     protected String getEditButtonId() {
         return SPUIComponetIdProvider.DS_EDIT_BUTTON;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * onLoadIsSwModuleSelected ()
-     */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
         return manageDistUIState.getSelectedDistributions().isPresent()
                 && !manageDistUIState.getSelectedDistributions().get().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * onLoadIsTableMaximized ()
-     */
     @Override
     protected Boolean onLoadIsTableMaximized() {
         return manageDistUIState.isDsTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * populateDetailsWidget()
-     */
     @Override
     protected void populateDetailsWidget() {
         populateDetailsWidget(selectedDsModule);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getDefaultCaption()
-     */
     @Override
     protected String getDefaultCaption() {
         return i18n.get("distribution.details.header");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * addTabs(com.vaadin. ui.TabSheet)
-     */
     @Override
     protected void addTabs(final TabSheet detailsTab) {
         detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
@@ -407,23 +345,11 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * clearDetails()
-     */
     @Override
     protected void clearDetails() {
         populateDetailsWidget(null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * hasEditSoftwareModulePermission()
-     */
     @Override
     protected Boolean hasEditPermission() {
         return permissionChecker.hasUpdateDistributionPermission();
@@ -476,7 +402,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
             });
         }
     }
-
+ 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
@@ -498,21 +424,6 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         }
     }
 
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good to do this, even though vaadin-spring will automatically
-         * unsubscribe .
-         */
-        eventBus.unsubscribe(this);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getTabSheetId()
-     */
     @Override
     protected String getTabSheetId() {
         return null;

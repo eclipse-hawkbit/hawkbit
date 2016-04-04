@@ -81,7 +81,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
         final Set<String> targetList = new HashSet<>();
         targetList.add(selectedTarget.getControllerId());
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
-        uinotification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(tagNameSelected, result, i18n));
+        uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
 
@@ -151,7 +151,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getAssigned() > 0) {
-            final List<String> assignedTargetNames = assignmentResult.getAssignedTargets().stream()
+            final List<String> assignedTargetNames = assignmentResult.getAssignedEntity().stream()
                     .map(t -> t.getControllerId()).collect(Collectors.toList());
             if (assignedTargetNames.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
                 return true;
@@ -162,7 +162,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     protected boolean isUnassign(final TargetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getUnassigned() > 0) {
-            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedTargets().stream()
+            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedEntity().stream()
                     .map(t -> t.getControllerId()).collect(Collectors.toList());
             if (unassignedTargetNamesList.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
                 return true;

@@ -263,7 +263,7 @@ public class TargetResource implements TargetRestApi {
         final ActionType type = (dsId.getType() != null)
                 ? RestResourceConversionHelper.convertActionType(dsId.getType()) : ActionType.FORCED;
         final Iterator<Target> changed = this.deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedTargets()
+                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedEntity()
                 .iterator();
         if (changed.hasNext()) {
             return new ResponseEntity<>(HttpStatus.OK);

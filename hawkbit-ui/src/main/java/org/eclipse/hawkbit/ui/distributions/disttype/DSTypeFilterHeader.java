@@ -10,14 +10,12 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -33,12 +31,6 @@ import com.vaadin.ui.Window;
 public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = 3433417459392880222L;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
 
     @Autowired
     private ManageDistUIState manageDistUIState;
@@ -81,8 +73,7 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         manageDistUIState.setDistTypeFilterClosed(true);
-        eventbus.publish(this, DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE);
-
+        eventBus.publish(this, DistributionsUIEvent.HIDE_DIST_FILTER_BY_TYPE);
     }
 
     @Override
