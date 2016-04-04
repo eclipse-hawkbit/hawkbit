@@ -17,15 +17,20 @@ package org.eclipse.hawkbit.api;
 public interface ArtifactUrlHandler {
 
     /**
-     * Returns a generated URL for a given artifact for a specific protocol.
+     * Returns a generated download URL for a given artifact parameters for a
+     * specific protocol.
      *
      * @param controllerId
      *            the authenticated controller id
-     * @param localArtifact
-     *            the artifact to retrieve a URL to
+     * @param softwareModuleId
+     *            the softwareModuleId belonging to the artifact
+     * @param filename
+     *            the filename of the artifact
+     * @param sha1Hash
+     *            the sha1Hash of the artifact
      * @param protocol
      *            the protocol the URL should be generated
-     * @return an URL for the given artifact in a given protocol
+     * @return an URL for the given artifact parameters in a given protocol
      */
     String getUrl(String controllerId, final Long softwareModuleId, final String filename, final String sha1Hash,
             final UrlProtocol protocol);
