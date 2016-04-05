@@ -59,12 +59,16 @@ public class BaseAmqpService {
      */
     @SuppressWarnings("unchecked")
     public <T> T convertMessage(final Message message, final Class<T> clazz) {
-        if (message == null || message.getBody() == null) {
+        if (isMessageBodyEmpty(message)) {
             return null;
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
                 clazz.getName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
+    }
+
+    private boolean isMessageBodyEmpty(final Message message) {
+        return message == null || message.getBody() == null || message.getBody().length == 0;
     }
 
     /**
@@ -79,7 +83,7 @@ public class BaseAmqpService {
      */
     @SuppressWarnings("unchecked")
     public <T> List<T> convertMessageList(final Message message, final Class<T> clazz) {
-        if (message == null || message.getBody() == null) {
+        if (isMessageBodyEmpty(message)) {
             return Collections.emptyList();
         }
         message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
@@ -105,7 +109,7 @@ public class BaseAmqpService {
     }
 
     protected final void logAndThrowMessageError(final Message message, final String error) {
-        LOGGER.error("Error \"{}\" reported by message {}", error, message.getMessageProperties().getMessageId());
+        LOGGER.warn("Error \"{}\" reported by message: {}", error, message);
         throw new IllegalArgumentException(error);
     }
 

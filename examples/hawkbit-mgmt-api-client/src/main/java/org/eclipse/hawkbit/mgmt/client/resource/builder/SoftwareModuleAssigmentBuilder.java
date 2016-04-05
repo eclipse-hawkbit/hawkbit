@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleAssi
 /**
  * 
  * Builder pattern for building {@link SoftwareModuleAssigmentRest}.
- * 
- * @author Jonathan Knoblauch
  *
  */
 public class SoftwareModuleAssigmentBuilder {

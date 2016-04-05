@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.Constants;
@@ -386,7 +387,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 .createTargets(TestDataUtil.buildTargetFixtures(10, myCtrlIDPref, "first description"));
 
         final String myDeployedCtrlIDPref = "myDeployedCtrlID";
-        final List<Target> savedDeployedTargets = targetManagement
+        List<Target> savedDeployedTargets = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(20, myDeployedCtrlIDPref, "first description"));
 
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
@@ -398,6 +399,10 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertThat(actionRepository.findAll(pageReq).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
 
         final Iterable<Target> allFoundTargets = targetManagement.findTargetsAll(pageReq).getContent();
+
+        // get final updated version of targets
+        savedDeployedTargets = targetManagement.findTargetByControllerID(
+                savedDeployedTargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
         assertThat(allFoundTargets).as("founded targets are wrong").containsAll(savedDeployedTargets)
                 .containsAll(savedNakedTargets);
@@ -602,8 +607,12 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedTargets();
         actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(1);
 
-        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsB.getDeployedTargets());
-        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsB.getDeployedTargets());
+        // get final updated version of targets
+        final List<Target> deployResWithDsBTargets = targetManagement.findTargetByControllerID(deployResWithDsB
+                .getDeployedTargets().stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+
+        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsBTargets);
+        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsBTargets);
 
         for (final Target t_ : deployed2DS) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId());

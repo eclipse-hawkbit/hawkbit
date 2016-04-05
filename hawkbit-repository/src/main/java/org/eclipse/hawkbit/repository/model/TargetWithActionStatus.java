@@ -30,32 +30,18 @@ public class TargetWithActionStatus {
         this.target = target;
     }
 
-    /**
-     * @return the target
-     */
     public Target getTarget() {
         return target;
     }
 
-    /**
-     * @return the status
-     */
     public Status getStatus() {
         return status;
     }
 
-    /**
-     * @param target
-     *            the target to set
-     */
     public void setTarget(final Target target) {
         this.target = target;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final Status status) {
         this.status = status;
     }

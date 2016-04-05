@@ -26,17 +26,12 @@ import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactHash;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
-import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactsRest;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulesRest;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
- *
- *
- *
  *
  */
 public final class SoftwareModuleMapper {
@@ -102,8 +97,8 @@ public final class SoftwareModuleMapper {
         return mappedList;
     }
 
-    static SoftwareModulesRest toResponseSoftwareModules(final Iterable<SoftwareModule> softwareModules) {
-        final SoftwareModulesRest response = new SoftwareModulesRest();
+    static List<SoftwareModuleRest> toResponseSoftwareModules(final Iterable<SoftwareModule> softwareModules) {
+        final List<SoftwareModuleRest> response = new ArrayList<>();
         for (final SoftwareModule softwareModule : softwareModules) {
             response.add(toResponse(softwareModule));
         }
@@ -192,8 +187,8 @@ public final class SoftwareModuleMapper {
         return artifactRest;
     }
 
-    static ArtifactsRest artifactsToResponse(final List<Artifact> artifacts) {
-        final ArtifactsRest mappedList = new ArtifactsRest();
+    static List<ArtifactRest> artifactsToResponse(final List<Artifact> artifacts) {
+        final List<ArtifactRest> mappedList = new ArrayList<>();
 
         if (artifacts != null) {
             for (final Artifact artifact : artifacts) {

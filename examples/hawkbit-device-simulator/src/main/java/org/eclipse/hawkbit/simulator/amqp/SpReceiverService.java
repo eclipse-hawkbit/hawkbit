@@ -26,14 +26,11 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 /**
- * Handle all incoming Messages from SP.
- *
- *
+ * Handle all incoming Messages from hawkBit update server.
  *
  */
 @Component
 public class SpReceiverService extends ReceiverService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
     public static final String SOFTWARE_MODULE_FIRMWARE = "firmware";
@@ -44,17 +41,6 @@ public class SpReceiverService extends ReceiverService {
 
     /**
      * Constructor.
-     *
-     * @param rabbitTemplate
-     *            the rabbit template
-     * @param amqpProperties
-     *            the amqp properties
-     * @param lwm2mSenderService
-     *            the lwm2mSenderService
-     * @param spSenderService
-     *            the spSenderService
-     * @param deviceUpdater
-     *            the updater service to simulate update process
      */
     @Autowired
     public SpReceiverService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,
@@ -62,12 +48,11 @@ public class SpReceiverService extends ReceiverService {
         super(rabbitTemplate, amqpProperties);
         this.spSenderService = spSenderService;
         this.deviceUpdater = deviceUpdater;
-
     }
 
     /**
      * Handle the incoming Message from Queue with the property
-     * (com.bosch.sp.lwm2m.connector.amqp.receiverConnectorQueueFromSp).
+     * (hawkbit.device.simulator.amqp.receiverConnectorQueueFromSp).
      *
      * @param message
      *            the incoming message

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.eventbus.event;
 import java.io.Serializable;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
  * An event interface which declares event types that an entities has been
@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
  * @param <E>
  *            the entity type
  */
-public interface EntityBulkEvent<E extends BaseEntity> extends Serializable, Event {
+public interface EntityBulkEvent<E extends TenantAwareBaseEntity> extends Serializable, Event {
 
     /**
      * A typesafe way to retrieve the the entities from the event, which might

@@ -114,7 +114,7 @@ public abstract class AbstractFilterButtons extends Table {
         typeButton.addClickListener(event -> filterButtonClickBehaviour.processFilterButtonClick(event));
         if (typeButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID) && isNoTagSateSelected()) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
-        } else if (id != null && isClickedByDefault(id)) {
+        } else if (id != null && isClickedByDefault(name)) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
         final DragAndDropWrapper wrapper = createDragAndDropWrapper(typeButton, name, id);
@@ -205,10 +205,11 @@ public abstract class AbstractFilterButtons extends Table {
     /**
      * Check if button should be displayed as clicked by default.
      * 
-     * @param id
-     * @return
+     * @param buttonCaption
+     *            button caption
+     * @return true if button is clicked
      */
-    protected abstract boolean isClickedByDefault(final Long buttonId);
+    protected abstract boolean isClickedByDefault(final String buttonCaption);
 
     /**
      * Get filter button Id.

@@ -32,27 +32,20 @@ import com.google.common.base.Splitter;
 
 /**
  * Entity to store the status for a specific action.
- * 
- *
- *
  */
 @Table(name = "sp_action_status", indexes = { @Index(name = "sp_idx_action_status_01", columnList = "tenant,action"),
         @Index(name = "sp_idx_action_status_02", columnList = "tenant,action,status"),
         @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })
 @Entity
-public class ActionStatus extends BaseEntity {
-
-    /**
-    *
-    */
+public class ActionStatus extends TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "target_occurred_at")
     private Long occurredAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "action", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action") )
+    @JoinColumn(name = "action", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
     private Action action;
 
     @Column(name = "status")
@@ -60,14 +53,14 @@ public class ActionStatus extends BaseEntity {
 
     @CascadeOnDelete
     @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
-    @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat") ) , indexes = {
+    @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat")), indexes = {
             @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
     @Column(name = "detail_message", length = 512)
     private final List<String> messages = new ArrayList<>();
 
     /**
      * Creates a new {@link ActionStatus} object.
-     * 
+     *
      * @param action
      *            the action for this action status
      * @param status
@@ -83,7 +76,7 @@ public class ActionStatus extends BaseEntity {
 
     /**
      * Creates a new {@link ActionStatus} object.
-     * 
+     *
      * @param action
      *            the action for this action status
      * @param status
@@ -103,67 +96,48 @@ public class ActionStatus extends BaseEntity {
     }
 
     /**
-    *
-    */
+     * JPA default constructor.
+     */
     public ActionStatus() {
+        // JPA default constructor.
     }
 
-    /**
-     * @return the occurredAt
-     */
     public Long getOccurredAt() {
         return occurredAt;
     }
 
-    /**
-     * @param occurredAt
-     *            the occurredAt to set
-     */
     public void setOccurredAt(final Long occurredAt) {
         this.occurredAt = occurredAt;
     }
 
     /**
-     * Adds message.
+     * Adds message including splitting in case it exceeds 512 length.
      *
      * @param message
      *            to add
      */
     public final void addMessage(final String message) {
-        Splitter.fixedLength(512).split(message).forEach(chunk -> messages.add(chunk));
+        Splitter.fixedLength(512).split(message).forEach(messages::add);
     }
 
     public List<String> getMessages() {
         return messages;
     }
 
-    /**
-     * @return the action
-     */
     public Action getAction() {
         return action;
     }
 
-    /**
-     * @param action
-     *            the action to set
-     */
     public void setAction(final Action action) {
         this.action = action;
     }
 
-    /**
-     * @return the status
-     */
     public Status getStatus() {
         return status;
     }
 
-    /**
-     * @param status
-     *            the status to set
-     */
     public void setStatus(final Status status) {
         this.status = status;
     }
+
 }

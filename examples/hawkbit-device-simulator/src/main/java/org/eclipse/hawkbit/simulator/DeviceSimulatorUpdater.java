@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.eclipse.hawkbit.simulator.event.InitUpdate;
 import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
@@ -33,6 +34,9 @@ public class DeviceSimulatorUpdater {
 
     @Autowired
     private SpSenderService spSenderService;
+
+    @Autowired
+    private SimulatedDeviceFactory deviceFactory;
 
     @Autowired
     private EventBus eventbus;
@@ -58,7 +62,13 @@ public class DeviceSimulatorUpdater {
      */
     public void startUpdate(final String tenant, final String id, final long actionId, final String swVersion,
             final UpdaterCallback callback) {
-        final AbstractSimulatedDevice device = repository.get(tenant, id);
+        AbstractSimulatedDevice device = repository.get(tenant, id);
+
+        // plug and play - non existing device will be auto created
+        if (device == null) {
+            device = repository.add(deviceFactory.createSimulatedDevice(id, tenant, Protocol.DMF_AMQP, -1, null, null));
+        }
+
         device.setProgress(0.0);
         device.setSwversion(swVersion);
         eventbus.post(new InitUpdate(device));

@@ -28,12 +28,10 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.RolloutRestApi;
-import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutPagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
-import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupPagedList;
 import org.eclipse.hawkbit.rest.resource.model.rolloutgroup.RolloutGroupResponseBody;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -64,8 +62,8 @@ public class RolloutResource implements RolloutRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<RolloutPagedList> getRollouts(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<RolloutResponseBody>> getRollouts(final int pagingOffsetParam,
+            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -82,7 +80,7 @@ public class RolloutResource implements RolloutRestApi {
         }
 
         final List<RolloutResponseBody> rest = RolloutMapper.toResponseRollout(findModulesAll.getContent());
-        return new ResponseEntity<>(new RolloutPagedList(rest, findModulesAll.getTotalElements()), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, findModulesAll.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
@@ -168,8 +166,8 @@ public class RolloutResource implements RolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<RolloutGroupPagedList> getRolloutGroups(final Long rolloutId, final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<RolloutGroupResponseBody>> getRolloutGroups(final Long rolloutId,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -188,8 +186,7 @@ public class RolloutResource implements RolloutRestApi {
 
         final List<RolloutGroupResponseBody> rest = RolloutMapper
                 .toResponseRolloutGroup(findRolloutGroupsAll.getContent());
-        return new ResponseEntity<>(new RolloutGroupPagedList(rest, findRolloutGroupsAll.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()), HttpStatus.OK);
     }
 
     @Override
@@ -200,7 +197,7 @@ public class RolloutResource implements RolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<TargetPagedList> getRolloutGroupTargets(final Long rolloutId, final Long groupId,
+    public ResponseEntity<PagedList<TargetRest>> getRolloutGroupTargets(final Long rolloutId, final Long groupId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
         final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
@@ -222,7 +219,8 @@ public class RolloutResource implements RolloutRestApi {
             rolloutGroupTargets = pageTargets;
         }
         final List<TargetRest> rest = TargetMapper.toResponse(rolloutGroupTargets.getContent());
-        return new ResponseEntity<>(new TargetPagedList(rest, rolloutGroupTargets.getTotalElements()), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<TargetRest>(rest, rolloutGroupTargets.getTotalElements()),
+                HttpStatus.OK);
     }
 
     private Rollout findRolloutOrThrowException(final Long rolloutId) {

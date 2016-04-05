@@ -21,14 +21,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypesRest;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
- *
- *
- *
  *
  */
 final class DistributionSetTypeMapper {
@@ -63,7 +59,7 @@ final class DistributionSetTypeMapper {
             }
 
             return smType;
-        }).forEach(softmType -> result.addMandatoryModuleType(softmType));
+        }).forEach(result::addMandatoryModuleType);
 
         // Add optional
         smsRest.getOptionalmodules().stream().map(opt -> {
@@ -74,13 +70,13 @@ final class DistributionSetTypeMapper {
             }
 
             return smType;
-        }).forEach(softmType -> result.addOptionalModuleType(softmType));
+        }).forEach(result::addOptionalModuleType);
 
         return result;
     }
 
-    static DistributionSetTypesRest toTypesResponse(final List<DistributionSetType> types) {
-        final DistributionSetTypesRest response = new DistributionSetTypesRest();
+    static List<DistributionSetTypeRest> toTypesResponse(final List<DistributionSetType> types) {
+        final List<DistributionSetTypeRest> response = new ArrayList<>();
         for (final DistributionSetType dsType : types) {
             response.add(toResponse(dsType));
         }

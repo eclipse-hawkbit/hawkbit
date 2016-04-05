@@ -29,9 +29,6 @@ import org.springframework.stereotype.Repository;
  * Workaround as spring data does not provide a {@link Slice} based
  * {@link JpaRepository#findAll()}.
  *
- *
- *
- *
  */
 @Repository
 public class NoCountPagingRepository {
@@ -104,15 +101,6 @@ public class NoCountPagingRepository {
             super(domainClass, em);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.springframework.data.jpa.repository.support.SimpleJpaRepository#
-         * readPage(javax.persistence .TypedQuery,
-         * org.springframework.data.domain.Pageable,
-         * org.springframework.data.jpa.domain.Specification)
-         */
         @Override
         protected Page<T> readPage(final TypedQuery<T> query, final Pageable pageable, final Specification<T> spec) {
             query.setFirstResult(pageable.getOffset());

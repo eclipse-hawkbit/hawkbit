@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -91,13 +92,19 @@ public class TenantConfigurationManagementTest extends AbstractIntegrationTestWi
                 .isEqualTo(value2);
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test
     @Description("Tests that the get configuration throws exception in case the value cannot be automatically converted from String to Boolean")
     public void wrongTenantConfigurationValueTypeThrowsException() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
         final String value1 = "thisIsNotABoolean";
+
         // add value as String
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, value1);
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKey, value1);
+            fail("should not have worked as string is not a boolean");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
     @Test
@@ -128,46 +135,71 @@ public class TenantConfigurationManagementTest extends AbstractIntegrationTestWi
         assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue()).isNull();
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test
     @Description("Test that an Exception is thrown, when an integer is stored  but a string expected.")
     public void storesIntegerWhenStringIsExpected() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_NAME;
         final Integer wrongDataype = 123;
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
+            fail("should not have worked as integer is not a string");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test
     @Description("Test that an Exception is thrown, when an integer is stored but a boolean expected.")
     public void storesIntegerWhenBooleanIsExpected() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED;
         final Integer wrongDataype = 123;
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
+            fail("should not have worked as integer is not a boolean");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test
     @Description("Test that an Exception is thrown, when an integer is stored as PollingTime.")
     public void storesIntegerWhenPollingIntervalIsExpected() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
         final Integer wrongDataype = 123;
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataype);
+            fail("should not have worked as integer is not a time field");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test
     @Description("Test that an Exception is thrown, when an invalid formatted string is stored as PollingTime.")
     public void storesWrongFormattedStringAsPollingInterval() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
         final String wrongFormatted = "wrongFormatted";
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongFormatted);
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongFormatted);
+            fail("should not have worked as string is not a time field");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
-    @Test(expected = TenantConfigurationValidatorException.class)
+    @Test
     @Description("Test that an Exception is thrown, when an invalid formatted string is stored as PollingTime.")
     public void storesTooSmallDurationAsPollingInterval() {
         final TenantConfigurationKey configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
 
         final String tooSmallDuration = DurationHelper
                 .durationToFormattedString(DurationHelper.getDurationByTimeValues(0, 0, 1));
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, tooSmallDuration);
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configKey, tooSmallDuration);
+            fail("should not have worked as string has an invalid format");
+        } catch (final TenantConfigurationValidatorException e) {
+
+        }
     }
 
     @Test

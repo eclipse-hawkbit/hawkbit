@@ -13,17 +13,15 @@ import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
-import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetPagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.TargetAssignmentResponseBody;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleAssigmentRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulePagedList;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
+import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,7 +56,7 @@ public interface DistributionSetRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<DistributionSetPagedList> getDistributionSets(
+    public ResponseEntity<PagedList<DistributionSetRest>> getDistributionSets(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -93,7 +91,7 @@ public interface DistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<DistributionSetsRest> createDistributionSets(
+    public ResponseEntity<List<DistributionSetRest>> createDistributionSets(
             @RequestBody final List<DistributionSetRequestBodyPost> sets);
 
     /**
@@ -148,7 +146,7 @@ public interface DistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/assignedTargets", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<TargetPagedList> getAssignedTargets(
+    public ResponseEntity<PagedList<TargetRest>> getAssignedTargets(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -179,7 +177,7 @@ public interface DistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/installedTargets", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<TargetPagedList> getInstalledTargets(
+    public ResponseEntity<PagedList<TargetRest>> getInstalledTargets(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -228,7 +226,7 @@ public interface DistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/metadata", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<MetadataRestPageList> getMetadata(
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -357,7 +355,7 @@ public interface DistributionSetRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/assignedSM", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModulePagedList> getAssignedSoftwareModules(
+    public ResponseEntity<PagedList<SoftwareModuleRest>> getAssignedSoftwareModules(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,

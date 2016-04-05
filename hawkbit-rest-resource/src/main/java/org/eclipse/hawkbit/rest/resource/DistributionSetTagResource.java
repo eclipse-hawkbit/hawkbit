@@ -17,16 +17,15 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetTagRestApi;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedDistributionSetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentResultRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +52,8 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<TagPagedList> getDistributionSetTags(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<TagRest>> getDistributionSetTags(final int pagingOffsetParam,
+            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -76,7 +75,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
         }
 
         final List<TagRest> rest = TagMapper.toResponseDistributionSetTag(findTargetsAll.getContent());
-        return new ResponseEntity<>(new TagPagedList(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override
@@ -86,7 +85,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TagsRest> createDistributionSetTags(final List<TagRequestBodyPut> tags) {
+    public ResponseEntity<List<TagRest>> createDistributionSetTags(final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
@@ -121,7 +120,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<DistributionSetsRest> getAssignedDistributionSets(final Long distributionsetTagId) {
+    public ResponseEntity<List<DistributionSetRest>> getAssignedDistributionSets(final Long distributionsetTagId) {
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
         return new ResponseEntity<>(
                 DistributionSetMapper.toResponseDistributionSets(tag.getAssignedToDistributionSet()), HttpStatus.OK);
@@ -135,7 +134,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
 
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
-        final DistributionSetTagAssigmentResult assigmentResult = this.distributionSetManagement
+        final DistributionSetTagAssignmentResult assigmentResult = this.distributionSetManagement
                 .toggleTagAssignment(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
 
         final DistributionSetTagAssigmentResultRest tagAssigmentResultRest = new DistributionSetTagAssigmentResultRest();
@@ -151,7 +150,7 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<DistributionSetsRest> assignDistributionSets(final Long distributionsetTagId,
+    public ResponseEntity<List<DistributionSetRest>> assignDistributionSets(final Long distributionsetTagId,
             final List<AssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         LOG.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);

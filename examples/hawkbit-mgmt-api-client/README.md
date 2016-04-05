@@ -1,4 +1,4 @@
-# HawkBit management API example
+# hawkBit Management API example client
 
 Example client that shows how to efficiently use the hawkBit management API.
 
@@ -36,4 +36,3 @@ In rollout mode:
 * assigning software modules to distribution sets
 * creating a rollout
 * starting a rollout
-

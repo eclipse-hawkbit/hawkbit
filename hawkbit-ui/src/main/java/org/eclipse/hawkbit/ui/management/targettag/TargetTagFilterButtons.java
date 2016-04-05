@@ -19,11 +19,10 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -69,9 +68,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Autowired
     private ManagementUIState managementUIState;
-
-    @Autowired
-    private transient TagManagement tagMgmtService;
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
@@ -139,10 +135,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
-        final TargetTag newTagClickedObj = tagMgmtService.findTargetTagById(buttonId);
-        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null && managementUIState
-                .getTargetTableFilters().getClickedTargetTags().contains(newTagClickedObj.getName());
+    protected boolean isClickedByDefault(final String tagName) {
+        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null
+                && managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName);
     }
 
     @Override
@@ -248,7 +243,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
             final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
 
-            final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+            final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
             notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
 
             if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {

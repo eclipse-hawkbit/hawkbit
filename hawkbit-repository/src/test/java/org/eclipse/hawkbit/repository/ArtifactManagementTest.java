@@ -352,11 +352,16 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
                 artifactManagement.loadLocalArtifactBinary(result).getFileInputStream()));
     }
 
-    @Test(expected = InsufficientPermissionException.class)
+    @Test
     @WithUser(allSpPermissions = true, removeFromAllPermission = { SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT })
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadLocalArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
-        artifactManagement.loadLocalArtifactBinary(new LocalArtifact());
+        try {
+            artifactManagement.loadLocalArtifactBinary(new LocalArtifact());
+            fail("Should not have worked with missing permission.");
+        } catch (final InsufficientPermissionException e) {
+
+        }
     }
 
     @Test

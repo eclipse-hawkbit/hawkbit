@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.client.scenarios;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetResourceClient;
 import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetTypeResourceClient;
 import org.eclipse.hawkbit.mgmt.client.resource.SoftwareModuleResourceClient;
@@ -17,9 +19,9 @@ import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetTypeBuild
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleTypeBuilder;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulesRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
+import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
+import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +41,13 @@ public class GettingStartedDefaultScenario {
     private static final String SM_MODULE_TYPE = "gettingstarted";
 
     /* known distribution set type name and key */
-    private static final String DS_MODULE_TYPE = "gettingstarted";
+    private static final String DS_MODULE_TYPE = SM_MODULE_TYPE;
 
     /* known distribution name of this getting started example */
     private static final String SM_EXAMPLE_NAME = "gettingstarted-example";
 
     /* known distribution name of this getting started example */
-    private static final String DS_EXAMPLE_NAME = "gettingstarted-example";
+    private static final String DS_EXAMPLE_NAME = SM_EXAMPLE_NAME;
 
     @Autowired
     private DistributionSetResourceClient distributionSetResource;
@@ -68,8 +70,9 @@ public class GettingStartedDefaultScenario {
 
         // create one SoftwareModuleTypes
         LOGGER.info("Creating software module type {}", SM_MODULE_TYPE);
-        final SoftwareModuleTypesRest createdSoftwareModuleTypes = softwareModuleTypeResource.createSoftwareModuleTypes(
-                new SoftwareModuleTypeBuilder().key(SM_MODULE_TYPE).name(SM_MODULE_TYPE).maxAssignments(1).build())
+        final List<SoftwareModuleTypeRest> createdSoftwareModuleTypes = softwareModuleTypeResource
+                .createSoftwareModuleTypes(new SoftwareModuleTypeBuilder().key(SM_MODULE_TYPE).name(SM_MODULE_TYPE)
+                        .maxAssignments(1).build())
                 .getBody();
 
         // create one DistributionSetType
@@ -83,17 +86,17 @@ public class GettingStartedDefaultScenario {
         final String dsVersion3 = "2.1.0";
 
         LOGGER.info("Creating distribution set {}:{}", DS_EXAMPLE_NAME, dsVersion1);
-        final DistributionSetsRest distributionSetsRest1 = distributionSetResource.createDistributionSets(
+        final List<DistributionSetRest> distributionSetsRest1 = distributionSetResource.createDistributionSets(
                 new DistributionSetBuilder().name(DS_EXAMPLE_NAME).version(dsVersion1).type(DS_MODULE_TYPE).build())
                 .getBody();
 
         LOGGER.info("Creating distribution set {}:{}", DS_EXAMPLE_NAME, dsVersion2);
-        final DistributionSetsRest distributionSetsRest2 = distributionSetResource.createDistributionSets(
+        final List<DistributionSetRest> distributionSetsRest2 = distributionSetResource.createDistributionSets(
                 new DistributionSetBuilder().name(DS_EXAMPLE_NAME).version(dsVersion2).type(DS_MODULE_TYPE).build())
                 .getBody();
 
         LOGGER.info("Creating distribution set {}:{}", DS_EXAMPLE_NAME, dsVersion3);
-        final DistributionSetsRest distributionSetsRest3 = distributionSetResource.createDistributionSets(
+        final List<DistributionSetRest> distributionSetsRest3 = distributionSetResource.createDistributionSets(
                 new DistributionSetBuilder().name(DS_EXAMPLE_NAME).version(dsVersion3).type(DS_MODULE_TYPE).build())
                 .getBody();
 
@@ -103,15 +106,15 @@ public class GettingStartedDefaultScenario {
         final String swVersion3 = "3";
 
         LOGGER.info("Creating distribution set {}:{}", SM_EXAMPLE_NAME, swVersion1);
-        final SoftwareModulesRest softwareModulesRest1 = softwareModuleResource.createSoftwareModules(
+        final List<SoftwareModuleRest> softwareModulesRest1 = softwareModuleResource.createSoftwareModules(
                 new SoftwareModuleBuilder().name(SM_EXAMPLE_NAME).version(swVersion1).type(SM_MODULE_TYPE).build())
                 .getBody();
         LOGGER.info("Creating distribution set {}:{}", SM_EXAMPLE_NAME, swVersion2);
-        final SoftwareModulesRest softwareModulesRest2 = softwareModuleResource.createSoftwareModules(
+        final List<SoftwareModuleRest> softwareModulesRest2 = softwareModuleResource.createSoftwareModules(
                 new SoftwareModuleBuilder().name(SM_EXAMPLE_NAME).version(swVersion2).type(SM_MODULE_TYPE).build())
                 .getBody();
         LOGGER.info("Creating distribution set {}:{}", SM_EXAMPLE_NAME, swVersion3);
-        final SoftwareModulesRest softwareModulesRest3 = softwareModuleResource.createSoftwareModules(
+        final List<SoftwareModuleRest> softwareModulesRest3 = softwareModuleResource.createSoftwareModules(
                 new SoftwareModuleBuilder().name(SM_EXAMPLE_NAME).version(swVersion3).type(SM_MODULE_TYPE).build())
                 .getBody();
 

@@ -12,17 +12,11 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 /**
- * {@link BaseEntity} extension for all entities that are named in addition to
- * their technical ID.
- *
- *
- *
- *
- *
- *
+ * {@link TenantAwareBaseEntity} extension for all entities that are named in
+ * addition to their technical ID.
  */
 @MappedSuperclass
-public abstract class NamedEntity extends BaseEntity {
+public abstract class NamedEntity extends TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", nullable = false, length = 64)
@@ -40,7 +34,7 @@ public abstract class NamedEntity extends BaseEntity {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param name
      *            of the {@link NamedEntity}
      * @param description
@@ -66,5 +60,4 @@ public abstract class NamedEntity extends BaseEntity {
     public void setName(final String name) {
         this.name = name;
     }
-
 }

@@ -14,7 +14,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  * Client binding for the Rollout resource of the management API.
  */
-@FeignClient(url = "${hawkbit.endpoint.url:localhost:8080}/rest/v1/rollouts")
+@FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/rollouts")
 public interface RolloutResourceClient extends RolloutRestApi {
 
 }

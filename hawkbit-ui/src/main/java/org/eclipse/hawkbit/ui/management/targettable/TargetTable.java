@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
@@ -105,11 +104,10 @@ import com.vaadin.ui.themes.ValoTheme;
 @ViewScope
 public class TargetTable extends AbstractTable implements Handler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
     private static final String TARGET_PINNED = "targetPinned";
 
     private static final long serialVersionUID = -2300392868806614568L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
 
     private static final int PROPERTY_DEPT = 3;
     private static final String ITEMID = "itemId";
@@ -141,8 +139,6 @@ public class TargetTable extends AbstractTable implements Handler {
     private Boolean isTargetPinned = Boolean.FALSE;
     private ShortcutAction actionSelectAll;
     private ShortcutAction actionUnSelectAll;
-    
-     
 
     @Override
     @PostConstruct
@@ -329,38 +325,20 @@ public class TargetTable extends AbstractTable implements Handler {
                 (source, itemId, columnId) -> getTagetPollTime(itemId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * isFirstRowSelectedOnLoad ()
-     */
     @Override
     protected boolean isFirstRowSelectedOnLoad() {
         return !managementUIState.getSelectedTargetIdName().isPresent()
                 || managementUIState.getSelectedTargetIdName().get().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getItemIdToSelect()
-     */
     @Override
     protected Object getItemIdToSelect() {
         if (managementUIState.getSelectedTargetIdName().isPresent()) {
-            setCurrentPageFirstItemId(managementUIState.getLastSelectedTargetIdName());
             return managementUIState.getSelectedTargetIdName().get();
         }
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#onValueChange()
-     */
     @Override
     protected void onValueChange() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
@@ -380,23 +358,11 @@ public class TargetTable extends AbstractTable implements Handler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#isMaximized()
-     */
     @Override
     protected boolean isMaximized() {
         return managementUIState.isTargetTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableVisibleColumns
-     * ()
-     */
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
@@ -453,13 +419,29 @@ public class TargetTable extends AbstractTable implements Handler {
             } else {
                 shouldRefreshTargets = true;
             }
-            unselect(targetIdName);
         }
+
         if (shouldRefreshTargets) {
             refreshOnDelete();
         } else {
             targetContainer.commit();
-            selectRow();
+        }
+        reSelectItemsAfterDeletionEvent();
+    }
+
+    private void reSelectItemsAfterDeletionEvent() {
+        Set<Object> values = new HashSet<>();
+        if (isMultiSelect()) {
+            values = new HashSet<>((Set<?>) getValue());
+        } else {
+            values.add(getValue());
+        }
+        unSelectAll();
+
+        for (final Object value : values) {
+            if (getVisibleItemIds().contains(value)) {
+                select(value);
+            }
         }
     }
 
@@ -659,7 +641,7 @@ public class TargetTable extends AbstractTable implements Handler {
         }
         final String targTagName = HawkbitCommonUtil.removePrefix(event.getTransferable().getSourceComponent().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
-        final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
 
         final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
         notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
@@ -1038,7 +1020,7 @@ public class TargetTable extends AbstractTable implements Handler {
         final String[] tagArray = tagList.toArray(new String[tagList.size()]);
 
         List<TargetIdName> targetIdList;
-        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, filterByDistId, statusList, searchText,
+        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, statusList, searchText, filterByDistId,
                 noTagSelected, tagList.toArray(tagArray));
         Collections.reverse(targetIdList);
         return targetIdList;

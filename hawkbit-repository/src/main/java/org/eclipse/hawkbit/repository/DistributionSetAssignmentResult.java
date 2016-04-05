@@ -55,7 +55,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult {
      * @return the assignedTargets
      */
     public List<Target> getAssignedTargets() {
-        return targetManagement.findTargetsByControllerID(assignedTargets);
+        return targetManagement.findTargetByControllerID(assignedTargets);
     }
 
     /**
