@@ -32,6 +32,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.UI;
 
 /**
  * Implementation of Target tag token.
@@ -175,10 +176,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
     void onEvent(final TargetTableEvent targetTableEvent) {
         if (targetTableEvent.getTargetComponentEvent() == TargetComponentEvent.SELECTED_TARGET
                 && targetTableEvent.getTarget() != null) {
-            ui.access(() -> {
-                /**
-                 * targetTableEvent.getTarget() is null when table has no data.
-                 */
+            UI.getCurrent().access(() -> {
                 selectedTarget = targetTableEvent.getTarget();
                 repopulateToken();
             });
