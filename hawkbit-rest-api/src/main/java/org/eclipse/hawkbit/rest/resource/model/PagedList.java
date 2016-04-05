@@ -36,7 +36,7 @@ public class PagedList<T> extends ResourceSupport {
     @JsonProperty
     private final List<T> content;
     @JsonProperty
-    private final long totalElements;
+    private final long total;
     private final int size;
 
     /**
@@ -45,16 +45,15 @@ public class PagedList<T> extends ResourceSupport {
      *
      * @param content
      *            the actual content of the list
-     * @param totalElements
+     * @param total
      *            the total amount of elements
      * @throws NullPointerException
      *             in case {@code content} is {@code null}.
      */
     @JsonCreator
-    public PagedList(@JsonProperty("content") @NotNull final List<T> content,
-            @JsonProperty("totalElements") final long totalElements) {
+    public PagedList(@JsonProperty("content") @NotNull final List<T> content, @JsonProperty("total") final long total) {
         this.size = content.size();
-        this.totalElements = totalElements;
+        this.total = total;
         this.content = content;
     }
 
@@ -69,7 +68,7 @@ public class PagedList<T> extends ResourceSupport {
      * @return the total amount of elements
      */
     public long getTotal() {
-        return totalElements;
+        return total;
     }
 
     public List<T> getContent() {
