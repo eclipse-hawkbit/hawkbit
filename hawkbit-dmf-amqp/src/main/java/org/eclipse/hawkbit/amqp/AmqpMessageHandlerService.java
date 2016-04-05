@@ -214,19 +214,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private LocalArtifact findLocalArtifactByFileResource(final FileResource fileResource) {
-        LocalArtifact localArtifact = null;
         if (fileResource.getSha1() != null) {
-            localArtifact = artifactManagement.findFirstLocalArtifactsBySHA1(fileResource.getSha1());
+            return artifactManagement.findFirstLocalArtifactsBySHA1(fileResource.getSha1());
         } else if (fileResource.getFilename() != null) {
-            localArtifact = artifactManagement.findLocalArtifactByFilename(fileResource.getFilename()).stream()
-                    .findFirst().orElse(null);
+            return artifactManagement.findLocalArtifactByFilename(fileResource.getFilename()).stream().findFirst()
+                    .orElse(null);
         } else if (fileResource.getSoftwareModuleFilenameResource() != null) {
-            localArtifact = artifactManagement
+            return artifactManagement
                     .findByFilenameAndSoftwareModule(fileResource.getSoftwareModuleFilenameResource().getFilename(),
                             fileResource.getSoftwareModuleFilenameResource().getSoftwareModuleId())
                     .stream().findFirst().orElse(null);
         }
-        return localArtifact;
+        return null;
     }
 
     private static Artifact convertDbArtifact(final DbArtifact dbArtifact) {
