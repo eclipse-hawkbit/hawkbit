@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.footer;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -41,9 +42,6 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Parent class for footer layout.
  * 
- *
- *
- * 
  */
 public abstract class AbstractDeleteActionsLayout extends VerticalLayout implements DropHandler {
 
@@ -72,6 +70,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     /**
      * Initialize.
      */
+    @PostConstruct
     protected void init() {
         if (hasCountMessage() || hasDeletePermission() || hasUpdatePermission() || hasBulkUploadPermission()) {
             createComponents();
