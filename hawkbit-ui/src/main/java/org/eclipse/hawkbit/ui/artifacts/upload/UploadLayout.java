@@ -222,10 +222,7 @@ public class UploadLayout extends VerticalLayout {
         }
 
         private boolean isDirectory(final Html5File file) {
-            if (Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0) {
-                return true;
-            }
-            return false;
+            return Strings.isNullOrEmpty(file.getType()) && file.getFileSize() % 4096 == 0;
         }
     }
 

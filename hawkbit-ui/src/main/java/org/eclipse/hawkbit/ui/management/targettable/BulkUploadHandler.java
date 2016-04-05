@@ -306,11 +306,10 @@ public class BulkUploadHandler extends CustomComponent
             final DistributionSetIdName dsSelected = (DistributionSetIdName) comboBox.getValue();
             if (distributionSetManagement.findDistributionSetById(dsSelected.getId()) == null) {
                 return i18n.get("message.bulk.upload.assignment.failed");
-            } else {
-                deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion().getId(), actionType,
-                        forcedTimeStamp, targetsList.toArray(new String[targetsList.size()]));
-                return null;
             }
+            deploymentManagement.assignDistributionSet(targetBulkUpload.getDsNameAndVersion().getId(), actionType,
+                    forcedTimeStamp, targetsList.toArray(new String[targetsList.size()]));
+            return null;
         }
 
         private String tagAssignment() {
@@ -330,9 +329,8 @@ public class BulkUploadHandler extends CustomComponent
             }
             if (deletedTags.size() == 1) {
                 return i18n.get("message.bulk.upload.tag.assignment.failed", deletedTags.get(0));
-            } else {
-                return i18n.get("message.bulk.upload.tag.assignments.failed");
             }
+            return i18n.get("message.bulk.upload.tag.assignments.failed");
         }
 
         private boolean ifTagsSelected() {

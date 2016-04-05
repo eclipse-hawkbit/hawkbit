@@ -248,13 +248,13 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
             if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
                 return HawkbitCommonUtil.getStatusLabelDetailsInString(
                         Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), "statusIconLightBlue", null);
-            } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
+            }
+            if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
                 return HawkbitCommonUtil.getStatusLabelDetailsInString(
                         Integer.toString(FontAwesome.MINUS_CIRCLE.getCodepoint()), "statusIconBlue", null);
-            } else {
-                return HawkbitCommonUtil.getStatusLabelDetailsInString(
-                        Integer.toString(FontAwesome.QUESTION_CIRCLE.getCodepoint()), "statusIconBlue", null);
             }
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.QUESTION_CIRCLE.getCodepoint()), "statusIconBlue", null);
         }
 
     }
