@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.io.Serializable;
-
-import javax.persistence.Basic;
-import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,16 +25,8 @@ import javax.persistence.Table;
 @IdClass(DsMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_ds_metadata")
-public class DistributionSetMetadata implements Serializable {
+public class DistributionSetMetadata extends MetaData {
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @Column(name = "meta_key", length = 128)
-    private String key;
-
-    @Column(name = "meta_value", length = 4000)
-    @Basic
-    private String value;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,7 +34,7 @@ public class DistributionSetMetadata implements Serializable {
     private DistributionSet distributionSet;
 
     public DistributionSetMetadata() {
-        // Default constructor for JPA.
+        super();
     }
 
     /**
@@ -57,33 +45,16 @@ public class DistributionSetMetadata implements Serializable {
      * @param value
      */
     public DistributionSetMetadata(final String key, final DistributionSet distributionSet, final String value) {
-        this.key = key;
+        super(key, value);
         this.distributionSet = distributionSet;
-        this.value = value;
     }
 
     public DsMetadataCompositeKey getId() {
-        return new DsMetadataCompositeKey(distributionSet, key);
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
+        return new DsMetadataCompositeKey(distributionSet, getKey());
     }
 
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = distributionSet;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
     }
 
     public DistributionSet getDistributionSet() {
@@ -93,9 +64,8 @@ public class DistributionSetMetadata implements Serializable {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + (distributionSet == null ? 0 : distributionSet.hashCode());
-        result = prime * result + (key == null ? 0 : key.hashCode());
+        int result = super.hashCode();
+        result = prime * result + ((distributionSet == null) ? 0 : distributionSet.hashCode());
         return result;
     }
 
@@ -104,7 +74,7 @@ public class DistributionSetMetadata implements Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!super.equals(obj)) {
             return false;
         }
         if (!(obj instanceof DistributionSetMetadata)) {
@@ -118,14 +88,6 @@ public class DistributionSetMetadata implements Serializable {
         } else if (!distributionSet.equals(other.distributionSet)) {
             return false;
         }
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
         return true;
     }
-
 }
