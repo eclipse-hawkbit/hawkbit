@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -19,10 +15,8 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -47,37 +41,15 @@ public class SoftwareModuleDetails extends AbstractTableDetailsLayout {
     private static final long serialVersionUID = -4900381301076646366L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permissionChecker;
-
-    @Autowired
     private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
 
-    private UI ui;
-
     private Long swModuleId;
 
     private SoftwareModule selectedSwModule;
-
-    /**
-     * Initialize the component.
-     */
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
-    }
-
+ 
     @Override
     protected String getEditButtonId() {
         return SPUIComponetIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
@@ -175,58 +147,24 @@ public class SoftwareModuleDetails extends AbstractTableDetailsLayout {
         }
     }
 
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * getDefaultCaption()
-     */
     @Override
     protected String getDefaultCaption() {
         return i18n.get("upload.swModuleTable.header");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * onLoadIsSwModuleSelected()
-     */
     @Override
     protected Boolean onLoadIsTableRowSelected() {
         return artifactUploadState.getSelectedBaseSoftwareModule().isPresent();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * onLoadIsTableMaximized()
-     */
+
     @Override
     protected Boolean onLoadIsTableMaximized() {
         return artifactUploadState.isSwModuleTableMaximized();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.detailslayout.TableDetailsLayout#
-     * populateDetailsWidget()
-     */
+
     @Override
     protected void populateDetailsWidget() {
         populateDetailsWidget(selectedSwModule);
@@ -266,12 +204,7 @@ public class SoftwareModuleDetails extends AbstractTableDetailsLayout {
         return permissionChecker.hasUpdateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.common.detailslayout.AbstractTableDetailsLayout#
-     * getTabSheetId()
-     */
+
     @Override
     protected String getTabSheetId() {
         return null;

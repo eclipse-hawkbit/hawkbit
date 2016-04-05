@@ -133,8 +133,8 @@ public class TargetTagResource implements TargetTagRestApi {
                 .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
 
         final TargetTagAssigmentResultRest tagAssigmentResultRest = new TargetTagAssigmentResultRest();
-        tagAssigmentResultRest.setAssignedTargets(TargetMapper.toResponse(assigmentResult.getAssignedTargets()));
-        tagAssigmentResultRest.setUnassignedTargets(TargetMapper.toResponse(assigmentResult.getUnassignedTargets()));
+        tagAssigmentResultRest.setAssignedTargets(TargetMapper.toResponse(assigmentResult.getAssignedEntity()));
+        tagAssigmentResultRest.setUnassignedTargets(TargetMapper.toResponse(assigmentResult.getUnassignedEntity()));
         return new ResponseEntity<>(tagAssigmentResultRest, HttpStatus.OK);
     }
 

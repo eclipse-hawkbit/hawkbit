@@ -11,10 +11,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -29,7 +25,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -64,12 +59,6 @@ public class TargetTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = -8647521126666320022L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
     private UINotification notification;
 
     @Autowired
@@ -90,19 +79,12 @@ public class TargetTableHeader extends AbstractTableHeader {
     private Boolean isComplexFilterViewDisplayed = Boolean.FALSE;
 
     @Override
-    @PostConstruct
     protected void init() {
         super.init();
         // creating add window for adding new target
         targetAddUpdateWindow.init();
         targetBulkUpdateWindow.init();
-        eventBus.subscribe(this);
         onLoadRestoreState();
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

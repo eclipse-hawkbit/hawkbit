@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
@@ -38,7 +36,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -62,9 +59,6 @@ import com.vaadin.ui.UI;
 public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     private static final long serialVersionUID = 5049554600376508073L;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -99,12 +93,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         super.init(filterButtonClickBehaviour);
         addNewTargetTag(new TargetTag("NO TAG"));
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -244,7 +232,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
             final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
 
             final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
-            notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
+            notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
 
             if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
