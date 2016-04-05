@@ -14,9 +14,11 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A list representation with meta data for pagination, e.g. containing the
@@ -31,7 +33,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class PagedList<T> extends ResourceSupport {
 
+    @JsonProperty
     private final List<T> content;
+    @JsonProperty
     private final long totalElements;
     private final int size;
 
@@ -41,14 +45,16 @@ public class PagedList<T> extends ResourceSupport {
      *
      * @param content
      *            the actual content of the list
-     * @param total
+     * @param totalElements
      *            the total amount of elements
      * @throws NullPointerException
      *             in case {@code content} is {@code null}.
      */
-    public PagedList(@NotNull final List<T> content, final long total) {
+    @JsonCreator
+    public PagedList(@JsonProperty("content") @NotNull final List<T> content,
+            @JsonProperty("totalElements") final long totalElements) {
         this.size = content.size();
-        this.totalElements = total;
+        this.totalElements = totalElements;
         this.content = content;
     }
 
