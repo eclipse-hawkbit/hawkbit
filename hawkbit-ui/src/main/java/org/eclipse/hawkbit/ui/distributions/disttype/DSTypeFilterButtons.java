@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
@@ -23,7 +20,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -46,25 +42,10 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     private static final long serialVersionUID = 771251569981876005L;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
     private ManageDistUIState manageDistUIState;
 
     @Autowired
     private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
-    /**
-     * Initialize component.
-     * 
-     * @param filterButtonClickBehaviour
-     *            the clickable behaviour.
-     */
-    @Override
-    public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
-        super.init(filterButtonClickBehaviour);
-        eventBus.subscribe(this);
-    }
 
     @Override
     protected String getButtonsTableId() {
@@ -138,11 +119,6 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
 
     private void refreshTypeTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
 }

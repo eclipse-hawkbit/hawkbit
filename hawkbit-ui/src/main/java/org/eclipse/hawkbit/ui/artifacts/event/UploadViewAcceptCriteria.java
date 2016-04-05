@@ -14,12 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
-import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -27,8 +22,6 @@ import com.vaadin.ui.Component;
 
 /**
  * Upload UI View for Accept criteria.
- * 
- *
  * 
  */
 @SpringComponent
@@ -40,29 +33,6 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     private static final Map<String, List<String>> DROP_CONFIGS = createDropConfigurations();
 
     private static final Map<String, Object> DROP_HINTS_CONFIGS = createDropHintConfigurations();
-
-    @Autowired
-    private transient UINotification uiNotification;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Override
-    protected void analyseDragComponent(final Component compsource) {
-        final String sourceID = getComponentId(compsource);
-        final Object event = DROP_HINTS_CONFIGS.get(sourceID);
-        eventBus.publish(this, event);
-    }
-
-    @Override
-    protected void hideDropHints() {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-    }
-
-    @Override
-    protected void invalidDrop() {
-        uiNotification.displayValidationError(SPUILabelDefinitions.ACTION_NOT_ALLOWED);
-    }
 
     @Override
     protected String getComponentId(final Component component) {
@@ -76,11 +46,6 @@ public class UploadViewAcceptCriteria extends AbstractAcceptCriteria {
     @Override
     protected Map<String, Object> getDropHintConfigurations() {
         return DROP_HINTS_CONFIGS;
-    }
-
-    @Override
-    protected void publishDragStartEvent(final Object event) {
-        eventBus.publish(this, event);
     }
 
     @Override

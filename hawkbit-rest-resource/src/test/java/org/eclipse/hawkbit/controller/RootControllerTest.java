@@ -270,7 +270,7 @@ public class RootControllerTest extends AbstractIntegrationTestWithMongoDB {
         Target savedTarget = targetManagement.createTarget(target);
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(savedTarget);
-        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedTargets().iterator().next();
+        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         mvc.perform(post("/{tenant}/controller/v1/911/deploymentBase/" + savedAction.getId() + "/feedback",
                 tenantAware.getCurrentTenant())

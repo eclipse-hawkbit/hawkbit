@@ -16,10 +16,6 @@ import java.util.Map;
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -39,29 +35,6 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
 
     private static final Map<String, List<String>> DROP_CONFIGS = createDropConfigurations();
 
-    @Autowired
-    private transient UINotification uiNotification;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Override
-    protected void analyseDragComponent(final Component compsource) {
-        final String sourceID = getComponentId(compsource);
-        final Object event = DROP_HINTS_CONFIGS.get(sourceID);
-        eventBus.publish(this, event);
-    }
-
-    @Override
-    protected void hideDropHints() {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-    }
-
-    @Override
-    protected void invalidDrop() {
-        uiNotification.displayValidationError(SPUILabelDefinitions.ACTION_NOT_ALLOWED);
-    }
-
     @Override
     protected String getComponentId(final Component component) {
         String id = component.getId();
@@ -76,11 +49,6 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     @Override
     protected Map<String, Object> getDropHintConfigurations() {
         return DROP_HINTS_CONFIGS;
-    }
-
-    @Override
-    protected void publishDragStartEvent(final Object event) {
-        eventBus.publish(this, event);
     }
 
     @Override

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
@@ -19,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.Target;
  * how much of the assignments had already been existed.
  *
  */
-public class DistributionSetAssignmentResult extends AssignmentResult {
+public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
 
     private final List<String> assignedTargets;
     private final List<Long> actions;
@@ -45,16 +46,14 @@ public class DistributionSetAssignmentResult extends AssignmentResult {
      */
     public DistributionSetAssignmentResult(final List<String> assignedTargets, final int assigned,
             final int alreadyAssigned, final List<Long> actions, final TargetManagement targetManagement) {
-        super(assigned, alreadyAssigned);
+        super(assigned, alreadyAssigned, 0, Collections.emptyList(), Collections.emptyList());
         this.assignedTargets = assignedTargets;
         this.actions = actions;
         this.targetManagement = targetManagement;
     }
-
-    /**
-     * @return the assignedTargets
-     */
-    public List<Target> getAssignedTargets() {
+    
+    @Override
+    public List<Target> getAssignedEntity() {
         return targetManagement.findTargetByControllerID(assignedTargets);
     }
 

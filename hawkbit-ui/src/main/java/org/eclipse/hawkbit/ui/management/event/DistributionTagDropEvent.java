@@ -150,7 +150,7 @@ public class DistributionTagDropEvent implements DropHandler {
         final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
                 distTagName);
 
-        notification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(distTagName, result, i18n));
+        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {
             eventBus.publish(this, TargetFilterEvent.FILTER_BY_TAG);
         }

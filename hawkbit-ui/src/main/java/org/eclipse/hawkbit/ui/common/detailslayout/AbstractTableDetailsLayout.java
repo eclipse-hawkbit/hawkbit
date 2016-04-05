@@ -10,6 +10,10 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -19,6 +23,8 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -27,6 +33,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -36,6 +43,17 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractTableDetailsLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 4862529368471627190L;
+
+    @Autowired
+    protected I18N i18n;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    protected SpPermissionChecker permissionChecker;
+
+    protected UI ui;
 
     private Label caption;
 
@@ -54,7 +72,9 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
     /**
      * Initialize components.
      */
+    @PostConstruct
     protected void init() {
+        ui = UI.getCurrent();
         createComponents();
         buildLayout();
         /**
@@ -62,6 +82,12 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
          * selected in table.
          */
         restoreState();
+        eventBus.subscribe(this);
+    }
+
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
     }
 
     private void createComponents() {

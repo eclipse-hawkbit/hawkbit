@@ -14,11 +14,8 @@ import java.util.List;
  * Result object for {@link TargetTag} assignments.
  *
  */
-public class TargetTagAssignmentResult extends AssignmentResult {
+public class TargetTagAssignmentResult extends AssignmentResult<Target> {
 
-    private final int unassigned;
-    private final List<Target> assignedTargets;
-    private final List<Target> unassignedTargets;
     private final TargetTag targetTag;
 
     /**
@@ -39,23 +36,8 @@ public class TargetTagAssignmentResult extends AssignmentResult {
      */
     public TargetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
             final List<Target> assignedTargets, final List<Target> unassignedTargets, final TargetTag targetTag) {
-        super(assigned, alreadyAssigned);
-        this.unassigned = unassigned;
-        this.assignedTargets = assignedTargets;
-        this.unassignedTargets = unassignedTargets;
+        super(assigned, alreadyAssigned, unassigned, assignedTargets, unassignedTargets);
         this.targetTag = targetTag;
-    }
-
-    public int getUnassigned() {
-        return unassigned;
-    }
-
-    public List<Target> getAssignedTargets() {
-        return assignedTargets;
-    }
-
-    public List<Target> getUnassignedTargets() {
-        return unassignedTargets;
     }
 
     public TargetTag getTargetTag() {

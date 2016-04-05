@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
@@ -20,10 +16,8 @@ import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -47,42 +41,14 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
     private static final long serialVersionUID = -1052279281066089812L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permissionChecker;
-
-    @Autowired
     private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
 
     @Autowired
     private ManageDistUIState manageDistUIState;
 
-    private UI ui;
-
     private Long swModuleId;
 
     private SoftwareModule selectedSwModule;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
