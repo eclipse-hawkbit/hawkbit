@@ -8,20 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -45,29 +39,10 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 242961845006626297L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
-
-    @Autowired
     private ArtifactUploadState artifactUploadState;
 
     @Autowired
     private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
-
-    /**
-     * Initialize the components.
-     */
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        eventbus.subscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final UploadArtifactUIEvent event) {
@@ -76,14 +51,6 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
         }
     }
 
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventbus.unsubscribe(this);
-    }
 
     @Override
     protected String getHeaderCaption() {

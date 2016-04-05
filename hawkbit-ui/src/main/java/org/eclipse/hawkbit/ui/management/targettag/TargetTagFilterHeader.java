@@ -10,14 +10,12 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -33,13 +31,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     private static final long serialVersionUID = 3046367045669148009L;
 
     @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
     private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
 
     @Autowired
     private CreateUpdateTargetTagLayout createUpdateTargetTagLayout;
@@ -58,7 +50,6 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getHideButtonId() {
-
         return SPUIComponetIdProvider.HIDE_TARGET_TAGS;
     }
 
@@ -87,7 +78,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         managementUIState.setTargetTagFilterClosed(true);
-        eventbus.publish(this, ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT);
+        eventBus.publish(this, ManagementUIEvent.HIDE_TARGET_TAG_LAYOUT);
     }
 
     @Override

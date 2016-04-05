@@ -12,13 +12,11 @@ import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.rest.resource.model.IdRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypePagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypesRest;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,7 +55,7 @@ public interface DistributionSetTypeRestApi {
      *         response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<DistributionSetTypePagedList> getDistributionSetTypes(
+    public ResponseEntity<PagedList<DistributionSetTypeRest>> getDistributionSetTypes(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -119,7 +117,7 @@ public interface DistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<DistributionSetTypesRest> createDistributionSetTypes(
+    public ResponseEntity<List<DistributionSetTypeRest>> createDistributionSetTypes(
             @RequestBody final List<DistributionSetTypeRequestBodyPost> distributionSetTypes);
 
     /**
@@ -133,7 +131,7 @@ public interface DistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}/"
             + RestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, produces = { "application/hal+json",
                     MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModuleTypesRest> getMandatoryModules(
+    public ResponseEntity<List<SoftwareModuleTypeRest>> getMandatoryModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
 
     /**
@@ -181,7 +179,7 @@ public interface DistributionSetTypeRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}/"
             + RestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, produces = { "application/hal+json",
                     MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModuleTypesRest> getOptionalModules(
+    public ResponseEntity<List<SoftwareModuleTypeRest>> getOptionalModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
 
     /**

@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.security;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -20,6 +21,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
@@ -38,11 +40,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
     @Mock
     private TenantAwareWebAuthenticationDetails webAuthenticationDetailsMock;
 
-    /**
-     * Testing in case the containing controllerId in the URI request path does
-     * not accord with the controllerId in the request header.
-     */
-    @Test(expected = BadCredentialsException.class)
+    @Test
+    @Description("Testing in case the containing controllerId in the URI request path does not accord with the controllerId in the request header.")
     public void principalAndCredentialsNotTheSameThrowsAuthenticationException() {
         final String principal = "controllerIdURL";
         final String credentials = "controllerIdHeader";
@@ -51,15 +50,17 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         token.setDetails(webAuthenticationDetailsMock);
 
         // test, should throw authentication exception
-        underTestWithoutSourceIpCheck.authenticate(token);
+        try {
+            underTestWithoutSourceIpCheck.authenticate(token);
+            fail("Should not work with wrong credentials");
+        } catch (final BadCredentialsException e) {
+
+        }
+
     }
 
-    /**
-     * Testing that the controllerId within the URI request path is the same
-     * with the controllerId within the request header and no source IP check is
-     * in place.
-     */
     @Test
+    @Description("Testing that the controllerId within the URI request path is the same with the controllerId within the request header and no source IP check is in place.")
     public void principalAndCredentialsAreTheSameWithNoSourceIpCheckIsSuccessful() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
@@ -71,12 +72,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         assertThat(authenticate.isAuthenticated()).isTrue();
     }
 
-    /**
-     * Testing that the controllerId in the URI request match with the
-     * controllerId in the request header but the request are not coming from a
-     * trustful source.
-     */
-    @Test(expected = InsufficientAuthenticationException.class)
+    @Test
+    @Description("Testing that the controllerId in the URI request match with the controllerId in the request header but the request are not coming from a trustful source.")
     public void priniciapAndCredentialsAreTheSameButSourceIpRequestNotMatching() {
         final String remoteAddress = "192.168.1.1";
         final String principal = "controllerId";
@@ -88,16 +85,17 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(remoteAddress);
 
         // test, should throw authentication exception
-        final Authentication authenticate = underTestWithSourceIpCheck.authenticate(token);
-        assertThat(authenticate.isAuthenticated()).isTrue();
+
+        try {
+            underTestWithSourceIpCheck.authenticate(token);
+            fail("as source is not trusted.");
+        } catch (final InsufficientAuthenticationException e) {
+
+        }
     }
 
-    /**
-     * Testing that the controllerId in the URI request match with the
-     * controllerId in the request header and the source Ip is matching the
-     * allowed remote IP address.
-     */
-    @Test()
+    @Test
+    @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source Ip is matching the allowed remote IP address.")
     public void priniciapAndCredentialsAreTheSameAndSourceIpIsTrusted() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
@@ -112,7 +110,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         assertThat(authenticate.isAuthenticated()).isTrue();
     }
 
-    @Test()
+    @Test
     public void priniciapAndCredentialsAreTheSameAndSourceIpIsWithinList() {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", REQUEST_SOURCE_IP,
                 "192.168.1.3" };
@@ -148,6 +146,11 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
         // test, should throw authentication exception
         final Authentication authenticate = underTestWithList.authenticate(token);
-        assertThat(authenticate.isAuthenticated()).isTrue();
+        try {
+            assertThat(authenticate.isAuthenticated()).isTrue();
+            fail("as source is not trusted.");
+        } catch (final InsufficientAuthenticationException e) {
+
+        }
     }
 }

@@ -8,18 +8,19 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
-import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- * An abstract definition class for {@link EntityEvent} for {@link BaseEntity}s,
- * which holds the {@link BaseEntity}.
+ * An abstract definition class for {@link EntityEvent} for
+ * {@link TenantAwareBaseEntity}s, which holds the {@link TenantAwareBaseEntity}
+ * .
  *
  *
  *
  * @param <E>
- *            the type of the {@link BaseEntity}
+ *            the type of the {@link TenantAwareBaseEntity}
  */
-public abstract class AbstractBaseEntityEvent<E extends BaseEntity> extends AbstractDistributedEvent
+public abstract class AbstractBaseEntityEvent<E extends TenantAwareBaseEntity> extends AbstractDistributedEvent
         implements EntityEvent {
 
     /**
@@ -37,33 +38,16 @@ public abstract class AbstractBaseEntityEvent<E extends BaseEntity> extends Abst
         this.entity = baseEntity;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.eventbus.event.EntityEvent#getEntity()
-     */
     @Override
     public E getEntity() {
         return entity;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.eventbus.event.EntityEvent#getEntity(java.lang
-     * .Class)
-     */
     @Override
     public <T> T getEntity(final Class<T> entityClass) {
         return entityClass.cast(entity);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.eventbus.event.EntityEvent#getTenant()
-     */
     @Override
     public String getTenant() {
         return entity.getTenant();

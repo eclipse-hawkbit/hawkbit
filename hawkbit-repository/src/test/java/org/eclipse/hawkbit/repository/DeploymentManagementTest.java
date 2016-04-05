@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.Constants;
@@ -154,8 +155,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         List<Target> targets = targetManagement
                 .createTargets(TestDataUtil.generateTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10));
 
-        targets = deploymentManagement.assignDistributionSet(cancelDs, targets).getAssignedTargets();
-        targets = deploymentManagement.assignDistributionSet(cancelDs2, targets).getAssignedTargets();
+        targets = deploymentManagement.assignDistributionSet(cancelDs, targets).getAssignedEntity();
+        targets = deploymentManagement.assignDistributionSet(cancelDs2, targets).getAssignedEntity();
 
         targetManagement.findAllTargetIds().forEach(targetIdName -> {
             assertThat(deploymentManagement.findActiveActionsByTarget(
@@ -386,7 +387,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 .createTargets(TestDataUtil.buildTargetFixtures(10, myCtrlIDPref, "first description"));
 
         final String myDeployedCtrlIDPref = "myDeployedCtrlID";
-        final List<Target> savedDeployedTargets = targetManagement
+        List<Target> savedDeployedTargets = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(20, myDeployedCtrlIDPref, "first description"));
 
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
@@ -398,6 +399,10 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertThat(actionRepository.findAll(pageReq).getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
 
         final Iterable<Target> allFoundTargets = targetManagement.findTargetsAll(pageReq).getContent();
+
+        // get final updated version of targets
+        savedDeployedTargets = targetManagement.findTargetByControllerID(
+                savedDeployedTargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
 
         assertThat(allFoundTargets).as("founded targets are wrong").containsAll(savedDeployedTargets)
                 .containsAll(savedNakedTargets);
@@ -599,11 +604,15 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // activeActions, add a corresponding cancelAction and another
         // UpdateAction for dsA
         final Iterable<Target> deployed2DS = deploymentManagement
-                .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedTargets();
+                .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedEntity();
         actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(1);
 
-        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsB.getDeployedTargets());
-        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsB.getDeployedTargets());
+        // get final updated version of targets
+        final List<Target> deployResWithDsBTargets = targetManagement.findTargetByControllerID(deployResWithDsB
+                .getDeployedTargets().stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+
+        assertThat(deployed2DS).as("deployed ds is wrong").containsAll(deployResWithDsBTargets);
+        assertThat(deployed2DS).as("deployed ds is wrong").hasSameSizeAs(deployResWithDsBTargets);
 
         for (final Target t_ : deployed2DS) {
             final Target t = targetManagement.findTargetByControllerID(t_.getControllerId());
@@ -752,7 +761,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         targs.add(targ);
 
         // doing the assignment
-        targs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedTargets();
+        targs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedEntity();
         targ = targetManagement.findTargetByControllerID(targs.iterator().next().getControllerId());
 
         // checking the revisions of the created entities
@@ -790,7 +799,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertEquals("wrong installed ds", dsA, targ.getTargetInfo().getInstalledDistributionSet());
 
         targs = deploymentManagement.assignDistributionSet(dsB.getId(), new String[] { "target-id-A" })
-                .getAssignedTargets();
+                .getAssignedEntity();
 
         targ = targs.iterator().next();
 
@@ -821,7 +830,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         final List<Target> targs = new ArrayList<Target>();
         targs.add(targ);
-        final Iterable<Target> savedTargs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedTargets();
+        final Iterable<Target> savedTargs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedEntity();
         targ = savedTargs.iterator().next();
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
@@ -917,7 +926,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // assigning all DistributionSet to the Target in the list
         // deployedTargets
         for (final DistributionSet ds : dsList) {
-            deployedTargets = deploymentManagement.assignDistributionSet(ds, deployedTargets).getAssignedTargets();
+            deployedTargets = deploymentManagement.assignDistributionSet(ds, deployedTargets).getAssignedEntity();
         }
 
         final DeploymentResult deploymentResult = new DeploymentResult(deployedTargets, nakedTargets, dsList,

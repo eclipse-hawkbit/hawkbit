@@ -27,18 +27,15 @@ import org.eclipse.hawkbit.rest.resource.api.TargetRestApi;
 import org.eclipse.hawkbit.rest.resource.model.PollStatusRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusRest;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionStatussRest;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionsRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
  *
  */
-final public class TargetMapper {
+public final class TargetMapper {
 
     private TargetMapper() {
         // Utility class
@@ -64,7 +61,7 @@ final public class TargetMapper {
     }
 
     /**
-     * Add the pollstatus to a target response.
+     * Add the poll status to a target response.
      *
      * @param target
      *            the target
@@ -91,8 +88,8 @@ final public class TargetMapper {
      *            the targets
      * @return the response
      */
-    public static TargetsRest toResponseWithLinksAndPollStatus(final Iterable<Target> targets) {
-        final TargetsRest mappedList = new TargetsRest();
+    public static List<TargetRest> toResponseWithLinksAndPollStatus(final Iterable<Target> targets) {
+        final List<TargetRest> mappedList = new ArrayList<>();
         if (targets != null) {
             for (final Target target : targets) {
                 final TargetRest response = toResponse(target);
@@ -111,8 +108,8 @@ final public class TargetMapper {
      *            list of targets
      * @return the response
      */
-    public static TargetsRest toResponse(final Iterable<Target> targets) {
-        final TargetsRest mappedList = new TargetsRest();
+    public static List<TargetRest> toResponse(final Iterable<Target> targets) {
+        final List<TargetRest> mappedList = new ArrayList<>();
         if (targets != null) {
             for (final Target target : targets) {
                 final TargetRest response = toResponse(target);
@@ -184,12 +181,12 @@ final public class TargetMapper {
         return target;
     }
 
-    static ActionStatussRest toActionStatusRestResponse(final Action action, final List<ActionStatus> actionStatus) {
-        final ActionStatussRest mappedList = new ActionStatussRest();
+    static List<ActionStatusRest> toActionStatusRestResponse(final List<ActionStatus> actionStatus) {
+        final List<ActionStatusRest> mappedList = new ArrayList<>();
 
         if (actionStatus != null) {
             for (final ActionStatus status : actionStatus) {
-                final ActionStatusRest response = toResponse(action, status);
+                final ActionStatusRest response = toResponse(status);
                 mappedList.add(response);
             }
         }
@@ -216,8 +213,8 @@ final public class TargetMapper {
         return result;
     }
 
-    static ActionsRest toResponse(final String targetId, final List<Action> actions) {
-        final ActionsRest mappedList = new ActionsRest();
+    static List<ActionRest> toResponse(final String targetId, final List<Action> actions) {
+        final List<ActionRest> mappedList = new ArrayList<>();
 
         for (final Action action : actions) {
             final ActionRest response = toResponse(targetId, action, action.isActive());
@@ -293,7 +290,7 @@ final public class TargetMapper {
         return result;
     }
 
-    private static ActionStatusRest toResponse(final Action action, final ActionStatus actionStatus) {
+    private static ActionStatusRest toResponse(final ActionStatus actionStatus) {
         final ActionStatusRest result = new ActionStatusRest();
 
         result.setMessages(actionStatus.getMessages());

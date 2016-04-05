@@ -88,7 +88,7 @@ public class SystemManagementResource {
                 .setOverallTargets(report.getOverallTargets()).setOverallTenants(report.getTenants().size());
 
         result.setTenantStats(
-                report.getTenants().stream().map(tenant -> convertTenant(tenant)).collect(Collectors.toList()));
+                report.getTenants().stream().map(SystemManagementResource::convertTenant).collect(Collectors.toList()));
 
         return ResponseEntity.ok(result);
     }
@@ -104,7 +104,7 @@ public class SystemManagementResource {
     }
 
     /**
-     * Returns a list of all caches containing currently.
+     * Returns a list of all caches.
      *
      * @return a list of caches for all tenants
      */
@@ -112,8 +112,8 @@ public class SystemManagementResource {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     public ResponseEntity<Collection<CacheRest>> getCaches() {
         final Collection<String> cacheNames = cacheManager.getCacheNames();
-        return ResponseEntity.ok(cacheNames.stream().map(cacheName -> cacheManager.getCache(cacheName))
-                .map(cache -> cacheRest(cache)).collect(Collectors.toList()));
+        return ResponseEntity
+                .ok(cacheNames.stream().map(cacheManager::getCache).map(this::cacheRest).collect(Collectors.toList()));
     }
 
     /**

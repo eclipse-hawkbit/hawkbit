@@ -74,7 +74,7 @@
       <!-- Vaadin versions - START -->
       <vaadin.spring.version>1.0.0</vaadin.spring.version>
       <vaadin.spring.addon.version>0.0.6.RELEASE</vaadin.spring.addon.version>
-      <vaadin.version>7.6.3</vaadin.version>
+      <vaadin.version>7.6.4</vaadin.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
       <vaadin.addon.vaadin-lazyquerycontainer.version>7.4.0.1</vaadin.addon.vaadin-lazyquerycontainer.version>
       <vaadin.addon.flexibleoptiongroup.version>2.2.0</vaadin.addon.flexibleoptiongroup.version>
@@ -84,6 +84,7 @@
       <!-- Vaadin versions - END -->
 
       <!-- Misc libraries versions - START -->
+      <validation-api.version>1.1.0.Final</validation-api.version>
       <fest-assert.version>1.4</fest-assert.version>
       <org.easytesting.version>2.0M10</org.easytesting.version>
       <allure.version>1.4.22</allure.version>
@@ -419,6 +420,11 @@
          </dependency>
 
          <!-- Misc -->
+         <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${validation-api.version}</version>
+         </dependency>
          <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>

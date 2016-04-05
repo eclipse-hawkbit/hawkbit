@@ -12,14 +12,11 @@ import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
-import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
-import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactsRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulePagedList;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulesRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,7 +76,8 @@ public interface SoftwareModuleRestAPI {
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/artifacts", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
     @ResponseBody
-    public ResponseEntity<ArtifactsRest> getArtifacts(@PathVariable("softwareModuleId") final Long softwareModuleId);
+    public ResponseEntity<List<ArtifactRest>> getArtifacts(
+            @PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
      * Handles the GET request of retrieving a single Artifact meta data
@@ -134,7 +132,7 @@ public interface SoftwareModuleRestAPI {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModulePagedList> getSoftwareModules(
+    public ResponseEntity<PagedList<SoftwareModuleRest>> getSoftwareModules(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -168,7 +166,7 @@ public interface SoftwareModuleRestAPI {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModulesRest> createSoftwareModules(
+    public ResponseEntity<List<SoftwareModuleRest>> createSoftwareModules(
             @RequestBody final List<SoftwareModuleRequestBodyPost> softwareModules);
 
     /**
@@ -187,7 +185,7 @@ public interface SoftwareModuleRestAPI {
             @RequestBody final SoftwareModuleRequestBodyPut restSoftwareModule);
 
     /**
-     * Handles the DELETE request for a single softwaremodule.
+     * Handles the DELETE request for a single software module.
      *
      * @param softwareModuleId
      *            the ID of the module to retrieve
@@ -219,7 +217,7 @@ public interface SoftwareModuleRestAPI {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    public ResponseEntity<MetadataRestPageList> getMetadata(
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,

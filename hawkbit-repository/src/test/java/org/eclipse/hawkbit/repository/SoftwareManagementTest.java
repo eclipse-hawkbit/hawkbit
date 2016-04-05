@@ -10,11 +10,11 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -24,14 +24,18 @@ import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.RandomGeneratedInputStream;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.CustomSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
@@ -50,6 +54,165 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Software Management")
 public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
+
+    @Test
+    @Description("Try to update non updatable fields results in repository doing nothing.")
+    public void updateTypeNonUpdateableFieldsFails() {
+        final SoftwareModuleType created = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+
+        created.setName("a new name");
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+
+        assertThat(updated.getOptLockRevision())
+                .as("Expected version number of updated entitity to be equal to created version")
+                .isEqualTo(created.getOptLockRevision());
+    }
+
+    @Test
+    @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
+    public void updateNothingResultsInUnchangedRepositoryForType() {
+        final SoftwareModuleType created = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+
+        assertThat(updated.getOptLockRevision())
+                .as("Expected version number of updated entitity to be equal to created version")
+                .isEqualTo(created.getOptLockRevision());
+    }
+
+    @Test
+    @Description("Calling update for changed fields results in change in the repository.")
+    public void updateSoftareModuleTypeFieldsToNewValue() {
+        final SoftwareModuleType created = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+
+        created.setDescription("changed");
+        created.setColour("changed");
+
+        final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
+
+        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
+                .isEqualTo(created.getOptLockRevision() + 1);
+        assertThat(updated.getDescription()).as("Updated description is").isEqualTo("changed");
+        assertThat(updated.getColour()).as("Updated vendor is").isEqualTo("changed");
+    }
+
+    @Test
+    @Description("Try to update non updatable fields results in repository doing nothing.")
+    public void updateNonUpdateableFieldsFails() {
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+
+        ah.setName("a new name");
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+
+        assertThat(updated.getOptLockRevision())
+                .as("Expected version number of updated entitity to be equal to created version")
+                .isEqualTo(ah.getOptLockRevision());
+    }
+
+    @Test
+    @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
+    public void updateNothingResultsInUnchangedRepository() {
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+
+        assertThat(updated.getOptLockRevision())
+                .as("Expected version number of updated entitity to be equal to created version")
+                .isEqualTo(ah.getOptLockRevision());
+    }
+
+    @Test
+    @Description("Calling update for changed fields results in change in the repository.")
+    public void updateSoftareModuleFieldsToNewValue() {
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+
+        ah.setDescription("changed");
+        ah.setVendor("changed");
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+
+        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
+                .isEqualTo(ah.getOptLockRevision() + 1);
+        assertThat(updated.getDescription()).as("Updated description is").isEqualTo("changed");
+        assertThat(updated.getVendor()).as("Updated vendor is").isEqualTo("changed");
+    }
+
+    @Test
+    @Description("Create Software Module call fails when called for existing entity.")
+    public void createModuleCallFailsForExistingModule() {
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+        try {
+            softwareManagement.createSoftwareModule(ah);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
+    }
+
+    @Test
+    @Description("Create Software Modules call fails when called for existing entities.")
+    public void createModulesCallFailsForExistingModule() {
+        final List<SoftwareModule> modules = softwareManagement.createSoftwareModule(
+                Lists.newArrayList(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"),
+                        new SoftwareModule(appType, "agent-hub", "1.0.2", "test desc", "test vendor")));
+        try {
+            softwareManagement.createSoftwareModule(modules);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
+    }
+
+    @Test
+    @Description("Create Software Module Type call fails when called for existing entity.")
+    public void createModuleTypeCallFailsForExistingType() {
+        final SoftwareModuleType created = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+
+        try {
+            softwareManagement.createSoftwareModuleType(created);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
+    }
+
+    @Test
+    @Description("Create Software Module Types call fails when called for existing entities.")
+    public void createModuleTypesCallFailsForExistingTypes() {
+        final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
+                Lists.newArrayList(new SoftwareModuleType("test-key-bumlux", "test-name", "test-desc", 1),
+                        new SoftwareModuleType("test-key-bumlux2", "test-name2", "test-desc", 1)));
+
+        try {
+            softwareManagement.createSoftwareModuleType(created);
+            fail("Should not have worked as module already exists.");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
+    }
+
+    @Test
+    @Description("Calling update for changing fields to null results in change in the repository.")
+    public void eraseSoftareModuleFields() {
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+
+        ah.setDescription(null);
+        ah.setVendor(null);
+        final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
+
+        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
+                .isEqualTo(ah.getOptLockRevision() + 1);
+        assertThat(updated.getDescription()).as("Updated description is").isNull();
+        assertThat(updated.getVendor()).as("Updated vendor is").isNull();
+    }
 
     @Test
     @Description("searched for software modules based on the various filter options, e.g. name,desc,type, version.")
@@ -105,7 +268,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
     @Test
     @Description("Searches for software modules based on a list of IDs.")
-    public void findSoftwareModulesByIdAndType() {
+    public void findSoftwareModulesById() {
 
         final List<Long> modules = new ArrayList<Long>();
 
@@ -116,6 +279,54 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         modules.add(624355263L);
 
         assertThat(softwareManagement.findSoftwareModulesById(modules)).hasSize(2);
+    }
+
+    @Test
+    @Description("Searches for software modules by type.")
+    public void findSoftwareModulesByType() {
+        // found in test
+        final SoftwareModule one = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "one", "one", null, ""));
+        final SoftwareModule two = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "two", "two", null, ""));
+        // ignored
+        softwareManagement.deleteSoftwareModule(
+                softwareManagement.createSoftwareModule(new SoftwareModule(osType, "deleted", "deleted", null, "")));
+        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "three", "3.0.2", null, ""));
+
+        assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent())
+                .as("Expected to find the following number of modules:").hasSize(2).as("with the following elements")
+                .contains(two, one);
+    }
+
+    @Test
+    @Description("Counts all software modules in the repsitory that are not marked as deleted.")
+    public void countSoftwareModulesAll() {
+        // found in test
+        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "one", "one", null, ""));
+        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "two", "two", null, ""));
+        // ignored
+        softwareManagement.deleteSoftwareModule(
+                softwareManagement.createSoftwareModule(new SoftwareModule(osType, "deleted", "deleted", null, "")));
+
+        assertThat(softwareManagement.countSoftwareModulesAll()).as("Expected to find the following number of modules:")
+                .isEqualTo(2);
+    }
+
+    @Test
+    @Description("Counts for software modules by type.")
+    public void countSoftwareModulesByType() {
+        // found in test
+        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "one", "one", null, ""));
+        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "two", "two", null, ""));
+
+        // ignored
+        softwareManagement.deleteSoftwareModule(
+                softwareManagement.createSoftwareModule(new SoftwareModule(osType, "deleted", "deleted", null, "")));
+        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "three", "3.0.2", null, ""));
+
+        assertThat(softwareManagement.countSoftwareModulesByType(osType))
+                .as("Expected to find the following number of modules:").isEqualTo(2);
     }
 
     @Test
@@ -419,32 +630,194 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         }
     }
 
-    /**
-     *
-     * @param findAll
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    private Collection iterable2Collection(final Iterable iterable) {
-        final Collection<Object> col = new ArrayList<Object>();
-        for (final Object o : iterable) {
-            col.add(o);
-        }
-        return col;
+    @Test
+    @Description("Test verfies that results are returned based on given filter parameters and in the specified order.")
+    public void findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc() {
+        // test meta data
+        final SoftwareModuleType testType = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        final DistributionSetType testDsType = distributionSetManagement
+                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
+                        .addOptionalModuleType(testType));
+
+        // found in test
+        final SoftwareModule unassigned = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "asis", "found", null, ""));
+        final SoftwareModule one = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "found", "b", null, ""));
+        final SoftwareModule two = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "found", "c", null, ""));
+        final SoftwareModule differentName = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "differentname", "d", null, ""));
+
+        // ignored
+        final SoftwareModule deleted = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+        final SoftwareModule four = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "sdfjhsdj", "e", null, ""));
+
+        final DistributionSet set = distributionSetManagement.createDistributionSet(new DistributionSet("set", "1",
+                "desc", testDsType, Lists.newArrayList(one, two, deleted, four, differentName)));
+        softwareManagement.deleteSoftwareModule(deleted);
+
+        // with filter on name, version and module type
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+                set.getId(), "found", testType).getContent())
+                        .as("Found modules with given name, given module type and the assigned ones first")
+                        .containsExactly(new CustomSoftwareModule(one, true), new CustomSoftwareModule(two, true),
+                                new CustomSoftwareModule(unassigned, false));
+
+        // with filter on module type only
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+                set.getId(), null, testType).getContent())
+                        .as("Found modules with given module type and the assigned ones first").containsExactly(
+                                new CustomSoftwareModule(differentName, true), new CustomSoftwareModule(one, true),
+                                new CustomSoftwareModule(two, true), new CustomSoftwareModule(unassigned, false));
+
+        // without any filter
+        assertThat(softwareManagement.findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(pageReq,
+                set.getId(), null, null).getContent()).as("Found modules with the assigned ones first").containsExactly(
+                        new CustomSoftwareModule(differentName, true), new CustomSoftwareModule(one, true),
+                        new CustomSoftwareModule(two, true), new CustomSoftwareModule(four, true),
+                        new CustomSoftwareModule(unassigned, false));
     }
 
-    /**
-    *
-    */
-    private void printDSTags() {
-        System.out.println("==============================================================================");
-        for (final DistributionSet d : distributionSetRepository.findAll()) {
-            System.out.printf("%s\t[", d.getName());
-            for (final DistributionSetTag t : d.getTags()) {
-                System.out.printf("%s ", t.getName());
-            }
-            System.out.println("]");
+    @Test
+    @Description("Checks that number of modules is returned as expected based on given filters.")
+    public void countSoftwareModuleByFilters() {
+
+        // test meta data
+        final SoftwareModuleType testType = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        final DistributionSetType testDsType = distributionSetManagement
+                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
+                        .addOptionalModuleType(testType));
+
+        // test modules
+        softwareManagement.createSoftwareModule(new SoftwareModule(testType, "asis", "found", null, ""));
+        final SoftwareModule one = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "found", "b", null, ""));
+        final SoftwareModule two = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "found", "c", null, ""));
+        final SoftwareModule differentName = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "differentname", "d", null, ""));
+        final SoftwareModule four = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "found", "3.0.2", null, ""));
+
+        // one soft deleted
+        final SoftwareModule deleted = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+        distributionSetManagement.createDistributionSet(new DistributionSet("set", "1", "desc", testDsType,
+                Lists.newArrayList(one, two, deleted, four, differentName)));
+        softwareManagement.deleteSoftwareModule(deleted);
+
+        // test
+        assertThat(softwareManagement.countSoftwareModuleByFilters("found", testType))
+                .as("Number of modules with given name or version and type").isEqualTo(3);
+        assertThat(softwareManagement.countSoftwareModuleByFilters(null, testType))
+                .as("Number of modules with given type").isEqualTo(4);
+        assertThat(softwareManagement.countSoftwareModuleByFilters(null, null)).as("Number of modules overall")
+                .isEqualTo(5);
+    }
+
+    @Test
+    @Description("Verfies that all undeleted software modules are found in the repository.")
+    public void countSoftwareModuleTypesAll() {
+        final SoftwareModuleType testType = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        final DistributionSetType testDsType = distributionSetManagement
+                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
+                        .addOptionalModuleType(testType));
+        final SoftwareModule four = softwareManagement
+                .createSoftwareModule(new SoftwareModule(osType, "found", "3.0.2", null, ""));
+
+        // one soft deleted
+        final SoftwareModule deleted = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+        distributionSetManagement.createDistributionSet(
+                new DistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(deleted, four)));
+        softwareManagement.deleteSoftwareModule(deleted);
+
+        assertThat(softwareManagement.countSoftwareModulesAll()).as("Number of undeleted modules").isEqualTo(1);
+        assertThat(softwareModuleRepository.count()).as("Number of all modules").isEqualTo(2);
+    }
+
+    @Test
+    @Description("Checks that software module typeis found based on given name.")
+    public void findSoftwareModuleTypeByName() {
+        final SoftwareModuleType found = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        softwareManagement.createSoftwareModuleType(new SoftwareModuleType("thetype2", "anothername", "desc", 100));
+
+        assertThat(softwareManagement.findSoftwareModuleTypeByName("thename")).as("Type with given name")
+                .isEqualTo(found);
+    }
+
+    @Test
+    @Description("Verfies that it is not possible to create a type that alrady exists.")
+    public void createSoftwareModuleTypeFailsWithExistingEntity() {
+        final SoftwareModuleType created = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        try {
+            softwareManagement.createSoftwareModuleType(created);
+            fail("should not have worked as module type already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
         }
+
+    }
+
+    @Test
+    @Description("Verfies that it is not possible to create a list of types where one already exists.")
+    public void createSoftwareModuleTypesFailsWithExistingEntity() {
+        final SoftwareModuleType created = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        try {
+            softwareManagement.createSoftwareModuleType(
+                    Lists.newArrayList(created, new SoftwareModuleType("anothertype", "anothername", "desc", 100)));
+            fail("should not have worked as module type already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
+    }
+
+    @Test
+    @Description("Verfies that multiple types are created as requested.")
+    public void createMultipleoftwareModuleTypes() {
+        final List<SoftwareModuleType> created = softwareManagement
+                .createSoftwareModuleType(Lists.newArrayList(new SoftwareModuleType("thetype", "thename", "desc", 100),
+                        new SoftwareModuleType("thetype2", "thename2", "desc2", 100)));
+
+        assertThat(created.size()).as("Number of created types").isEqualTo(2);
+        assertThat(softwareManagement.countSoftwareModuleTypesAll()).as("Number of types in repository").isEqualTo(5);
+    }
+
+    @Test
+    @Description("Verfies that sofwtare modules are resturned that are assigned to given DS.")
+    public void findSoftwareModuleByAssignedTo() {
+        // test meta data
+        final SoftwareModuleType testType = softwareManagement
+                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+        final DistributionSetType testDsType = distributionSetManagement
+                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
+                        .addOptionalModuleType(testType));
+
+        // test modules
+        softwareManagement.createSoftwareModule(new SoftwareModule(testType, "asis", "found", null, ""));
+        final SoftwareModule one = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "found", "b", null, ""));
+        final SoftwareModule two = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "found", "c", null, ""));
+
+        // one soft deleted
+        final SoftwareModule deleted = softwareManagement
+                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+        final DistributionSet set = distributionSetManagement.createDistributionSet(
+                new DistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(one, deleted)));
+        softwareManagement.deleteSoftwareModule(deleted);
+
+        assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set).getContent())
+                .as("Found this number of modules").hasSize(2);
     }
 
     @Test
@@ -477,6 +850,27 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(softwareModuleMetadata.get(0).getValue()).isEqualTo(knownValue1);
         assertThat(softwareModuleMetadata.get(0).getId().getKey()).isEqualTo(knownKey1);
         assertThat(softwareModuleMetadata.get(0).getSoftwareModule().getId()).isEqualTo(ah.getId());
+    }
+
+    @Test
+    @Description("Checks that metadata for a software module cannot be created for an existing key.")
+    public void createSoftwareModuleMetadataFailsIfKeyExists() {
+
+        final String knownKey1 = "myKnownKey1";
+        final String knownValue1 = "myKnownValue1";
+        final String knownValue2 = "myKnownValue2";
+
+        final SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+
+        softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1));
+
+        try {
+            softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue2));
+            fail("should not have worked as module metadata already exists");
+        } catch (final EntityAlreadyExistsException e) {
+
+        }
     }
 
     @Test
@@ -523,6 +917,47 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
         assertThat(updated.getId().getKey()).isEqualTo(knownKey);
         assertThat(updated.getSoftwareModule().getId()).isEqualTo(ah.getId());
+    }
+
+    @Test
+    @Description("Verfies that existing metadata can be deleted.")
+    public void deleteSoftwareModuleMetadata() {
+        final String knownKey1 = "myKnownKey1";
+        final String knownValue1 = "myKnownValue1";
+
+        SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+
+        ah = softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1))
+                .getSoftwareModule();
+
+        assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata())
+                .as("Contains the created metadata element")
+                .containsExactly(new SoftwareModuleMetadata(knownKey1, ah, knownValue1));
+
+        softwareManagement.deleteSoftwareModuleMetadata(new SwMetadataCompositeKey(ah, knownKey1));
+        assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata()).as("Metadata elemenets are")
+                .isEmpty();
+    }
+
+    @Test
+    @Description("Verfies that non existing metadata find results in exception.")
+    public void findSoftwareModuleMetadataFailsIfEntryDoesNotExist() {
+        final String knownKey1 = "myKnownKey1";
+        final String knownValue1 = "myKnownValue1";
+
+        SoftwareModule ah = softwareManagement
+                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+
+        ah = softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1))
+                .getSoftwareModule();
+
+        try {
+            softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(ah, "doesnotexist"));
+            fail("should not have worked as module metadata with that key does not exist");
+        } catch (final EntityNotFoundException e) {
+
+        }
     }
 
     @Test

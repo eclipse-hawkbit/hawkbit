@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
@@ -36,8 +35,6 @@ import org.springframework.data.jpa.domain.Specification;
  * Specifications class for {@link Target}s. The class provides Spring Data JPQL
  * Specifications.
  *
- *
- *
  */
 public final class TargetSpecifications {
     private TargetSpecifications() {
@@ -54,18 +51,12 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<Target> byControllerIdWithStatusAndTagsInJoin(final Collection<String> controllerIDs) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = targetRoot.get(Target_.controllerId).in(controllerIDs);
-                targetRoot.fetch(Target_.tags, JoinType.LEFT);
-                query.distinct(true);
-                return predicate;
-            }
+        return (targetRoot, query, cb) -> {
+            final Predicate predicate = targetRoot.get(Target_.controllerId).in(controllerIDs);
+            targetRoot.fetch(Target_.tags, JoinType.LEFT);
+            query.distinct(true);
+            return predicate;
         };
-
-        return spec;
     }
 
     /**
@@ -79,18 +70,12 @@ public final class TargetSpecifications {
      */
     public static Specification<Target> byControllerIdWithStatusAndAssignedInJoin(
             final Collection<String> controllerIDs) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
+        return (targetRoot, query, cb) -> {
 
-                final Predicate predicate = targetRoot.get(Target_.controllerId).in(controllerIDs);
-                targetRoot.fetch(Target_.assignedDistributionSet);
-                return predicate;
-            }
+            final Predicate predicate = targetRoot.get(Target_.controllerId).in(controllerIDs);
+            targetRoot.fetch(Target_.assignedDistributionSet);
+            return predicate;
         };
-
-        return spec;
     }
 
     /**
@@ -106,24 +91,18 @@ public final class TargetSpecifications {
      */
     public static Specification<Target> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus,
             final boolean fetch) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                if (!query.getResultType().isAssignableFrom(Long.class)) {
-                    if (fetch) {
-                        targetRoot.fetch(Target_.targetInfo);
-                    } else {
-                        targetRoot.join(Target_.targetInfo);
-                    }
-                    return targetRoot.get(Target_.targetInfo).get(TargetInfo_.updateStatus).in(updateStatus);
+        return (targetRoot, query, cb) -> {
+            if (!query.getResultType().isAssignableFrom(Long.class)) {
+                if (fetch) {
+                    targetRoot.fetch(Target_.targetInfo);
+                } else {
+                    targetRoot.join(Target_.targetInfo);
                 }
-                final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
-                return targetInfoJoin.get(TargetInfo_.updateStatus).in(updateStatus);
+                return targetRoot.get(Target_.targetInfo).get(TargetInfo_.updateStatus).in(updateStatus);
             }
+            final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
+            return targetInfoJoin.get(TargetInfo_.updateStatus).in(updateStatus);
         };
-
-        return spec;
     }
 
     /**
@@ -135,18 +114,11 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<Target> likeNameOrDescriptionOrIp(final String searchText) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final String searchTextToLower = searchText.toLowerCase();
-                final Predicate predicate = cb.or(cb.like(cb.lower(targetRoot.get(Target_.name)), searchTextToLower),
-                        cb.like(cb.lower(targetRoot.get(Target_.description)), searchTextToLower));
-                return predicate;
-            }
+        return (targetRoot, query, cb) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            return cb.or(cb.like(cb.lower(targetRoot.get(Target_.name)), searchTextToLower),
+                    cb.like(cb.lower(targetRoot.get(Target_.description)), searchTextToLower));
         };
-
-        return spec;
     }
 
     /**
@@ -158,21 +130,14 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<Target> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
-                final Predicate predicate = cb.or(
-                        cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
-                                distributionId),
-                        cb.equal(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet)
-                                .get(DistributionSet_.id), distributionId));
-                return predicate;
-            }
+        return (targetRoot, query, cb) -> {
+            final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
+            return cb.or(
+                    cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
+                            distributionId),
+                    cb.equal(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(DistributionSet_.id),
+                            distributionId));
         };
-
-        return spec;
     }
 
     /**
@@ -187,18 +152,11 @@ public final class TargetSpecifications {
      */
     public static Specification<Target> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
             @NotNull final Long distributionId) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = cb.and(targetRoot.get(Target_.controllerId).in(tIDs),
+        return (targetRoot, query, cb) -> cb
+                .and(targetRoot.get(Target_.controllerId).in(tIDs),
                         cb.or(cb.notEqual(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet)
                                 .get(DistributionSet_.id), distributionId),
-                        cb.isNull(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet))));
-                return predicate;
-            }
-        };
-        return spec;
+                                cb.isNull(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet))));
     }
 
     /**
@@ -212,16 +170,11 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<Target> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
-        final Specification<Target> spec = new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = getPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
-                query.distinct(true);
-                return predicate;
-            }
+        return (targetRoot, query, cb) -> {
+            final Predicate predicate = getPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
+            query.distinct(true);
+            return predicate;
         };
-        return spec;
     }
 
     private static Predicate getPredicate(final Root<Target> targetRoot, final CriteriaBuilder cb,
@@ -248,15 +201,9 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<Target> hasAssignedDistributionSet(final Long distributionSetId) {
-        return new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                return cb.equal(
-                        targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(DistributionSet_.id),
-                        distributionSetId);
-            }
-        };
+        return (targetRoot, query, cb) -> cb.equal(
+                targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(DistributionSet_.id),
+                distributionSetId);
     }
 
     /**
@@ -268,14 +215,10 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<Target> hasInstalledDistributionSet(final Long distributionSetId) {
-        return new Specification<Target>() {
-            @Override
-            public Predicate toPredicate(final Root<Target> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
-                return cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
-                        distributionSetId);
-            }
+        return (targetRoot, query, cb) -> {
+            final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
+            return cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
+                    distributionSetId);
         };
     }
 }

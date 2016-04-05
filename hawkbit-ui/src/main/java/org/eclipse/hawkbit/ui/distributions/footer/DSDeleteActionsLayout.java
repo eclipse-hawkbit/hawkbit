@@ -15,10 +15,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -30,13 +26,10 @@ import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -66,21 +59,6 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
                     DragEvent.SOFTWAREMODULE_TYPE_DRAG));
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private transient UINotification notification;
-
-    @Autowired
-    private transient UINotification uiNotification;
-
-    @Autowired
     private transient SystemManagement systemManagement;
 
     @Autowired
@@ -91,28 +69,6 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Autowired
     private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.DeleteActionsLayout#init()
-     */
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DragEvent event) {
@@ -139,77 +95,34 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * hasDeletePermission()
-     */
     @Override
     protected boolean hasDeletePermission() {
         return permChecker.hasDeleteDistributionPermission();
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * hasUpdatePermission()
-     */
     @Override
     protected boolean hasUpdatePermission() {
 
         return permChecker.hasUpdateDistributionPermission();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getDeleteAreaLabel()
-     */
     @Override
     protected String getDeleteAreaLabel() {
         return i18n.get("label.components.drop.area");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getDeleteAreaId()
-     */
     @Override
     protected String getDeleteAreaId() {
 
         return SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getDeleteLayoutAcceptCriteria ()
-     */
     @Override
     protected AcceptCriterion getDeleteLayoutAcceptCriteria() {
-
         return distributionsViewAcceptCriteria;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * processDroppedComponent(com .vaadin.event.dd.DragAndDropEvent)
-     */
     @Override
     protected void processDroppedComponent(final DragAndDropEvent event) {
         final Component sourceComponent = event.getTransferable().getSourceComponent();
@@ -298,7 +211,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
              * message accordingly.
              */
 
-            uiNotification.displayValidationError(i18n.get("message.targets.already.deleted"));
+            notification.displayValidationError(i18n.get("message.targets.already.deleted"));
         } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
             /*
              * Not the all distributions dropped now are added to the delete
@@ -306,7 +219,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
              * delete list. Hence display warning message accordingly.
              */
 
-            uiNotification.displayValidationError(i18n.get("message.dist.deleted.pending"));
+            notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
         }
 
     }
@@ -366,64 +279,12 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE.equals(source.getId());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getNoActionsButtonLabel()
-     */
-    @Override
-    protected String getNoActionsButtonLabel() {
-        return i18n.get("button.no.actions");
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getActionsButtonLabel()
-     */
-    @Override
-    protected String getActionsButtonLabel() {
-
-        return i18n.get("button.actions");
-
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * reloadActionCount()
-     */
     @Override
     protected void restoreActionCount() {
         updateDSActionCount();
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getUnsavedActionsWindowCaption ()
-     */
-    @Override
-    protected String getUnsavedActionsWindowCaption() {
-        return i18n.get("caption.save.window");
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * unsavedActionsWindowClosed()
-     */
     @Override
     protected void unsavedActionsWindowClosed() {
         final String message = distConfirmationWindowLayout.getConsolidatedMessage();
@@ -433,26 +294,12 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * getUnsavedActionsWindowContent ()
-     */
     @Override
     protected Component getUnsavedActionsWindowContent() {
         distConfirmationWindowLayout.init();
         return distConfirmationWindowLayout;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.footer.AbstractDeleteActionsLayout#
-     * hasUnsavedActions()
-     */
     @Override
     protected boolean hasUnsavedActions() {
         boolean unSavedActionsTypes = false;
@@ -479,23 +326,11 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
-     * hasBulkUploadPermission()
-     */
     @Override
     protected boolean hasBulkUploadPermission() {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
-     * showBulkUploadWindow()
-     */
     @Override
     protected void showBulkUploadWindow() {
         /**
@@ -503,12 +338,6 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
          */
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout#
-     * restoreBulkUploadStatusCount()
-     */
     @Override
     protected void restoreBulkUploadStatusCount() {
         /**

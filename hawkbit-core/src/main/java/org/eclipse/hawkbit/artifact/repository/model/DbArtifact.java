@@ -14,9 +14,6 @@ import java.io.OutputStream;
 /**
  * Database representation of artifact.
  * 
- *
- *
- *
  */
 public class DbArtifact {
 

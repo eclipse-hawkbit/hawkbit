@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.rsql;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
@@ -37,13 +40,13 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractIntegrationTes
                         "application", "1.0.0", "Desc", "vendor Limited, California"));
         softwareModuleId = softwareModule.getId();
 
+        final List<SoftwareModuleMetadata> metadata = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            final SoftwareModuleMetadata metadata = new SoftwareModuleMetadata("" + i, softwareModule, "" + i);
-            softwareModule.getMetadata().add(metadata);
-            softwareModuleMetadataRepository.save(metadata);
+            metadata.add(new SoftwareModuleMetadata("" + i, softwareModule, "" + i));
         }
 
-        softwareManagement.updateSoftwareModule(softwareModule);
+        softwareManagement.createSoftwareModuleMetadata(metadata);
+
     }
 
     @Test

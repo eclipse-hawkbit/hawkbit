@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.rest.resource.api;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetsRest;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
+import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedDistributionSetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.tag.DistributionSetTagAssigmentResultRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +52,7 @@ public interface DistributionSetTagRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TagPagedList> getDistributionSetTags(
+    public ResponseEntity<PagedList<TagRest>> getDistributionSetTags(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -87,7 +86,7 @@ public interface DistributionSetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TagsRest> createDistributionSetTags(@RequestBody final List<TagRequestBodyPut> tags);
+    public ResponseEntity<List<TagRest>> createDistributionSetTags(@RequestBody final List<TagRequestBodyPut> tags);
 
     /**
      *
@@ -137,7 +136,7 @@ public interface DistributionSetTagRestApi {
      *             exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = RestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
-    public ResponseEntity<DistributionSetsRest> getAssignedDistributionSets(
+    public ResponseEntity<List<DistributionSetRest>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId);
 
     /**
@@ -175,7 +174,7 @@ public interface DistributionSetTagRestApi {
      *             exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = RestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
-    public ResponseEntity<DistributionSetsRest> assignDistributionSets(
+    public ResponseEntity<List<DistributionSetRest>> assignDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final List<AssignedDistributionSetRequestBody> assignedDSRequestBodies);
 

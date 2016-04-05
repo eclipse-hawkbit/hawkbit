@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.UIEventProvider;
 import org.eclipse.hawkbit.ui.push.DelayedEventBusPushStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,7 +34,8 @@ public class MyUI extends HawkbitUI {
     private static final long serialVersionUID = 1L;
 
     @Autowired
-    public MyUI(final EventBus systemEventBus, final org.vaadin.spring.events.EventBus.SessionEventBus eventBus) {
-        super(new DelayedEventBusPushStrategy(eventBus, systemEventBus));
+    public MyUI(final EventBus systemEventBus, final org.vaadin.spring.events.EventBus.SessionEventBus eventBus,
+            final UIEventProvider provider) {
+        super(new DelayedEventBusPushStrategy(eventBus, systemEventBus, provider));
     }
 }

@@ -59,11 +59,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
 /**
- * Business facade for managing the deployable {@link SoftwareModule}s.
- *
- *
- *
- *
+ * Business facade for managing {@link SoftwareModule}s.
  *
  */
 @Transactional(readOnly = true)
@@ -99,7 +95,7 @@ public class SoftwareManagement {
     private ArtifactManagement artifactManagement;
 
     /**
-     * Updates existing {@link SoftwareModule}. Updateable values are
+     * Updates existing {@link SoftwareModule}. Update-able values are
      * {@link SoftwareModule#getDescription()}
      * {@link SoftwareModule#getVendor()}.
      *
@@ -119,17 +115,21 @@ public class SoftwareManagement {
 
         final SoftwareModule module = softwareModuleRepository.findOne(sm.getId());
 
+        boolean updated = false;
         if (null == sm.getDescription() || !sm.getDescription().equals(module.getDescription())) {
             module.setDescription(sm.getDescription());
+            updated = true;
         }
         if (null == sm.getVendor() || !sm.getVendor().equals(module.getVendor())) {
             module.setVendor(sm.getVendor());
+            updated = true;
         }
-        return softwareModuleRepository.save(module);
+
+        return updated ? softwareModuleRepository.save(module) : module;
     }
 
     /**
-     * Updates existing {@link SoftwareModuleType}. Updatable value is
+     * Updates existing {@link SoftwareModuleType}. Update-able value is
      * {@link SoftwareModuleType#getDescription()} and
      * {@link SoftwareModuleType#getColour()}.
      *
@@ -145,13 +145,16 @@ public class SoftwareManagement {
 
         final SoftwareModuleType type = softwareModuleTypeRepository.findOne(sm.getId());
 
+        boolean updated = false;
         if (sm.getDescription() != null && !sm.getDescription().equals(type.getDescription())) {
             type.setDescription(sm.getDescription());
+            updated = true;
         }
         if (sm.getColour() != null && !sm.getColour().equals(type.getColour())) {
             type.setColour(sm.getColour());
+            updated = true;
         }
-        return softwareModuleTypeRepository.save(type);
+        return updated ? softwareModuleTypeRepository.save(type) : type;
     }
 
     /**
@@ -256,19 +259,21 @@ public class SoftwareManagement {
     }
 
     /**
-     * retrieves {@link SoftwareModule}s by their name AND version.
+     * retrieves {@link SoftwareModule} by their name AND version AND type..
      *
      * @param name
      *            of the {@link SoftwareModule}
      * @param version
      *            of the {@link SoftwareModule}
-     * @return the found {@link SoftwareModule}s
+     * @param type
+     *            of the {@link SoftwareModule}
+     * @return the found {@link SoftwareModule} or <code>null</code>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public List<SoftwareModule> findSoftwareModuleByNameAndVersion(@NotEmpty final String name,
-            @NotEmpty final String version) {
+    public SoftwareModule findSoftwareModuleByNameAndVersion(@NotEmpty final String name,
+            @NotEmpty final String version, @NotNull final SoftwareModuleType type) {
 
-        return softwareModuleRepository.findByNameAndVersion(name, version);
+        return softwareModuleRepository.findOneByNameAndVersionAndType(name, version, type);
     }
 
     /**
@@ -491,21 +496,27 @@ public class SoftwareManagement {
     /**
      * Filter {@link SoftwareModule}s with given
      * {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
-     * and {@link SoftwareModule#getType()} that are not marked as deleted.
+     * search text and {@link SoftwareModule#getType()} that are not marked as
+     * deleted and sort them by means of given distribution set related modules
+     * on top of the list.
+     * 
+     * After that the modules are sorted by {@link SoftwareModule#getName()} and
+     * {@link SoftwareModule#getVersion()} in ascending order.
      *
      * @param pageable
      *            page parameter
      * @param orderByDistributionId
-     *            the ID of distribution set to be order by
+     *            the ID of distribution set to be ordered on top
      * @param searchText
-     *            to be filtered as "like" on {@link SoftwareModule#getName()}
+     *            filtered as "like" on {@link SoftwareModule#getName()}
      * @param type
-     *            to be filtered as "like" on {@link SoftwareModule#getType()}
+     *            filtered as "equal" on {@link SoftwareModule#getType()}
      * @return the page of found {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public Slice<CustomSoftwareModule> findSoftwareModuleOrderByDistribution(@NotNull final Pageable pageable,
-            @NotNull final Long orderByDistributionId, final String searchText, final SoftwareModuleType type) {
+    public Slice<CustomSoftwareModule> findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
+            @NotNull final Pageable pageable, @NotNull final Long orderByDistributionId, final String searchText,
+            final SoftwareModuleType type) {
 
         final List<CustomSoftwareModule> resultList = new ArrayList<>();
         final int pageSize = pageable.getPageSize();
@@ -522,7 +533,7 @@ public class SoftwareManagement {
                 assignedRoot, assignedQuery, cb,
                 cb.equal(assignedDsJoin.get(DistributionSet_.id), orderByDistributionId));
         // if we have some predicates then add it to the where clause of the
-        // multiselect
+        // multi select
         assignedQuery.where(specPredicate);
         assignedQuery.orderBy(cb.asc(assignedRoot.get(SoftwareModule_.name)),
                 cb.asc(assignedRoot.get(SoftwareModule_.version)));
@@ -546,7 +557,7 @@ public class SoftwareManagement {
         unassignedQuery.distinct(true);
         final Root<SoftwareModule> unassignedRoot = unassignedQuery.from(SoftwareModule.class);
 
-        Predicate[] unassignedSpec = null;
+        Predicate[] unassignedSpec;
         if (!assignedSoftwareModules.isEmpty()) {
             unassignedSpec = specificationsToPredicate(buildSpecificationList(searchText, type), unassignedRoot,
                     unassignedQuery, cb, cb.not(unassignedRoot.get(SoftwareModule_.id)
@@ -709,8 +720,8 @@ public class SoftwareManagement {
     @Modifying
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    public List<SoftwareModuleType> createSoftwareModuleTypes(@NotNull final Collection<SoftwareModuleType> types) {
-        return types.stream().map(type -> createSoftwareModuleType(type)).collect(Collectors.toList());
+    public List<SoftwareModuleType> createSoftwareModuleType(@NotNull final Collection<SoftwareModuleType> types) {
+        return types.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
     }
 
     /**
@@ -826,7 +837,7 @@ public class SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull final SoftwareModuleMetadata metadata) {
         // check if exists otherwise throw entity not found exception
-        findOne(metadata.getId());
+        findSoftwareModuleMetadata(metadata.getId());
         // touch it to update the lock revision because we are modifying the
         // software module
         // indirectly
@@ -884,7 +895,7 @@ public class SoftwareManagement {
                                 cb) -> cb.and(
                                         cb.equal(root.get(SoftwareModuleMetadata_.softwareModule)
                                                 .get(SoftwareModule_.id), softwareModuleId),
-                                spec.toPredicate(root, query, cb)),
+                                        spec.toPredicate(root, query, cb)),
                         pageable);
     }
 
@@ -899,7 +910,7 @@ public class SoftwareManagement {
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    public SoftwareModuleMetadata findOne(@NotNull final SwMetadataCompositeKey id) {
+    public SoftwareModuleMetadata findSoftwareModuleMetadata(@NotNull final SwMetadataCompositeKey id) {
         final SoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
         if (findOne == null) {
             throw new EntityNotFoundException("Metadata with key '" + id.getKey() + "' does not exist");

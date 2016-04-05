@@ -54,19 +54,11 @@ import org.springframework.data.domain.Persistable;
  * modifying the {@link Target} itself when a controller reports it's
  * {@link #lastTargetQuery} for example.
  *
- *
- *
- *
  */
 @Table(name = "sp_target_info", indexes = {
         @Index(name = "sp_idx_target_info_02", columnList = "target_id,update_status") })
 @Entity
-// @DynamicUpdate
 public class TargetInfo implements Persistable<Long>, Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetInfo.class);
@@ -81,9 +73,6 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @OneToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY, targetEntity = Target.class)
     @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_stat_targ"))
     @MapsId
-    // use deprecated annotation until HHH-8862 is fixed
-    // @SuppressWarnings( "deprecation" )
-    // @org.hibernate.annotations.ForeignKey( name = "fk_targ_stat_targ" )
     private Target target;
 
     @Column(name = "address", length = 512)
@@ -111,9 +100,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
     @MapKeyColumn(name = "attribute_key", nullable = false, length = 32)
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
             @JoinColumn(name = "target_id") }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
-    // use deprecated annotation until HHH-8862 is fixed
 
-    // @org.hibernate.annotations.ForeignKey( name = "fk_targ_attrib_target" )
     private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
 
     // set default request controller attributes to true, because we want to
@@ -124,7 +111,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
 
     /**
      * Constructor for {@link TargetStatus}.
-     * 
+     *
      * @param target
      *            related to this status.
      */
@@ -138,21 +125,11 @@ public class TargetInfo implements Persistable<Long>, Serializable {
         targetId = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.domain.Persistable#getId()
-     */
     @Override
     public Long getId() {
         return targetId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.domain.Persistable#isNew()
-     */
     @Override
     @Transient
     public boolean isNew() {
@@ -198,114 +175,62 @@ public class TargetInfo implements Persistable<Long>, Serializable {
         this.address = address;
     }
 
-    /**
-     * @return the targetId
-     */
     public Long getTargetId() {
         return targetId;
     }
 
-    /**
-     * @param targetId
-     *            the targetId to set
-     */
     public void setTargetId(final Long targetId) {
         this.targetId = targetId;
     }
 
-    /**
-     * @return the target
-     */
     public Target getTarget() {
         return target;
     }
 
-    /**
-     * @param target
-     *            the target to set
-     */
     public void setTarget(final Target target) {
         this.target = target;
     }
 
-    /**
-     * @return the lastTargetQuery
-     */
     public Long getLastTargetQuery() {
         return lastTargetQuery;
     }
 
-    /**
-     * @param lastTargetQuery
-     *            the lastTargetQuery to set
-     */
     public void setLastTargetQuery(final Long lastTargetQuery) {
         this.lastTargetQuery = lastTargetQuery;
     }
 
-    /**
-     * @param requestControllerAttributes
-     *            the requestControllerAttributes to set
-     */
     public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
         this.requestControllerAttributes = requestControllerAttributes;
     }
 
-    /**
-     * @return the controllerAttributes
-     */
     public Map<String, String> getControllerAttributes() {
         return controllerAttributes;
     }
 
-    /**
-     * @return the requestControllerAttributes
-     */
     public boolean isRequestControllerAttributes() {
         return requestControllerAttributes;
     }
 
-    /**
-     * @return the installationDate
-     */
     public Long getInstallationDate() {
         return installationDate;
     }
 
-    /**
-     * @param installationDate
-     *            the installationDate to set
-     */
     public void setInstallationDate(final Long installationDate) {
         this.installationDate = installationDate;
     }
 
-    /**
-     * @return the updateStatus
-     */
     public TargetUpdateStatus getUpdateStatus() {
         return updateStatus;
     }
 
-    /**
-     * @param updateStatus
-     *            the updateStatus to set
-     */
     public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
         this.updateStatus = updateStatus;
     }
 
-    /**
-     * @return the installedDistributionSet
-     */
     public DistributionSet getInstalledDistributionSet() {
         return installedDistributionSet;
     }
 
-    /**
-     * @param installedDistributionSet
-     *            the installedDistributionSet to set
-     */
     public void setInstalledDistributionSet(final DistributionSet installedDistributionSet) {
         this.installedDistributionSet = installedDistributionSet;
     }
@@ -338,8 +263,6 @@ public class TargetInfo implements Persistable<Long>, Serializable {
      * The poll time object which holds all the necessary information around the
      * target poll time, e.g. the last poll time, the next poll time and the
      * overdue poll time.
-     * 
-     *
      *
      */
     public static final class PollStatus {
@@ -359,7 +282,7 @@ public class TargetInfo implements Persistable<Long>, Serializable {
         /**
          * calculates if the target poll time is overdue and the target has not
          * been polled in the configured poll time interval.
-         * 
+         *
          * @return {@code true} if the current time is after the poll time
          *         overdue date otherwise {@code false}.
          */
@@ -386,15 +309,48 @@ public class TargetInfo implements Persistable<Long>, Serializable {
             return currentDate;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
             return "PollTime [lastPollDate=" + lastPollDate + ", nextPollDate=" + nextPollDate + ", overdueDate="
                     + overdueDate + ", currentDate=" + currentDate + "]";
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((target == null) ? 0 : target.hashCode());
+        result = prime * result + ((targetId == null) ? 0 : targetId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof TargetInfo)) {
+            return false;
+        }
+        final TargetInfo other = (TargetInfo) obj;
+        if (target == null) {
+            if (other.target != null) {
+                return false;
+            }
+        } else if (!target.equals(other.target)) {
+            return false;
+        }
+        if (targetId == null) {
+            if (other.targetId != null) {
+                return false;
+            }
+        } else if (!targetId.equals(other.targetId)) {
+            return false;
+        }
+        return true;
     }
 }

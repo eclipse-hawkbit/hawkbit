@@ -114,12 +114,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).isEmpty();
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.FORCED,
-                Action.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedTargets();
+                Action.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(actionRepository.findAll()).hasSize(1);
-        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedTargets();
+        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
         assertThat(actionRepository.findAll()).hasSize(2);
 
@@ -236,12 +236,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
         List<Target> saved = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.SOFT, Action.NO_FORCE_TIME, savedTarget.getControllerId())
-                .getAssignedTargets();
+                .getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(actionRepository.findAll()).hasSize(1);
-        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedTargets();
+        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
         assertThat(actionRepository.findAll()).hasSize(2);
 
@@ -358,12 +358,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).isEmpty();
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                System.currentTimeMillis(), savedTarget.getControllerId()).getAssignedTargets();
+                System.currentTimeMillis(), savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(actionRepository.findAll()).hasSize(1);
-        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedTargets();
+        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
         assertThat(actionRepository.findAll()).hasSize(2);
 
@@ -887,7 +887,7 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
-        savedTarget = deploymentManagement.assignDistributionSet(savedSet, toAssign).getAssignedTargets().iterator()
+        savedTarget = deploymentManagement.assignDistributionSet(savedSet, toAssign).getAssignedEntity().iterator()
                 .next();
         deploymentManagement.assignDistributionSet(savedSet2, toAssign2);
 

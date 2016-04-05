@@ -161,7 +161,6 @@ public class SoftwareModuleDetailsTable extends Table {
         if (null != distributionSet) {
             if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
                 try {
-                    distributionSetManagement.checkDistributionSetAlreadyUse(distributionSet);
                     isTargetAssigned = false;
                 } catch (final EntityLockedException exception) {
                     isTargetAssigned = true;

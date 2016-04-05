@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.artifact.repository.model;
 /**
  * Database representation of artifact hash.
  * 
- *
- *
- *
  */
 public class DbArtifactHash {
 

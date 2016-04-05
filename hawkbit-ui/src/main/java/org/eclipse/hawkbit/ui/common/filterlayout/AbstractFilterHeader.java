@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
@@ -30,6 +33,13 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private static final long serialVersionUID = -1388340600522323332L;
+
+    
+    @Autowired
+    protected SpPermissionChecker permChecker;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
 
     private Label title;
 

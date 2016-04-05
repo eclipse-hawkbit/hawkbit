@@ -21,13 +21,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.IdRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypePagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypesRest;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,7 +54,7 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<DistributionSetTypePagedList> getDistributionSetTypes(
+    public ResponseEntity<PagedList<DistributionSetTypeRest>> getDistributionSetTypes(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -81,7 +79,7 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
 
         final List<DistributionSetTypeRest> rest = DistributionSetTypeMapper
                 .toListResponse(findModuleTypessAll.getContent());
-        return new ResponseEntity<>(new DistributionSetTypePagedList(rest, countModulesAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countModulesAll), HttpStatus.OK);
     }
 
     @Override
@@ -119,7 +117,7 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<DistributionSetTypesRest> createDistributionSetTypes(
+    public ResponseEntity<List<DistributionSetTypeRest>> createDistributionSetTypes(
             @RequestBody final List<DistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
         final List<DistributionSetType> createdSoftwareModules = distributionSetManagement.createDistributionSetTypes(
@@ -139,14 +137,12 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<SoftwareModuleTypesRest> getMandatoryModules(@PathVariable final Long distributionSetTypeId) {
+    public ResponseEntity<List<SoftwareModuleTypeRest>> getMandatoryModules(
+            @PathVariable final Long distributionSetTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
-
-        final SoftwareModuleTypesRest rest = new SoftwareModuleTypesRest();
-
-        rest.addAll(SoftwareModuleTypeMapper.toListResponse(foundType.getMandatoryModuleTypes()));
-        return new ResponseEntity<>(rest, HttpStatus.OK);
+        return new ResponseEntity<>(SoftwareModuleTypeMapper.toListResponse(foundType.getMandatoryModuleTypes()),
+                HttpStatus.OK);
     }
 
     @Override
@@ -182,14 +178,13 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<SoftwareModuleTypesRest> getOptionalModules(@PathVariable final Long distributionSetTypeId) {
+    public ResponseEntity<List<SoftwareModuleTypeRest>> getOptionalModules(
+            @PathVariable final Long distributionSetTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
-        final SoftwareModuleTypesRest rest = new SoftwareModuleTypesRest();
-
-        rest.addAll(SoftwareModuleTypeMapper.toListResponse(foundType.getOptionalModuleTypes()));
-        return new ResponseEntity<>(rest, HttpStatus.OK);
+        return new ResponseEntity<>(SoftwareModuleTypeMapper.toListResponse(foundType.getOptionalModuleTypes()),
+                HttpStatus.OK);
     }
 
     @Override

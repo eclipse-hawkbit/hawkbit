@@ -10,11 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.net.URI;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -25,12 +21,10 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -61,15 +55,6 @@ public class TargetDetails extends AbstractTableDetailsLayout {
     private static final long serialVersionUID = 4571732743399605843L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
     private ManagementUIState managementUIState;
 
     @Autowired
@@ -87,11 +72,9 @@ public class TargetDetails extends AbstractTableDetailsLayout {
      * Initialize the Target details.
      */
     @Override
-    @PostConstruct
     public void init() {
         super.init();
         targetAddUpdateWindowLayout.init();
-        eventBus.subscribe(this);
     }
 
     @Override
@@ -286,7 +269,7 @@ public class TargetDetails extends AbstractTableDetailsLayout {
 
     @Override
     protected Boolean hasEditPermission() {
-        return permChecker.hasUpdateTargetPermission();
+        return permissionChecker.hasUpdateTargetPermission();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -310,11 +293,6 @@ public class TargetDetails extends AbstractTableDetailsLayout {
         } else if (event == TargetComponentEvent.MAXIMIZED) {
             UI.getCurrent().access(() -> hideLayout());
         }
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @Override

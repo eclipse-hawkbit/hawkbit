@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
@@ -21,10 +17,8 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -46,15 +40,7 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     private static final long serialVersionUID = 350360207334118826L;
 
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permissionChecker;
-
+   
     @Autowired
     private ManagementUIState managementUIState;
 
@@ -70,22 +56,13 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     private DistributionSet selectedDsModule;
 
-    private UI ui;
-
     @Override
-    @PostConstruct
     protected void init() {
-        eventBus.subscribe(this);
         softwareModuleTable = new SoftwareModuleDetailsTable();
         softwareModuleTable.init(i18n, false, permissionChecker, null, null, null);
         super.init();
-        ui = UI.getCurrent();
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {

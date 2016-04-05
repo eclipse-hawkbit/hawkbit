@@ -8,22 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.specifications;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- *
- *
- *
- *
- *
+ * Specifications class for {@link DistributionSetType}s. The class provides
+ * Spring Data JPQL Specifications.
  */
 public final class DistributionSetTypeSpecification {
     private DistributionSetTypeSpecification() {
@@ -40,16 +32,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSetType} {@link Specification}
      */
     public static Specification<DistributionSetType> isDeleted(final Boolean isDeleted) {
-        final Specification<DistributionSetType> spec = new Specification<DistributionSetType>() {
-            @Override
-            public Predicate toPredicate(final Root<DistributionSetType> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = cb.equal(targetRoot.<Boolean> get(DistributionSetType_.deleted), isDeleted);
-                return predicate;
-            }
-        };
-
-        return spec;
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(DistributionSetType_.deleted), isDeleted);
     }
 
     /**
@@ -62,16 +45,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<DistributionSetType> byId(final Long distid) {
-        final Specification<DistributionSetType> spec = new Specification<DistributionSetType>() {
-            @Override
-            public Predicate toPredicate(final Root<DistributionSetType> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                final Predicate predicate = cb.equal(targetRoot.<Long> get(DistributionSetType_.id), distid);
-                return predicate;
-            }
-        };
-        return spec;
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Long> get(DistributionSetType_.id), distid);
     }
 
     /**
@@ -84,16 +58,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<DistributionSetType> byName(final String name) {
-        final Specification<DistributionSetType> spec = new Specification<DistributionSetType>() {
-            @Override
-            public Predicate toPredicate(final Root<DistributionSetType> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                final Predicate predicate = cb.equal(targetRoot.<String> get(DistributionSetType_.name), name);
-                return predicate;
-            }
-        };
-        return spec;
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(DistributionSetType_.name), name);
     }
 
     /**
@@ -106,16 +71,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<DistributionSetType> byKey(final String key) {
-        final Specification<DistributionSetType> spec = new Specification<DistributionSetType>() {
-            @Override
-            public Predicate toPredicate(final Root<DistributionSetType> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                final Predicate predicate = cb.equal(targetRoot.<String> get(DistributionSetType_.key), key);
-                return predicate;
-            }
-        };
-        return spec;
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(DistributionSetType_.key), key);
     }
 
 }

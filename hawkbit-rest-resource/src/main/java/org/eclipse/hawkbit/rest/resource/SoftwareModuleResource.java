@@ -23,14 +23,11 @@ import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleRestAPI;
 import org.eclipse.hawkbit.rest.resource.model.MetadataRest;
-import org.eclipse.hawkbit.rest.resource.model.MetadataRestPageList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactRest;
-import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactsRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulePagedList;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModulesRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +90,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
     }
 
     @Override
-    public ResponseEntity<ArtifactsRest> getArtifacts(@PathVariable final Long softwareModuleId) {
+    public ResponseEntity<List<ArtifactRest>> getArtifacts(@PathVariable final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         return new ResponseEntity<>(SoftwareModuleMapper.artifactsToResponse(module.getArtifacts()), HttpStatus.OK);
@@ -120,7 +117,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
     }
 
     @Override
-    public ResponseEntity<SoftwareModulePagedList> getSoftwareModules(
+    public ResponseEntity<PagedList<SoftwareModuleRest>> getSoftwareModules(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -144,7 +141,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
         }
 
         final List<SoftwareModuleRest> rest = SoftwareModuleMapper.toResponse(findModulesAll.getContent());
-        return new ResponseEntity<>(new SoftwareModulePagedList(rest, countModulesAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countModulesAll), HttpStatus.OK);
     }
 
     @Override
@@ -155,7 +152,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
     }
 
     @Override
-    public ResponseEntity<SoftwareModulesRest> createSoftwareModules(
+    public ResponseEntity<List<SoftwareModuleRest>> createSoftwareModules(
             @RequestBody final List<SoftwareModuleRequestBodyPost> softwareModules) {
         LOG.debug("creating {} softwareModules", softwareModules.size());
         final Iterable<SoftwareModule> createdSoftwareModules = softwareManagement
@@ -193,7 +190,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
     }
 
     @Override
-    public ResponseEntity<MetadataRestPageList> getMetadata(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(@PathVariable final Long softwareModuleId,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -217,7 +214,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
         }
 
         return new ResponseEntity<>(
-                new MetadataRestPageList(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
+                new PagedList<>(SoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
                         metaDataPage.getTotalElements()),
                 HttpStatus.OK);
     }
@@ -228,7 +225,7 @@ public class SoftwareModuleResource implements SoftwareModuleRestAPI {
         // check if distribution set exists otherwise throw exception
         // immediately
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final SoftwareModuleMetadata findOne = softwareManagement.findOne(new SwMetadataCompositeKey(sw, metadataKey));
+        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sw, metadataKey));
         return ResponseEntity.<MetadataRest> ok(SoftwareModuleMapper.toResponseSwMetadata(findOne));
     }
 

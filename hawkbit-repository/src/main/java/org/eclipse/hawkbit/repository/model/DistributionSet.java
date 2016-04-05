@@ -46,10 +46,6 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
  * A {@link Target} has exactly one target {@link DistributionSet} assigned.
  * </p>
  *
- *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_distribution_set", uniqueConstraints = {
@@ -67,14 +63,14 @@ public class DistributionSet extends NamedVersionedEntity {
 
     @ManyToMany(targetEntity = SoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(name = "sp_ds_module", joinColumns = {
-            @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds") ) }, inverseJoinColumns = {
-                    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module") ) })
+            @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private final Set<SoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = DistributionSetTag.class)
     @JoinTable(name = "sp_ds_dstag", joinColumns = {
-            @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds") ) }, inverseJoinColumns = {
-                    @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag") ) })
+            @JoinColumn(name = "ds", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
+                    @JoinColumn(name = "TAG", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 
     @Column(name = "deleted")
@@ -95,7 +91,7 @@ public class DistributionSet extends NamedVersionedEntity {
     private final List<DistributionSetMetadata> metadata = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds") )
+    @JoinColumn(name = "ds_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     private DistributionSetType type;
 
     @Column(name = "complete")
@@ -130,75 +126,34 @@ public class DistributionSet extends NamedVersionedEntity {
         if (moduleList != null) {
             moduleList.forEach(this::addModule);
         }
-        complete = type.checkComplete(this);
+        if (this.type != null) {
+            complete = this.type.checkComplete(this);
+        }
     }
 
     public Set<DistributionSetTag> getTags() {
         return tags;
     }
 
-    /**
-     * @return the deleted
-     */
     public boolean isDeleted() {
         return deleted;
     }
 
     /**
-     * @return the metadata
+     * @return immutable list of meta data elements.
      */
     public List<DistributionSetMetadata> getMetadata() {
-        return metadata;
+        return Collections.unmodifiableList(metadata);
     }
 
-    /**
-     * @return the actions
-     */
     public List<Action> getActions() {
         return actions;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof DistributionSet)) {
-            return false;
-        }
-
-        return true;
     }
 
     public boolean isRequiredMigrationStep() {
         return requiredMigrationStep;
     }
 
-    /**
-     * @param deleted
-     *            the deleted to set
-     */
     public DistributionSet setDeleted(final boolean deleted) {
         this.deleted = deleted;
         return this;
@@ -209,10 +164,6 @@ public class DistributionSet extends NamedVersionedEntity {
         return this;
     }
 
-    /**
-     * @param tags
-     *            the tags to set
-     */
     public DistributionSet setTags(final Set<DistributionSetTag> tags) {
         this.tags = tags;
         return this;
@@ -232,11 +183,6 @@ public class DistributionSet extends NamedVersionedEntity {
         return installedAtTargets;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "DistributionSet [getName()=" + getName() + ", getOptLockRevision()=" + getOptLockRevision()
@@ -322,7 +268,7 @@ public class DistributionSet extends NamedVersionedEntity {
      * Searches through modules for the given type.
      *
      * @param type
-     *            to seach for
+     *            to search for
      * @return SoftwareModule of given type or <code>null</code> if not in the
      *         list.
      */
@@ -337,26 +283,15 @@ public class DistributionSet extends NamedVersionedEntity {
         return null;
     }
 
-    /**
-     * @return the type
-     */
     public DistributionSetType getType() {
         return type;
     }
 
-    /**
-     * @param type
-     *            the type to set
-     */
     public void setType(final DistributionSetType type) {
         this.type = type;
     }
 
-    /**
-     * @return the complete
-     */
     public boolean isComplete() {
         return complete;
     }
-
 }

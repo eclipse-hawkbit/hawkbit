@@ -35,18 +35,18 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     @Before
     public void seuptBeforeTest() {
 
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("DS", softwareManagement,
-                distributionSetManagement);
+        DistributionSet ds = TestDataUtil.generateDistributionSet("DS", softwareManagement, distributionSetManagement);
         ds.setDescription("DS");
-        ds.getMetadata().add(new DistributionSetMetadata("metaKey", ds, "metaValue"));
-        distributionSetManagement.updateDistributionSet(ds);
+        ds = distributionSetManagement.updateDistributionSet(ds);
+        distributionSetManagement
+                .createDistributionSetMetadata(new DistributionSetMetadata("metaKey", ds, "metaValue"));
 
-        final DistributionSet ds2 = TestDataUtil
+        DistributionSet ds2 = TestDataUtil
                 .generateDistributionSets("NewDS", 3, softwareManagement, distributionSetManagement).get(0);
 
         ds2.setDescription("DS%");
-        ds2.getMetadata().add(new DistributionSetMetadata("metaKey", ds2, "value"));
-        distributionSetManagement.updateDistributionSet(ds2);
+        ds2 = distributionSetManagement.updateDistributionSet(ds2);
+        distributionSetManagement.createDistributionSetMetadata(new DistributionSetMetadata("metaKey", ds2, "value"));
 
         final DistributionSetTag targetTag = tagManagement.createDistributionSetTag(new DistributionSetTag("Tag1"));
         tagManagement.createDistributionSetTag(new DistributionSetTag("Tag2"));

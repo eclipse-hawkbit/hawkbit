@@ -13,11 +13,6 @@ package org.eclipse.hawkbit.repository.model;
  * status. A {@link Target} can have only one status. independent of the number
  * of {@link UpdateAction}s that have to be applied.
  *
- *
- *
- *
- *
- *
  */
 public enum TargetUpdateStatus {
 

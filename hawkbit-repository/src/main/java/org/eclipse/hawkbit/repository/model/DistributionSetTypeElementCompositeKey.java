@@ -15,17 +15,9 @@ import javax.persistence.Embeddable;
 
 /**
  * Composite key for {@link DistributionSetTypeElement}.
- *
- *
- *
- *
  */
 @Embeddable
 public class DistributionSetTypeElementCompositeKey implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Column(name = "distribution_set_type", nullable = false)
@@ -54,34 +46,19 @@ public class DistributionSetTypeElementCompositeKey implements Serializable {
         this.smType = smType.getId();
     }
 
-    /**
-     * @return the dsType
-     */
     public Long getDsType() {
         return dsType;
     }
 
-    /**
-     * @param dsType
-     *            the dsType to set
-     */
     public void setDsType(final Long dsType) {
         this.dsType = dsType;
     }
 
-    /**
-     * @return the smType
-     */
     public Long getSmType() {
         return smType;
     }
 
-    /**
-     * @param smType
-     *            the smType to set
-     */
     public void setSmType(final Long smType) {
         this.smType = smType;
     }
-
 }

@@ -64,10 +64,6 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * Transactional (read-write) as all queries at least update the last poll time.
  *
- *
- *
- *
- *
  */
 @RestController
 @RequestMapping(ControllerConstants.BASE_V1_REQUEST_MAPPING)

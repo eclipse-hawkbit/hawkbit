@@ -11,11 +11,8 @@ package org.eclipse.hawkbit.ui.distributions.smtype;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
@@ -27,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -48,19 +44,10 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     private static final long serialVersionUID = 6804534533362387433L;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
     private ManageDistUIState manageDistUIState;
 
     @Autowired
     private DistributionsViewAcceptCriteria distributionsViewAcceptCriteria;
-
-    @Override
-    public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
-        super.init(filterButtonClickBehaviour);
-        eventBus.subscribe(this);
-    }
 
     @Override
     protected String getButtonsTableId() {
@@ -82,10 +69,9 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
-
+    protected boolean isClickedByDefault(final String typeName) {
         return manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
-                && manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getId().equals(buttonId);
+                && manageDistUIState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName().equals(typeName);
     }
 
     @Override
@@ -136,9 +122,5 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
         setContainerDataSource(createButtonsLazyQueryContainer());
     }
 
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
 
 }

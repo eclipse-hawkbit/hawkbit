@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
@@ -22,19 +21,15 @@ import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -52,19 +47,6 @@ import com.vaadin.ui.UI;
 public class DistributionTagToken extends AbstractTagToken {
 
     private static final long serialVersionUID = -8022738301736043396L;
-
-    @Autowired
-    private SpPermissionChecker spChecker;
-
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private UINotification uinotification;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
     @Autowired
     private transient TagManagement tagManagement;
 
@@ -73,19 +55,8 @@ public class DistributionTagToken extends AbstractTagToken {
 
     private DistributionSet selectedDS;
 
-    private UI ui;
-
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
-
-    }
 
     @Override
     protected String getTagStyleName() {
@@ -100,7 +71,7 @@ public class DistributionTagToken extends AbstractTagToken {
     @Override
     protected void assignTag(final String tagNameSelected) {
         if (tagNameSelected != null) {
-            final DistributionSetTagAssigmentResult result = toggleAssignment(tagNameSelected);
+            final DistributionSetTagAssignmentResult result = toggleAssignment(tagNameSelected);
             if (result.getAssigned() >= 1 && NOTAGS_SELECTED) {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_DISTRIBUTION_TAG);
             }
@@ -109,18 +80,18 @@ public class DistributionTagToken extends AbstractTagToken {
         }
     }
 
-    private DistributionSetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
+    private DistributionSetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final Set<Long> distributionList = new HashSet<>();
         distributionList.add(selectedDS.getId());
-        final DistributionSetTagAssigmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
+        final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
                 tagNameSelected);
-        uinotification.displaySuccess(HawkbitCommonUtil.getDistributionTagAssignmentMsg(tagNameSelected, result, i18n));
+        uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
 
     @Override
     protected void unassignTag(final String tagName) {
-        final DistributionSetTagAssigmentResult result = toggleAssignment(tagName);
+        final DistributionSetTagAssignmentResult result = toggleAssignment(tagName);
         if (result.getUnassigned() >= 1 && (isClickedTagListEmpty() || getClickedTagList().contains(tagName))) {
             eventBus.publish(this, ManagementUIEvent.UNASSIGN_DISTRIBUTION_TAG);
         }
@@ -140,7 +111,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @Override
     protected Boolean isToggleTagAssignmentAllowed() {
-        return spChecker.hasUpdateDistributionPermission();
+        return checker.hasUpdateDistributionPermission();
     }
 
     @Override
@@ -163,18 +134,15 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
-        if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE) {
-            ui.access(() -> {
-                /**
-                 * distributionTableEvent.getDistributionSet() is null when
-                 * table has no data.
-                 */
-                if (distributionTableEvent.getDistributionSet() != null) {
-                    selectedDS = distributionTableEvent.getDistributionSet();
-                    repopulateToken();
-                }
-            });
+        if (distributionTableEvent.getDistributionComponentEvent() != DistributionComponentEvent.ON_VALUE_CHANGE) {
+            return;
         }
+        UI.getCurrent().access(() -> {
+            if (distributionTableEvent.getDistributionSet() != null) {
+                selectedDS = distributionTableEvent.getDistributionSet();
+                repopulateToken();
+            }
+        });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -202,7 +170,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetTagAssigmentResultEvent(final DistributionSetTagAssigmentResultEvent event) {
-        final DistributionSetTagAssigmentResult assignmentResult = event.getAssigmentResult();
+        final DistributionSetTagAssignmentResult assignmentResult = event.getAssigmentResult();
         final DistributionSetTag tag = assignmentResult.getDistributionSetTag();
         if (isAssign(assignmentResult)) {
             addNewToken(tag.getId());
@@ -212,9 +180,9 @@ public class DistributionTagToken extends AbstractTagToken {
 
     }
 
-    protected boolean isAssign(final DistributionSetTagAssigmentResult assignmentResult) {
+    protected boolean isAssign(final DistributionSetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getAssigned() > 0) {
-            final List<Long> assignedDsNames = assignmentResult.getAssignedDs().stream().map(t -> t.getId())
+            final List<Long> assignedDsNames = assignmentResult.getAssignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
             if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
                 return true;
@@ -223,9 +191,9 @@ public class DistributionTagToken extends AbstractTagToken {
         return false;
     }
 
-    protected boolean isUnassign(final DistributionSetTagAssigmentResult assignmentResult) {
+    protected boolean isUnassign(final DistributionSetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getUnassigned() > 0) {
-            final List<Long> assignedDsNames = assignmentResult.getUnassignedDs().stream().map(t -> t.getId())
+            final List<Long> assignedDsNames = assignmentResult.getUnassignedEntity().stream().map(t -> t.getId())
                     .collect(Collectors.toList());
             if (assignedDsNames.contains(managementUIState.getLastSelectedDsIdName().getId())) {
                 return true;
@@ -234,6 +202,7 @@ public class DistributionTagToken extends AbstractTagToken {
         return false;
     }
 
+    @Override
     @PreDestroy
     void destroy() {
         eventBus.unsubscribe(this);
