@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
@@ -47,7 +48,7 @@ public class SimulatorStartup implements ApplicationListener<ContextRefreshedEve
                     repository.add(deviceFactory.createSimulatedDevice(deviceId, autostart.getTenant(),
                             autostart.getApi(), autostart.getPollDelay(), new URL(autostart.getEndpoint()),
                             autostart.getGatewayToken()));
-                } catch (final Exception e) {
+                } catch (final MalformedURLException e) {
                     LOGGER.error("Creation of simulated device at startup failed.", e);
                 }
 
