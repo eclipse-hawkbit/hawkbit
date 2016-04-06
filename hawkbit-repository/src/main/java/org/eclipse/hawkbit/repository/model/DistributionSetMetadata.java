@@ -34,16 +34,9 @@ public class DistributionSetMetadata extends MetaData {
     private DistributionSet distributionSet;
 
     public DistributionSetMetadata() {
-        super();
+        // default public constructor for JPA
     }
 
-    /**
-     * Parameter constructor.
-     *
-     * @param key
-     * @param distributionSet
-     * @param value
-     */
     public DistributionSetMetadata(final String key, final DistributionSet distributionSet, final String value) {
         super(key, value);
         this.distributionSet = distributionSet;
@@ -71,13 +64,7 @@ public class DistributionSetMetadata extends MetaData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof DistributionSetMetadata)) {
             return false;
         }
         final DistributionSetMetadata other = (DistributionSetMetadata) obj;

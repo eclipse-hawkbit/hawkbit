@@ -74,7 +74,7 @@ public abstract class MetaData implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof MetaData)) {
+        if (!(this.getClass().isInstance(obj))) {
             return false;
         }
         final MetaData other = (MetaData) obj;

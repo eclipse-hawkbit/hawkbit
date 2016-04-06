@@ -33,22 +33,10 @@ public class SoftwareModuleMetadata extends MetaData {
     @JoinColumn(name = "sw_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
     private SoftwareModule softwareModule;
 
-    /**
-     * Default constructor for JPA.
-     */
     public SoftwareModuleMetadata() {
-        super();
+        // default public constructor for JPA
     }
 
-    /**
-     * Standard constructor.
-     *
-     * @param key
-     *            of the meta data element
-     * @param softwareModule
-     * @param value
-     *            of the meta data element
-     */
     public SoftwareModuleMetadata(final String key, final SoftwareModule softwareModule, final String value) {
         super(key, value);
         this.softwareModule = softwareModule;
@@ -76,13 +64,7 @@ public class SoftwareModuleMetadata extends MetaData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof SoftwareModuleMetadata)) {
             return false;
         }
         final SoftwareModuleMetadata other = (SoftwareModuleMetadata) obj;
