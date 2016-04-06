@@ -356,7 +356,6 @@ public class RolloutListGrid extends AbstractGrid {
         return context;
     }
 
-
     private void getUpdateMenuItem(final ContextMenu context, final Long rolloutId) {
         // Add 'Update' option only if user has update permission
         if (!permissionChecker.hasRolloutUpdatePermission()) {
@@ -364,17 +363,6 @@ public class RolloutListGrid extends AbstractGrid {
         }
         final ContextMenuItem cancelItem = context.addItem(UPDATE_OPTION);
         cancelItem.setData(new ContextMenuData(rolloutId, ACTION.UPDATE));
-    }
-
-    private String convertRolloutStatusToString(final RolloutStatus value) {
-        final StatusFontIcon statusFontIcon = statusIconMap.get(value);
-        if (statusFontIcon == null) {
-            return null;
-        }
-        final String codePoint = statusFontIcon.getFontIcon() != null
-                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
-        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
     }
 
     private void menuItemClicked(final ContextMenuItemClickEvent event) {
@@ -537,6 +525,13 @@ public class RolloutListGrid extends AbstractGrid {
         public Class<String> getPresentationType() {
             return String.class;
         }
+
+        private String convertRolloutStatusToString(final RolloutStatus value) {
+            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
+                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+        }
     }
 
     /**
@@ -549,14 +544,16 @@ public class RolloutListGrid extends AbstractGrid {
         private static final long serialVersionUID = -5794528427855153924L;
 
         @Override
-        public TotalTargetCountStatus convertToModel(final String value, final Class<? extends TotalTargetCountStatus> targetType,
-                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public TotalTargetCountStatus convertToModel(final String value,
+                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
-        public String convertToPresentation(final TotalTargetCountStatus value, final Class<? extends String> targetType,
-                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public String convertToPresentation(final TotalTargetCountStatus value,
+                final Class<? extends String> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 

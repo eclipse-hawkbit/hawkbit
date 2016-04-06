@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
 import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
+import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -1350,6 +1351,21 @@ public final class HawkbitCommonUtil {
         }
         val.append("id:").append(id);
         return val.toString();
+    }
+
+    /**
+     * Receive the code point of a given StatusFontIcon.
+     * 
+     * @param statusFontIcon
+     *            the status font icon
+     * @return the code point of the StatusFontIcon
+     */
+    public static String getCodePoint(final StatusFontIcon statusFontIcon) {
+        if (statusFontIcon == null) {
+            return null;
+        }
+        return statusFontIcon.getFontIcon() != null ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint())
+                : null;
     }
 
 }

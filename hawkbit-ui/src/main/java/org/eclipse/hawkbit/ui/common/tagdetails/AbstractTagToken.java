@@ -178,18 +178,25 @@ public abstract class AbstractTagToken implements Serializable {
             }
         }
 
-    }
+        private void updateTokenStyle(final Object tokenId, final Button button) {
+            final String color = getColor(tokenId);
+            button.setCaption("<span style=\"color:" + color + " !important;\">" + FontAwesome.CIRCLE.getHtml()
+                    + "</span>" + " " + getItemNameProperty(tokenId).getValue().toString().concat(" ×"));
+            button.setCaptionAsHtml(true);
+        }
 
-    private void updateTokenStyle(final Object tokenId, final Button button) {
-        final String color = getColor(tokenId);
-        button.setCaption("<span style=\"color:" + color + " !important;\">" + FontAwesome.CIRCLE.getHtml() + "</span>"
-                + " " + getItemNameProperty(tokenId).getValue().toString().concat(" ×"));
-        button.setCaptionAsHtml(true);
-    }
+        private void onTokenSearch(final Object tokenId) {
+            assignTag(getItemNameProperty(tokenId).getValue().toString());
+            removeTagAssignedFromCombo((Long) tokenId);
+        }
 
-    private void onTokenSearch(final Object tokenId) {
-        assignTag(getItemNameProperty(tokenId).getValue().toString());
-        removeTagAssignedFromCombo((Long) tokenId);
+        private void tokenClick(final Object tokenId) {
+            final Item item = tokenField.getContainerDataSource().addItem(tokenId);
+            item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
+            item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
+            unassignTag(tagDetails.get(tokenId).getName());
+        }
+
     }
 
     private Property getItemNameProperty(final Object tokenId) {
@@ -209,13 +216,6 @@ public abstract class AbstractTagToken implements Serializable {
     private String getTagName(final Object tokenId) {
         final Item item = tokenField.getContainerDataSource().getItem(tokenId);
         return (String) item.getItemProperty("name").getValue();
-    }
-
-    private void tokenClick(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().addItem(tokenId);
-        item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
-        item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
-        unassignTag(tagDetails.get(tokenId).getName());
     }
 
     protected void removePreviouslyAddedTokens() {
