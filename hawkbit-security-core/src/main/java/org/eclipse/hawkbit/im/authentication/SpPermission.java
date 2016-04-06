@@ -183,6 +183,12 @@ public final class SpPermission {
         public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
 
         /**
+         * The role which contains in the spring security context in case an
+         * controller is authenticated to download artifacts.
+         */
+        public static final String CONTROLLER_DOWNLOAD_ROLE = "ROLE_CONTROLLER_DOWNLOAD";
+
+        /**
          * The role which contains the spring security context in case the
          * system is executing code which is necessary to be privileged.
          */
@@ -275,8 +281,16 @@ public final class SpPermission {
          * context contains the anoynmous role or the controller specific role
          * {@link SpPermission#CONTROLLER_ROLE}.
          */
-        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '"
-                + CONTROLLER_ROLE + "')";
+        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE
+                + "')";
+
+        /**
+         * Spring security eval hasAuthority expression to check if the spring
+         * context contains the role to allow controllers to download specific
+         * role {@link SpPermission#CONTROLLER_DOWNLOAD_ROLE}.
+         */
+        public static final String HAS_CONTROLLER_DOWNLOAD = HAS_AUTH_PREFIX + CONTROLLER_DOWNLOAD_ROLE
+                + HAS_AUTH_SUFFIX;
 
         /**
          * Spring security eval hasAnyRole expression to check if the spring

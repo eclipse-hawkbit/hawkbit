@@ -35,7 +35,32 @@
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-web</artifactId>
       </dependency>
+
+      <!-- TEST -->
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+       <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>ru.yandex.qatools.allure</groupId>
+         <artifactId>allure-junit-adaptor</artifactId>
+         <scope>test</scope>
+      </dependency>
    </dependencies>
-
-
 </project>

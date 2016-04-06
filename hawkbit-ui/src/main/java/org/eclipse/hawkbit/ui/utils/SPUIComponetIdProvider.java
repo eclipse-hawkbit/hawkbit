@@ -502,6 +502,11 @@ public final class SPUIComponetIdProvider {
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
 
     /**
+     * Id of the anonymous download checkbox.
+     */
+    public static final String SYSTEM_CONFIGURATION_ANONYMOUS_DOWNLOAD_CHECKBOX = "system.configuration.anonymous.download.checkbox";
+
+    /**
      * Id of maximize/minimize icon of table - Software module table.
      */
     public static final String SW_MAX_MIN_TABLE_ICON = "sw.max.min.table.icon";
@@ -827,7 +832,7 @@ public final class SPUIComponetIdProvider {
      * Rollout status label id.
      */
     public static final String ROLLOUT_STATUS_LABEL_ID = "rollout.status.id";
-    
+
     /**
      * Rollout group status label id.
      */
@@ -867,12 +872,12 @@ public final class SPUIComponetIdProvider {
      * Rollout group targets count message label.
      */
     public static final String ROLLOUT_GROUP_TARGET_LABEL = "rollout.group.target.label";
-    
+
     /**
      * Action confirmation popup id.
      */
     public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
-    
+
     /**
      * Validation status icon .
      */

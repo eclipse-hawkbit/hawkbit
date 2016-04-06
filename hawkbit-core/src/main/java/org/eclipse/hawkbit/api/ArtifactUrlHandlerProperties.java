@@ -6,13 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.util;
+package org.eclipse.hawkbit.api;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- *
- *
+ * Artifact handler properties class for holding all supported protocols with
+ * host, ip, port and download pattern.
  */
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
@@ -23,23 +23,14 @@ public class ArtifactUrlHandlerProperties {
     private final Https https = new Https();
     private final Coap coap = new Coap();
 
-    /**
-     * @return the http
-     */
     public Http getHttp() {
         return http;
     }
 
-    /**
-     * @return the https
-     */
     public Https getHttps() {
         return https;
     }
 
-    /**
-     * @return the coap
-     */
     public Coap getCoap() {
         return coap;
     }
@@ -66,9 +57,6 @@ public class ArtifactUrlHandlerProperties {
     /**
      * Interface for declaring common properties through all supported protocols
      * pattern.
-     *
-     *
-     *
      */
     public interface ProtocolProperties {
         /**
@@ -94,9 +82,6 @@ public class ArtifactUrlHandlerProperties {
 
     /**
      * Object to hold the properties for the HTTP protocol.
-     *
-     *
-     *
      */
     public static class Http implements ProtocolProperties {
         private String hostname = LOCALHOST;
@@ -108,66 +93,38 @@ public class ArtifactUrlHandlerProperties {
          */
         private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
 
-        /**
-         * @return the hostname
-         */
         @Override
         public String getHostname() {
             return hostname;
         }
 
-        /**
-         * @param hostname
-         *            the hostname to set
-         */
         public void setHostname(final String hostname) {
             this.hostname = hostname;
         }
 
-        /**
-         * @return the ip
-         */
         @Override
         public String getIp() {
             return ip;
         }
 
-        /**
-         * @param ip
-         *            the ip to set
-         */
         public void setIp(final String ip) {
             this.ip = ip;
         }
 
-        /**
-         * @return the urlPattern
-         */
         @Override
         public String getPattern() {
             return pattern;
         }
 
-        /**
-         * @param urlPattern
-         *            the urlPattern to set
-         */
         public void setPattern(final String urlPattern) {
             this.pattern = urlPattern;
         }
 
-        /**
-         * @return the port
-         */
         @Override
         public String getPort() {
             return port;
         }
 
-        /**
-         * @param port
-         *            the port to set
-         */
         public void setPort(final String port) {
             this.port = port;
         }
@@ -175,9 +132,6 @@ public class ArtifactUrlHandlerProperties {
 
     /**
      * Object to hold the properties for the HTTP protocol.
-     *
-     *
-     *
      */
     public static class Https implements ProtocolProperties {
         private String hostname = LOCALHOST;
@@ -189,66 +143,38 @@ public class ArtifactUrlHandlerProperties {
          */
         private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
 
-        /**
-         * @return the hostname
-         */
         @Override
         public String getHostname() {
             return hostname;
         }
 
-        /**
-         * @param hostname
-         *            the hostname to set
-         */
         public void setHostname(final String hostname) {
             this.hostname = hostname;
         }
 
-        /**
-         * @return the ip
-         */
         @Override
         public String getIp() {
             return ip;
         }
 
-        /**
-         * @param ip
-         *            the ip to set
-         */
         public void setIp(final String ip) {
             this.ip = ip;
         }
 
-        /**
-         * @return the urlPattern
-         */
         @Override
         public String getPattern() {
             return pattern;
         }
 
-        /**
-         * @param urlPattern
-         *            the urlPattern to set
-         */
         public void setPattern(final String urlPattern) {
             this.pattern = urlPattern;
         }
 
-        /**
-         * @return the port
-         */
         @Override
         public String getPort() {
             return port;
         }
 
-        /**
-         * @param port
-         *            the port to set
-         */
         public void setPort(final String port) {
             this.port = port;
         }
@@ -256,9 +182,6 @@ public class ArtifactUrlHandlerProperties {
 
     /**
      * Object to hold the properties for the HTTP protocol.
-     *
-     *
-     *
      */
     public static class Coap implements ProtocolProperties {
         private String hostname = LOCALHOST;
@@ -270,68 +193,41 @@ public class ArtifactUrlHandlerProperties {
          */
         private String pattern = "{protocol}://{ip}:{port}/fw/{tenant}/{targetId}/sha1/{artifactSHA1}";
 
-        /**
-         * @return the hostname
-         */
         @Override
         public String getHostname() {
             return hostname;
         }
 
-        /**
-         * @param hostname
-         *            the hostname to set
-         */
         public void setHostname(final String hostname) {
             this.hostname = hostname;
         }
 
-        /**
-         * @return the ip
-         */
         @Override
         public String getIp() {
             return ip;
         }
 
-        /**
-         * @param ip
-         *            the ip to set
-         */
         public void setIp(final String ip) {
             this.ip = ip;
         }
 
-        /**
-         * @return the urlPattern
-         */
         @Override
         public String getPattern() {
             return pattern;
         }
 
-        /**
-         * @param urlPattern
-         *            the urlPattern to set
-         */
         public void setPattern(final String urlPattern) {
             this.pattern = urlPattern;
         }
 
-        /**
-         * @return the port
-         */
         @Override
         public String getPort() {
             return port;
         }
 
-        /**
-         * @param port
-         *            the port to set
-         */
         public void setPort(final String port) {
             this.port = port;
         }
     }
+
 }

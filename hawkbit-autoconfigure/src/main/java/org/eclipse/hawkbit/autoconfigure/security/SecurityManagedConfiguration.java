@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
@@ -35,6 +34,7 @@ import org.eclipse.hawkbit.security.ControllerTenantAwareAuthenticationDetailsSo
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownloadFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
@@ -82,6 +82,8 @@ import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
 import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 import org.vaadin.spring.security.web.authentication.VaadinAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.authentication.VaadinUrlAuthenticationSuccessHandler;
+
+import com.google.common.collect.Lists;
 
 /**
  * All configurations related to SP authentication and authorization layer.
@@ -147,6 +149,12 @@ public class SecurityManagedConfiguration {
             gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
             gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
+            final HttpControllerPreAuthenticateAnonymousDownloadFilter controllerAnonymousDownloadFilter = new HttpControllerPreAuthenticateAnonymousDownloadFilter(
+                    tenantConfigurationManagement, tenantAware, systemSecurityContext);
+            controllerAnonymousDownloadFilter.setAuthenticationManager(authenticationManager());
+            controllerAnonymousDownloadFilter.setCheckForPrincipalChanges(true);
+            controllerAnonymousDownloadFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+
             HttpSecurity httpSec = http.csrf().disable().headers()
                     .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsMode.DENY)).contentTypeOptions()
                     .xssProtection().httpStrictTransportSecurity().and();
@@ -159,15 +167,17 @@ public class SecurityManagedConfiguration {
                 LOG.info(
                         "******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
-                        "controllerAnonymousFilter", "anonymous", Collections.singletonList(
-                                new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
+                        "controllerAnonymousFilter", "anonymous",
+                        Lists.newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
+                                new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers("/*/controller/v1/**", "/*/controller/artifacts/v1/**").and()
                         .securityContext().disable().anonymous().authenticationFilter(anoymousFilter);
             } else {
                 httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
-                        .addFilter(gatewaySecurityTokenFilter).antMatcher("/*/controller/**").anonymous().disable()
-                        .authorizeRequests().anyRequest().authenticated().and().exceptionHandling()
+                        .addFilter(gatewaySecurityTokenFilter).addFilter(controllerAnonymousDownloadFilter)
+                        .antMatcher("/*/controller/**").anonymous().disable().authorizeRequests().anyRequest()
+                        .authenticated().and().exceptionHandling()
                         .authenticationEntryPoint((request, response, authException) -> response
                                 .setStatus(HttpStatus.UNAUTHORIZED.value()))
                         .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

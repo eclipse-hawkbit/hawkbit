@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -36,7 +38,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.util.ArtifactUrlHandler;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -77,7 +78,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         amqpMessageDispatcherService.setAmqpSenderService(senderService);
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
-        when(artifactUrlHandlerMock.getUrl(anyString(), any(), anyObject())).thenReturn("http://mockurl");
+        when(artifactUrlHandlerMock.getUrl(anyString(), anyLong(), anyString(), anyString(), anyObject()))
+                .thenReturn("http://mockurl");
 
         amqpMessageDispatcherService.setArtifactUrlHandler(artifactUrlHandlerMock);
 
