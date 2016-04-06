@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -50,7 +50,6 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
             setFilterButtonsIconVisible(true);
         }
     }
-
 
     @Override
     protected String getHeaderCaption() {
@@ -131,14 +130,14 @@ public class SoftwareModuleTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         artifactUploadState.setSwModuleTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MAXIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED, null));
 
     }
 
     @Override
     public void minimizeTable() {
         artifactUploadState.setSwModuleTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MINIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override

@@ -13,8 +13,12 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -40,7 +44,7 @@ import com.vaadin.ui.VerticalLayout;
  *
  *
  */
-public abstract class AbstractTableDetailsLayout extends VerticalLayout {
+public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends VerticalLayout {
 
     private static final long serialVersionUID = 4862529368471627190L;
 
@@ -53,7 +57,7 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
     @Autowired
     protected SpPermissionChecker permissionChecker;
 
-    protected UI ui;
+    protected T selectedBaseEntity;
 
     private Label caption;
 
@@ -74,13 +78,8 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
      */
     @PostConstruct
     protected void init() {
-        ui = UI.getCurrent();
         createComponents();
         buildLayout();
-        /**
-         * On load of UI/Refresh details will be loaded based on the row
-         * selected in table.
-         */
         restoreState();
         eventBus.subscribe(this);
     }
@@ -88,6 +87,18 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
     @PreDestroy
     void destroy() {
         eventBus.unsubscribe(this);
+    }
+
+    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+        final BaseEntityEventType eventType = baseEntityEvent.getEventType();
+        if (BaseEntityEventType.SELECTED_ENTITY == eventType
+                || BaseEntityEventType.UPDATED_ENTITY == eventType) {
+            UI.getCurrent().access(() -> populateData(baseEntityEvent.getEntity()));
+        } else if (BaseEntityEventType.MINIMIZED == eventType) {
+            UI.getCurrent().access(() -> setVisible(true));
+        } else if (BaseEntityEventType.MAXIMIZED == eventType) {
+            UI.getCurrent().access(() -> setVisible(false));
+        }
     }
 
     private void createComponents() {
@@ -156,44 +167,29 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
 
     private void restoreState() {
         if (onLoadIsTableRowSelected()) {
-            populateData(true);
+            populateData(null);
+            editButton.setEnabled(true);
         }
         if (onLoadIsTableMaximized()) {
-            /**
-             * If table is maximized hide details layout.
-             */
-            hideLayout();
+            setVisible(false);
         }
-    }
-
-    protected void showLayout() {
-        setVisible(true);
-    }
-
-    protected void hideLayout() {
-        setVisible(false);
     }
 
     /**
      * If no data in table (i,e no row selected),then disable the edit button.
      * If row is selected ,enable edit button.
      */
-    protected void populateData(final Boolean isRowSelected) {
-        if (isRowSelected) {
-            populateDetailsWidget();
-            enableEditButton();
+    private void populateData(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+        editButton.setEnabled(selectedBaseEntity != null);
+        if (selectedBaseEntity == null) {
+            setName(getDefaultCaption(), StringUtils.EMPTY);
         } else {
-            disableEditButton();
-            clearDetails();
+            setName(getDefaultCaption(), getName());
         }
-    }
-
-    protected void enableEditButton() {
-        editButton.setEnabled(true);
-    }
-
-    protected void disableEditButton() {
-        editButton.setEnabled(false);
+        populateLog();
+        populateDescription();
+        populateDetailsWidget();
     }
 
     protected void updateLogLayout(final VerticalLayout changeLogLayout, final Long lastModifiedAt,
@@ -297,13 +293,6 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
 
     protected abstract String getTabSheetId();
 
-    /**
-     * Populate details layout.
-     */
-    protected abstract void populateDetailsWidget();
-
-    protected abstract void clearDetails();
-
     protected abstract Boolean hasEditPermission();
 
     public VerticalLayout getDetailsLayout() {
@@ -314,6 +303,31 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
         return logLayout;
     }
 
+    private void populateLog() {
+        if (selectedBaseEntity == null) {
+            updateLogLayout(getLogLayout(), null, StringUtils.EMPTY, null, null, i18n);
+            return;
+        }
+        updateLogLayout(getLogLayout(), selectedBaseEntity.getLastModifiedAt(), selectedBaseEntity.getLastModifiedBy(),
+                selectedBaseEntity.getCreatedAt(), selectedBaseEntity.getCreatedBy(), i18n);
+    }
+
+    private void populateDescription() {
+        if (selectedBaseEntity != null) {
+            updateDescriptionLayout(i18n.get("label.description"), selectedBaseEntity.getDescription());
+        } else {
+            updateDescriptionLayout(i18n.get("label.description"), null);
+        }
+    }
+
+    protected abstract void populateDetailsWidget();
+
+    protected Long getSelectedBaseEntityId() {
+        return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
+    }
+
     protected abstract String getDetailsHeaderCaptionId();
+
+    protected abstract String getName();
 
 }

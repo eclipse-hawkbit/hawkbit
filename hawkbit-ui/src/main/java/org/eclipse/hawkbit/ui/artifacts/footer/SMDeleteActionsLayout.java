@@ -28,7 +28,6 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableTransferable;
 import com.vaadin.ui.UI;
@@ -191,7 +190,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        uploadViewConfirmationWindowLayout.init();
+        uploadViewConfirmationWindowLayout.inittialize();
         return uploadViewConfirmationWindowLayout;
     }
 
@@ -199,35 +198,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     protected boolean hasUnsavedActions() {
         return !artifactUploadState.getDeleteSofwareModules().isEmpty()
                 || !artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty();
-    }
-
-    @Override
-    protected boolean hasCountMessage() {
-        return false;
-    }
-
-    @Override
-    protected Label getCountMessageLabel() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasBulkUploadPermission() {
-        return false;
-    }
-
-    @Override
-    protected void showBulkUploadWindow() {
-        /**
-         * Bulk upload not supported .No implementation required.
-         */
-    }
-
-    @Override
-    protected void restoreBulkUploadStatusCount() {
-        /**
-         * Bulk upload not supported .No implementation required.
-         */
     }
 
 }

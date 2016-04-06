@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleAssignmentDiscar
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,7 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class DistributionSetDetails extends AbstractTableDetailsLayout {
+public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDetailsLayout<DistributionSet> {
 
     private static final long serialVersionUID = -4595004466943546669L;
 
@@ -85,10 +84,6 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
 
     private VerticalLayout tagsLayout;
 
-    private DistributionSet selectedDsModule;
-
-    private Long dsId;
-
     Map<String, StringBuilder> assignedSWModule = new HashMap<>();
 
     /**
@@ -106,28 +101,15 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         return tagsLayout;
     }
 
-    private void populateDetailsWidget(final DistributionSet ds) {
-        if (ds != null) {
-            setDsId(ds.getId());
-            setName(getDefaultCaption(), HawkbitCommonUtil.getFormattedNameVersion(ds.getName(), ds.getVersion()));
-            populateDetails(ds);
-            populateDescription(ds);
-            populateLog(ds);
-            populteModule(ds);
-            populateTags(ds);
-        } else {
-            setDsId(null);
-            setName(getDefaultCaption(), HawkbitCommonUtil.SP_STRING_EMPTY);
-            populateDetails(null);
-            populateDescription(null);
-            populteModule(null);
-            populateTags(null);
-            populateLog(null);
-        }
+    @Override
+    protected void populateDetailsWidget() {
+        populateDetails();
+        populateModule();
+        populateTags();
     }
 
-    private void populteModule(final DistributionSet distributionSet) {
-        softwareModuleTable.populateModule(distributionSet);
+    private void populateModule() {
+        softwareModuleTable.populateModule(selectedBaseEntity);
         showUnsavedAssignment();
     }
 
@@ -159,7 +141,7 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
                     assignedSWModule.put(softwareModule.getType().getName(),
                             new StringBuilder().append("<I>").append(
                                     getUnsavedAssigedSwModule(softwareModule.getName(), softwareModule.getVersion()))
-                            .append("<I>"));
+                                    .append("<I>"));
                 }
 
             }
@@ -243,35 +225,19 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         return softwareLayout;
     }
 
-    private void populateTags(final DistributionSet ds) {
+    private void populateTags() {
         tagsLayout.removeAllComponents();
-        if (null != ds) {
+        if (null != selectedBaseEntity) {
             tagsLayout.addComponent(distributionTagToken.getTokenField());
         }
     }
 
-    private void populateLog(final DistributionSet ds) {
-        if (null != ds) {
-            updateLogLayout(getLogLayout(), ds.getLastModifiedAt(), ds.getLastModifiedBy(), ds.getCreatedAt(),
-                    ds.getCreatedBy(), i18n);
-        } else {
-            updateLogLayout(getLogLayout(), null, HawkbitCommonUtil.SP_STRING_EMPTY, null, null, i18n);
-        }
-    }
-
-    private void populateDetails(final DistributionSet ds) {
-        if (ds != null) {
-            updateDistributionSetDetailsLayout(ds.getType().getName(), ds.isRequiredMigrationStep());
+    private void populateDetails() {
+        if (selectedBaseEntity != null) {
+            updateDistributionSetDetailsLayout(selectedBaseEntity.getType().getName(),
+                    selectedBaseEntity.isRequiredMigrationStep());
         } else {
             updateDistributionSetDetailsLayout(null, null);
-        }
-    }
-
-    private void populateDescription(final DistributionSet ds) {
-        if (ds != null) {
-            updateDescriptionLayout(i18n.get("label.description"), ds.getDescription());
-        } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
         }
     }
 
@@ -293,18 +259,10 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
         }
     }
 
-    public Long getDsId() {
-        return dsId;
-    }
-
-    public void setDsId(final Long dsId) {
-        this.dsId = dsId;
-    }
-
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
-        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getDsId());
+        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getSelectedBaseEntityId());
         newDistWindow.setCaption(i18n.get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
@@ -327,11 +285,6 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     }
 
     @Override
-    protected void populateDetailsWidget() {
-        populateDetailsWidget(selectedDsModule);
-    }
-
-    @Override
     protected String getDefaultCaption() {
         return i18n.get("distribution.details.header");
     }
@@ -346,11 +299,6 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     }
 
     @Override
-    protected void clearDetails() {
-        populateDetailsWidget(null);
-    }
-
-    @Override
     protected Boolean hasEditPermission() {
         return permissionChecker.hasUpdateDistributionPermission();
     }
@@ -358,59 +306,40 @@ public class DistributionSetDetails extends AbstractTableDetailsLayout {
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent event) {
         if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.ASSIGN_SOFTWARE_MODULE) {
-            ui.access(() -> updateSoftwareModule(event.getSoftwareModule()));
+            UI.getCurrent().access(() -> updateSoftwareModule(event.getEntity()));
         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
-        if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE
-                || distributionTableEvent
-                        .getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
-            assignedSWModule.clear();
-            ui.access(() -> {
-                /**
-                 * distributionTableEvent.getDistributionSet() is null when
-                 * table has no data.
-                 */
-                if (distributionTableEvent.getDistributionSet() != null) {
-                    selectedDsModule = distributionTableEvent.getDistributionSet();
-                    populateData(true);
-                } else {
-                    populateData(false);
-                }
-            });
-        } else if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.MINIMIZED) {
-            ui.access(() -> showLayout());
-        } else if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.MAXIMIZED) {
-            ui.access(() -> hideLayout());
-        }
+        onBaseEntityEvent(distributionTableEvent);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleAssignmentDiscardEvent softwareModuleAssignmentDiscardEvent) {
         if (softwareModuleAssignmentDiscardEvent.getDistributionSetIdName() != null) {
-            ui.access(() -> {
+            UI.getCurrent().access(() -> {
                 final DistributionSetIdName distIdName = softwareModuleAssignmentDiscardEvent
                         .getDistributionSetIdName();
-                if (distIdName.getId().equals(selectedDsModule.getId())
-                        && distIdName.getName().equals(selectedDsModule.getName())) {
-                    selectedDsModule = distributionSetManagement
-                            .findDistributionSetByIdWithDetails(selectedDsModule.getId());
-                    populteModule(selectedDsModule);
+                if (distIdName.getId().equals(getSelectedBaseEntityId())
+                        && distIdName.getName().equals(selectedBaseEntity.getName())) {
+                    selectedBaseEntity = distributionSetManagement
+                            .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+                    populateModule();
                 }
             });
         }
     }
- 
+
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
-                && selectedDsModule != null) {
+                && selectedBaseEntity != null) {
             assignedSWModule.clear();
-            selectedDsModule = distributionSetManagement.findDistributionSetByIdWithDetails(selectedDsModule.getId());
-            ui.access(() -> populteModule(selectedDsModule));
+            selectedBaseEntity = distributionSetManagement
+                    .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+            UI.getCurrent().access(() -> populateModule());
         }
     }
 

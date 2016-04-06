@@ -37,7 +37,6 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableTransferable;
 import com.vaadin.ui.UI;
@@ -296,7 +295,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        distConfirmationWindowLayout.init();
+        distConfirmationWindowLayout.inittialize();
         return distConfirmationWindowLayout;
     }
 
@@ -314,35 +313,6 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
 
         return unSavedActionsTables || unSavedActionsTypes;
-    }
-
-    @Override
-    protected boolean hasCountMessage() {
-        return false;
-    }
-
-    @Override
-    protected Label getCountMessageLabel() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasBulkUploadPermission() {
-        return false;
-    }
-
-    @Override
-    protected void showBulkUploadWindow() {
-        /**
-         * Bulk upload not supported No implementation required.
-         */
-    }
-
-    @Override
-    protected void restoreBulkUploadStatusCount() {
-        /**
-         * No implementation required.As no bulk upload in Distribution view.
-         */
     }
 
     private DistributionSetType getCurrentDistributionSetType() {

@@ -9,29 +9,59 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
+import com.google.gwt.thirdparty.guava.common.collect.Iterables;
 import com.vaadin.data.Container;
+import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Parent class for table.
- * 
+ * Abstract table to handling entity
  *
- *
+ * @param <E>
+ *            e is the entity class
+ * @param <I>
+ *            i is the id of the table
  */
-public abstract class AbstractTable extends Table {
+public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     private static final long serialVersionUID = 4856562746502217630L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTable.class);
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    protected I18N i18n;
 
     /**
      * Initialize the components.
      */
+    @PostConstruct
     protected void init() {
         setStyleName("sp-table");
         setSizeFull();
@@ -48,6 +78,52 @@ public abstract class AbstractTable extends Table {
         addValueChangeListener(event -> onValueChange());
         selectRow();
         setPageLength(SPUIDefinitions.PAGE_SIZE);
+
+        setDataAvailable(getContainerDataSource().size() != 0);
+        eventBus.subscribe(this);
+    }
+
+    @PreDestroy
+    protected void destroy() {
+        eventBus.unsubscribe(this);
+    }
+
+    public static <T> Set<T> getTableValue(final Table table) {
+        @SuppressWarnings("unchecked")
+        Set<T> values = (Set<T>) table.getValue();
+        if (values == null) {
+            values = Collections.emptySet();
+        }
+        if (values.remove(null)) {
+            LOG.warn("Null values in table content. How could this happen?");
+        }
+        return values;
+    }
+
+    private void onValueChange() {
+        eventBus.publish(this, UploadArtifactUIEvent.HIDE_DROP_HINTS);
+
+        // TODO Einzelwerte?
+
+        final Set<I> values = getTableValue(this);
+
+        E entity = null;
+
+        final I lastId = Iterables.getLast(values);
+        if (lastId != null) {
+            entity = findEntityByTableValue(lastId);
+        }
+        setManagementEntitiyStateValues(values, lastId);
+        publishEntityAfterValueChange(entity);
+    }
+
+    protected void setManagementEntitiyStateValues(final Set<I> values, final I lastId) {
+        final ManagmentEntityState<I> managmentEntityState = getManagmentEntityState();
+        if (managmentEntityState == null) {
+            return;
+        }
+        managmentEntityState.setLastSelectedEntity(lastId);
+        managmentEntityState.setSelectedEnitities(values);
     }
 
     private void setDefault() {
@@ -119,6 +195,51 @@ public abstract class AbstractTable extends Table {
     }
 
     /**
+     * Add new software module to table.
+     *
+     * @param baseEntity
+     *            new software module
+     */
+    protected Item addEntity(final E baseEntity) {
+        final Object addItem = addItem();
+        final Item item = getItem(addItem);
+        updateEntity(baseEntity, item);
+        return item;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void updateEntity(final E baseEntity, final Item item) {
+        item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(baseEntity.getName());
+        item.getItemProperty(SPUILabelDefinitions.VAR_ID).setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(baseEntity.getDescription());
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
+                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getCreatedBy()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
+                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getLastModifiedBy()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
+                .setValue(SPDateTimeUtil.getFormattedDate(baseEntity.getCreatedAt()));
+        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
+                .setValue(SPDateTimeUtil.getFormattedDate(baseEntity.getLastModifiedAt()));
+
+    }
+
+    protected void onBaseEntityEvent(final BaseEntityEvent<E> event) {
+        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
+            UI.getCurrent().access(() -> applyMinTableSettings());
+        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
+            UI.getCurrent().access(() -> applyMaxTableSettings());
+        } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
+            UI.getCurrent().access(() -> addEntity(event.getEntity()));
+        }
+    }
+
+    protected abstract E findEntityByTableValue(I lastSelectedId);
+
+    protected abstract void publishEntityAfterValueChange(E selectedLastEntity);
+
+    protected abstract ManagmentEntityState<I> getManagmentEntityState();
+
+    /**
      * Get Id of the table.
      * 
      * @return Id.
@@ -141,7 +262,9 @@ public abstract class AbstractTable extends Table {
     /**
      * Add any generated columns if required.
      */
-    protected abstract void addCustomGeneratedColumns();
+    protected void addCustomGeneratedColumns() {
+        // can be overriden
+    }
 
     /**
      * Check if first row should be selected by default on load.
@@ -158,11 +281,6 @@ public abstract class AbstractTable extends Table {
     protected abstract Object getItemIdToSelect();
 
     /**
-     * On select of row.
-     */
-    protected abstract void onValueChange();
-
-    /**
      * Check if the table is maximized or minimized.
      * 
      * @return true if maximized, otherwise false.
@@ -174,7 +292,23 @@ public abstract class AbstractTable extends Table {
      * 
      * @return List<TableColumn> list of visible columns
      */
-    protected abstract List<TableColumn> getTableVisibleColumns();
+    protected List<TableColumn> getTableVisibleColumns() {
+        final List<TableColumn> columnList = new ArrayList<>();
+        if (isMaximized()) {
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
+            columnList
+                    .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
+            columnList.add(
+                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
+                    0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
+        } else {
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.8F));
+        }
+        return columnList;
+    }
 
     /**
      * Get drop handler for the table.
@@ -182,5 +316,7 @@ public abstract class AbstractTable extends Table {
      * @return reference of {@link DropHandler}
      */
     protected abstract DropHandler getTableDropHandler();
+
+    protected abstract void setDataAvailable(boolean available);
 
 }

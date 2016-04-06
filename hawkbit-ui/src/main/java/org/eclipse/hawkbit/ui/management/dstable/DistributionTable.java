@@ -11,15 +11,12 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -29,9 +26,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -40,8 +37,6 @@ import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -52,7 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -76,21 +70,15 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class DistributionTable extends AbstractTable {
+public class DistributionTable extends AbstractTable<DistributionSet, DistributionSetIdName> {
 
     private static final long serialVersionUID = -1928335256399519494L;
-
-    @Autowired
-    private I18N i18n;
 
     @Autowired
     private SpPermissionChecker permissionChecker;
 
     @Autowired
     private UINotification notification;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -111,17 +99,9 @@ public class DistributionTable extends AbstractTable {
     private Button distributinPinnedBtn;
 
     @Override
-    @PostConstruct
     protected void init() {
         super.init();
-        eventBus.subscribe(this);
         notAllowedMsg = i18n.get("message.action.not.allowed");
-        setNoDataAvailable();
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     /**
@@ -151,13 +131,7 @@ public class DistributionTable extends AbstractTable {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent event) {
-        if (event.getDistributionComponentEvent() == DistributionComponentEvent.MINIMIZED) {
-            UI.getCurrent().access(() -> applyMinTableSettings());
-        } else if (event.getDistributionComponentEvent() == DistributionComponentEvent.MAXIMIZED) {
-            UI.getCurrent().access(() -> applyMaxTableSettings());
-        } else if (event.getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
-            UI.getCurrent().access(() -> updateDistributionInTable(event.getDistributionSet()));
-        }
+        onBaseEntityEvent(event);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -272,31 +246,18 @@ public class DistributionTable extends AbstractTable {
     }
 
     @Override
-    protected void onValueChange() {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        final Set<DistributionSetIdName> values = HawkbitCommonUtil.getSelectedDSDetails(this);
-        DistributionSetIdName value = null;
-        if (values != null && !values.isEmpty()) {
-            final Iterator<DistributionSetIdName> iterator = values.iterator();
+    protected DistributionSet findEntityByTableValue(final DistributionSetIdName lastSelectedId) {
+        return distributionSetManagement.findDistributionSetByIdWithDetails(lastSelectedId.getId());
+    }
 
-            while (iterator.hasNext()) {
-                value = iterator.next();
-            }
+    @Override
+    protected void publishEntityAfterValueChange(final DistributionSet selectedLastEntity) {
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+    }
 
-            if (null != value) {
-                managementUIState.setSelectedDsIdName(values);
-                managementUIState.setLastSelectedDsIdName(value);
-                final DistributionSet lastSelectedDistSet = distributionSetManagement
-                        .findDistributionSetByIdWithDetails(value.getId());
-                eventBus.publish(this,
-                        new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE, lastSelectedDistSet));
-            }
-        } else {
-            managementUIState.setSelectedDsIdName(null);
-            managementUIState.setLastSelectedDsIdName(null);
-            eventBus.publish(this, new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE, null));
-        }
-
+    @Override
+    protected ManagementUIState getManagmentEntityState() {
+        return managementUIState;
     }
 
     @Override
@@ -306,7 +267,16 @@ public class DistributionTable extends AbstractTable {
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        return HawkbitCommonUtil.getTableVisibleColumns(isMaximized(), true, i18n);
+        final List<TableColumn> columnList = new ArrayList<>();
+        if (isMaximized()) {
+            columnList.addAll(super.getTableVisibleColumns());
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1f));
+        } else {
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.7f));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.2f));
+            columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.1f));
+        }
+        return columnList;
     }
 
     @Override
@@ -345,7 +315,7 @@ public class DistributionTable extends AbstractTable {
     private void assignDsTag(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
         final Table distTable = (Table) taregtDet.getTarget();
-        final Set<DistributionSetIdName> distsSelected = HawkbitCommonUtil.getSelectedDSDetails(distTable);
+        final Set<DistributionSetIdName> distsSelected = getTableValue(distTable);
         final Set<Long> distList = new HashSet<>();
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
@@ -390,7 +360,7 @@ public class DistributionTable extends AbstractTable {
     private void assignTargetToDs(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final Table source = transferable.getSourceComponent();
-        final Set<TargetIdName> targetsSelected = HawkbitCommonUtil.getSelectedTargetDetails(source);
+        final Set<TargetIdName> targetsSelected = getTableValue(source);
         final Set<TargetIdName> targetDetailsList = new HashSet<>();
 
         if (!targetsSelected.contains(transferable.getData("itemId"))) {
@@ -502,17 +472,14 @@ public class DistributionTable extends AbstractTable {
     private void updateDistributionInTable(final DistributionSet editedDs) {
         final Item item = getContainerDataSource()
                 .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(editedDs.getName());
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(editedDs.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(editedDs.getCreatedBy()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(editedDs.getCreatedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(editedDs.getLastModifiedBy()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(editedDs.getLastModifiedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(editedDs.getDescription());
+        updateEntity(editedDs, item);
+
+    }
+
+    @Override
+    protected void updateEntity(final DistributionSet baseEntity, final Item item) {
+        super.updateEntity(baseEntity, item);
+        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
     }
 
     private void restoreDistributionTableStyle() {
@@ -703,12 +670,10 @@ public class DistributionTable extends AbstractTable {
         this.distributinPinnedBtn = distributinPinnedBtn;
     }
 
-    private void setNoDataAvailable() {
-        final int size = getContainerDataSource().size();
-        if (size == 0) {
-            managementUIState.setNoDataAvailableDistribution(true);
-        } else {
-            managementUIState.setNoDataAvailableDistribution(false);
-        }
+    @Override
+    protected void setDataAvailable(final boolean available) {
+        managementUIState.setNoDataAvailableDistribution(!available);
+
     }
+
 }

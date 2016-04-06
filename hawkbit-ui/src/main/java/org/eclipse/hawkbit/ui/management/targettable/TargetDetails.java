@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.tagdetails.TargetTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -50,7 +49,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class TargetDetails extends AbstractTableDetailsLayout {
+public class TargetDetails extends AbstractTableDetailsLayout<Target> {
 
     private static final long serialVersionUID = 4571732743399605843L;
 
@@ -62,8 +61,6 @@ public class TargetDetails extends AbstractTableDetailsLayout {
 
     @Autowired
     private TargetTagToken targetTagToken;
-
-    private Target selectedTarget = null;
 
     private VerticalLayout assignedDistLayout;
     private VerticalLayout installedDistLayout;
@@ -112,13 +109,14 @@ public class TargetDetails extends AbstractTableDetailsLayout {
 
     @Override
     protected void onEdit(final ClickEvent event) {
-        if (selectedTarget != null) {
-            final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
-            targetAddUpdateWindowLayout.populateValuesOfTarget(selectedTarget.getControllerId());
-            newDistWindow.setCaption(i18n.get("caption.update.dist"));
-            UI.getCurrent().addWindow(newDistWindow);
-            newDistWindow.setVisible(Boolean.TRUE);
+        if (selectedBaseEntity == null) {
+            return;
         }
+        final Window newDistWindow = targetAddUpdateWindowLayout.getWindow();
+        targetAddUpdateWindowLayout.populateValuesOfTarget(selectedBaseEntity.getControllerId());
+        newDistWindow.setCaption(i18n.get("caption.update.dist"));
+        UI.getCurrent().addWindow(newDistWindow);
+        newDistWindow.setVisible(Boolean.TRUE);
     }
 
     @Override
@@ -138,50 +136,24 @@ public class TargetDetails extends AbstractTableDetailsLayout {
 
     @Override
     protected void populateDetailsWidget() {
-        if (selectedTarget != null) {
-            setName(getDefaultCaption(), selectedTarget.getName());
-        }
-        populateDetailsWidget(selectedTarget);
-    }
-
-    private void populateDetailsWidget(final Target target) {
-        if (target != null) {
-            setName(getDefaultCaption(), target.getName());
-            updateDetailsLayout(target.getControllerId(), target.getTargetInfo().getAddress(),
-                    target.getSecurityToken(),
-                    SPDateTimeUtil.getFormattedDate(target.getTargetInfo().getLastTargetQuery()));
-            populateDescription(target);
-            populateDistributionDtls(installedDistLayout, target.getTargetInfo().getInstalledDistributionSet());
-            populateDistributionDtls(assignedDistLayout, target.getAssignedDistributionSet());
-            updateLogLayout(getLogLayout(), target.getLastModifiedAt(), target.getLastModifiedBy(),
-                    target.getCreatedAt(), target.getCreatedBy(), i18n);
-            populateAttributes(target);
+        if (selectedBaseEntity != null) {
+            updateDetailsLayout(selectedBaseEntity.getControllerId(), selectedBaseEntity.getTargetInfo().getAddress(),
+                    selectedBaseEntity.getSecurityToken(),
+                    SPDateTimeUtil.getFormattedDate(selectedBaseEntity.getTargetInfo().getLastTargetQuery()));
+            populateDistributionDtls(installedDistLayout,
+                    selectedBaseEntity.getTargetInfo().getInstalledDistributionSet());
+            populateDistributionDtls(assignedDistLayout, selectedBaseEntity.getAssignedDistributionSet());
         } else {
-            setName(getDefaultCaption(), HawkbitCommonUtil.SP_STRING_EMPTY);
             updateDetailsLayout(null, null, null, null);
-            populateDescription(null);
             populateDistributionDtls(installedDistLayout, null);
             populateDistributionDtls(assignedDistLayout, null);
-            updateLogLayout(getLogLayout(), null, HawkbitCommonUtil.SP_STRING_EMPTY, null, null, i18n);
-            populateAttributes(null);
         }
+        updateAttributesLayout(selectedBaseEntity);
     }
 
-    private void populateAttributes(final Target target) {
-        if (target != null) {
-
-            updateAttributesLayout(target);
-        } else {
-            updateAttributesLayout(null);
-        }
-    }
-
-    private void populateDescription(final Target target) {
-        if (target != null) {
-            updateDescriptionLayout(i18n.get("label.description"), target.getDescription());
-        } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
-        }
+    @Override
+    protected String getName() {
+        return selectedBaseEntity.getName();
     }
 
     private void updateDetailsLayout(final String controllerId, final URI address, final String securityToken,
@@ -263,36 +235,13 @@ public class TargetDetails extends AbstractTableDetailsLayout {
     }
 
     @Override
-    protected void clearDetails() {
-        populateDetailsWidget(null);
-    }
-
-    @Override
     protected Boolean hasEditPermission() {
         return permissionChecker.hasUpdateTargetPermission();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent targetTableEvent) {
-        // Get the event type
-        final TargetComponentEvent event = targetTableEvent.getTargetComponentEvent();
-
-        if (event == TargetComponentEvent.SELECTED_TARGET || event == TargetComponentEvent.EDIT_TARGET) {
-            UI.getCurrent().access(() -> {
-                // If selected or edited, populate the fresh details.
-                if (targetTableEvent.getTarget() != null) {
-                    selectedTarget = targetTableEvent.getTarget();
-                } else {
-                    selectedTarget = null;
-                }
-                populateData(selectedTarget != null);
-
-            });
-        } else if (event == TargetComponentEvent.MINIMIZED) {
-            UI.getCurrent().access(() -> showLayout());
-        } else if (event == TargetComponentEvent.MAXIMIZED) {
-            UI.getCurrent().access(() -> hideLayout());
-        }
+        onBaseEntityEvent(targetTableEvent);
     }
 
     @Override

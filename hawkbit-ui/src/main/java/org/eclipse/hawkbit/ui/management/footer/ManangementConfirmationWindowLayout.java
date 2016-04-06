@@ -19,8 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -31,20 +29,15 @@ import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.footer.ActionTypeOptionGroupLayout.ActionTypeOption;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -52,8 +45,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Confirmation window for target/ds delete and assignment.
@@ -80,12 +73,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private ManagementUIState managementUIState;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
     private transient TargetManagement targetManagement;
 
     @Autowired
@@ -98,14 +85,6 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
     private ActionTypeOptionGroupLayout actionTypeOptionGroupLayout;
 
     private ConfirmationTab assignmnetTab;
-
-    /**
-     * Initialze the component.
-     */
-    @PostConstruct
-    public void init() {
-        super.inittialize();
-    }
 
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
@@ -130,6 +109,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         assignmnetTab.getConfirmAll().setIcon(FontAwesome.SAVE);
         assignmnetTab.getConfirmAll().setCaption(i18n.get("button.assign.all"));
         assignmnetTab.getConfirmAll().addClickListener(event -> saveAllAssignments(assignmnetTab));
+
         assignmnetTab.getDiscardAll().setCaption(i18n.get(SPUILabelDefinitions.BUTTON_DISCARD_ALL));
         assignmnetTab.getDiscardAll().setId(SPUIComponetIdProvider.DISCARD_ASSIGNMENT);
         assignmnetTab.getDiscardAll().addClickListener(event -> discardAllAssignments(assignmnetTab));
@@ -139,35 +119,17 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         // Add the discard action column
         assignmnetTab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
-            style.append(' ');
-            style.append(SPUIStyleDefinitions.REDICON);
-            final Button deleteIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    style.toString(), true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
-            deleteIcon.setData(itemId);
-            deleteIcon.setImmediate(true);
-            deleteIcon.addClickListener(event -> discardAssignment(
-                    (TargetIdName) ((Button) event.getComponent()).getData(), assignmnetTab));
-            return deleteIcon;
+            final ClickListener clickListener = event -> discardAssignment(
+                    (TargetIdName) ((Button) event.getComponent()).getData(), assignmnetTab);
+            return createDiscardButton(itemId, clickListener);
         });
-
-        // set the visible columns
-        final List<Object> visibleColumnIds = new ArrayList<>();
-        final List<String> visibleColumnLabels = new ArrayList<>();
-        if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
-            visibleColumnIds.add(TARGET_NAME);
-            visibleColumnIds.add(DISTRIBUTION_NAME);
-            visibleColumnIds.add(DISCARD_CHANGES);
-            visibleColumnLabels.add(i18n.get("header.first.assignment.table"));
-            visibleColumnLabels.add(i18n.get("header.second.assignment.table"));
-            visibleColumnLabels.add(i18n.get("header.third.assignment.table"));
-        }
 
         assignmnetTab.getTable().setColumnExpandRatio(TARGET_NAME, 2);
         assignmnetTab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, 2);
         assignmnetTab.getTable().setColumnExpandRatio(DISCARD_CHANGES, 1);
-        assignmnetTab.getTable().setVisibleColumns(visibleColumnIds.toArray());
-        assignmnetTab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
+        assignmnetTab.getTable().setVisibleColumns(TARGET_NAME, DISTRIBUTION_NAME, DISCARD_CHANGES);
+        assignmnetTab.getTable().setColumnHeaders(i18n.get("header.first.assignment.table"),
+                i18n.get("header.second.assignment.table"), i18n.get("header.third.assignment.table"));
         assignmnetTab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
 
         actionTypeOptionGroupLayout.selectDefaultOption();
@@ -326,27 +288,15 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         /* Add the discard action column */
         tab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final Button deletestargetIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
-                    SPUIButtonStyleSmallNoBorder.class);
-            deletestargetIcon.setData(itemId);
-            deletestargetIcon.setImmediate(true);
-            deletestargetIcon.addClickListener(event -> discardTargetDelete(
-                    (TargetIdName) ((Button) event.getComponent()).getData(), itemId, tab));
-            return deletestargetIcon;
+            final ClickListener clickListener = event -> discardTargetDelete(
+                    (TargetIdName) ((Button) event.getComponent()).getData(), itemId, tab);
+            return createDiscardButton(itemId, clickListener);
+
         });
 
-        /* set the visible columns */
-        final List<Object> visibleColumnIds = new ArrayList<>();
-        final List<String> visibleColumnLabels = new ArrayList<>();
-        if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
-            visibleColumnIds.add(TARGET_NAME);
-            visibleColumnIds.add(DISCARD_CHANGES);
-            visibleColumnLabels.add(i18n.get("header.first.deletetarget.table"));
-            visibleColumnLabels.add(i18n.get("header.second.deletetarget.table"));
-        }
-        tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
-        tab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
+        tab.getTable().setVisibleColumns(TARGET_NAME, DISCARD_CHANGES);
+        tab.getTable().setColumnHeaders(i18n.get("header.first.deletetarget.table"),
+                i18n.get("header.second.deletetarget.table"));
 
         tab.getTable().setColumnExpandRatio(TARGET_NAME, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(DISCARD_CHANGES, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -371,30 +321,17 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
 
         /* Add the discard action column */
         tab.getTable().addGeneratedColumn(DISCARD_CHANGES, (source, itemId, columnId) -> {
-            final Button deletesDsIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
-                    SPUIButtonStyleSmallNoBorder.class);
-            deletesDsIcon.setData(itemId);
-            deletesDsIcon.setImmediate(true);
-            deletesDsIcon.addClickListener(event -> discardDSDelete(
-                    (DistributionSetIdName) ((Button) event.getComponent()).getData(), itemId, tab));
-            return deletesDsIcon;
-        });
+            final ClickListener clickListener = event -> discardDSDelete(
+                    (DistributionSetIdName) ((Button) event.getComponent()).getData(), itemId, tab);
+            return createDiscardButton(itemId, clickListener);
 
-        /* set the visible columns */
-        final List<Object> visibleColumnIds = new ArrayList<>();
-        final List<String> visibleColumnLabels = new ArrayList<>();
-        if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
-            visibleColumnIds.add(DISTRIBUTION_NAME);
-            visibleColumnIds.add(DISCARD_CHANGES);
-            visibleColumnLabels.add(i18n.get("header.one.deletedist.table"));
-            visibleColumnLabels.add(i18n.get("header.second.deletedist.table"));
-        }
+        });
 
         tab.getTable().setColumnExpandRatio(DISTRIBUTION_NAME, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(DISCARD_CHANGES, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
-        tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
-        tab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
+        tab.getTable().setVisibleColumns(DISTRIBUTION_NAME, DISCARD_CHANGES);
+        tab.getTable().setColumnHeaders(i18n.get("header.one.deletedist.table"),
+                i18n.get("header.second.deletedist.table"));
         tab.getTable().setColumnAlignment(DISCARD_CHANGES, Align.CENTER);
         return tab;
     }

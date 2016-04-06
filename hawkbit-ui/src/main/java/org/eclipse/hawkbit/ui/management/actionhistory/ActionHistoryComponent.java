@@ -12,8 +12,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -62,9 +62,9 @@ public class ActionHistoryComponent extends VerticalLayout {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent targetUIEvent) {
-        if (targetUIEvent.getTargetComponentEvent() == TargetComponentEvent.SELECTED_TARGET) {
+        if (BaseEntityEventType.SELECTED_ENTITY == targetUIEvent.getEventType()) {
             setData(SPUIDefinitions.DATA_AVAILABLE);
-            UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getTarget()));
+            UI.getCurrent().access(() -> populateActionHistoryDetails(targetUIEvent.getEntity()));
         }
     }
 

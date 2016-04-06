@@ -10,9 +10,8 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
-import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -36,7 +35,7 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class SwModuleDetails extends AbstractTableDetailsLayout {
+public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLayout<SoftwareModule> {
 
     private static final long serialVersionUID = -1052279281066089812L;
 
@@ -46,37 +45,15 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
     @Autowired
     private ManageDistUIState manageDistUIState;
 
-    private Long swModuleId;
-
-    private SoftwareModule selectedSwModule;
-
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
-        if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE
-                || softwareModuleEvent
-                        .getSoftwareModuleEventType() == SoftwareModuleEventType.UPDATED_SOFTWARE_MODULE) {
-            ui.access(() -> {
-                /**
-                 * softwareModuleEvent.getSoftwareModule() is null when table
-                 * has no data.
-                 */
-                if (softwareModuleEvent.getSoftwareModule() != null) {
-                    selectedSwModule = softwareModuleEvent.getSoftwareModule();
-                    populateData(true);
-                } else {
-                    populateData(false);
-                }
-            });
-        } else if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.MINIMIZED) {
-            showLayout();
-        } else if (softwareModuleEvent.getSoftwareModuleEventType() == SoftwareModuleEventType.MAXIMIZED) {
-            hideLayout();
-        }
+        onBaseEntityEvent(softwareModuleEvent);
     }
 
     @Override
     protected void onEdit(final ClickEvent event) {
-        final Window addSoftwareModule = softwareModuleAddUpdateWindow.createUpdateSoftwareModuleWindow(swModuleId);
+        final Window addSoftwareModule = softwareModuleAddUpdateWindow
+                .createUpdateSoftwareModuleWindow(getSelectedBaseEntityId());
         addSoftwareModule.setCaption(i18n.get("upload.caption.update.swmodule"));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
@@ -110,16 +87,6 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
     }
 
     @Override
-    protected void populateDetailsWidget() {
-        populateDetailsWidget(selectedSwModule);
-    }
-
-    @Override
-    protected void clearDetails() {
-        populateDetailsWidget(null);
-    }
-
-    @Override
     protected Boolean hasEditPermission() {
         return permissionChecker.hasUpdateDistributionPermission();
     }
@@ -129,26 +96,19 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
         return null;
     }
 
-    private void populateDetails(final SoftwareModule swModule) {
+    private void populateDetails() {
         String maxAssign = HawkbitCommonUtil.SP_STRING_EMPTY;
-        if (swModule != null) {
-            if (swModule.getType().getMaxAssignments() == Integer.MAX_VALUE) {
+        if (selectedBaseEntity != null) {
+            if (selectedBaseEntity.getType().getMaxAssignments() == Integer.MAX_VALUE) {
                 maxAssign = i18n.get("label.multiAssign.type");
             } else {
                 maxAssign = i18n.get("label.singleAssign.type");
             }
-            updateSwModuleDetailsLayout(swModule.getType().getName(), swModule.getVendor(), maxAssign);
+            updateSwModuleDetailsLayout(selectedBaseEntity.getType().getName(), selectedBaseEntity.getVendor(),
+                    maxAssign);
         } else {
             updateSwModuleDetailsLayout(HawkbitCommonUtil.SP_STRING_EMPTY, HawkbitCommonUtil.SP_STRING_EMPTY,
                     maxAssign);
-        }
-    }
-
-    private void populateDescription(final SoftwareModule sw) {
-        if (sw != null) {
-            updateDescriptionLayout(i18n.get("label.description"), sw.getDescription());
-        } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
         }
     }
 
@@ -176,34 +136,9 @@ public class SwModuleDetails extends AbstractTableDetailsLayout {
 
     }
 
-    private void populateLog(final SoftwareModule softwareModule) {
-        if (null != softwareModule) {
-            updateLogLayout(getLogLayout(), softwareModule.getLastModifiedAt(), softwareModule.getLastModifiedBy(),
-                    softwareModule.getCreatedAt(), softwareModule.getCreatedBy(), i18n);
-        } else {
-            updateLogLayout(getLogLayout(), null, HawkbitCommonUtil.SP_STRING_EMPTY, null, null, i18n);
-        }
-    }
-
-    public void setSwModuleId(final Long swModuleId) {
-        this.swModuleId = swModuleId;
-    }
-
-    private void populateDetailsWidget(final SoftwareModule swModule) {
-        if (swModule != null) {
-            setSwModuleId(swModule.getId());
-            setName(getDefaultCaption(),
-                    HawkbitCommonUtil.getFormattedNameVersion(swModule.getName(), swModule.getVersion()));
-            populateDetails(swModule);
-            populateDescription(swModule);
-            populateLog(swModule);
-        } else {
-            setSwModuleId(null);
-            setName(getDefaultCaption(), HawkbitCommonUtil.SP_STRING_EMPTY);
-            populateDetails(null);
-            populateDescription(null);
-            populateLog(null);
-        }
+    @Override
+    protected void populateDetailsWidget() {
+        populateDetails();
     }
 
     @Override

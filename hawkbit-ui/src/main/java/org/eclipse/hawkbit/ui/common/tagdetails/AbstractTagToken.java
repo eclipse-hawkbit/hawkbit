@@ -17,6 +17,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -35,6 +38,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -44,7 +48,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  *
  */
-public abstract class AbstractTagToken implements Serializable {
+public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable {
 
     private static final String COLOR_PROPERTY = "color";
 
@@ -59,7 +63,7 @@ public abstract class AbstractTagToken implements Serializable {
     protected final Map<Long, TagData> tokensAdded = new HashMap<>();
 
     protected CssLayout tokenLayout = new CssLayout();
-    
+
     @Autowired
     protected SpPermissionChecker checker;
 
@@ -71,9 +75,11 @@ public abstract class AbstractTagToken implements Serializable {
 
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
-    
+
     @Autowired
     protected ManagementUIState managementUIState;
+
+    protected T selectedEntity;
 
     @PostConstruct
     protected void init() {
@@ -81,11 +87,23 @@ public abstract class AbstractTagToken implements Serializable {
         checkIfTagAssignedIsAllowed();
         eventBus.subscribe(this);
     }
-   
 
     @PreDestroy
-    void destroy() {
+    protected void destroy() {
         eventBus.unsubscribe(this);
+    }
+
+    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+        if (BaseEntityEventType.SELECTED_ENTITY != baseEntityEvent.getEventType()) {
+            return;
+        }
+        UI.getCurrent().access(() -> {
+            final T entity = baseEntityEvent.getEntity();
+            if (entity != null) {
+                selectedEntity = entity;
+                repopulateToken();
+            }
+        });
     }
 
     private void createTokenField() {
