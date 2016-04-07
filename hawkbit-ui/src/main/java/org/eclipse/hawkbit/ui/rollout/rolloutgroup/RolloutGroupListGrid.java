@@ -217,7 +217,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         createRolloutGroupStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(),
                 new RolloutGroupStatusConverter());
-        
+
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
         if (permissionChecker.hasRolloutTargetsReadPermission()) {
@@ -248,18 +248,6 @@ public class RolloutGroupListGrid extends AbstractGrid {
         rolloutUIState
                 .setRolloutGroup(rolloutGroupManagement.findRolloutGroupWithDetailedStatus((Long) event.getItemId()));
         eventBus.publish(this, RolloutEvent.SHOW_ROLLOUT_GROUP_TARGETS);
-    }
-
-    private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
-        final StatusFontIcon statusFontIcon = statusIconMap.get(value);
-        if (statusFontIcon == null) {
-            return null;
-        }
-        final String codePoint = statusFontIcon.getFontIcon() != null
-                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
-        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
-
     }
 
     private void createRolloutGroupStatusToFontMap() {
@@ -316,14 +304,16 @@ public class RolloutGroupListGrid extends AbstractGrid {
         private static final long serialVersionUID = -9205943894818450807L;
 
         @Override
-        public TotalTargetCountStatus convertToModel(final String value, final Class<? extends TotalTargetCountStatus> targetType,
-                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public TotalTargetCountStatus convertToModel(final String value,
+                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
-        public String convertToPresentation(final TotalTargetCountStatus value, final Class<? extends String> targetType,
-                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public String convertToPresentation(final TotalTargetCountStatus value,
+                final Class<? extends String> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 
@@ -367,6 +357,14 @@ public class RolloutGroupListGrid extends AbstractGrid {
         @Override
         public Class<String> getPresentationType() {
             return String.class;
+        }
+
+        private String convertRolloutGroupStatusToString(final RolloutGroupStatus value) {
+            final StatusFontIcon statusFontIcon = statusIconMap.get(value);
+            final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
+                    SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+
         }
 
     }

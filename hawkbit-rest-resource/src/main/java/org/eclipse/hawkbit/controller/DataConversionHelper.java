@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.controller.model.Artifact;
 import org.eclipse.hawkbit.controller.model.Chunk;
 import org.eclipse.hawkbit.controller.model.Config;
@@ -29,27 +31,29 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactHash;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 
 import com.google.common.base.Charsets;
 
 /**
  * Utility class for the Controller API.
- *
- *
- *
- *
  */
 public final class DataConversionHelper {
+
+    @Autowired
+    ArtifactUrlHandler artifactUrlHandler;
 
     // utility class, private constructor.
     private DataConversionHelper() {
 
     }
 
-    static List<Chunk> createChunks(final String targetid, final Action uAction, final TenantAware tenantAware) {
-        return uAction.getDistributionSet()
-                .getModules().stream().map(module -> new Chunk(mapChunkLegacyKeys(module.getType().getKey()),
-                        module.getVersion(), module.getName(), createArtifacts(targetid, module, tenantAware)))
+    static List<Chunk> createChunks(final String targetid, final Action uAction,
+            final ArtifactUrlHandler artifactUrlHandler) {
+        return uAction.getDistributionSet().getModules().stream()
+                .map(module -> new Chunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
+                        module.getName(), createArtifacts(targetid, module, artifactUrlHandler)))
                 .collect(Collectors.toList());
 
     }
@@ -72,23 +76,25 @@ public final class DataConversionHelper {
      *            of the target
      * @param module
      *            the software module
-     * @param tenantAware
-     *            of the tenant
      * @return a list of artifacts or a empty list. Cannot be <null>.
      */
     public static List<Artifact> createArtifacts(final String targetid,
-            final org.eclipse.hawkbit.repository.model.SoftwareModule module, final TenantAware tenantAware) {
+            final org.eclipse.hawkbit.repository.model.SoftwareModule module,
+            final ArtifactUrlHandler artifactUrlHandler) {
         final List<Artifact> files = new ArrayList<>();
         module.getLocalArtifacts().forEach(artifact -> {
             final Artifact file = new Artifact();
             file.setHashes(new ArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
             file.setFilename(artifact.getFilename());
             file.setSize(artifact.getSize());
-
-            file.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).downloadArtifact(targetid,
-                    artifact.getSoftwareModule().getId(), artifact.getFilename(), null, null)).withRel("download"));
-            file.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).downloadArtifactMd5(targetid,
-                    artifact.getSoftwareModule().getId(), artifact.getFilename(), null, null)).withRel("md5sum"));
+            final String linkHttp = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
+                    artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTP);
+            final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
+                    artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
+            file.add(new Link(linkHttps).withRel("download"));
+            file.add(new Link(linkHttps + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
+            file.add(new Link(linkHttp).withRel("download-http"));
+            file.add(new Link(linkHttp + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
 
             files.add(file);
         });

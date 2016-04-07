@@ -13,12 +13,14 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousDownload;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -90,6 +92,11 @@ public class AmqpControllerAuthentfication {
                 tenantConfigurationManagement, controllerManagement, tenantAware, systemSecurityContext);
         filterChain.add(securityTokenFilter);
 
+        final ControllerPreAuthenticatedAnonymousDownload anonymousDownloadFilter = new ControllerPreAuthenticatedAnonymousDownload(
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
+        filterChain.add(anonymousDownloadFilter);
+
+        filterChain.add(new ControllerPreAuthenticatedAnonymousFilter(ddiSecruityProperties));
         filterChain.add(new CoapAnonymousPreAuthenticatedFilter());
     }
 
@@ -100,7 +107,7 @@ public class AmqpControllerAuthentfication {
      *            the authentication request object
      * @return the authentfication object
      */
-    public Authentication doAuthenticate(final TenantSecruityToken secruityToken) {
+    public Authentication doAuthenticate(final TenantSecurityToken secruityToken) {
         PreAuthenticatedAuthenticationToken authentication = new PreAuthenticatedAuthenticationToken(null, null);
         for (final PreAuthenficationFilter filter : filterChain) {
             final PreAuthenticatedAuthenticationToken authenticationRest = createAuthentication(filter, secruityToken);
@@ -115,7 +122,7 @@ public class AmqpControllerAuthentfication {
     }
 
     private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthenficationFilter filter,
-            final TenantSecruityToken secruityToken) {
+            final TenantSecurityToken secruityToken) {
 
         if (!filter.isEnable(secruityToken)) {
             return null;

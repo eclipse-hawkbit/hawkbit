@@ -19,17 +19,13 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
 /**
- *
- *
- *
+ * This class represents the UI item for the target security token section in
+ * the authentication configuration view.
  */
 @SpringComponent
 @ViewScope
 public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Autowired
@@ -49,7 +45,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
     }
 
     /**
-     * init mehotd called by spring.
+     * Init mehotd called by spring.
      */
     @PostConstruct
     public void init() {
@@ -57,12 +53,6 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
         configurationEnabled = isConfigEnabled();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# configEnable()
-     */
     @Override
     public void configEnable() {
         if (!configurationEnabled) {
@@ -71,12 +61,6 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
         configurationEnabled = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# configDisable()
-     */
     @Override
     public void configDisable() {
         if (configurationEnabled) {

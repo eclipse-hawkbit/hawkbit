@@ -30,16 +30,13 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
- *
+ * This class represents the UI item for the gateway security token section in
+ * the authentication configuration view.
  */
 @SpringComponent
 @ViewScope
 public class GatewaySecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Autowired
@@ -70,7 +67,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     }
 
     /**
-     * init mehotd called by spring.
+     * Init mehotd called by spring.
      */
     @PostConstruct
     public void init() {
@@ -135,12 +132,6 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         notifyConfigurationChanged();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# configEnable()
-     */
     @Override
     public void configEnable() {
         if (!configurationEnabled) {

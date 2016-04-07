@@ -11,9 +11,8 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import com.vaadin.ui.Component;
 
 /**
- *
- *
- *
+ * Interface that all system configurations have to implement to save and undo
+ * their customized changes.
  */
 public interface ConfigurationGroup extends Component, ConfigurationItem {
 

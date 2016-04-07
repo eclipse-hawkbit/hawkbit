@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
- * {@link TenantSecruityToken}.
+ * {@link TenantSecurityToken}.
  *
  *
  *
@@ -75,7 +75,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecruityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
         // retrieve the common name header and the authority name header from
         // the http request and
         // combine them together
@@ -97,7 +97,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecruityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
         final String authorityNameConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
         String controllerId = secruityToken.getControllerId();
@@ -117,7 +117,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * It's ok if we find the the hash in any the trusted CA chain to accept
      * this request for this tenant.
      */
-    private String getIssuerHashHeader(final TenantSecruityToken secruityToken, final String knownIssuerHash) {
+    private String getIssuerHashHeader(final TenantSecurityToken secruityToken, final String knownIssuerHash) {
         // iterate over the headers until we get a null header.
         int iHeader = 1;
         String foundHash;

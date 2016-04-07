@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
+import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -89,8 +90,6 @@ public final class HawkbitCommonUtil {
     private static final String COUNT_STYLE = " countStyle = document.createElement('style'); ";
     private static final String COUNT_STYLE_ID = " countStyle.id=\"sp-drag-count\"; ";
     private static final String APPEND_CHILD = " document.head.appendChild(countStyle);";
-    private static final String HEADER_VERSION = "header.version";
-    private static final String HEADER_NAME = "header.name";
     private static final String SM_HIGHLIGHT_CREATE_SCRIPT = "smHighlight = document.createElement('style'); smHighlight.id=\"sm-table-highlight\";  document.head.appendChild(smHighlight); ";
     private static final String SM_HIGHLIGHT_REMOVE_SCRIPT = "var y = document.getElementById('sm-table-highlight'); if(y) { document.head.removeChild(y); } ";
     private static final String SM_HIGHLIGHT_RESET_SCRIPT = SM_HIGHLIGHT_REMOVE_SCRIPT + SM_HIGHLIGHT_CREATE_SCRIPT
@@ -1277,6 +1276,21 @@ public final class HawkbitCommonUtil {
         }
         val.append("id:").append(id);
         return val.toString();
+    }
+
+    /**
+     * Receive the code point of a given StatusFontIcon.
+     * 
+     * @param statusFontIcon
+     *            the status font icon
+     * @return the code point of the StatusFontIcon
+     */
+    public static String getCodePoint(final StatusFontIcon statusFontIcon) {
+        if (statusFontIcon == null) {
+            return null;
+        }
+        return statusFontIcon.getFontIcon() != null ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint())
+                : null;
     }
 
 }

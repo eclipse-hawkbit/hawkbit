@@ -196,11 +196,9 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         public String convertToPresentation(final Status status, final Class<? extends String> targetType,
                 final Locale locale) {
             if (status == null) {
-                // Actions are not created for targets when
-                // rollout's status
-                // is READY and when duplicate assignment is done.
-                // In these cases display a appropriate status with
-                // description
+                // Actions are not created for targets when rollout's status is
+                // READY and when duplicate assignment is done. In these cases
+                // display a appropriate status with description
                 return getStatus();
             }
             return processActionStatus(status);
@@ -216,16 +214,27 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
             return String.class;
         }
 
-    }
-
-    private String processActionStatus(final Status status) {
-        final StatusFontIcon statusFontIcon = statusIconMap.get(status);
-        if (statusFontIcon == null) {
-            return null;
+        private String processActionStatus(final Status status) {
+            final StatusFontIcon statusFontIcon = statusIconMap.get(status);
+            final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
         }
-        final String codePoint = statusFontIcon.getFontIcon() != null
-                ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint()) : null;
-        return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(), null);
+
+        private String getStatus() {
+            final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
+                    ? rolloutUIState.getRolloutGroup().get() : null;
+            if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
+                return HawkbitCommonUtil.getStatusLabelDetailsInString(
+                        Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), "statusIconLightBlue", null);
+            }
+            if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
+                return HawkbitCommonUtil.getStatusLabelDetailsInString(
+                        Integer.toString(FontAwesome.MINUS_CIRCLE.getCodepoint()), "statusIconBlue", null);
+            }
+            return HawkbitCommonUtil.getStatusLabelDetailsInString(
+                    Integer.toString(FontAwesome.QUESTION_CIRCLE.getCodepoint()), "statusIconBlue", null);
+        }
+
     }
 
     private void createRolloutStatusToFontMap() {
@@ -249,21 +258,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
                 new StatusFontIcon(FontAwesome.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED));
     }
 
-    private String getStatus() {
-        final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
-                ? rolloutUIState.getRolloutGroup().get() : null;
-        if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
-            return HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.DOT_CIRCLE_O.getCodepoint()), "statusIconLightBlue", null);
-        } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
-            return HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.MINUS_CIRCLE.getCodepoint()), "statusIconBlue", null);
-        } else {
-            return HawkbitCommonUtil.getStatusLabelDetailsInString(
-                    Integer.toString(FontAwesome.QUESTION_CIRCLE.getCodepoint()), "statusIconBlue", null);
-        }
-    }
-
     private String getDescription(final CellReference cell) {
         if (!SPUILabelDefinitions.VAR_STATUS.equals(cell.getPropertyId())) {
             return null;
@@ -274,7 +268,6 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
         }
         return cell.getProperty().getValue().toString().toLowerCase();
     }
-       
 
     private String getDescriptionWhenNoAction() {
         final RolloutGroup rolloutGroup = rolloutUIState.getRolloutGroup().isPresent()
