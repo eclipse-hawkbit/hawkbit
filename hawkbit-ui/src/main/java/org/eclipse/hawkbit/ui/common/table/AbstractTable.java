@@ -94,7 +94,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         if (values == null) {
             values = Collections.emptySet();
         }
-        if (values.remove(null)) {
+        if (values.contains(null)) {
             LOG.warn("Null values in table content. How could this happen?");
         }
         return values;
@@ -103,14 +103,12 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
     private void onValueChange() {
         eventBus.publish(this, UploadArtifactUIEvent.HIDE_DROP_HINTS);
 
-        // TODO Einzelwerte?
-
         final Set<I> values = getTableValue(this);
 
         E entity = null;
-
-        final I lastId = Iterables.getLast(values);
-        if (lastId != null) {
+        I lastId = null;
+        if (!values.isEmpty()) {
+            lastId = Iterables.getLast(values);
             entity = findEntityByTableValue(lastId);
         }
         setManagementEntitiyStateValues(values, lastId);
@@ -294,19 +292,17 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
      */
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
-        if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
-            columnList
-                    .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                    0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
-        } else {
+        if (!isMaximized()) {
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.8F));
+            return columnList;
         }
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
+        columnList.add(
+                new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
         return columnList;
     }
 
