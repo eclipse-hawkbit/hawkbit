@@ -43,7 +43,7 @@ public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAu
     @PostConstruct
     public void init() {
 
-        super.init(i18n.get("enonymous.download.label"));
+        super.init(i18n.get("label.configuration.anonymous.download"));
         configurationEnabled = isConfigEnabled();
 
     }
