@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AnonymousDownloadAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.CertificateAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.GatewaySecurityTokenAuthenticationConfigurationItem;
@@ -52,11 +53,16 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
     @Autowired
     private GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
 
+    @Autowired
+    private AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
+
     private CheckBox gatewaySecTokenCheckBox;
 
     private CheckBox targetSecTokenCheckBox;
 
     private CheckBox certificateAuthCheckbox;
+
+    private CheckBox downloadAnonymousCheckBox;
 
     /**
      * Initialize Authentication Configuration layout.
@@ -77,7 +83,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         headerDisSetType.addStyleName("config-panel-header");
         vLayout.addComponent(headerDisSetType);
 
-        final GridLayout gridLayout = new GridLayout(2, 3);
+        final GridLayout gridLayout = new GridLayout(2, 4);
         gridLayout.setSpacing(true);
         gridLayout.setImmediate(true);
         gridLayout.setColumnExpandRatio(1, 1.0F);
@@ -105,6 +111,13 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         gridLayout.addComponent(gatewaySecTokenCheckBox, 0, 2);
         gridLayout.addComponent(gatewaySecurityTokenAuthenticationConfigurationItem, 1, 2);
 
+        downloadAnonymousCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
+        downloadAnonymousCheckBox.setValue(targetSecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
+        downloadAnonymousCheckBox.addValueChangeListener(this);
+        anonymousDownloadAuthenticationConfigurationItem.addChangeListener(this);
+        gridLayout.addComponent(downloadAnonymousCheckBox, 0, 3);
+        gridLayout.addComponent(anonymousDownloadAuthenticationConfigurationItem, 1, 3);
+
         vLayout.addComponent(gridLayout);
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
@@ -115,6 +128,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         certificateAuthenticationConfigurationItem.save();
         targetSecurityTokenAuthenticationConfigurationItem.save();
         gatewaySecurityTokenAuthenticationConfigurationItem.save();
+        anonymousDownloadAuthenticationConfigurationItem.save();
     }
 
     @Override
@@ -122,9 +136,11 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
         certificateAuthenticationConfigurationItem.undo();
         targetSecurityTokenAuthenticationConfigurationItem.undo();
         gatewaySecurityTokenAuthenticationConfigurationItem.undo();
+        anonymousDownloadAuthenticationConfigurationItem.undo();
         certificateAuthCheckbox.setValue(certificateAuthenticationConfigurationItem.isConfigEnabled());
         targetSecTokenCheckBox.setValue(targetSecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
         gatewaySecTokenCheckBox.setValue(gatewaySecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
+        downloadAnonymousCheckBox.setValue(anonymousDownloadAuthenticationConfigurationItem.isConfigEnabled());
     }
 
     @Override
@@ -150,6 +166,8 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
             configurationItem = targetSecurityTokenAuthenticationConfigurationItem;
         } else if (checkBox == certificateAuthCheckbox) {
             configurationItem = certificateAuthenticationConfigurationItem;
+        } else if (checkBox == downloadAnonymousCheckBox) {
+            configurationItem = anonymousDownloadAuthenticationConfigurationItem;
         } else {
             return;
         }
