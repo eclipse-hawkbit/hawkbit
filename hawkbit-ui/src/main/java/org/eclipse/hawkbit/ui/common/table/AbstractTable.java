@@ -293,7 +293,8 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = new ArrayList<>();
         if (!isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.8F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"),
+                    getColumnNameMinimizedSize()));
             return columnList;
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
@@ -304,6 +305,10 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
         return columnList;
+    }
+
+    protected float getColumnNameMinimizedSize() {
+        return 0.8F;
     }
 
     /**

@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -70,7 +70,7 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class DistributionTable extends AbstractTable<DistributionSet, DistributionSetIdName> {
+public class DistributionTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
 
     private static final long serialVersionUID = -1928335256399519494L;
 
@@ -272,16 +272,17 @@ public class DistributionTable extends AbstractTable<DistributionSet, Distributi
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (isMaximized()) {
-            columnList.addAll(super.getTableVisibleColumns());
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1f));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.7f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.2f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.1f));
+            return columnList;
         }
+        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.1f));
         return columnList;
+    }
+
+    @Override
+    protected float getColumnNameMinimizedSize() {
+        return 0.7F;
     }
 
     @Override
@@ -478,13 +479,6 @@ public class DistributionTable extends AbstractTable<DistributionSet, Distributi
         final Item item = getContainerDataSource()
                 .getItem(new DistributionSetIdName(editedDs.getId(), editedDs.getName(), editedDs.getVersion()));
         updateEntity(editedDs, item);
-
-    }
-
-    @Override
-    protected void updateEntity(final DistributionSet baseEntity, final Item item) {
-        super.updateEntity(baseEntity, item);
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
     }
 
     private void restoreDistributionTableStyle() {

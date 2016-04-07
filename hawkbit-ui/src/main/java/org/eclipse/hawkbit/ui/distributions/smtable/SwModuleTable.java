@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -63,7 +62,7 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class SwModuleTable extends AbstractTable<SoftwareModule, Long> {
+public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6785314784507424750L;
 
@@ -228,17 +227,18 @@ public class SwModuleTable extends AbstractTable<SoftwareModule, Long> {
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (isMaximized()) {
-            columnList.addAll(super.getTableVisibleColumns());
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1f));
             columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1f));
         } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.7F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.2F));
             columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, "", 0.1F));
         }
         return columnList;
+    }
+
+    @Override
+    protected float getColumnNameMinimizedSize() {
+        return 0.7F;
     }
 
     @Override
@@ -332,12 +332,11 @@ public class SwModuleTable extends AbstractTable<SoftwareModule, Long> {
                 baseEntity.getVersion());
         item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
         item.getItemProperty("swId").setValue(baseEntity.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
         item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
         item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(baseEntity.getType().getColour());
 
         if (!manageDistUIState.getSelectedSoftwareModules().isEmpty()) {
-            manageDistUIState.getSelectedSoftwareModules().stream().forEach(swmNameId -> unselect(swmNameId));
+            manageDistUIState.getSelectedSoftwareModules().stream().forEach(this::unselect);
         }
         select(baseEntity.getId());
         return item;

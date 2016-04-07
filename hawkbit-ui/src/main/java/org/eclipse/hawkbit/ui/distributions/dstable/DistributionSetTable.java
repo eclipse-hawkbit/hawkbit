@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
@@ -70,7 +70,7 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class DistributionSetTable extends AbstractTable<DistributionSet, DistributionSetIdName> {
+public class DistributionSetTable extends AbstractNamedVersionTable<DistributionSet, DistributionSetIdName> {
 
     private static final long serialVersionUID = -7731776093470487988L;
 
@@ -475,11 +475,10 @@ public class DistributionSetTable extends AbstractTable<DistributionSet, Distrib
     protected Item addEntity(final DistributionSet baseEntity) {
         final Item item = super.addEntity(baseEntity);
         item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
         item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(baseEntity.isComplete());
 
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
-            manageDistUIState.getSelectedDistributions().get().stream().forEach(dsNameId -> unselect(dsNameId));
+            manageDistUIState.getSelectedDistributions().get().stream().forEach(this::unselect);
         }
         select(baseEntity.getDistributionSetIdName());
         return item;

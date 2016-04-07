@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -48,7 +48,7 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class SoftwareModuleTable extends AbstractTable<SoftwareModule, Long> {
+public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6469417305487144809L;
 
@@ -165,7 +165,7 @@ public class SoftwareModuleTable extends AbstractTable<SoftwareModule, Long> {
         final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
                 baseEntity.getVersion());
         item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
+
         item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
         if (!artifactUploadState.getSelectedSoftwareModules().isEmpty()) {
             artifactUploadState.getSelectedSoftwareModules().stream().forEach(this::unselect);
@@ -178,12 +178,10 @@ public class SoftwareModuleTable extends AbstractTable<SoftwareModule, Long> {
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
-        if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.2F));
+        if (!isMaximized()) {
+            return columnList;
         }
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
         return columnList;
     }
 
