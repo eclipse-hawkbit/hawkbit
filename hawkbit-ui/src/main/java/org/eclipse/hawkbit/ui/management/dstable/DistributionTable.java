@@ -132,6 +132,11 @@ public class DistributionTable extends AbstractTable<DistributionSet, Distributi
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent event) {
         onBaseEntityEvent(event);
+        if (BaseEntityEventType.UPDATED_ENTITY != event.getEventType()) {
+            return;
+        }
+        UI.getCurrent().access(() -> updateDistributionInTable(event.getEntity()));
+
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
