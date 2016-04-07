@@ -283,7 +283,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
 
     /**
      * 
-     * @return true if the count label is displayed false ist not displayed
+     * @return true if the count label is displayed false is not displayed
      */
     protected boolean hasCountMessage() {
         return false;
