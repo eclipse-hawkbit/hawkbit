@@ -117,7 +117,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
         this.lastSelectedDistribution = value;
     }
 
-    public void setSelectedEnitities(final java.util.Set<DistributionSetIdName> values) {
+    public void setSelectedEnitities(final Set<DistributionSetIdName> values) {
         selectedDistributions = values;
     }
 
