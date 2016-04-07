@@ -282,9 +282,8 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     /**
-     * Only in deployment view count message is displayed.
      * 
-     * @return
+     * @return true if the count label is displayed false ist not displayed
      */
     protected boolean hasCountMessage() {
         return false;
