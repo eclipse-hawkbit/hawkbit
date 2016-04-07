@@ -86,7 +86,7 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
+        return Optional.ofNullable(selectedBaseSwModuleId);
     }
 
     /**
@@ -179,7 +179,7 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     }
 
     public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
-        return selectedBaseSoftwareModule == null ? Optional.empty() : Optional.of(selectedBaseSoftwareModule);
+        return Optional.ofNullable(selectedBaseSoftwareModule);
     }
 
     public void setSelectedBaseSoftwareModule(final SoftwareModule selectedBaseSoftwareModule) {

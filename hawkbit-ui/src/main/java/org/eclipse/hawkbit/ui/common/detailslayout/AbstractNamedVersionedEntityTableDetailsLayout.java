@@ -24,5 +24,4 @@ public abstract class AbstractNamedVersionedEntityTableDetailsLayout<T extends N
     protected String getName() {
         return HawkbitCommonUtil.getFormattedNameVersion(selectedBaseEntity.getName(), selectedBaseEntity.getVersion());
     }
-
 }

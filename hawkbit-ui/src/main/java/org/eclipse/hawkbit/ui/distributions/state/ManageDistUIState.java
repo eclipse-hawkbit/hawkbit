@@ -102,14 +102,14 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
      * @return the slectedDistributions
      */
     public Optional<Set<DistributionSetIdName>> getSelectedDistributions() {
-        return selectedDistributions == null ? Optional.empty() : Optional.of(selectedDistributions);
+        return Optional.ofNullable(selectedDistributions);
     }
 
     /**
      * @return the lastSelectedDistribution
      */
     public Optional<DistributionSetIdName> getLastSelectedDistribution() {
-        return lastSelectedDistribution == null ? Optional.empty() : Optional.of(lastSelectedDistribution);
+        return Optional.ofNullable(lastSelectedDistribution);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class ManageDistUIState implements ManagmentEntityState<DistributionSetId
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
+        return Optional.ofNullable(selectedBaseSwModuleId);
     }
 
     /**

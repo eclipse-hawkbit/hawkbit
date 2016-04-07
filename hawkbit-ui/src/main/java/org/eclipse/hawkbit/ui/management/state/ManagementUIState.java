@@ -171,7 +171,7 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
     }
 
     public Optional<Set<TargetIdName>> getSelectedTargetIdName() {
-        return selectedTargetIdName == null ? Optional.empty() : Optional.of(selectedTargetIdName);
+        return Optional.ofNullable(selectedTargetIdName);
     }
 
     public void setSelectedTargetIdName(final Set<TargetIdName> selectedTargetIdName) {
@@ -279,7 +279,7 @@ public class ManagementUIState implements ManagmentEntityState<DistributionSetId
     }
 
     public Optional<Set<DistributionSetIdName>> getSelectedDsIdName() {
-        return selectedDsIdName == null ? Optional.empty() : Optional.of(selectedDsIdName);
+        return Optional.ofNullable(selectedDsIdName);
     }
 
     /**
