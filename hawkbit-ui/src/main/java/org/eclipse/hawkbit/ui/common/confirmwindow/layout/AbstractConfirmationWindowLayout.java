@@ -52,7 +52,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     protected transient EventBus.SessionEventBus eventBus;
 
     @PostConstruct
-    public void inittialize() {
+    public void initialize() {
         removeAllComponents();
         consolidatedMessage = "";
         createComponents();

@@ -190,7 +190,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        uploadViewConfirmationWindowLayout.inittialize();
+        uploadViewConfirmationWindowLayout.initialize();
         return uploadViewConfirmationWindowLayout;
     }
 

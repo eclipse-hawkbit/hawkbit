@@ -212,7 +212,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        manangementConfirmationWindowLayout.inittialize();
+        manangementConfirmationWindowLayout.initialize();
         return manangementConfirmationWindowLayout;
     }
 

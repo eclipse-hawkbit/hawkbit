@@ -295,7 +295,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        distConfirmationWindowLayout.inittialize();
+        distConfirmationWindowLayout.initialize();
         return distConfirmationWindowLayout;
     }
 
