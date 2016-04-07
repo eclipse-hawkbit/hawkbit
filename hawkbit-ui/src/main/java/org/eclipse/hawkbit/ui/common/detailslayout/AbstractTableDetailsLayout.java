@@ -41,7 +41,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- *
+ * Abstract Layout to show the entity details.
  *
  */
 public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends VerticalLayout {
@@ -89,10 +89,15 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         eventBus.unsubscribe(this);
     }
 
+    /**
+     * Default implementation to handle a entity event.
+     * 
+     * @param baseEntityEvent
+     *            the event
+     */
     protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
         final BaseEntityEventType eventType = baseEntityEvent.getEventType();
-        if (BaseEntityEventType.SELECTED_ENTITY == eventType
-                || BaseEntityEventType.UPDATED_ENTITY == eventType) {
+        if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType) {
             UI.getCurrent().access(() -> populateData(baseEntityEvent.getEntity()));
         } else if (BaseEntityEventType.MINIMIZED == eventType) {
             UI.getCurrent().access(() -> setVisible(true));

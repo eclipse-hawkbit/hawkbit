@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 /**
- * 
+ * Types of the entity event.
  *
  */
 public enum BaseEntityEventType {
