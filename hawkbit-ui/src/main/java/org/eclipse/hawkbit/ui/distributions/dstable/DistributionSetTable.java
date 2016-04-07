@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,17 +187,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected boolean isMaximized() {
         return manageDistUIState.isDsTableMaximized();
-    }
-
-    @Override
-    protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = super.getTableVisibleColumns();
-        if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1f));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.2f));
-        }
-        return columnList;
     }
 
     @Override
