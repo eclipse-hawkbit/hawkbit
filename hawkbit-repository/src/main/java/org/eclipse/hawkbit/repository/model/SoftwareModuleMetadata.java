@@ -24,18 +24,11 @@ import javax.persistence.Table;
 /**
  * Metadata for {@link SoftwareModule}.
  *
- *
- *
- *
  */
 @IdClass(SwMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_sw_metadata")
 public class SoftwareModuleMetadata implements Serializable {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -50,18 +43,21 @@ public class SoftwareModuleMetadata implements Serializable {
     @JoinColumn(name = "sw_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
     private SoftwareModule softwareModule;
 
+    /**
+     * Default constructor for JPA.
+     */
     public SoftwareModuleMetadata() {
-
+        // default constructor for JPA.
     }
 
     /**
      * Standard constructor.
      *
      * @param key
-     *            of the metadata element
+     *            of the meta data element
      * @param softwareModule
      * @param value
-     *            of the metadata element
+     *            of the meta data element
      */
     public SoftwareModuleMetadata(final String key, final SoftwareModule softwareModule, final String value) {
         this.key = key;
@@ -69,56 +65,75 @@ public class SoftwareModuleMetadata implements Serializable {
         this.value = value;
     }
 
-    /**
-     * @return the id
-     */
     public SwMetadataCompositeKey getId() {
         return new SwMetadataCompositeKey(softwareModule, key);
     }
 
-    /**
-     * @return the value
-     */
     public String getValue() {
         return value;
     }
 
-    /**
-     * @param value
-     *            the value to set
-     */
     public void setValue(final String value) {
         this.value = value;
     }
 
-    /**
-     * @return the softwareModule
-     */
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
     }
 
-    /**
-     * @param softwareModule
-     *            the softwareModule to set
-     */
     public void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
+    }
+
+    @Override
+    public String toString() {
+        return "SoftwareModuleMetadata [key=" + key + ", value=" + value + ", softwareModule=" + softwareModule + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof SoftwareModuleMetadata)) {
+            return false;
+        }
+        final SoftwareModuleMetadata other = (SoftwareModuleMetadata) obj;
+        if (key == null) {
+            if (other.key != null) {
+                return false;
+            }
+        } else if (!key.equals(other.key)) {
+            return false;
+        }
+        if (softwareModule == null) {
+            if (other.softwareModule != null) {
+                return false;
+            }
+        } else if (!softwareModule.equals(other.softwareModule)) {
+            return false;
+        }
+        return true;
     }
 
 }

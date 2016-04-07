@@ -13,8 +13,6 @@ import java.io.Serializable;
 /**
  * To hold software module name and Id.
  *
- *
- *
  */
 public class SoftwareModuleIdName implements Serializable {
 
@@ -35,25 +33,14 @@ public class SoftwareModuleIdName implements Serializable {
         this.name = name;
     }
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {// NOSONAR - as this is generated
         final int prime = 31;
@@ -62,11 +49,6 @@ public class SoftwareModuleIdName implements Serializable {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {// NOSONAR - as this is generated
         if (this == obj) {

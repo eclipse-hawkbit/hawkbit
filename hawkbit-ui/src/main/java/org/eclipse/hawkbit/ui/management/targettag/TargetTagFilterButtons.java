@@ -13,17 +13,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -39,7 +36,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -65,13 +61,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private static final long serialVersionUID = 5049554600376508073L;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
     private ManagementUIState managementUIState;
-
-    @Autowired
-    private transient TagManagement tagMgmtService;
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
@@ -103,12 +93,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         super.init(filterButtonClickBehaviour);
         addNewTargetTag(new TargetTag("NO TAG"));
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -139,10 +123,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
-        final TargetTag newTagClickedObj = tagMgmtService.findTargetTagById(buttonId);
-        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null && managementUIState
-                .getTargetTableFilters().getClickedTargetTags().contains(newTagClickedObj.getName());
+    protected boolean isClickedByDefault(final String tagName) {
+        return managementUIState.getTargetTableFilters().getClickedTargetTags() != null
+                && managementUIState.getTargetTableFilters().getClickedTargetTags().contains(tagName);
     }
 
     @Override
@@ -248,8 +231,8 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
             final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
 
-            final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
-            notification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(targTagName, result, i18n));
+            final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+            notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
 
             if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);

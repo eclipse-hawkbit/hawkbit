@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
@@ -18,7 +17,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -34,12 +32,6 @@ import com.vaadin.ui.Window;
 public class SMTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = -4855810338059032342L;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
@@ -84,7 +76,7 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         artifactUploadState.setSwTypeFilterClosed(true);
-        eventbus.publish(this, UploadArtifactUIEvent.HIDE_FILTER_BY_TYPE);
+        eventBus.publish(this, UploadArtifactUIEvent.HIDE_FILTER_BY_TYPE);
     }
 
     @Override

@@ -21,9 +21,6 @@ import com.vaadin.server.Resource;
 
 /**
  * Menu item for system configuration view.
- * 
- *
- *
  */
 @Component
 @Order(700)

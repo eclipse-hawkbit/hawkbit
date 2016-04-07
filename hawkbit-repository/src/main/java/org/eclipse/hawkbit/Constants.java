@@ -11,9 +11,6 @@ package org.eclipse.hawkbit;
 /**
  * A constant class which holds only static constants used within the SP server.
  *
- *
- *
- *
  */
 public final class Constants {
 
@@ -27,7 +24,7 @@ public final class Constants {
     public static final int MAX_ENTRIES_IN_STATEMENT = 999;
 
     /**
-     * constant class only private constructor.
+     * Constant class only private constructor.
      */
     private Constants() {
 

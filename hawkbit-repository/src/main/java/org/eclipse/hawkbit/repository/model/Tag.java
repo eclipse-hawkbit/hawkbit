@@ -14,13 +14,8 @@ import javax.persistence.MappedSuperclass;
 import org.springframework.hateoas.Identifiable;
 
 /**
- * A Tag can be used as describing and organisational meta information for any
+ * A Tag can be used as describing and organizational meta information for any
  * kind of entity.
- *
- *
- *
- *
- *
  *
  */
 @MappedSuperclass
@@ -57,14 +52,8 @@ public abstract class Tag extends NamedEntity implements Identifiable<Long> {
         this.colour = colour;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Tag [getOptLockRevision()=" + getOptLockRevision() + ", getId()=" + getId() + "]";
     }
-
 }

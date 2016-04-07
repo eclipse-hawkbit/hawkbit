@@ -29,16 +29,14 @@ import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.DistributionSetRestApi;
 import org.eclipse.hawkbit.rest.resource.api.TargetRestApi;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionPagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.action.ActionRest;
-import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusPagedList;
+import org.eclipse.hawkbit.rest.resource.model.action.ActionStatusRest;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRest;
 import org.eclipse.hawkbit.rest.resource.model.target.DistributionSetAssigmentRest;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetAttributes;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetPagedList;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRequestBody;
 import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +75,7 @@ public class TargetResource implements TargetRestApi {
     }
 
     @Override
-    public ResponseEntity<TargetPagedList> getTargets(final int pagingOffsetParam, final int pagingLimitParam,
+    public ResponseEntity<PagedList<TargetRest>> getTargets(final int pagingOffsetParam, final int pagingLimitParam,
             final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -98,11 +96,11 @@ public class TargetResource implements TargetRestApi {
         }
 
         final List<TargetRest> rest = TargetMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new TargetPagedList(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<TargetRest>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<TargetsRest> createTargets(final List<TargetRequestBody> targets) {
+    public ResponseEntity<List<TargetRest>> createTargets(final List<TargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
         final Iterable<Target> createdTargets = this.targetManagement.createTargets(TargetMapper.fromRequest(targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
@@ -147,7 +145,7 @@ public class TargetResource implements TargetRestApi {
     }
 
     @Override
-    public ResponseEntity<ActionPagedList> getActionHistory(final String targetId, final int pagingOffsetParam,
+    public ResponseEntity<PagedList<ActionRest>> getActionHistory(final String targetId, final int pagingOffsetParam,
             final int pagingLimitParam, final String sortParam, final String rsqlParam) {
 
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
@@ -169,7 +167,7 @@ public class TargetResource implements TargetRestApi {
         }
 
         return new ResponseEntity<>(
-                new ActionPagedList(TargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount),
+                new PagedList<>(TargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount),
                 HttpStatus.OK);
     }
 
@@ -220,7 +218,7 @@ public class TargetResource implements TargetRestApi {
     }
 
     @Override
-    public ResponseEntity<ActionStatusPagedList> getActionStatusList(final String targetId, final Long actionId,
+    public ResponseEntity<PagedList<ActionStatusRest>> getActionStatusList(final String targetId, final Long actionId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
 
         final Target target = findTargetWithExceptionIfNotFound(targetId);
@@ -238,10 +236,8 @@ public class TargetResource implements TargetRestApi {
         final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(
                 new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action, true);
 
-        return new ResponseEntity<>(
-                new ActionStatusPagedList(TargetMapper.toActionStatusRestResponse(action, statusList.getContent()),
-                        statusList.getTotalElements()),
-                HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(TargetMapper.toActionStatusRestResponse(statusList.getContent()),
+                statusList.getTotalElements()), HttpStatus.OK);
 
     }
 
@@ -267,7 +263,7 @@ public class TargetResource implements TargetRestApi {
         final ActionType type = (dsId.getType() != null)
                 ? RestResourceConversionHelper.convertActionType(dsId.getType()) : ActionType.FORCED;
         final Iterator<Target> changed = this.deploymentManagement
-                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedTargets()
+                .assignDistributionSet(dsId.getId(), type, dsId.getForcetime(), targetId).getAssignedEntity()
                 .iterator();
         if (changed.hasNext()) {
             return new ResponseEntity<>(HttpStatus.OK);

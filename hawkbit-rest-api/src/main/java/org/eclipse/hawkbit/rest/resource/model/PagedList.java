@@ -14,26 +14,29 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A list representation with meta data for pagination, e.g. containing the
- * total elements. The content of the acutal list is stored in the
- * {@link #content} field.
+ * total elements and size of content. The content of the actual list is stored
+ * in the {@link #content} field.
  *
  * @param <T>
  *            the type of elements in this list
- *
- *
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class PagedList<T> extends ResourceSupport {
 
-    private final long totalElements;
+    @JsonProperty
+    private final List<T> content;
+    @JsonProperty
+    private final long total;
     private final int size;
 
     /**
@@ -47,9 +50,11 @@ public class PagedList<T> extends ResourceSupport {
      * @throws NullPointerException
      *             in case {@code content} is {@code null}.
      */
-    public PagedList(@NotNull final List<T> content, final long total) {
+    @JsonCreator
+    public PagedList(@JsonProperty("content") @NotNull final List<T> content, @JsonProperty("total") final long total) {
         this.size = content.size();
-        this.totalElements = total;
+        this.total = total;
+        this.content = content;
     }
 
     /**
@@ -63,6 +68,11 @@ public class PagedList<T> extends ResourceSupport {
      * @return the total amount of elements
      */
     public long getTotal() {
-        return totalElements;
+        return total;
     }
+
+    public List<T> getContent() {
+        return content;
+    }
+
 }

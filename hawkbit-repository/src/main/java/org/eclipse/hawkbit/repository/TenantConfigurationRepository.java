@@ -16,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The spring-data repository for the entity {@link TenantConfiguration}.
  *
- *
- *
- *
  */
 @Transactional(readOnly = true)
 public interface TenantConfigurationRepository extends BaseEntityRepository<TenantConfiguration, Long> {
@@ -32,11 +29,6 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<Tena
      */
     TenantConfiguration findByKey(String configurationKey);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.repository.CrudRepository#findAll()
-     */
     @Override
     List<TenantConfiguration> findAll();
 

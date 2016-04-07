@@ -56,11 +56,6 @@ import org.springframework.data.domain.Persistable;
  * {@link TargetStatus#REGISTERED}, i.e. a target {@link DistributionSet} .
  * </p>
  *
- *
- *
- *
- *
- *
  */
 @Entity
 @Table(name = "sp_target", indexes = {
@@ -117,7 +112,7 @@ public class Target extends NamedEntity implements Persistable<Long> {
 
     /**
      * Constructor.
-     * 
+     *
      * @param controllerId
      *            controller ID of the {@link Target}
      */
@@ -136,28 +131,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
         securityToken = null;
     }
 
-    @Override
-    public boolean equals(final Object obj) {// NOSONAR - as this is generated
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Target other = (Target) obj;
-        if (controllerId == null) {
-            if (other.controllerId != null) {
-                return false;
-            }
-        } else if (!controllerId.equals(other.controllerId)) {
-            return false;
-        }
-        return true;
-    }
-
     public DistributionSet getAssignedDistributionSet() {
         return assignedDistributionSet;
     }
@@ -170,37 +143,18 @@ public class Target extends NamedEntity implements Persistable<Long> {
         return tags;
     }
 
-    @Override
-    public int hashCode() { // NOSONAR - as this is generated
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (controllerId == null ? 0 : controllerId.hashCode());
-        return result;
-    }
-
     public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
         this.assignedDistributionSet = assignedDistributionSet;
     }
 
-    /**
-     * @param controllerId
-     *            the controllerId to set
-     */
     public void setControllerId(final String controllerId) {
         this.controllerId = controllerId;
     }
 
-    /**
-     * @param tags
-     *            the tags to set
-     */
     public void setTags(final Set<TargetTag> tags) {
         this.tags = tags;
     }
 
-    /**
-     * @return the actions
-     */
     public List<Action> getActions() {
         return actions;
     }
@@ -209,11 +163,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
         return new TargetIdName(getId(), getControllerId(), getName());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.data.domain.Persistable#isNew()
-     */
     @Override
     @Transient
     public boolean isNew() {
@@ -261,11 +210,6 @@ public class Target extends NamedEntity implements Persistable<Long> {
         this.securityToken = securityToken;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Target [controllerId=" + controllerId + ", getId()=" + getId() + "]";

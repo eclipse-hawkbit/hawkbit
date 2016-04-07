@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.distributions.smtype;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.CreateUpdateSoftwareTypeLayout;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
@@ -19,7 +18,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -35,12 +33,6 @@ import com.vaadin.ui.Window;
 public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     private static final long serialVersionUID = -8763788280848718344L;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private ManageDistUIState manageDistUIState;

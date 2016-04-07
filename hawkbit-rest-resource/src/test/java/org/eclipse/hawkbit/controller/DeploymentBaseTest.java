@@ -114,12 +114,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).isEmpty();
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.FORCED,
-                Action.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedTargets();
+                Action.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(actionRepository.findAll()).hasSize(1);
-        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedTargets();
+        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
         assertThat(actionRepository.findAll()).hasSize(2);
 
@@ -170,15 +170,27 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
                                 equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.MD5SUM")))
+
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download-http.href",
+                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum-http.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
+
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].size", equalTo(5 * 1024)))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].filename",
                         equalTo("test1.signature")))
@@ -188,11 +200,21 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
                                 equalTo(artifactSignature.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.signature.MD5SUM")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
+                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.signature")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
@@ -236,12 +258,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
         List<Target> saved = deploymentManagement
                 .assignDistributionSet(ds.getId(), ActionType.SOFT, Action.NO_FORCE_TIME, savedTarget.getControllerId())
-                .getAssignedTargets();
+                .getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(actionRepository.findAll()).hasSize(1);
-        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedTargets();
+        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
         assertThat(actionRepository.findAll()).hasSize(2);
 
@@ -293,12 +315,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
                                 equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
@@ -311,11 +333,21 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
                                 equalTo(artifactSignature.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.signature.MD5SUM")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
+                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.signature")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
@@ -358,12 +390,12 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(actionStatusRepository.findAll()).isEmpty();
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
-                System.currentTimeMillis(), savedTarget.getControllerId()).getAssignedTargets();
+                System.currentTimeMillis(), savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(actionRepository.findAll()).hasSize(1);
-        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedTargets();
+        saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
         assertThat(actionRepository.findAll()).hasSize(2);
 
@@ -409,15 +441,25 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].filename", equalTo("test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.md5",
                         equalTo(artifact.getMd5Hash())))
-                .andExpect(
-                        jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
-                                equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
+                        equalTo(artifact.getSha1Hash())))
+
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.MD5SUM")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download-http.href",
+                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum-http.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
@@ -431,15 +473,27 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
                                 equalTo(artifactSignature.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
+                        equalTo("https://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.signature.MD5SUM")))
+
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
+                        equalTo("http://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/softwaremodules/"
+                                + findDistributionSetByAction.findFirstModuleByType(osType).getId()
+                                + "/artifacts/test1.signature")))
+                .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
+
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
                         equalTo(ds.findFirstModuleByType(appType).getVersion())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].name",
@@ -887,7 +941,7 @@ public class DeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
 
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
-        savedTarget = deploymentManagement.assignDistributionSet(savedSet, toAssign).getAssignedTargets().iterator()
+        savedTarget = deploymentManagement.assignDistributionSet(savedSet, toAssign).getAssignedEntity().iterator()
                 .next();
         deploymentManagement.assignDistributionSet(savedSet2, toAssign2);
 

@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.resource.api.SoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -50,8 +49,8 @@ final class SoftwareModuleTypeMapper {
                 smsRest.getMaxAssignments());
     }
 
-    static SoftwareModuleTypesRest toTypesResponse(final List<SoftwareModuleType> types) {
-        final SoftwareModuleTypesRest response = new SoftwareModuleTypesRest();
+    static List<SoftwareModuleTypeRest> toTypesResponse(final List<SoftwareModuleType> types) {
+        final List<SoftwareModuleTypeRest> response = new ArrayList<>();
         for (final SoftwareModuleType softwareModule : types) {
             response.add(toResponse(softwareModule));
         }

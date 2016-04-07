@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 
 /**
  * A Filter for device which download via coap.
@@ -19,19 +19,19 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
 public class CoapAnonymousPreAuthenticatedFilter implements PreAuthenficationFilter {
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecruityToken secruityToken) {
-        return new HeaderAuthentication(secruityToken.getControllerId(), TenantSecruityToken.COAP_TOKEN_VALUE);
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final TenantSecurityToken secruityToken) {
+        return new HeaderAuthentication(secruityToken.getControllerId(), TenantSecurityToken.COAP_TOKEN_VALUE);
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecruityToken secruityToken) {
-        return new HeaderAuthentication(secruityToken.getControllerId(), TenantSecruityToken.COAP_TOKEN_VALUE);
+    public HeaderAuthentication getPreAuthenticatedCredentials(final TenantSecurityToken secruityToken) {
+        return new HeaderAuthentication(secruityToken.getControllerId(), TenantSecurityToken.COAP_TOKEN_VALUE);
     }
 
     @Override
-    public boolean isEnable(final TenantSecruityToken secruityToken) {
-        final String authHeader = secruityToken.getHeader(TenantSecruityToken.COAP_AUTHORIZATION_HEADER);
-        return TenantSecruityToken.COAP_TOKEN_VALUE.equals(authHeader);
+    public boolean isEnable(final TenantSecurityToken secruityToken) {
+        final String authHeader = secruityToken.getHeader(TenantSecurityToken.COAP_AUTHORIZATION_HEADER);
+        return TenantSecurityToken.COAP_TOKEN_VALUE.equals(authHeader);
     }
 
 }

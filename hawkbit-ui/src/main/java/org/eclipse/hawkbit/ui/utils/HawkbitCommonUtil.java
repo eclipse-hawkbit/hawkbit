@@ -24,14 +24,14 @@ import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
@@ -802,13 +802,16 @@ public final class HawkbitCommonUtil {
      *            as string
      * @param version
      *            as string
+     * @param type
+     *            key as string
      * @return boolean as flag
      */
-    public static boolean isDuplicate(final String name, final String version) {
+    public static boolean isDuplicate(final String name, final String version, final String type) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        final List<SoftwareModule> swModulesList = swMgmtService.findSoftwareModuleByNameAndVersion(name, version);
+        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
+                swMgmtService.findSoftwareModuleTypeByName(type));
         boolean duplicate = false;
-        if (swModulesList != null && !swModulesList.isEmpty()) {
+        if (swModule != null) {
             duplicate = true;
         }
         return duplicate;
@@ -865,7 +868,7 @@ public final class HawkbitCommonUtil {
     /**
      * Display Target Tag action message.
      * 
-     * @param targTagName
+     * @param tagName
      *            as tag name
      * @param result
      *            as TargetTagAssigmentResult
@@ -875,7 +878,7 @@ public final class HawkbitCommonUtil {
      *            I18N
      * @return message
      */
-    public static String getTargetTagAssigmentMsg(final String targTagName, final TargetTagAssigmentResult result,
+    public static String createAssignmentMessage(final String tagName, final AssignmentResult<? extends NamedEntity> result,
             final I18N i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
@@ -884,10 +887,10 @@ public final class HawkbitCommonUtil {
 
         if (assignedCount == 1) {
             formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedTargets().get(0).getName(), targTagName })).append("<br>");
+                    new Object[] { result.getAssignedEntity().get(0).getName(), tagName })).append("<br>");
 
         } else if (assignedCount > 1) {
-            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
+            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, tagName }))
                     .append("<br>");
 
             if (alreadyAssignedCount > 0) {
@@ -899,55 +902,10 @@ public final class HawkbitCommonUtil {
 
         if (unassignedCount == 1) {
             formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedTargets().get(0).getName(), targTagName })).append("<br>");
+                    new Object[] { result.getUnassignedEntity().get(0).getName(), tagName })).append("<br>");
 
         } else if (unassignedCount > 1) {
-            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
-                    .append("<br>");
-        }
-        return formMsg.toString();
-    }
-
-    /**
-     * Get message to be displayed after distribution tag assignment.
-     * 
-     * @param targTagName
-     *            tag name
-     * @param result
-     *            DistributionSetTagAssigmentResult
-     * @param tagsClickedList
-     *            list of clicked tags
-     * @param i18n
-     *            I18N
-     * @return message
-     */
-    public static String getDistributionTagAssignmentMsg(final String targTagName,
-            final DistributionSetTagAssigmentResult result, final I18N i18n) {
-        final StringBuilder formMsg = new StringBuilder();
-        final int assignedCount = result.getAssigned();
-        final int alreadyAssignedCount = result.getAlreadyAssigned();
-        final int unassignedCount = result.getUnassigned();
-
-        if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedDs().get(0).getName(), targTagName })).append("<br>");
-
-        } else if (assignedCount > 1) {
-            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
-                    .append("<br>");
-
-            if (alreadyAssignedCount > 0) {
-                final String alreadyAssigned = i18n.get("message.target.alreadyAssigned",
-                        new Object[] { alreadyAssignedCount });
-                formMsg.append(alreadyAssigned).append("<br>");
-            }
-        }
-
-        if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedDs().get(0).getName(), targTagName })).append("<br>");
-        } else if (unassignedCount > 1) {
-            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
+            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
                     .append("<br>");
         }
         return formMsg.toString();
@@ -1359,12 +1317,12 @@ public final class HawkbitCommonUtil {
      *            details of status and count
      * @return String
      */
-    public static String getFormattedString(Map<Status, Long> details) {
-        StringBuilder val = new StringBuilder();
+    public static String getFormattedString(final Map<Status, Long> details) {
+        final StringBuilder val = new StringBuilder();
         if (details == null || details.isEmpty()) {
             return null;
         }
-        for (Entry<Status, Long> entry : details.entrySet()) {
+        for (final Entry<Status, Long> entry : details.entrySet()) {
             val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
         }
         return val.substring(0, val.length() - 1);
@@ -1382,8 +1340,8 @@ public final class HawkbitCommonUtil {
      *            label id
      * @return
      */
-    public static String getStatusLabelDetailsInString(String value, String style, String id) {
-        StringBuilder val = new StringBuilder();
+    public static String getStatusLabelDetailsInString(final String value, final String style, final String id) {
+        final StringBuilder val = new StringBuilder();
         if (!Strings.isNullOrEmpty(value)) {
             val.append("value:").append(value).append(",");
         }

@@ -154,6 +154,7 @@ public class SimulatorView extends VerticalLayout implements View {
     public void pollCounterUpdate(final NextPollCounterUpdate update) {
         final List<AbstractSimulatedDevice> devices = update.getDevices();
         this.getUI().access(new Runnable() {
+            
             @Override
             public void run() {
                 devices.forEach(device -> {
@@ -176,6 +177,7 @@ public class SimulatorView extends VerticalLayout implements View {
     public void initUpdate(final InitUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
         this.getUI().access(new Runnable() {
+            
             @Override
             public void run() {
                 final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());

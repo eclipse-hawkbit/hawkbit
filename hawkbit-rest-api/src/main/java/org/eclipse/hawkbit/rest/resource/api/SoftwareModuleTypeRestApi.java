@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.rest.resource.api;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypePagedList;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRest;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypesRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,7 +51,7 @@ public interface SoftwareModuleTypeRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModuleTypePagedList> getTypes(
+    public ResponseEntity<PagedList<SoftwareModuleTypeRest>> getTypes(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -113,7 +112,7 @@ public interface SoftwareModuleTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<SoftwareModuleTypesRest> createSoftwareModuleTypes(
+    public ResponseEntity<List<SoftwareModuleTypeRest>> createSoftwareModuleTypes(
             @RequestBody final List<SoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
 
 }

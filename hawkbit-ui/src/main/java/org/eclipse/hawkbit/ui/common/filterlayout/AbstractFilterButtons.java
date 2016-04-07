@@ -11,13 +11,17 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PreDestroy;
+
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.dd.DropHandler;
@@ -38,10 +42,13 @@ import com.vaadin.ui.themes.ValoTheme;
 public abstract class AbstractFilterButtons extends Table {
 
     private static final long serialVersionUID = 7783305719009746375L;
-
+    
     private static final String DEFAULT_GREEN = "rgb(44,151,32)";
 
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
+    
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
 
     private AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
 
@@ -54,6 +61,12 @@ public abstract class AbstractFilterButtons extends Table {
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         createTable();
+        eventBus.subscribe(this);
+    }
+    
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
     }
 
     private void createTable() {
@@ -88,12 +101,7 @@ public abstract class AbstractFilterButtons extends Table {
 
     @SuppressWarnings("serial")
     protected void addColumn() {
-        addGeneratedColumn(FILTER_BUTTON_COLUMN, new ColumnGenerator() {
-            @Override
-            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                return addGeneratedCell(itemId);
-            }
-        });
+        addGeneratedColumn(FILTER_BUTTON_COLUMN, (source, itemId, columnId) -> addGeneratedCell(itemId));
     }
 
     /**
@@ -114,7 +122,7 @@ public abstract class AbstractFilterButtons extends Table {
         typeButton.addClickListener(event -> filterButtonClickBehaviour.processFilterButtonClick(event));
         if (typeButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID) && isNoTagSateSelected()) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
-        } else if (id != null && isClickedByDefault(id)) {
+        } else if (id != null && isClickedByDefault(name)) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
         final DragAndDropWrapper wrapper = createDragAndDropWrapper(typeButton, name, id);
@@ -205,10 +213,11 @@ public abstract class AbstractFilterButtons extends Table {
     /**
      * Check if button should be displayed as clicked by default.
      * 
-     * @param id
-     * @return
+     * @param buttonCaption
+     *            button caption
+     * @return true if button is clicked
      */
-    protected abstract boolean isClickedByDefault(final Long buttonId);
+    protected abstract boolean isClickedByDefault(final String buttonCaption);
 
     /**
      * Get filter button Id.

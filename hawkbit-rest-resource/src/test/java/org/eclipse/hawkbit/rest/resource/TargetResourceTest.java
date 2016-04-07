@@ -1029,7 +1029,7 @@ public class TargetResourceTest extends AbstractIntegrationTest {
 
         // Update
         final List<Target> updatedTargets = deploymentManagement.assignDistributionSet(one, targets)
-                .getAssignedTargets();
+                .getAssignedEntity();
         // 2nd update
         // sleep 10ms to ensure that we can sort by reportedAt
         Thread.sleep(10);

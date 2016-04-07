@@ -17,16 +17,15 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rest.resource.api.TargetTagRestApi;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedTargetRequestBody;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,7 @@ public class TargetTagResource implements TargetTagRestApi {
     private TargetManagement targetManagement;
 
     @Override
-    public ResponseEntity<TagPagedList> getTargetTags(final int pagingOffsetParam, final int pagingLimitParam,
+    public ResponseEntity<PagedList<TagRest>> getTargetTags(final int pagingOffsetParam, final int pagingLimitParam,
             final String sortParam, final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -77,7 +76,7 @@ public class TargetTagResource implements TargetTagRestApi {
         }
 
         final List<TagRest> rest = TagMapper.toResponse(findTargetsAll.getContent());
-        return new ResponseEntity<>(new TagPagedList(rest, countTargetsAll), HttpStatus.OK);
+        return new ResponseEntity<>(new PagedList<>(rest, countTargetsAll), HttpStatus.OK);
     }
 
     @Override
@@ -87,7 +86,7 @@ public class TargetTagResource implements TargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TagsRest> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
+    public ResponseEntity<List<TagRest>> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
                 .createTargetTags(TagMapper.mapTargeTagFromRequest(tags));
@@ -118,7 +117,7 @@ public class TargetTagResource implements TargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<TargetsRest> getAssignedTargets(final Long targetTagId) {
+    public ResponseEntity<List<TargetRest>> getAssignedTargets(final Long targetTagId) {
         final TargetTag targetTag = findTargetTagById(targetTagId);
         return new ResponseEntity<>(TargetMapper.toResponseWithLinksAndPollStatus(targetTag.getAssignedToTargets()),
                 HttpStatus.OK);
@@ -130,17 +129,17 @@ public class TargetTagResource implements TargetTagRestApi {
         LOG.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
-        final TargetTagAssigmentResult assigmentResult = this.targetManagement
+        final TargetTagAssignmentResult assigmentResult = this.targetManagement
                 .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
 
         final TargetTagAssigmentResultRest tagAssigmentResultRest = new TargetTagAssigmentResultRest();
-        tagAssigmentResultRest.setAssignedTargets(TargetMapper.toResponse(assigmentResult.getAssignedTargets()));
-        tagAssigmentResultRest.setUnassignedTargets(TargetMapper.toResponse(assigmentResult.getUnassignedTargets()));
+        tagAssigmentResultRest.setAssignedTargets(TargetMapper.toResponse(assigmentResult.getAssignedEntity()));
+        tagAssigmentResultRest.setUnassignedTargets(TargetMapper.toResponse(assigmentResult.getUnassignedEntity()));
         return new ResponseEntity<>(tagAssigmentResultRest, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<TargetsRest> assignTargets(final Long targetTagId,
+    public ResponseEntity<List<TargetRest>> assignTargets(final Long targetTagId,
             final List<AssignedTargetRequestBody> assignedTargetRequestBodies) {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);

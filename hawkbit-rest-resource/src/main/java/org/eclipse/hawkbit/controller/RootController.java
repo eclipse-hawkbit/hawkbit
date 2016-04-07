@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.controller.model.ActionFeedback;
@@ -64,10 +65,6 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * Transactional (read-write) as all queries at least update the last poll time.
  *
- *
- *
- *
- *
  */
 @RestController
 @RequestMapping(ControllerConstants.BASE_V1_REQUEST_MAPPING)
@@ -89,10 +86,13 @@ public class RootController {
     private CacheWriteNotify cacheWriteNotify;
 
     @Autowired
+    private HawkbitSecurityProperties securityProperties;
+
+    @Autowired
     private TenantAware tenantAware;
 
     @Autowired
-    private HawkbitSecurityProperties securityProperties;
+    private ArtifactUrlHandler artifactUrlHandler;
 
     /**
      * Returns all artifacts of a given software module and target.
@@ -118,7 +118,7 @@ public class RootController {
 
         }
 
-        return new ResponseEntity<>(DataConversionHelper.createArtifacts(targetid, softwareModule, tenantAware),
+        return new ResponseEntity<>(DataConversionHelper.createArtifacts(targetid, softwareModule, artifactUrlHandler),
                 HttpStatus.OK);
     }
 
@@ -307,7 +307,7 @@ public class RootController {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, tenantAware);
+            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, artifactUrlHandler);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 

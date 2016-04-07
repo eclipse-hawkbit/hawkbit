@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.rest.resource.api;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.RestConstants;
+import org.eclipse.hawkbit.rest.resource.model.PagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.AssignedTargetRequestBody;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagPagedList;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
 import org.eclipse.hawkbit.rest.resource.model.tag.TagRest;
-import org.eclipse.hawkbit.rest.resource.model.tag.TagsRest;
 import org.eclipse.hawkbit.rest.resource.model.tag.TargetTagAssigmentResultRest;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetsRest;
+import org.eclipse.hawkbit.rest.resource.model.target.TargetRest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +52,7 @@ public interface TargetTagRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TagPagedList> getTargetTags(
+    public ResponseEntity<PagedList<TagRest>> getTargetTags(
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = RestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = RestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -85,7 +84,7 @@ public interface TargetTagRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<TagsRest> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags);
+    public ResponseEntity<List<TagRest>> createTargetTags(@RequestBody final List<TagRequestBodyPut> tags);
 
     /**
      *
@@ -129,7 +128,7 @@ public interface TargetTagRestApi {
      *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = RestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
-    public ResponseEntity<TargetsRest> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
+    public ResponseEntity<List<TargetRest>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
 
     /**
      * Handles the POST request to toggle the assignment of targets by the given
@@ -163,7 +162,7 @@ public interface TargetTagRestApi {
      *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = RestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
-    public ResponseEntity<TargetsRest> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
+    public ResponseEntity<List<TargetRest>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<AssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**

@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.specifications;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -21,8 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 /**
  * Specifications class for {@link SoftwareModule}s. The class provides Spring
  * Data JPQL Specifications
- *
- *
  *
  */
 public final class SoftwareModuleSpecification {
@@ -39,38 +34,21 @@ public final class SoftwareModuleSpecification {
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<SoftwareModule> byId(final Long moduleId) {
-        final Specification<SoftwareModule> spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-
-                final Predicate predicate = cb.equal(targetRoot.<Long> get(SoftwareModule_.id), moduleId);
-                targetRoot.fetch(SoftwareModule_.type);
-                return predicate;
-            }
+        return (targetRoot, query, cb) -> {
+            final Predicate predicate = cb.equal(targetRoot.<Long> get(SoftwareModule_.id), moduleId);
+            targetRoot.fetch(SoftwareModule_.type);
+            return predicate;
         };
-        return spec;
     }
 
     /**
-     * {@link Specification} for retrieving {@link SoftwareModule}s by its
-     * DELETED attribute.
+     * {@link Specification} for retrieving {@link SoftwareModule}s where its
+     * DELETED attribute is false.
      * 
-     * @param isDeleted
-     *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
-     *            attribute is ignored
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<SoftwareModule> isDeletedFalse() {
-        final Specification<SoftwareModule> spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> swRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = cb.equal(swRoot.<Boolean> get(SoftwareModule_.deleted), Boolean.FALSE);
-                return predicate;
-            }
-        };
-        return spec;
+        return (swRoot, query, cb) -> cb.equal(swRoot.<Boolean> get(SoftwareModule_.deleted), Boolean.FALSE);
     }
 
     /**
@@ -82,18 +60,9 @@ public final class SoftwareModuleSpecification {
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<SoftwareModule> likeNameOrVersion(final String subString) {
-        final Specification<SoftwareModule> spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = cb.or(
-                        cb.like(cb.lower(targetRoot.<String> get(SoftwareModule_.name)), subString.toLowerCase()),
-                        cb.like(cb.lower(targetRoot.<String> get(SoftwareModule_.version)), subString.toLowerCase()));
-                return predicate;
-            }
-        };
-
-        return spec;
+        return (targetRoot, query, cb) -> cb.or(
+                cb.like(cb.lower(targetRoot.<String> get(SoftwareModule_.name)), subString.toLowerCase()),
+                cb.like(cb.lower(targetRoot.<String> get(SoftwareModule_.version)), subString.toLowerCase()));
     }
 
     /**
@@ -105,16 +74,7 @@ public final class SoftwareModuleSpecification {
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<SoftwareModule> equalType(final SoftwareModuleType type) {
-        final Specification<SoftwareModule> spec = new Specification<SoftwareModule>() {
-            @Override
-            public Predicate toPredicate(final Root<SoftwareModule> targetRoot, final CriteriaQuery<?> query,
-                    final CriteriaBuilder cb) {
-                final Predicate predicate = cb.equal(targetRoot.<SoftwareModuleType> get(SoftwareModule_.type), type);
-                return predicate;
-            }
-        };
-
-        return spec;
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<SoftwareModuleType> get(SoftwareModule_.type), type);
     }
 
 }

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
 
+import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -33,8 +34,12 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
     }
 
     @Override
-    public void sendMessage(final Message message, final URI uri) {
-        internalAmqpTemplate.send(extractExchange(uri), null, message);
+    public void sendMessage(final Message message, final URI replyTo) {
+        if (!IpUtil.isAmqpUri(replyTo)) {
+            return;
+        }
+
+        internalAmqpTemplate.send(extractExchange(replyTo), null, message);
     }
 
 }
