@@ -110,7 +110,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     /**
-     * Default implementation to handle a entity event.
+     * Default implementation to handle an entity event.
      * 
      * @param baseEntityEvent
      *            the event
@@ -127,9 +127,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     private void createComponents() {
-        /**
-         * Default caption is set.Reset on selecting table row.
-         */
         caption = createHeaderCaption();
         caption.setImmediate(true);
         caption.setContentMode(ContentMode.HTML);
@@ -152,7 +149,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     private void buildLayout() {
-
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
         nameEditLayout.setWidth(100.0f, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
