@@ -31,7 +31,7 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
-        final float versionColumnSize = isMaximized() ? 0.1f : 0.2f;
+        final float versionColumnSize = isMaximized() ? 0.1F : 0.2F;
         columnList
                 .add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), versionColumnSize));
         return columnList;
