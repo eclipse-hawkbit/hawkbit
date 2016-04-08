@@ -38,7 +38,7 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
         super.doBegin(transaction, definition);
 
         // ignore transactions on tenant independent calls
-        if (isTenantManagement(definition) && isCurrentTenantKeyGenerator(definition)) {
+        if (isTenantManagement(definition) || isCurrentTenantKeyGenerator(definition)) {
             return;
         }
 
