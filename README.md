@@ -22,7 +22,7 @@ https://hawkbit.eu-gb.mybluemix.net/UI/
 
 # Compile, Run and Getting Started
 
-We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit.
+We are not providing an off the shelf installation ready hawkBit update server. However, we recommend to check out the [Example Application](examples/hawkbit-example-app) for a runtime ready Spring Boot based update server that is empowered by hawkBit. In addition we have [guide](https://github.com/eclipse/hawkbit/wiki/Run-hawkBit) for setting up a complete landscape.
 
 #### Clone and build hawkBit
 ```
