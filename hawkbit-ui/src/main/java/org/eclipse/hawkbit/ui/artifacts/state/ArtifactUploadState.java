@@ -185,5 +185,4 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     public void setSelectedBaseSoftwareModule(final SoftwareModule selectedBaseSoftwareModule) {
         this.selectedBaseSoftwareModule = selectedBaseSoftwareModule;
     }
-
 }

@@ -206,6 +206,5 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     @Override
     protected void setDataAvailable(final boolean available) {
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
-
     }
 }

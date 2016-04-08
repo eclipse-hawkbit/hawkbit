@@ -141,5 +141,4 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponetIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
-
 }

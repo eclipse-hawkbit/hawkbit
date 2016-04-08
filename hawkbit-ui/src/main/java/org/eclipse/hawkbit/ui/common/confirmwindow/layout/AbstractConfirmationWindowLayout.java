@@ -148,5 +148,4 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
         deletesDsIcon.addClickListener(clickListener);
         return deletesDsIcon;
     }
-
 }
