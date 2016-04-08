@@ -12,7 +12,6 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -27,9 +26,6 @@ import com.vaadin.spring.annotation.ViewScope;
 public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
-
-    @Autowired
-    private I18N i18n;
 
     private boolean configurationEnabled = false;
     private boolean configurationEnabledChange = false;
@@ -49,7 +45,7 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
      */
     @PostConstruct
     public void init() {
-        super.init(i18n.get("label.configuration.auth.targettoken"));
+        super.init("label.configuration.auth.targettoken");
         configurationEnabled = isConfigEnabled();
     }
 

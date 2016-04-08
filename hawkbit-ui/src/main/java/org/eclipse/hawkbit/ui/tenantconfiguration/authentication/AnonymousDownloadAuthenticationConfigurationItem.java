@@ -12,7 +12,6 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -32,9 +31,6 @@ public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAu
     private boolean configurationEnabledChange = false;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
     public AnonymousDownloadAuthenticationConfigurationItem(
             final TenantConfigurationManagement tenantConfigurationManagement) {
         super(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, tenantConfigurationManagement);
@@ -42,26 +38,19 @@ public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAu
 
     @PostConstruct
     public void init() {
-
-        super.init(i18n.get("label.configuration.anonymous.download"));
+        super.init("label.configuration.anonymous.download");
         configurationEnabled = isConfigEnabled();
-
     }
 
     @Override
     public void configEnable() {
-
-        if (!configurationEnabled) {
-            configurationEnabledChange = true;
-        }
+        configurationEnabledChange = !configurationEnabled;
         configurationEnabled = true;
     }
 
     @Override
     public void configDisable() {
-        if (configurationEnabled) {
-            configurationEnabledChange = true;
-        }
+        configurationEnabledChange = configurationEnabled;
         configurationEnabled = false;
     }
 
@@ -71,16 +60,13 @@ public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAu
             return;
         }
         getTenantConfigurationManagement().addOrUpdateConfiguration(getConfigurationKey(), configurationEnabled);
-
     }
 
     @Override
     public void undo() {
-
         configurationEnabledChange = false;
         configurationEnabled = getTenantConfigurationManagement()
                 .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
-
     }
 
 }
