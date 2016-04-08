@@ -173,24 +173,11 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
-     */
     @Override
     protected String getTableId() {
         return SPUIComponetIdProvider.DIST_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
-     * )
-     */
     @Override
     protected Container createContainer() {
         final Map<String, Object> queryConfiguration = prepareQueryConfigFilters();
@@ -276,7 +263,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (isMaximized()) {
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.1f));
+        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.1F));
         return columnList;
     }
 

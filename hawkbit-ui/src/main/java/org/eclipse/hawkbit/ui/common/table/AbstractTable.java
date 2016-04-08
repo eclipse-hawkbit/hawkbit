@@ -66,7 +66,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         setStyleName("sp-table");
         setSizeFull();
         setImmediate(true);
-        setHeight(100.0f, Unit.PERCENTAGE);
+        setHeight(100.0F, Unit.PERCENTAGE);
         addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         addStyleName(ValoTheme.TABLE_SMALL);
         setSortEnabled(false);
