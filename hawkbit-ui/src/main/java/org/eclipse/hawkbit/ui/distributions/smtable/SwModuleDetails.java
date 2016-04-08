@@ -54,7 +54,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     protected void onEdit(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow
                 .createUpdateSoftwareModuleWindow(getSelectedBaseEntityId());
-        addSoftwareModule.setCaption(i18n.get("upload.caption.update.swmodule"));
+        addSoftwareModule.setCaption(getI18n().get("upload.caption.update.swmodule"));
         UI.getCurrent().addWindow(addSoftwareModule);
         addSoftwareModule.setVisible(Boolean.TRUE);
     }
@@ -66,14 +66,14 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), i18n.get("caption.tab.description"), null);
-        detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
+        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
     }
 
     @Override
     protected String getDefaultCaption() {
-        return i18n.get("upload.swModuleTable.header");
+        return getI18n().get("upload.swModuleTable.header");
     }
 
     @Override
@@ -88,7 +88,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected Boolean hasEditPermission() {
-        return permissionChecker.hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
     @Override
@@ -98,14 +98,14 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     private void populateDetails() {
         String maxAssign = HawkbitCommonUtil.SP_STRING_EMPTY;
-        if (selectedBaseEntity != null) {
-            if (selectedBaseEntity.getType().getMaxAssignments() == Integer.MAX_VALUE) {
-                maxAssign = i18n.get("label.multiAssign.type");
+        if (getSelectedBaseEntity() != null) {
+            if (getSelectedBaseEntity().getType().getMaxAssignments() == Integer.MAX_VALUE) {
+                maxAssign = getI18n().get("label.multiAssign.type");
             } else {
-                maxAssign = i18n.get("label.singleAssign.type");
+                maxAssign = getI18n().get("label.singleAssign.type");
             }
-            updateSwModuleDetailsLayout(selectedBaseEntity.getType().getName(), selectedBaseEntity.getVendor(),
-                    maxAssign);
+            updateSwModuleDetailsLayout(getSelectedBaseEntity().getType().getName(),
+                    getSelectedBaseEntity().getVendor(), maxAssign);
         } else {
             updateSwModuleDetailsLayout(HawkbitCommonUtil.SP_STRING_EMPTY, HawkbitCommonUtil.SP_STRING_EMPTY,
                     maxAssign);
@@ -117,19 +117,19 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
 
-        final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.vendor"),
+        final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.vendor"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(vendor) == null ? "" : vendor);
         vendorLabel.setId(SPUIComponetIdProvider.DETAILS_VENDOR_LABEL_ID);
         detailsTabLayout.addComponent(vendorLabel);
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
             typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
-        final Label assignLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.assigned.type"),
+        final Label assignLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.assigned.type"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(maxAssign) == null ? "" : maxAssign);
         assignLabel.setId(SPUIComponetIdProvider.SWM_DTLS_MAX_ASSIGN);
         detailsTabLayout.addComponent(assignLabel);

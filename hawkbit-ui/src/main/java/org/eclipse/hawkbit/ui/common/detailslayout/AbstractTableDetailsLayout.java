@@ -49,15 +49,15 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private static final long serialVersionUID = 4862529368471627190L;
 
     @Autowired
-    protected I18N i18n;
+    private I18N i18n;
 
     @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
+    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
-    protected SpPermissionChecker permissionChecker;
+    private SpPermissionChecker permissionChecker;
 
-    protected T selectedBaseEntity;
+    private T selectedBaseEntity;
 
     private Label caption;
 
@@ -89,6 +89,26 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         eventBus.unsubscribe(this);
     }
 
+    protected SpPermissionChecker getPermissionChecker() {
+        return permissionChecker;
+    }
+
+    protected EventBus.SessionEventBus getEventBus() {
+        return eventBus;
+    }
+
+    protected I18N getI18n() {
+        return i18n;
+    }
+
+    protected T getSelectedBaseEntity() {
+        return selectedBaseEntity;
+    }
+
+    public void setSelectedBaseEntity(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+    }
+
     /**
      * Default implementation to handle a entity event.
      * 
@@ -118,7 +138,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
                 SPUIButtonStyleSmallNoBorder.class);
         editButton.setId(getEditButtonId());
-        editButton.addClickListener(event -> onEdit(event));
+        editButton.addClickListener(this::onEdit);
 
         editButton.setEnabled(false);
 

@@ -52,7 +52,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected void init() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(i18n, false, permissionChecker, null, null, null);
+        softwareModuleTable.init(getI18n(), false, getPermissionChecker(), null, null, null);
         super.init();
     }
 
@@ -63,23 +63,23 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected String getDefaultCaption() {
-        return i18n.get("distribution.details.header");
+        return getI18n().get("distribution.details.header");
     }
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), i18n.get("caption.tab.description"), null);
-        detailsTab.addTab(createSoftwareModuleTab(), i18n.get("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(createTagsLayout(), i18n.get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
+        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
+        detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
+        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
     }
 
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
         distributionAddUpdateWindowLayout.populateValuesOfDistribution(getSelectedBaseEntityId());
-        newDistWindow.setCaption(i18n.get("caption.update.dist"));
+        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
@@ -102,7 +102,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected Boolean hasEditPermission() {
-        return permissionChecker.hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
     @Override
@@ -112,8 +112,8 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void populateDetailsWidget() {
-        softwareModuleTable.populateModule(selectedBaseEntity);
-        populateDetails(selectedBaseEntity);
+        softwareModuleTable.populateModule(getSelectedBaseEntity());
+        populateDetails(getSelectedBaseEntity());
 
     }
 
@@ -130,16 +130,16 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         detailsTabLayout.removeAllComponents();
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
             typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(
-                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
-                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                    getI18n().get("checkbox.dist.migration.required"),
+                    isMigrationRequired.equals(Boolean.TRUE) ? getI18n().get("label.yes") : getI18n().get("label.no")));
         }
     }
 

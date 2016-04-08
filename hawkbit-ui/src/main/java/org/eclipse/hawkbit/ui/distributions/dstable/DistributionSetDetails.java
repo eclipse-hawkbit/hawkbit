@@ -92,7 +92,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     @Override
     protected void init() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(i18n, true, permissionChecker, distributionSetManagement, eventBus, manageDistUIState);
+        softwareModuleTable.init(getI18n(), true, getPermissionChecker(), distributionSetManagement, getEventBus(),
+                manageDistUIState);
         super.init();
     }
 
@@ -109,7 +110,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     }
 
     private void populateModule() {
-        softwareModuleTable.populateModule(selectedBaseEntity);
+        softwareModuleTable.populateModule(getSelectedBaseEntity());
         showUnsavedAssignment();
     }
 
@@ -157,12 +158,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         }
     }
 
-    /**
-     * @param item
-     * @param entry
-     */
     private void assignSoftModuleButton(final Item item, final Map.Entry<String, StringBuilder> entry) {
-        if (permissionChecker.hasUpdateDistributionPermission() && distributionSetManagement
+        if (getPermissionChecker().hasUpdateDistributionPermission() && distributionSetManagement
                 .findDistributionSetById(manageDistUIState.getLastSelectedDistribution().get().getId())
                 .getAssignedTargets().isEmpty()) {
             final Button reassignSoftModule = SPUIComponentProvider.getButton(entry.getKey(), "", "", "", true,
@@ -227,15 +224,16 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private void populateTags() {
         tagsLayout.removeAllComponents();
-        if (null != selectedBaseEntity) {
-            tagsLayout.addComponent(distributionTagToken.getTokenField());
+        if (getSelectedBaseEntity() == null) {
+            return;
         }
+        tagsLayout.addComponent(distributionTagToken.getTokenField());
     }
 
     private void populateDetails() {
-        if (selectedBaseEntity != null) {
-            updateDistributionSetDetailsLayout(selectedBaseEntity.getType().getName(),
-                    selectedBaseEntity.isRequiredMigrationStep());
+        if (getSelectedBaseEntity() != null) {
+            updateDistributionSetDetailsLayout(getSelectedBaseEntity().getType().getName(),
+                    getSelectedBaseEntity().isRequiredMigrationStep());
         } else {
             updateDistributionSetDetailsLayout(null, null);
         }
@@ -246,16 +244,16 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         detailsTabLayout.removeAllComponents();
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
             typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(
-                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
-                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                    getI18n().get("checkbox.dist.migration.required"),
+                    isMigrationRequired.equals(Boolean.TRUE) ? getI18n().get("label.yes") : getI18n().get("label.no")));
         }
     }
 
@@ -263,7 +261,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
         distributionAddUpdateWindowLayout.populateValuesOfDistribution(getSelectedBaseEntityId());
-        newDistWindow.setCaption(i18n.get("caption.update.dist"));
+        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
@@ -286,21 +284,21 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getDefaultCaption() {
-        return i18n.get("distribution.details.header");
+        return getI18n().get("distribution.details.header");
     }
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), i18n.get("caption.tab.description"), null);
-        detailsTab.addTab(createSoftwareModuleTab(), i18n.get("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(createTagsLayout(), i18n.get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
+        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
+        detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
+        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
     }
 
     @Override
     protected Boolean hasEditPermission() {
-        return permissionChecker.hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -322,9 +320,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
                 final DistributionSetIdName distIdName = softwareModuleAssignmentDiscardEvent
                         .getDistributionSetIdName();
                 if (distIdName.getId().equals(getSelectedBaseEntityId())
-                        && distIdName.getName().equals(selectedBaseEntity.getName())) {
-                    selectedBaseEntity = distributionSetManagement
-                            .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+                        && distIdName.getName().equals(getSelectedBaseEntity().getName())) {
+                    setSelectedBaseEntity(
+                            distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()));
                     populateModule();
                 }
             });
@@ -335,10 +333,10 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     void onEvent(final SaveActionWindowEvent saveActionWindowEvent) {
         if ((saveActionWindowEvent == SaveActionWindowEvent.SAVED_ASSIGNMENTS
                 || saveActionWindowEvent == SaveActionWindowEvent.DISCARD_ALL_ASSIGNMENTS)
-                && selectedBaseEntity != null) {
+                && getSelectedBaseEntity() != null) {
             assignedSWModule.clear();
-            selectedBaseEntity = distributionSetManagement
-                    .findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+            setSelectedBaseEntity(
+                    distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId()));
             UI.getCurrent().access(() -> populateModule());
         }
     }
