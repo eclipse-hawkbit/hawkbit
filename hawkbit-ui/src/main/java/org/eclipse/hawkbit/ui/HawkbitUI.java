@@ -48,15 +48,13 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Vaadin management UI.
- *
- *
- *
+ * hawkBit Management UI.
  *
  */
-@SuppressWarnings("serial")
 @Title("hawkBit Update Server")
 public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitUI.class);
 
     private static final String EMPTY_VIEW = "";
@@ -154,6 +152,8 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
         }
         final Navigator navigator = new Navigator(this, content);
         navigator.addViewChangeListener(new ViewChangeListener() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public boolean beforeViewChange(final ViewChangeEvent event) {
                 return true;
@@ -233,6 +233,7 @@ public class HawkbitUI extends DefaultHawkbitUI implements DetachListener {
     }
 
     private class ManagementViewProvider implements ViewProvider {
+        private static final long serialVersionUID = 1L;
 
         @Override
         public String getViewName(final String viewAndParameters) {
