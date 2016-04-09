@@ -14,7 +14,9 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.ui.VerticalLayout;
 
@@ -29,6 +31,9 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
         implements AuthenticationConfigurationItem {
 
     private static final long serialVersionUID = 1L;
+
+    @Autowired
+    private I18N i18n;
 
     private final TenantConfigurationKey configurationKey;
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
@@ -53,7 +58,7 @@ abstract class AbstractAuthenticationTenantConfigurationItem extends VerticalLay
      */
     protected void init(final String labelText) {
         setImmediate(true);
-        addComponent(SPUIComponentProvider.getLabel(labelText, SPUILabelDefinitions.SP_LABEL_SIMPLE));
+        addComponent(SPUIComponentProvider.getLabel(i18n.get(labelText), SPUILabelDefinitions.SP_LABEL_SIMPLE));
     }
 
     @Override

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,8 +40,6 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
     @Autowired
     private transient SecurityTokenGenerator securityTokenGenerator;
-    @Autowired
-    private I18N i18n;
 
     private TextField gatewayTokenNameTextField;
 
@@ -72,7 +69,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     @PostConstruct
     public void init() {
 
-        super.init(i18n.get("label.configuration.auth.gatewaytoken"));
+        super.init("label.configuration.auth.gatewaytoken");
         configurationEnabled = isConfigEnabled();
 
         detailLayout = new VerticalLayout();
