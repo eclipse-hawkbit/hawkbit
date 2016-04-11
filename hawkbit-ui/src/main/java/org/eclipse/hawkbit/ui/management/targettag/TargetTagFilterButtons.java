@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -212,36 +211,32 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     private void processTargetDrop(final DragAndDropEvent event) {
-
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
+        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) transferable
+                .getSourceComponent();
 
-        final Set<TargetIdName> targetSelected = AbstractTable.getTableValue(source);
-        final Set<String> targetList = new HashSet<>();
-        if (transferable.getData(ITEMID) != null) {
-            if (!targetSelected.contains(transferable.getData(ITEMID))) {
-                targetList.add(((TargetIdName) transferable.getData(ITEMID)).getControllerId());
-            } else {
-                targetList.addAll(targetSelected.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
-            }
+        final Set<TargetIdName> targetSelected = targetTable.getDeletedEntityByTransferable(transferable);
+        final Set<String> targetList = targetSelected.stream().map(t -> t.getControllerId())
+                .collect(Collectors.toSet());
 
-            final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
-                    SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+        final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
+                SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
 
-            final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
+        final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
 
-            final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
-            notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
+        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
 
-            if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
-                eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
-            }
-            if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty() && tagsClickedList.contains(targTagName)) {
-                eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
-            }
+        if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
+            eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
         }
+        if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty() && tagsClickedList.contains(targTagName)) {
+            eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
+        }
+
     }
 
     private boolean validateIfSourceisTargetTable(final Table source) {

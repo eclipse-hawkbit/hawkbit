@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
@@ -208,17 +209,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         };
     }
 
+    @SuppressWarnings("unchecked")
     private void onDrop(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
-        final Set<Long> softwareModuleSelected = (Set<Long>) source.getValue();
-        final Set<Long> softwareModulesIdList = new HashSet<>();
-
-        if (!softwareModuleSelected.contains(transferable.getData("itemId"))) {
-            softwareModulesIdList.add((Long) transferable.getData("itemId"));
-        } else {
-            softwareModulesIdList.addAll(softwareModuleSelected);
-        }
+        final AbstractTable<?, Long> source = (AbstractTable<SoftwareModule, Long>) transferable.getSourceComponent();
+        final Set<Long> softwareModulesIdList = source.getDeletedEntityByTransferable(transferable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
