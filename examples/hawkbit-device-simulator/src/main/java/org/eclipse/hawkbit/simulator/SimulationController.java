@@ -86,7 +86,10 @@ public class SimulationController {
             final String deviceId = name + i;
             repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, protocol, pollDelay, new URL(endpoint),
                     gatewayToken));
-            spSenderService.createOrUpdateThing(tenant, deviceId);
+
+            if (protocol == Protocol.DMF_AMQP) {
+                spSenderService.createOrUpdateThing(tenant, deviceId);
+            }
         }
 
         return ResponseEntity.ok("Updated " + amount + " DMF connected targets!");
