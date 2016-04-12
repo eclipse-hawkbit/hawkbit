@@ -171,21 +171,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 throw new EntityNotFoundException();
             }
 
-            // check action for this download purposes, the method will throw an
-            // EntityNotFoundException in case the controller is not allowed to
-            // download this file because it's not assigned to an action and not
-            // assigned to this controller. Otherwise no controllerId is set =
-            // anonymous download
-            if (secruityToken.getControllerId() != null) {
-                LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
-                        secruityToken.getControllerId(), localArtifact);
-                if (!controllerManagement.hasTargetArtifactAssigned(secruityToken.getControllerId(), localArtifact)) {
-                    LOG.info("target {} tried to download artifact {} which is not assigned to the target");
-                    throw new EntityNotFoundException();
-                }
-                LOG.info("download security check for target {} and artifact {} granted",
-                        secruityToken.getControllerId(), localArtifact);
-            }
+            checkIfArtifactIsAssignedToTarget(secruityToken, localArtifact);
 
             final Artifact artifact = convertDbArtifact(artifactManagement.loadLocalArtifactBinary(localArtifact));
             if (artifact == null) {
@@ -217,6 +203,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         return getMessageConverter().toMessage(authentificationResponse, messageProperties);
+    }
+
+    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
+            final LocalArtifact localArtifact) {
+        // check action for this download purposes, the method will throw an
+        // EntityNotFoundException in case the controller is not allowed to
+        // download this file because it's not assigned to an action and not
+        // assigned to this controller. Otherwise no controllerId is set =
+        // anonymous download
+        if (secruityToken.getControllerId() != null) {
+            LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
+                    secruityToken.getControllerId(), localArtifact);
+            if (!controllerManagement.hasTargetArtifactAssigned(secruityToken.getControllerId(), localArtifact)) {
+                LOG.info("target {} tried to download artifact {} which is not assigned to the target");
+                throw new EntityNotFoundException();
+            }
+            LOG.info("download security check for target {} and artifact {} granted", secruityToken.getControllerId(),
+                    localArtifact);
+        }
     }
 
     private LocalArtifact findLocalArtifactByFileResource(final FileResource fileResource) {
