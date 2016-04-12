@@ -47,14 +47,14 @@ public class ActionSpecifications {
      *            assigned
      * @return a specification to use with spring JPA
      */
-    public static Specification<Action> hasTargetArtifactAssigned(final Target target,
+    public static Specification<Action> hasTargetAssignedArtifact(final Target target,
             final LocalArtifact localArtifact) {
-        return (actionRoot, query, cb) -> {
+        return (actionRoot, query, criteriaBuilder) -> {
             final Join<Action, DistributionSet> dsJoin = actionRoot.join(Action_.distributionSet);
             final SetJoin<DistributionSet, SoftwareModule> modulesJoin = dsJoin.join(DistributionSet_.modules);
             final ListJoin<SoftwareModule, LocalArtifact> artifactsJoin = modulesJoin.join(SoftwareModule_.artifacts);
-            return cb.and(cb.equal(artifactsJoin.get(LocalArtifact_.id), localArtifact.getId()),
-                    cb.equal(actionRoot.get(Action_.target), target));
+            return criteriaBuilder.and(criteriaBuilder.equal(artifactsJoin.get(LocalArtifact_.id), localArtifact.getId()),
+                    criteriaBuilder.equal(actionRoot.get(Action_.target), target));
         };
     }
 }

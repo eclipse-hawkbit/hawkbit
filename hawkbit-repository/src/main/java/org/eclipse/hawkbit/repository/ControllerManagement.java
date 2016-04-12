@@ -190,7 +190,7 @@ public class ControllerManagement {
         if (target == null) {
             return false;
         }
-        return actionRepository.count(ActionSpecifications.hasTargetArtifactAssigned(target, localArtifact)) > 0;
+        return actionRepository.count(ActionSpecifications.hasTargetAssignedArtifact(target, localArtifact)) > 0;
     }
 
     /**
