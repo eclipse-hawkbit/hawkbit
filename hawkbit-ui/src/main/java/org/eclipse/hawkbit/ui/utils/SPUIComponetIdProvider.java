@@ -599,7 +599,7 @@ public final class SPUIComponetIdProvider {
     /**
      * Documentation Link in Login view and menu.
      */
-    public static final String LINK_DOCUMENATION = "link.documentation";
+    public static final String LINK_DOCUMENTATION = "link.documentation";
 
     /**
      * Demo Link in Login view and menu.

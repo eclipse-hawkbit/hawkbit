@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -36,7 +36,6 @@ import com.vaadin.ui.Window;
 public class SwModuleTableHeader extends AbstractTableHeader {
 
     private static final long serialVersionUID = 242961845006626297L;
-
 
     @Autowired
     private ManageDistUIState manageDistUIState;
@@ -123,14 +122,14 @@ public class SwModuleTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         manageDistUIState.setSwModuleTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MAXIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED, null));
 
     }
 
     @Override
     public void minimizeTable() {
         manageDistUIState.setSwModuleTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MINIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override
