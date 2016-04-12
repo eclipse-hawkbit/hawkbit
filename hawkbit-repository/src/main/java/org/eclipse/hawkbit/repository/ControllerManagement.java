@@ -28,12 +28,14 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionStatus_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.repository.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -164,6 +166,31 @@ public class ControllerManagement {
         }
 
         return action.get(0);
+    }
+
+    /**
+     * Checks if a given target has currently or has even been assigned to the
+     * given artifact through the action history list. This can e.g. indicate if
+     * a target is allowed to download a given artifact because it has currently
+     * assigned or had ever been assigned to the target and so it's visible to a
+     * specific target e.g. for downloading.
+     * 
+     * @param targetId
+     *            the ID of the target to check
+     * @param localArtifact
+     *            the artifact to verify if the given target had even been
+     *            assigned to
+     * @return {@code true} if the given target has currently or had ever a
+     *         relation to the given artifact through the action history,
+     *         otherwise {@code false}
+     */
+    public boolean hasTargetArtifactAssigned(@NotNull final String targetId,
+            @NotNull final LocalArtifact localArtifact) {
+        final Target target = targetRepository.findByControllerId(targetId);
+        if (target == null) {
+            return false;
+        }
+        return actionRepository.count(ActionSpecifications.hasTargetArtifactAssigned(target, localArtifact)) > 0;
     }
 
     /**

@@ -166,6 +166,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final LocalArtifact localArtifact = findLocalArtifactByFileResource(fileResource);
 
             if (localArtifact == null) {
+                LOG.info("target {} requested file resource which does not exists to download",
+                        secruityToken.getControllerId(), fileResource);
                 throw new EntityNotFoundException();
             }
 
@@ -175,10 +177,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             // assigned to this controller. Otherwise no controllerId is set =
             // anonymous download
             if (secruityToken.getControllerId() != null) {
-                final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(
-                        secruityToken.getControllerId(), localArtifact.getSoftwareModule());
-                LOG.info("Found action for download authentication request action: {}, resource: {}", action,
-                        secruityToken.getFileResource());
+                LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
+                        secruityToken.getControllerId(), localArtifact);
+                if (!controllerManagement.hasTargetArtifactAssigned(secruityToken.getControllerId(), localArtifact)) {
+                    LOG.info("target {} tried to download artifact {} which is not assigned to the target");
+                    throw new EntityNotFoundException();
+                }
+                LOG.info("download security check for target {} and artifact {} granted",
+                        secruityToken.getControllerId(), localArtifact);
             }
 
             final Artifact artifact = convertDbArtifact(artifactManagement.loadLocalArtifactBinary(localArtifact));
