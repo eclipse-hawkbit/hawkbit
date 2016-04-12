@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.footer;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.TagManagement;
@@ -257,15 +256,10 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(sourceTable);
-        final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<>();
-
-        if (!distSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            distributionIdNameSet.add((DistributionSetIdName) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            distributionIdNameSet.addAll(distSelected);
-        }
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) sourceTable;
+        final Set<DistributionSetIdName> distributionIdNameSet = distTable.getDeletedEntityByTransferable(transferable);
 
         final DistributionSetIdName dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload()
                 .getDsNameAndVersion();
@@ -273,31 +267,31 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             distributionIdNameSet.remove(dsInBulkUpload);
         }
 
-        if (!distributionIdNameSet.isEmpty()) {
-
+        if (distributionIdNameSet.isEmpty()) {
+            return;
+        }
+        /*
+         * Flags to identify whether all dropped distributions are already in
+         * the deleted list (or) some distributions are already in the deleted
+         * distribution list.
+         */
+        final int existingDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
+        managementUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
+        final int newDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
+        if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
             /*
-             * Flags to identify whether all dropped distributions are already
-             * in the deleted list (or) some distributions are already in the
-             * deleted distribution list.
+             * No new distributions are added, all distributions dropped now are
+             * already available in the delete list. Hence display warning
+             * message accordingly.
              */
-            final int existingDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
-            managementUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
-            final int newDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
-            if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-                /*
-                 * No new distributions are added, all distributions dropped now
-                 * are already available in the delete list. Hence display
-                 * warning message accordingly.
-                 */
-                notification.displayValidationError(i18n.get("message.targets.already.deleted"));
-            } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-                /*
-                 * Not the all distributions dropped now are added to the delete
-                 * list. There are some distributions are already there in the
-                 * delete list. Hence display warning message accordingly.
-                 */
-                notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
-            }
+            notification.displayValidationError(i18n.get("message.targets.already.deleted"));
+        } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
+            /*
+             * Not the all distributions dropped now are added to the delete
+             * list. There are some distributions are already there in the
+             * delete list. Hence display warning message accordingly.
+             */
+            notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
         }
     }
 
@@ -311,15 +305,10 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<TargetIdName> targetSelected = AbstractTable.getTableValue(sourceTable);
-
-        final Set<TargetIdName> targetIdNameSet = new HashSet<>();
-        if (!targetSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            targetIdNameSet.add((TargetIdName) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            targetIdNameSet.addAll(targetSelected);
-        }
+        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) sourceTable;
+        final Set<TargetIdName> targetIdNameSet = targetTable.getDeletedEntityByTransferable(transferable);
 
         /*
          * Flags to identify whether all dropped targets are already in the

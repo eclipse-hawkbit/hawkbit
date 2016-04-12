@@ -632,16 +632,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     private static Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
             final Table source) {
-        final Set<DistributionSetIdName> distSelected = getTableValue(source);
-        final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
-        if (!distSelected.contains(transferable.getData(ITEMID))) {
-            distributionIdSet.add((DistributionSetIdName) transferable.getData(ITEMID));
-        } else {
-            distributionIdSet.addAll(distSelected);
-        }
-        return distributionIdSet;
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) source;
+        return distTable.getDeletedEntityByTransferable(transferable);
     }
 
     private Boolean validateDragAndDropWrapper(final Component compsource) {

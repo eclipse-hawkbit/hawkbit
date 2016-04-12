@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -229,6 +230,30 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
             UI.getCurrent().access(() -> addEntity(event.getEntity()));
         }
+    }
+
+    /**
+     * Return the entity which should be deleted by a transferable
+     * 
+     * @param transferable
+     *            the table transferable
+     * @return set of entities id which will deleted
+     */
+    @SuppressWarnings("unchecked")
+    public Set<I> getDeletedEntityByTransferable(final TableTransferable transferable) {
+        final Set<I> selectedEntities = (Set<I>) getTableValue(this);
+        final Set<I> ids = new HashSet<>();
+        final Object tranferableData = transferable.getData(SPUIDefinitions.ITEMID);
+        if (tranferableData == null) {
+            return ids;
+        }
+
+        if (!selectedEntities.contains(tranferableData)) {
+            ids.add((I) tranferableData);
+        } else {
+            ids.addAll(selectedEntities);
+        }
+        return ids;
     }
 
     protected abstract E findEntityByTableValue(I lastSelectedId);

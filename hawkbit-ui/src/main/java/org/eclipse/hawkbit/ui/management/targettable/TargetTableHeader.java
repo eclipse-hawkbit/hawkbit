@@ -378,16 +378,10 @@ public class TargetTableHeader extends AbstractTableHeader {
         return isValid;
     }
 
+    @SuppressWarnings("unchecked")
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(transferable.getSourceComponent());
-        final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
-        if (!distSelected.contains(transferable.getData("itemId"))) {
-            distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));
-        } else {
-            distributionIdSet.addAll(distSelected);
-        }
-
-        return distributionIdSet;
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) transferable.getSourceComponent();
+        return distTable.getDeletedEntityByTransferable(transferable);
     }
 
     private void addFilterTextField(final DistributionSetIdName distributionSetIdName) {
