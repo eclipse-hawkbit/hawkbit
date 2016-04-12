@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,13 +125,13 @@ public class DistributionSetTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         manageDistUIstate.setDsTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new DistributionTableEvent(DistributionComponentEvent.MAXIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED, null));
     }
 
     @Override
     public void minimizeTable() {
         manageDistUIstate.setDsTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new DistributionTableEvent(DistributionComponentEvent.MINIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override

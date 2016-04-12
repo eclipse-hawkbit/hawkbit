@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
@@ -217,7 +218,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
         final Table source = transferable.getSourceComponent();
 
-        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(source);
+        final Set<TargetIdName> targetSelected = AbstractTable.getTableValue(source);
         final Set<String> targetList = new HashSet<>();
         if (transferable.getData(ITEMID) != null) {
             if (!targetSelected.contains(transferable.getData(ITEMID))) {

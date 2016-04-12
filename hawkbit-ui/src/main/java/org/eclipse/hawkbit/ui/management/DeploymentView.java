@@ -12,6 +12,7 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.actionhistory.ActionHistoryComponent;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionTableLayout;
 import org.eclipse.hawkbit.ui.management.dstag.DistributionTagLayout;
@@ -108,19 +109,18 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent event) {
-        if (event.getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MINIMIZED) {
+        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeDistTable();
-        } else if (event
-                .getDistributionComponentEvent() == DistributionTableEvent.DistributionComponentEvent.MAXIMIZED) {
+        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             maximizeDistTable();
         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent event) {
-        if (event.getTargetComponentEvent() == TargetTableEvent.TargetComponentEvent.MINIMIZED) {
+        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeTargetTable();
-        } else if (event.getTargetComponentEvent() == TargetTableEvent.TargetComponentEvent.MAXIMIZED) {
+        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             maximizeTargetTable();
         }
     }

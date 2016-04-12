@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -211,7 +212,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        manangementConfirmationWindowLayout.init();
+        manangementConfirmationWindowLayout.initialize();
         return manangementConfirmationWindowLayout;
     }
 
@@ -257,7 +258,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(sourceTable);
+        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(sourceTable);
         final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<>();
 
         if (!distSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
@@ -311,7 +312,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(sourceTable);
+        final Set<TargetIdName> targetSelected = AbstractTable.getTableValue(sourceTable);
 
         final Set<TargetIdName> targetIdNameSet = new HashSet<>();
         if (!targetSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {

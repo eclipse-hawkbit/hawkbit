@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -19,14 +20,12 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 /**
  * Abstract class for target tag token layout.
  */
-public abstract class AbstractTargetTagToken extends AbstractTagToken {
+public abstract class AbstractTargetTagToken<T extends BaseEntity> extends AbstractTagToken<T> {
 
     private static final long serialVersionUID = 7772876588903171201L;
 
     @Autowired
     protected transient TagManagement tagManagement;
-
-
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {

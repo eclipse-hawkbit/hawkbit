@@ -9,58 +9,53 @@
 package org.eclipse.hawkbit.ui.artifacts.event;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
  * Event to represent software add, update or delete.
- * 
- *
  *
  */
-public class SoftwareModuleEvent {
+public class SoftwareModuleEvent extends BaseEntityEvent<SoftwareModule> {
 
     /**
      * Software module events in the Upload UI.
-     * 
-     *
      *
      */
     public enum SoftwareModuleEventType {
-        NEW_SOFTWARE_MODULE, UPDATED_SOFTWARE_MODULE, DELETE_SOFTWARE_MODULE, SELECTED_SOFTWARE_MODULE, MAXIMIZED, MINIMIZED, ARTIFACTS_CHANGED, ASSIGN_SOFTWARE_MODULE
+        ARTIFACTS_CHANGED, ASSIGN_SOFTWARE_MODULE
     }
 
     private SoftwareModuleEventType softwareModuleEventType;
 
-    private SoftwareModule softwareModule;
+    /**
+     * Creates software module event.
+     * 
+     * @param entityEventType
+     *            the event type
+     * @param softwareModule
+     *            the module
+     */
+    public SoftwareModuleEvent(final BaseEntityEventType entityEventType, final SoftwareModule softwareModule) {
+        super(entityEventType, softwareModule);
+    }
 
     /**
      * Creates software module event.
      * 
      * @param softwareModuleEventType
-     *            reference of {@link SoftwareModuleEventType}
+     *            the event type
      * @param softwareModule
-     *            reference of {@link SoftwareModule}
+     *            the module
      */
     public SoftwareModuleEvent(final SoftwareModuleEventType softwareModuleEventType,
             final SoftwareModule softwareModule) {
-        super();
+        super(null, softwareModule);
         this.softwareModuleEventType = softwareModuleEventType;
-        this.softwareModule = softwareModule;
     }
 
     public SoftwareModuleEventType getSoftwareModuleEventType() {
         return softwareModuleEventType;
-    }
-
-    public void setSoftwareModuleEventType(final SoftwareModuleEventType softwareModuleEventType) {
-        this.softwareModuleEventType = softwareModuleEventType;
-    }
-
-    public SoftwareModule getSoftwareModule() {
-        return softwareModule;
-    }
-
-    public void setSoftwareModule(final SoftwareModule softwareModule) {
-        this.softwareModule = softwareModule;
     }
 
 }

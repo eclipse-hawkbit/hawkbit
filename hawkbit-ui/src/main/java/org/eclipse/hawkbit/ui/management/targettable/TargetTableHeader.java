@@ -12,7 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
@@ -254,13 +256,13 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.TRUE);
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.MAXIMIZED));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED,null));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.FALSE);
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.MINIMIZED));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED,null));
     }
 
     @Override
@@ -377,8 +379,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil
-                .getSelectedDSDetails(transferable.getSourceComponent());
+        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(transferable.getSourceComponent());
         final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
         if (!distSelected.contains(transferable.getData("itemId"))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));

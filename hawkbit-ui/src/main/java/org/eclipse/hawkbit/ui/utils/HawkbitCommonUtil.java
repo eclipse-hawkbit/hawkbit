@@ -14,29 +14,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
-import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
-import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,8 +90,6 @@ public final class HawkbitCommonUtil {
     private static final String COUNT_STYLE = " countStyle = document.createElement('style'); ";
     private static final String COUNT_STYLE_ID = " countStyle.id=\"sp-drag-count\"; ";
     private static final String APPEND_CHILD = " document.head.appendChild(countStyle);";
-    private static final String HEADER_VERSION = "header.version";
-    private static final String HEADER_NAME = "header.name";
     private static final String SM_HIGHLIGHT_CREATE_SCRIPT = "smHighlight = document.createElement('style'); smHighlight.id=\"sm-table-highlight\";  document.head.appendChild(smHighlight); ";
     private static final String SM_HIGHLIGHT_REMOVE_SCRIPT = "var y = document.getElementById('sm-table-highlight'); if(y) { document.head.removeChild(y); } ";
     private static final String SM_HIGHLIGHT_RESET_SCRIPT = SM_HIGHLIGHT_REMOVE_SCRIPT + SM_HIGHLIGHT_CREATE_SCRIPT
@@ -879,8 +871,8 @@ public final class HawkbitCommonUtil {
      *            I18N
      * @return message
      */
-    public static String createAssignmentMessage(final String tagName, final AssignmentResult<? extends NamedEntity> result,
-            final I18N i18n) {
+    public static String createAssignmentMessage(final String tagName,
+            final AssignmentResult<? extends NamedEntity> result, final I18N i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();
@@ -958,43 +950,6 @@ public final class HawkbitCommonUtil {
         lqc.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false, true);
         lqc.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false, true);
         lqc.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null, false, true);
-    }
-
-    /**
-     * Get visible columns in table.
-     * 
-     * @param isMaximized
-     *            true if table is maximized
-     * @param isShowPinColumn
-     *            if true pin column will be displayed.
-     * @param i18n
-     *            I18N
-     * @return List<TableColumn> list of columns to be displayed.
-     */
-    public static List<TableColumn> getTableVisibleColumns(final Boolean isMaximized, final Boolean isShowPinColumn,
-            final I18N i18n) {
-        final List<TableColumn> columnList = new ArrayList<>();
-        if (isMaximized) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.2f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
-            columnList
-                    .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                    0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2f));
-        } else if (isShowPinColumn) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.7f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.2f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, SP_STRING_EMPTY, 0.1f));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.8f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.2f));
-        }
-        return columnList;
-
     }
 
     /**
@@ -1101,36 +1056,6 @@ public final class HawkbitCommonUtil {
      */
     public static String hideDeleteDropHintScript() {
         return DELETE_TAG_DROP_REMOVE_SCRIPT;
-    }
-
-    /**
-     * Get the details of selected rows of {@link TargetTable}.
-     * 
-     * @param sourceTable
-     * @return set of {@link TargetIdName}
-     */
-    public static Set<TargetIdName> getSelectedTargetDetails(final Table sourceTable) {
-        Set<TargetIdName> targetSelected = null;
-        if (sourceTable.getValue() != null) {
-            targetSelected = new LinkedHashSet<>((Set) sourceTable.getValue());
-            targetSelected.remove(null);
-        }
-        return targetSelected;
-    }
-
-    /**
-     * Get the details of selected rows of {@link DistributionTable}.
-     * 
-     * @param sourceTable
-     * @return set of {@link DistributionSetIdName}
-     */
-    public static Set<DistributionSetIdName> getSelectedDSDetails(final Table sourceTable) {
-        Set<DistributionSetIdName> distSelected = null;
-        if (sourceTable.getValue() != null) {
-            distSelected = new LinkedHashSet<>((Set) sourceTable.getValue());
-            distSelected.remove(null);
-        }
-        return distSelected;
     }
 
     /**
