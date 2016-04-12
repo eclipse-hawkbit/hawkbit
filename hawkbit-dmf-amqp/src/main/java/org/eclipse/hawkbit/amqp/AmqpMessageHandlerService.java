@@ -166,7 +166,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final LocalArtifact localArtifact = findLocalArtifactByFileResource(fileResource);
 
             if (localArtifact == null) {
-                LOG.info("target {} requested file resource which does not exists to download",
+                LOG.info("target {} requested file resource {} which does not exists to download",
                         secruityToken.getControllerId(), fileResource);
                 throw new EntityNotFoundException();
             }
