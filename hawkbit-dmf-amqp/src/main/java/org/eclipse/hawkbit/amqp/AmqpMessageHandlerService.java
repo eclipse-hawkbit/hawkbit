@@ -227,7 +227,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
                 controllerId, localArtifact);
         if (!controllerManagement.hasTargetArtifactAssigned(controllerId, localArtifact)) {
-            LOG.info("target {} tried to download artifact {} which is not assigned to the target");
+            LOG.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
+                    localArtifact);
             throw new EntityNotFoundException();
         }
         LOG.info("download security check for target {} and artifact {} granted", controllerId, localArtifact);
