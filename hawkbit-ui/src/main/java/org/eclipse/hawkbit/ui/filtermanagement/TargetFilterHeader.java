@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
@@ -79,7 +78,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel("Custom Filters",
+        final Label captionLabel = SPUIComponentProvider.getLabel(getHeaderCaption(),
                 SPUILabelDefinitions.SP_WIDGET_CAPTION);
         return captionLabel;
     }
@@ -110,10 +109,9 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Button createAddButton() {
-        final Button button = SPUIComponentProvider.getButton("camp.search.add.Id", "Create Filter", "Create Filter",
-                "", false, null, SPUIButtonStyleSmall.class);
+        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
+                SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> addNewFilter());
-        button.addStyleName("on-focus-no-border link");
         return button;
     }
 
@@ -187,4 +185,11 @@ public class TargetFilterHeader extends VerticalLayout {
         eventBus.publish(this, CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE);
     }
 
+    protected String getAddIconId() {
+        return SPUIComponetIdProvider.TARGET_FILTER_ADD_ICON_ID;
+    }
+
+    protected String getHeaderCaption() {
+        return SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION;
+    }
 }
