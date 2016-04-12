@@ -313,11 +313,9 @@ public class AmqpMessageHandlerServiceTest {
 
         // mock
         final LocalArtifact localArtifactMock = mock(LocalArtifact.class);
-        final Action actionMock = mock(Action.class);
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
         when(artifactManagementMock.findFirstLocalArtifactsBySHA1(anyString())).thenReturn(localArtifactMock);
-        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
-                .thenReturn(actionMock);
+        when(controllerManagementMock.hasTargetArtifactAssigned(anyObject(), anyObject())).thenReturn(true);
         when(artifactManagementMock.loadLocalArtifactBinary(localArtifactMock)).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
