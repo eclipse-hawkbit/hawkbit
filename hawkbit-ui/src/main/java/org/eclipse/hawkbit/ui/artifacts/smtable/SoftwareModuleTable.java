@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -25,7 +24,6 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -44,6 +42,8 @@ import com.vaadin.ui.UI;
 
 /**
  * Header of Software module table.
+ * 
+ *
  *
  */
 @SpringComponent
@@ -129,22 +129,6 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         return artifactUploadState.isSwModuleTableMaximized();
     }
 
-    @Override
-    protected SoftwareModule findEntityByTableValue(final Long entityTableId) {
-        return softwareManagement.findSoftwareModuleById(entityTableId);
-    }
-
-    @Override
-    protected ArtifactUploadState getManagmentEntityState() {
-        return artifactUploadState;
-    }
-
-    @Override
-    protected void publishEntityAfterValueChange(final SoftwareModule lastSoftwareModule) {
-        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
-        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
-    }
-
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent event) {
         onBaseEntityEvent(event);
@@ -157,32 +141,25 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected Item addEntity(final SoftwareModule baseEntity) {
         final Item item = super.addEntity(baseEntity);
-
-        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
-                baseEntity.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
-
-        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
         if (!artifactUploadState.getSelectedSoftwareModules().isEmpty()) {
             artifactUploadState.getSelectedSoftwareModules().stream().forEach(this::unselect);
         }
         select(baseEntity.getId());
         return item;
-
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = super.getTableVisibleColumns();
-        if (!isMaximized()) {
-            return columnList;
-        }
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
-        return columnList;
+    protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
+        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
+                baseEntity.getVersion());
+        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
+        item.getItemProperty("swId").setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
+        super.updateEntity(baseEntity, item);
     }
 
     @Override
@@ -201,6 +178,22 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
                 /* Not required */
             }
         };
+    }
+
+    @Override
+    protected SoftwareModule findEntityByTableValue(final Long entityTableId) {
+        return softwareManagement.findSoftwareModuleById(entityTableId);
+    }
+
+    @Override
+    protected ArtifactUploadState getManagmentEntityState() {
+        return artifactUploadState;
+    }
+
+    @Override
+    protected void publishEntityAfterValueChange(final SoftwareModule lastSoftwareModule) {
+        artifactUploadState.setSelectedBaseSoftwareModule(lastSoftwareModule);
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, lastSoftwareModule));
     }
 
     @Override
