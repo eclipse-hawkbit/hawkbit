@@ -471,9 +471,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     @SuppressWarnings("unchecked")
     protected void updateEntity(final DistributionSet baseEntity, final Item item) {
+        super.updateEntity(baseEntity, item);
         item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(baseEntity.isComplete());
-        super.updateEntity(baseEntity, item);
     }
 
     @Override
