@@ -15,6 +15,7 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -40,16 +41,12 @@ public class AmqpConfiguration {
     @Autowired
     private ConnectionFactory connectionFactory;
 
-    // /**
-    // * Method to set the Jackson2JsonMessageConverter.
-    // *
-    // * @return the Jackson2JsonMessageConverter
-    // */
-    // @Bean
-    // public RabbitAdmin rabbitAdmin(final RabbitAdmin rabbitAdmin) {
-    // rabbitAdmin.setIgnoreDeclarationExceptions(true);
-    // return rabbitAdmin;
-    // }
+    @Bean
+    public RabbitAdmin rabbitAdmin() {
+        final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+        rabbitAdmin.setIgnoreDeclarationExceptions(true);
+        return rabbitAdmin;
+    }
 
     /**
      * Method to set the Jackson2JsonMessageConverter.

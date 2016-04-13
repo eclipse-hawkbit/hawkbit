@@ -48,8 +48,7 @@ public class AmqpDeadletterProperties {
      * @return the deadletter queue
      */
     public Queue createDeadletterQueue(final String queueName) {
-        // getTTLArgs()
-        return new Queue(queueName, true, false, false, null);
+        return new Queue(queueName, true, false, false, getTTLArgs());
     }
 
     private Map<String, Object> getTTLArgs() {
