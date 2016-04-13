@@ -209,9 +209,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         };
     }
 
-    @SuppressWarnings("unchecked")
     private void onDrop(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, Long> source = (AbstractTable<SoftwareModule, Long>) transferable.getSourceComponent();
         final Set<Long> softwareModulesIdList = source.getDeletedEntityByTransferable(transferable);
 
@@ -224,11 +224,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
     }
 
-    /**
-     * @param source
-     * @param softwareModulesIdList
-     * @param item
-     */
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Item item) {
         final Long distId = (Long) item.getItemProperty("id").getValue();
         final String distName = (String) item.getItemProperty("name").getValue();

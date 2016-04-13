@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
@@ -378,8 +377,8 @@ public class TargetTableHeader extends AbstractTableHeader {
         return isValid;
     }
 
-    @SuppressWarnings("unchecked")
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) transferable.getSourceComponent();
         return distTable.getDeletedEntityByTransferable(transferable);
     }

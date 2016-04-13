@@ -68,8 +68,6 @@ public class DistributionTagDropEvent implements DropHandler {
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
-    private static final String ITEMID = "itemId";
-
     @Override
     public void drop(final DragAndDropEvent event) {
         if (validate(event) && isNoTagAssigned(event)) {
@@ -127,12 +125,12 @@ public class DistributionTagDropEvent implements DropHandler {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private void processDistributionDrop(final DragAndDropEvent event) {
 
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
 
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, DistributionSetIdName> source = (AbstractTable<?, DistributionSetIdName>) transferable
                 .getSourceComponent();
 

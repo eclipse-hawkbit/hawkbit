@@ -78,8 +78,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     @Autowired
     private transient TargetManagement targetManagement;
 
-    private static final String ITEMID = "itemId";
-
     TargetTagFilterButtonClick filterButtonClickBehaviour;
 
     /**
@@ -211,10 +209,10 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private void processTargetDrop(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) transferable
                 .getSourceComponent();
 

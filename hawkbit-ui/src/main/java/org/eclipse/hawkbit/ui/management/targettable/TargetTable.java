@@ -107,7 +107,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
     private static final long serialVersionUID = -2300392868806614568L;
 
     private static final int PROPERTY_DEPT = 3;
-    private static final String ITEMID = "itemId";
     private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
     @Autowired
@@ -632,9 +631,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private static Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
             final Table source) {
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) source;
         return distTable.getDeletedEntityByTransferable(transferable);
     }
@@ -853,6 +852,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
+    @SuppressWarnings("unchecked")
     private void updateVisibleItemOnEvent(final TargetInfo targetInfo, final Target target,
             final TargetIdName targetIdName) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
@@ -875,8 +875,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
      * @param targetInfoUpdateEvents
      *            list of target info update event
      */
-    @SuppressWarnings("unchecked")
     private void onTargetInfoUpdateEvents(final List<TargetInfoUpdateEvent> targetInfoUpdateEvents) {
+        @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shoulTargetsUpdated = false;
         Target lastSelectedTarget = null;

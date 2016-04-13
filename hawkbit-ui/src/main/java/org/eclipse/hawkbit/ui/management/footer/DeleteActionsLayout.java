@@ -256,8 +256,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) sourceTable;
         final Set<DistributionSetIdName> distributionIdNameSet = distTable.getDeletedEntityByTransferable(transferable);
 
@@ -305,8 +305,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
+        @SuppressWarnings("unchecked")
         final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) sourceTable;
         final Set<TargetIdName> targetIdNameSet = targetTable.getDeletedEntityByTransferable(transferable);
 
