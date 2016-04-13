@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -31,14 +28,28 @@ import org.springframework.context.annotation.Bean;
  * {@code amqp} to use a AMQP for communication with SP enabled devices.
  *
  */
-@EnableConfigurationProperties(AmqpProperties.class)
+@EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
 public class AmqpConfiguration {
 
     @Autowired
     protected AmqpProperties amqpProperties;
 
     @Autowired
+    protected AmqpDeadletterProperties amqpDeadletterProperties;
+
+    @Autowired
     private ConnectionFactory connectionFactory;
+
+    // /**
+    // * Method to set the Jackson2JsonMessageConverter.
+    // *
+    // * @return the Jackson2JsonMessageConverter
+    // */
+    // @Bean
+    // public RabbitAdmin rabbitAdmin(final RabbitAdmin rabbitAdmin) {
+    // rabbitAdmin.setIgnoreDeclarationExceptions(true);
+    // return rabbitAdmin;
+    // }
 
     /**
      * Method to set the Jackson2JsonMessageConverter.
@@ -59,7 +70,8 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue receiverQueue() {
-        return new Queue(amqpProperties.getReceiverQueue(), true, false, false, getDeadLetterExchangeArgs());
+        return new Queue(amqpProperties.getReceiverQueue(), true, false, false,
+                amqpDeadletterProperties.getDeadLetterExchangeArgs(amqpProperties.getDeadLetterExchange()));
     }
 
     /**
@@ -79,7 +91,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue deadLetterQueue() {
-        return new Queue(amqpProperties.getDeadLetterQueue());
+        return amqpDeadletterProperties.createDeadletterQueue(amqpProperties.getDeadLetterQueue());
     }
 
     /**
@@ -147,12 +159,6 @@ public class AmqpConfiguration {
         containerFactory.setConnectionFactory(connectionFactory);
         containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
         return containerFactory;
-    }
-
-    private Map<String, Object> getDeadLetterExchangeArgs() {
-        final Map<String, Object> args = new HashMap<>();
-        args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
-        return args;
     }
 
 }
