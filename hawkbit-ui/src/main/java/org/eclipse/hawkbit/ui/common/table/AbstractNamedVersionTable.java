@@ -40,8 +40,8 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
     @SuppressWarnings("unchecked")
     @Override
     protected void updateEntity(final E baseEntity, final Item item) {
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
         super.updateEntity(baseEntity, item);
+        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
     }
 
 }
