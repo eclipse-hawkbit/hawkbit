@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObject;
 
 /**
  * Proxy rollout group with suctome properties.
@@ -39,6 +40,16 @@ public class ProxyRolloutGroup extends RolloutGroup {
     private Boolean isActionRecieved = Boolean.FALSE;
 
     private String totalTargetsCount;
+    
+    private CustomObject customObject;
+
+	public CustomObject getCustomObject() {
+		return customObject;
+	}
+
+	public void setCustomObject(CustomObject customObject) {
+		this.customObject = customObject;
+	}
 
     /**
      * @return the createdDate

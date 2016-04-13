@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObject;
 
 import com.vaadin.server.FontAwesome;
 
@@ -18,113 +19,122 @@ import com.vaadin.server.FontAwesome;
  */
 public class ProxyRollout extends Rollout {
 
-    private static final long serialVersionUID = 4539849939617681918L;
+	private static final long serialVersionUID = 4539849939617681918L;
 
-    private String distributionSetNameVersion;
+	private String distributionSetNameVersion;
 
-    private String createdDate;
+	private String createdDate;
 
-    private String modifiedDate;
+	private String modifiedDate;
 
-    private Long numberOfGroups;
+	private Long numberOfGroups;
 
-    private Boolean isActionRecieved = Boolean.FALSE;
+	private Boolean isActionRecieved = Boolean.FALSE;
 
-    private String totalTargetsCount;
-    
-    /**
-     * @return the distributionSetNameVersion
-     */
-    public String getDistributionSetNameVersion() {
-        return distributionSetNameVersion;
-    }
+	private String totalTargetsCount;
 
-    /**
-     * @param distributionSetNameVersion
-     *            the distributionSetNameVersion to set
-     */
-    public void setDistributionSetNameVersion(final String distributionSetNameVersion) {
-        this.distributionSetNameVersion = distributionSetNameVersion;
-    }
+	private CustomObject customObject;
 
-    /**
-     * @return the numberOfGroups
-     */
-    public Long getNumberOfGroups() {
-        return numberOfGroups;
-    }
+	public CustomObject getCustomObject() {
+		return customObject;
+	}
 
-    /**
-     * @param numberOfGroups
-     *            the numberOfGroups to set
-     */
-    public void setNumberOfGroups(final Long numberOfGroups) {
-        this.numberOfGroups = numberOfGroups;
-    }
+	public void setCustomObject(CustomObject customObject) {
+		this.customObject = customObject;
+	}
 
-    /**
-     * @return the createdDate
-     */
-    public String getCreatedDate() {
-        return createdDate;
-    }
+	/**
+	 * @return the distributionSetNameVersion
+	 */
+	public String getDistributionSetNameVersion() {
+		return distributionSetNameVersion;
+	}
 
-    /**
-     * @param createdDate
-     *            the createdDate to set
-     */
-    public void setCreatedDate(final String createdDate) {
-        this.createdDate = createdDate;
-    }
+	/**
+	 * @param distributionSetNameVersion
+	 *            the distributionSetNameVersion to set
+	 */
+	public void setDistributionSetNameVersion(final String distributionSetNameVersion) {
+		this.distributionSetNameVersion = distributionSetNameVersion;
+	}
 
-    /**
-     * @return the modifiedDate
-     */
-    public String getModifiedDate() {
-        return modifiedDate;
-    }
+	/**
+	 * @return the numberOfGroups
+	 */
+	public Long getNumberOfGroups() {
+		return numberOfGroups;
+	}
 
-    /**
-     * @param modifiedDate
-     *            the modifiedDate to set
-     */
-    public void setModifiedDate(final String modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
+	/**
+	 * @param numberOfGroups
+	 *            the numberOfGroups to set
+	 */
+	public void setNumberOfGroups(final Long numberOfGroups) {
+		this.numberOfGroups = numberOfGroups;
+	}
 
-    /**
-     * @return the isActionRecieved
-     */
-    public Boolean getIsActionRecieved() {
-        return isActionRecieved;
-    }
+	/**
+	 * @return the createdDate
+	 */
+	public String getCreatedDate() {
+		return createdDate;
+	}
 
-    /**
-     * @param isActionRecieved
-     *            the isActionRecieved to set
-     */
-    public void setIsActionRecieved(final Boolean isActionRecieved) {
-        this.isActionRecieved = isActionRecieved;
-    }
+	/**
+	 * @param createdDate
+	 *            the createdDate to set
+	 */
+	public void setCreatedDate(final String createdDate) {
+		this.createdDate = createdDate;
+	}
 
-    /**
-     * @return the totalTargetsCount
-     */
-    public String getTotalTargetsCount() {
-        return totalTargetsCount;
-    }
+	/**
+	 * @return the modifiedDate
+	 */
+	public String getModifiedDate() {
+		return modifiedDate;
+	}
 
-    /**
-     * @param totalTargetsCount
-     *            the totalTargetsCount to set
-     */
-    public void setTotalTargetsCount(final String totalTargetsCount) {
-        this.totalTargetsCount = totalTargetsCount;
-    }
-    
-    
-    public String getAction() { 
-        return FontAwesome.CIRCLE_O.getHtml();
-    }
-    
+	/**
+	 * @param modifiedDate
+	 *            the modifiedDate to set
+	 */
+	public void setModifiedDate(final String modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+
+	/**
+	 * @return the isActionRecieved
+	 */
+	public Boolean getIsActionRecieved() {
+		return isActionRecieved;
+	}
+
+	/**
+	 * @param isActionRecieved
+	 *            the isActionRecieved to set
+	 */
+	public void setIsActionRecieved(final Boolean isActionRecieved) {
+		this.isActionRecieved = isActionRecieved;
+	}
+
+	/**
+	 * @return the totalTargetsCount
+	 */
+	public String getTotalTargetsCount() {
+		return totalTargetsCount;
+	}
+
+	/**
+	 * @param totalTargetsCount
+	 *            the totalTargetsCount to set
+	 */
+	public void setTotalTargetsCount(final String totalTargetsCount) {
+		this.totalTargetsCount = totalTargetsCount;
+	}
+
+	public String getAction() {
+		return FontAwesome.CIRCLE_O.getHtml();
+	}
+
 }
