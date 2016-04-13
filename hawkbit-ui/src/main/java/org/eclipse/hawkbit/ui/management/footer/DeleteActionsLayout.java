@@ -270,27 +270,20 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         if (distributionIdNameSet.isEmpty()) {
             return;
         }
-        /*
-         * Flags to identify whether all dropped distributions are already in
-         * the deleted list (or) some distributions are already in the deleted
-         * distribution list.
-         */
+        checkDeletedDistributionSets(distributionIdNameSet);
+    }
+
+    private void checkDeletedDistributionSets(final Set<DistributionSetIdName> distributionIdNameSet) {
         final int existingDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
         managementUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
         final int newDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
+
         if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-            /*
-             * No new distributions are added, all distributions dropped now are
-             * already available in the delete list. Hence display warning
-             * message accordingly.
-             */
             notification.displayValidationError(i18n.get("message.targets.already.deleted"));
-        } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-            /*
-             * Not the all distributions dropped now are added to the delete
-             * list. There are some distributions are already there in the
-             * delete list. Hence display warning message accordingly.
-             */
+            return;
+        }
+
+        if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
             notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
         }
     }
@@ -310,28 +303,22 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) sourceTable;
         final Set<TargetIdName> targetIdNameSet = targetTable.getDeletedEntityByTransferable(transferable);
 
-        /*
-         * Flags to identify whether all dropped targets are already in the
-         * deleted list (or) some target are already in the deleted distribution
-         * list.
-         */
+        checkDeletedTargets(targetIdNameSet);
+    }
+
+    private void checkDeletedTargets(final Set<TargetIdName> targetIdNameSet) {
         final int existingDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
         managementUIState.getDeletedTargetList().addAll(targetIdNameSet);
         final int newDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
+
         if (newDeletedTargetsSize == existingDeletedTargetsSize) {
-            /*
-             * No new targets are added, all targets dropped now are already
-             * available in the delete list. Hence display warning message
-             * accordingly.
-             */
             notification.displayValidationError(i18n.get("message.targets.already.deleted"));
-        } else if (newDeletedTargetsSize - existingDeletedTargetsSize != targetIdNameSet.size()) {
-            /*
-             * Not the all targets dropped now are added to the delete list.
-             * There are some targets are already there in the delete list.
-             * Hence display warning message accordingly.
-             */
+            return;
+        }
+
+        if (newDeletedTargetsSize - existingDeletedTargetsSize != targetIdNameSet.size()) {
             notification.displayValidationError(i18n.get("message.target.deleted.pending"));
+            return;
         }
     }
 

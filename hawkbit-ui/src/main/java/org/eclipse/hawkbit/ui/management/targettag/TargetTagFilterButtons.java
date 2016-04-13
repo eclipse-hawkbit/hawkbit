@@ -223,18 +223,33 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
 
-        final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
-
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
         notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
 
-        if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
-            eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
-        }
-        if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty() && tagsClickedList.contains(targTagName)) {
-            eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
-        }
+        publishAssignTargetTagEvent(result);
 
+        publishUnAssignTargetTagEvent(targTagName, result);
+
+    }
+
+    private void publishUnAssignTargetTagEvent(final String targTagName, final TargetTagAssignmentResult result) {
+        final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
+        final boolean isTargetTagUnAssigned = result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()
+                && tagsClickedList.contains(targTagName);
+
+        if (!isTargetTagUnAssigned) {
+            return;
+        }
+        eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
+    }
+
+    private void publishAssignTargetTagEvent(final TargetTagAssignmentResult result) {
+        final boolean isNewTargetTagAssigned = result.getAssigned() >= 1
+                && managementUIState.getTargetTableFilters().isNoTagSelected();
+        if (!isNewTargetTagAssigned) {
+            return;
+        }
+        eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
     }
 
     private boolean validateIfSourceisTargetTable(final Table source) {
@@ -281,6 +296,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addNewTargetTag(final TargetTag newTargetTag) {
         final LazyQueryContainer targetTagContainer = (LazyQueryContainer) getContainerDataSource();
         final Object addItem = targetTagContainer.addItem();
