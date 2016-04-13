@@ -278,14 +278,27 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         managementUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
         final int newDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
 
-        if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-            notification.displayValidationError(i18n.get("message.targets.already.deleted"));
+        showAlreadyDeletedDistributionSetNotfication(existingDeletedDistributionsSize, newDeletedDistributionsSize,
+                "message.dists.already.deleted");
+        showPendingDeletedNotifaction(distributionIdNameSet, existingDeletedDistributionsSize,
+                newDeletedDistributionsSize, "message.dist.deleted.pending");
+    }
+
+    private void showPendingDeletedNotifaction(final Set<?> currentValues, final int existingDeletedSize,
+            final int newDeletedSize, final String messageKey) {
+        if (newDeletedSize - existingDeletedSize == currentValues.size()) {
             return;
         }
+        notification.displayValidationError(i18n.get(messageKey));
+    }
 
-        if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-            notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
+    private void showAlreadyDeletedDistributionSetNotfication(final int existingDeletedSize, final int newDeletedSize,
+            final String messageKey) {
+
+        if (newDeletedSize != existingDeletedSize) {
+            return;
         }
+        notification.displayValidationError(i18n.get(messageKey));
     }
 
     private boolean isDsInUseInBulkUpload(final Set<DistributionSetIdName> distributionIdNameSet,
@@ -311,15 +324,11 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
         managementUIState.getDeletedTargetList().addAll(targetIdNameSet);
         final int newDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
 
-        if (newDeletedTargetsSize == existingDeletedTargetsSize) {
-            notification.displayValidationError(i18n.get("message.targets.already.deleted"));
-            return;
-        }
+        showAlreadyDeletedDistributionSetNotfication(existingDeletedTargetsSize, newDeletedTargetsSize,
+                "message.targets.already.deleted");
 
-        if (newDeletedTargetsSize - existingDeletedTargetsSize != targetIdNameSet.size()) {
-            notification.displayValidationError(i18n.get("message.target.deleted.pending"));
-            return;
-        }
+        showPendingDeletedNotifaction(targetIdNameSet, existingDeletedTargetsSize, newDeletedTargetsSize,
+                "message.target.deleted.pending");
     }
 
     private void updateActionCount() {
