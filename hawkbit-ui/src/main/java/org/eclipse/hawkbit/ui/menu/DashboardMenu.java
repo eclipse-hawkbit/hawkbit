@@ -139,7 +139,7 @@ public final class DashboardMenu extends CustomComponent {
         final Label logo = new Label("<strong>" + i18n.get("menu.title") + "</strong>", ContentMode.HTML);
         logo.setSizeUndefined();
         final HorizontalLayout logoWrapper = new HorizontalLayout(logo);
-        logoWrapper.setComponentAlignment(logo, Alignment.MIDDLE_CENTER);
+        logoWrapper.setComponentAlignment(logo, Alignment.TOP_CENTER);
         logoWrapper.addStyleName("valo-menu-title");
         return logoWrapper;
     }
