@@ -53,7 +53,8 @@ public class ActionSpecifications {
             final Join<Action, DistributionSet> dsJoin = actionRoot.join(Action_.distributionSet);
             final SetJoin<DistributionSet, SoftwareModule> modulesJoin = dsJoin.join(DistributionSet_.modules);
             final ListJoin<SoftwareModule, LocalArtifact> artifactsJoin = modulesJoin.join(SoftwareModule_.artifacts);
-            return criteriaBuilder.and(criteriaBuilder.equal(artifactsJoin.get(LocalArtifact_.id), localArtifact.getId()),
+            return criteriaBuilder.and(
+                    criteriaBuilder.equal(artifactsJoin.get(LocalArtifact_.filename), localArtifact.getFilename()),
                     criteriaBuilder.equal(actionRoot.get(Action_.target), target));
         };
     }
