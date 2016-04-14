@@ -3,7 +3,7 @@
 The application with user interface to create and manage rollouts.
 
 ## Debugging client-side code 
-### Debug usings SuperDevMode
+### Debug using SuperDevMode
 The SuperDevMode can be used to debug client side code without any browser plugin.
 
 #### Using SuperDevMode with chrome :
