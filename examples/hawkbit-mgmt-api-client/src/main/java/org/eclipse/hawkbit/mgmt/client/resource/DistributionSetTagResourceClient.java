@@ -14,7 +14,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  * Client binding for the DistributionSetTag resource of the management API.
  */
-@FeignClient(url = "${hawkbit.endpoint.url:localhost:8080}/rest/v1/distributionsettags")
+@FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/distributionsettags")
 public interface DistributionSetTagResourceClient extends DistributionSetTagRestApi {
 
 }

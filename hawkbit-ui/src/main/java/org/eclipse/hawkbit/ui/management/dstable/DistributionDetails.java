@@ -8,23 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -42,18 +34,9 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class DistributionDetails extends AbstractTableDetailsLayout {
+public class DistributionDetails extends AbstractNamedVersionedEntityTableDetailsLayout<DistributionSet> {
 
     private static final long serialVersionUID = 350360207334118826L;
-
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private SpPermissionChecker permissionChecker;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -66,70 +49,37 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
 
     private SoftwareModuleDetailsTable softwareModuleTable;
 
-    private Long dsId;
-
-    private DistributionSet selectedDsModule;
-
-    private UI ui;
-
     @Override
-    @PostConstruct
     protected void init() {
-        eventBus.subscribe(this);
         softwareModuleTable = new SoftwareModuleDetailsTable();
-        softwareModuleTable.init(i18n, false, permissionChecker, null, null, null);
+        softwareModuleTable.init(getI18n(), false, getPermissionChecker(), null, null, null);
         super.init();
-        ui = UI.getCurrent();
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
-        if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.ON_VALUE_CHANGE
-                || distributionTableEvent
-                        .getDistributionComponentEvent() == DistributionComponentEvent.EDIT_DISTRIBUTION) {
-            ui.access(() -> {
-                /**
-                 * distributionTableEvent.getDistributionSet() is null when
-                 * table has no data.
-                 */
-                if (distributionTableEvent.getDistributionSet() != null) {
-                    selectedDsModule = distributionTableEvent.getDistributionSet();
-                    populateData(true);
-                } else {
-                    populateData(false);
-                }
-            });
-        } else if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.MINIMIZED) {
-            ui.access(() -> showLayout());
-        } else if (distributionTableEvent.getDistributionComponentEvent() == DistributionComponentEvent.MAXIMIZED) {
-            ui.access(() -> hideLayout());
-        }
+        onBaseEntityEvent(distributionTableEvent);
     }
 
     @Override
     protected String getDefaultCaption() {
-        return i18n.get("distribution.details.header");
+        return getI18n().get("distribution.details.header");
     }
 
     @Override
     protected void addTabs(final TabSheet detailsTab) {
-        detailsTab.addTab(createDetailsLayout(), i18n.get("caption.tab.details"), null);
-        detailsTab.addTab(createDescriptionLayout(), i18n.get("caption.tab.description"), null);
-        detailsTab.addTab(createSoftwareModuleTab(), i18n.get("caption.softwares.distdetail.tab"), null);
-        detailsTab.addTab(createTagsLayout(), i18n.get("caption.tags.tab"), null);
-        detailsTab.addTab(createLogLayout(), i18n.get("caption.logs.tab"), null);
+        detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
+        detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
+        detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
+        detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
+        detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
     }
 
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
-        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getDsId());
-        newDistWindow.setCaption(i18n.get("caption.update.dist"));
+        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getSelectedBaseEntityId());
+        newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);
     }
@@ -151,18 +101,8 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
     }
 
     @Override
-    protected void populateDetailsWidget() {
-        populateDetailsWidget(selectedDsModule);
-    }
-
-    @Override
-    protected void clearDetails() {
-        populateDetailsWidget(null);
-    }
-
-    @Override
     protected Boolean hasEditPermission() {
-        return permissionChecker.hasUpdateDistributionPermission();
+        return getPermissionChecker().hasUpdateDistributionPermission();
     }
 
     @Override
@@ -170,31 +110,11 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         return SPUIComponetIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
     }
 
-    private void populateDetailsWidget(final DistributionSet dist) {
-        if (dist != null) {
-            setDsId(dist.getId());
-            setName(getDefaultCaption(), HawkbitCommonUtil.getFormattedNameVersion(dist.getName(), dist.getVersion()));
-            populateDetails(dist);
-            populateDescription(dist);
-            populateLog(dist);
-            softwareModuleTable.populateModule(dist);
-        } else {
-            setDsId(null);
-            setName(getDefaultCaption(), HawkbitCommonUtil.SP_STRING_EMPTY);
-            populateDetails(null);
-            populateDescription(null);
-            softwareModuleTable.populateModule(null);
-            populateLog(null);
-        }
-    }
+    @Override
+    protected void populateDetailsWidget() {
+        softwareModuleTable.populateModule(getSelectedBaseEntity());
+        populateDetails(getSelectedBaseEntity());
 
-    private void populateLog(final DistributionSet ds) {
-        if (null != ds) {
-            updateLogLayout(getLogLayout(), ds.getLastModifiedAt(), ds.getLastModifiedBy(), ds.getCreatedAt(),
-                    ds.getCreatedBy(), i18n);
-        } else {
-            updateLogLayout(getLogLayout(), null, HawkbitCommonUtil.SP_STRING_EMPTY, null, null, i18n);
-        }
     }
 
     private void populateDetails(final DistributionSet ds) {
@@ -205,29 +125,21 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         }
     }
 
-    private void populateDescription(final DistributionSet ds) {
-        if (ds != null) {
-            updateDescriptionLayout(i18n.get("label.description"), ds.getDescription());
-        } else {
-            updateDescriptionLayout(i18n.get("label.description"), null);
-        }
-    }
-
     private void updateDistributionDetailsLayout(final String type, final Boolean isMigrationRequired) {
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
 
         if (type != null) {
-            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(i18n.get("label.dist.details.type"),
+            final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
             typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
         if (isMigrationRequired != null) {
-            detailsTabLayout.addComponent(
-                    SPUIComponentProvider.createNameValueLabel(i18n.get("checkbox.dist.migration.required"),
-                            isMigrationRequired.equals(Boolean.TRUE) ? i18n.get("label.yes") : i18n.get("label.no")));
+            detailsTabLayout.addComponent(SPUIComponentProvider.createNameValueLabel(
+                    getI18n().get("checkbox.dist.migration.required"),
+                    isMigrationRequired.equals(Boolean.TRUE) ? getI18n().get("label.yes") : getI18n().get("label.no")));
         }
     }
 
@@ -242,14 +154,6 @@ public class DistributionDetails extends AbstractTableDetailsLayout {
         final VerticalLayout tagsLayout = getTabLayout();
         tagsLayout.addComponent(distributionTagToken.getTokenField());
         return tagsLayout;
-    }
-
-    public Long getDsId() {
-        return dsId;
-    }
-
-    public void setDsId(final Long dsId) {
-        this.dsId = dsId;
     }
 
     @Override

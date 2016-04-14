@@ -155,8 +155,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         List<Target> targets = targetManagement
                 .createTargets(TestDataUtil.generateTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10));
 
-        targets = deploymentManagement.assignDistributionSet(cancelDs, targets).getAssignedTargets();
-        targets = deploymentManagement.assignDistributionSet(cancelDs2, targets).getAssignedTargets();
+        targets = deploymentManagement.assignDistributionSet(cancelDs, targets).getAssignedEntity();
+        targets = deploymentManagement.assignDistributionSet(cancelDs2, targets).getAssignedEntity();
 
         targetManagement.findAllTargetIds().forEach(targetIdName -> {
             assertThat(deploymentManagement.findActiveActionsByTarget(
@@ -604,7 +604,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // activeActions, add a corresponding cancelAction and another
         // UpdateAction for dsA
         final Iterable<Target> deployed2DS = deploymentManagement
-                .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedTargets();
+                .assignDistributionSet(dsA, deployResWithDsB.getDeployedTargets()).getAssignedEntity();
         actionRepository.findByDistributionSet(pageRequest, dsA).getContent().get(1);
 
         // get final updated version of targets
@@ -761,7 +761,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         targs.add(targ);
 
         // doing the assignment
-        targs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedTargets();
+        targs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedEntity();
         targ = targetManagement.findTargetByControllerID(targs.iterator().next().getControllerId());
 
         // checking the revisions of the created entities
@@ -799,7 +799,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertEquals("wrong installed ds", dsA, targ.getTargetInfo().getInstalledDistributionSet());
 
         targs = deploymentManagement.assignDistributionSet(dsB.getId(), new String[] { "target-id-A" })
-                .getAssignedTargets();
+                .getAssignedEntity();
 
         targ = targs.iterator().next();
 
@@ -830,7 +830,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         final List<Target> targs = new ArrayList<Target>();
         targs.add(targ);
-        final Iterable<Target> savedTargs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedTargets();
+        final Iterable<Target> savedTargs = deploymentManagement.assignDistributionSet(dsA, targs).getAssignedEntity();
         targ = savedTargs.iterator().next();
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
@@ -926,7 +926,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // assigning all DistributionSet to the Target in the list
         // deployedTargets
         for (final DistributionSet ds : dsList) {
-            deployedTargets = deploymentManagement.assignDistributionSet(ds, deployedTargets).getAssignedTargets();
+            deployedTargets = deploymentManagement.assignDistributionSet(ds, deployedTargets).getAssignedEntity();
         }
 
         final DeploymentResult deploymentResult = new DeploymentResult(deployedTargets, nakedTargets, dsList,

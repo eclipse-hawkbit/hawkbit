@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
@@ -31,7 +29,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -52,9 +49,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private static final long serialVersionUID = -8151483237450892057L;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
     private DistributionTagDropEvent spDistTagDropEvent;
 
     @Autowired
@@ -64,12 +58,6 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
         addNewTag(new DistributionSetTag("NO TAG"));
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)

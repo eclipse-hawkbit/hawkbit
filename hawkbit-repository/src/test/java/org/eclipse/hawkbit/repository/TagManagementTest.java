@@ -179,29 +179,29 @@ public class TagManagementTest extends AbstractIntegrationTest {
         DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedDs()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
                 groupA.stream().map(set -> set.getId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
-        assertThat(result.getUnassignedDs()).isEmpty();
+        assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
         result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedDs()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
                 groupB.stream().map(set -> set.getId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
-        assertThat(result.getUnassignedDs()).isEmpty();
+        assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
         // toggle A+B -> both unassigned
         result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(0);
-        assertThat(result.getAssignedDs()).isEmpty();
+        assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedDs()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
                 concat(groupB, groupA).stream().map(set -> set.getId()).collect(Collectors.toList())));
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
@@ -220,29 +220,29 @@ public class TagManagementTest extends AbstractIntegrationTest {
         TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedTargets()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
                 groupA.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
-        assertThat(result.getUnassignedTargets()).isEmpty();
+        assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
         result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedTargets()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
                 groupB.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
-        assertThat(result.getUnassignedTargets()).isEmpty();
+        assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> both unassigned
         result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(0);
-        assertThat(result.getAssignedTargets()).isEmpty();
+        assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedTargets()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
                 concat(groupB, groupA).stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
         assertThat(result.getTargetTag()).isEqualTo(tag);
 

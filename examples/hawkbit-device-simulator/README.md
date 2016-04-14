@@ -2,7 +2,7 @@
 
 The device simulator handles software update commands from the update server.
 
-## Run
+## Run on your own workstation
 ```
 java -jar examples/hawkbit-device-simulator/target/hawkbit-device-simulator-*-SNAPSHOT.jar
 ```
@@ -10,6 +10,11 @@ Or:
 ```
 run org.eclipse.hawkbit.simulator.DeviceSimulator
 ```
+
+## Deploy to cloud foundry environment
+
+- Go to ```target``` subfolder.
+- Run ```cf push```
 
 ## Notes
 
@@ -30,9 +35,9 @@ http://localhost:8083
 ```
 
  ![](src/main/images/generateScreenshot.png)
- 
+
  ![](src/main/images/updateProcessScreenshot.png)
- 
+
  ![](src/main/images/updateResultOverviewScreenshot.png)
 
 
@@ -54,12 +59,12 @@ Example: for 20 simulated devices (default)
 http://localhost:8083/start
 ```
 
-Example: for 10 simulated devices that start with the name prefix "activeSim": 
+Example: for 10 simulated devices that start with the name prefix "activeSim":
 ```
 http://localhost:8083/start?amount=10&name=activeSim
 ```
 
-Example: for 5 simulated devices that start with the name prefix "ddi" using the Direct Device Integration API (http): 
+Example: for 5 simulated devices that start with the name prefix "ddi" using the Direct Device Integration API (http):
 ```
 http://localhost:8083/start?amount=5&name=ddi?api=ddi
 ```

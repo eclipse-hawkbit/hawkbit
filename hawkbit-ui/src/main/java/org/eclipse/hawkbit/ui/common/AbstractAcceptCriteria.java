@@ -13,8 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.ServerSideCriterion;
@@ -27,9 +32,6 @@ import com.vaadin.ui.Table;
 /**
  * Abstract class for Accept criteria.
  * 
- *
- *
- * 
  */
 public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
 
@@ -37,13 +39,12 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
 
     private int previousRowCount;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.event.dd.acceptcriteria.AcceptCriterion#accept(com.vaadin.
-     * event.dd.DragAndDropEvent )
-     */
+    @Autowired
+    protected transient UINotification uiNotification;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
     @Override
     public boolean accept(final DragAndDropEvent dragEvent) {
         final Component compsource = dragEvent.getTransferable().getSourceComponent();
@@ -129,7 +130,7 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
     protected void analyseDragComponent(final Component compsource) {
         final String sourceID = getComponentId(compsource);
         final Object event = getDropHintConfigurations().get(sourceID);
-        publishDragStartEvent(event);
+        eventBus.publish(this, event);
     }
 
     /**
@@ -160,22 +161,18 @@ public abstract class AbstractAcceptCriteria extends ServerSideCriterion {
     protected abstract String getComponentId(final Component component);
 
     /**
-     * publish the given event into eventBus.
-     * 
-     * @param event
-     *            to be published in eventBus.
-     */
-    protected abstract void publishDragStartEvent(Object event);
-
-    /**
      * Hide the drop hints. Dragging is stopped.
      */
-    protected abstract void hideDropHints();
+    protected void hideDropHints() {
+        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
+    }
 
     /**
      * Display invalid drop message.
      */
-    protected abstract void invalidDrop();
+    protected void invalidDrop() {
+        uiNotification.displayValidationError(SPUILabelDefinitions.ACTION_NOT_ALLOWED);
+    }
 
     /**
      * @return

@@ -11,14 +11,11 @@ package org.eclipse.hawkbit.ui.management.footer;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -28,12 +25,9 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -56,17 +50,6 @@ import com.vaadin.ui.UI;
 public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private static final long serialVersionUID = -8112907467821886253L;
-    @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private transient UINotification notification;
 
     @Autowired
     private transient TagManagement tagManagementService;
@@ -82,18 +65,6 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Autowired
     private CountMessageLabel countMessageLabel;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final ManagementUIEvent event) {
@@ -227,23 +198,8 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     @Override
-    protected String getNoActionsButtonLabel() {
-        return i18n.get("button.no.actions");
-    }
-
-    @Override
-    protected String getActionsButtonLabel() {
-        return i18n.get("button.actions");
-    }
-
-    @Override
     protected void restoreActionCount() {
         updateActionCount();
-    }
-
-    @Override
-    protected String getUnsavedActionsWindowCaption() {
-        return i18n.get("caption.save.window");
     }
 
     @Override
@@ -256,7 +212,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        manangementConfirmationWindowLayout.init();
+        manangementConfirmationWindowLayout.initialize();
         return manangementConfirmationWindowLayout;
     }
 
@@ -302,7 +258,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(sourceTable);
+        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(sourceTable);
         final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<>();
 
         if (!distSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
@@ -356,7 +312,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(sourceTable);
+        final Set<TargetIdName> targetSelected = AbstractTable.getTableValue(sourceTable);
 
         final Set<TargetIdName> targetIdNameSet = new HashSet<>();
         if (!targetSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {

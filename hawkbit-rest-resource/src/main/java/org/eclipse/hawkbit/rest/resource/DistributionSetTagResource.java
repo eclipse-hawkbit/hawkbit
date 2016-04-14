@@ -139,9 +139,9 @@ public class DistributionSetTagResource implements DistributionSetTagRestApi {
 
         final DistributionSetTagAssigmentResultRest tagAssigmentResultRest = new DistributionSetTagAssigmentResultRest();
         tagAssigmentResultRest.setAssignedDistributionSets(
-                DistributionSetMapper.toResponseDistributionSets(assigmentResult.getAssignedDs()));
+                DistributionSetMapper.toResponseDistributionSets(assigmentResult.getAssignedEntity()));
         tagAssigmentResultRest.setUnassignedDistributionSets(
-                DistributionSetMapper.toResponseDistributionSets(assigmentResult.getUnassignedDs()));
+                DistributionSetMapper.toResponseDistributionSets(assigmentResult.getUnassignedEntity()));
 
         LOG.debug("Toggled assignedDS {} and unassignedDS{}", assigmentResult.getAssigned(),
                 assigmentResult.getUnassigned());

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,22 +29,17 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
- *
+ * This class represents the UI item for the gateway security token section in
+ * the authentication configuration view.
  */
 @SpringComponent
 @ViewScope
 public class GatewaySecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     @Autowired
     private transient SecurityTokenGenerator securityTokenGenerator;
-    @Autowired
-    private I18N i18n;
 
     private TextField gatewayTokenNameTextField;
 
@@ -70,12 +64,12 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
     }
 
     /**
-     * init mehotd called by spring.
+     * Init mehotd called by spring.
      */
     @PostConstruct
     public void init() {
 
-        super.init(i18n.get("label.configuration.auth.gatewaytoken"));
+        super.init("label.configuration.auth.gatewaytoken");
         configurationEnabled = isConfigEnabled();
 
         detailLayout = new VerticalLayout();
@@ -135,12 +129,6 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         notifyConfigurationChanged();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# configEnable()
-     */
     @Override
     public void configEnable() {
         if (!configurationEnabled) {

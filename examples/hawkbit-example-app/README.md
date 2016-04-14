@@ -1,7 +1,15 @@
 # hawkBit Example Application
-The hawkBit example application is a standalone spring-boot application with an embedded servlet container to start the hawkBit.
+The hawkBit example application is a standalone spring-boot application with an embedded servlet container to host the hawkBit Update Server.
 
-## Run
+We have have described several options for you to get access to the example.
+
+## Try out the example application in our hawkBit sandbox on Bluemix
+- try out Management UI https://hawkbit.eu-gb.mybluemix.net/UI
+- try out Management API https://hawkbit.eu-gb.mybluemix.net/rest/v1/targets (don't forget basic auth header)
+- try out DDI API https://hawkbit.eu-gb.mybluemix.net/DEFAULT/controller/v1/MYTESTDEVICE
+
+## On your own workstation
+### Run
 ```
 java -jar examples/hawkbit-example-app/target/hawkbit-example-app-*-SNAPSHOT.jar
 ```
@@ -10,6 +18,14 @@ Or:
 run org eclipse.hawkbit.app.Start
 ```
 
-## Usage
-The UI can be accessed via _http://localhost:8080/UI_.
-The REST API can be accessed via _http://localhost:8080/rest/v1_.
+### Usage
+The Management UI can be accessed via http://localhost:8080/UI
+The Management API can be accessed via http://localhost:8080/rest/v1
+
+## Deploy example app to Cloud Foundry
+
+- Go to ```target``` subfolder.
+- Select one of the two manifests
+ - **manifest-simple.yml** for a standalone hawkBit installation with embedded H2.
+ - **manifest.yml**  for a standalone hawkBit installation with embedded H2 and RabbitMQ service binding for DMF integration (note: this manifest is used for the sandbox above).
+- Run ```cf push``` against you cloud foundry environment.

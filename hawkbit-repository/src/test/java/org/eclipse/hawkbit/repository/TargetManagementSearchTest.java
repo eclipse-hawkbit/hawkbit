@@ -64,19 +64,19 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final String targetDsAIdPref = "targ-A";
         List<Target> targAs = targetManagement.createTargets(
                 TestDataUtil.buildTargetFixtures(100, targetDsAIdPref, targetDsAIdPref.concat(" description")));
-        targAs = targetManagement.toggleTagAssignment(targAs, targTagX).getAssignedTargets();
+        targAs = targetManagement.toggleTagAssignment(targAs, targTagX).getAssignedEntity();
 
         final String targetDsBIdPref = "targ-B";
         List<Target> targBs = targetManagement.createTargets(
                 TestDataUtil.buildTargetFixtures(100, targetDsBIdPref, targetDsBIdPref.concat(" description")));
-        targBs = targetManagement.toggleTagAssignment(targBs, targTagY).getAssignedTargets();
-        targBs = targetManagement.toggleTagAssignment(targBs, targTagW).getAssignedTargets();
+        targBs = targetManagement.toggleTagAssignment(targBs, targTagY).getAssignedEntity();
+        targBs = targetManagement.toggleTagAssignment(targBs, targTagW).getAssignedEntity();
 
         final String targetDsCIdPref = "targ-C";
         List<Target> targCs = targetManagement.createTargets(
                 TestDataUtil.buildTargetFixtures(100, targetDsCIdPref, targetDsCIdPref.concat(" description")));
-        targCs = targetManagement.toggleTagAssignment(targCs, targTagZ).getAssignedTargets();
-        targCs = targetManagement.toggleTagAssignment(targCs, targTagW).getAssignedTargets();
+        targCs = targetManagement.toggleTagAssignment(targCs, targTagZ).getAssignedEntity();
+        targCs = targetManagement.toggleTagAssignment(targCs, targTagW).getAssignedEntity();
 
         final String targetDsDIdPref = "targ-D";
         final List<Target> targDs = targetManagement.createTargets(
@@ -688,8 +688,8 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final DistributionSet ds = TestDataUtil.generateDistributionSet("a", softwareManagement,
                 distributionSetManagement);
 
-        targAssigned = deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedTargets();
-        targInstalled = deploymentManagement.assignDistributionSet(ds, targInstalled).getAssignedTargets();
+        targAssigned = deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedEntity();
+        targInstalled = deploymentManagement.assignDistributionSet(ds, targInstalled).getAssignedEntity();
         targInstalled = sendUpdateActionStatusToTargets(ds, targInstalled, Status.FINISHED, "installed");
 
         final Slice<Target> result = targetManagement.findTargetsAllOrderByLinkedDistributionSet(pageReq, ds.getId(),

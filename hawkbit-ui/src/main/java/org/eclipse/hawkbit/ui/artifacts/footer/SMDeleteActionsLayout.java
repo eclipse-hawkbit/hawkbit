@@ -11,22 +11,15 @@ package org.eclipse.hawkbit.ui.artifacts.footer;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -35,7 +28,6 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableTransferable;
 import com.vaadin.ui.UI;
@@ -51,18 +43,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     private static final long serialVersionUID = -3273982053389866299L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private transient UINotification notification;
-
-    @Autowired
     private ArtifactUploadState artifactUploadState;
 
     @Autowired
@@ -70,22 +50,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final UploadArtifactUIEvent event) {
@@ -212,23 +176,8 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     @Override
-    protected String getNoActionsButtonLabel() {
-        return i18n.get("button.no.actions");
-    }
-
-    @Override
-    protected String getActionsButtonLabel() {
-        return i18n.get("button.actions");
-    }
-
-    @Override
     protected void restoreActionCount() {
         updateSWActionCount();
-    }
-
-    @Override
-    protected String getUnsavedActionsWindowCaption() {
-        return i18n.get("caption.save.window");
     }
 
     @Override
@@ -241,7 +190,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        uploadViewConfirmationWindowLayout.init();
+        uploadViewConfirmationWindowLayout.initialize();
         return uploadViewConfirmationWindowLayout;
     }
 
@@ -249,35 +198,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     protected boolean hasUnsavedActions() {
         return !artifactUploadState.getDeleteSofwareModules().isEmpty()
                 || !artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty();
-    }
-
-    @Override
-    protected boolean hasCountMessage() {
-        return false;
-    }
-
-    @Override
-    protected Label getCountMessageLabel() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasBulkUploadPermission() {
-        return false;
-    }
-
-    @Override
-    protected void showBulkUploadWindow() {
-        /**
-         * Bulk upload not supported .No implementation required.
-         */
-    }
-
-    @Override
-    protected void restoreBulkUploadStatusCount() {
-        /**
-         * Bulk upload not supported .No implementation required.
-         */
     }
 
 }

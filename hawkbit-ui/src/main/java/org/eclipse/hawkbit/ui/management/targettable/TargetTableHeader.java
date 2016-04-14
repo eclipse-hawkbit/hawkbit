@@ -11,12 +11,10 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
@@ -29,7 +27,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -64,12 +61,6 @@ public class TargetTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = -8647521126666320022L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
     private UINotification notification;
 
     @Autowired
@@ -90,19 +81,12 @@ public class TargetTableHeader extends AbstractTableHeader {
     private Boolean isComplexFilterViewDisplayed = Boolean.FALSE;
 
     @Override
-    @PostConstruct
     protected void init() {
         super.init();
         // creating add window for adding new target
         targetAddUpdateWindow.init();
         targetBulkUpdateWindow.init();
-        eventBus.subscribe(this);
         onLoadRestoreState();
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -272,13 +256,13 @@ public class TargetTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.TRUE);
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.MAXIMIZED));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MAXIMIZED,null));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setTargetTableMaximized(Boolean.FALSE);
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.MINIMIZED));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.MINIMIZED,null));
     }
 
     @Override
@@ -395,8 +379,7 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil
-                .getSelectedDSDetails(transferable.getSourceComponent());
+        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(transferable.getSourceComponent());
         final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
         if (!distSelected.contains(transferable.getData("itemId"))) {
             distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));

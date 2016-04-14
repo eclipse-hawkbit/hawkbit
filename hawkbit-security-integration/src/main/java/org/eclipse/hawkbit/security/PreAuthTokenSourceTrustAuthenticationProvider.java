@@ -109,6 +109,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         if (successAuthentication) {
             final Collection<GrantedAuthority> controllerAuthorities = new ArrayList<>();
             controllerAuthorities.add(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
+            controllerAuthorities.add(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
             final PreAuthenticatedAuthenticationToken successToken = new PreAuthenticatedAuthenticationToken(principal,
                     credentials, controllerAuthorities);
             successToken.setDetails(tokenDetails);

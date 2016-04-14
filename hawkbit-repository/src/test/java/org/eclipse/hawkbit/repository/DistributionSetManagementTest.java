@@ -495,11 +495,11 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         distributionSetManagement.deleteDistributionSet(dsDeleted);
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
 
-        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagA).getAssignedDs();
+        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
-        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagB).getAssignedDs();
+        ds100Group1 = distributionSetManagement.toggleTagAssignment(ds100Group1, dsTagB).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
-        ds100Group2 = distributionSetManagement.toggleTagAssignment(ds100Group2, dsTagA).getAssignedDs();
+        ds100Group2 = distributionSetManagement.toggleTagAssignment(ds100Group2, dsTagA).getAssignedEntity();
         dsTagA = distributionSetTagRepository.findByNameEquals(dsTagA.getName());
 
         // check setup

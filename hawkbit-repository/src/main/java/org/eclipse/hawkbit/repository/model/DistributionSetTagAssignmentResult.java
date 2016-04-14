@@ -14,11 +14,8 @@ import java.util.List;
  * Result object for {@link DistributionSetTag} assignments.
  *
  */
-public class DistributionSetTagAssignmentResult extends AssignmentResult {
+public class DistributionSetTagAssignmentResult extends AssignmentResult<DistributionSet> {
 
-    private final int unassigned;
-    private final List<DistributionSet> assignedDs;
-    private final List<DistributionSet> unassignedDs;
     private final DistributionSetTag distributionSetTag;
 
     /**
@@ -40,27 +37,13 @@ public class DistributionSetTagAssignmentResult extends AssignmentResult {
     public DistributionSetTagAssignmentResult(final int alreadyAssigned, final int assigned, final int unassigned,
             final List<DistributionSet> assignedDs, final List<DistributionSet> unassignedDs,
             final DistributionSetTag distributionSetTag) {
-        super(assigned, alreadyAssigned);
-        this.unassigned = unassigned;
-        this.assignedDs = assignedDs;
-        this.unassignedDs = unassignedDs;
+        super(assigned, alreadyAssigned,unassigned, assignedDs, unassignedDs);
         this.distributionSetTag = distributionSetTag;
-    }
-
-    public int getUnassigned() {
-        return unassigned;
     }
 
     public DistributionSetTag getDistributionSetTag() {
         return distributionSetTag;
     }
 
-    public List<DistributionSet> getAssignedDs() {
-        return assignedDs;
-    }
-
-    public List<DistributionSet> getUnassignedDs() {
-        return unassignedDs;
-    }
 
 }

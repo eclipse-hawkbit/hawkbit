@@ -26,6 +26,11 @@
          <artifactId>hawkbit-repository</artifactId>
          <version>${project.version}</version>
       </dependency>
+       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-rest-api</artifactId>

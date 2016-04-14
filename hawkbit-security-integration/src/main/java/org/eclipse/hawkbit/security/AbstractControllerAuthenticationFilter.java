@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -42,15 +42,15 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     protected abstract TenantConfigurationKey getTenantConfigurationKey();
 
     @Override
-    public boolean isEnable(final TenantSecruityToken secruityToken) {
+    public boolean isEnable(final TenantSecurityToken secruityToken) {
         return tenantAware.runAsTenant(secruityToken.getTenant(), configurationKeyTenantRunner);
     }
 
     @Override
-    public abstract HeaderAuthentication getPreAuthenticatedPrincipal(TenantSecruityToken secruityToken);
+    public abstract HeaderAuthentication getPreAuthenticatedPrincipal(TenantSecurityToken secruityToken);
 
     @Override
-    public abstract HeaderAuthentication getPreAuthenticatedCredentials(TenantSecruityToken secruityToken);
+    public abstract HeaderAuthentication getPreAuthenticatedCredentials(TenantSecurityToken secruityToken);
 
     private final class SecurityConfigurationKeyTenantRunner implements TenantAware.TenantRunner<Boolean> {
         @Override

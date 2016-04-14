@@ -23,10 +23,10 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -260,8 +260,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
                 notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
                         new Object[] { currentDS.getName(), currentDS.getVersion() }));
                 // update table row+details layout
-                eventBus.publish(this,
-                        new DistributionTableEvent(DistributionComponentEvent.EDIT_DISTRIBUTION, currentDS));
+                eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.UPDATED_ENTITY, currentDS));
             } catch (final EntityAlreadyExistsException entityAlreadyExistsException) {
                 LOG.error("Update distribution failed {}", entityAlreadyExistsException);
                 notificationMessage.displayValidationError(
@@ -307,7 +306,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
             /* close the window */
             closeThisWindow();
 
-            eventBus.publish(this, new DistributionTableEvent(DistributionComponentEvent.ADD_DISTRIBUTION, newDist));
+            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));
         }
     }
 

@@ -8,54 +8,24 @@
  */
 package org.eclipse.hawkbit.ui.common.tagdetails;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
-
-import com.vaadin.ui.UI;
 
 /**
  * Abstract class for target tag token layout.
  */
-public abstract class AbstractTargetTagToken extends AbstractTagToken {
+public abstract class AbstractTargetTagToken<T extends BaseEntity> extends AbstractTagToken<T> {
 
     private static final long serialVersionUID = 7772876588903171201L;
-    protected UI ui;
-
-    @Autowired
-    protected transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    protected I18N i18n;
 
     @Autowired
     protected transient TagManagement tagManagement;
-
-    @Autowired
-    protected SpPermissionChecker checker;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        ui = UI.getCurrent();
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {

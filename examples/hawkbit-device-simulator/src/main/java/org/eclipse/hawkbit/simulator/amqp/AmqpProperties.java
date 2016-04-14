@@ -19,26 +19,25 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("hawkbit.device.simulator.amqp")
 public class AmqpProperties {
-
     /**
      * Queue for receiving DMF messages from update server.
      */
-    private String receiverConnectorQueueFromSp;
+    private String receiverConnectorQueueFromSp = "simulator_receiver";
 
     /**
      * Exchange for sending DMF messages to update server.
      */
-    private String senderForSpExchange;
+    private String senderForSpExchange = "simulator.replyTo";
 
     /**
      * Simulator dead letter queue.
      */
-    private String deadLetterQueue;
+    private String deadLetterQueue = "simulator_deadletter";
 
     /**
      * Simulator dead letter exchange.
      */
-    private String deadLetterExchange;
+    private String deadLetterExchange = "simulator.deadletter";
 
     public String getReceiverConnectorQueueFromSp() {
         return receiverConnectorQueueFromSp;
