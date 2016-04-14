@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -350,17 +351,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void assignTargetToDs(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
-        final Set<TargetIdName> targetsSelected = getTableValue(source);
-        final Set<TargetIdName> targetDetailsList = new HashSet<>();
-
-        if (!targetsSelected.contains(transferable.getData("itemId"))) {
-            targetDetailsList.add((TargetIdName) transferable.getData("itemId"));
-        } else {
-            targetDetailsList.addAll(targetsSelected);
-        }
+        final AbstractTable<?, TargetIdName> source = (AbstractTable<?, TargetIdName>) transferable
+                .getSourceComponent();
+        final Set<TargetIdName> targetDetailsList = source.getDeletedEntityByTransferable(transferable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 

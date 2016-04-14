@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.event;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -67,8 +67,6 @@ public class DistributionTagDropEvent implements DropHandler {
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
-
-    private static final String ITEMID = "itemId";
 
     @Override
     public void drop(final DragAndDropEvent event) {
@@ -132,23 +130,20 @@ public class DistributionTagDropEvent implements DropHandler {
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
 
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
-
         @SuppressWarnings("unchecked")
-        final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) source.getValue();
-        final Set<Long> distributionList = new HashSet<>();
-        if (!distSelected.contains(transferable.getData(ITEMID))) {
-            distributionList.add(((DistributionSetIdName) transferable.getData(ITEMID)).getId());
-        } else {
-            distributionList.addAll(distSelected.stream().map(t -> t.getId()).collect(Collectors.toList()));
-        }
+        final AbstractTable<?, DistributionSetIdName> source = (AbstractTable<?, DistributionSetIdName>) transferable
+                .getSourceComponent();
+
+        final Set<DistributionSetIdName> distSelected = source.getDeletedEntityByTransferable(transferable);
+        final Set<Long> distributionList = distSelected.stream().map(entity -> entity.getId())
+                .collect(Collectors.toSet());
 
         final String distTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
                 SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS);
 
         final List<String> tagsClickedList = distFilterParameters.getDistSetTags();
-        final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
-                distTagName);
+        final DistributionSetTagAssignmentResult result = distributionSetManagement
+                .toggleTagAssignment(distributionList, distTagName);
 
         notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(distTagName, result, i18n));
         if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()) {
