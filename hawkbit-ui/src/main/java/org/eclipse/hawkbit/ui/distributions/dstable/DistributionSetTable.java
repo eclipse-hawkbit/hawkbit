@@ -459,17 +459,21 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Item addEntity(final DistributionSet baseEntity) {
         final Item item = super.addEntity(baseEntity);
-        item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(baseEntity.isComplete());
-
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
             manageDistUIState.getSelectedDistributions().get().stream().forEach(this::unselect);
         }
         select(baseEntity.getDistributionSetIdName());
         return item;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void updateEntity(final DistributionSet baseEntity, final Item item) {
+        item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(baseEntity.isComplete());
+        super.updateEntity(baseEntity, item);
     }
 
     @Override

@@ -324,22 +324,26 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Item addEntity(final SoftwareModule baseEntity) {
         final Item item = super.addEntity(baseEntity);
-
-        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
-                baseEntity.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
-        item.getItemProperty("swId").setValue(baseEntity.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
-        item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(baseEntity.getType().getColour());
 
         if (!manageDistUIState.getSelectedSoftwareModules().isEmpty()) {
             manageDistUIState.getSelectedSoftwareModules().stream().forEach(this::unselect);
         }
         select(baseEntity.getId());
         return item;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
+        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
+                baseEntity.getVersion());
+        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
+        item.getItemProperty("swId").setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
+        item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(baseEntity.getType().getColour());
+        super.updateEntity(baseEntity, item);
     }
 
     private void showArtifactDetailsWindow(final Long itemId, final String nameVersionStr) {
