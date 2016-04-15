@@ -12,36 +12,36 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObject;
 
 /**
- * Proxy rollout group with suctome properties.
+ * Proxy rollout group with custom properties.
  *
  */
 public class ProxyRolloutGroup extends RolloutGroup {
 
-    private static final long serialVersionUID = -2745056813306692356L;
+	private static final long serialVersionUID = -2745056813306692356L;
 
-    private String createdDate;
+	private String createdDate;
 
-    private String modifiedDate;
+	private String modifiedDate;
 
-    private String finishedPercentage;
+	private String finishedPercentage;
 
-    private Long runningTargetsCount;
+	private Long runningTargetsCount;
 
-    private Long scheduledTargetsCount;
+	private Long scheduledTargetsCount;
 
-    private Long cancelledTargetsCount;
+	private Long cancelledTargetsCount;
 
-    private Long errorTargetsCount;
+	private Long errorTargetsCount;
 
-    private Long finishedTargetsCount;
+	private Long finishedTargetsCount;
 
-    private Long notStartedTargetsCount;
+	private Long notStartedTargetsCount;
 
-    private Boolean isActionRecieved = Boolean.FALSE;
+	private Boolean isActionRecieved = Boolean.FALSE;
 
-    private String totalTargetsCount;
-    
-    private CustomObject customObject;
+	private String totalTargetsCount;
+
+	private CustomObject customObject;
 
 	public CustomObject getCustomObject() {
 		return customObject;
@@ -51,169 +51,169 @@ public class ProxyRolloutGroup extends RolloutGroup {
 		this.customObject = customObject;
 	}
 
-    /**
-     * @return the createdDate
-     */
-    public String getCreatedDate() {
-        return createdDate;
-    }
+	/**
+	 * @return the createdDate
+	 */
+	public String getCreatedDate() {
+		return createdDate;
+	}
 
-    /**
-     * @param createdDate
-     *            the createdDate to set
-     */
-    public void setCreatedDate(final String createdDate) {
-        this.createdDate = createdDate;
-    }
+	/**
+	 * @param createdDate
+	 *            the createdDate to set
+	 */
+	public void setCreatedDate(final String createdDate) {
+		this.createdDate = createdDate;
+	}
 
-    /**
-     * @return the modifiedDate
-     */
-    public String getModifiedDate() {
-        return modifiedDate;
-    }
+	/**
+	 * @return the modifiedDate
+	 */
+	public String getModifiedDate() {
+		return modifiedDate;
+	}
 
-    /**
-     * @param modifiedDate
-     *            the modifiedDate to set
-     */
-    public void setModifiedDate(final String modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
+	/**
+	 * @param modifiedDate
+	 *            the modifiedDate to set
+	 */
+	public void setModifiedDate(final String modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
 
-    /**
-     * @return the finishedPercentage
-     */
-    public String getFinishedPercentage() {
-        return finishedPercentage;
-    }
+	/**
+	 * @return the finishedPercentage
+	 */
+	public String getFinishedPercentage() {
+		return finishedPercentage;
+	}
 
-    /**
-     * @param finishedPercentage
-     *            the finishedPercentage to set
-     */
-    public void setFinishedPercentage(final String finishedPercentage) {
-        this.finishedPercentage = finishedPercentage;
-    }
+	/**
+	 * @param finishedPercentage
+	 *            the finishedPercentage to set
+	 */
+	public void setFinishedPercentage(final String finishedPercentage) {
+		this.finishedPercentage = finishedPercentage;
+	}
 
-    /**
-     * @return the runningTargetsCount
-     */
-    public Long getRunningTargetsCount() {
-        return runningTargetsCount;
-    }
+	/**
+	 * @return the runningTargetsCount
+	 */
+	public Long getRunningTargetsCount() {
+		return runningTargetsCount;
+	}
 
-    /**
-     * @param runningTargetsCount
-     *            the runningTargetsCount to set
-     */
-    public void setRunningTargetsCount(final Long runningTargetsCount) {
-        this.runningTargetsCount = runningTargetsCount;
-    }
+	/**
+	 * @param runningTargetsCount
+	 *            the runningTargetsCount to set
+	 */
+	public void setRunningTargetsCount(final Long runningTargetsCount) {
+		this.runningTargetsCount = runningTargetsCount;
+	}
 
-    /**
-     * @return the scheduledTargetsCount
-     */
-    public Long getScheduledTargetsCount() {
-        return scheduledTargetsCount;
-    }
+	/**
+	 * @return the scheduledTargetsCount
+	 */
+	public Long getScheduledTargetsCount() {
+		return scheduledTargetsCount;
+	}
 
-    /**
-     * @param scheduledTargetsCount
-     *            the scheduledTargetsCount to set
-     */
-    public void setScheduledTargetsCount(final Long scheduledTargetsCount) {
-        this.scheduledTargetsCount = scheduledTargetsCount;
-    }
+	/**
+	 * @param scheduledTargetsCount
+	 *            the scheduledTargetsCount to set
+	 */
+	public void setScheduledTargetsCount(final Long scheduledTargetsCount) {
+		this.scheduledTargetsCount = scheduledTargetsCount;
+	}
 
-    /**
-     * @return the cancelledTargetsCount
-     */
-    public Long getCancelledTargetsCount() {
-        return cancelledTargetsCount;
-    }
+	/**
+	 * @return the cancelledTargetsCount
+	 */
+	public Long getCancelledTargetsCount() {
+		return cancelledTargetsCount;
+	}
 
-    /**
-     * @param cancelledTargetsCount
-     *            the cancelledTargetsCount to set
-     */
-    public void setCancelledTargetsCount(final Long cancelledTargetsCount) {
-        this.cancelledTargetsCount = cancelledTargetsCount;
-    }
+	/**
+	 * @param cancelledTargetsCount
+	 *            the cancelledTargetsCount to set
+	 */
+	public void setCancelledTargetsCount(final Long cancelledTargetsCount) {
+		this.cancelledTargetsCount = cancelledTargetsCount;
+	}
 
-    /**
-     * @return the errorTargetsCount
-     */
-    public Long getErrorTargetsCount() {
-        return errorTargetsCount;
-    }
+	/**
+	 * @return the errorTargetsCount
+	 */
+	public Long getErrorTargetsCount() {
+		return errorTargetsCount;
+	}
 
-    /**
-     * @param errorTargetsCount
-     *            the errorTargetsCount to set
-     */
-    public void setErrorTargetsCount(final Long errorTargetsCount) {
-        this.errorTargetsCount = errorTargetsCount;
-    }
+	/**
+	 * @param errorTargetsCount
+	 *            the errorTargetsCount to set
+	 */
+	public void setErrorTargetsCount(final Long errorTargetsCount) {
+		this.errorTargetsCount = errorTargetsCount;
+	}
 
-    /**
-     * @return the finishedTargetsCount
-     */
-    public Long getFinishedTargetsCount() {
-        return finishedTargetsCount;
-    }
+	/**
+	 * @return the finishedTargetsCount
+	 */
+	public Long getFinishedTargetsCount() {
+		return finishedTargetsCount;
+	}
 
-    /**
-     * @param finishedTargetsCount
-     *            the finishedTargetsCount to set
-     */
-    public void setFinishedTargetsCount(final Long finishedTargetsCount) {
-        this.finishedTargetsCount = finishedTargetsCount;
-    }
+	/**
+	 * @param finishedTargetsCount
+	 *            the finishedTargetsCount to set
+	 */
+	public void setFinishedTargetsCount(final Long finishedTargetsCount) {
+		this.finishedTargetsCount = finishedTargetsCount;
+	}
 
-    /**
-     * @return the notStartedTargetsCount
-     */
-    public Long getNotStartedTargetsCount() {
-        return notStartedTargetsCount;
-    }
+	/**
+	 * @return the notStartedTargetsCount
+	 */
+	public Long getNotStartedTargetsCount() {
+		return notStartedTargetsCount;
+	}
 
-    /**
-     * @param notStartedTargetsCount
-     *            the notStartedTargetsCount to set
-     */
-    public void setNotStartedTargetsCount(final Long notStartedTargetsCount) {
-        this.notStartedTargetsCount = notStartedTargetsCount;
-    }
+	/**
+	 * @param notStartedTargetsCount
+	 *            the notStartedTargetsCount to set
+	 */
+	public void setNotStartedTargetsCount(final Long notStartedTargetsCount) {
+		this.notStartedTargetsCount = notStartedTargetsCount;
+	}
 
-    /**
-     * @return the isActionRecieved
-     */
-    public Boolean getIsActionRecieved() {
-        return isActionRecieved;
-    }
+	/**
+	 * @return the isActionRecieved
+	 */
+	public Boolean getIsActionRecieved() {
+		return isActionRecieved;
+	}
 
-    /**
-     * @param isActionRecieved
-     *            the isActionRecieved to set
-     */
-    public void setIsActionRecieved(final Boolean isActionRecieved) {
-        this.isActionRecieved = isActionRecieved;
-    }
+	/**
+	 * @param isActionRecieved
+	 *            the isActionRecieved to set
+	 */
+	public void setIsActionRecieved(final Boolean isActionRecieved) {
+		this.isActionRecieved = isActionRecieved;
+	}
 
-    /**
-     * @return the totalTargetsCount
-     */
-    public String getTotalTargetsCount() {
-        return totalTargetsCount;
-    }
+	/**
+	 * @return the totalTargetsCount
+	 */
+	public String getTotalTargetsCount() {
+		return totalTargetsCount;
+	}
 
-    /**
-     * @param totalTargetsCount
-     *            the totalTargetsCount to set
-     */
-    public void setTotalTargetsCount(final String totalTargetsCount) {
-        this.totalTargetsCount = totalTargetsCount;
-    }
+	/**
+	 * @param totalTargetsCount
+	 *            the totalTargetsCount to set
+	 */
+	public void setTotalTargetsCount(final String totalTargetsCount) {
+		this.totalTargetsCount = totalTargetsCount;
+	}
 
 }

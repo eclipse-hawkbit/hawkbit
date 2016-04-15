@@ -15,26 +15,36 @@ import com.vaadin.ui.renderers.ClickableRenderer;
 
 import elemental.json.JsonValue;
 
+/**
+ * Renders button with provided CustomObject.
+ * Used to display button with link. 
+ *
+ */
+
 public class CustomObjectRenderer extends ClickableRenderer<CustomObject> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8754180585906263554L;
 
 	/**
-	 * Creates a new image renderer.
+	 * Creates a new custom object renderer.
 	 */
 	public CustomObjectRenderer() {
 		super(CustomObject.class, null);
 	}
+	
+	/**
+	 * Initialize custom object renderer with {@link Class<CustomObject>}
+	 * 
+	 * @param presentationType
+	 *        Class<CustomObject>
+	 */
 
 	public CustomObjectRenderer(Class<CustomObject> presentationType) {
 		super(presentationType);
 	}
 
 	/**
-	 * Creates a new image renderer and adds the given click listener to it.
+	 * Creates a new custom object renderer and adds the given click listener to it.
 	 * 
 	 * @param listener
 	 *            the click listener to register

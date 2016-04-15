@@ -13,6 +13,11 @@ import com.vaadin.client.renderers.ClickableRenderer;
 import com.vaadin.client.ui.VButton;
 import com.vaadin.client.widget.grid.RendererCellReference;
 
+/**
+ * Renders button with provided CustomObject.
+ * Used to display button with link.
+ *
+ */
 public class CustomObjectRenederer extends ClickableRenderer<CustomObject, VButton> {
 
 	@Override

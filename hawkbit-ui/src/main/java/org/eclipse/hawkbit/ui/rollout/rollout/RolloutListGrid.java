@@ -97,6 +97,10 @@ public class RolloutListGrid extends AbstractGrid {
 
 	private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
+	/**
+	 * Handles the RolloutEvent to refresh Grid.
+	 *
+	 */
 	@EventBusListenerMethod(scope = EventScope.SESSION)
 	void onEvent(final RolloutEvent event) {
 		switch (event) {
@@ -419,6 +423,9 @@ public class RolloutListGrid extends AbstractGrid {
 		((LazyQueryContainer) getContainerDataSource()).refresh();
 	}
 
+	/**
+	 * Generator to generate fontIcon by String.
+	 */
 	public final class FontIconGenerator extends PropertyValueGenerator<String> {
 
 		private static final long serialVersionUID = 2544026030795375748L;
@@ -585,11 +592,9 @@ public class RolloutListGrid extends AbstractGrid {
 	}
 
 	/**
-	 * 
-	 * Converter to convert 0 to empty , if total target groups is zero.
+	 * Converter to convert 0 to empty, if total target groups is zero.
 	 *
 	 */
-
 	class TotalTargetGroupsConverter implements Converter<String, Long> {
 
 		private static final long serialVersionUID = 6589305227035220369L;

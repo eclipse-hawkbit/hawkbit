@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObject;
 import com.vaadin.server.FontAwesome;
 
 /**
- * Proxy rollout with suctome properties.
+ * Proxy rollout with custom properties.
  *
  */
 public class ProxyRollout extends Rollout {
