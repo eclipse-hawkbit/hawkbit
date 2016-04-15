@@ -204,10 +204,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.setSizeUndefined();
 
-        mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(),
+        mainLayout.addComponents(getMandatoryLabelLinkToHelp(), rolloutName, distributionSet, getTargetFilterLayout(),
                 getGroupDetailsLayout(), getTriggerThresoldLayout(), getErrorThresoldLayout(), description,
-                actionTypeOptionGroupLayout, linkToHelp, getSaveDiscardButtonLayout());
-        mainLayout.setComponentAlignment(linkToHelp, Alignment.BOTTOM_RIGHT);
+                actionTypeOptionGroupLayout, getSaveDiscardButtonLayout());
         setCompositionRoot(mainLayout);
     }
 
@@ -264,6 +263,16 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         return buttonsLayout;
     }
 
+    private HorizontalLayout getMandatoryLabelLinkToHelp() {
+        final HorizontalLayout mandatoryLabelLinkToHelpLayout = new HorizontalLayout();
+        mandatoryLabelLinkToHelpLayout.setSizeFull();
+        mandatoryLabelLinkToHelpLayout.addComponents(madatoryLabel, linkToHelp);
+        mandatoryLabelLinkToHelpLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
+        mandatoryLabelLinkToHelpLayout.setComponentAlignment(linkToHelp, Alignment.MIDDLE_RIGHT);
+        mandatoryLabelLinkToHelpLayout.addStyleName("window-style");
+        return mandatoryLabelLinkToHelpLayout;
+    }
+
     private void createRequiredComponents() {
         madatoryLabel = createMandatoryLabel();
         rolloutName = createRolloutNameField();
@@ -287,9 +296,13 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         totalTargetsLabel = createTotalTargetsLabel();
         targetFilterQuery = createTargetFilterQuery();
 
-        linkToHelp = SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
+        linkToHelp = createLinkToHelp();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
+    }
+
+    private Link createLinkToHelp() {
+        return SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
     }
 
     private Label createGroupSizeLabel() {
