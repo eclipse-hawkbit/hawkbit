@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 import com.vaadin.server.WebBrowser;
 
@@ -80,14 +82,31 @@ public final class SPDateTimeUtil {
      * @param lastQueryDate
      * @return String formatted date
      */
-
     public static String getFormattedDate(final Long lastQueryDate) {
+        return formatDate(lastQueryDate, null);
+    }
+
+    public static String formatCreatedAt(final BaseEntity baseEntity) {
+        if (baseEntity == null) {
+            return StringUtils.EMPTY;
+        }
+        return formatDate(baseEntity.getCreatedAt(), StringUtils.EMPTY);
+    }
+
+    public static String formatLastModifiedAt(final BaseEntity baseEntity) {
+        if (baseEntity == null) {
+            return StringUtils.EMPTY;
+        }
+        return formatDate(baseEntity.getLastModifiedAt(), StringUtils.EMPTY);
+    }
+
+    private static String formatDate(final Long lastQueryDate, final String defaultString) {
         if (lastQueryDate != null) {
             final SimpleDateFormat format = new SimpleDateFormat(SPUIDefinitions.LAST_QUERY_DATE_FORMAT);
             format.setTimeZone(getBrowserTimeZone());
             return format.format(new Date(lastQueryDate));
         }
-        return null;
+        return defaultString;
     }
 
     /**

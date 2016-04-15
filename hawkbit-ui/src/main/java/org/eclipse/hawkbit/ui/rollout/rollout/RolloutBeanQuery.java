@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -119,14 +120,14 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setName(rollout.getName());
             proxyRollout.setDescription(rollout.getDescription());
             final DistributionSet distributionSet = rollout.getDistributionSet();
-            proxyRollout.setDistributionSetNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
-                    distributionSet.getName(), distributionSet.getVersion()));
+            proxyRollout.setDistributionSetNameVersion(
+                    HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
             proxyRollout.setDistributionSet(distributionSet);
             proxyRollout.setNumberOfGroups(Long.valueOf(rollout.getRolloutGroups().size()));
             proxyRollout.setCreatedDate(SPDateTimeUtil.getFormattedDate(rollout.getCreatedAt()));
             proxyRollout.setModifiedDate(SPDateTimeUtil.getFormattedDate(rollout.getLastModifiedAt()));
-            proxyRollout.setCreatedBy(HawkbitCommonUtil.getIMUser(rollout.getCreatedBy()));
-            proxyRollout.setLastModifiedBy(HawkbitCommonUtil.getIMUser(rollout.getLastModifiedBy()));
+            proxyRollout.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rollout));
+            proxyRollout.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rollout));
             proxyRollout.setForcedTime(rollout.getForcedTime());
             proxyRollout.setId(rollout.getId());
             proxyRollout.setStatus(rollout.getStatus());
@@ -134,7 +135,7 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
             proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
             proxyRollout.setTotalTargetsCount(String.valueOf(rollout.getTotalTargets()));
-            
+
             proxyRolloutList.add(proxyRollout);
         }
         return proxyRolloutList;
@@ -148,7 +149,8 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
      * .util.List, java.util.List, java.util.List)
      */
     @Override
-    protected void saveBeans(final List<ProxyRollout> arg0, final List<ProxyRollout> arg1, final List<ProxyRollout> arg2) {
+    protected void saveBeans(final List<ProxyRollout> arg0, final List<ProxyRollout> arg1,
+            final List<ProxyRollout> arg2) {
         /**
          * CRUD operations on Target will be done through repository methods
          */

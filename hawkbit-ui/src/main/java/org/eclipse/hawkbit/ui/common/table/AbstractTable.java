@@ -20,7 +20,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -212,9 +212,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         item.getItemProperty(SPUILabelDefinitions.VAR_ID).setValue(baseEntity.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(baseEntity.getDescription());
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getCreatedBy()));
+                .setValue(UserDetailsFormatter.loadAndFormatCreatedBy(baseEntity));
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getLastModifiedBy()));
+                .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(baseEntity));
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
                 .setValue(SPDateTimeUtil.getFormattedDate(baseEntity.getCreatedAt()));
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)

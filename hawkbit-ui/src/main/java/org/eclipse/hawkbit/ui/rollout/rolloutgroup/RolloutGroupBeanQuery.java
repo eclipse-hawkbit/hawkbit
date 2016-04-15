@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -110,8 +111,8 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
             proxyRolloutGroup.setDescription(rolloutGroup.getDescription());
             proxyRolloutGroup.setCreatedDate(SPDateTimeUtil.getFormattedDate(rolloutGroup.getCreatedAt()));
             proxyRolloutGroup.setModifiedDate(SPDateTimeUtil.getFormattedDate(rolloutGroup.getLastModifiedAt()));
-            proxyRolloutGroup.setCreatedBy(HawkbitCommonUtil.getIMUser(rolloutGroup.getCreatedBy()));
-            proxyRolloutGroup.setLastModifiedBy(HawkbitCommonUtil.getIMUser(rolloutGroup.getLastModifiedBy()));
+            proxyRolloutGroup.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(rolloutGroup));
+            proxyRolloutGroup.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(rolloutGroup));
             proxyRolloutGroup.setId(rolloutGroup.getId());
             proxyRolloutGroup.setStatus(rolloutGroup.getStatus());
             proxyRolloutGroup.setErrorAction(rolloutGroup.getErrorAction());

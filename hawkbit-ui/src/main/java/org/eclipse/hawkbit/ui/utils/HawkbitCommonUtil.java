@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -34,9 +33,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -606,31 +602,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * get formatted name - lastname,firstname.
-     *
-     * @param user
-     *            user name
-     * @return String formatted name
-     */
-    public static String getFormattedName(final UserDetails user) {
-        final StringBuilder formattedName = new StringBuilder();
-        if (user instanceof UserPrincipal) {
-            if (trimAndNullIfEmpty(((UserPrincipal) user).getLastname()) != null) {
-                formattedName.append(((UserPrincipal) user).getLastname());
-            }
-            if (trimAndNullIfEmpty(((UserPrincipal) user).getFirstname()) != null) {
-                if (formattedName.length() > 0) {
-                    formattedName.append(", ");
-                }
-                formattedName.append(((UserPrincipal) user).getFirstname());
-            }
-        } else if (user != null) {
-            formattedName.append(user.getUsername());
-        }
-        return formattedName.toString();
-    }
-
-    /**
      * get the Last sequence of string which is after last dot in String.
      *
      * @param name
@@ -684,30 +655,6 @@ public final class HawkbitCommonUtil {
                     .append(APPEND_CHILD);
         }
         return exeJS.toString();
-    }
-
-    /**
-     * Get IM User for user UUID.
-     * 
-     * @param uuid
-     * @return imReslovedUser user details
-     */
-    public static String getIMUser(final String uuid) {
-        // Get modifed user
-        String imReslovedUser = HawkbitCommonUtil.SP_STRING_SPACE;
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(uuid) != null) {
-            final UserDetailsService idManagement = SpringContextHelper.getBean(UserDetailsService.class);
-            try {
-                imReslovedUser = HawkbitCommonUtil.getFormattedName(idManagement.loadUserByUsername(uuid));
-            } catch (final UsernameNotFoundException e) { // NOSONAR
-                // nope not need to handle
-            }
-            // If Null display the UID
-            if (HawkbitCommonUtil.trimAndNullIfEmpty(imReslovedUser) == null) {
-                imReslovedUser = uuid;
-            }
-        }
-        return imReslovedUser;
     }
 
     /**
