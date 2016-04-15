@@ -740,7 +740,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
                     .setValue(updatedTarget.getTargetInfo().getLastTargetQuery());
 
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                    .setValue(UserDetailsFormatter.loadAndFormatCreatedBy(updatedTarget));
+                    .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(updatedTarget));
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
                     .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());

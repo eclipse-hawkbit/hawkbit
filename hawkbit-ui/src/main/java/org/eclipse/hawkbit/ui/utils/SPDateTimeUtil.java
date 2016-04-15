@@ -86,6 +86,13 @@ public final class SPDateTimeUtil {
         return formatDate(lastQueryDate, null);
     }
 
+    /**
+     * Get formatted date 'created at' by entity.
+     *
+     * @param baseEntity
+     *            the entity
+     * @return String formatted date
+     */
     public static String formatCreatedAt(final BaseEntity baseEntity) {
         if (baseEntity == null) {
             return StringUtils.EMPTY;
@@ -93,6 +100,13 @@ public final class SPDateTimeUtil {
         return formatDate(baseEntity.getCreatedAt(), StringUtils.EMPTY);
     }
 
+    /**
+     * Get formatted date 'last modefied at' by entity.
+     *
+     * @param baseEntity
+     *            the entity
+     * @return String formatted date
+     */
     public static String formatLastModifiedAt(final BaseEntity baseEntity) {
         if (baseEntity == null) {
             return StringUtils.EMPTY;
