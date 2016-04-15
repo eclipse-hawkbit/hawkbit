@@ -6,13 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
 /**
  * {@link ControllerBase} resource content.
- *
  */
 public class ControllerBase extends ResourceSupport {
 
@@ -29,9 +28,6 @@ public class ControllerBase extends ResourceSupport {
         this.config = config;
     }
 
-    /**
-     * @return the config
-     */
     public Config getConfig() {
         return config;
     }

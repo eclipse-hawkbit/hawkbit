@@ -6,14 +6,13 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller;
+package org.eclipse.hawkbit.ddi;
 
 /**
- *
- *
- *
+ * Constants for the direct device integration rest resources.
  */
 public final class ControllerConstants {
+
     /**
      * The base URL mapping of the direct device integration rest resources.
      */
@@ -37,7 +36,7 @@ public final class ControllerConstants {
     /**
      * Feedback channel.
      */
-    static final String FEEDBACK = "feedback";
+    public static final String FEEDBACK = "feedback";
 
     /**
      * Config data action resources.
@@ -47,17 +46,17 @@ public final class ControllerConstants {
     /**
      * The artifact URL mapping rest resource.
      */
-    static final String ARTIFACT_DOWNLOAD = "artifact";
+    public static final String ARTIFACT_DOWNLOAD = "artifact";
 
     /**
      * The artifact by filename URL mapping rest resource.
      */
-    static final String ARTIFACT_DOWNLOAD_BY_FILENAME = "/filename";
+    public static final String ARTIFACT_DOWNLOAD_BY_FILENAME = "/filename";
 
     /**
      * File suffix for MDH hash download (see Linux md5sum).
      */
-    static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
+    public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
 
     // constant class, private constructor.
     private ControllerConstants() {

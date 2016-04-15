@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import java.util.Map;
 
@@ -17,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Feedback channel for ConfigData action.
- *
  */
 public class ConfigData extends ActionFeedback {
 
@@ -35,7 +34,6 @@ public class ConfigData extends ActionFeedback {
      *            is the feedback itself
      * @param data
      *            contains the attributes.
-     *
      */
     @JsonCreator
     public ConfigData(@JsonProperty(value = "id") final Long id, @JsonProperty(value = "time") final String time,
@@ -45,18 +43,10 @@ public class ConfigData extends ActionFeedback {
         this.data = data;
     }
 
-    /**
-     * @return the data
-     */
     public Map<String, String> getData() {
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "ConfigData [data=" + data + ", toString()=" + super.toString() + "]";

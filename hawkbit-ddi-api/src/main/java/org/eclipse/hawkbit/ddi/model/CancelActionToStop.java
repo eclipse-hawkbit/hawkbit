@@ -6,15 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.model.Action;
-
 /**
  * The {@link Action} that has to be stopped by the target.
- *
  */
 public class CancelActionToStop {
 
@@ -32,18 +29,10 @@ public class CancelActionToStop {
         this.stopId = stopId;
     }
 
-    /**
-     * @return the stopId
-     */
     public String getStopId() {
         return stopId;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "CancelAction [stopId=" + stopId + "]";

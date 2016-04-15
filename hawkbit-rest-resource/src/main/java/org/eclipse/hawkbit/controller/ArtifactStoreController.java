@@ -16,12 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
+import org.eclipse.hawkbit.ddi.api.ArtifactStoreControllerDdiApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.resource.helper.RestResourceConversionHelper;
@@ -32,28 +32,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The {@link ArtifactStoreController} of the SP server controller API that is
- * queried by the SP target in order to download artifacts independent of their
- * own individual resource. This is offered in addition to the
+ * The {@link ArtifactStoreController} of the Rollouts server controller API
+ * that is queried by the SP target in order to download artifacts independent
+ * of their own individual resource. This is offered in addition to the
  * {@link RootController#downloadArtifact(String, Long, Long, javax.servlet.http.HttpServletResponse)}
  * for legacy controllers that can not be fed with a download URI at runtime.
  *
- *
- *
- *
- *
+ * TODO
  */
 @RestController
-@RequestMapping(ControllerConstants.ARTIFACTS_V1_REQUEST_MAPPING)
-public class ArtifactStoreController {
+public class ArtifactStoreController implements ArtifactStoreControllerDdiApi {
+
     private static final Logger LOG = LoggerFactory.getLogger(ArtifactStoreController.class);
 
     @Autowired
@@ -68,29 +60,9 @@ public class ArtifactStoreController {
     @Autowired
     private HawkbitSecurityProperties securityProperties;
 
-    /**
-     * Handles GET {@link Artifact} download request. This could be full or
-     * partial download request.
-     *
-     * @param fileName
-     *            to search for
-     * @param response
-     *            to write to
-     * @param request
-     *            from the client
-     * @param targetid
-     *            of authenticated target
-     *
-     * @return response of the servlet which in case of success is status code
-     *         {@link HttpStatus#OK} or in case of partial download
-     *         {@link HttpStatus#PARTIAL_CONTENT}.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = ControllerConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
-            + "/{fileName}")
-    @ResponseBody
-    public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable final String fileName,
-            final HttpServletResponse response, final HttpServletRequest request,
-            @AuthenticationPrincipal final String targetid) {
+    @Override
+    public ResponseEntity<Void> downloadArtifactByFilename(final String fileName, final HttpServletResponse response,
+            final HttpServletRequest request, final String targetid) {
         ResponseEntity<Void> result;
 
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
@@ -112,8 +84,7 @@ public class ArtifactStoreController {
                 final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
 
                 // we set a download status only if we are aware of the
-                // targetid, i.e.
-                // authenticated and not anonymous
+                // targetid, i.e. authenticated and not anonymous
                 if (targetid != null && !"anonymous".equals(targetid)) {
                     final Action action = checkAndReportDownloadByTarget(request, targetid, artifact);
                     result = RestResourceConversionHelper.writeFileResponse(artifact, response, request, file,
@@ -124,8 +95,29 @@ public class ArtifactStoreController {
 
             }
         }
-
         return result;
+    }
+
+    @Override
+    public ResponseEntity<Void> downloadArtifactMD5ByFilename(final String fileName,
+            final HttpServletResponse response) {
+        final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
+
+        if (foundArtifacts.isEmpty()) {
+            LOG.warn("Softeare artifact with name {} could not be found.", fileName);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else if (foundArtifacts.size() > 1) {
+            LOG.error("Softeare artifact name {} is not unique.", fileName);
+        }
+
+        try {
+            DataConversionHelper.writeMD5FileResponse(fileName, response, foundArtifacts.get(0));
+        } catch (final IOException e) {
+            LOG.error("Failed to stream MD5 File", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private Action checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
@@ -149,40 +141,6 @@ public class ArtifactStoreController {
         }
         controllerManagement.addActionStatusMessage(actionStatus);
         return action;
-    }
-
-    /**
-     * Handles GET {@link Artifact} MD5 checksum file download request.
-     *
-     * @param fileName
-     *            to search for
-     * @param response
-     *            to write to
-     *
-     * @return response of the servlet
-     */
-    @RequestMapping(method = RequestMethod.GET, value = ControllerConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
-            + "/{fileName}" + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX)
-    @ResponseBody
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable final String fileName,
-            final HttpServletResponse response) {
-        final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
-
-        if (foundArtifacts.isEmpty()) {
-            LOG.warn("Softeare artifact with name {} could not be found.", fileName);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else if (foundArtifacts.size() > 1) {
-            LOG.error("Softeare artifact name {} is not unique.", fileName);
-        }
-
-        try {
-            DataConversionHelper.writeMD5FileResponse(fileName, response, foundArtifacts.get(0));
-        } catch (final IOException e) {
-            LOG.error("Failed to stream MD5 File", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

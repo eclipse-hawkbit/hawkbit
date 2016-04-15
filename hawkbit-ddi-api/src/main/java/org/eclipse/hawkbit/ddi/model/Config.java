@@ -6,29 +6,28 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 /**
- * Polling interval for the SP target.
- *
+ * Standard configuration for the target.
  */
-public class Polling {
+public class Config {
 
-    private final String sleep;
+    private final Polling polling;
 
     /**
      * Constructor.
      *
-     * @param sleep
-     *            between polls
+     * @param polling
+     *            configuration of the SP target
      */
-    public Polling(final String sleep) {
+    public Config(final Polling polling) {
         super();
-        this.sleep = sleep;
+        this.polling = polling;
     }
 
-    public String getSleep() {
-        return sleep;
+    public Polling getPolling() {
+        return polling;
     }
 
 }

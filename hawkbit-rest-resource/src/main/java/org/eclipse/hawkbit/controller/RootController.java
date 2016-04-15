@@ -18,16 +18,17 @@ import javax.validation.Valid;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
-import org.eclipse.hawkbit.controller.model.ActionFeedback;
-import org.eclipse.hawkbit.controller.model.Cancel;
-import org.eclipse.hawkbit.controller.model.CancelActionToStop;
-import org.eclipse.hawkbit.controller.model.Chunk;
-import org.eclipse.hawkbit.controller.model.ConfigData;
-import org.eclipse.hawkbit.controller.model.ControllerBase;
-import org.eclipse.hawkbit.controller.model.Deployment;
-import org.eclipse.hawkbit.controller.model.Deployment.HandlingType;
-import org.eclipse.hawkbit.controller.model.DeploymentBase;
-import org.eclipse.hawkbit.controller.model.Result.FinalResult;
+import org.eclipse.hawkbit.ddi.api.RootControllerDdiApi;
+import org.eclipse.hawkbit.ddi.model.ActionFeedback;
+import org.eclipse.hawkbit.ddi.model.Cancel;
+import org.eclipse.hawkbit.ddi.model.CancelActionToStop;
+import org.eclipse.hawkbit.ddi.model.Chunk;
+import org.eclipse.hawkbit.ddi.model.ConfigData;
+import org.eclipse.hawkbit.ddi.model.ControllerBase;
+import org.eclipse.hawkbit.ddi.model.Deployment;
+import org.eclipse.hawkbit.ddi.model.Deployment.HandlingType;
+import org.eclipse.hawkbit.ddi.model.DeploymentBase;
+import org.eclipse.hawkbit.ddi.model.Result.FinalResult;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -35,7 +36,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -49,26 +49,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The {@link RootController} of the SP server controller API that is queried by
- * the SP controller in order to pull {@link Action}s that have to be fullfilled
- * and report status updates concerning the {@link Action} processing.
+ * The {@link RootController} of the hawkBit server controller API that is
+ * queried by the hawkBit controller in order to pull {@link Action}s that have
+ * to be fulfilled and report status updates concerning the {@link Action}
+ * processing.
  *
  * Transactional (read-write) as all queries at least update the last poll time.
  *
  */
 @RestController
-@RequestMapping(ControllerConstants.BASE_V1_REQUEST_MAPPING)
-public class RootController {
+public class RootController implements RootControllerDdiApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
@@ -94,19 +91,8 @@ public class RootController {
     @Autowired
     private ArtifactUrlHandler artifactUrlHandler;
 
-    /**
-     * Returns all artifacts of a given software module and target.
-     *
-     * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
-     * @param softwareModuleId
-     *            of the {@link SoftwareModule}
-     * @return the response
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts", produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<List<org.eclipse.hawkbit.controller.model.Artifact>> getSoftwareModulesArtifacts(
+    @Override
+    public ResponseEntity<List<org.eclipse.hawkbit.ddi.model.Artifact>> getSoftwareModulesArtifacts(
             @PathVariable final String targetid, @PathVariable final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", targetid);
 
@@ -122,18 +108,7 @@ public class RootController {
                 HttpStatus.OK);
     }
 
-    /**
-     * Root resource for an individual {@link Target}.
-     *
-     * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
-     * @param request
-     *            the HTTP request injected by spring
-     * @return the response
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
+    @Override
     public ResponseEntity<ControllerBase> getControllerBase(@PathVariable final String targetid,
             final HttpServletRequest request) {
         LOG.debug("getControllerBase({})", targetid);
@@ -154,26 +129,7 @@ public class RootController {
                 HttpStatus.OK);
     }
 
-    /**
-     * Handles GET {@link Artifact} download request. This could be full or
-     * partial (as specified by RFC7233 (Range Requests)) download request.
-     *
-     * @param targetid
-     *            of the related
-     * @param softwareModuleId
-     *            of the parent {@link SoftwareModule}
-     * @param fileName
-     *            of the related {@link LocalArtifact}
-     * @param response
-     *            of the servlet
-     * @param request
-     *            from the client
-     *
-     * @return response of the servlet which in case of success is status code
-     *         {@link HttpStatus#OK} or in case of partial download
-     *         {@link HttpStatus#PARTIAL_CONTENT}.
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
+    @Override
     public ResponseEntity<Void> downloadArtifact(@PathVariable final String targetid,
             @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
             final HttpServletResponse response, final HttpServletRequest request) {
@@ -198,9 +154,7 @@ public class RootController {
                 result = RestResourceConversionHelper.writeFileResponse(artifact, response, request, file,
                         cacheWriteNotify, action.getId());
             }
-
         }
-
         return result;
     }
 
@@ -228,25 +182,7 @@ public class RootController {
         return null == module || !module.getLocalArtifactByFilename(fileName).isPresent();
     }
 
-    /**
-     * Handles GET {@link Artifact} MD5 checksum file download request.
-     *
-     * @param targetid
-     *            of the related
-     * @param softwareModuleId
-     *            of the parent {@link SoftwareModule}
-     * @param fileName
-     *            of the related {@link LocalArtifact}
-     * @param response
-     *            of the servlet
-     * @param request
-     *            the HTTP request injected by spring
-     *
-     * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
-     *         successful
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
-            + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
+    @Override
     public ResponseEntity<Void> downloadArtifactMd5(@PathVariable final String targetid,
             @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
             final HttpServletResponse response, final HttpServletRequest request) {
@@ -271,25 +207,7 @@ public class RootController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**
-     * Resource for {@link SoftwareModule} {@link UpdateAction}s.
-     *
-     * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
-     * @param actionId
-     *            of the {@link DeploymentBase} that matches to
-     *            {@link Target#getActiveActions()}
-     * @param resource
-     *            an hashcode of the resource which indicates if the action has
-     *            been changed, e.g. from 'soft' to 'force' and the eTag needs
-     *            to be re-generated
-     * @param request
-     *            the HTTP request injected by spring
-     * @return the response
-     */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION
-            + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
     public ResponseEntity<DeploymentBase> getControllerBasedeploymentAction(
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
@@ -325,23 +243,7 @@ public class RootController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * This is the feedback channel for the {@link DeploymentBase} action.
-     *
-     * @param feedback
-     *            to provide
-     * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
-     * @param actionId
-     *            of the action we have feedback for
-     * @param request
-     *            the HTTP request injected by spring
-     *
-     * @return the response
-     */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
-            + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Override
     public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
             @PathVariable final String targetid, @PathVariable @NotEmpty final Long actionId,
             final HttpServletRequest request) {
@@ -369,8 +271,9 @@ public class RootController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action),
-                action);
+        controllerManagement.addUpdateActionStatus(
+
+                generateUpdateStatus(feedback, targetid, feedback.getId(), action), action);
 
         return new ResponseEntity<>(HttpStatus.OK);
 
@@ -437,20 +340,7 @@ public class RootController {
         }
     }
 
-    /**
-     * This is the feedback channel for the config data action.
-     *
-     * @param configData
-     *            as body
-     * @param targetid
-     *            to provide data for
-     * @param request
-     *            the HTTP request injected by spring
-     *
-     * @return status of the request
-     */
-    @RequestMapping(value = "/{targetid}/"
-            + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final ConfigData configData,
             @PathVariable final String targetid, final HttpServletRequest request) {
         controllerManagement.updateLastTargetQuery(targetid,
@@ -461,20 +351,7 @@ public class RootController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**
-     * {@link RequestMethod.GET} method for the {@link Cancel} action.
-     *
-     * @param targetid
-     *            ID of the calling target
-     * @param actionId
-     *            of the action
-     * @param request
-     *            the HTTP request injected by spring
-     *
-     * @return the {@link Cancel} response
-     */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION
-            + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Override
     public ResponseEntity<Cancel> getControllerCancelAction(@PathVariable @NotEmpty final String targetid,
             @PathVariable @NotEmpty final Long actionId, final HttpServletRequest request) {
         LOG.debug("getControllerCancelAction({})", targetid);
@@ -503,24 +380,7 @@ public class RootController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * {@link RequestMethod.POST} method receiving the {@link ActionFeedback}
-     * from the target.
-     *
-     * @param feedback
-     *            the {@link ActionFeedback} from the target.
-     * @param targetid
-     *            the ID of the calling target
-     * @param actionId
-     *            of the action we have feedback for
-     * @param request
-     *            the HTTP request injected by spring
-     *
-     * @return the {@link ActionFeedback} response
-     */
-
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION + "/{actionId}/"
-            + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Override
     public ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             final HttpServletRequest request) {

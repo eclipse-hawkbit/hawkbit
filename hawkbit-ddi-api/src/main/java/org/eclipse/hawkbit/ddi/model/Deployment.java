@@ -6,17 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import java.util.List;
-
-import org.eclipse.hawkbit.repository.model.Action;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Detailed {@link UpdateAction} information.
- *
  */
 public class Deployment {
 
@@ -57,9 +54,9 @@ public class Deployment {
 
     /**
      * The handling type for the update {@link Action}.
-     *
      */
     public enum HandlingType {
+
         /**
          * Not necessary for the command.
          */
@@ -81,20 +78,12 @@ public class Deployment {
             this.name = name;
         }
 
-        /**
-         * @return the name
-         */
         @JsonValue
         public String getName() {
             return name;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Deployment [download=" + download + ", update=" + update + ", chunks=" + chunks + "]";

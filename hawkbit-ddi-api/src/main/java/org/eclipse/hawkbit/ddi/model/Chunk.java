@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import java.util.List;
 
@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 
 /**
  * Deployment chunks.
- *
  */
 public class Chunk {
 
@@ -40,7 +39,6 @@ public class Chunk {
      *            of the artifact
      * @param artifacts
      *            download information
-     *
      */
     public Chunk(final String part, final String version, final String name, final List<Artifact> artifacts) {
         super();
@@ -58,16 +56,10 @@ public class Chunk {
         return version;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @return the artifacts
-     */
     public List<Artifact> getArtifacts() {
         return artifacts;
     }

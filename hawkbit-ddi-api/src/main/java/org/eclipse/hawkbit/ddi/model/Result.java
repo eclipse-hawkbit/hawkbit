@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -17,8 +17,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Result information of the action progress which can by an intermediate or
  * final update.
- *
- *
  */
 public class Result {
 
@@ -77,21 +75,12 @@ public class Result {
             this.name = name;
         }
 
-        /**
-         * @return the name
-         */
         @JsonValue
         public String getName() {
             return name;
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Result [finished=" + finished + ", progress=" + progress + "]";

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -15,16 +15,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- *
  * <p>
- * After the SP Target has executed an action, received by a GET(URL) request it
- * reports the completion of it to the SP Server with a action status message,
- * i.e. with a PUT message to the feedback channel, i.e. PUT URL/feedback. This
- * message could be used not only at the end of execution but also as status
- * updates during a longer lasting execution period. The format of each action
- * answer message is defined below at each action. But it is expected, that the
- * contents of the message answers have all a similar structure: The content
- * starts with a generic header and additional elements. *
+ * After the HawkBit Target has executed an action, received by a GET(URL)
+ * request it reports the completion of it to the HawkBit Server with a action
+ * status message, i.e. with a PUT message to the feedback channel, i.e. PUT
+ * URL/feedback. This message could be used not only at the end of execution but
+ * also as status updates during a longer lasting execution period. The format
+ * of each action answer message is defined below at each action. But it is
+ * expected, that the contents of the message answers have all a similar
+ * structure: The content starts with a generic header and additional elements.
+ * *
  * </p>
  *
  * <p>
@@ -72,11 +72,6 @@ public class ActionFeedback {
         return status;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "ActionFeedback [id=" + id + ", time=" + time + ", status=" + status + "]";

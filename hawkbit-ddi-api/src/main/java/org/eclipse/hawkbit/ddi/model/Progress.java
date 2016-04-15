@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Action fulfillment progress by means of gives the achieved amount of maximal
  * of possible levels.
- *
  */
 public class Progress {
 
@@ -48,11 +47,6 @@ public class Progress {
         return of;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Progress [cnt=" + cnt + ", of=" + of + "]";

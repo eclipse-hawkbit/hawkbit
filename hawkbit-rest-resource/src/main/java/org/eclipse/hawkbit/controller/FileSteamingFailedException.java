@@ -13,15 +13,9 @@ import org.eclipse.hawkbit.exception.SpServerRtException;
 
 /**
  * Thrown if artifact content streaming to client failed.
- *
- *
- *
- *
  */
 public final class FileSteamingFailedException extends SpServerRtException {
-    /**
-    *
-    */
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -33,6 +27,8 @@ public final class FileSteamingFailedException extends SpServerRtException {
     }
 
     /**
+     * Constructor with Throwable.
+     * 
      * @param cause
      *            for the exception
      */
@@ -41,6 +37,8 @@ public final class FileSteamingFailedException extends SpServerRtException {
     }
 
     /**
+     * Constructor with error string.
+     * 
      * @param message
      *            of the error
      */

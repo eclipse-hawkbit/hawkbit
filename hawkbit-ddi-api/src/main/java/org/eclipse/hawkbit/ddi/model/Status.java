@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import java.util.List;
 
@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Details status information concerning the action processing.
- *
  */
 public class Status {
 
@@ -103,20 +102,12 @@ public class Status {
             this.name = name;
         }
 
-        /**
-         * @return the name
-         */
         @JsonValue
         public String getName() {
             return name;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Status [execution=" + execution + ", result=" + result + ", details=" + details + "]";

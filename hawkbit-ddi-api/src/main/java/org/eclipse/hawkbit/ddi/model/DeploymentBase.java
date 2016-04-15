@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller.model;
+package org.eclipse.hawkbit.ddi.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * {@link UpdateAction} resource.
- *
  */
 public class DeploymentBase extends ResourceSupport {
 
@@ -44,11 +43,6 @@ public class DeploymentBase extends ResourceSupport {
         return deployment;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "DeploymentBase [id=" + deplyomentId + ", deployment=" + deployment + "]";

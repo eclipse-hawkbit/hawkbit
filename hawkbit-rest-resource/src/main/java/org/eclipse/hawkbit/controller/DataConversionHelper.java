@@ -20,11 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.UrlProtocol;
-import org.eclipse.hawkbit.controller.model.Artifact;
-import org.eclipse.hawkbit.controller.model.Chunk;
-import org.eclipse.hawkbit.controller.model.Config;
-import org.eclipse.hawkbit.controller.model.ControllerBase;
-import org.eclipse.hawkbit.controller.model.Polling;
+import org.eclipse.hawkbit.ddi.ControllerConstants;
+import org.eclipse.hawkbit.ddi.model.Artifact;
+import org.eclipse.hawkbit.ddi.model.Chunk;
+import org.eclipse.hawkbit.ddi.model.Config;
+import org.eclipse.hawkbit.ddi.model.ControllerBase;
+import org.eclipse.hawkbit.ddi.model.Polling;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
