@@ -58,6 +58,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -259,13 +261,7 @@ public class RolloutManagement {
         entityManager.flush();
         executor.execute(() -> {
             try {
-                final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                def.setName("creatingRollout");
-                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-                new TransactionTemplate(txManager, def).execute(status -> {
-                    createRolloutGroups(amountGroup, conditions, savedRollout);
-                    return null;
-                });
+                createRolloutGroupsInNewTransaction(amountGroup, conditions, savedRollout);
             } finally {
                 creatingRollouts.remove(savedRollout.getName());
             }
@@ -288,6 +284,15 @@ public class RolloutManagement {
         }
     }
 
+    private Rollout createRolloutGroupsInNewTransaction(final int amountGroup, final RolloutGroupConditions conditions,
+            final Rollout savedRollout) {
+        final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setName("creatingRollout");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return new TransactionTemplate(txManager, def)
+                .execute(status -> createRolloutGroups(amountGroup, conditions, savedRollout));
+    }
+
     /**
      * Method for creating rollout groups and calculating group sizes. Group
      * sizes are calculated by dividing the total count of targets through the
@@ -308,7 +313,8 @@ public class RolloutManagement {
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
         final int groupSize = (int) Math.ceil((double) totalCount / (double) amountGroup);
-        // validate if the amount of groups that will be created are the amount
+        // validate if the amount of groups that will be created are the
+        // amount
         // of groups that the client what's to have created.
         int amountGroupValidated = amountGroup;
         final int amountGroupCreation = (int) (Math.ceil((double) totalCount / (double) groupSize));
@@ -540,7 +546,7 @@ public class RolloutManagement {
      *            this check. This check is only applied if the last check is
      *            less than (lastcheck-delay).
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
