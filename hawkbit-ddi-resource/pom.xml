@@ -16,23 +16,30 @@
          <artifactId>hawkbit-ddi-api</artifactId>
          <version>${project.version}</version>
       </dependency>
-      <dependency>
+       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-rest-resource</artifactId>
          <version>${project.version}</version>
-      </dependency>
+      </dependency> 
     <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository</artifactId>
          <version>${project.version}</version>
       </dependency>
-   <dependency>
+  <!--  <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-core</artifactId>
          <version>${project.version}</version>
-      </dependency>  
+      </dependency>  --> 
       
        <!-- Test -->
+         <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-rest-resource</artifactId>
+         <version>${project.version}</version>
+          <scope>test</scope>
+          <classifier>tests</classifier>
+      </dependency> 
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter</artifactId>
