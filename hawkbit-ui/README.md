@@ -1,6 +1,6 @@
 # hawkBit User Interface
 
-The application with user interface to create and manage rollouts.
+The hawkBit user interface is based on the Vaadin and Vaadin-Spring framework and allows to manage software updates and large scale roll-outs via a user interface.
 
 ## Debugging client-side code 
 ### Debug using SuperDevMode
