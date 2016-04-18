@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
-import org.eclipse.hawkbit.controller.FileSteamingFailedException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.rest.resource.model.distributionset.ActionTypeRest;
@@ -286,7 +285,7 @@ public final class RestResourceConversionHelper {
 
     private static long copyStreams(final InputStream from, final OutputStream to,
             final CacheWriteNotify cacheWriteNotify, final Long statusId, final long start, final long length)
-                    throws IOException {
+            throws IOException {
         checkNotNull(from);
         checkNotNull(to);
         final byte[] buf = new byte[BUFFER_SIZE];

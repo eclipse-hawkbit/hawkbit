@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.web;
 
-import org.eclipse.hawkbit.controller.EnableDirectDeviceApi;
+import org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi;
 import org.eclipse.hawkbit.rest.resource.EnableRestResources;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;

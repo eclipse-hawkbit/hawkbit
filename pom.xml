@@ -34,12 +34,13 @@
       <module>hawkbit-security-integration</module>
       <module>hawkbit-http-security</module>
       <module>hawkbit-rest-resource</module>
+      <module>hawkbit-ddi-resource</module>
       <module>hawkbit-ui</module>
       <module>hawkbit-artifact-repository-mongo</module>
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-cache-redis</module>
       <module>hawkbit-test-report</module>
-      <module>examples</module>
+      <module>examples</module> 
   </modules>
 
 

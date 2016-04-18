@@ -68,6 +68,12 @@
          <version>${project.version}</version>
          <optional>true</optional>
       </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-ddi-resource</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
         <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-context-support</artifactId>

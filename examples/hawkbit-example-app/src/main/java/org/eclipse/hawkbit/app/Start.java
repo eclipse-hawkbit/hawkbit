@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
-import org.eclipse.hawkbit.controller.EnableDirectDeviceApi;
+import org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi;
 import org.eclipse.hawkbit.rest.resource.EnableRestResources;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

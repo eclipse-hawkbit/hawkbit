@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.controller;
+package org.eclipse.hawkbit.rest.resource.helper;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.exception.SpServerRtException;
