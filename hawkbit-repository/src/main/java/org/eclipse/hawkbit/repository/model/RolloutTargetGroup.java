@@ -28,8 +28,9 @@ import org.eclipse.persistence.annotations.ExistenceChecking;
 import org.eclipse.persistence.annotations.ExistenceType;
 
 /**
- * @author Michael Hirsch
- *
+ * Entity with JPA annotation to store the information which {@link Target} is
+ * in a specific {@link RolloutGroup}.
+ * 
  */
 @IdClass(RolloutTargetGroupId.class)
 @Entity
