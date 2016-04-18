@@ -10,18 +10,34 @@ package org.eclipse.hawkbit.ui.customrenderers.client.renderers;
 
 import java.io.Serializable;
 
-public class CustomObject implements Serializable {
+/**
+ * RendererData class with Name and Status.
+ * 
+ */
+
+public class RendererData implements Serializable {
 	private static final long serialVersionUID = -5018181529953620263L;
 
 	private String name;
 
 	private String status;
 
-	public CustomObject(){
-		
+	/**
+	 * Initialize the RendererData.
+	 */
+	public RendererData() {
+
 	}
-	
-	public CustomObject(String name, String status) {
+
+	/**
+	 * Initialize the RendererData.
+	 * 
+	 * @param name
+	 *            Name of the Rollout.
+	 * @param status
+	 *            Status of Rollout.
+	 */
+	public RendererData(String name, String status) {
 		super();
 		this.name = name;
 		this.status = status;
@@ -38,7 +54,6 @@ public class CustomObject implements Serializable {
 	public String getStatus() {
 		return status;
 	}
-
 
 	public void setStatus(String status) {
 		this.status = status;

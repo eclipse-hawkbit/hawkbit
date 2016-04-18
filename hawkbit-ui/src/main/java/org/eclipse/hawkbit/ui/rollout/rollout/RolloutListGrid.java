@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObject;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.CustomObjectRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
@@ -145,7 +145,7 @@ public class RolloutListGrid extends AbstractGrid {
 					.setValue(Long.valueOf(rollout.getRolloutGroups().size()));
 		}
 		item.getItemProperty(customObject)
-				.setValue(new CustomObject(rollout.getName(), rollout.getStatus().toString()));
+				.setValue(new RendererData(rollout.getName(), rollout.getStatus().toString()));
 
 	}
 
@@ -160,7 +160,7 @@ public class RolloutListGrid extends AbstractGrid {
 	protected void addContainerProperties() {
 		final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) getContainerDataSource();
 		rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
-		rolloutGridContainer.addContainerProperty(customObject, CustomObject.class, null, false, false);
+		rolloutGridContainer.addContainerProperty(customObject, RendererData.class, null, false, false);
 		rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
 		rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
 				false);
@@ -287,7 +287,7 @@ public class RolloutListGrid extends AbstractGrid {
 
 		getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(event -> onClickOfActionBtn(event)));
 
-		CustomObjectRenderer customObjectRenderer = new CustomObjectRenderer(CustomObject.class);
+		CustomObjectRenderer customObjectRenderer = new CustomObjectRenderer(RendererData.class);
 		customObjectRenderer.addClickListener(event -> onClickOfRolloutName(event));
 		getColumn(customObject).setRenderer(customObjectRenderer);
 
@@ -452,7 +452,7 @@ public class RolloutListGrid extends AbstractGrid {
 		} else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
 			return SPUILabelDefinitions.ACTION.toLowerCase();
 		} else if (customObject.equals(cell.getPropertyId())) {
-			return ((CustomObject) cell.getProperty().getValue()).getName();
+			return ((RendererData) cell.getProperty().getValue()).getName();
 		} else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
 			return DistributionBarHelper
 					.getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());

@@ -9,7 +9,7 @@
 
 package org.eclipse.hawkbit.ui.customrenderers.renderers;
 
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObject;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
 
 import com.vaadin.ui.renderers.ClickableRenderer;
 
@@ -21,7 +21,7 @@ import elemental.json.JsonValue;
  *
  */
 
-public class CustomObjectRenderer extends ClickableRenderer<CustomObject> {
+public class CustomObjectRenderer extends ClickableRenderer<RendererData> {
 
 	private static final long serialVersionUID = -8754180585906263554L;
 
@@ -29,7 +29,7 @@ public class CustomObjectRenderer extends ClickableRenderer<CustomObject> {
 	 * Creates a new custom object renderer.
 	 */
 	public CustomObjectRenderer() {
-		super(CustomObject.class, null);
+		super(RendererData.class, null);
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class CustomObjectRenderer extends ClickableRenderer<CustomObject> {
 	 *        Class<CustomObject>
 	 */
 
-	public CustomObjectRenderer(Class<CustomObject> presentationType) {
+	public CustomObjectRenderer(Class<RendererData> presentationType) {
 		super(presentationType);
 	}
 
@@ -55,7 +55,7 @@ public class CustomObjectRenderer extends ClickableRenderer<CustomObject> {
 	}
 
 	@Override
-	public JsonValue encode(CustomObject resource) {
-		return super.encode(resource, CustomObject.class);
+	public JsonValue encode(RendererData resource) {
+		return super.encode(resource, RendererData.class);
 	}
 }
