@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -172,9 +171,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel(getDefaultCaption(),
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
+        return SPUIComponentProvider.getLabel(getDefaultCaption(), SPUILabelDefinitions.SP_WIDGET_CAPTION);
     }
 
     protected VerticalLayout getTabLayout() {
@@ -220,8 +217,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
                 SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
 
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.by"),
-                UserDetailsFormatter.loadAndFormatCreatedBy(selectedBaseEntity)));
+        logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
 
         if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
             return;
@@ -230,8 +226,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
                 SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
 
-        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.by"),
-                UserDetailsFormatter.loadAndFormatLastModifiedBy(selectedBaseEntity)));
+        logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
     }
 
     protected void updateDescriptionLayout(final String descriptionLabel, final String description) {

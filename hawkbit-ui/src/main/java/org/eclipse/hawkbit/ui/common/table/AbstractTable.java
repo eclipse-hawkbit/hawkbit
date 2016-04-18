@@ -329,6 +329,17 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         columnList.add(
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
+        setItemDescriptionGenerator((source, itemId, propertyId) -> {
+
+            if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
+            }
+            if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue().toString();
+            }
+            return null;
+        });
+
         return columnList;
     }
 
