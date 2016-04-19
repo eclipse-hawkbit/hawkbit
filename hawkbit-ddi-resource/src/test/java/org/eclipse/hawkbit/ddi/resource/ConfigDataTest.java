@@ -34,6 +34,9 @@ import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
 
+/**
+ * Test config data from the controller.
+ */
 @ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Config Data Resource")

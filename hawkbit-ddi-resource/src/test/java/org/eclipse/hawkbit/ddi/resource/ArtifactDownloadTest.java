@@ -56,9 +56,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 /**
  * Test artifact downloads from the controller.
- *
  */
-
 @ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
