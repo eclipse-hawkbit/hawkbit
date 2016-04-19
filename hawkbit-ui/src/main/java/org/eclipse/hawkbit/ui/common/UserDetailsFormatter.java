@@ -28,7 +28,7 @@ import com.vaadin.server.VaadinService;
  */
 public final class UserDetailsFormatter {
 
-    private static final String TRIM_APPENDIX = "..";
+    private static final String TRIM_APPENDIX = "...";
     private static final String DETAIL_SEPERATOR = ", ";
 
     private UserDetailsFormatter() {
@@ -45,7 +45,7 @@ public final class UserDetailsFormatter {
      * @return the formatted user name (max 100 characters) cannot be <null>
      */
     public static String loadAndFormatUsername(final String username) {
-        return loadAndFormatUsername(username, 50);
+        return loadAndFormatUsername(username, 100);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class UserDetailsFormatter {
      * @return the formatted user name (max 12 characters) cannot be <null>
      */
     public static String loadAndFormatCurrentUsername() {
-        return loadAndFormatUsername(getCurrentUser().getUsername(), 6);
+        return loadAndFormatUsername(getCurrentUser().getUsername(), 12);
     }
 
     /**
@@ -109,7 +109,7 @@ public final class UserDetailsFormatter {
      *            the user name
      * @param expectedNameLength
      *            the name size of each name part
-     * @return the formatted user name (max 2 * expectedNameLength characters)
+     * @return the formatted user name (max expectedNameLength characters)
      *         cannot be <null>
      */
     public static String loadAndFormatUsername(final String username, final int expectedNameLength) {
@@ -120,13 +120,21 @@ public final class UserDetailsFormatter {
 
         final UserPrincipal userPrincipal = (UserPrincipal) userDetails;
 
-        final String trimmedFirstname = trimAndFormatDetail(userPrincipal.getFirstname(), expectedNameLength);
-        final String trimmedLastname = trimAndFormatDetail(userPrincipal.getLastname(), expectedNameLength);
+        String firstname = StringUtils.defaultIfEmpty(userPrincipal.getFirstname(), StringUtils.EMPTY);
 
-        if (StringUtils.isEmpty(trimmedFirstname) && StringUtils.isEmpty(trimmedLastname)) {
-            return StringUtils.substring(userPrincipal.getLoginname(), 0, 2 * expectedNameLength);
+        if (!StringUtils.isEmpty(firstname)) {
+            firstname += DETAIL_SEPERATOR;
         }
-        return trimmedFirstname + DETAIL_SEPERATOR + trimmedLastname;
+
+        final String firstAndLastname = firstname
+                + StringUtils.defaultIfEmpty(userPrincipal.getLastname(), StringUtils.EMPTY);
+
+        final String trimmedUsername = trimAndFormatDetail(firstAndLastname, expectedNameLength);
+
+        if (StringUtils.isEmpty(trimmedUsername)) {
+            return trimAndFormatDetail(userPrincipal.getLoginname(), expectedNameLength);
+        }
+        return firstAndLastname;
     }
 
     /**
@@ -168,8 +176,8 @@ public final class UserDetailsFormatter {
                 throw new UsernameNotFoundException("User not found " + username);
             }
             return loadUserByUsername;
-        } catch (final UsernameNotFoundException e) { // NOSONAR
+        } catch (final UsernameNotFoundException e) {
+            return new User(username, "", Collections.emptyList());
         }
-        return new User(username, "", Collections.emptyList());
     }
 }
