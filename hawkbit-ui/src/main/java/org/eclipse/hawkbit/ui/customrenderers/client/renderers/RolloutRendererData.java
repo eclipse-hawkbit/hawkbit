@@ -15,7 +15,7 @@ import java.io.Serializable;
  * 
  */
 
-public class RendererData implements Serializable {
+public class RolloutRendererData implements Serializable {
 	private static final long serialVersionUID = -5018181529953620263L;
 
 	private String name;
@@ -25,7 +25,7 @@ public class RendererData implements Serializable {
 	/**
 	 * Initialize the RendererData.
 	 */
-	public RendererData() {
+	public RolloutRendererData() {
 
 	}
 
@@ -37,7 +37,7 @@ public class RendererData implements Serializable {
 	 * @param status
 	 *            Status of Rollout.
 	 */
-	public RendererData(String name, String status) {
+	public RolloutRendererData(String name, String status) {
 		super();
 		this.name = name;
 		this.status = status;

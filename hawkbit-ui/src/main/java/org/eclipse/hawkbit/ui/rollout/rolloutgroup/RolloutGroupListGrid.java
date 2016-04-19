@@ -23,8 +23,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.CustomObjectRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
 
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
@@ -132,7 +132,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 		final LazyQueryContainer rolloutGroupGridContainer = (LazyQueryContainer) getContainerDataSource();
 		rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
 
-		rolloutGroupGridContainer.addContainerProperty(customObject, RendererData.class, null, false, false);
+		rolloutGroupGridContainer.addContainerProperty(customObject, RolloutRendererData.class, null, false, false);
 		rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
 		rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutGroupStatus.class, null,
 				false, false);
@@ -238,7 +238,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 		getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
 				new TotalTargetCountStatusConverter());
 		if (permissionChecker.hasRolloutTargetsReadPermission()) {
-			getColumn(customObject).setRenderer(new CustomObjectRenderer(event -> onClickOfRolloutGroupName(event)));
+			getColumn(customObject).setRenderer(new RolloutRenderer(event -> onClickOfRolloutGroupName(event)));
 		}
 	}
 
@@ -286,7 +286,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 		} else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
 			return SPUILabelDefinitions.ACTION.toLowerCase();
 		} else if (customObject.equals(cell.getPropertyId())) {
-			return ((RendererData) cell.getProperty().getValue()).getName();
+			return ((RolloutRendererData) cell.getProperty().getValue()).getName();
 		} else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
 			return DistributionBarHelper
 					.getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());

@@ -18,7 +18,7 @@ import com.vaadin.client.widget.grid.RendererCellReference;
  * Used to display button with link.
  *
  */
-public class CustomObjectRenederer extends ClickableRenderer<RendererData, VButton> {
+public class RolloutRenderer extends ClickableRenderer<RolloutRendererData, VButton> {
 
 	@Override
 	public VButton createWidget() {
@@ -29,7 +29,7 @@ public class CustomObjectRenederer extends ClickableRenderer<RendererData, VButt
 	}
 
 	@Override
-	public void render(RendererCellReference cell, RendererData text, VButton button) {
+	public void render(RendererCellReference cell, RolloutRendererData text, VButton button) {
 		final String creating = "CREATING";
 		button.setText(text.getName());
 		applystyle(button);

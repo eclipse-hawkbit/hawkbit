@@ -9,7 +9,7 @@
 
 package org.eclipse.hawkbit.ui.customrenderers.renderers;
 
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 import com.vaadin.ui.renderers.ClickableRenderer;
 
@@ -21,15 +21,15 @@ import elemental.json.JsonValue;
  *
  */
 
-public class CustomObjectRenderer extends ClickableRenderer<RendererData> {
+public class RolloutRenderer extends ClickableRenderer<RolloutRendererData> {
 
 	private static final long serialVersionUID = -8754180585906263554L;
 
 	/**
 	 * Creates a new custom object renderer.
 	 */
-	public CustomObjectRenderer() {
-		super(RendererData.class, null);
+	public RolloutRenderer() {
+		super(RolloutRendererData.class, null);
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class CustomObjectRenderer extends ClickableRenderer<RendererData> {
 	 *        Class<CustomObject>
 	 */
 
-	public CustomObjectRenderer(Class<RendererData> presentationType) {
+	public RolloutRenderer(Class<RolloutRendererData> presentationType) {
 		super(presentationType);
 	}
 
@@ -49,13 +49,13 @@ public class CustomObjectRenderer extends ClickableRenderer<RendererData> {
 	 * @param listener
 	 *            the click listener to register
 	 */
-	public CustomObjectRenderer(RendererClickListener listener) {
+	public RolloutRenderer(RendererClickListener listener) {
 		this();
 		addClickListener(listener);
 	}
 
 	@Override
-	public JsonValue encode(RendererData resource) {
-		return super.encode(resource, RendererData.class);
+	public JsonValue encode(RolloutRendererData resource) {
+		return super.encode(resource, RolloutRendererData.class);
 	}
 }

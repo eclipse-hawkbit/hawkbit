@@ -9,7 +9,7 @@
 
 package org.eclipse.hawkbit.ui.customrenderers.client;
 
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.vaadin.client.connectors.ClickableRendererConnector;
@@ -21,12 +21,12 @@ import elemental.json.JsonObject;
  * A connector for {@link CustomObjectRenderer }.
  *
  */
-@Connect(org.eclipse.hawkbit.ui.customrenderers.renderers.CustomObjectRenderer.class)
-public class CustomObjectRendererConnector extends ClickableRendererConnector<RendererData> {
+@Connect(org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer.class)
+public class RolloutRendererConnector extends ClickableRendererConnector<RolloutRendererData> {
 	private static final long serialVersionUID = 7734682321931830566L;
 
-	public org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObjectRenederer getRenderer() {
-		return (org.eclipse.hawkbit.ui.customrenderers.client.renderers.CustomObjectRenederer) super.getRenderer();
+	public org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRenderer getRenderer() {
+		return (org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRenderer) super.getRenderer();
 	}
 
 	@Override

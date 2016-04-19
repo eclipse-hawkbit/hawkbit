@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 import com.vaadin.server.FontAwesome;
 
@@ -33,15 +33,14 @@ public class ProxyRollout extends Rollout {
 
 	private String totalTargetsCount;
 
-	private RendererData rendererData;
+	private RolloutRendererData rendererData;
 
-	
 
-	public RendererData getRendererData() {
+	public RolloutRendererData getRendererData() {
 		return rendererData;
 	}
 
-	public void setRendererData(RendererData rendererData) {
+	public void setRendererData(RolloutRendererData rendererData) {
 		this.rendererData = rendererData;
 	}
 

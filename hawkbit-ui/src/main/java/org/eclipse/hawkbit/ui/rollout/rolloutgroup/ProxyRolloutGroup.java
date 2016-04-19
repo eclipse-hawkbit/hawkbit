@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 /**
  * Proxy rollout group with renderer properties.
@@ -41,13 +41,13 @@ public class ProxyRolloutGroup extends RolloutGroup {
 
 	private String totalTargetsCount;
 
-	private RendererData rendererData;
+	private RolloutRendererData rendererData;
 
-	public RendererData getRendererData() {
+	public RolloutRendererData getRendererData() {
 		return rendererData;
 	}
 
-	public void setRendererData(RendererData rendererData) {
+	public void setRendererData(RolloutRendererData rendererData) {
 		this.rendererData = rendererData;
 	}
 

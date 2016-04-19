@@ -15,7 +15,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RendererData;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -123,7 +123,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 			proxyRolloutGroup.setSuccessConditionExp(rolloutGroup.getSuccessConditionExp());
 			proxyRolloutGroup.setFinishedPercentage(calculateFinishedPercentage(rolloutGroup));
 
-			proxyRolloutGroup.setRendererData(new RendererData(rolloutGroup.getName(), null));
+			proxyRolloutGroup.setRendererData(new RolloutRendererData(rolloutGroup.getName(), null));
 
 			proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
 			proxyRolloutGroup.setTotalTargetCountStatus(rolloutGroup.getTotalTargetCountStatus());
