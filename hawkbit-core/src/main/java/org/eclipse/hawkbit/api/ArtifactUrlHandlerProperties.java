@@ -17,7 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
     private static final String DEFAULT_IP_LOCALHOST = "127.0.0.1";
-    private static final String LOCALHOST = "localhost";
+    private static final String LOCALHOST = "localhost:8080";
 
     private final Http http = new Http();
     private final Https https = new Https();

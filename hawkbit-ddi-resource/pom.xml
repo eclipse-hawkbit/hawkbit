@@ -26,11 +26,6 @@
          <artifactId>hawkbit-repository</artifactId>
          <version>${project.version}</version>
       </dependency>
-  <!--  <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-core</artifactId>
-         <version>${project.version}</version>
-      </dependency>  --> 
       
        <!-- Test -->
          <dependency>
@@ -38,7 +33,7 @@
          <artifactId>hawkbit-rest-resource</artifactId>
          <version>${project.version}</version>
           <scope>test</scope>
-          <classifier>tests</classifier>
+          <classifier>tests</classifier> 
       </dependency> 
       <dependency>
          <groupId>org.springframework.boot</groupId>
@@ -139,11 +134,11 @@
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
       </dependency>
-      <dependency>
+     <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-context-support</artifactId>
          <scope>test</scope>
-      </dependency>
+      </dependency> 
    </dependencies>
    <build>
       <plugins>

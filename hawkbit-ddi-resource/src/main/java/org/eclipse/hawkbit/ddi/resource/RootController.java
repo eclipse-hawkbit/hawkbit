@@ -56,13 +56,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The {@link RootController} of the hawkBit server controller API that is
- * queried by the hawkBit controller in order to pull {@link Action}s that have
- * to be fulfilled and report status updates concerning the {@link Action}
- * processing.
+ * The {@link RootController} of the hawkBit server DDI API that is queried by
+ * the hawkBit controller in order to pull {@link Action}s that have to be
+ * fulfilled and report status updates concerning the {@link Action} processing.
  *
  * Transactional (read-write) as all queries at least update the last poll time.
- *
  */
 @RestController
 public class RootController implements RootControllerDdiApi {

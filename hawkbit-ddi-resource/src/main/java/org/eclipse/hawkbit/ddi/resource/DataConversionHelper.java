@@ -38,7 +38,7 @@ import org.springframework.hateoas.Link;
 import com.google.common.base.Charsets;
 
 /**
- * Utility class for the Controller API.
+ * Utility class for the DDI API.
  */
 public final class DataConversionHelper {
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
+import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleAssigmentRest;
 
 import com.google.common.collect.Lists;
 
@@ -23,6 +24,7 @@ public class DistributionSetBuilder {
     private String name;
     private String version;
     private String type;
+    private final List<SoftwareModuleAssigmentRest> modules = new ArrayList<>();
 
     /**
      * @param name
@@ -31,6 +33,13 @@ public class DistributionSetBuilder {
      */
     public DistributionSetBuilder name(final String name) {
         this.name = name;
+        return this;
+    }
+
+    public DistributionSetBuilder moduleByID(final Long id) {
+        final SoftwareModuleAssigmentRest softwareModuleAssigmentRest = new SoftwareModuleAssigmentRest();
+        softwareModuleAssigmentRest.setId(id);
+        modules.add(softwareModuleAssigmentRest);
         return this;
     }
 
@@ -89,6 +98,7 @@ public class DistributionSetBuilder {
         body.setName(prefixName);
         body.setVersion(version);
         body.setType(type);
+        body.setModules(modules);
         return body;
     }
 
