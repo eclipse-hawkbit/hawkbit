@@ -41,6 +41,12 @@ public class AmqpConfiguration {
     @Autowired
     private ConnectionFactory connectionFactory;
 
+    /**
+     * Create a {@link RabbitAdmin} and ignore declaration exceptions.
+     * {@link RabbitAdmin#setIgnoreDeclarationExceptions(boolean)}
+     * 
+     * @return the bean
+     */
     @Bean
     public RabbitAdmin rabbitAdmin() {
         final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
