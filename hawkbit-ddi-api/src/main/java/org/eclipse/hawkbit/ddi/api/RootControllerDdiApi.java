@@ -7,22 +7,15 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 import org.eclipse.hawkbit.ddi.ControllerConstants;
-import org.eclipse.hawkbit.ddi.model.ActionFeedback;
-import org.eclipse.hawkbit.ddi.model.Artifact;
 import org.eclipse.hawkbit.ddi.model.Cancel;
-import org.eclipse.hawkbit.ddi.model.ConfigData;
 import org.eclipse.hawkbit.ddi.model.ControllerBase;
 import org.eclipse.hawkbit.ddi.model.DeploymentBase;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +25,21 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @RequestMapping(ControllerConstants.BASE_V1_REQUEST_MAPPING)
 public interface RootControllerDdiApi {
+
+    /**
+     * Root resource for an individual {@link Target}.
+     *
+     * @param targetid
+     *            of the {@link Target} that matches to
+     *            {@link Target#getControllerId()}
+     * @param request
+     *            the HTTP request injected by spring
+     * @return the response
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}", produces = { "application/hal+json",
+            MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<ControllerBase> getControllerBase(@PathVariable("targetid") final String targetid,
+            final HttpServletRequest request);
 
     /**
      * Returns all artifacts of a given software module and target.
@@ -48,21 +56,6 @@ public interface RootControllerDdiApi {
     public ResponseEntity<List<org.eclipse.hawkbit.ddi.model.Artifact>> getSoftwareModulesArtifacts(
             @PathVariable("targetid") final String targetid,
             @PathVariable("softwareModuleId") final Long softwareModuleId);
-
-    /**
-     * Root resource for an individual {@link Target}.
-     *
-     * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
-     * @param request
-     *            the HTTP request injected by spring
-     * @return the response
-     */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}", produces = { "application/hal+json",
-            MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ControllerBase> getControllerBase(@PathVariable("targetid") final String targetid,
-            final HttpServletRequest request);
 
     /**
      * Handles GET {@link Artifact} download request. This could be full or
@@ -83,11 +76,14 @@ public interface RootControllerDdiApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
-    public ResponseEntity<Void> downloadArtifact(@PathVariable("targetid") final String targetid,
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName, final HttpServletResponse response,
-            final HttpServletRequest request);
+    // @RequestMapping(method = RequestMethod.GET, value =
+    // "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
+    // public ResponseEntity<Void> downloadArtifact(@PathVariable("targetid")
+    // final String targetid,
+    // @PathVariable("softwareModuleId") final Long softwareModuleId,
+    // @PathVariable("fileName") final String fileName, final
+    // HttpServletResponse response,
+    // final HttpServletRequest request);
 
     /**
      * Handles GET {@link Artifact} MD5 checksum file download request.
@@ -106,12 +102,16 @@ public interface RootControllerDdiApi {
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
-            + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<Void> downloadArtifactMd5(@PathVariable("targetid") final String targetid,
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName, final HttpServletResponse response,
-            final HttpServletRequest request);
+    // @RequestMapping(method = RequestMethod.GET, value =
+    // "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
+    // + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces =
+    // MediaType.TEXT_PLAIN_VALUE)
+    // public ResponseEntity<Void> downloadArtifactMd5(@PathVariable("targetid")
+    // final String targetid,
+    // @PathVariable("softwareModuleId") final Long softwareModuleId,
+    // @PathVariable("fileName") final String fileName, final
+    // HttpServletResponse response,
+    // final HttpServletRequest request);
 
     /**
      * Resource for {@link SoftwareModule} {@link UpdateAction}s.
@@ -153,11 +153,15 @@ public interface RootControllerDdiApi {
      *
      * @return the response
      */
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
-            + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
-            @PathVariable("targetid") final String targetid, @PathVariable("actionId") @NotEmpty final Long actionId,
-            final HttpServletRequest request);
+    // @RequestMapping(value = "/{targetid}/" +
+    // ControllerConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
+    // + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes =
+    // MediaType.APPLICATION_JSON_VALUE)
+    // public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid
+    // @RequestBody final ActionFeedback feedback,
+    // @PathVariable("targetid") final String targetid,
+    // @PathVariable("actionId") @NotEmpty final Long actionId,
+    // final HttpServletRequest request);
 
     /**
      * This is the feedback channel for the config data action.
@@ -171,10 +175,13 @@ public interface RootControllerDdiApi {
      *
      * @return status of the request
      */
-    @RequestMapping(value = "/{targetid}/"
-            + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> putConfigData(@Valid @RequestBody final ConfigData configData,
-            @PathVariable("targetid") final String targetid, final HttpServletRequest request);
+    // @RequestMapping(value = "/{targetid}/"
+    // + ControllerConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT,
+    // consumes = MediaType.APPLICATION_JSON_VALUE)
+    // public ResponseEntity<Void> putConfigData(@Valid @RequestBody final
+    // ConfigData configData,
+    // @PathVariable("targetid") final String targetid, final HttpServletRequest
+    // request);
 
     /**
      * {@link RequestMethod.GET} method for the {@link Cancel} action.
@@ -209,10 +216,14 @@ public interface RootControllerDdiApi {
      * @return the {@link ActionFeedback} response
      */
 
-    @RequestMapping(value = "/{targetid}/" + ControllerConstants.CANCEL_ACTION + "/{actionId}/"
-            + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
-            @PathVariable("targetid") @NotEmpty final String targetid,
-            @PathVariable("actionId") @NotEmpty final Long actionId, final HttpServletRequest request);
+    // @RequestMapping(value = "/{targetid}/" +
+    // ControllerConstants.CANCEL_ACTION + "/{actionId}/"
+    // + ControllerConstants.FEEDBACK, method = RequestMethod.POST, consumes =
+    // MediaType.APPLICATION_JSON_VALUE)
+    // public ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody
+    // final ActionFeedback feedback,
+    // @PathVariable("targetid") @NotEmpty final String targetid,
+    // @PathVariable("actionId") @NotEmpty final Long actionId, final
+    // HttpServletRequest request);
 
 }
