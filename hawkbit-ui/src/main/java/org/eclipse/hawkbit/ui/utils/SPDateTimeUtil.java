@@ -101,7 +101,7 @@ public final class SPDateTimeUtil {
     }
 
     /**
-     * Get formatted date 'last modefied at' by entity.
+     * Get formatted date 'last modified at' by entity.
      *
      * @param baseEntity
      *            the entity
