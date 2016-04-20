@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,14 +17,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * {@link UpdateAction} resource.
  */
-public class DeploymentBase extends ResourceSupport {
+public class DdiDeploymentBase extends ResourceSupport {
 
     @JsonProperty("id")
     @NotNull
     private final String deplyomentId;
 
     @NotNull
-    private final Deployment deployment;
+    private final DdiDeployment deployment;
 
     /**
      * Constructor.
@@ -34,12 +34,12 @@ public class DeploymentBase extends ResourceSupport {
      * @param deployment
      *            details.
      */
-    public DeploymentBase(final String id, final Deployment deployment) {
+    public DdiDeploymentBase(final String id, final DdiDeployment deployment) {
         deplyomentId = id;
         this.deployment = deployment;
     }
 
-    public Deployment getDeployment() {
+    public DdiDeployment getDeployment() {
         return deployment;
     }
 

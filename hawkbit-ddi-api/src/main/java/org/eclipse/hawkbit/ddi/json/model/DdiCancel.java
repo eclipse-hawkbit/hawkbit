@@ -6,19 +6,19 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
 /**
  * Cancel action to be provided to the target.
  */
-public class Cancel {
+public class DdiCancel {
 
     private final String id;
 
     @NotNull
-    private final CancelActionToStop cancelAction;
+    private final DdiCancelActionToStop cancelAction;
 
     /**
      * Parameterized constructor.
@@ -28,7 +28,7 @@ public class Cancel {
      * @param cancelAction
      *            the action
      */
-    public Cancel(final String id, final CancelActionToStop cancelAction) {
+    public DdiCancel(final String id, final DdiCancelActionToStop cancelAction) {
         super();
         this.id = id;
         this.cancelAction = cancelAction;
@@ -38,7 +38,7 @@ public class Cancel {
         return id;
     }
 
-    public CancelActionToStop getCancelAction() {
+    public DdiCancelActionToStop getCancelAction() {
         return cancelAction;
     }
 

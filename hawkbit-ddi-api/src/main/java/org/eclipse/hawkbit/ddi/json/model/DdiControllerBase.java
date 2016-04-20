@@ -6,16 +6,16 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
 /**
- * {@link ControllerBase} resource content.
+ * {@link DdiControllerBase} resource content.
  */
-public class ControllerBase extends ResourceSupport {
+public class DdiControllerBase extends ResourceSupport {
 
-    private final Config config;
+    private final DdiConfig config;
 
     /**
      * Constructor.
@@ -23,12 +23,12 @@ public class ControllerBase extends ResourceSupport {
      * @param config
      *            configuration of the SP target
      */
-    public ControllerBase(final Config config) {
+    public DdiControllerBase(final DdiConfig config) {
         super();
         this.config = config;
     }
 
-    public Config getConfig() {
+    public DdiConfig getConfig() {
         return config;
     }
 

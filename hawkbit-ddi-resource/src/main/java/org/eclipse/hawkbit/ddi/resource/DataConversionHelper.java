@@ -20,12 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.UrlProtocol;
-import org.eclipse.hawkbit.ddi.ControllerConstants;
-import org.eclipse.hawkbit.ddi.model.Artifact;
-import org.eclipse.hawkbit.ddi.model.Chunk;
-import org.eclipse.hawkbit.ddi.model.Config;
-import org.eclipse.hawkbit.ddi.model.ControllerBase;
-import org.eclipse.hawkbit.ddi.model.Polling;
+import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
+import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
+import org.eclipse.hawkbit.ddi.json.model.DdiConfig;
+import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -50,10 +50,10 @@ public final class DataConversionHelper {
 
     }
 
-    static List<Chunk> createChunks(final String targetid, final Action uAction,
+    static List<DdiChunk> createChunks(final String targetid, final Action uAction,
             final ArtifactUrlHandler artifactUrlHandler) {
         return uAction.getDistributionSet().getModules().stream()
-                .map(module -> new Chunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
+                .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
                         module.getName(), createArtifacts(targetid, module, artifactUrlHandler)))
                 .collect(Collectors.toList());
 
@@ -79,12 +79,12 @@ public final class DataConversionHelper {
      *            the software module
      * @return a list of artifacts or a empty list. Cannot be <null>.
      */
-    public static List<Artifact> createArtifacts(final String targetid,
+    public static List<DdiArtifact> createArtifacts(final String targetid,
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler) {
-        final List<Artifact> files = new ArrayList<>();
+        final List<DdiArtifact> files = new ArrayList<>();
         module.getLocalArtifacts().forEach(artifact -> {
-            final Artifact file = new Artifact();
+            final DdiArtifact file = new DdiArtifact();
             file.setHashes(new ArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
             file.setFilename(artifact.getFilename());
             file.setSize(artifact.getSize());
@@ -93,18 +93,18 @@ public final class DataConversionHelper {
             final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
                     artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
             file.add(new Link(linkHttps).withRel("download"));
-            file.add(new Link(linkHttps + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
+            file.add(new Link(linkHttps + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
             file.add(new Link(linkHttp).withRel("download-http"));
-            file.add(new Link(linkHttp + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
+            file.add(new Link(linkHttp + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
 
             files.add(file);
         });
         return files;
     }
 
-    static ControllerBase fromTarget(final Target target, final List<Action> actions,
+    static DdiControllerBase fromTarget(final Target target, final List<Action> actions,
             final String defaultControllerPollTime, final TenantAware tenantAware) {
-        final ControllerBase result = new ControllerBase(new Config(new Polling(defaultControllerPollTime)));
+        final DdiControllerBase result = new DdiControllerBase(new DdiConfig(new DdiPolling(defaultControllerPollTime)));
 
         boolean addedUpdate = false;
         boolean addedCancel = false;
@@ -118,19 +118,19 @@ public final class DataConversionHelper {
                 // response because of eTags.
                 result.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant())
                         .getControllerBasedeploymentAction(target.getControllerId(), action.getId(), actions.hashCode(),
-                                null)).withRel(ControllerConstants.DEPLOYMENT_BASE_ACTION));
+                                null)).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
                 addedUpdate = true;
             } else if (action.isCancelingOrCanceled() && !addedCancel) {
                 result.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant())
                         .getControllerCancelAction(target.getControllerId(), action.getId(), null))
-                                .withRel(ControllerConstants.CANCEL_ACTION));
+                                .withRel(DdiRestConstants.CANCEL_ACTION));
                 addedCancel = true;
             }
         }
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
             result.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
-                    target.getControllerId(), null)).withRel(ControllerConstants.CONFIG_DATA_ACTION));
+                    target.getControllerId(), null)).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;
     }
@@ -146,7 +146,7 @@ public final class DataConversionHelper {
         final StringBuilder header = new StringBuilder();
         header.append("attachment;filename=");
         header.append(fileName);
-        header.append(ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX);
+        header.append(DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX);
 
         response.setContentLength(content.length);
         response.setHeader("Content-Disposition", header.toString());

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -35,12 +35,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ActionFeedback {
+public class DdiActionFeedback {
     private final Long id;
     private final String time;
 
     @NotNull
-    private final Status status;
+    private final DdiStatus status;
 
     /**
      * Constructor.
@@ -53,8 +53,8 @@ public class ActionFeedback {
      *            is the feedback itself
      */
     @JsonCreator
-    public ActionFeedback(@JsonProperty("id") final Long id, @JsonProperty("time") final String time,
-            @JsonProperty("status") final Status status) {
+    public DdiActionFeedback(@JsonProperty("id") final Long id, @JsonProperty("time") final String time,
+            @JsonProperty("status") final DdiStatus status) {
         this.id = id;
         this.time = time;
         this.status = status;
@@ -68,7 +68,7 @@ public class ActionFeedback {
         return time;
     }
 
-    public Status getStatus() {
+    public DdiStatus getStatus() {
         return status;
     }
 

@@ -6,13 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.api;
+package org.eclipse.hawkbit.ddi.rest.api;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.ddi.ControllerConstants;
-import org.eclipse.hawkbit.ddi.model.Artifact;
+import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -24,11 +23,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * REST resource handling for artifact download operations.
  */
-@RequestMapping(ControllerConstants.ARTIFACTS_V1_REQUEST_MAPPING)
-public interface ArtifactStoreControllerDdiApi {
+@RequestMapping(DdiRestConstants.ARTIFACTS_V1_REQUEST_MAPPING)
+public interface DdiArtifactStoreControllerRestApi {
 
     /**
-     * Handles GET {@link Artifact} download request. This could be full or
+     * Handles GET {@link DdiArtifact} download request. This could be full or
      * partial download request.
      *
      * @param fileName
@@ -44,7 +43,7 @@ public interface ArtifactStoreControllerDdiApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @RequestMapping(method = RequestMethod.GET, value = ControllerConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
+    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
             + "/{fileName}")
     @ResponseBody
     public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
@@ -52,7 +51,7 @@ public interface ArtifactStoreControllerDdiApi {
             @AuthenticationPrincipal final String targetid);
 
     /**
-     * Handles GET {@link Artifact} MD5 checksum file download request.
+     * Handles GET {@link DdiArtifact} MD5 checksum file download request.
      *
      * @param fileName
      *            to search for
@@ -61,8 +60,8 @@ public interface ArtifactStoreControllerDdiApi {
      *
      * @return response of the servlet
      */
-    @RequestMapping(method = RequestMethod.GET, value = ControllerConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
-            + "/{fileName}" + ControllerConstants.ARTIFACT_MD5_DWNL_SUFFIX)
+    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
+            + "/{fileName}" + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
     @ResponseBody
     public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName,
             final HttpServletResponse response);

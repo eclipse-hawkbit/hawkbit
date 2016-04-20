@@ -6,9 +6,9 @@ package org.eclipse.hawkbit.ddi.client;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.ddi.ControllerConstants;
 import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
-import org.eclipse.hawkbit.ddi.model.ControllerBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.feign.support.ResponseEntityDecoder;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +39,7 @@ public class DdiClient {
         this.controllerId = controllerId;
         this.name = name;
         this.description = description;
-        rootControllerResourcePath = rolloutsUrl + ControllerConstants.BASE_V1_REQUEST_MAPPING;
+        rootControllerResourcePath = rolloutsUrl + DdiRestConstants.BASE_V1_REQUEST_MAPPING;
         rootControllerResourcePath = rootControllerResourcePath.replace("{tenant}", tenant);
 
         createFeignClient();
@@ -71,8 +71,9 @@ public class DdiClient {
 
         // final HttpServletRequest request = new;
 
-        final ResponseEntity<ControllerBase> response = rootControllerResourceClient.getControllerBase("test", request);
-        final ControllerBase controllerBase = response.getBody();
+        final ResponseEntity<DdiControllerBase> response = rootControllerResourceClient.getControllerBase("test",
+                request);
+        final DdiControllerBase controllerBase = response.getBody();
 
         // TODO notify every 10 seconds on the rollout server
 

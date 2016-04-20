@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
-import org.eclipse.hawkbit.ddi.api.ArtifactStoreControllerDdiApi;
+import org.eclipse.hawkbit.ddi.rest.api.DdiArtifactStoreControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
  * for legacy controllers that can not be fed with a download URI at runtime.
  */
 @RestController
-public class ArtifactStoreController implements ArtifactStoreControllerDdiApi {
+public class ArtifactStoreController implements DdiArtifactStoreControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArtifactStoreController.class);
 

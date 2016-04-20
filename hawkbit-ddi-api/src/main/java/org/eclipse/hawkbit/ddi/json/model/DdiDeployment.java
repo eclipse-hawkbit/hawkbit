@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import java.util.List;
 
@@ -15,13 +15,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Detailed {@link UpdateAction} information.
  */
-public class Deployment {
+public class DdiDeployment {
 
     private final HandlingType download;
 
     private final HandlingType update;
 
-    private final List<Chunk> chunks;
+    private final List<DdiChunk> chunks;
 
     /**
      * Constructor.
@@ -33,7 +33,7 @@ public class Deployment {
      * @param chunks
      *            to handle.
      */
-    public Deployment(final HandlingType download, final HandlingType update, final List<Chunk> chunks) {
+    public DdiDeployment(final HandlingType download, final HandlingType update, final List<DdiChunk> chunks) {
         super();
         this.download = download;
         this.update = update;
@@ -48,7 +48,7 @@ public class Deployment {
         return update;
     }
 
-    public List<Chunk> getChunks() {
+    public List<DdiChunk> getChunks() {
         return chunks;
     }
 

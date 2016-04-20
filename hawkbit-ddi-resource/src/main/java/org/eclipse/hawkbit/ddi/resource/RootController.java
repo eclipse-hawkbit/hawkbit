@@ -18,17 +18,17 @@ import javax.validation.Valid;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
-import org.eclipse.hawkbit.ddi.api.RootControllerDdiApi;
-import org.eclipse.hawkbit.ddi.model.ActionFeedback;
-import org.eclipse.hawkbit.ddi.model.Cancel;
-import org.eclipse.hawkbit.ddi.model.CancelActionToStop;
-import org.eclipse.hawkbit.ddi.model.Chunk;
-import org.eclipse.hawkbit.ddi.model.ConfigData;
-import org.eclipse.hawkbit.ddi.model.ControllerBase;
-import org.eclipse.hawkbit.ddi.model.Deployment;
-import org.eclipse.hawkbit.ddi.model.Deployment.HandlingType;
-import org.eclipse.hawkbit.ddi.model.DeploymentBase;
-import org.eclipse.hawkbit.ddi.model.Result.FinalResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiCancel;
+import org.eclipse.hawkbit.ddi.json.model.DdiCancelActionToStop;
+import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
+import org.eclipse.hawkbit.ddi.json.model.DdiConfigData;
+import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
+import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -63,7 +63,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Transactional (read-write) as all queries at least update the last poll time.
  */
 @RestController
-public class RootController implements RootControllerDdiApi {
+public class RootController implements DdiRootControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
@@ -90,7 +90,7 @@ public class RootController implements RootControllerDdiApi {
     private ArtifactUrlHandler artifactUrlHandler;
 
     @Override
-    public ResponseEntity<List<org.eclipse.hawkbit.ddi.model.Artifact>> getSoftwareModulesArtifacts(
+    public ResponseEntity<List<org.eclipse.hawkbit.ddi.json.model.DdiArtifact>> getSoftwareModulesArtifacts(
             @PathVariable final String targetid, @PathVariable final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", targetid);
 
@@ -107,7 +107,7 @@ public class RootController implements RootControllerDdiApi {
     }
 
     @Override
-    public ResponseEntity<ControllerBase> getControllerBase(@PathVariable final String targetid,
+    public ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable final String targetid,
             final HttpServletRequest request) {
         LOG.debug("getControllerBase({})", targetid);
 
@@ -206,7 +206,7 @@ public class RootController implements RootControllerDdiApi {
     }
 
     @Override
-    public ResponseEntity<DeploymentBase> getControllerBasedeploymentAction(
+    public ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
             final HttpServletRequest request) {
@@ -223,12 +223,12 @@ public class RootController implements RootControllerDdiApi {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<Chunk> chunks = DataConversionHelper.createChunks(targetid, action, artifactUrlHandler);
+            final List<DdiChunk> chunks = DataConversionHelper.createChunks(targetid, action, artifactUrlHandler);
 
             final HandlingType handlingType = action.isForce() ? HandlingType.FORCED : HandlingType.ATTEMPT;
 
-            final DeploymentBase base = new DeploymentBase(Long.toString(action.getId()),
-                    new Deployment(handlingType, handlingType, chunks));
+            final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
+                    new DdiDeployment(handlingType, handlingType, chunks));
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", targetid, base);
 
@@ -242,7 +242,7 @@ public class RootController implements RootControllerDdiApi {
     }
 
     @Override
-    public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
+    public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
             @PathVariable final String targetid, @PathVariable @NotEmpty final Long actionId,
             final HttpServletRequest request) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", targetid, actionId, feedback);
@@ -277,7 +277,7 @@ public class RootController implements RootControllerDdiApi {
 
     }
 
-    private ActionStatus generateUpdateStatus(final ActionFeedback feedback, final String targetid, final Long actionid,
+    private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String targetid, final Long actionid,
             final Action action) {
 
         final ActionStatus actionStatus = new ActionStatus();
@@ -317,7 +317,7 @@ public class RootController implements RootControllerDdiApi {
         return actionStatus;
     }
 
-    private static void handleDefaultUpdateStatus(final ActionFeedback feedback, final String targetid,
+    private static void handleDefaultUpdateStatus(final DdiActionFeedback feedback, final String targetid,
             final Long actionid, final ActionStatus actionStatus) {
         LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.", actionid,
                 targetid, feedback.getStatus().getExecution());
@@ -325,7 +325,7 @@ public class RootController implements RootControllerDdiApi {
         actionStatus.addMessage("Controller reported: " + feedback.getStatus().getExecution());
     }
 
-    private static void handleClosedUpdateStatus(final ActionFeedback feedback, final String targetid,
+    private static void handleClosedUpdateStatus(final DdiActionFeedback feedback, final String targetid,
             final Long actionid, final ActionStatus actionStatus) {
         LOG.debug("Controller reported closed (actionid: {}, targetid: {}) as we got {} report.", actionid, targetid,
                 feedback.getStatus().getExecution());
@@ -339,7 +339,7 @@ public class RootController implements RootControllerDdiApi {
     }
 
     @Override
-    public ResponseEntity<Void> putConfigData(@Valid @RequestBody final ConfigData configData,
+    public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
             @PathVariable final String targetid, final HttpServletRequest request) {
         controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
@@ -350,7 +350,7 @@ public class RootController implements RootControllerDdiApi {
     }
 
     @Override
-    public ResponseEntity<Cancel> getControllerCancelAction(@PathVariable @NotEmpty final String targetid,
+    public ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable @NotEmpty final String targetid,
             @PathVariable @NotEmpty final Long actionId, final HttpServletRequest request) {
         LOG.debug("getControllerCancelAction({})", targetid);
 
@@ -364,8 +364,8 @@ public class RootController implements RootControllerDdiApi {
         }
 
         if (action.isCancelingOrCanceled()) {
-            final Cancel cancel = new Cancel(String.valueOf(action.getId()),
-                    new CancelActionToStop(String.valueOf(action.getId())));
+            final DdiCancel cancel = new DdiCancel(String.valueOf(action.getId()),
+                    new DdiCancelActionToStop(String.valueOf(action.getId())));
 
             LOG.debug("Found an active CancelAction for target {}. returning cancel: {}", targetid, cancel);
 
@@ -379,7 +379,7 @@ public class RootController implements RootControllerDdiApi {
     }
 
     @Override
-    public ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final ActionFeedback feedback,
+    public ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
             @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
             final HttpServletRequest request) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", targetid, feedback);
@@ -405,7 +405,7 @@ public class RootController implements RootControllerDdiApi {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private static ActionStatus generateActionCancelStatus(final ActionFeedback feedback, final Target target,
+    private static ActionStatus generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
             final Long actionid, final Action action) {
 
         final ActionStatus actionStatus = new ActionStatus();
@@ -445,7 +445,7 @@ public class RootController implements RootControllerDdiApi {
 
     }
 
-    private static void handleClosedCancelStatus(final ActionFeedback feedback, final ActionStatus actionStatus) {
+    private static void handleClosedCancelStatus(final DdiActionFeedback feedback, final ActionStatus actionStatus) {
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             actionStatus.setStatus(Status.ERROR);
         } else {

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import java.util.List;
 
@@ -19,13 +19,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Details status information concerning the action processing.
  */
-public class Status {
+public class DdiStatus {
 
     @NotNull
     private final ExecutionStatus execution;
 
     @NotNull
-    private final Result result;
+    private final DdiResult result;
 
     private final List<String> details;
 
@@ -40,8 +40,8 @@ public class Status {
      *            as optional addition
      */
     @JsonCreator
-    public Status(@JsonProperty("execution") final ExecutionStatus execution,
-            @JsonProperty("result") final Result result, @JsonProperty("details") final List<String> details) {
+    public DdiStatus(@JsonProperty("execution") final ExecutionStatus execution,
+            @JsonProperty("result") final DdiResult result, @JsonProperty("details") final List<String> details) {
         super();
         this.execution = execution;
         this.result = result;
@@ -52,7 +52,7 @@ public class Status {
         return execution;
     }
 
-    public Result getResult() {
+    public DdiResult getResult() {
         return result;
     }
 

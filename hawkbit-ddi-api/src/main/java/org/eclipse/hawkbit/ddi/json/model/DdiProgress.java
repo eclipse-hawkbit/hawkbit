@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Action fulfillment progress by means of gives the achieved amount of maximal
  * of possible levels.
  */
-public class Progress {
+public class DdiProgress {
 
     @NotNull
     private final Integer cnt;
@@ -33,7 +33,7 @@ public class Progress {
      *            maximum levels
      */
     @JsonCreator
-    public Progress(@JsonProperty("cnt") final Integer cnt, @JsonProperty("of") final Integer of) {
+    public DdiProgress(@JsonProperty("cnt") final Integer cnt, @JsonProperty("of") final Integer of) {
         super();
         this.cnt = cnt;
         this.of = of;
