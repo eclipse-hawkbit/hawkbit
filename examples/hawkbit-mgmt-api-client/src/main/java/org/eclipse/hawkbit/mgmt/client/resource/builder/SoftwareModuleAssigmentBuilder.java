@@ -11,11 +11,11 @@ package org.eclipse.hawkbit.mgmt.client.resource.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleAssigmentRest;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 
 /**
  * 
- * Builder pattern for building {@link SoftwareModuleAssigmentRest}.
+ * Builder pattern for building {@link MgmtSoftwareModuleAssigment}.
  *
  */
 public class SoftwareModuleAssigmentBuilder {
@@ -37,15 +37,15 @@ public class SoftwareModuleAssigmentBuilder {
     }
 
     /**
-     * Builds a list with a single entry of {@link SoftwareModuleAssigmentRest}
+     * Builds a list with a single entry of {@link MgmtSoftwareModuleAssigment}
      * which can directly be used in the RESTful-API.
      * 
-     * @return a single entry list of {@link SoftwareModuleAssigmentRest}
+     * @return a single entry list of {@link MgmtSoftwareModuleAssigment}
      */
-    public List<SoftwareModuleAssigmentRest> build() {
-        final List<SoftwareModuleAssigmentRest> softwareModuleAssigmentRestList = new ArrayList<>();
+    public List<MgmtSoftwareModuleAssigment> build() {
+        final List<MgmtSoftwareModuleAssigment> softwareModuleAssigmentRestList = new ArrayList<>();
         for (final Long id : ids) {
-            final SoftwareModuleAssigmentRest softwareModuleAssigmentRest = new SoftwareModuleAssigmentRest();
+            final MgmtSoftwareModuleAssigment softwareModuleAssigmentRest = new MgmtSoftwareModuleAssigment();
             softwareModuleAssigmentRest.setId(id);
             softwareModuleAssigmentRestList.add(softwareModuleAssigmentRest);
         }

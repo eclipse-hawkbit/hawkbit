@@ -8,13 +8,13 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource;
 
-import org.eclipse.hawkbit.rest.resource.api.TargetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
  * Client binding for the Target resource of the management API.
  */
 @FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/targets")
-public interface TargetResourceClient extends TargetRestApi {
+public interface TargetResourceClient extends MgmtTargetRestApi {
 
 }

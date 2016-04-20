@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.mgmt.client.resource.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeRequestBodyPost;
-import org.eclipse.hawkbit.rest.resource.model.target.TargetRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 
 import com.google.common.collect.Lists;
 
 /**
  * 
- * Builder pattern for building {@link TargetRequestBody}.
+ * Builder pattern for building {@link MgmtTargetRequestBody}.
  *
  */
 public class TargetBuilder {
@@ -58,35 +58,35 @@ public class TargetBuilder {
     }
 
     /**
-     * Builds a list with a single entry of {@link TargetRequestBody} which can
+     * Builds a list with a single entry of {@link MgmtTargetRequestBody} which can
      * directly be used in the RESTful-API.
      * 
-     * @return a single entry list of {@link TargetRequestBody}
+     * @return a single entry list of {@link MgmtTargetRequestBody}
      */
-    public List<TargetRequestBody> build() {
+    public List<MgmtTargetRequestBody> build() {
         return Lists.newArrayList(doBuild(controllerId));
     }
 
     /**
-     * Builds a list of multiple {@link TargetRequestBody} to create multiple
+     * Builds a list of multiple {@link MgmtTargetRequestBody} to create multiple
      * targets at once. An increasing number will be added to the controllerId
      * of the target. The name and description will remain.
      * 
      * @param count
      *            the amount of software module type bodies which should be
      *            created
-     * @return a list of {@link SoftwareModuleTypeRequestBodyPost}
+     * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
-    public List<TargetRequestBody> buildAsList(final int count) {
-        final ArrayList<TargetRequestBody> bodyList = Lists.newArrayList();
+    public List<MgmtTargetRequestBody> buildAsList(final int count) {
+        final ArrayList<MgmtTargetRequestBody> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(controllerId + index));
         }
         return bodyList;
     }
 
-    private TargetRequestBody doBuild(final String prefixControllerId) {
-        final TargetRequestBody body = new TargetRequestBody();
+    private MgmtTargetRequestBody doBuild(final String prefixControllerId) {
+        final MgmtTargetRequestBody body = new MgmtTargetRequestBody();
         body.setControllerId(prefixControllerId);
         body.setName(name);
         body.setDescription(description);

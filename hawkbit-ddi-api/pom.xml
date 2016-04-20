@@ -1,4 +1,14 @@
-<?xml version="1.0"?>
+<!--
+
+    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+-->
+
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
@@ -9,12 +19,19 @@
   </parent>
   <artifactId>hawkbit-ddi-api</artifactId>
   <name>hawkBit :: DDI API</name>
-  
-  <dependencies>
+
+   <dependencies>
       <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-rest-api</artifactId>
-         <version>${project.version}</version>
+         <groupId>org.springframework.hateoas</groupId>
+         <artifactId>spring-hateoas</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-annotations</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>javax.validation</groupId>
+         <artifactId>validation-api</artifactId>
       </dependency>
       <dependency>
          <groupId>javax.servlet</groupId>
@@ -22,17 +39,12 @@
          <scope>provided</scope>
       </dependency>
       <dependency>
-         <groupId>commons-io</groupId>
-         <artifactId>commons-io</artifactId>
-         <version>2.4</version>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate-validator</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-web</artifactId>
       </dependency>
-        <dependency>
-         <groupId>org.hibernate</groupId>
-         <artifactId>hibernate-validator</artifactId>
-      </dependency>
-  </dependencies>
+   </dependencies>
 </project>

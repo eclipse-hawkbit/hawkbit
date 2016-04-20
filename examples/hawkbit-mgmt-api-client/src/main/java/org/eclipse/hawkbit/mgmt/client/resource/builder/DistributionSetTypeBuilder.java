@@ -11,22 +11,22 @@ package org.eclipse.hawkbit.mgmt.client.resource.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
-import org.eclipse.hawkbit.rest.resource.model.softwaremoduletype.SoftwareModuleTypeAssigmentRest;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
 
 import com.google.common.collect.Lists;
 
 /**
  * 
- * Builder pattern for building {@link DistributionSetTypeRequestBodyPost}.
+ * Builder pattern for building {@link MgmtDistributionSetTypeRequestBodyPost}.
  *
  */
 public class DistributionSetTypeBuilder {
 
     private String key;
     private String name;
-    private final List<SoftwareModuleTypeAssigmentRest> mandatorymodules = Lists.newArrayList();
-    private final List<SoftwareModuleTypeAssigmentRest> optionalmodules = Lists.newArrayList();
+    private final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules = Lists.newArrayList();
+    private final List<MgmtSoftwareModuleTypeAssigment> optionalmodules = Lists.newArrayList();
 
     /**
      * @param key
@@ -56,7 +56,7 @@ public class DistributionSetTypeBuilder {
      */
     public DistributionSetTypeBuilder mandatorymodules(final Long... softwareModuleTypeIds) {
         for (final Long id : softwareModuleTypeIds) {
-            final SoftwareModuleTypeAssigmentRest softwareModuleTypeAssigmentRest = new SoftwareModuleTypeAssigmentRest();
+            final MgmtSoftwareModuleTypeAssigment softwareModuleTypeAssigmentRest = new MgmtSoftwareModuleTypeAssigment();
             softwareModuleTypeAssigmentRest.setId(id);
             this.mandatorymodules.add(softwareModuleTypeAssigmentRest);
         }
@@ -72,7 +72,7 @@ public class DistributionSetTypeBuilder {
      */
     public DistributionSetTypeBuilder optionalmodules(final Long... softwareModuleTypeIds) {
         for (final Long id : softwareModuleTypeIds) {
-            final SoftwareModuleTypeAssigmentRest softwareModuleTypeAssigmentRest = new SoftwareModuleTypeAssigmentRest();
+            final MgmtSoftwareModuleTypeAssigment softwareModuleTypeAssigmentRest = new MgmtSoftwareModuleTypeAssigment();
             softwareModuleTypeAssigmentRest.setId(id);
             this.optionalmodules.add(softwareModuleTypeAssigmentRest);
         }
@@ -81,17 +81,17 @@ public class DistributionSetTypeBuilder {
 
     /**
      * Builds a list with a single entry of
-     * {@link DistributionSetTypeRequestBodyPost} which can directly be used in
+     * {@link MgmtDistributionSetTypeRequestBodyPost} which can directly be used in
      * the RESTful-API.
      * 
-     * @return a single entry list of {@link DistributionSetTypeRequestBodyPost}
+     * @return a single entry list of {@link MgmtDistributionSetTypeRequestBodyPost}
      */
-    public List<DistributionSetTypeRequestBodyPost> build() {
+    public List<MgmtDistributionSetTypeRequestBodyPost> build() {
         return Lists.newArrayList(doBuild(name, key));
     }
 
     /**
-     * Builds a list of multiple {@link DistributionSetTypeRequestBodyPost} to
+     * Builds a list of multiple {@link MgmtDistributionSetTypeRequestBodyPost} to
      * create multiple distribution set types at once. An increasing number will
      * be added to the name and key of the distribution set type. The optional
      * and mandatory software module types will remain the same.
@@ -99,10 +99,10 @@ public class DistributionSetTypeBuilder {
      * @param count
      *            the amount of distribution sets type body which should be
      *            created
-     * @return a list of {@link DistributionSetTypeRequestBodyPost}
+     * @return a list of {@link MgmtDistributionSetTypeRequestBodyPost}
      */
-    public List<DistributionSetTypeRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<DistributionSetTypeRequestBodyPost> bodyList = Lists.newArrayList();
+    public List<MgmtDistributionSetTypeRequestBodyPost> buildAsList(final int count) {
+        final ArrayList<MgmtDistributionSetTypeRequestBodyPost> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(name + index, key + index));
         }
@@ -110,8 +110,8 @@ public class DistributionSetTypeBuilder {
 
     }
 
-    private DistributionSetTypeRequestBodyPost doBuild(final String prefixName, final String prefixKey) {
-        final DistributionSetTypeRequestBodyPost body = new DistributionSetTypeRequestBodyPost();
+    private MgmtDistributionSetTypeRequestBodyPost doBuild(final String prefixName, final String prefixKey) {
+        final MgmtDistributionSetTypeRequestBodyPost body = new MgmtDistributionSetTypeRequestBodyPost();
         body.setKey(prefixKey);
         body.setName(prefixName);
         body.setMandatorymodules(mandatorymodules);

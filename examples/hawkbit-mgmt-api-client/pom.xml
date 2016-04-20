@@ -57,7 +57,7 @@
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-rest-api</artifactId>
+         <artifactId>hawkbit-mgmt-api</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>

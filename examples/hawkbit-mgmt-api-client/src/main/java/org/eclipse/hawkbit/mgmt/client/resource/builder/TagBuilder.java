@@ -11,12 +11,12 @@ package org.eclipse.hawkbit.mgmt.client.resource.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.tag.TagRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 
 import com.google.common.collect.Lists;
 
 /**
- * Builder pattern for building {@link TagRequestBodyPut}.
+ * Builder pattern for building {@link MgmtTagRequestBodyPut}.
  *
  */
 public class TagBuilder {
@@ -56,26 +56,26 @@ public class TagBuilder {
     }
 
     /**
-     * Builds a list with a single entry of {@link TagRequestBodyPut} which can
+     * Builds a list with a single entry of {@link MgmtTagRequestBodyPut} which can
      * directly be used in the RESTful-API.
      * 
-     * @return a single entry list of {@link TagRequestBodyPut}
+     * @return a single entry list of {@link MgmtTagRequestBodyPut}
      */
-    public List<TagRequestBodyPut> build() {
+    public List<MgmtTagRequestBodyPut> build() {
         return Lists.newArrayList(doBuild(name));
     }
 
     /**
-     * Builds a list of multiple {@link TagRequestBodyPut} to create multiple
+     * Builds a list of multiple {@link MgmtTagRequestBodyPut} to create multiple
      * tags at once. An increasing number will be added to the name of the tag.
      * The color and description will remain the same.
      * 
      * @param count
      *            the amount of distribution sets body which should be created
-     * @return a list of {@link TagRequestBodyPut}
+     * @return a list of {@link MgmtTagRequestBodyPut}
      */
-    public List<TagRequestBodyPut> buildAsList(final int count) {
-        final ArrayList<TagRequestBodyPut> bodyList = Lists.newArrayList();
+    public List<MgmtTagRequestBodyPut> buildAsList(final int count) {
+        final ArrayList<MgmtTagRequestBodyPut> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(name + index));
         }
@@ -83,8 +83,8 @@ public class TagBuilder {
         return bodyList;
     }
 
-    private TagRequestBodyPut doBuild(final String prefixName) {
-        final TagRequestBodyPut body = new TagRequestBodyPut();
+    private MgmtTagRequestBodyPut doBuild(final String prefixName) {
+        final MgmtTagRequestBodyPut body = new MgmtTagRequestBodyPut();
         body.setName(prefixName);
         body.setDescription(description);
         body.setColour(color);

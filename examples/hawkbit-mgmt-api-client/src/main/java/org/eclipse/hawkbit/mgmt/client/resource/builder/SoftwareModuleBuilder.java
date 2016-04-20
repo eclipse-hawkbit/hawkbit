@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.mgmt.client.resource.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.distributionsettype.DistributionSetTypeRequestBodyPost;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 
 import com.google.common.collect.Lists;
 
 /**
  * 
- * Builder pattern for building {@link SoftwareModuleRequestBodyPost}.
+ * Builder pattern for building {@link MgmtSoftwareModuleRequestBodyPost}.
  *
  */
 public class SoftwareModuleBuilder {
@@ -60,27 +60,27 @@ public class SoftwareModuleBuilder {
 
     /**
      * Builds a list with a single entry of
-     * {@link SoftwareModuleRequestBodyPost} which can directly be used in the
+     * {@link MgmtSoftwareModuleRequestBodyPost} which can directly be used in the
      * RESTful-API.
      * 
-     * @return a single entry list of {@link SoftwareModuleRequestBodyPost}
+     * @return a single entry list of {@link MgmtSoftwareModuleRequestBodyPost}
      */
-    public List<SoftwareModuleRequestBodyPost> build() {
+    public List<MgmtSoftwareModuleRequestBodyPost> build() {
         return Lists.newArrayList(doBuild(name));
     }
 
     /**
-     * Builds a list of multiple {@link SoftwareModuleRequestBodyPost} to create
+     * Builds a list of multiple {@link MgmtSoftwareModuleRequestBodyPost} to create
      * multiple software module at once. An increasing number will be added to
      * the name of the software module. The version and type will remain the
      * same.
      * 
      * @param count
      *            the amount of software module body which should be created
-     * @return a list of {@link DistributionSetTypeRequestBodyPost}
+     * @return a list of {@link MgmtDistributionSetTypeRequestBodyPost}
      */
-    public List<SoftwareModuleRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<SoftwareModuleRequestBodyPost> bodyList = Lists.newArrayList();
+    public List<MgmtSoftwareModuleRequestBodyPost> buildAsList(final int count) {
+        final ArrayList<MgmtSoftwareModuleRequestBodyPost> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(name + index));
         }
@@ -88,8 +88,8 @@ public class SoftwareModuleBuilder {
         return bodyList;
     }
 
-    private SoftwareModuleRequestBodyPost doBuild(final String prefixName) {
-        final SoftwareModuleRequestBodyPost body = new SoftwareModuleRequestBodyPost();
+    private MgmtSoftwareModuleRequestBodyPost doBuild(final String prefixName) {
+        final MgmtSoftwareModuleRequestBodyPost body = new MgmtSoftwareModuleRequestBodyPost();
         body.setName(prefixName);
         body.setVersion(version);
         body.setType(type);

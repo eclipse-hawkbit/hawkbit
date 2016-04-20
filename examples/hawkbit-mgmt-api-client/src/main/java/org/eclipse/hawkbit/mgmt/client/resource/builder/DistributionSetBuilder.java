@@ -11,20 +11,20 @@ package org.eclipse.hawkbit.mgmt.client.resource.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.resource.model.distributionset.DistributionSetRequestBodyPost;
-import org.eclipse.hawkbit.rest.resource.model.softwaremodule.SoftwareModuleAssigmentRest;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 
 import com.google.common.collect.Lists;
 
 /**
- * Builder pattern for building {@link DistributionSetRequestBodyPost}.
+ * Builder pattern for building {@link MgmtDistributionSetRequestBodyPost}.
  */
 public class DistributionSetBuilder {
 
     private String name;
     private String version;
     private String type;
-    private final List<SoftwareModuleAssigmentRest> modules = new ArrayList<>();
+    private final List<MgmtSoftwareModuleAssigment> modules = new ArrayList<>();
 
     /**
      * @param name
@@ -37,7 +37,7 @@ public class DistributionSetBuilder {
     }
 
     public DistributionSetBuilder moduleByID(final Long id) {
-        final SoftwareModuleAssigmentRest softwareModuleAssigmentRest = new SoftwareModuleAssigmentRest();
+        final MgmtSoftwareModuleAssigment softwareModuleAssigmentRest = new MgmtSoftwareModuleAssigment();
         softwareModuleAssigmentRest.setId(id);
         modules.add(softwareModuleAssigmentRest);
         return this;
@@ -65,27 +65,27 @@ public class DistributionSetBuilder {
 
     /**
      * Builds a list with a single entry of
-     * {@link DistributionSetRequestBodyPost} which can directly be used to post
+     * {@link MgmtDistributionSetRequestBodyPost} which can directly be used to post
      * on the RESTful-API.
      * 
-     * @return a single entry list of {@link DistributionSetRequestBodyPost}
+     * @return a single entry list of {@link MgmtDistributionSetRequestBodyPost}
      */
-    public List<DistributionSetRequestBodyPost> build() {
+    public List<MgmtDistributionSetRequestBodyPost> build() {
         return Lists.newArrayList(doBuild(name));
     }
 
     /**
-     * Builds a list of multiple {@link DistributionSetRequestBodyPost} to
+     * Builds a list of multiple {@link MgmtDistributionSetRequestBodyPost} to
      * create multiple distribution sets at once. An increasing number will be
      * added to the name of the distribution set. The version and type will
      * remain the same.
      * 
      * @param count
      *            the amount of distribution sets body which should be created
-     * @return a list of {@link DistributionSetRequestBodyPost}
+     * @return a list of {@link MgmtDistributionSetRequestBodyPost}
      */
-    public List<DistributionSetRequestBodyPost> buildAsList(final int count) {
-        final ArrayList<DistributionSetRequestBodyPost> bodyList = Lists.newArrayList();
+    public List<MgmtDistributionSetRequestBodyPost> buildAsList(final int count) {
+        final ArrayList<MgmtDistributionSetRequestBodyPost> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
             bodyList.add(doBuild(name + index));
         }
@@ -93,8 +93,8 @@ public class DistributionSetBuilder {
         return bodyList;
     }
 
-    private DistributionSetRequestBodyPost doBuild(final String prefixName) {
-        final DistributionSetRequestBodyPost body = new DistributionSetRequestBodyPost();
+    private MgmtDistributionSetRequestBodyPost doBuild(final String prefixName) {
+        final MgmtDistributionSetRequestBodyPost body = new MgmtDistributionSetRequestBodyPost();
         body.setName(prefixName);
         body.setVersion(version);
         body.setType(type);

@@ -8,13 +8,13 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
-import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutCondition;
-import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutCondition.Condition;
-import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Condition;
 
 /**
  * 
- * Builder pattern for building {@link RolloutRestRequestBody}.
+ * Builder pattern for building {@link MgmtRolloutRestRequestBody}.
  *
  */
 public class RolloutBuilder {
@@ -95,18 +95,18 @@ public class RolloutBuilder {
      * 
      * @return the rest request body for creating a rollout
      */
-    public RolloutRestRequestBody build() {
+    public MgmtRolloutRestRequestBody build() {
         return doBuild();
     }
 
-    private RolloutRestRequestBody doBuild() {
-        final RolloutRestRequestBody body = new RolloutRestRequestBody();
+    private MgmtRolloutRestRequestBody doBuild() {
+        final MgmtRolloutRestRequestBody body = new MgmtRolloutRestRequestBody();
         body.setName(name);
         body.setAmountGroups(groupSize);
         body.setTargetFilterQuery(targetFilterQuery);
         body.setDistributionSetId(distributionSetId);
-        body.setSuccessCondition(new RolloutCondition(Condition.THRESHOLD, successThreshold));
-        body.setErrorCondition(new RolloutCondition(Condition.THRESHOLD, errorThreshold));
+        body.setSuccessCondition(new MgmtRolloutCondition(Condition.THRESHOLD, successThreshold));
+        body.setErrorCondition(new MgmtRolloutCondition(Condition.THRESHOLD, errorThreshold));
         return body;
     }
 

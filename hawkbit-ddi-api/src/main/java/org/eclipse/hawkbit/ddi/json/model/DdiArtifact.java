@@ -10,13 +10,13 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.rest.resource.model.artifact.ArtifactHash;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Download information for all artifacts related to a specific {@link DdiChunk}.
+ * Download information for all artifacts related to a specific {@link DdiChunk}
+ * .
  */
 public class DdiArtifact extends ResourceSupport {
 
@@ -25,16 +25,16 @@ public class DdiArtifact extends ResourceSupport {
     private String filename;
 
     @JsonProperty
-    private ArtifactHash hashes;
+    private DdiArtifactHash hashes;
 
     @JsonProperty
     private Long size;
 
-    public ArtifactHash getHashes() {
+    public DdiArtifactHash getHashes() {
         return hashes;
     }
 
-    public void setHashes(final ArtifactHash hashes) {
+    public void setHashes(final DdiArtifactHash hashes) {
         this.hashes = hashes;
     }
 
