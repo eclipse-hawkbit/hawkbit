@@ -98,7 +98,7 @@ public final class UserDetailsFormatter {
 
     /**
      * Load user details by the user name and format the user name. If the
-     * loaded {@link UserDetails} is not a instance of a {@link UserPrincipal},
+     * loaded {@link UserDetails} is not an instance of a {@link UserPrincipal},
      * then just the {@link UserDetails#getUsername()} will return.
      * 
      * If first and last name available, they will combined. Otherwise the
