@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Feedback channel for ConfigData action.
  */
-public class ConfigData extends ActionFeedback {
+public class DdiConfigData extends DdiActionFeedback {
 
     @NotEmpty
     private final Map<String, String> data;
@@ -36,8 +36,8 @@ public class ConfigData extends ActionFeedback {
      *            contains the attributes.
      */
     @JsonCreator
-    public ConfigData(@JsonProperty(value = "id") final Long id, @JsonProperty(value = "time") final String time,
-            @JsonProperty(value = "status") final Status status,
+    public DdiConfigData(@JsonProperty(value = "id") final Long id, @JsonProperty(value = "time") final String time,
+            @JsonProperty(value = "status") final DdiStatus status,
             @JsonProperty(value = "data") final Map<String, String> data) {
         super(id, time, status);
         this.data = data;

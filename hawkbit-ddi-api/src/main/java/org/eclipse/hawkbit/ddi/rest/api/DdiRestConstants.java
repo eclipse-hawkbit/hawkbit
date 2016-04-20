@@ -6,12 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi;
+package org.eclipse.hawkbit.ddi.rest.api;
 
 /**
  * Constants for the direct device integration rest resources.
  */
-public final class ControllerConstants {
+public final class DdiRestConstants {
 
     /**
      * The base URL mapping of the direct device integration rest resources.
@@ -59,7 +59,7 @@ public final class ControllerConstants {
     public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
 
     // constant class, private constructor.
-    private ControllerConstants() {
+    private DdiRestConstants() {
 
     }
 }

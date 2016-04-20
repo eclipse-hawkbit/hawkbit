@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,9 +16,9 @@ import org.springframework.hateoas.ResourceSupport;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Download information for all artifacts related to a specific {@link Chunk}.
+ * Download information for all artifacts related to a specific {@link DdiChunk}.
  */
-public class Artifact extends ResourceSupport {
+public class DdiArtifact extends ResourceSupport {
 
     @NotNull
     @JsonProperty

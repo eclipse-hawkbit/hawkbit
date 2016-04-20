@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -18,12 +18,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Result information of the action progress which can by an intermediate or
  * final update.
  */
-public class Result {
+public class DdiResult {
 
     @NotEmpty
     private final FinalResult finished;
 
-    private final Progress progress;
+    private final DdiProgress progress;
 
     /**
      * Constructor.
@@ -34,8 +34,8 @@ public class Result {
      *            if not yet finished
      */
     @JsonCreator
-    public Result(@JsonProperty("finished") final FinalResult finished,
-            @JsonProperty("progress") final Progress progress) {
+    public DdiResult(@JsonProperty("finished") final FinalResult finished,
+            @JsonProperty("progress") final DdiProgress progress) {
         super();
         this.finished = finished;
         this.progress = progress;
@@ -45,7 +45,7 @@ public class Result {
         return finished;
     }
 
-    public Progress getProgress() {
+    public DdiProgress getProgress() {
         return progress;
     }
 
