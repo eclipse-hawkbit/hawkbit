@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 

@@ -28,7 +28,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId> hawkbit-rest-core</artifactId>
+         <artifactId>hawkbit-rest-core</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -40,6 +40,12 @@
      
       
        <!-- Test -->
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+          <artifactId>hawkbit-rest-core</artifactId>
+         <version>${project.version}</version>
+         <classifier>test</classifier>
+      </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter</artifactId>

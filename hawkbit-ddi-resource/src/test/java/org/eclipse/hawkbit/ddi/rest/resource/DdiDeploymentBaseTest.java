@@ -35,6 +35,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.rest.util.JsonBuilder;
+import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;

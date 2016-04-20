@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
+import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.mock.web.MockMultipartFile;

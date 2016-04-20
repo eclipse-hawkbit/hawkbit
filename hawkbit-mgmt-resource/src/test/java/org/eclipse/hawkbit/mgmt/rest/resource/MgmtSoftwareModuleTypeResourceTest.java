@@ -28,6 +28,8 @@ import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.util.JsonBuilder;
+import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;

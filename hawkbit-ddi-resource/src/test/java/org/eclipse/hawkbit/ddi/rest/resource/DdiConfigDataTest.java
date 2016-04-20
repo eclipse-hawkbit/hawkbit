@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.util.JsonBuilder;
+import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
