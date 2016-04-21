@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -60,8 +62,9 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     private HawkbitSecurityProperties securityProperties;
 
     @Override
-    public ResponseEntity<Void> downloadArtifactByFilename(final String fileName, final HttpServletResponse response,
-            final HttpServletRequest request, final String targetid) {
+    public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
+            final HttpServletResponse response, final HttpServletRequest request,
+            @AuthenticationPrincipal final String targetid) {
         ResponseEntity<Void> result;
 
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
@@ -98,7 +101,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     }
 
     @Override
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(final String fileName,
+    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName,
             final HttpServletResponse response) {
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
