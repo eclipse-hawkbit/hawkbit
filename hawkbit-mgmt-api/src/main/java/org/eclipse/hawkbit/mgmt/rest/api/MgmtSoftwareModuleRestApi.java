@@ -32,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  */
 @RequestMapping(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
-public interface MgmtSoftwareModuleRestAPI {
+public interface MgmtSoftwareModuleRestApi {
 
     /**
      * Handles POST request for artifact upload.

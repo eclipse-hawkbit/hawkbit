@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestAPI;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -51,7 +51,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  */
 @RestController
-public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestAPI {
+public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private static final Logger LOG = LoggerFactory.getLogger(MgmtSoftwareModuleResource.class);
 
     @Autowired

@@ -30,15 +30,8 @@ import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.ActionRepository;
-import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
@@ -299,8 +292,8 @@ public class MgmtDistributionSetResourceTest extends AbstractIntegrationTest {
         // assign knownTargetId to distribution set
         deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetId);
         // make it in install state
-        sendUpdateActionStatusToTargets(controllerManagament, targetManagement, actionRepository, createdDs,
-                Lists.newArrayList(createTarget), Status.FINISHED, "some message");
+        TestDataUtil.sendUpdateActionStatusToTargets(controllerManagament, targetManagement, actionRepository,
+                createdDs, Lists.newArrayList(createTarget), Status.FINISHED, "some message");
 
         mvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/installedTargets"))
@@ -399,7 +392,8 @@ public class MgmtDistributionSetResourceTest extends AbstractIntegrationTest {
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that single DS requested by ID is listed with expected payload.")
     public void getDistributionSet() throws Exception {
-        final DistributionSet set = createTestDistributionSet(softwareManagement, distributionSetManagement);
+        final DistributionSet set = TestDataUtil.createTestDistributionSet(softwareManagement,
+                distributionSetManagement);
 
         // perform request
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()).accept(MediaType.APPLICATION_JSON))
@@ -867,56 +861,6 @@ public class MgmtDistributionSetResourceTest extends AbstractIntegrationTest {
             character++;
         }
         return created;
-    }
-
-    public static List<Target> sendUpdateActionStatusToTargets(final ControllerManagement controllerManagament,
-            final TargetManagement targetManagement, final ActionRepository actionRepository, final DistributionSet dsA,
-            final Iterable<Target> targs, final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<Target>();
-        for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget(t);
-            for (final Action action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(controllerManagament, targetManagement, status, action, t,
-                        msgs));
-            }
-        }
-        return result;
-    }
-
-    private static Target sendUpdateActionStatusToTarget(final ControllerManagement controllerManagament,
-            final TargetManagement targetManagement, final Status status, final Action updActA, final Target t,
-            final String... msgs) {
-        updActA.setStatus(status);
-
-        final ActionStatus statusMessages = new ActionStatus();
-        statusMessages.setAction(updActA);
-        statusMessages.setOccurredAt(System.currentTimeMillis());
-        statusMessages.setStatus(status);
-        for (final String msg : msgs) {
-            statusMessages.addMessage(msg);
-        }
-        controllerManagament.addUpdateActionStatus(statusMessages, updActA);
-        return targetManagement.findTargetByControllerID(t.getControllerId());
-    }
-
-    public static DistributionSet createTestDistributionSet(final SoftwareManagement softwareManagement,
-            final DistributionSetManagement distributionSetManagement) {
-
-        DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
-                distributionSetManagement);
-        set.setVersion("anotherVersion");
-        set = distributionSetManagement.updateDistributionSet(set);
-
-        set.getModules().forEach(module -> {
-            module.setDescription("updated description");
-            softwareManagement.updateSoftwareModule(module);
-        });
-
-        // load also lazy stuff
-        set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
-
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
-        return set;
     }
 
 }

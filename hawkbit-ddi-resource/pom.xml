@@ -42,9 +42,10 @@
        <!-- Test -->
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-          <artifactId>hawkbit-rest-core</artifactId>
+         <artifactId>hawkbit-rest-core</artifactId>
          <version>${project.version}</version>
-         <classifier>test</classifier>
+         <classifier>tests</classifier>
+         <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
@@ -151,19 +152,4 @@
          <scope>test</scope>
       </dependency> 
    </dependencies>
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>test-jar</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-      </build>  
 </project>

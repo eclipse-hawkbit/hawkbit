@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestAPI;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -140,9 +140,9 @@ public final class MgmtSoftwareModuleMapper {
         response.setType(baseSofwareModule.getType().getKey());
         response.setVendor(baseSofwareModule.getVendor());
 
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestAPI.class).getArtifacts(response.getModuleId()))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT));
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestAPI.class).getSoftwareModule(response.getModuleId()))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
                 .withRel("self"));
 
         response.add(linkTo(
@@ -176,7 +176,7 @@ public final class MgmtSoftwareModuleMapper {
 
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
-        artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestAPI.class).getArtifact(artifact.getSoftwareModule().getId(),
+        artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifact(artifact.getSoftwareModule().getId(),
                 artifact.getId())).withRel("self"));
 
         if (artifact instanceof LocalArtifact) {

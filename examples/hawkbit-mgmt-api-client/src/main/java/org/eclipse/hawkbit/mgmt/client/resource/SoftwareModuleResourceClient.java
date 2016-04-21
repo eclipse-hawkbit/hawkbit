@@ -8,13 +8,13 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestAPI;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
  * Client binding for the SoftwareModule resource of the management API.
  */
 @FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/softwaremodules")
-public interface SoftwareModuleResourceClient extends MgmtSoftwareModuleRestAPI {
+public interface SoftwareModuleResourceClient extends MgmtSoftwareModuleRestApi {
 
 }
