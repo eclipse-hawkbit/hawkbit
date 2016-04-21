@@ -29,6 +29,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -54,7 +55,7 @@ public class SystemManagementResource implements SystemManagementRestApi {
      * @return HttpStatus.OK
      */
     @Override
-    public ResponseEntity<Void> deleteTenant(final String tenant) {
+    public ResponseEntity<Void> deleteTenant(@PathVariable("tenant") final String tenant) {
         systemManagement.deleteTenant(tenant);
         return new ResponseEntity<>(HttpStatus.OK);
     }
