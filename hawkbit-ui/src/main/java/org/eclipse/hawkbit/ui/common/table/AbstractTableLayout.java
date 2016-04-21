@@ -9,8 +9,11 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.Action.Handler;
+import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -26,6 +29,15 @@ import com.vaadin.ui.themes.ValoTheme;
 public abstract class AbstractTableLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 8611248179949245460L;
+
+    /**
+     * action for the shortcut key ctrl + 'A'.
+     */
+    protected static final ShortcutAction ACTION_CTRL_A = new ShortcutAction("Select All", ShortcutAction.KeyCode.A,
+            new int[] { ShortcutAction.ModifierKey.CTRL });
+
+    @Autowired
+    private transient EventBus.SessionEventBus eventBus;
 
     private AbstractTableHeader tableHeader;
 
@@ -93,12 +105,14 @@ public abstract class AbstractTableLayout extends VerticalLayout {
      * @return reference of {@link Handler} to handler the short cut keys.
      *         Default is null.
      */
-    protected Handler getShortCutKeysHandler() {
-        return null;
-    }
+    protected abstract Handler getShortCutKeysHandler();
 
     public void setShowFilterButtonVisible(final boolean visible) {
         tableHeader.setFilterButtonsIconVisible(visible);
+    }
+
+    public EventBus.SessionEventBus getEventBus() {
+        return eventBus;
     }
 
 }

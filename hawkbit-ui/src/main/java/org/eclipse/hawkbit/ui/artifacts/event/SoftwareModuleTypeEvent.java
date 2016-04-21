@@ -25,7 +25,7 @@ public class SoftwareModuleTypeEvent {
      *
      */
     public enum SoftwareModuleTypeEnum {
-        ADD_SOFTWARE_MODULE_TYPE, DELETE_SOFTWARE_MODULE_TYPE, UPDATE_SOFTWARE_MODULE_TYPE
+        ADD_SOFTWARE_MODULE_TYPE, DELETE_SOFTWARE_MODULE_TYPE, UPDATE_SOFTWARE_MODULE_TYPE, SELECT_ALL
     }
 
     private SoftwareModuleType softwareModuleType;

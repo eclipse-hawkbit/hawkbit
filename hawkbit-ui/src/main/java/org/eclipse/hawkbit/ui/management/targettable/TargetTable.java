@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
@@ -63,7 +62,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -353,6 +351,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         };
     }
 
+    // TODO MR
     private void onTargetDeletedEvent(final List<TargetDeletedEvent> events) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
@@ -928,16 +927,24 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
      * Select all rows in the table.
      */
     public void selectAll() {
-        final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(),
-                new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER, "createdAt"));
-        List<TargetIdName> targetIdList;
-        // is custom filter selected
-        if (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent()) {
-            targetIdList = getTargetIdsByCustomFilters(pageRequest);
-        } else {
-            targetIdList = getTargetIdsBySimpleFilters(pageRequest);
-        }
-        setValue(targetIdList);
+        // final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(),
+        // new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER,
+        // "createdAt"));
+        // List<TargetIdName> targetIdList;
+        // // is custom filter selected
+        // if
+        // (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent())
+        // {
+        // targetIdList = getTargetIdsByCustomFilters(pageRequest);
+        // } else {
+        // targetIdList = getTargetIdsBySimpleFilters(pageRequest);
+        // }
+        // setValue(targetIdList);
+
+        // TODO MR
+        // As Vaadin Table only returns the current ItemIds which are visible
+        // you don't need to search explicit for them.
+        setValue(getItemIds());
     }
 
     private List<TargetIdName> getTargetIdsBySimpleFilters(final PageRequest pageRequest) {

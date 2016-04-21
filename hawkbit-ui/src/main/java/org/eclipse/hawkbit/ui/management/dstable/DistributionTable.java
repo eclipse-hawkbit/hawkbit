@@ -53,6 +53,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
+import com.vaadin.event.Action;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -655,6 +656,13 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Override
     protected void setDataAvailable(final boolean available) {
         managementUIState.setNoDataAvailableDistribution(!available);
+
+    }
+
+    //TODO MR
+    @Override
+    public void handleAction(final Action action, final Object sender, final Object target) {
+        // TODO Auto-generated method stub
 
     }
 

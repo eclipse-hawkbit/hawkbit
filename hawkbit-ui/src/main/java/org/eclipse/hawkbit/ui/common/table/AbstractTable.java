@@ -53,6 +53,7 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTable.class);
 
+    // TODO MR should be private and use with getter/setter
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
 

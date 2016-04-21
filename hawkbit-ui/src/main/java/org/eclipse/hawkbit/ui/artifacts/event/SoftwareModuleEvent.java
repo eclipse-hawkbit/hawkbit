@@ -28,6 +28,10 @@ public class SoftwareModuleEvent extends BaseEntityEvent<SoftwareModule> {
 
     private SoftwareModuleEventType softwareModuleEventType;
 
+    public SoftwareModuleEvent() {
+        super(null, null);
+    }
+
     /**
      * Creates software module event.
      * 

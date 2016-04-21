@@ -10,14 +10,17 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.event.Action;
+import com.vaadin.event.Action.Handler;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
 /**
- * Software module table layout.
+ * Software module table layout. (Upload Management)
  * 
  *
  * 
@@ -43,5 +46,43 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
     @PostConstruct
     void init() {
         super.init(smTableHeader, smTable, softwareModuleDetails);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableLayout#
+     * isShortCutKeysRequired()
+     */
+    @Override
+    protected boolean isShortCutKeysRequired() {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTableLayout#
+     * getShortCutKeysHandler()
+     */
+    @Override
+    protected Handler getShortCutKeysHandler() {
+        return new Handler() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void handleAction(final Action action, final Object sender, final Object target) {
+                if (ACTION_CTRL_A.equals(action)) {
+                    smTable.selectAll();
+                    getEventBus().publish(this, new SoftwareModuleEvent());
+                }
+            }
+
+            @Override
+            public Action[] getActions(final Object target, final Object sender) {
+                return new Action[] { ACTION_CTRL_A };
+            }
+        };
     }
 }
