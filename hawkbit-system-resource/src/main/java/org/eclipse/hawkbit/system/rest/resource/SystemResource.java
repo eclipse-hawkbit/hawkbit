@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -68,7 +70,7 @@ public class SystemResource implements SystemRestApi {
      *         the response.
      */
     @Override
-    public ResponseEntity<Void> deleteConfigurationValue(final String keyName) {
+    public ResponseEntity<Void> deleteConfigurationValue(@PathVariable("keyName") final String keyName) {
 
         final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
 
@@ -89,7 +91,8 @@ public class SystemResource implements SystemRestApi {
      *         response.
      */
     @Override
-    public ResponseEntity<SystemTenantConfigurationValue> getConfigurationValue(final String keyName) {
+    public ResponseEntity<SystemTenantConfigurationValue> getConfigurationValue(
+            @PathVariable("keyName") final String keyName) {
 
         final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
 
@@ -111,8 +114,9 @@ public class SystemResource implements SystemRestApi {
      *         response.
      */
     @Override
-    public ResponseEntity<SystemTenantConfigurationValue> updateConfigurationValue(final String keyName,
-            final SystemTenantConfigurationValueRequest configurationValueRest) {
+    public ResponseEntity<SystemTenantConfigurationValue> updateConfigurationValue(
+            @PathVariable("keyName") final String keyName,
+            @RequestBody final SystemTenantConfigurationValueRequest configurationValueRest) {
 
         final TenantConfigurationKey configKey = TenantConfigurationKey.fromKeyName(keyName);
 
