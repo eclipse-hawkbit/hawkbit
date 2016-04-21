@@ -17,7 +17,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
     private static final String DEFAULT_IP_LOCALHOST = "127.0.0.1";
-    private static final String LOCALHOST = "localhost:8080";
+    private static final String DEFAULT_PORT = "8080";
+    private static final String LOCALHOST = "localhost";
 
     private final Http http = new Http();
     private final Https https = new Https();
@@ -86,7 +87,7 @@ public class ArtifactUrlHandlerProperties {
     public static class Http implements ProtocolProperties {
         private String hostname = LOCALHOST;
         private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = "";
+        private String port = DEFAULT_PORT;
         /**
          * An ant-URL pattern with placeholder to build the URL on. The URL can
          * have specific artifact placeholder.
@@ -136,7 +137,7 @@ public class ArtifactUrlHandlerProperties {
     public static class Https implements ProtocolProperties {
         private String hostname = LOCALHOST;
         private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = "";
+        private String port = DEFAULT_PORT;
         /**
          * An ant-URL pattern with placeholder to build the URL on. The URL can
          * have specific artifact placeholder.
