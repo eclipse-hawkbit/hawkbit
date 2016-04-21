@@ -33,15 +33,15 @@ public class ProxyRollout extends Rollout {
 
 	private String totalTargetsCount;
 
-	private RolloutRendererData rendererData;
+	private RolloutRendererData rolloutRendererData;
 
 
-	public RolloutRendererData getRendererData() {
-		return rendererData;
+	public RolloutRendererData getRolloutRendererData() {
+		return rolloutRendererData;
 	}
 
-	public void setRendererData(RolloutRendererData rendererData) {
-		this.rendererData = rendererData;
+	public void setRolloutRendererData(RolloutRendererData rendererData) {
+		this.rolloutRendererData = rendererData;
 	}
 
 	/**
