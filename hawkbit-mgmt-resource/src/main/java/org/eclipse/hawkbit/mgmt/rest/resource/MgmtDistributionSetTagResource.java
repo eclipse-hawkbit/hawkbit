@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtDistributionSetTagAssigmentRe
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TagFields;
@@ -36,6 +37,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -53,8 +57,11 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -80,13 +87,15 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<MgmtTag> getDistributionSetTag(final Long distributionsetTagId) {
+    public ResponseEntity<MgmtTag> getDistributionSetTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
         return new ResponseEntity<>(MgmtTagMapper.toResponse(tag), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<MgmtTag>> createDistributionSetTags(final List<MgmtTagRequestBodyPut> tags) {
+    public ResponseEntity<List<MgmtTag>> createDistributionSetTags(
+            @RequestBody final List<MgmtTagRequestBodyPut> tags) {
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
@@ -96,8 +105,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<MgmtTag> updateDistributionSetTag(final Long distributionsetTagId,
-            final MgmtTagRequestBodyPut restDSTagRest) {
+    public ResponseEntity<MgmtTag> updateDistributionSetTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final MgmtTagRequestBodyPut restDSTagRest) {
         LOG.debug("update {} ds tag", restDSTagRest);
 
         final DistributionSetTag distributionSetTag = findDistributionTagById(distributionsetTagId);
@@ -111,7 +121,8 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<Void> deleteDistributionSetTag(final Long distributionsetTagId) {
+    public ResponseEntity<Void> deleteDistributionSetTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         LOG.debug("Delete {} distribution set tag", distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
@@ -121,15 +132,18 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(final Long distributionsetTagId) {
+    public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
         return new ResponseEntity<>(
-                MgmtDistributionSetMapper.toResponseDistributionSets(tag.getAssignedToDistributionSet()), HttpStatus.OK);
+                MgmtDistributionSetMapper.toResponseDistributionSets(tag.getAssignedToDistributionSet()),
+                HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(final Long distributionsetTagId,
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+    public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         LOG.debug("Toggle distribution set assignment {} for ds tag {}", assignedDSRequestBodies.size(),
                 distributionsetTagId);
 
@@ -151,8 +165,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(final Long distributionsetTagId,
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
         LOG.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
@@ -163,7 +178,8 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<Void> unassignDistributionSets(final Long distributionsetTagId) {
+    public ResponseEntity<Void> unassignDistributionSets(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
         LOG.debug("Unassign all DS for ds tag {}", distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
         if (tag.getAssignedToDistributionSet() == null) {
@@ -178,7 +194,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<Void> unassignDistributionSet(final Long distributionsetTagId, final Long distributionsetId) {
+    public ResponseEntity<Void> unassignDistributionSet(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @PathVariable("distributionsetId") final Long distributionsetId) {
         LOG.debug("Unassign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
         this.distributionSetManagement.unAssignTag(distributionsetId, tag);

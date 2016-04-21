@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTargetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TagFields;
@@ -36,7 +37,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -54,8 +57,11 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     private TargetManagement targetManagement;
 
     @Override
-    public ResponseEntity<PagedList<MgmtTag>> getTargetTags(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTag>> getTargetTags(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -81,7 +87,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTag> getTargetTag(final Long targetTagId) {
+    public ResponseEntity<MgmtTag> getTargetTag(@PathVariable("targetTagId") final Long targetTagId) {
         final TargetTag tag = findTargetTagById(targetTagId);
         return new ResponseEntity<>(MgmtTagMapper.toResponse(tag), HttpStatus.OK);
     }
@@ -95,7 +101,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTag> updateTagretTag(final Long targetTagId, final MgmtTagRequestBodyPut restTargetTagRest) {
+    public ResponseEntity<MgmtTag> updateTagretTag(@PathVariable("targetTagId") final Long targetTagId,
+            @RequestBody final MgmtTagRequestBodyPut restTargetTagRest) {
         LOG.debug("update {} target tag", restTargetTagRest);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
@@ -108,7 +115,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteTargetTag(final Long targetTagId) {
+    public ResponseEntity<Void> deleteTargetTag(@PathVariable("targetTagId") final Long targetTagId) {
         LOG.debug("Delete {} target tag", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
 
@@ -118,15 +125,16 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtTarget>> getAssignedTargets(final Long targetTagId) {
+    public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
         final TargetTag targetTag = findTargetTagById(targetTagId);
         return new ResponseEntity<>(MgmtTargetMapper.toResponseWithLinksAndPollStatus(targetTag.getAssignedToTargets()),
                 HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(final Long targetTagId,
-            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
+            @PathVariable("targetTagId") final Long targetTagId,
+            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         LOG.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
@@ -140,8 +148,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtTarget>> assignTargets(final Long targetTagId,
-            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+    public ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
+            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
         final List<Target> assignedTarget = this.targetManagement
@@ -150,7 +158,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargets(final Long targetTagId) {
+    public ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId) {
         LOG.debug("Unassign all Targets for target tag {}", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
         if (targetTag.getAssignedToTargets() == null) {
@@ -162,7 +170,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> unassignTarget(final Long targetTagId, final String controllerId) {
+    public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
+            @PathVariable("controllerId") final String controllerId) {
         LOG.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
         this.targetManagement.unAssignTag(controllerId, targetTag);
@@ -177,8 +186,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         return tag;
     }
 
-    private List<String> findTargetControllerIds(final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+    private List<String> findTargetControllerIds(
+            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         return assignedTargetRequestBodies.stream().map(request -> request.getControllerId())
                 .collect(Collectors.toList());
     }
+
 }

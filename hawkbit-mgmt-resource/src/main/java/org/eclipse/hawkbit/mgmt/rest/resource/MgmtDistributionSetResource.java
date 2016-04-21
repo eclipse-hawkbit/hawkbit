@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
@@ -51,6 +52,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -79,8 +83,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -100,7 +107,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getDistributionSet(final Long distributionSetId) {
+    public ResponseEntity<MgmtDistributionSet> getDistributionSet(
+            @PathVariable("distributionSetId") final Long distributionSetId) {
         final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponse(foundDs), HttpStatus.OK);
@@ -108,7 +116,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(
-            final List<MgmtDistributionSetRequestBodyPost> sets) {
+            @RequestBody final List<MgmtDistributionSetRequestBodyPost> sets) {
 
         LOG.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
@@ -124,7 +132,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteDistributionSet(final Long distributionSetId) {
+    public ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") final Long distributionSetId) {
         final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         this.distributionSetManagement.deleteDistributionSet(set);
@@ -133,8 +141,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> updateDistributionSet(final Long distributionSetId,
-            final MgmtDistributionSetRequestBodyPut toUpdate) {
+    public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
         final DistributionSet set = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         if (toUpdate.getDescription() != null) {
@@ -154,8 +163,12 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         // check if distribution set exists otherwise throw exception
         // immediately
@@ -179,8 +192,12 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
         findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -206,8 +223,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(final Long distributionSetId,
-            final List<MgmtTargetAssignmentRequestBody> targetIds) {
+    public ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestBody final List<MgmtTargetAssignmentRequestBody> targetIds) {
 
         final DistributionSetAssignmentResult assignDistributionSet = this.deployManagament.assignDistributionSet(
                 distributionSetId,
@@ -220,8 +238,12 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MetadataRest>> getMetadata(final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         // check if distribution set exists otherwise throw exception
         // immediately
@@ -250,7 +272,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MetadataRest> getMetadataValue(final Long distributionSetId, final String metadataKey) {
+    public ResponseEntity<MetadataRest> getMetadataValue(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @PathVariable("metadataKey") final String metadataKey) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -260,8 +284,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MetadataRest> updateMetadata(final Long distributionSetId, final String metadataKey,
-            final MetadataRest metadata) {
+    public ResponseEntity<MetadataRest> updateMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MetadataRest metadata) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -271,7 +295,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMetadata(final Long distributionSetId, final String metadataKey) {
+    public ResponseEntity<Void> deleteMetadata(@PathVariable("distributionSetId") final Long distributionSetId,
+            @PathVariable("metadataKey") final String metadataKey) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -280,8 +305,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MetadataRest>> createMetadata(final Long distributionSetId,
-            final List<MetadataRest> metadataRest) {
+    public ResponseEntity<List<MetadataRest>> createMetadata(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestBody final List<MetadataRest> metadataRest) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -293,8 +319,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignSoftwareModules(final Long distributionSetId,
-            final List<MgmtSoftwareModuleAssigment> softwareModuleIDs) {
+    public ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestBody final List<MgmtSoftwareModuleAssigment> softwareModuleIDs) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -314,7 +340,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteAssignSoftwareModules(final Long distributionSetId, final Long softwareModuleId) {
+    public ResponseEntity<Void> deleteAssignSoftwareModules(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @PathVariable("softwareModuleId") final Long softwareModuleId) {
         // check if distribution set and software module exist otherwise throw
         // exception immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
@@ -324,8 +352,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+    public ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);

@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,8 +54,9 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
      */
     @Override
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifact(final Long softwareModuleId, final Long artifactId,
-            final HttpServletResponse servletResponse, final HttpServletRequest request) {
+    public ResponseEntity<Void> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("artifactId") final Long artifactId, final HttpServletResponse servletResponse,
+            final HttpServletRequest request) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
         if (null == module || !module.getLocalArtifact(artifactId).isPresent()) {

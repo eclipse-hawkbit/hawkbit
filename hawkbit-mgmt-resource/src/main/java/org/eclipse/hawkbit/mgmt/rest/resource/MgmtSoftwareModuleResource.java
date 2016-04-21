@@ -42,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,7 +62,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private SoftwareManagement softwareManagement;
 
     @Override
-    public ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
@@ -92,15 +93,18 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtArtifact>> getArtifacts(@PathVariable final Long softwareModuleId) {
+    @ResponseBody
+    public ResponseEntity<List<MgmtArtifact>> getArtifacts(
+            @PathVariable("softwareModuleId") final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         return new ResponseEntity<>(MgmtSoftwareModuleMapper.artifactsToResponse(module.getArtifacts()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable final Long softwareModuleId,
-            @PathVariable final Long artifactId) {
+    @ResponseBody
+    public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("artifactId") final Long artifactId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
         return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponse(module.getLocalArtifact(artifactId).get()),
@@ -108,8 +112,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteArtifact(@PathVariable final Long softwareModuleId,
-            @PathVariable final Long artifactId) {
+    @ResponseBody
+    public ResponseEntity<Void> deleteArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("artifactId") final Long artifactId) {
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
         artifactManagement.deleteLocalArtifact(artifactId);
@@ -147,7 +152,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable final Long softwareModuleId) {
+    public ResponseEntity<MgmtSoftwareModule> getSoftwareModule(
+            @PathVariable("softwareModuleId") final Long softwareModuleId) {
         final SoftwareModule findBaseSoftareModule = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponse(findBaseSoftareModule), HttpStatus.OK);
@@ -166,7 +172,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
@@ -183,7 +190,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteSoftwareModule(@PathVariable final Long softwareModuleId) {
+    public ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         softwareManagement.deleteSoftwareModule(module);
@@ -192,7 +199,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MetadataRest>> getMetadata(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<PagedList<MetadataRest>> getMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -222,19 +230,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MetadataRest> getMetadataValue(@PathVariable final Long softwareModuleId,
-            @PathVariable final String metadataKey) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
+    public ResponseEntity<MetadataRest> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        final SoftwareModuleMetadata findOne = softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(sw, metadataKey));
+        final SoftwareModuleMetadata findOne = softwareManagement
+                .findSoftwareModuleMetadata(new SwMetadataCompositeKey(sw, metadataKey));
         return ResponseEntity.<MetadataRest> ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));
     }
 
     @Override
-    public ResponseEntity<MetadataRest> updateMetadata(@PathVariable final Long softwareModuleId,
-            @PathVariable final String metadataKey, @RequestBody final MetadataRest metadata) {
-        // check if software module exists otherwise throw exception immediately
+    public ResponseEntity<MetadataRest> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MetadataRest metadata) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         final SoftwareModuleMetadata updated = softwareManagement
                 .updateSoftwareModuleMetadata(new SoftwareModuleMetadata(metadataKey, sw, metadata.getValue()));
@@ -242,18 +248,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMetadata(@PathVariable final Long softwareModuleId,
-            @PathVariable final String metadataKey) {
-        // check if software module exists otherwise throw exception immediately
+    public ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         softwareManagement.deleteSoftwareModuleMetadata(new SwMetadataCompositeKey(sw, metadataKey));
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<List<MetadataRest>> createMetadata(@PathVariable final Long softwareModuleId,
+    public ResponseEntity<List<MetadataRest>> createMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestBody final List<MetadataRest> metadataRest) {
-        // check if software module exists otherwise throw exception immediately
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         final List<SoftwareModuleMetadata> created = softwareManagement
@@ -273,4 +278,5 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
         return module;
     }
+
 }

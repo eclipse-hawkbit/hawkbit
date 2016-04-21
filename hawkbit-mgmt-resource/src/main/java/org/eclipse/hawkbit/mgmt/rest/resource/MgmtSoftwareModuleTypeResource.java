@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -30,6 +31,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -43,8 +47,11 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     private SoftwareManagement softwareManagement;
 
     @Override
-    public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -69,14 +76,16 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(final Long softwareModuleTypeId) {
+    public ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
         final SoftwareModuleType foundType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toResponse(foundType), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> deleteSoftwareModuleType(final Long softwareModuleTypeId) {
+    public ResponseEntity<Void> deleteSoftwareModuleType(
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
         final SoftwareModuleType module = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         this.softwareManagement.deleteSoftwareModuleType(module);
@@ -85,8 +94,9 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(final Long softwareModuleTypeId,
-            final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
+    public ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
+            @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
         final SoftwareModuleType type = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         // only description can be modified
@@ -100,7 +110,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
-            final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
+            @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
         final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement
                 .createSoftwareModuleType(MgmtSoftwareModuleTypeMapper.smFromRequest(softwareModuleTypes));

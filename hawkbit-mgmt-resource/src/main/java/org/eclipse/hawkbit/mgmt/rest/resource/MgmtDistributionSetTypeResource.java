@@ -86,14 +86,15 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<MgmtDistributionSetTypeRest> getDistributionSetType(
-            @PathVariable final Long distributionSetTypeId) {
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
         return new ResponseEntity<>(MgmtDistributionSetTypeMapper.toResponse(foundType), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> deleteDistributionSetType(@PathVariable final Long distributionSetTypeId) {
+    public ResponseEntity<Void> deleteDistributionSetType(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
         final DistributionSetType module = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
         distributionSetManagement.deleteDistributionSetType(module);
@@ -103,7 +104,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<MgmtDistributionSetTypeRest> updateDistributionSetType(
-            @PathVariable final Long distributionSetTypeId,
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
         final DistributionSetType type = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -115,7 +116,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final DistributionSetType updatedDistributionSetType = distributionSetManagement
                 .updateDistributionSetType(type);
 
-        return new ResponseEntity<>(MgmtDistributionSetTypeMapper.toResponse(updatedDistributionSetType), HttpStatus.OK);
+        return new ResponseEntity<>(MgmtDistributionSetTypeMapper.toResponse(updatedDistributionSetType),
+                HttpStatus.OK);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
-            @PathVariable final Long distributionSetTypeId) {
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toListResponse(foundType.getMandatoryModuleTypes()),
@@ -148,8 +150,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(@PathVariable final Long distributionSetTypeId,
-            @PathVariable final Long softwareModuleTypeId) {
+    public ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -164,8 +167,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(@PathVariable final Long distributionSetTypeId,
-            @PathVariable final Long softwareModuleTypeId) {
+    public ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -181,7 +185,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
-            @PathVariable final Long distributionSetTypeId) {
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -190,8 +194,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<Void> removeMandatoryModule(@PathVariable final Long distributionSetTypeId,
-            @PathVariable final Long softwareModuleTypeId) {
+    public ResponseEntity<Void> removeMandatoryModule(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -210,8 +215,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<Void> removeOptionalModule(@PathVariable final Long distributionSetTypeId,
-            @PathVariable final Long softwareModuleTypeId) {
+    public ResponseEntity<Void> removeOptionalModule(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
+            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
@@ -229,8 +235,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<Void> addMandatoryModule(@PathVariable final Long distributionSetTypeId,
-            @RequestBody final MgmtId smtId) {
+    public ResponseEntity<Void> addMandatoryModule(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -244,8 +250,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<Void> addOptionalModule(@PathVariable final Long distributionSetTypeId,
-            @RequestBody final MgmtId smtId) {
+    public ResponseEntity<Void> addOptionalModule(
+            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 

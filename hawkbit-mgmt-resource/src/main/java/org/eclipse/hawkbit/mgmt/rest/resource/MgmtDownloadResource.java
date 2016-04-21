@@ -26,6 +26,8 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -57,7 +59,8 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
      *         successful
      */
     @Override
-    public ResponseEntity<Void> downloadArtifactByDownloadId(final String downloadId,
+    @ResponseBody
+    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") final String downloadId,
             final HttpServletResponse response) {
         try {
             final ValueWrapper cacheWrapper = cache.get(downloadId);

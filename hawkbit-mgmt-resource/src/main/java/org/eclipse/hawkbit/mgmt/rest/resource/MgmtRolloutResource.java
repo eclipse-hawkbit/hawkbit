@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -41,7 +42,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -63,8 +66,11 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -85,13 +91,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutResponseBody> getRollout(final Long rolloutId) {
+    public ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") final Long rolloutId) {
         final Rollout findRolloutById = findRolloutOrThrowException(rolloutId);
         return new ResponseEntity<>(MgmtRolloutMapper.toResponseRollout(findRolloutById), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutResponseBody> create(@RequestBody final MgmtRolloutRestRequestBody rolloutRequestBody) {
+    public ResponseEntity<MgmtRolloutResponseBody> create(
+            @RequestBody final MgmtRolloutRestRequestBody rolloutRequestBody) {
 
         // first check the given RSQL query if it's well formed, otherwise and
         // exception is thrown
@@ -142,7 +149,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> start(final Long rolloutId, final boolean startAsync) {
+    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_ASYNC, defaultValue = "false") final boolean startAsync) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
         if (startAsync) {
             this.rolloutManagement.startRolloutAsync(rollout);
@@ -153,22 +161,26 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> pause(final Long rolloutId) {
+    public ResponseEntity<Void> pause(@PathVariable("rolloutId") final Long rolloutId) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
         this.rolloutManagement.pauseRollout(rollout);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> resume(final Long rolloutId) {
+    public ResponseEntity<Void> resume(@PathVariable("rolloutId") final Long rolloutId) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
         this.rolloutManagement.resumeRollout(rollout);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(final Long rolloutId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
+            @PathVariable("rolloutId") final Long rolloutId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         final Rollout rollout = findRolloutOrThrowException(rolloutId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -191,15 +203,20 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(final Long rolloutId, final Long groupId) {
+    public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
+            @PathVariable("groupId") final Long groupId) {
         findRolloutOrThrowException(rolloutId);
         final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup));
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(final Long rolloutId, final Long groupId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(@PathVariable("rolloutId") final Long rolloutId,
+            @PathVariable("groupId") final Long groupId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
         final RolloutGroup rolloutGroup = findRolloutGroupOrThrowException(groupId);
 

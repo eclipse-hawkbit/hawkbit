@@ -49,6 +49,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,7 +68,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private DeploymentManagement deploymentManagement;
 
     @Override
-    public ResponseEntity<MgmtTarget> getTarget(final String targetId) {
+    public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
         final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget);
@@ -77,8 +79,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getTargets(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getTargets(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -102,7 +107,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtTarget>> createTargets(final List<MgmtTargetRequestBody> targets) {
+    public ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
         final Iterable<Target> createdTargets = this.targetManagement
                 .createTargets(MgmtTargetMapper.fromRequest(targets));
@@ -111,7 +116,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTarget> updateTarget(final String targetId, final MgmtTargetRequestBody targetRest) {
+    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String targetId,
+            @RequestBody final MgmtTargetRequestBody targetRest) {
         final Target existingTarget = findTargetWithExceptionIfNotFound(targetId);
         LOG.debug("updating target {}", existingTarget.getId());
         if (targetRest.getDescription() != null) {
@@ -126,7 +132,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteTarget(final String targetId) {
+    public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
         this.targetManagement.deleteTargets(target.getId());
         LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
@@ -134,7 +140,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetAttributes> getAttributes(final String targetId) {
+    public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") final String targetId) {
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
         final Map<String, String> controllerAttributes = foundTarget.getTargetInfo().getControllerAttributes();
         if (controllerAttributes.isEmpty()) {
@@ -148,8 +154,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(final String targetId, final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("targetId") final String targetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
 
         final Target foundTarget = findTargetWithExceptionIfNotFound(targetId);
 
@@ -175,7 +184,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtAction> getAction(final String targetId, final Long actionId) {
+    public ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") final String targetId,
+            @PathVariable("actionId") final Long actionId) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
@@ -204,8 +214,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> cancelAction(final String targetId, final Long actionId,
-            @RequestParam(required = false, defaultValue = "false") final boolean force) {
+    public ResponseEntity<Void> cancelAction(@PathVariable("targetId") final String targetId,
+            @PathVariable("actionId") final Long actionId,
+            @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
         final Target target = findTargetWithExceptionIfNotFound(targetId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
 
@@ -221,8 +232,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(final String targetId, final Long actionId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+    public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
+            @PathVariable("targetId") final String targetId, @PathVariable("actionId") final Long actionId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
 
         final Target target = findTargetWithExceptionIfNotFound(targetId);
 
@@ -247,7 +261,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(final String targetId) {
+    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
+            @PathVariable("targetId") final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
                 .toResponse(findTarget.getAssignedDistributionSet());
@@ -261,8 +276,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> postAssignedDistributionSet(final String targetId,
-            final MgmtDistributionSetAssigment dsId) {
+    public ResponseEntity<Void> postAssignedDistributionSet(@PathVariable("targetId") final String targetId,
+            @RequestBody final MgmtDistributionSetAssigment dsId) {
 
         findTargetWithExceptionIfNotFound(targetId);
         final ActionType type = (dsId.getType() != null) ? MgmtRestModelMapper.convertActionType(dsId.getType())
@@ -281,7 +296,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(final String targetId) {
+    public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
+            @PathVariable("targetId") final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         final MgmtDistributionSet distributionSetRest = MgmtDistributionSetMapper
                 .toResponse(findTarget.getTargetInfo().getInstalledDistributionSet());
@@ -309,4 +325,5 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
         return findAction;
     }
+
 }
