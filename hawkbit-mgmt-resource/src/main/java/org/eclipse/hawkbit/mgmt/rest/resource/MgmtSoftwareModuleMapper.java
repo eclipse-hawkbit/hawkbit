@@ -14,7 +14,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MetadataRest;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -59,9 +59,9 @@ public final class MgmtSoftwareModuleMapper {
     }
 
     static List<SoftwareModuleMetadata> fromRequestSwMetadata(final SoftwareModule sw,
-            final List<MetadataRest> metadata) {
+            final List<MgmtMetadata> metadata) {
         final List<SoftwareModuleMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final MetadataRest metadataRest : metadata) {
+        for (final MgmtMetadata metadataRest : metadata) {
             if (metadataRest.getKey() == null) {
                 throw new IllegalArgumentException("the key of the metadata must be present");
             }
@@ -106,16 +106,16 @@ public final class MgmtSoftwareModuleMapper {
         return response;
     }
 
-    static List<MetadataRest> toResponseSwMetadata(final List<SoftwareModuleMetadata> metadata) {
-        final List<MetadataRest> mappedList = new ArrayList<>(metadata.size());
+    static List<MgmtMetadata> toResponseSwMetadata(final List<SoftwareModuleMetadata> metadata) {
+        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final SoftwareModuleMetadata distributionSetMetadata : metadata) {
             mappedList.add(toResponseSwMetadata(distributionSetMetadata));
         }
         return mappedList;
     }
 
-    static MetadataRest toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
-        final MetadataRest metadataRest = new MetadataRest();
+    static MgmtMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
+        final MgmtMetadata metadataRest = new MgmtMetadata();
         metadataRest.setKey(metadata.getId().getKey());
         metadataRest.setValue(metadata.getValue());
         return metadataRest;

@@ -14,7 +14,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MetadataRest;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
@@ -128,16 +128,16 @@ public final class MgmtDistributionSetMapper {
     }
 
     /**
-     * From {@link MetadataRest} to {@link DistributionSetMetadata}.
+     * From {@link MgmtMetadata} to {@link DistributionSetMetadata}.
      *
      * @param ds
      * @param metadata
      * @return
      */
     static List<DistributionSetMetadata> fromRequestDsMetadata(final DistributionSet ds,
-            final List<MetadataRest> metadata) {
+            final List<MgmtMetadata> metadata) {
         final List<DistributionSetMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final MetadataRest metadataRest : metadata) {
+        for (final MgmtMetadata metadataRest : metadata) {
             if (metadataRest.getKey() == null) {
                 throw new IllegalArgumentException("the key of the metadata must be present");
             }
@@ -204,16 +204,16 @@ public final class MgmtDistributionSetMapper {
         return response;
     }
 
-    static MetadataRest toResponseDsMetadata(final DistributionSetMetadata metadata) {
-        final MetadataRest metadataRest = new MetadataRest();
+    static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {
+        final MgmtMetadata metadataRest = new MgmtMetadata();
         metadataRest.setKey(metadata.getId().getKey());
         metadataRest.setValue(metadata.getValue());
         return metadataRest;
     }
 
-    static List<MetadataRest> toResponseDsMetadata(final List<DistributionSetMetadata> metadata) {
+    static List<MgmtMetadata> toResponseDsMetadata(final List<DistributionSetMetadata> metadata) {
 
-        final List<MetadataRest> mappedList = new ArrayList<>(metadata.size());
+        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final DistributionSetMetadata distributionSetMetadata : metadata) {
             mappedList.add(toResponseDsMetadata(distributionSetMetadata));
         }

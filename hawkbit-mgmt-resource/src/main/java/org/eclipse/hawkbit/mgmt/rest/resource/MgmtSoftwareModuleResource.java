@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.io.IOException;
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MetadataRest;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -199,7 +199,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MetadataRest>> getMetadata(
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -230,17 +230,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MetadataRest> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         final SoftwareModuleMetadata findOne = softwareManagement
                 .findSoftwareModuleMetadata(new SwMetadataCompositeKey(sw, metadataKey));
-        return ResponseEntity.<MetadataRest> ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));
+        return ResponseEntity.<MgmtMetadata> ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));
     }
 
     @Override
-    public ResponseEntity<MetadataRest> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MetadataRest metadata) {
+    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         final SoftwareModuleMetadata updated = softwareManagement
                 .updateSoftwareModuleMetadata(new SoftwareModuleMetadata(metadataKey, sw, metadata.getValue()));
@@ -256,9 +256,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MetadataRest>> createMetadata(
+    public ResponseEntity<List<MgmtMetadata>> createMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestBody final List<MetadataRest> metadataRest) {
+            @RequestBody final List<MgmtMetadata> metadataRest) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         final List<SoftwareModuleMetadata> created = softwareManagement

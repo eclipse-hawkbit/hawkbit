@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.MetadataRest;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -214,7 +214,7 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    ResponseEntity<PagedList<MetadataRest>> getMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -232,7 +232,7 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MetadataRest> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey);
 
     /**
@@ -247,8 +247,8 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{softwareModuleId}/metadata/{metadataKey}", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    ResponseEntity<MetadataRest> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MetadataRest metadata);
+    ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata);
 
     /**
      * Deletes a single meta data entry from the software module.
@@ -276,7 +276,7 @@ public interface MgmtSoftwareModuleRestApi {
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/metadata", consumes = {
             MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })
-    ResponseEntity<List<MetadataRest>> createMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestBody final List<MetadataRest> metadataRest);
+    ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @RequestBody final List<MgmtMetadata> metadataRest);
 
 }
