@@ -123,7 +123,7 @@ public class RolloutGroupBeanQuery extends AbstractBeanQuery<ProxyRolloutGroup> 
 			proxyRolloutGroup.setSuccessConditionExp(rolloutGroup.getSuccessConditionExp());
 			proxyRolloutGroup.setFinishedPercentage(calculateFinishedPercentage(rolloutGroup));
 
-			proxyRolloutGroup.setRendererData(new RolloutRendererData(rolloutGroup.getName(), null));
+			proxyRolloutGroup.setRolloutRendererData(new RolloutRendererData(rolloutGroup.getName(), null));
 
 			proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
 			proxyRolloutGroup.setTotalTargetCountStatus(rolloutGroup.getTotalTargetCountStatus());
