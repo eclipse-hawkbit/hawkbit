@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -131,6 +132,8 @@ public class RolloutBeanQuery extends AbstractBeanQuery<ProxyRollout> {
             proxyRollout.setForcedTime(rollout.getForcedTime());
             proxyRollout.setId(rollout.getId());
             proxyRollout.setStatus(rollout.getStatus());
+            proxyRollout
+                    .setRolloutRendererData(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
 
             final TotalTargetCountStatus totalTargetCountActionStatus = rollout.getTotalTargetCountStatus();
             proxyRollout.setTotalTargetCountStatus(totalTargetCountActionStatus);
