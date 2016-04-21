@@ -29,9 +29,14 @@
          <artifactId>hawkbit-rest-core</artifactId>
          <version>${project.version}</version>
       </dependency>
+      <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>2.4</version>
+      </dependency>
 
       <!-- Test -->
- <dependency>
+      <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-rest-core</artifactId>
          <version>${project.version}</version>

@@ -52,20 +52,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The {@link RootController} of the hawkBit server DDI API that is queried by
+ * The {@link DdiRootController} of the hawkBit server DDI API that is queried by
  * the hawkBit controller in order to pull {@link Action}s that have to be
  * fulfilled and report status updates concerning the {@link Action} processing.
  *
  * Transactional (read-write) as all queries at least update the last poll time.
  */
 @RestController
-public class RootController implements DdiRootControllerRestApi {
+public class DdiRootController implements DdiRootControllerRestApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RootController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DdiRootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
 
     @Autowired
@@ -91,7 +90,7 @@ public class RootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<List<org.eclipse.hawkbit.ddi.json.model.DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable final String targetid, @PathVariable final Long softwareModuleId) {
+            final String targetid, final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", targetid);
 
         final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
@@ -107,7 +106,7 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable final String targetid,
+    public ResponseEntity<DdiControllerBase> getControllerBase(final String targetid,
             final HttpServletRequest request) {
         LOG.debug("getControllerBase({})", targetid);
 
@@ -128,9 +127,8 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> downloadArtifact(@PathVariable final String targetid,
-            @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
-            final HttpServletResponse response, final HttpServletRequest request) {
+    public ResponseEntity<Void> downloadArtifact(final String targetid, final Long softwareModuleId,
+            final String fileName, final HttpServletResponse response, final HttpServletRequest request) {
         ResponseEntity<Void> result;
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
@@ -181,9 +179,8 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> downloadArtifactMd5(@PathVariable final String targetid,
-            @PathVariable final Long softwareModuleId, @PathVariable final String fileName,
-            final HttpServletResponse response, final HttpServletRequest request) {
+    public ResponseEntity<Void> downloadArtifactMd5(final String targetid, final Long softwareModuleId,
+            final String fileName, final HttpServletResponse response, final HttpServletRequest request) {
         controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
@@ -206,10 +203,8 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
-            @PathVariable @NotEmpty final String targetid, @PathVariable @NotEmpty final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
-            final HttpServletRequest request) {
+    public ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(final String targetid,
+            final Long actionId, final int resource, final HttpServletRequest request) {
         LOG.debug("getControllerBasedeploymentAction({},{})", targetid, resource);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
@@ -242,9 +237,8 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
-            @PathVariable final String targetid, @PathVariable @NotEmpty final Long actionId,
-            final HttpServletRequest request) {
+    public ResponseEntity<Void> postBasedeploymentActionFeedback(final DdiActionFeedback feedback,
+            final String targetid, final Long actionId, final HttpServletRequest request) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", targetid, actionId, feedback);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
@@ -277,8 +271,8 @@ public class RootController implements DdiRootControllerRestApi {
 
     }
 
-    private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String targetid, final Long actionid,
-            final Action action) {
+    private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String targetid,
+            final Long actionid, final Action action) {
 
         final ActionStatus actionStatus = new ActionStatus();
         actionStatus.setAction(action);
@@ -339,8 +333,8 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
-            @PathVariable final String targetid, final HttpServletRequest request) {
+    public ResponseEntity<Void> putConfigData(final DdiConfigData configData, final String targetid,
+            final HttpServletRequest request) {
         controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
 
@@ -350,8 +344,8 @@ public class RootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable @NotEmpty final String targetid,
-            @PathVariable @NotEmpty final Long actionId, final HttpServletRequest request) {
+    public ResponseEntity<DdiCancel> getControllerCancelAction(final String targetid, final Long actionId,
+            final HttpServletRequest request) {
         LOG.debug("getControllerCancelAction({})", targetid);
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,

@@ -117,12 +117,12 @@ public final class DataConversionHelper {
                 // have changed from 'soft' to 'forced' type and we need to
                 // change the payload of the
                 // response because of eTags.
-                result.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant())
+                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getControllerBasedeploymentAction(target.getControllerId(), action.getId(), actions.hashCode(),
                                 null)).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
                 addedUpdate = true;
             } else if (action.isCancelingOrCanceled() && !addedCancel) {
-                result.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant())
+                result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getControllerCancelAction(target.getControllerId(), action.getId(), null))
                                 .withRel(DdiRestConstants.CANCEL_ACTION));
                 addedCancel = true;
@@ -130,7 +130,7 @@ public final class DataConversionHelper {
         }
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
-            result.add(linkTo(methodOn(RootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
+            result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
                     target.getControllerId(), null)).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;

@@ -65,7 +65,7 @@ public class SystemResourceTest extends AbstractIntegrationTest {
 
         tenantConfigurationManagement.addOrUpdateConfiguration(key, notGlobalValue);
 
-        mvc.perform(get(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{configId}/", key.getKeyName()))
+        mvc.perform(get(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}/", key.getKeyName()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("value", equalTo(notGlobalValue))).andExpect(jsonPath("global", equalTo(false)))
                 .andExpect(jsonPath("createdAt", notNullValue())).andExpect(jsonPath("createdBy", notNullValue()));
@@ -78,7 +78,7 @@ public class SystemResourceTest extends AbstractIntegrationTest {
         final TenantConfigurationKey key = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME;
         final String testValue = "12:12:12";
 
-        mvc.perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{configId}/", key.getKeyName())
+        mvc.perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", key.getKeyName())
                 .content(String.format(BASE_JSON_REQUEST_STRING, testValue)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
@@ -99,7 +99,7 @@ public class SystemResourceTest extends AbstractIntegrationTest {
         assertThat(tenantConfigurationManagement.getConfigurationValue(key, String.class).getValue())
                 .isEqualTo(notGlobalValue);
 
-        mvc.perform(delete(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{configId}/", key.getKeyName()))
+        mvc.perform(delete(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}/", key.getKeyName()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNoContent());
 
         assertThat(tenantConfigurationManagement.getConfigurationValue(key, String.class).isGlobal()).isEqualTo(true);
@@ -115,7 +115,7 @@ public class SystemResourceTest extends AbstractIntegrationTest {
         final String testValue = "12:12:12";
 
         final MvcResult mvcResult = mvc
-                .perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{configId}", notExistingKey)
+                .perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", notExistingKey)
                         .content(String.format(BASE_JSON_REQUEST_STRING, testValue))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
@@ -134,7 +134,7 @@ public class SystemResourceTest extends AbstractIntegrationTest {
         final String testValue = "invalidFormattedDuration";
 
         final MvcResult mvcResult = mvc
-                .perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{configId}", key.getKeyName())
+                .perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", key.getKeyName())
                         .content(String.format(BASE_JSON_REQUEST_STRING, testValue))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();

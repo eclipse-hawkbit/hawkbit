@@ -50,7 +50,7 @@ public interface SystemRestApi {
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/configs/{keyName}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> deleteConfigurationValue(@PathVariable final String keyName);
+    ResponseEntity<Void> deleteConfigurationValue(@PathVariable("keyName") final String keyName);
 
     /**
      * Handles the GET request of deleting a tenant specific configuration value
@@ -64,7 +64,7 @@ public interface SystemRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/configs/{keyName}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<SystemTenantConfigurationValue> getConfigurationValue(@PathVariable final String keyName);
+    ResponseEntity<SystemTenantConfigurationValue> getConfigurationValue(@PathVariable("keyName") final String keyName);
 
     /**
      * Handles the GET request of deleting a tenant specific configuration value
@@ -80,7 +80,8 @@ public interface SystemRestApi {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/configs/{keyName}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<SystemTenantConfigurationValue> updateConfigurationValue(@PathVariable final String keyName,
+    ResponseEntity<SystemTenantConfigurationValue> updateConfigurationValue(
+            @PathVariable("keyName") final String keyName,
             @RequestBody final SystemTenantConfigurationValueRequest configurationValueRest);
 
 }
