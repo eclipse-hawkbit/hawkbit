@@ -78,7 +78,7 @@ public class SystemResourceTest extends AbstractIntegrationTest {
         final TenantConfigurationKey key = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME;
         final String testValue = "12:12:12";
 
-        mvc.perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", key.getKeyName())
+        mvc.perform(put(SystemRestConstant.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}/", key.getKeyName())
                 .content(String.format(BASE_JSON_REQUEST_STRING, testValue)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
