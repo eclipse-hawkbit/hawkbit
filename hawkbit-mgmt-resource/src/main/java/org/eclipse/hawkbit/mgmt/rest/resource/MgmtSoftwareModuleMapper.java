@@ -145,8 +145,8 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
                 .withRel("self"));
 
-        response.add(linkTo(
-                methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(baseSofwareModule.getType().getId()))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class)
+                .getSoftwareModuleType(baseSofwareModule.getType().getId()))
                         .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE));
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getModuleId(),
@@ -176,13 +176,12 @@ public final class MgmtSoftwareModuleMapper {
 
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
-        artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifact(artifact.getSoftwareModule().getId(),
-                artifact.getId())).withRel("self"));
+        artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
+                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("self"));
 
         if (artifact instanceof LocalArtifact) {
             artifactRest.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
-                    .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId(), null, null))
-                            .withRel("download"));
+                    .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download"));
         }
 
         return artifactRest;
