@@ -19,6 +19,10 @@ import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleTypeClientReso
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetTagClientResource;
 import org.springframework.cloud.netflix.feign.support.ResponseEntityDecoder;
+import org.springframework.hateoas.hal.Jackson2HalModule;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import feign.Feign;
 import feign.Feign.Builder;
@@ -47,10 +51,14 @@ public class MgmtDefaultFeignClient {
     private final String baseUrl;
 
     public MgmtDefaultFeignClient(final String baseUrl) {
+        final ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .registerModule(new Jackson2HalModule());
+
         feignBuilder = Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract())
                 .requestInterceptor(new ApplicationJsonRequestHeaderInterceptor()).logLevel(Level.FULL)
                 .logger(new Logger.ErrorLogger()).encoder(new JacksonEncoder())
-                .decoder(new ResponseEntityDecoder(new JacksonDecoder()));
+                .decoder(new ResponseEntityDecoder(new JacksonDecoder(mapper)));
         this.baseUrl = baseUrl;
     }
 
@@ -93,7 +101,7 @@ public class MgmtDefaultFeignClient {
     public MgmtSoftwareModuleClientResource getMgmtSoftwareModuleClientResource() {
         if (mgmtSoftwareModuleClientResource == null) {
             mgmtSoftwareModuleClientResource = feignBuilder.target(MgmtSoftwareModuleClientResource.class,
-                    MgmtSoftwareModuleClientResource.PATH);
+                    this.baseUrl + MgmtSoftwareModuleClientResource.PATH);
         }
         return mgmtSoftwareModuleClientResource;
     }

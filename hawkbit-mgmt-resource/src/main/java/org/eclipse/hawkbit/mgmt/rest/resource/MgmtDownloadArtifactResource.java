@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
@@ -18,18 +17,22 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  *
  */
 @RestController
+@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
 
     @Autowired
@@ -37,6 +40,9 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
 
     @Autowired
     private ArtifactManagement artifactManagement;
+
+    @Autowired
+    private RequestResponseContextHolder requestResponseContextHolder;
 
     /**
      * Handles the GET request for downloading an artifact.
@@ -55,8 +61,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     @Override
     @ResponseBody
     public ResponseEntity<Void> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId, final HttpServletResponse servletResponse,
-            final HttpServletRequest request) {
+            @PathVariable("artifactId") final Long artifactId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
         if (null == module || !module.getLocalArtifact(artifactId).isPresent()) {
@@ -65,13 +70,14 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
 
         final LocalArtifact artifact = module.getLocalArtifact(artifactId).get();
         final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
-
+        final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }
 
-        return RestResourceConversionHelper.writeFileResponse(artifact, servletResponse, request, file);
+        return RestResourceConversionHelper.writeFileResponse(artifact,
+                requestResponseContextHolder.getHttpServletResponse(), request, file);
 
     }
 
