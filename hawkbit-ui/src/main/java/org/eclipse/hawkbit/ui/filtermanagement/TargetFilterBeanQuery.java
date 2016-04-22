@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTargetFilter;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -93,9 +94,9 @@ public class TargetFilterBeanQuery extends AbstractBeanQuery<ProxyTargetFilter> 
             proxyTarFilter.setName(tarFilterQuery.getName());
             proxyTarFilter.setId(tarFilterQuery.getId());
             proxyTarFilter.setCreatedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getCreatedAt()));
-            proxyTarFilter.setCreatedBy(HawkbitCommonUtil.getIMUser(tarFilterQuery.getCreatedBy()));
+            proxyTarFilter.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(tarFilterQuery));
             proxyTarFilter.setModifiedDate(SPDateTimeUtil.getFormattedDate(tarFilterQuery.getLastModifiedAt()));
-            proxyTarFilter.setLastModifiedBy(HawkbitCommonUtil.getIMUser(tarFilterQuery.getLastModifiedBy()));
+            proxyTarFilter.setLastModifiedBy(UserDetailsFormatter.loadAndFormatLastModifiedBy(tarFilterQuery));
             proxyTarFilter.setQuery(tarFilterQuery.getQuery());
             proxyTargetFilter.add(proxyTarFilter);
         }
