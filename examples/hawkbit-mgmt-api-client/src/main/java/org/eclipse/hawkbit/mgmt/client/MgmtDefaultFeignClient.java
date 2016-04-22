@@ -93,7 +93,7 @@ public class MgmtDefaultFeignClient {
     public MgmtSoftwareModuleClientResource getMgmtSoftwareModuleClientResource() {
         if (mgmtSoftwareModuleClientResource == null) {
             mgmtSoftwareModuleClientResource = feignBuilder.target(MgmtSoftwareModuleClientResource.class,
-                    MgmtSoftwareModuleClientResource.PATH);
+                    this.baseUrl + MgmtSoftwareModuleClientResource.PATH);
         }
         return mgmtSoftwareModuleClientResource;
     }
