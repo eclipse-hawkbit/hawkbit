@@ -20,7 +20,7 @@ import feign.Contract;
 public class Application {
 
     @Autowired
-    private DdiClient ddiClient;
+    private DdiExampleClient ddiClient;
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder().showBanner(false).sources(Application.class).run(args);
