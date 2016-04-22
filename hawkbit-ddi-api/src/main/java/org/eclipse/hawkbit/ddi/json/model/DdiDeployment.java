@@ -17,11 +17,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public class DdiDeployment {
 
-    private final HandlingType download;
+    private HandlingType download;
 
-    private final HandlingType update;
+    private HandlingType update;
 
-    private final List<DdiChunk> chunks;
+    private List<DdiChunk> chunks;
+
+    public DdiDeployment() {
+
+    }
 
     /**
      * Constructor.

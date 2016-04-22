@@ -8,12 +8,20 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Polling interval for the SP target.
  */
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiPolling {
 
-    private final String sleep;
+    @JsonProperty
+    private String sleep;
 
     /**
      * Constructor.
@@ -24,6 +32,9 @@ public class DdiPolling {
     public DdiPolling(final String sleep) {
         super();
         this.sleep = sleep;
+    }
+
+    public DdiPolling() {
     }
 
     public String getSleep() {

@@ -11,9 +11,10 @@ public class AppTest {
     @Test
     public void AppTest() {
 
-        final DdiExampleClient ddiClient = new DdiExampleClient("http://localhost:8080/", "mytest", "mytest", "desc",
-                "DEFAULT");
-        ddiClient.startDdiClient();
+        final DdiExampleClient ddiClient = new DdiExampleClient("http://localhost:8080/", "jktest", "DEFAULT");
+        ddiClient.run();
+
+        System.out.println("next steps........................");
     }
 
 }

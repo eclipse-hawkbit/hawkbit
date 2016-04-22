@@ -18,15 +18,19 @@ import javax.validation.constraints.NotNull;
 public class DdiChunk {
 
     @NotNull
-    private final String part;
+    private String part;
 
     @NotNull
-    private final String version;
+    private String version;
 
     @NotNull
-    private final String name;
+    private String name;
 
-    private final List<DdiArtifact> artifacts;
+    private List<DdiArtifact> artifacts;
+
+    public DdiChunk() {
+
+    }
 
     /**
      * Constructor.

@@ -37,18 +37,24 @@
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
          <!-- need to overwrite for the interface inheritance feature of feign-core -->
-         <version>8.16.0</version>
+        <!--  <version>8.16.0</version> -->
+         <version>8.14.2</version>
       </dependency>
         <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-jackson</artifactId>
          <!-- need to overwrite for the interface inheritance feature of feign-core -->
-         <version>8.16.0</version>
+        <!--  <version>8.16.0</version> -->
+          <version>8.14.2</version>
       </dependency>
        <dependency>
          <groupId>javax.servlet</groupId>
          <artifactId>javax.servlet-api</artifactId>
          <!-- <scope>provided</scope> -->
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.plugin</groupId>
+         <artifactId>spring-plugin-core</artifactId>
       </dependency>
       <!--  Test -->
    <dependency>

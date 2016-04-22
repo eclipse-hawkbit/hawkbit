@@ -8,12 +8,20 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Standard configuration for the target.
  */
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiConfig {
 
-    private final DdiPolling polling;
+    @JsonProperty
+    private DdiPolling polling;
 
     /**
      * Constructor.
@@ -24,6 +32,10 @@ public class DdiConfig {
     public DdiConfig(final DdiPolling polling) {
         super();
         this.polling = polling;
+    }
+
+    public DdiConfig() {
+
     }
 
     public DdiPolling getPolling() {

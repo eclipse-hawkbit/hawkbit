@@ -10,12 +10,20 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * {@link DdiControllerBase} resource content.
  */
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiControllerBase extends ResourceSupport {
 
-    private final DdiConfig config;
+    @JsonProperty
+    private DdiConfig config;
 
     /**
      * Constructor.
@@ -26,6 +34,10 @@ public class DdiControllerBase extends ResourceSupport {
     public DdiControllerBase(final DdiConfig config) {
         super();
         this.config = config;
+    }
+
+    public DdiControllerBase() {
+
     }
 
     public DdiConfig getConfig() {
