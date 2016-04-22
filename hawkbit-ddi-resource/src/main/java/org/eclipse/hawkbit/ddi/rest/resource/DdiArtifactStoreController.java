@@ -35,6 +35,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * The {@link DdiArtifactStoreController} of the HawkBit server controller API
@@ -61,10 +63,18 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     @Autowired
     private HawkbitSecurityProperties securityProperties;
 
+    private HttpServletResponse getResponse() {
+        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
+    }
+
+    private HttpServletRequest getRequest() {
+        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    }
+
     @Override
     public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
-            final HttpServletResponse response, final HttpServletRequest request,
             @AuthenticationPrincipal final String targetid) {
+
         ResponseEntity<Void> result;
 
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
@@ -79,7 +89,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
 
             final LocalArtifact artifact = foundArtifacts.get(0);
 
-            final String ifMatch = request.getHeader("If-Match");
+            final String ifMatch = getRequest().getHeader("If-Match");
             if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
@@ -88,11 +98,12 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
                 // we set a download status only if we are aware of the
                 // targetid, i.e. authenticated and not anonymous
                 if (targetid != null && !"anonymous".equals(targetid)) {
-                    final Action action = checkAndReportDownloadByTarget(request, targetid, artifact);
-                    result = RestResourceConversionHelper.writeFileResponse(artifact, response, request, file,
+                    final Action action = checkAndReportDownloadByTarget(getRequest(), targetid, artifact);
+                    result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(), file,
                             cacheWriteNotify, action.getId());
                 } else {
-                    result = RestResourceConversionHelper.writeFileResponse(artifact, response, request, file);
+                    result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(),
+                            file);
                 }
 
             }
@@ -101,8 +112,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     }
 
     @Override
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName,
-            final HttpServletResponse response) {
+    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName) {
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
@@ -113,7 +123,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
         }
 
         try {
-            DataConversionHelper.writeMD5FileResponse(fileName, response, foundArtifacts.get(0));
+            DataConversionHelper.writeMD5FileResponse(fileName, getResponse(), foundArtifacts.get(0));
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

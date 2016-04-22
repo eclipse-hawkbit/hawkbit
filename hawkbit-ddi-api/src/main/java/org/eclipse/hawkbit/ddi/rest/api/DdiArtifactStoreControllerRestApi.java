@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.api;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,11 +40,10 @@ public interface DdiArtifactStoreControllerRestApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
-            + "/{fileName}")
+    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}")
     @ResponseBody
     public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
-            final HttpServletResponse response, final HttpServletRequest request,
+
             @AuthenticationPrincipal final String targetid);
 
     /**
@@ -60,10 +56,9 @@ public interface DdiArtifactStoreControllerRestApi {
      *
      * @return response of the servlet
      */
-    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
-            + "/{fileName}" + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
+    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}"
+            + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName,
-            final HttpServletResponse response);
+    public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName);
 
 }

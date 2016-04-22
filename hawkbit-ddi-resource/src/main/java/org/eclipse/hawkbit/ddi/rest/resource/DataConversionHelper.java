@@ -118,12 +118,12 @@ public final class DataConversionHelper {
                 // change the payload of the
                 // response because of eTags.
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerBasedeploymentAction(target.getControllerId(), action.getId(), actions.hashCode(),
-                                null)).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
+                        .getControllerBasedeploymentAction(target.getControllerId(), action.getId(),
+                                actions.hashCode())).withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
                 addedUpdate = true;
             } else if (action.isCancelingOrCanceled() && !addedCancel) {
                 result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerCancelAction(target.getControllerId(), action.getId(), null))
+                        .getControllerCancelAction(target.getControllerId(), action.getId()))
                                 .withRel(DdiRestConstants.CANCEL_ACTION));
                 addedCancel = true;
             }
@@ -131,7 +131,7 @@ public final class DataConversionHelper {
 
         if (target.getTargetInfo().isRequestControllerAttributes()) {
             result.add(linkTo(methodOn(DdiRootController.class, tenantAware.getCurrentTenant()).putConfigData(null,
-                    target.getControllerId(), null)).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
+                    target.getControllerId())).withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }
         return result;
     }

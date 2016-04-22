@@ -6,8 +6,6 @@ package org.eclipse.hawkbit.ddi.rest.api;
 import java.lang.annotation.Target;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
@@ -60,8 +58,7 @@ public interface DdiRootControllerRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("targetid") final String targetid,
-            final HttpServletRequest request);
+    ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("targetid") final String targetid);
 
     /**
      * Handles GET {@link DdiArtifact} download request. This could be full or
@@ -85,8 +82,7 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<Void> downloadArtifact(@PathVariable("targetid") final String targetid,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName, final HttpServletResponse response,
-            final HttpServletRequest request);
+            @PathVariable("fileName") final String fileName);
 
     /**
      * Handles GET {@link DdiArtifact} MD5 checksum file download request.
@@ -109,8 +105,7 @@ public interface DdiRootControllerRestApi {
             + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<Void> downloadArtifactMd5(@PathVariable("targetid") final String targetid,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName, final HttpServletResponse response,
-            final HttpServletRequest request);
+            @PathVariable("fileName") final String fileName);
 
     /**
      * Resource for {@link SoftwareModule} {@link UpdateAction}s.
@@ -134,8 +129,7 @@ public interface DdiRootControllerRestApi {
     ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
             @PathVariable("targetid") @NotEmpty final String targetid,
             @PathVariable("actionId") @NotEmpty final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
-            final HttpServletRequest request);
+            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource);
 
     /**
      * This is the feedback channel for the {@link DdiDeploymentBase} action.
@@ -155,8 +149,7 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(value = "/{targetid}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
-            @PathVariable("targetid") final String targetid, @PathVariable("actionId") @NotEmpty final Long actionId,
-            final HttpServletRequest request);
+            @PathVariable("targetid") final String targetid, @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
      * This is the feedback channel for the config data action.
@@ -173,7 +166,7 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(value = "/{targetid}/"
             + DdiRestConstants.CONFIG_DATA_ACTION, method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
-            @PathVariable("targetid") final String targetid, final HttpServletRequest request);
+            @PathVariable("targetid") final String targetid);
 
     /**
      * {@link RequestMethod.GET} method for the {@link DdiCancel} action.
@@ -190,7 +183,7 @@ public interface DdiRootControllerRestApi {
     @RequestMapping(value = "/{targetid}/" + DdiRestConstants.CANCEL_ACTION
             + "/{actionId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable("targetid") @NotEmpty final String targetid,
-            @PathVariable("actionId") @NotEmpty final Long actionId, final HttpServletRequest request);
+            @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
      * {@link RequestMethod.POST} method receiving the {@link DdiActionFeedback}
@@ -212,6 +205,6 @@ public interface DdiRootControllerRestApi {
             + DdiRestConstants.FEEDBACK, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> postCancelActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
             @PathVariable("targetid") @NotEmpty final String targetid,
-            @PathVariable("actionId") @NotEmpty final Long actionId, final HttpServletRequest request);
+            @PathVariable("actionId") @NotEmpty final Long actionId);
 
 }
