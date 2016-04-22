@@ -8,13 +8,15 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
- * Client binding for the Rollout resource of the management API.
+ *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/rollouts")
-public interface RolloutResourceClient extends MgmtRolloutRestApi {
+@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtDownloadClientResource.PATH)
+public interface MgmtDownloadClientResource extends MgmtDownloadRestApi {
+
+    static String PATH = "api/v1/downloadserver/";
 
 }

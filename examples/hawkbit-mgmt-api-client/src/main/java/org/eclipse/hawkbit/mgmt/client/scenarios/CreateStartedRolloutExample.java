@@ -10,12 +10,12 @@ package org.eclipse.hawkbit.mgmt.client.scenarios;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetTypeResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.RolloutResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.SoftwareModuleResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.SoftwareModuleTypeResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.TargetResourceClient;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetTypeClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtRolloutClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleTypeClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.RolloutBuilder;
@@ -44,22 +44,22 @@ public class CreateStartedRolloutExample {
     private static final String DS_MODULE_TYPE = SM_MODULE_TYPE;
 
     @Autowired
-    private DistributionSetResourceClient distributionSetResource;
+    private MgmtDistributionSetClientResource distributionSetResource;
 
     @Autowired
-    private SoftwareModuleResourceClient softwareModuleResource;
+    private MgmtSoftwareModuleClientResource softwareModuleResource;
 
     @Autowired
-    private TargetResourceClient targetResource;
+    private MgmtTargetClientResource targetResource;
 
     @Autowired
-    private RolloutResourceClient rolloutResource;
+    private MgmtRolloutClientResource rolloutResource;
 
     @Autowired
-    private DistributionSetTypeResourceClient distributionSetTypeResource;
+    private MgmtDistributionSetTypeClientResource distributionSetTypeResource;
 
     @Autowired
-    private SoftwareModuleTypeResourceClient softwareModuleTypeResource;
+    private MgmtSoftwareModuleTypeClientResource softwareModuleTypeResource;
 
     /**
      * Run the Rollout scenario.
