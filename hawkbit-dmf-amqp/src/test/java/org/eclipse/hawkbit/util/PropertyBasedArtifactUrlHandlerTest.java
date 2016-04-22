@@ -69,7 +69,7 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
         final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.HTTP);
         assertEquals("http is build incorrect",
-                "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                "http://localhost:8080/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                         + "/softwaremodules/" + localArtifact.getSoftwareModule().getId() + "/artifacts/"
                         + localArtifact.getFilename(),
                 url);
@@ -81,7 +81,7 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
         final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.HTTPS);
         assertEquals("https is build incorrect",
-                "https://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                "https://localhost:8080/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                         + "/softwaremodules/" + localArtifact.getSoftwareModule().getId() + "/artifacts/"
                         + localArtifact.getFilename(),
                 url);

@@ -74,39 +74,35 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     @Override
     public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
             @AuthenticationPrincipal final String targetid) {
-
-        ResponseEntity<Void> result;
-
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
         if (foundArtifacts.isEmpty()) {
             LOG.warn("Software artifact with name {} could not be found.", fileName);
-            result = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (foundArtifacts.size() > 1) {
+            LOG.warn("Software artifact name {} is not unique. We will use the first entry.", fileName);
+        }
+        ResponseEntity<Void> result;
+        final LocalArtifact artifact = foundArtifacts.get(0);
+
+        final String ifMatch = getRequest().getHeader("If-Match");
+        if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
+            result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } else {
-            if (foundArtifacts.size() > 1) {
-                LOG.warn("Software artifact name {} is not unique. We will use the first entry.", fileName);
-            }
+            final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
 
-            final LocalArtifact artifact = foundArtifacts.get(0);
-
-            final String ifMatch = getRequest().getHeader("If-Match");
-            if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
-                result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
+            // we set a download status only if we are aware of the
+            // targetid, i.e. authenticated and not anonymous
+            if (targetid != null && !"anonymous".equals(targetid)) {
+                final Action action = checkAndReportDownloadByTarget(getRequest(), targetid, artifact);
+                result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(), file,
+                        cacheWriteNotify, action.getId());
             } else {
-                final DbArtifact file = artifactManagement.loadLocalArtifactBinary(artifact);
-
-                // we set a download status only if we are aware of the
-                // targetid, i.e. authenticated and not anonymous
-                if (targetid != null && !"anonymous".equals(targetid)) {
-                    final Action action = checkAndReportDownloadByTarget(getRequest(), targetid, artifact);
-                    result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(), file,
-                            cacheWriteNotify, action.getId());
-                } else {
-                    result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(),
-                            file);
-                }
-
+                result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(), file);
             }
+
         }
         return result;
     }

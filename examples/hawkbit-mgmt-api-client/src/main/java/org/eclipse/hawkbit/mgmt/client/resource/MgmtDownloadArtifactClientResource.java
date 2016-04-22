@@ -8,13 +8,15 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
- * Client binding for the DistributionSet resource of the management API.
+ *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/rest/v1/distributionsets")
-public interface DistributionSetResourceClient extends MgmtDistributionSetRestApi {
+@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtDownloadArtifactClientResource.PATH)
+public interface MgmtDownloadArtifactClientResource extends MgmtDownloadArtifactRestApi {
+
+    static String PATH = "rest/v1/softwaremodules";
 
 }

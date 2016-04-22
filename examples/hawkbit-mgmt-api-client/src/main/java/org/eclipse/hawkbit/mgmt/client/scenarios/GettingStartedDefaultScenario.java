@@ -10,10 +10,10 @@ package org.eclipse.hawkbit.mgmt.client.scenarios;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.DistributionSetTypeResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.SoftwareModuleResourceClient;
-import org.eclipse.hawkbit.mgmt.client.resource.SoftwareModuleTypeResourceClient;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetTypeClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleTypeClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentBuilder;
@@ -50,16 +50,16 @@ public class GettingStartedDefaultScenario {
     private static final String DS_EXAMPLE_NAME = SM_EXAMPLE_NAME;
 
     @Autowired
-    private DistributionSetResourceClient distributionSetResource;
+    private MgmtDistributionSetClientResource distributionSetResource;
 
     @Autowired
-    private DistributionSetTypeResourceClient distributionSetTypeResource;
+    private MgmtDistributionSetTypeClientResource distributionSetTypeResource;
 
     @Autowired
-    private SoftwareModuleResourceClient softwareModuleResource;
+    private MgmtSoftwareModuleClientResource softwareModuleResource;
 
     @Autowired
-    private SoftwareModuleTypeResourceClient softwareModuleTypeResource;
+    private MgmtSoftwareModuleTypeClientResource softwareModuleTypeResource;
 
     /**
      * Run the default getting started scenario.
