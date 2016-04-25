@@ -26,7 +26,8 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
-        return super.createMvcWebAppContext().addFilter(filterHttpResponse);
+        final DefaultMockMvcBuilder createMvcWebAppContext = super.createMvcWebAppContext();
+        return createMvcWebAppContext.addFilter(filterHttpResponse);
     }
 
 }

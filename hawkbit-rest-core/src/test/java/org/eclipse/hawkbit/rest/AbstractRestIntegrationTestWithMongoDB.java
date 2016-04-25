@@ -26,6 +26,7 @@ public abstract class AbstractRestIntegrationTestWithMongoDB extends AbstractInt
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
-        return super.createMvcWebAppContext().addFilter(filterHttpResponse);
+        DefaultMockMvcBuilder createMvcWebAppContext = super.createMvcWebAppContext();
+        return createMvcWebAppContext.addFilter(filterHttpResponse);
     }
 }

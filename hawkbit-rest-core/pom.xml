@@ -51,6 +51,12 @@
          <scope>test</scope>
       </dependency>
       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository</artifactId>
+         <version>${project.version}</version>
+         <classifier>tests</classifier>
+      </dependency>
+      <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
