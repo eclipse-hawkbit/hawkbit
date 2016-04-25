@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
@@ -24,19 +23,20 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.rest.util.RestResourceConversionHelper;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * The {@link DdiArtifactStoreController} of the HawkBit server controller API
@@ -47,6 +47,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * for legacy controllers that can not be fed with a download URI at runtime.
  */
 @RestController
+@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DdiArtifactStoreController implements DdiArtifactStoreControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DdiArtifactStoreController.class);
@@ -63,13 +64,8 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     @Autowired
     private HawkbitSecurityProperties securityProperties;
 
-    private HttpServletResponse getResponse() {
-        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
-    }
-
-    private HttpServletRequest getRequest() {
-        return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-    }
+    @Autowired
+    private RequestResponseContextHolder requestResponseContextHolder;
 
     @Override
     public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
@@ -87,7 +83,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
         ResponseEntity<Void> result;
         final LocalArtifact artifact = foundArtifacts.get(0);
 
-        final String ifMatch = getRequest().getHeader("If-Match");
+        final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");
         if (ifMatch != null && !RestResourceConversionHelper.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } else {
@@ -96,11 +92,15 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
             // we set a download status only if we are aware of the
             // targetid, i.e. authenticated and not anonymous
             if (targetid != null && !"anonymous".equals(targetid)) {
-                final Action action = checkAndReportDownloadByTarget(getRequest(), targetid, artifact);
-                result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(), file,
-                        cacheWriteNotify, action.getId());
+                final Action action = checkAndReportDownloadByTarget(
+                        requestResponseContextHolder.getHttpServletRequest(), targetid, artifact);
+                result = RestResourceConversionHelper.writeFileResponse(artifact,
+                        requestResponseContextHolder.getHttpServletResponse(),
+                        requestResponseContextHolder.getHttpServletRequest(), file, cacheWriteNotify, action.getId());
             } else {
-                result = RestResourceConversionHelper.writeFileResponse(artifact, getResponse(), getRequest(), file);
+                result = RestResourceConversionHelper.writeFileResponse(artifact,
+                        requestResponseContextHolder.getHttpServletResponse(),
+                        requestResponseContextHolder.getHttpServletRequest(), file);
             }
 
         }
@@ -119,7 +119,8 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
         }
 
         try {
-            DataConversionHelper.writeMD5FileResponse(fileName, getResponse(), foundArtifacts.get(0));
+            DataConversionHelper.writeMD5FileResponse(fileName, requestResponseContextHolder.getHttpServletResponse(),
+                    foundArtifacts.get(0));
         } catch (final IOException e) {
             LOG.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
