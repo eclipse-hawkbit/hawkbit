@@ -13,8 +13,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.eclipse.hawkbit.rest.configuration.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Controller;
 @Retention(RetentionPolicy.RUNTIME)
 @Configuration
 @ComponentScan
+@Import(RestConfiguration.class)
 public @interface EnableDdiApi {
 
 }

@@ -73,6 +73,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -181,10 +182,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
-    
+
     @Autowired
     protected TenantConfigurationManagement tenantConfigurationManagement;
-
 
     @Autowired
     protected RolloutManagement rolloutManagement;
@@ -223,12 +223,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Before
     public void before() throws Exception {
-        mvc = MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
-                        "X-Forwarded-For"))
-                .addFilter(new ExcludePathAwareShallowETagFilter(
-                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"))
-                .build();
+        mvc = createMvcWebAppContext().build();
 
         standardDsType = securityRule.runAsPrivileged(() -> systemManagement.getTenantMetadata().getDefaultDsType());
 
@@ -243,6 +238,14 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
         runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.findSoftwareModuleTypeByKey("runtime"));
         runtimeType.setDescription("Updated description to have lastmodified available in tests");
         runtimeType = securityRule.runAsPrivileged(() -> softwareManagement.updateSoftwareModuleType(runtimeType));
+    }
+
+    protected DefaultMockMvcBuilder createMvcWebAppContext() {
+        return MockMvcBuilders.webAppContextSetup(context)
+                .addFilter(new DosFilter(100, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
+                        "X-Forwarded-For"))
+                .addFilter(new ExcludePathAwareShallowETagFilter(
+                        "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/*/controller/artifacts/**"));
     }
 
     @BeforeClass

@@ -19,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class RequestResponseContextHolder {
 
-    @Autowired
     private HttpServletRequest httpServletRequest;
 
-    @Resource(name = HttpResponseFactoryBean.FACTORY_BEAN_NAME)
     private HttpServletResponse httpServletResponse;
 
     public HttpServletRequest getHttpServletRequest() {
@@ -31,5 +29,15 @@ public class RequestResponseContextHolder {
 
     public HttpServletResponse getHttpServletResponse() {
         return httpServletResponse;
+    }
+
+    @Autowired
+    public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
+        this.httpServletRequest = httpServletRequest;
+    }
+
+    @Resource(name = HttpResponseFactoryBean.FACTORY_BEAN_NAME)
+    public void setHttpServletResponse(final HttpServletResponse httpServletResponse) {
+        this.httpServletResponse = httpServletResponse;
     }
 }

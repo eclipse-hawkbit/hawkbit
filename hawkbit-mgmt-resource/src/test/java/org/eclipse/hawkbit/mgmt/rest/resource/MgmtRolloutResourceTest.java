@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -34,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.rest.util.SuccessCondition;
@@ -52,7 +52,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Rollout Resource")
-public class MgmtRolloutResourceTest extends AbstractIntegrationTest {
+public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
     @Autowired
     private RolloutManagement rolloutManagement;

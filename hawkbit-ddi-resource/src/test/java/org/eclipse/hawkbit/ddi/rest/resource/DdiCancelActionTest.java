@@ -22,18 +22,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -42,10 +41,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test cancel action from the controller.
  */
-@ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Cancel Action Resource")
-public class DdiCancelActionTest extends AbstractIntegrationTest {
+public class DdiCancelActionTest extends AbstractRestIntegrationTest {
 
     @Test
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")

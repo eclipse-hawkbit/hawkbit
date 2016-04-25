@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
@@ -36,13 +35,13 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
@@ -57,10 +56,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test artifact downloads from the controller.
  */
-@ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Artifact Download Resource")
-public class DdiArtifactDownloadTest extends AbstractIntegrationTestWithMongoDB {
+public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMongoDB {
 
     public DdiArtifactDownloadTest() {
         LOG = LoggerFactory.getLogger(DdiArtifactDownloadTest.class);

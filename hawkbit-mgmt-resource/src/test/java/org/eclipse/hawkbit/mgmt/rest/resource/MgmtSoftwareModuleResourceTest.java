@@ -32,7 +32,6 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.HashGeneratorUtils;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
@@ -46,6 +45,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -71,7 +71,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Software Module Resource")
-public class MgmtSoftwareModuleResourceTest extends AbstractIntegrationTestWithMongoDB {
+public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestWithMongoDB {
 
     @Before
     public void assertPreparationOfRepo() {

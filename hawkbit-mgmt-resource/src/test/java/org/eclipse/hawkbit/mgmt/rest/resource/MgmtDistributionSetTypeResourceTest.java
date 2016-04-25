@@ -23,13 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONException;
@@ -51,7 +51,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Distribution Set Type Resource")
-public class MgmtDistributionSetTypeResourceTest extends AbstractIntegrationTest {
+public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegrationTest {
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)

@@ -22,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.WithUser;
@@ -32,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -48,10 +47,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test the root controller resources.
  */
-@ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Root Poll Resource")
-public class DdiRootControllerTest extends AbstractIntegrationTestWithMongoDB {
+public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoDB {
 
     @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")

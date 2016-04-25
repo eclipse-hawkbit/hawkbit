@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -35,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.fest.assertions.core.Condition;
@@ -45,7 +45,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -54,10 +53,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 /**
  * Test deployment base from the controller.
  */
-@ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Deployment Action Resource")
-public class DdiDeploymentBaseTest extends AbstractIntegrationTestWithMongoDB {
+public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoDB {
 
     @Test()
     @Description("Ensures that artifacts are not found, when softare module does not exists.")
