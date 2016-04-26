@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface DistributionSetRepository
         extends BaseEntityRepository<DistributionSet, Long>, JpaSpecificationExecutor<DistributionSet> {
 
@@ -50,7 +51,7 @@ public interface DistributionSetRepository
      *            to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("update DistributionSet d set d.deleted = 1 where d.id in :ids")
     void deleteDistributionSet(@Param("ids") Long... ids);
 
@@ -62,7 +63,7 @@ public interface DistributionSetRepository
      * @return number of affected/deleted records
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM DistributionSet d WHERE d.id IN ?1")
     int deleteByIdIn(Collection<Long> ids);
@@ -82,7 +83,7 @@ public interface DistributionSetRepository
      * yet to an {@link UpdateAction}, i.e. unused.
      *
      * @param ids
-     *            to searcgh for
+     *            to search for
      * @return
      */
     @Query("select ac.distributionSet.id from Action ac where ac.distributionSet.id in :ids")

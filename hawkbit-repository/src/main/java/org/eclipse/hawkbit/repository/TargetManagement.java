@@ -62,6 +62,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -74,7 +75,7 @@ import com.google.common.eventbus.EventBus;
  * Business service facade for managing {@link Target}s.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class TargetManagement {
@@ -260,7 +261,7 @@ public class TargetManagement {
      * @return the updated {@link Target}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -278,7 +279,7 @@ public class TargetManagement {
      * @return the updated {@link Target}s
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -294,7 +295,7 @@ public class TargetManagement {
      *            the technical IDs of the targets to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     public void deleteTargets(@NotEmpty final Long... targetIDs) {
         // we need to select the target IDs first to check the if the targetIDs
@@ -527,11 +528,11 @@ public class TargetManagement {
      * @param targets
      *            to toggle for
      * @param tag
-     *            to toogle
-     * @return TagAssigmentResult with all metadata of the assigment outcome.
+     *            to toggle
+     * @return TagAssigmentResult with all metadata of the assignment outcome.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetTagAssignmentResult toggleTagAssignment(@NotEmpty final List<Target> targets,
@@ -553,7 +554,7 @@ public class TargetManagement {
      * @return TagAssigmentResult with all metadata of the assigment outcome.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetTagAssignmentResult toggleTagAssignment(@NotEmpty final Collection<String> targetIds,
@@ -596,7 +597,7 @@ public class TargetManagement {
      * @return list of assigned targets
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public List<Target> assignTag(@NotEmpty final Collection<String> targetIds, @NotNull final TargetTag tag) {
@@ -635,7 +636,7 @@ public class TargetManagement {
      * @return list of unassigned targets
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public List<Target> unAssignAllTargetsByTag(@NotNull final TargetTag tag) {
@@ -652,7 +653,7 @@ public class TargetManagement {
      * @return the unassigned target or <null> if no target is unassigned
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Target unAssignTag(@NotNull final String controllerID, @NotNull final TargetTag targetTag) {
         final List<Target> allTargets = targetRepository
@@ -934,7 +935,7 @@ public class TargetManagement {
      * @return
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -972,7 +973,7 @@ public class TargetManagement {
      *
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -996,7 +997,7 @@ public class TargetManagement {
      *             already exist.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final List<Target> targets) {
@@ -1028,7 +1029,7 @@ public class TargetManagement {
      * @return newly created target
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<Target> createTargets(@NotNull final Collection<Target> targets,

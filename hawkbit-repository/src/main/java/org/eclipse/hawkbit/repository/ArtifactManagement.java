@@ -43,17 +43,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * service for {@link Artifact} management operations.
- *
- *
- *
+ * Service for {@link Artifact} management operations.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class ArtifactManagement {
@@ -108,7 +106,7 @@ public class ArtifactManagement {
      *             if check against provided SHA1 checksum failed
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public LocalArtifact createLocalArtifact(@NotNull final InputStream stream, @NotNull final Long moduleId,
             @NotEmpty final String filename, final String providedMd5Sum, final String providedSha1Sum,
@@ -138,7 +136,7 @@ public class ArtifactManagement {
         return storeArtifactMetadata(softwareModule, filename, result, existing);
     }
 
-    private LocalArtifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
+    private static LocalArtifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
             final SoftwareModule softwareModule) {
         if (softwareModule.getLocalArtifactByFilename(filename).isPresent()) {
             if (overrideExisting) {
@@ -222,9 +220,7 @@ public class ArtifactManagement {
         artifact.setSize(result.getSize());
 
         LOG.debug("storing new artifact into repository {}", artifact);
-        final LocalArtifact artifactPersisted = localArtifactRepository.save(artifact);
-
-        return artifactPersisted;
+        return localArtifactRepository.save(artifact);
     }
 
     /**
@@ -242,7 +238,7 @@ public class ArtifactManagement {
      * @return created {@link ExternalArtifactProvider}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public ExternalArtifactProvider createExternalArtifactProvider(@NotEmpty final String name,
             final String description, @NotNull final String basePath, final String defaultUrlSuffix) {
@@ -268,16 +264,13 @@ public class ArtifactManagement {
      *             if {@link SoftwareModule} with given ID does not exist
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public ExternalArtifact createExternalArtifact(@NotNull final ExternalArtifactProvider externalRepository,
             final String urlSuffix, @NotNull final Long moduleId) {
 
         final SoftwareModule module = getModuleAndThrowExceptionIfThatFails(moduleId);
-        final ExternalArtifact result = externalArtifactRepository
-                .save(new ExternalArtifact(externalRepository, urlSuffix, module));
-
-        return result;
+        return externalArtifactRepository.save(new ExternalArtifact(externalRepository, urlSuffix, module));
     }
 
     /**
@@ -290,7 +283,7 @@ public class ArtifactManagement {
      *
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteLocalArtifact(@NotNull final Long id) {
         final LocalArtifact existing = localArtifactRepository.findOne(id);
@@ -313,7 +306,7 @@ public class ArtifactManagement {
      *            the related local artifact
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteGridFsArtifact(@NotNull final LocalArtifact existing) {
         if (existing == null) {
@@ -350,7 +343,7 @@ public class ArtifactManagement {
      *
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteExternalArtifact(@NotNull final Long id) {
         final ExternalArtifact existing = externalArtifactRepository.findOne(id);
@@ -425,17 +418,17 @@ public class ArtifactManagement {
      * @param filename
      *            of the artifact
      * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overdiden
+     *            to <code>true</code> if the artifact binary can be overridden
      *            if it already exists
      * @param contentType
      *            the contentType of the file
      *
      * @return uploaded {@link LocalArtifact}
      *
-     * @throw ArtifactUploadFailedException if upload failes
+     * @throw ArtifactUploadFailedException if upload fails
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public LocalArtifact createLocalArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting, final String contentType) {
@@ -461,7 +454,7 @@ public class ArtifactManagement {
      * @throw ArtifactUploadFailedException if upload failes
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public LocalArtifact createLocalArtifact(final InputStream inputStream, final Long moduleId, final String filename,
             final boolean overrideExisting) {

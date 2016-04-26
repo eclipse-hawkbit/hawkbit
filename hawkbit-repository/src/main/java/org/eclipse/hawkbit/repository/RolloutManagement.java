@@ -58,6 +58,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -72,7 +73,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @EnableScheduling
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class RolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);
 
@@ -199,7 +200,7 @@ public class RolloutManagement {
      * @throws IllegalArgumentException
      *             in case the given groupSize is zero or lower.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout createRollout(final Rollout rollout, final int amountGroup,
@@ -242,7 +243,7 @@ public class RolloutManagement {
      * @return the created rollout entity in state
      *         {@link RolloutStatus#CREATING}
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
@@ -280,7 +281,7 @@ public class RolloutManagement {
         return rolloutRepository.save(rollout);
     }
 
-    private void verifyRolloutGroupParameter(final int amountGroup) {
+    private static void verifyRolloutGroupParameter(final int amountGroup) {
         if (amountGroup <= 0) {
             throw new IllegalArgumentException("the amountGroup must be greater than zero");
         } else if (amountGroup > 500) {
@@ -362,11 +363,13 @@ public class RolloutManagement {
      * @param rollout
      *            the rollout to be started
      * 
+     * @return started rollout
+     * 
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -388,6 +391,8 @@ public class RolloutManagement {
      * 
      * @param rollout
      *            the rollout to be started
+     * 
+     * @return the started rollout
      * 
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
@@ -468,7 +473,7 @@ public class RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *             Only running rollouts can be paused.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -498,7 +503,7 @@ public class RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#PAUSED}. Only
      *             paused rollouts can be resumed.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -540,7 +545,7 @@ public class RolloutManagement {
      *            this check. This check is only applied if the last check is
      *            less than (lastcheck-delay).
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -783,7 +788,7 @@ public class RolloutManagement {
      * @return Rollout updated rollout
      */
     @NotNull
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout updateRollout(@NotNull final Rollout rollout) {
@@ -845,7 +850,7 @@ public class RolloutManagement {
         }
     }
 
-    private void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
+    private static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
         if (!(RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
                     + rollout.getStatus().name().toLowerCase());

@@ -12,16 +12,14 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * repository for operations on {@link TenantMetaData} entity.
  *
- *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TenantMetaDataRepository extends PagingAndSortingRepository<TenantMetaData, Long> {
 
     /**
