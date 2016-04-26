@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 
 /**
  * @author Jonathan Knoblauch
@@ -23,23 +24,11 @@ import com.google.common.io.ByteStreams;
 public class SaveArtifactsStrategy implements PersistenceStrategy {
 
     @Override
-    public String getPersistenceStrategy() {
-
-        return "save";
-    }
-
-    @Override
-    public void handleInputStream(final InputStream in, final String artifactName) {
-
-        final File file = new File("C:\\testdownload\\" + artifactName);
-
-        try {
-            final OutputStream out = new FileOutputStream(file);
-            ByteStreams.copy(in, out);
-        } catch (final IOException e) {
-            e.printStackTrace();
-            // TODO throw
-        }
+    public void handleInputStream(final InputStream in, final String artifactName) throws IOException {
+        final File tempDir = Files.createTempDir();
+        final File file = new File(tempDir + "\\" + artifactName);
+        final OutputStream out = new FileOutputStream(file);
+        ByteStreams.copy(in, out);
     }
 
 }

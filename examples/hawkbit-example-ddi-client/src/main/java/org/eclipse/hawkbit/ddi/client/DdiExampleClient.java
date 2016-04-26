@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.ddi.client;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -36,8 +38,10 @@ public class DdiExampleClient implements Runnable {
     private final String controllerId;
     private Long actionIdOfLastInstalltion;
     private final DdiDefaultFeignClient ddiDefaultFeignClient;
-    private final long pollingIntervalInMillis;
+    private long pollingIntervalInMillis;
     private final PersistenceStrategy persistenceStrategy;
+
+    private STATUS clientStatus;
 
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
             final long pollingIntervalInMillis, final PersistenceStrategy persistenceStrategy) {
@@ -46,27 +50,28 @@ public class DdiExampleClient implements Runnable {
         this.actionIdOfLastInstalltion = null;
         this.pollingIntervalInMillis = pollingIntervalInMillis;
         this.persistenceStrategy = persistenceStrategy;
+        this.clientStatus = STATUS.DOWN;
     }
 
     @Override
     public void run() {
+        clientStatus = STATUS.UP;
+        ResponseEntity<DdiControllerBase> response = ddiDefaultFeignClient.getRootControllerResourceClient()
+                .getControllerBase(controllerId);
+        final String pollingTime = response.getBody().getConfig().getPolling().getSleep();
+        final LocalTime localtime = LocalTime.parse(pollingTime);
+        pollingIntervalInMillis = localtime.toNanoOfDay();
 
-        ResponseEntity<DdiControllerBase> response;
-
-        while (!Thread.currentThread().isInterrupted()) {
+        while (clientStatus == STATUS.UP) {
             response = ddiDefaultFeignClient.getRootControllerResourceClient().getControllerBase(controllerId);
-            final DdiControllerBase controllerBase = response.getBody();
-            final Link controllerDeploymentBaseLink = controllerBase.getLink("deploymentBase");
+            // final DdiControllerBase controllerBase = response.getBody();
+            final Link controllerDeploymentBaseLink = response.getBody().getLink("deploymentBase");
 
             if (controllerDeploymentBaseLink != null) {
                 final Long actionId = getActionIdOutOfLink(controllerDeploymentBaseLink);
                 final Integer resource = getResourceOutOfLink(controllerDeploymentBaseLink);
                 if (actionId != actionIdOfLastInstalltion) {
-
                     startDownload(actionId, resource);
-
-                    simulateSuccessfulInstallation(actionId);
-
                     actionIdOfLastInstalltion = actionId;
                 }
             }
@@ -81,9 +86,12 @@ public class DdiExampleClient implements Runnable {
 
     }
 
+    public void stop() {
+        clientStatus = STATUS.DOWN;
+    }
+
     private void startDownload(final Long actionId, final Integer resource) {
 
-        // resource has not been downloaded and installed
         final ResponseEntity<DdiDeploymentBase> respone = ddiDefaultFeignClient.getRootControllerResourceClient()
                 .getControllerBasedeploymentAction(controllerId, Long.valueOf(actionId), Integer.valueOf(resource));
         final DdiDeploymentBase ddiDeploymentBase = respone.getBody();
@@ -94,7 +102,6 @@ public class DdiExampleClient implements Runnable {
                     .getLink("download-http");
             final String[] downloadLinkSep = downloadLink.getHref().split(Pattern.quote("/"));
             final Long softwareModuleId = Long.valueOf(downloadLinkSep[8]);
-            // download all artifacts
             for (final DdiArtifact ddiArtifact : artifactList) {
                 downloadArtifact(actionId, softwareModuleId, ddiArtifact.getFilename());
             }
@@ -111,9 +118,17 @@ public class DdiExampleClient implements Runnable {
                 .getRootControllerResourceClient().downloadArtifact(controllerId, softwareModuleId, artifact);
         final HttpStatus statsuCode = responseDownloadArtifact.getStatusCode();
         System.out.println("Finished download with stataus " + statsuCode);
-        persistenceStrategy.handleInputStream(responseDownloadArtifact.getBody(), artifact);
 
+        try {
+            persistenceStrategy.handleInputStream(responseDownloadArtifact.getBody(), artifact);
+        } catch (final IOException e) {
+            sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.FAILURE,
+                    "Downloaded of artifact " + artifact + " failed");
+            return;
+        }
         sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE, "Downloaded artifact " + artifact);
+
+        simulateSuccessfulInstallation(actionId);
     }
 
     private void sendFeedBackMessage(final Long actionId, final ExecutionStatus executionStatus,
@@ -127,14 +142,12 @@ public class DdiExampleClient implements Runnable {
         final DdiActionFeedback feedback = new DdiActionFeedback(actionId, time, ddiStatus);
         final ResponseEntity<Void> response = ddiDefaultFeignClient.getRootControllerResourceClient()
                 .postBasedeploymentActionFeedback(feedback, controllerId, actionId);
-
         final HttpStatus statsuCode = response.getStatusCode();
         System.out.println("Message send with stataus " + statsuCode);
     }
 
     private void simulateSuccessfulInstallation(final Long actionId) {
-        sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.SUCESS,
-                "Simulated installation successful");
+        sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.SUCESS, "Simulated installation successful");
     }
 
     private Long getActionIdOutOfLink(final Link controllerDeploymentBaseLink) {
@@ -153,39 +166,8 @@ public class DdiExampleClient implements Runnable {
         return segments[8].split(Pattern.quote("?"));
     }
 
-    // private RootControllerResourceClient getDownloadFeignClient() {
-    //
-    // final Builder feignBuilder = Feign.builder().contract(new
-    // IgnoreMultipleConsumersProducersSpringMvcContract())
-    // .requestInterceptor(new
-    // ApplicationJsonRequestHeaderInterceptor()).logLevel(Level.FULL)
-    // .logger(new Logger.ErrorLogger()).encoder(new
-    // JacksonEncoder()).decoder(new Decoder() {
-    // @Override
-    // public Object decode(final Response response, final Type type)
-    // throws IOException, DecodeException, FeignException {
-    //
-    // // TODO download
-    // final InputStream stream = response.body().asInputStream();
-    //
-    // final FileSystem local = FileSystems.getDefault();
-    //
-    // System.out.println("Status is " + response.status());
-    //
-    // final ResponseEntity<Void> test = new ResponseEntity<Void>(
-    // HttpStatus.valueOf(response.status()));
-    //
-    // return test;
-    // }
-    // });
-    //
-    // final RootControllerResourceClient rootControllerResourceClient =
-    // feignBuilder
-    // .target(RootControllerResourceClient.class,
-    // "http://localhost:8080/DEFAULT/controller/v1");
-    //
-    // return rootControllerResourceClient;
-    //
-    // }
+    public enum STATUS {
 
+        UP, DOWN;
+    }
 }

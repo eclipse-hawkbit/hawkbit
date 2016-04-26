@@ -33,6 +33,7 @@ import feign.jackson.JacksonDecoder;
 public class DdiDecoder implements Decoder {
 
     ObjectMapper mapper;
+    private final String octentTypeOctetStream = "[application/octet-stream]";
 
     public DdiDecoder() {
         mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -44,8 +45,7 @@ public class DdiDecoder implements Decoder {
 
         final Map<String, Collection<String>> header = response.headers();
         final String contentType = String.valueOf(header.get("Content-Type"));
-        // TODO parameter verwenden
-        if (contentType.equals("[application/octet-stream]")) {
+        if (contentType.equals(octentTypeOctetStream)) {
             return ResponseEntity.ok(response.body().asInputStream());
         }
         final ResponseEntityDecoder responseEntityDecoder = new ResponseEntityDecoder(new JacksonDecoder(mapper));

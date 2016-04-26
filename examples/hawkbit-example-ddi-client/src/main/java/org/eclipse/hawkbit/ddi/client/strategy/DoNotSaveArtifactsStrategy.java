@@ -17,13 +17,8 @@ import java.io.InputStream;
 public class DoNotSaveArtifactsStrategy implements PersistenceStrategy {
 
     @Override
-    public String getPersistenceStrategy() {
-        return "nosave";
-    }
-
-    @Override
     public void handleInputStream(final InputStream in, final String artifactName) {
-        // down but do not save
+        // do nothing
     }
 
 }

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.client.strategy;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -16,8 +17,6 @@ import java.io.InputStream;
  */
 public interface PersistenceStrategy {
 
-    public String getPersistenceStrategy();
-
-    public void handleInputStream(InputStream in, String artifactName);
+    public void handleInputStream(InputStream in, String artifactName) throws IOException;
 
 }
