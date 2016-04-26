@@ -26,6 +26,11 @@
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-example-feign-core-client</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ddi-api</artifactId>
          <version>${project.version}</version>
       </dependency>

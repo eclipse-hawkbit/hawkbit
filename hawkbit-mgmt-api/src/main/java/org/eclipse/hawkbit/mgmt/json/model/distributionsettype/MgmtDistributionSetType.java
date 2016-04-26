@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtDistributionSetTypeRest extends MgmtNamedEntity {
+public class MgmtDistributionSetType extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
     private Long moduleId;

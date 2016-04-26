@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
-import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRest;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -76,24 +76,24 @@ final class MgmtDistributionSetTypeMapper {
         return result;
     }
 
-    static List<MgmtDistributionSetTypeRest> toTypesResponse(final List<DistributionSetType> types) {
-        final List<MgmtDistributionSetTypeRest> response = new ArrayList<>();
+    static List<MgmtDistributionSetType> toTypesResponse(final List<DistributionSetType> types) {
+        final List<MgmtDistributionSetType> response = new ArrayList<>();
         for (final DistributionSetType dsType : types) {
             response.add(toResponse(dsType));
         }
         return response;
     }
 
-    static List<MgmtDistributionSetTypeRest> toListResponse(final List<DistributionSetType> types) {
-        final List<MgmtDistributionSetTypeRest> response = new ArrayList<>();
+    static List<MgmtDistributionSetType> toListResponse(final List<DistributionSetType> types) {
+        final List<MgmtDistributionSetType> response = new ArrayList<>();
         for (final DistributionSetType dsType : types) {
             response.add(toResponse(dsType));
         }
         return response;
     }
 
-    static MgmtDistributionSetTypeRest toResponse(final DistributionSetType type) {
-        final MgmtDistributionSetTypeRest result = new MgmtDistributionSetTypeRest();
+    static MgmtDistributionSetType toResponse(final DistributionSetType type) {
+        final MgmtDistributionSetType result = new MgmtDistributionSetType();
 
         MgmtRestModelMapper.mapNamedToNamed(result, type);
         result.setKey(type.getKey());

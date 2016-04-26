@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ddi.client;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
+import org.eclipse.hawkbit.feign.core.client.ApplicationJsonRequestHeaderInterceptor;
+import org.eclipse.hawkbit.feign.core.client.IgnoreMultipleConsumersProducersSpringMvcContract;
 
 import feign.Feign;
 import feign.Feign.Builder;
@@ -30,7 +32,8 @@ public class DdiDefaultFeignClient {
 
     public DdiDefaultFeignClient(final String baseUrl, final String tenant) {
         feignBuilder = Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract())
-                .requestInterceptor(new ApplicationJsonRequestHeaderInterceptor()).logLevel(Level.FULL)
+                .requestInterceptor(new ApplicationJsonRequestHeaderInterceptor())
+                .requestInterceptor(new DdiAcceptedRequestInterceptor()).logLevel(Level.FULL)
                 .logger(new Logger.ErrorLogger()).encoder(new JacksonEncoder()).decoder(new DdiDecoder());
         Validate.notNull(baseUrl, "A baseUrl has to be set");
         Validate.notNull(tenant, "A tenant has to be set");
