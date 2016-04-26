@@ -134,7 +134,7 @@ public class DeploymentManagement {
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}. *
      */
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
@@ -168,7 +168,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
@@ -220,7 +220,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
@@ -253,7 +253,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
@@ -513,7 +513,7 @@ public class DeploymentManagement {
      *             action
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Action cancelAction(@NotNull final Action action, @NotNull final Target target) {
         LOG.debug("cancelAction({}, {})", action, target);
@@ -570,7 +570,7 @@ public class DeploymentManagement {
      *             in case the given action is not active
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Action forceQuitAction(@NotNull final Action action) {
         final Action mergedAction = entityManager.merge(action);
@@ -615,7 +615,7 @@ public class DeploymentManagement {
      *            the rolloutgroup for this action
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public void createScheduledAction(final List<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final long forcedTime, final Rollout rollout,
@@ -649,7 +649,7 @@ public class DeploymentManagement {
      * @return the action which has been started
      */
     @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public Action startScheduledAction(@NotNull final Action action) {
