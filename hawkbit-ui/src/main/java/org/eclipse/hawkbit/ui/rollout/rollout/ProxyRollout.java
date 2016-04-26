@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import java.util.Set;
+
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 import com.vaadin.server.FontAwesome;
@@ -30,11 +33,85 @@ public class ProxyRollout extends Rollout {
 	private Long numberOfGroups;
 
 	private Boolean isActionRecieved = Boolean.FALSE;
+	
+	private Boolean isRequiredMigrationStep = Boolean.FALSE;
 
 	private String totalTargetsCount;
 
 	private RolloutRendererData rolloutRendererData;
+	
+	private String discription;
 
+	private String type;
+	
+	private Set<SoftwareModule> swModules;
+	
+	
+	
+	/**
+	 * @return the isRequiredMigrationStep
+	 */
+
+	public Boolean getIsRequiredMigrationStep() {
+		return isRequiredMigrationStep;
+	}
+
+	/**
+	 * @param isRequiredMigrationStep
+	 *            the isRequiredMigrationStep to set
+	 */
+
+	public void setIsRequiredMigrationStep(Boolean isRequiredMigrationStep) {
+		this.isRequiredMigrationStep = isRequiredMigrationStep;
+	}
+
+	
+	/**
+	 * @return the discription
+	 */
+
+	public String getDiscription() {
+		return discription;
+	}
+
+	/**
+	 * @param discription
+	 *            the discription to set
+	 */
+
+	public void setDiscription(String discription) {
+		this.discription = discription;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	/**
+	 * 
+	 * @return the Set of Software modules
+	 */
+	public Set<SoftwareModule> getSwModules() {
+		return swModules;
+	}
+	/**
+	 * @param swModules
+	 *        Set<SoftwareModule> to set
+	 */
+	public void setSwModules(Set<SoftwareModule> swModules) {
+		this.swModules = swModules;
+	}
 
 	public RolloutRendererData getRolloutRendererData() {
 		return rolloutRendererData;

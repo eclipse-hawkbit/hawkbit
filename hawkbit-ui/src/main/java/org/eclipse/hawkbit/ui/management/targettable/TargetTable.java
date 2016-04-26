@@ -24,7 +24,9 @@ import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -40,6 +42,7 @@ import org.eclipse.hawkbit.ui.filter.target.CustomTargetFilter;
 import org.eclipse.hawkbit.ui.filter.target.TargetSearchTextFilter;
 import org.eclipse.hawkbit.ui.filter.target.TargetStatusFilter;
 import org.eclipse.hawkbit.ui.filter.target.TargetTagFilter;
+import org.eclipse.hawkbit.ui.filtermanagement.CreateOrUpdateFilterTable.TooltipGenerator;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementViewAcceptCriteria;
@@ -92,6 +95,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 
 /**
  * Concrete implementation of Target table.
@@ -108,6 +112,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     private static final int PROPERTY_DEPT = 3;
     private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
+    
+	private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
+	private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     @Autowired
     private transient TargetManagement targetManagement;
@@ -136,6 +143,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         addActionHandler(this);
         actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
         actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
+        setItemDescriptionGenerator(new TooltipGenerator());
     }
 
     /**
@@ -1073,4 +1081,61 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
     }
+    
+    
+    /**
+     * tooltip for assignedDS and installedDS
+     */
+    
+    protected class TooltipGenerator implements ItemDescriptionGenerator {
+		private static final long serialVersionUID = 688730421728162456L;
+
+		@Override
+		public String generateDescription(Component source, Object itemId, Object propertyId) {
+			final DistributionSet distributionSet;
+			final Item item = getItem(itemId);
+			if (propertyId != null) {
+				if (propertyId.equals(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER)) {
+					distributionSet = (DistributionSet) item.getItemProperty(ASSIGN_DIST_SET).getValue();
+					return getDSDetails(distributionSet);
+				} else if (propertyId.equals(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER)) {
+					distributionSet = (DistributionSet) item.getItemProperty(INSTALL_DIST_SET).getValue();
+					return getDSDetails(distributionSet);
+				}
+			}
+			return null;
+		}
+
+		private String getDSDetails(final DistributionSet distributionSet) {
+			StringBuilder swModuleNames = new StringBuilder();
+			StringBuilder swModuleVendors = new StringBuilder();
+			final Set<SoftwareModule> swModules = (Set<SoftwareModule>)distributionSet.getModules();
+			swModules.forEach(swModule -> {
+				swModuleNames.append(swModule.getName());
+				swModuleNames.append(" , ");
+				swModuleVendors.append(swModule.getVendor());
+				swModuleVendors.append(" , ");
+			});			
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("<ul>");
+			stringBuilder.append("<li>");
+			stringBuilder.append(" DistributionSet Description : ").append((String) distributionSet.getDescription());
+			stringBuilder.append("</li>");
+			stringBuilder.append("<li>");
+			stringBuilder.append(" DistributionSet Type : ").append((distributionSet.getType()).getName());
+			stringBuilder.append("</li>");
+			stringBuilder.append("<li>");
+			stringBuilder.append(" Required Migration step : ")
+					.append(distributionSet.isRequiredMigrationStep() ? "Yes" : "No");
+			stringBuilder.append("</li>");
+			stringBuilder.append("<li>");
+			stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
+			stringBuilder.append("</li>");
+			stringBuilder.append("<li>");
+			stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
+			stringBuilder.append("</li>");
+			stringBuilder.append("</ul>");
+			return stringBuilder.toString();
+		}
+   }
 }
