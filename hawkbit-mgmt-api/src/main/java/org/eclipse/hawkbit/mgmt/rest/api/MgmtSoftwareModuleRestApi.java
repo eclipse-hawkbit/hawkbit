@@ -53,8 +53,7 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/artifacts", produces = {
-            "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/artifacts")
     ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,

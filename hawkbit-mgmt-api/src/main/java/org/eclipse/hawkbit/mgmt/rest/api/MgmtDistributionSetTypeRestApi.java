@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPut;
-import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRest;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +54,7 @@ public interface MgmtDistributionSetTypeRestApi {
      *         response.
      */
     @RequestMapping(method = RequestMethod.GET, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtDistributionSetTypeRest>> getDistributionSetTypes(
+    ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -73,7 +73,7 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtDistributionSetTypeRest> getDistributionSetType(
+    ResponseEntity<MgmtDistributionSetType> getDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId);
 
     /**
@@ -99,7 +99,7 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{distributionSetTypeId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtDistributionSetTypeRest> updateDistributionSetType(
+    ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
 
@@ -116,7 +116,7 @@ public interface MgmtDistributionSetTypeRestApi {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtDistributionSetTypeRest>> createDistributionSetTypes(
+    ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
     /**

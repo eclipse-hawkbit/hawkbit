@@ -10,25 +10,26 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
+import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * A resource for download artifacts.
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
+@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadResource implements MgmtDownloadRestApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MgmtDownloadResource.class);
@@ -47,6 +49,9 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
     @Autowired
     @Qualifier(CacheConstants.DOWNLOAD_ID_CACHE)
     private Cache cache;
+
+    @Autowired
+    private RequestResponseContextHolder requestResponseContextHolder;
 
     /**
      * Handles the GET request for downloading an artifact.
@@ -60,8 +65,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
      */
     @Override
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") final String downloadId,
-            final HttpServletResponse response) {
+    public ResponseEntity<Void> downloadArtifactByDownloadId(@PathVariable("downloadId") final String downloadId) {
         try {
             final ValueWrapper cacheWrapper = cache.get(downloadId);
             if (cacheWrapper == null) {
@@ -87,7 +91,8 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             try {
-                IOUtils.copy(artifact.getFileInputStream(), response.getOutputStream());
+                IOUtils.copy(artifact.getFileInputStream(),
+                        requestResponseContextHolder.getHttpServletResponse().getOutputStream());
             } catch (final IOException e) {
                 LOGGER.error("Cannot copy streams", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPut;
-import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRest;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -56,7 +56,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     private DistributionSetManagement distributionSetManagement;
 
     @Override
-    public ResponseEntity<PagedList<MgmtDistributionSetTypeRest>> getDistributionSetTypes(
+    public ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -79,13 +79,13 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             countModulesAll = distributionSetManagement.countDistributionSetTypesAll();
         }
 
-        final List<MgmtDistributionSetTypeRest> rest = MgmtDistributionSetTypeMapper
+        final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper
                 .toListResponse(findModuleTypessAll.getContent());
         return new ResponseEntity<>(new PagedList<>(rest, countModulesAll), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetTypeRest> getDistributionSetType(
+    public ResponseEntity<MgmtDistributionSetType> getDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
@@ -103,7 +103,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetTypeRest> updateDistributionSetType(
+    public ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
         final DistributionSetType type = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
@@ -121,7 +121,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSetTypeRest>> createDistributionSetTypes(
+    public ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
         final List<DistributionSetType> createdSoftwareModules = distributionSetManagement.createDistributionSetTypes(

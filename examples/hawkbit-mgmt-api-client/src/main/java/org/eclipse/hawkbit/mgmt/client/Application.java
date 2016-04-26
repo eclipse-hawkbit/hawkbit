@@ -17,13 +17,14 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import feign.Contract;
 import feign.auth.BasicAuthRequestInterceptor;
 
 @SpringBootApplication
 @EnableFeignClients
 @EnableConfigurationProperties(ClientConfigurationProperties.class)
+@Configuration
 public class Application implements CommandLineRunner {
 
     @Autowired
@@ -54,16 +55,6 @@ public class Application implements CommandLineRunner {
     @Bean
     public BasicAuthRequestInterceptor basicAuthRequestInterceptor() {
         return new BasicAuthRequestInterceptor(configuration.getUsername(), configuration.getPassword());
-    }
-
-    @Bean
-    public ApplicationJsonRequestHeaderInterceptor jsonHeaderInterceptor() {
-        return new ApplicationJsonRequestHeaderInterceptor();
-    }
-
-    @Bean
-    public Contract feignContract() {
-        return new IgnoreMultipleConsumersProducersSpringMvcContract();
     }
 
     private boolean containsArg(final String containsArg, final String... args) {
