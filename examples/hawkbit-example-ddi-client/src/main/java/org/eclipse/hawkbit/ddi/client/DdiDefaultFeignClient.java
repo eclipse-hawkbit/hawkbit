@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.client;
 
+import org.apache.commons.lang.Validate;
 import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
 
 import feign.Feign;
@@ -17,7 +18,7 @@ import feign.Logger.Level;
 import feign.jackson.JacksonEncoder;
 
 /**
- * @author Jonathan Knoblauch
+ * TODO
  *
  */
 public class DdiDefaultFeignClient {
@@ -32,18 +33,10 @@ public class DdiDefaultFeignClient {
         feignBuilder = Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract())
                 .requestInterceptor(new ApplicationJsonRequestHeaderInterceptor()).logLevel(Level.FULL)
                 .logger(new Logger.ErrorLogger()).encoder(new JacksonEncoder()).decoder(new DdiDecoder());
-
-        if (baseUrl == null) {
-            throw new IllegalStateException("A baseUrl has to be set");
-        }
-
-        if (tenant == null) {
-            throw new IllegalStateException("A tenant has to be set");
-        }
-
+        Validate.notNull(baseUrl, "A baseUrl has to be set");
+        Validate.notNull(tenant, "A tenant has to be set");
         this.baseUrl = baseUrl;
         this.tenant = tenant;
-
     }
 
     public Builder getFeignBuilder() {
@@ -52,12 +45,9 @@ public class DdiDefaultFeignClient {
 
     public RootControllerResourceClient getRootControllerResourceClient() {
 
-        // TODO tenant null throw exception
         if (rootControllerResourceClient == null) {
-
             String rootControllerResourcePath = this.baseUrl + RootControllerResourceClient.PATH;
             rootControllerResourcePath = rootControllerResourcePath.replace("{tenant}", tenant);
-
             rootControllerResourceClient = feignBuilder.target(RootControllerResourceClient.class,
                     rootControllerResourcePath);
         }
