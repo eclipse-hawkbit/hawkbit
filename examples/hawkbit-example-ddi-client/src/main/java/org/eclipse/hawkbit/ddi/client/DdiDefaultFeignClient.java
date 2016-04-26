@@ -18,8 +18,7 @@ import feign.Logger.Level;
 import feign.jackson.JacksonEncoder;
 
 /**
- * TODO
- *
+ * Default implementation of DDI client.
  */
 public class DdiDefaultFeignClient {
 
@@ -39,10 +38,20 @@ public class DdiDefaultFeignClient {
         this.tenant = tenant;
     }
 
+    /**
+     * Get the feign builder.
+     * 
+     * @return the feign builder
+     */
     public Builder getFeignBuilder() {
         return feignBuilder;
     }
 
+    /**
+     * Get the rootController resource client.
+     * 
+     * @return the rootController resource client
+     */
     public RootControllerResourceClient getRootControllerResourceClient() {
 
         if (rootControllerResourceClient == null) {

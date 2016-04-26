@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,9 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+/**
+ * DDI example client based on defualt DDI feign client.
+ */
 public class DdiExampleClient implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DdiExampleClient.class);
@@ -38,17 +42,26 @@ public class DdiExampleClient implements Runnable {
     private final String controllerId;
     private Long actionIdOfLastInstalltion;
     private final DdiDefaultFeignClient ddiDefaultFeignClient;
-    private long pollingIntervalInMillis;
     private final PersistenceStrategy persistenceStrategy;
-
     private STATUS clientStatus;
 
+    /**
+     * Constructor for the DDI example client.
+     * 
+     * @param baseUrl
+     *            the base url of the hawkBit server
+     * @param controllerId
+     *            the controller id that will be simulated
+     * @param tenant
+     *            the tenant
+     * @param persistenceStrategy
+     *            the persistence strategy for downloading artifacts
+     */
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
-            final long pollingIntervalInMillis, final PersistenceStrategy persistenceStrategy) {
+            final PersistenceStrategy persistenceStrategy) {
         this.controllerId = controllerId;
         this.ddiDefaultFeignClient = new DdiDefaultFeignClient(baseUrl, tenant);
         this.actionIdOfLastInstalltion = null;
-        this.pollingIntervalInMillis = pollingIntervalInMillis;
         this.persistenceStrategy = persistenceStrategy;
         this.clientStatus = STATUS.DOWN;
     }
@@ -56,15 +69,13 @@ public class DdiExampleClient implements Runnable {
     @Override
     public void run() {
         clientStatus = STATUS.UP;
-        ResponseEntity<DdiControllerBase> response = ddiDefaultFeignClient.getRootControllerResourceClient()
-                .getControllerBase(controllerId);
-        final String pollingTime = response.getBody().getConfig().getPolling().getSleep();
-        final LocalTime localtime = LocalTime.parse(pollingTime);
-        pollingIntervalInMillis = localtime.toNanoOfDay();
-
+        ResponseEntity<DdiControllerBase> response;
         while (clientStatus == STATUS.UP) {
+            LOGGER.info(" Controller {} polling from hawkBit server", controllerId);
             response = ddiDefaultFeignClient.getRootControllerResourceClient().getControllerBase(controllerId);
-            // final DdiControllerBase controllerBase = response.getBody();
+            final String pollingTime = response.getBody().getConfig().getPolling().getSleep();
+            final LocalTime localtime = LocalTime.parse(pollingTime);
+            final long pollingIntervalInMillis = localtime.toNanoOfDay();
             final Link controllerDeploymentBaseLink = response.getBody().getLink("deploymentBase");
 
             if (controllerDeploymentBaseLink != null) {
@@ -78,14 +89,15 @@ public class DdiExampleClient implements Runnable {
 
             try {
                 Thread.sleep(pollingIntervalInMillis);
-                System.out.println("polling ...");
             } catch (final InterruptedException e) {
                 LOGGER.error("Error during sleep");
             }
         }
-
     }
 
+    /**
+     * Stop the DDI example client
+     */
     public void stop() {
         clientStatus = STATUS.DOWN;
     }
@@ -112,12 +124,12 @@ public class DdiExampleClient implements Runnable {
 
         sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
                 "Starting download of artifact " + artifact);
-        System.out.println("Starting download for artifact " + artifact);
+        LOGGER.info("Starting download of artifact " + artifact);
 
         final ResponseEntity<InputStream> responseDownloadArtifact = ddiDefaultFeignClient
                 .getRootControllerResourceClient().downloadArtifact(controllerId, softwareModuleId, artifact);
         final HttpStatus statsuCode = responseDownloadArtifact.getStatusCode();
-        System.out.println("Finished download with stataus " + statsuCode);
+        LOGGER.info("Finished download with stataus {}", statsuCode);
 
         try {
             persistenceStrategy.handleInputStream(responseDownloadArtifact.getBody(), artifact);
@@ -138,12 +150,11 @@ public class DdiExampleClient implements Runnable {
         final List<String> details = new ArrayList<>();
         details.add(message);
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, result, details);
-        final String time = null;
+        final String time = String.valueOf(LocalDateTime.now());
         final DdiActionFeedback feedback = new DdiActionFeedback(actionId, time, ddiStatus);
-        final ResponseEntity<Void> response = ddiDefaultFeignClient.getRootControllerResourceClient()
-                .postBasedeploymentActionFeedback(feedback, controllerId, actionId);
-        final HttpStatus statsuCode = response.getStatusCode();
-        System.out.println("Message send with stataus " + statsuCode);
+        ddiDefaultFeignClient.getRootControllerResourceClient().postBasedeploymentActionFeedback(feedback, controllerId,
+                actionId);
+        LOGGER.info("Sent feedback message to HaktBit");
     }
 
     private void simulateSuccessfulInstallation(final Long actionId) {
@@ -166,6 +177,9 @@ public class DdiExampleClient implements Runnable {
         return segments[8].split(Pattern.quote("?"));
     }
 
+    /**
+     * Enum for DDI running status.
+     */
     public enum STATUS {
 
         UP, DOWN;

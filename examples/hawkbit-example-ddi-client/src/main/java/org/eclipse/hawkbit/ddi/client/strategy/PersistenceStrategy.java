@@ -12,11 +12,19 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author Jonathan Knoblauch
- *
+ * Interface of persistence strategy.
  */
 public interface PersistenceStrategy {
 
+    /**
+     * Method handling the artifact download.
+     * 
+     * @param in
+     *            the input stream
+     * @param artifactName
+     *            the name of the artifact
+     * @throws IOException
+     */
     public void handleInputStream(InputStream in, String artifactName) throws IOException;
 
 }

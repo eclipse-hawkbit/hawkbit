@@ -18,8 +18,8 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 /**
- * @author Jonathan Knoblauch
- *
+ * Implementation of {@link PersistenceStrategy} for downloading artifacts to
+ * the temp directory.
  */
 public class SaveArtifactsStrategy implements PersistenceStrategy {
 

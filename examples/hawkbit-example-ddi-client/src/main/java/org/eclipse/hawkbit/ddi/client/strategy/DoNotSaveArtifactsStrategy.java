@@ -8,16 +8,17 @@
  */
 package org.eclipse.hawkbit.ddi.client.strategy;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author Jonathan Knoblauch
- *
+ * Implementation of {@link PersistenceStrategy} for not downloading any
+ * artifacts.
  */
 public class DoNotSaveArtifactsStrategy implements PersistenceStrategy {
 
     @Override
-    public void handleInputStream(final InputStream in, final String artifactName) {
+    public void handleInputStream(final InputStream in, final String artifactName) throws IOException {
         // do nothing
     }
 
