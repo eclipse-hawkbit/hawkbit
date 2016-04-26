@@ -67,6 +67,10 @@
          <artifactId>commons-io</artifactId>
          <version>2.5</version>
       </dependency>
+      <dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava</artifactId>
+</dependency>
 
 
       <!-- Test -->
