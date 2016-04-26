@@ -61,7 +61,7 @@ public final class RestResourceConversionHelper {
      *
      * @return http code
      */
-    public static ResponseEntity<Void> writeFileResponse(final LocalArtifact artifact,
+    public static ResponseEntity<InputStream> writeFileResponse(final LocalArtifact artifact,
             final HttpServletResponse servletResponse, final HttpServletRequest request, final DbArtifact file) {
         return writeFileResponse(artifact, servletResponse, request, file, null, null);
     }
@@ -96,11 +96,11 @@ public final class RestResourceConversionHelper {
      *
      * @see https://tools.ietf.org/html/rfc7233
      */
-    public static ResponseEntity<Void> writeFileResponse(final LocalArtifact artifact,
+    public static ResponseEntity<InputStream> writeFileResponse(final LocalArtifact artifact,
             final HttpServletResponse response, final HttpServletRequest request, final DbArtifact file,
             final CacheWriteNotify cacheWriteNotify, final Long statusId) {
 
-        ResponseEntity<Void> result = null;
+        ResponseEntity<InputStream> result = null;
 
         final String etag = artifact.getSha1Hash();
         final Long lastModified = artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt()
@@ -181,9 +181,9 @@ public final class RestResourceConversionHelper {
         }
     }
 
-    private static ResponseEntity<Void> extractRange(final HttpServletResponse response, final long length,
+    private static ResponseEntity<InputStream> extractRange(final HttpServletResponse response, final long length,
             final List<ByteRange> ranges, final String range) {
-        ResponseEntity<Void> result = null;
+        ResponseEntity<InputStream> result = null;
         if (ranges.isEmpty()) {
             for (final String part : range.substring(6).split(",")) {
                 long start = sublong(part, 0, part.indexOf('-'));

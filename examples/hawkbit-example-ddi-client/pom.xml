@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.eclipse.hawkbit</groupId>
-    <artifactId>hawkbit-examples-parent</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>hawkbit-example-ddi-client</artifactId>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.hawkbit</groupId>
+      <artifactId>hawkbit-examples-parent</artifactId>
+      <version>0.2.0-SNAPSHOT</version>
+   </parent>
+   <artifactId>hawkbit-example-ddi-client</artifactId>
 
-  <name>hawkbit-example-ddi-client</name>
- 
- <dependencyManagement>
+   <name>hawkbit-example-ddi-client</name>
+
+   <dependencyManagement>
       <dependencies>
          <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -22,32 +22,32 @@
          </dependency>
       </dependencies>
    </dependencyManagement>
- 
-  <dependencies>
-  <dependency>
-      <groupId>org.eclipse.hawkbit</groupId>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ddi-api</artifactId>
          <version>${project.version}</version>
       </dependency>
-       <dependency>
+      <dependency>
          <groupId>org.springframework.cloud</groupId>
          <artifactId>spring-cloud-starter-feign</artifactId>
       </dependency>
-       <dependency>
+      <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
          <!-- need to overwrite for the interface inheritance feature of feign-core -->
-        <!--  <version>8.16.0</version> -->
+         <!-- <version>8.16.0</version> -->
          <version>8.14.2</version>
       </dependency>
-        <dependency>
+      <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-jackson</artifactId>
          <!-- need to overwrite for the interface inheritance feature of feign-core -->
-        <!--  <version>8.16.0</version> -->
-          <version>8.14.2</version>
+         <!-- <version>8.16.0</version> -->
+         <version>8.14.2</version>
       </dependency>
-       <dependency>
+      <dependency>
          <groupId>javax.servlet</groupId>
          <artifactId>javax.servlet-api</artifactId>
          <!-- <scope>provided</scope> -->
@@ -56,11 +56,29 @@
          <groupId>org.springframework.plugin</groupId>
          <artifactId>spring-plugin-core</artifactId>
       </dependency>
-      <!--  Test -->
-   <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency> 
-  </dependencies>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+      </dependency>
+
+      <!-- Move to parent or use different framework -->
+      <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>2.5</version>
+      </dependency>
+
+
+      <!-- Test -->
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>ru.yandex.qatools.allure</groupId>
+         <artifactId>allure-junit-adaptor</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
 </project>

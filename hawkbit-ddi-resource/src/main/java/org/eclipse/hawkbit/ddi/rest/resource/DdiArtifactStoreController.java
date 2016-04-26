@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +69,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
     private RequestResponseContextHolder requestResponseContextHolder;
 
     @Override
-    public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
+    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
             @AuthenticationPrincipal final String targetid) {
         final List<LocalArtifact> foundArtifacts = artifactManagement.findLocalArtifactByFilename(fileName);
 
@@ -80,7 +81,7 @@ public class DdiArtifactStoreController implements DdiArtifactStoreControllerRes
         if (foundArtifacts.size() > 1) {
             LOG.warn("Software artifact name {} is not unique. We will use the first entry.", fileName);
         }
-        ResponseEntity<Void> result;
+        ResponseEntity<InputStream> result;
         final LocalArtifact artifact = foundArtifacts.get(0);
 
         final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader("If-Match");

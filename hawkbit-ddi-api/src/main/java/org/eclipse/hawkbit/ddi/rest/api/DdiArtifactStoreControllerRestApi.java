@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ddi.rest.api;
 
+import java.io.InputStream;
+
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +44,7 @@ public interface DdiArtifactStoreControllerRestApi {
      */
     @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}")
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
+    public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
 
             @AuthenticationPrincipal final String targetid);
 

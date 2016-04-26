@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.io.InputStream;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -60,7 +62,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
      */
     @Override
     @ResponseBody
-    public ResponseEntity<Void> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 

@@ -3,6 +3,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.api;
 
+import java.io.InputStream;
 import java.lang.annotation.Target;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public interface DdiRootControllerRestApi {
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
-    ResponseEntity<Void> downloadArtifact(@PathVariable("targetid") final String targetid,
+    ResponseEntity<InputStream> downloadArtifact(@PathVariable("targetid") final String targetid,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName);
 

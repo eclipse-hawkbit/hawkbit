@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -138,10 +139,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> downloadArtifact(@PathVariable("targetid") final String targetid,
+    public ResponseEntity<InputStream> downloadArtifact(@PathVariable("targetid") final String targetid,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        ResponseEntity<Void> result;
+        ResponseEntity<InputStream> result;
 
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
                 IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),

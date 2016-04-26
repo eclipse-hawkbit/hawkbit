@@ -21,10 +21,11 @@ public class ApplicationJsonRequestHeaderInterceptor implements RequestIntercept
 
     @Override
     public void apply(final RequestTemplate template) {
-        template.header("Accept", MediaType.APPLICATION_JSON_VALUE);
-        // template.header("Accept",
-        // EnableHypermediaSupport.HypermediaType.HAL);
+        template.header("Accept", MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                MediaType.TEXT_PLAIN_VALUE);
+        // template.header("Accept", MediaType.APPLICATION_OCTET_STREAM_VALUE);
         template.header("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+
     }
 
 }
