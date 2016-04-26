@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
 import org.eclipse.hawkbit.ddi.client.strategy.PersistenceStrategy;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
@@ -41,9 +42,11 @@ public class DdiExampleClient implements Runnable {
 
     private final String controllerId;
     private Long actionIdOfLastInstalltion;
-    private final DdiDefaultFeignClient ddiDefaultFeignClient;
+    private final RootControllerResourceClient rootControllerResourceClient;
     private final PersistenceStrategy persistenceStrategy;
-    private STATUS clientStatus;
+    private DdiClientStatus clientStatus;
+
+    private FinalResult finalReusltOfCurrentUpdate;
 
     /**
      * Constructor for the DDI example client.
@@ -60,33 +63,34 @@ public class DdiExampleClient implements Runnable {
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
             final PersistenceStrategy persistenceStrategy) {
         this.controllerId = controllerId;
-        this.ddiDefaultFeignClient = new DdiDefaultFeignClient(baseUrl, tenant);
+        this.rootControllerResourceClient = new DdiDefaultFeignClient(baseUrl, tenant)
+                .getRootControllerResourceClient();
         this.actionIdOfLastInstalltion = null;
         this.persistenceStrategy = persistenceStrategy;
-        this.clientStatus = STATUS.DOWN;
+        this.clientStatus = DdiClientStatus.DOWN;
     }
 
     @Override
     public void run() {
-        clientStatus = STATUS.UP;
+        clientStatus = DdiClientStatus.UP;
         ResponseEntity<DdiControllerBase> response;
-        while (clientStatus == STATUS.UP) {
+        while (clientStatus == DdiClientStatus.UP) {
             LOGGER.info(" Controller {} polling from hawkBit server", controllerId);
-            response = ddiDefaultFeignClient.getRootControllerResourceClient().getControllerBase(controllerId);
-            final String pollingTime = response.getBody().getConfig().getPolling().getSleep();
-            final LocalTime localtime = LocalTime.parse(pollingTime);
+            response = rootControllerResourceClient.getControllerBase(controllerId);
+            final String pollingTimeFormReponse = response.getBody().getConfig().getPolling().getSleep();
+            final LocalTime localtime = LocalTime.parse(pollingTimeFormReponse);
             final long pollingIntervalInMillis = localtime.toNanoOfDay();
             final Link controllerDeploymentBaseLink = response.getBody().getLink("deploymentBase");
-
             if (controllerDeploymentBaseLink != null) {
                 final Long actionId = getActionIdOutOfLink(controllerDeploymentBaseLink);
                 final Integer resource = getResourceOutOfLink(controllerDeploymentBaseLink);
                 if (actionId != actionIdOfLastInstalltion) {
+                    finalReusltOfCurrentUpdate = FinalResult.NONE;
                     startDownload(actionId, resource);
+                    finishUpdateProcess(actionId);
                     actionIdOfLastInstalltion = actionId;
                 }
             }
-
             try {
                 Thread.sleep(pollingIntervalInMillis);
             } catch (final InterruptedException e) {
@@ -99,12 +103,12 @@ public class DdiExampleClient implements Runnable {
      * Stop the DDI example client
      */
     public void stop() {
-        clientStatus = STATUS.DOWN;
+        clientStatus = DdiClientStatus.DOWN;
     }
 
     private void startDownload(final Long actionId, final Integer resource) {
 
-        final ResponseEntity<DdiDeploymentBase> respone = ddiDefaultFeignClient.getRootControllerResourceClient()
+        final ResponseEntity<DdiDeploymentBase> respone = rootControllerResourceClient
                 .getControllerBasedeploymentAction(controllerId, Long.valueOf(actionId), Integer.valueOf(resource));
         final DdiDeploymentBase ddiDeploymentBase = respone.getBody();
         final List<DdiChunk> chunks = ddiDeploymentBase.getDeployment().getChunks();
@@ -115,7 +119,9 @@ public class DdiExampleClient implements Runnable {
             final String[] downloadLinkSep = downloadLink.getHref().split(Pattern.quote("/"));
             final Long softwareModuleId = Long.valueOf(downloadLinkSep[8]);
             for (final DdiArtifact ddiArtifact : artifactList) {
-                downloadArtifact(actionId, softwareModuleId, ddiArtifact.getFilename());
+                if (finalReusltOfCurrentUpdate != FinalResult.FAILURE) {
+                    downloadArtifact(actionId, softwareModuleId, ddiArtifact.getFilename());
+                }
             }
         }
     }
@@ -126,39 +132,46 @@ public class DdiExampleClient implements Runnable {
                 "Starting download of artifact " + artifact);
         LOGGER.info("Starting download of artifact " + artifact);
 
-        final ResponseEntity<InputStream> responseDownloadArtifact = ddiDefaultFeignClient
-                .getRootControllerResourceClient().downloadArtifact(controllerId, softwareModuleId, artifact);
+        final ResponseEntity<InputStream> responseDownloadArtifact = rootControllerResourceClient
+                .downloadArtifact(controllerId, softwareModuleId, artifact);
         final HttpStatus statsuCode = responseDownloadArtifact.getStatusCode();
         LOGGER.info("Finished download with stataus {}", statsuCode);
 
         try {
             persistenceStrategy.handleInputStream(responseDownloadArtifact.getBody(), artifact);
+            sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
+                    "Downloaded artifact " + artifact);
         } catch (final IOException e) {
-            sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.FAILURE,
-                    "Downloaded of artifact " + artifact + " failed");
-            return;
+            sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
+                    "Downloaded of artifact " + artifact + "failed");
+            finalReusltOfCurrentUpdate = FinalResult.FAILURE;
         }
-        sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE, "Downloaded artifact " + artifact);
 
-        simulateSuccessfulInstallation(actionId);
     }
 
     private void sendFeedBackMessage(final Long actionId, final ExecutionStatus executionStatus,
             final FinalResult finalResult, final String message) {
-
         final DdiResult result = new DdiResult(finalResult, null);
         final List<String> details = new ArrayList<>();
         details.add(message);
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, result, details);
         final String time = String.valueOf(LocalDateTime.now());
         final DdiActionFeedback feedback = new DdiActionFeedback(actionId, time, ddiStatus);
-        ddiDefaultFeignClient.getRootControllerResourceClient().postBasedeploymentActionFeedback(feedback, controllerId,
-                actionId);
+        rootControllerResourceClient.postBasedeploymentActionFeedback(feedback, controllerId, actionId);
         LOGGER.info("Sent feedback message to HaktBit");
     }
 
-    private void simulateSuccessfulInstallation(final Long actionId) {
-        sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.SUCESS, "Simulated installation successful");
+    private void finishUpdateProcess(final Long actionId) {
+
+        if (finalReusltOfCurrentUpdate == FinalResult.FAILURE) {
+            sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.FAILURE, "Error during update process");
+        }
+
+        if (finalReusltOfCurrentUpdate == FinalResult.NONE) {
+            sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.SUCESS,
+                    "Simulated installation successful");
+        }
+
     }
 
     private Long getActionIdOutOfLink(final Link controllerDeploymentBaseLink) {
@@ -180,8 +193,8 @@ public class DdiExampleClient implements Runnable {
     /**
      * Enum for DDI running status.
      */
-    public enum STATUS {
-
+    public enum DdiClientStatus {
         UP, DOWN;
     }
+
 }
