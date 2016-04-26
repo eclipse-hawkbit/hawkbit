@@ -13,8 +13,8 @@ import java.io.Serializable;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -282,8 +282,8 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
                     /* display success message */
                     uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {
                             newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-                    eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.NEW_SOFTWARE_MODULE,
-                            newBaseSoftwareModule));
+                    eventBus.publish(this,
+                            new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
                 }
                 // close the window
                 closeThisWindow();
@@ -302,8 +302,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
             uiNotifcation.displaySuccess(i18n.get("message.save.success",
                     new Object[] { newSWModule.getName() + ":" + newSWModule.getVersion() }));
 
-            eventBus.publish(this,
-                    new SoftwareModuleEvent(SoftwareModuleEventType.UPDATED_SOFTWARE_MODULE, newSWModule));
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.UPDATED_ENTITY, newSWModule));
         }
         closeThisWindow();
     }

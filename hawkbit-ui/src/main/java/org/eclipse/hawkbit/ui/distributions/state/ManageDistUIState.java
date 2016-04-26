@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
+import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -30,7 +31,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @SpringComponent
 @VaadinSessionScope
-public class ManageDistUIState implements Serializable {
+public class ManageDistUIState implements ManagmentEntityState<DistributionSetIdName>, Serializable {
 
     private static final long serialVersionUID = -7569047247017742928L;
 
@@ -101,26 +102,23 @@ public class ManageDistUIState implements Serializable {
      * @return the slectedDistributions
      */
     public Optional<Set<DistributionSetIdName>> getSelectedDistributions() {
-        return selectedDistributions == null ? Optional.empty() : Optional.of(selectedDistributions);
+        return Optional.ofNullable(selectedDistributions);
     }
 
     /**
      * @return the lastSelectedDistribution
      */
     public Optional<DistributionSetIdName> getLastSelectedDistribution() {
-        return lastSelectedDistribution == null ? Optional.empty() : Optional.of(lastSelectedDistribution);
+        return Optional.ofNullable(lastSelectedDistribution);
     }
 
-    /**
-     * @param lastSelectedDistribution
-     *            the lastSelectedDistribution to set
-     */
-    public void setLastSelectedDistribution(final DistributionSetIdName lastSelectedDistribution) {
-        this.lastSelectedDistribution = lastSelectedDistribution;
+    @Override
+    public void setLastSelectedEntity(final DistributionSetIdName value) {
+        this.lastSelectedDistribution = value;
     }
 
-    public void setSelectedDistributions(final Set<DistributionSetIdName> slectedDistributions) {
-        selectedDistributions = slectedDistributions;
+    public void setSelectedEnitities(final Set<DistributionSetIdName> values) {
+        selectedDistributions = values;
     }
 
     /**
@@ -141,7 +139,7 @@ public class ManageDistUIState implements Serializable {
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
+        return Optional.ofNullable(selectedBaseSwModuleId);
     }
 
     /**

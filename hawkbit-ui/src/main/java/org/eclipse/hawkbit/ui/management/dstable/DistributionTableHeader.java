@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -127,13 +127,13 @@ public class DistributionTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setDsTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new DistributionTableEvent(DistributionComponentEvent.MAXIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED, null));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setDsTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new DistributionTableEvent(DistributionComponentEvent.MINIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override

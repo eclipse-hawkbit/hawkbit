@@ -182,40 +182,45 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     protected void setUploadStatusButtonCaption(final Long count) {
-        if (null != bulkUploadStatusButton) {
-            bulkUploadStatusButton.setCaption("<div class='unread'>" + count + "</div>");
+        if (bulkUploadStatusButton == null) {
+            return;
         }
+        bulkUploadStatusButton.setCaption("<div class='unread'>" + count + "</div>");
     }
 
     protected void enableBulkUploadStatusButton() {
-        if (null != bulkUploadStatusButton) {
-            bulkUploadStatusButton.setVisible(true);
+        if (bulkUploadStatusButton == null) {
+            return;
         }
+        bulkUploadStatusButton.setVisible(true);
     }
 
     protected void updateUploadBtnIconToComplete() {
-        if (null != bulkUploadStatusButton) {
-            bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
-            bulkUploadStatusButton.setIcon(FontAwesome.UPLOAD);
+        if (bulkUploadStatusButton == null) {
+            return;
         }
+        bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        bulkUploadStatusButton.setIcon(FontAwesome.UPLOAD);
     }
 
     protected void updateUploadBtnIconToProgressIndicator() {
-        if (null != bulkUploadStatusButton) {
-            bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
-            bulkUploadStatusButton.setIcon(null);
+        if (bulkUploadStatusButton == null) {
+            return;
         }
+        bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        bulkUploadStatusButton.setIcon(null);
     }
 
     protected void actionButtonClicked() {
-        if (hasUnsavedActions()) {
-            unsavedActionsWindow = SPUIComponentProvider.getWindow(getUnsavedActionsWindowCaption(),
-                    SPUIComponetIdProvider.SAVE_ACTIONS_POPUP, SPUIDefinitions.CONFIRMATION_WINDOW);
-            unsavedActionsWindow.addCloseListener(event -> unsavedActionsWindowClosed());
-            unsavedActionsWindow.setContent(getUnsavedActionsWindowContent());
-            unsavedActionsWindow.setId(SPUIComponetIdProvider.CONFIRMATION_POPUP_ID);
-            UI.getCurrent().addWindow(unsavedActionsWindow);
+        if (!hasUnsavedActions()) {
+            return;
         }
+        unsavedActionsWindow = SPUIComponentProvider.getWindow(getUnsavedActionsWindowCaption(),
+                SPUIComponetIdProvider.SAVE_ACTIONS_POPUP, SPUIDefinitions.CONFIRMATION_WINDOW);
+        unsavedActionsWindow.addCloseListener(event -> unsavedActionsWindowClosed());
+        unsavedActionsWindow.setContent(getUnsavedActionsWindowContent());
+        unsavedActionsWindow.setId(SPUIComponetIdProvider.CONFIRMATION_POPUP_ID);
+        UI.getCurrent().addWindow(unsavedActionsWindow);
     }
 
     /**
@@ -225,22 +230,11 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         UI.getCurrent().removeWindow(unsavedActionsWindow);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.event.dd.DropHandler#getAcceptCriterion()
-     */
     @Override
     public AcceptCriterion getAcceptCriterion() {
         return getDeleteLayoutAcceptCriteria();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.event.dd.DropHandler#drop(com.vaadin.event.dd.
-     * DragAndDropEvent)
-     */
     @Override
     public void drop(final DragAndDropEvent event) {
         processDroppedComponent(event);
@@ -285,6 +279,42 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             bulkUploadStatusButton.setCaption(null);
             bulkUploadStatusButton.setVisible(false);
         }
+    }
+
+    /**
+     * 
+     * @return true if the count label is displayed false is not displayed
+     */
+    protected boolean hasCountMessage() {
+        return false;
+    }
+
+    /**
+     * 
+     * @return the count message label
+     */
+    protected Label getCountMessageLabel() {
+        return null;
+    }
+
+    /**
+     * @return true if bulk upload is allowed and has required create
+     *         permissions.
+     */
+    protected boolean hasBulkUploadPermission() {
+        // can be overriden
+        return false;
+    }
+
+    protected void showBulkUploadWindow() {
+        // can be overriden
+    }
+
+    /**
+     * restore the upload status count.
+     */
+    protected void restoreBulkUploadStatusCount() {
+        // can be overriden
     }
 
     /**
@@ -363,11 +393,6 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     protected abstract void restoreActionCount();
 
     /**
-     * restore the upload status count.
-     */
-    protected abstract void restoreBulkUploadStatusCount();
-
-    /**
      * This method will be called when unsaved actions window is closed.
      */
     protected abstract void unsavedActionsWindowClosed();
@@ -386,22 +411,5 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
      *         'false'.
      */
     protected abstract boolean hasUnsavedActions();
-
-    /**
-     * Only in deployment view count message is displayed.
-     * 
-     * @return
-     */
-    protected abstract boolean hasCountMessage();
-
-    protected abstract Label getCountMessageLabel();
-
-    /**
-     * @return true if bulk upload is allowed and has required create
-     *         permissions.
-     */
-    protected abstract boolean hasBulkUploadPermission();
-
-    protected abstract void showBulkUploadWindow();
 
 }

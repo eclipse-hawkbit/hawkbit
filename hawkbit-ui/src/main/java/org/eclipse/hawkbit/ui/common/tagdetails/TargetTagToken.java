@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.UI;
 
 /**
  * Implementation of Target tag token.
@@ -41,7 +39,7 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class TargetTagToken extends AbstractTargetTagToken {
+public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private static final long serialVersionUID = 7124887018280196721L;
 
@@ -53,8 +51,6 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     @Autowired
     private transient TargetManagement targetManagement;
-
-    private Target selectedTarget;
 
     @Override
     protected String getTagStyleName() {
@@ -80,7 +76,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     private TargetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final Set<String> targetList = new HashSet<>();
-        targetList.add(selectedTarget.getControllerId());
+        targetList.add(selectedEntity.getControllerId());
         final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
         uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
@@ -114,8 +110,8 @@ public class TargetTagToken extends AbstractTargetTagToken {
     @Override
     protected void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
-        if (selectedTarget != null) {
-            for (final TargetTag tag : selectedTarget.getTags()) {
+        if (selectedEntity != null) {
+            for (final TargetTag tag : selectedEntity.getTags()) {
                 addNewToken(tag.getId());
             }
         }
@@ -174,13 +170,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent targetTableEvent) {
-        if (targetTableEvent.getTargetComponentEvent() == TargetComponentEvent.SELECTED_TARGET
-                && targetTableEvent.getTarget() != null) {
-            UI.getCurrent().access(() -> {
-                selectedTarget = targetTableEvent.getTarget();
-                repopulateToken();
-            });
-        }
+        onBaseEntityEvent(targetTableEvent);
     }
 
 }

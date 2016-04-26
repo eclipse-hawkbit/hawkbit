@@ -13,7 +13,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.disttype.DSTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.DistributionSetTableLayout;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.ui.distributions.smtable.SwModuleTableLayout;
 import org.eclipse.hawkbit.ui.distributions.smtype.DistSMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -160,18 +159,18 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent event) {
-        if (event.getDistributionComponentEvent() == DistributionComponentEvent.MINIMIZED) {
+        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeDistTable();
-        } else if (event.getDistributionComponentEvent() == DistributionComponentEvent.MAXIMIZED) {
+        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             maximizeDistTable();
         }
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent event) {
-        if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.MINIMIZED) {
+        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeSwTable();
-        } else if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.MAXIMIZED) {
+        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             maximizeSwTable();
         }
     }

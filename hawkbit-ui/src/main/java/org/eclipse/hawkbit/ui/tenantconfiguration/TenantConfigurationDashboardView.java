@@ -56,9 +56,6 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private PollingConfigurationView pollingConfigurationView;
 
     @Autowired
-    private DownloadAnonymousConfigurationView downloadAnonymousConfigurationView;
-
-    @Autowired
     private I18N i18n;
 
     @Autowired
@@ -80,7 +77,6 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         configurationViews.add(defaultDistributionSetTypeLayout);
         configurationViews.add(authenticationConfigurationView);
         configurationViews.add(pollingConfigurationView);
-        configurationViews.add(downloadAnonymousConfigurationView);
     }
 
     @Override

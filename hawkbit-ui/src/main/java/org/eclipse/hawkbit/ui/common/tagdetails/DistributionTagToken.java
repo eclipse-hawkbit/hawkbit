@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
@@ -26,7 +24,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +33,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import com.vaadin.data.Item;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.UI;
 
 /**
  * Implementation of target/ds tag token layout.
@@ -44,7 +40,7 @@ import com.vaadin.ui.UI;
  */
 @SpringComponent
 @ViewScope
-public class DistributionTagToken extends AbstractTagToken {
+public class DistributionTagToken extends AbstractTagToken<DistributionSet> {
 
     private static final long serialVersionUID = -8022738301736043396L;
     @Autowired
@@ -52,8 +48,6 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
-
-    private DistributionSet selectedDS;
 
     // To Be Done : have to set this value based on view???
     private static final Boolean NOTAGS_SELECTED = Boolean.FALSE;
@@ -82,9 +76,9 @@ public class DistributionTagToken extends AbstractTagToken {
 
     private DistributionSetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final Set<Long> distributionList = new HashSet<>();
-        distributionList.add(selectedDS.getId());
-        final DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(distributionList,
-                tagNameSelected);
+        distributionList.add(selectedEntity.getId());
+        final DistributionSetTagAssignmentResult result = distributionSetManagement
+                .toggleTagAssignment(distributionList, tagNameSelected);
         uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
@@ -117,8 +111,8 @@ public class DistributionTagToken extends AbstractTagToken {
     @Override
     public void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
-        if (selectedDS != null) {
-            for (final DistributionSetTag tag : selectedDS.getTags()) {
+        if (selectedEntity != null) {
+            for (final DistributionSetTag tag : selectedEntity.getTags()) {
                 addNewToken(tag.getId());
             }
         }
@@ -134,15 +128,7 @@ public class DistributionTagToken extends AbstractTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
-        if (distributionTableEvent.getDistributionComponentEvent() != DistributionComponentEvent.ON_VALUE_CHANGE) {
-            return;
-        }
-        UI.getCurrent().access(() -> {
-            if (distributionTableEvent.getDistributionSet() != null) {
-                selectedDS = distributionTableEvent.getDistributionSet();
-                repopulateToken();
-            }
-        });
+        onBaseEntityEvent(distributionTableEvent);
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -200,12 +186,6 @@ public class DistributionTagToken extends AbstractTagToken {
             }
         }
         return false;
-    }
-
-    @Override
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
 }

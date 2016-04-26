@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -31,7 +32,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @VaadinSessionScope
 @SpringComponent
-public class ManagementUIState implements Serializable {
+public class ManagementUIState implements ManagmentEntityState<DistributionSetIdName>, Serializable {
 
     private static final long serialVersionUID = 7301409196969723794L;
 
@@ -170,7 +171,7 @@ public class ManagementUIState implements Serializable {
     }
 
     public Optional<Set<TargetIdName>> getSelectedTargetIdName() {
-        return selectedTargetIdName == null ? Optional.empty() : Optional.of(selectedTargetIdName);
+        return Optional.ofNullable(selectedTargetIdName);
     }
 
     public void setSelectedTargetIdName(final Set<TargetIdName> selectedTargetIdName) {
@@ -266,16 +267,19 @@ public class ManagementUIState implements Serializable {
         return lastSelectedDsIdName;
     }
 
-    public void setLastSelectedDsIdName(final DistributionSetIdName lastSelectedDsIdName) {
-        this.lastSelectedDsIdName = lastSelectedDsIdName;
+    @Override
+    public void setLastSelectedEntity(final DistributionSetIdName value) {
+        this.lastSelectedDsIdName = value;
     }
 
-    public void setSelectedDsIdName(final Set<DistributionSetIdName> selectedDsIdName) {
-        this.selectedDsIdName = selectedDsIdName;
+    @Override
+    public void setSelectedEnitities(final Set<DistributionSetIdName> values) {
+        this.selectedDsIdName = values;
+
     }
 
     public Optional<Set<DistributionSetIdName>> getSelectedDsIdName() {
-        return selectedDsIdName == null ? Optional.empty() : Optional.of(selectedDsIdName);
+        return Optional.ofNullable(selectedDsIdName);
     }
 
     /**

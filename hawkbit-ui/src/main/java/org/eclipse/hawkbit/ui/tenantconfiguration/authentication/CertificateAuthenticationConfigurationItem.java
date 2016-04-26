@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,9 +33,6 @@ import com.vaadin.ui.themes.ValoTheme;
 public class CertificateAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
-
-    @Autowired
-    private I18N i18n;
 
     private boolean configurationEnabled = false;
     private boolean configurationEnabledChange = false;
@@ -60,7 +56,7 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
      */
     @PostConstruct
     public void init() {
-        super.init(i18n.get("label.configuration.auth.header"));
+        super.init("label.configuration.auth.header");
         configurationEnabled = isConfigEnabled();
 
         detailLayout = new VerticalLayout();

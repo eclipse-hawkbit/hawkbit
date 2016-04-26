@@ -18,50 +18,39 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
 /**
- * This class represents the UI item for the target security token section in
- * the authentication configuration view.
+ * This class represents the UI item for the anonymous download by in the
+ * authentication configuration view.
  */
 @SpringComponent
 @ViewScope
-public class TargetSecurityTokenAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
+public class AnonymousDownloadAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
     private static final long serialVersionUID = 1L;
 
     private boolean configurationEnabled = false;
     private boolean configurationEnabledChange = false;
 
-    /**
-     * @param systemManagement
-     *            the system management to retrie the configuration
-     */
     @Autowired
-    public TargetSecurityTokenAuthenticationConfigurationItem(
+    public AnonymousDownloadAuthenticationConfigurationItem(
             final TenantConfigurationManagement tenantConfigurationManagement) {
-        super(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, tenantConfigurationManagement);
+        super(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, tenantConfigurationManagement);
     }
 
-    /**
-     * Init mehotd called by spring.
-     */
     @PostConstruct
     public void init() {
-        super.init("label.configuration.auth.targettoken");
+        super.init("label.configuration.anonymous.download");
         configurationEnabled = isConfigEnabled();
     }
 
     @Override
     public void configEnable() {
-        if (!configurationEnabled) {
-            configurationEnabledChange = true;
-        }
+        configurationEnabledChange = !configurationEnabled;
         configurationEnabled = true;
     }
 
     @Override
     public void configDisable() {
-        if (configurationEnabled) {
-            configurationEnabledChange = true;
-        }
+        configurationEnabledChange = configurationEnabled;
         configurationEnabled = false;
     }
 
@@ -79,4 +68,5 @@ public class TargetSecurityTokenAuthenticationConfigurationItem extends Abstract
         configurationEnabled = getTenantConfigurationManagement()
                 .getConfigurationValue(getConfigurationKey(), Boolean.class).getValue();
     }
+
 }

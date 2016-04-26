@@ -8,13 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.management.footer;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
@@ -211,7 +211,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        manangementConfirmationWindowLayout.init();
+        manangementConfirmationWindowLayout.initialize();
         return manangementConfirmationWindowLayout;
     }
 
@@ -257,14 +257,9 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(sourceTable);
-        final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<>();
-
-        if (!distSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            distributionIdNameSet.add((DistributionSetIdName) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            distributionIdNameSet.addAll(distSelected);
-        }
+        @SuppressWarnings("unchecked")
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) sourceTable;
+        final Set<DistributionSetIdName> distributionIdNameSet = distTable.getDeletedEntityByTransferable(transferable);
 
         final DistributionSetIdName dsInBulkUpload = managementUIState.getTargetTableFilters().getBulkUpload()
                 .getDsNameAndVersion();
@@ -272,32 +267,38 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
             distributionIdNameSet.remove(dsInBulkUpload);
         }
 
-        if (!distributionIdNameSet.isEmpty()) {
-
-            /*
-             * Flags to identify whether all dropped distributions are already
-             * in the deleted list (or) some distributions are already in the
-             * deleted distribution list.
-             */
-            final int existingDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
-            managementUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
-            final int newDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
-            if (newDeletedDistributionsSize == existingDeletedDistributionsSize) {
-                /*
-                 * No new distributions are added, all distributions dropped now
-                 * are already available in the delete list. Hence display
-                 * warning message accordingly.
-                 */
-                notification.displayValidationError(i18n.get("message.targets.already.deleted"));
-            } else if (newDeletedDistributionsSize - existingDeletedDistributionsSize != distributionIdNameSet.size()) {
-                /*
-                 * Not the all distributions dropped now are added to the delete
-                 * list. There are some distributions are already there in the
-                 * delete list. Hence display warning message accordingly.
-                 */
-                notification.displayValidationError(i18n.get("message.dist.deleted.pending"));
-            }
+        if (distributionIdNameSet.isEmpty()) {
+            return;
         }
+        checkDeletedDistributionSets(distributionIdNameSet);
+    }
+
+    private void checkDeletedDistributionSets(final Set<DistributionSetIdName> distributionIdNameSet) {
+        final int existingDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
+        managementUIState.getDeletedDistributionList().addAll(distributionIdNameSet);
+        final int newDeletedDistributionsSize = managementUIState.getDeletedDistributionList().size();
+
+        showAlreadyDeletedDistributionSetNotfication(existingDeletedDistributionsSize, newDeletedDistributionsSize,
+                "message.dists.already.deleted");
+        showPendingDeletedNotifaction(distributionIdNameSet, existingDeletedDistributionsSize,
+                newDeletedDistributionsSize, "message.dist.deleted.pending");
+    }
+
+    private void showPendingDeletedNotifaction(final Set<?> currentValues, final int existingDeletedSize,
+            final int newDeletedSize, final String messageKey) {
+        if (newDeletedSize - existingDeletedSize == currentValues.size()) {
+            return;
+        }
+        notification.displayValidationError(i18n.get(messageKey));
+    }
+
+    private void showAlreadyDeletedDistributionSetNotfication(final int existingDeletedSize, final int newDeletedSize,
+            final String messageKey) {
+
+        if (newDeletedSize != existingDeletedSize) {
+            return;
+        }
+        notification.displayValidationError(i18n.get(messageKey));
     }
 
     private boolean isDsInUseInBulkUpload(final Set<DistributionSetIdName> distributionIdNameSet,
@@ -311,38 +312,23 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addInDeleteTargetList(final Table sourceTable, final TableTransferable transferable) {
-        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(sourceTable);
+        @SuppressWarnings("unchecked")
+        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) sourceTable;
+        final Set<TargetIdName> targetIdNameSet = targetTable.getDeletedEntityByTransferable(transferable);
 
-        final Set<TargetIdName> targetIdNameSet = new HashSet<>();
-        if (!targetSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            targetIdNameSet.add((TargetIdName) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            targetIdNameSet.addAll(targetSelected);
-        }
+        checkDeletedTargets(targetIdNameSet);
+    }
 
-        /*
-         * Flags to identify whether all dropped targets are already in the
-         * deleted list (or) some target are already in the deleted distribution
-         * list.
-         */
+    private void checkDeletedTargets(final Set<TargetIdName> targetIdNameSet) {
         final int existingDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
         managementUIState.getDeletedTargetList().addAll(targetIdNameSet);
         final int newDeletedTargetsSize = managementUIState.getDeletedTargetList().size();
-        if (newDeletedTargetsSize == existingDeletedTargetsSize) {
-            /*
-             * No new targets are added, all targets dropped now are already
-             * available in the delete list. Hence display warning message
-             * accordingly.
-             */
-            notification.displayValidationError(i18n.get("message.targets.already.deleted"));
-        } else if (newDeletedTargetsSize - existingDeletedTargetsSize != targetIdNameSet.size()) {
-            /*
-             * Not the all targets dropped now are added to the delete list.
-             * There are some targets are already there in the delete list.
-             * Hence display warning message accordingly.
-             */
-            notification.displayValidationError(i18n.get("message.target.deleted.pending"));
-        }
+
+        showAlreadyDeletedDistributionSetNotfication(existingDeletedTargetsSize, newDeletedTargetsSize,
+                "message.targets.already.deleted");
+
+        showPendingDeletedNotifaction(targetIdNameSet, existingDeletedTargetsSize, newDeletedTargetsSize,
+                "message.target.deleted.pending");
     }
 
     private void updateActionCount() {

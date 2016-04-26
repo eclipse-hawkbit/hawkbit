@@ -9,50 +9,26 @@
 package org.eclipse.hawkbit.ui.management.event;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
  *
  *
  *
  */
-public class DistributionTableEvent {
+public class DistributionTableEvent extends BaseEntityEvent<DistributionSet> {
 
     /**
-     *
-     *
+     * Constructor.
+     * 
+     * @param eventType
+     *            the event type
+     * @param entity
+     *            the distribution set
      */
-    public enum DistributionComponentEvent {
-        ADD_DISTRIBUTION, EDIT_DISTRIBUTION, DELETE_DISTRIBUTION, ON_VALUE_CHANGE, MAXIMIZED, MINIMIZED
-    }
-
-    private DistributionComponentEvent distributionComponentEvent;
-
-    private DistributionSet distributionSet;
-
-    /**
-     * @param distributionComponentEvent
-     * @param distributionSet
-     */
-    public DistributionTableEvent(final DistributionComponentEvent distributionComponentEvent,
-            final DistributionSet distributionSet) {
-        this.distributionComponentEvent = distributionComponentEvent;
-        this.distributionSet = distributionSet;
-    }
-
-    public DistributionComponentEvent getDistributionComponentEvent() {
-        return distributionComponentEvent;
-    }
-
-    public void setDistributionComponentEvent(final DistributionComponentEvent distributionComponentEvent) {
-        this.distributionComponentEvent = distributionComponentEvent;
-    }
-
-    public DistributionSet getDistributionSet() {
-        return distributionSet;
-    }
-
-    public void setDistributionSet(final DistributionSet distributionSet) {
-        this.distributionSet = distributionSet;
+    public DistributionTableEvent(final BaseEntityEventType eventType, final DistributionSet entity) {
+        super(eventType, entity);
     }
 
 }

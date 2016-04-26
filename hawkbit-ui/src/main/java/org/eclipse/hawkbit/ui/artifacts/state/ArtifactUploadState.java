@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -29,7 +30,7 @@ import com.vaadin.spring.annotation.VaadinSessionScope;
  */
 @VaadinSessionScope
 @SpringComponent
-public class ArtifactUploadState implements Serializable {
+public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializable {
 
     private static final long serialVersionUID = 8273440375917450859L;
 
@@ -85,30 +86,7 @@ public class ArtifactUploadState implements Serializable {
      * @return the selectedBaseSwModuleId
      */
     public Optional<Long> getSelectedBaseSwModuleId() {
-        return selectedBaseSwModuleId != null ? Optional.of(selectedBaseSwModuleId) : Optional.empty();
-    }
-
-    /**
-     * @param selectedBaseSwModuleId
-     *            the selectedBaseSwModuleId to set
-     */
-    public void setSelectedBaseSwModuleId(final Long selectedBaseSwModuleId) {
-        this.selectedBaseSwModuleId = selectedBaseSwModuleId;
-    }
-
-    /**
-     * @return the selectedBaseSoftwareModule
-     */
-    public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
-        return selectedBaseSoftwareModule == null ? Optional.empty() : Optional.of(selectedBaseSoftwareModule);
-    }
-
-    /**
-     * @param selectedBaseSoftwareModule
-     *            the selectedBaseSoftwareModule to set
-     */
-    public void setSelectedBaseSoftwareModule(final SoftwareModule selectedBaseSoftwareModule) {
-        this.selectedBaseSoftwareModule = selectedBaseSoftwareModule;
+        return Optional.ofNullable(selectedBaseSwModuleId);
     }
 
     /**
@@ -125,12 +103,15 @@ public class ArtifactUploadState implements Serializable {
         return selectedSoftwareModules;
     }
 
-    /**
-     * @param selectedSoftwareModules
-     *            the selectedSoftwareModules to set
-     */
-    public void setSelectedSoftwareModules(final Set<Long> selectedSoftwareModules) {
-        this.selectedSoftwareModules = selectedSoftwareModules;
+    @Override
+    public void setLastSelectedEntity(final Long value) {
+        this.selectedBaseSwModuleId = value;
+
+    }
+
+    @Override
+    public void setSelectedEnitities(final Set<Long> values) {
+        this.selectedSoftwareModules = values;
     }
 
     /**
@@ -197,4 +178,11 @@ public class ArtifactUploadState implements Serializable {
         this.noDataAvilableSoftwareModule = noDataAvilableSoftwareModule;
     }
 
+    public Optional<SoftwareModule> getSelectedBaseSoftwareModule() {
+        return Optional.ofNullable(selectedBaseSoftwareModule);
+    }
+
+    public void setSelectedBaseSoftwareModule(final SoftwareModule selectedBaseSoftwareModule) {
+        this.selectedBaseSoftwareModule = selectedBaseSoftwareModule;
+    }
 }

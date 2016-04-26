@@ -18,9 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
@@ -34,7 +31,9 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
 import org.eclipse.hawkbit.ui.filter.Filters;
 import org.eclipse.hawkbit.ui.filter.target.CustomTargetFilter;
@@ -53,7 +52,6 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentE
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -69,7 +67,6 @@ import org.springframework.data.domain.Sort;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -102,7 +99,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class TargetTable extends AbstractTable implements Handler {
+public class TargetTable extends AbstractTable<Target, TargetIdName> implements Handler {
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
     private static final String TARGET_PINNED = "targetPinned";
@@ -110,14 +107,10 @@ public class TargetTable extends AbstractTable implements Handler {
     private static final long serialVersionUID = -2300392868806614568L;
 
     private static final int PROPERTY_DEPT = 3;
-    private static final String ITEMID = "itemId";
     private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
     @Autowired
     private transient TargetManagement targetManagement;
-
-    @Autowired
-    private I18N i18n;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -129,9 +122,6 @@ public class TargetTable extends AbstractTable implements Handler {
     private UINotification notification;
 
     @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
 
     private Button targetPinnedBtn;
@@ -141,19 +131,11 @@ public class TargetTable extends AbstractTable implements Handler {
     private ShortcutAction actionUnSelectAll;
 
     @Override
-    @PostConstruct
     protected void init() {
         super.init();
         addActionHandler(this);
         actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
         actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
-        eventBus.subscribe(this);
-        setNoDataAvailable();
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
     }
 
     /**
@@ -199,9 +181,10 @@ public class TargetTable extends AbstractTable implements Handler {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void addOrEditEvent(final TargetAddUpdateWindowEvent targetUIEvent) {
-        if (targetUIEvent.getTargetComponentEvent() == TargetComponentEvent.EDIT_TARGET) {
-            UI.getCurrent().access(() -> updateTarget(targetUIEvent.getTarget()));
+        if (BaseEntityEventType.UPDATED_ENTITY != targetUIEvent.getEventType()) {
+            return;
         }
+        UI.getCurrent().access(() -> updateTarget(targetUIEvent.getEntity()));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -239,33 +222,14 @@ public class TargetTable extends AbstractTable implements Handler {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent event) {
-        if (event.getTargetComponentEvent() == TargetComponentEvent.MINIMIZED) {
-            UI.getCurrent().access(() -> applyMinTableSettings());
-        } else if (event.getTargetComponentEvent() == TargetComponentEvent.MAXIMIZED) {
-            UI.getCurrent().access(() -> applyMaxTableSettings());
-        } else if (event.getTargetComponentEvent() == TargetComponentEvent.EDIT_TARGET) {
-            UI.getCurrent().access(() -> updateTarget(event.getTarget()));
-        }
+        onBaseEntityEvent(event);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#getTableId()
-     */
     @Override
     protected String getTableId() {
         return SPUIComponetIdProvider.TARGET_TABLE_ID;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.eclipse.hawkbit.server.ui.common.table.AbstractTable#createContainer(
-     * )
-     */
     @Override
     protected Container createContainer() {
         // ADD all the filters to the query config
@@ -311,12 +275,6 @@ public class TargetTable extends AbstractTable implements Handler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.common.table.AbstractTable#
-     * addCustomGeneratedColumns ()
-     */
     @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON,
@@ -340,22 +298,24 @@ public class TargetTable extends AbstractTable implements Handler {
     }
 
     @Override
-    protected void onValueChange() {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        @SuppressWarnings("unchecked")
-        final Set<TargetIdName> values = HawkbitCommonUtil.getSelectedTargetDetails(this);
-        if (values != null && !values.isEmpty()) {
-            final TargetIdName lastSelectedItem = getLastSelectedItem(values);
-            managementUIState.setSelectedTargetIdName(values);
-            managementUIState.setLastSelectedTargetIdName(lastSelectedItem);
-            final Target target = targetManagement
-                    .findTargetByControllerIDWithDetails(lastSelectedItem.getControllerId());
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, target));
-        } else {
-            managementUIState.setSelectedTargetIdName(null);
-            managementUIState.setLastSelectedTargetIdName(null);
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, (Target) null));
-        }
+    protected void publishEntityAfterValueChange(final Target selectedLastEntity) {
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+    }
+
+    @Override
+    protected Target findEntityByTableValue(final TargetIdName lastSelectedId) {
+        return targetManagement.findTargetByControllerIDWithDetails(lastSelectedId.getControllerId());
+    }
+
+    @Override
+    protected void setManagementEntitiyStateValues(final Set<TargetIdName> values, final TargetIdName lastId) {
+        managementUIState.setSelectedTargetIdName(values);
+        managementUIState.setLastSelectedTargetIdName(lastId);
+    }
+
+    @Override
+    protected ManagmentEntityState<TargetIdName> getManagmentEntityState() {
+        return null;
     }
 
     @Override
@@ -365,30 +325,15 @@ public class TargetTable extends AbstractTable implements Handler {
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
-        if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
-            columnList
-                    .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                    0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2f));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.8f));
-            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0f));
-            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0f));
+        final List<TableColumn> columnList = super.getTableVisibleColumns();
+        if (!isMaximized()) {
+            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
+            columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
         }
         return columnList;
+
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see hawkbit.server.ui.common.table.AbstractTable#getTableDropHandler()
-     */
     @Override
     protected DropHandler getTableDropHandler() {
         return new DropHandler() {
@@ -630,7 +575,7 @@ public class TargetTable extends AbstractTable implements Handler {
     private void tagAssignment(final DragAndDropEvent event) {
         final com.vaadin.event.dd.TargetDetails taregtDet = event.getTargetDetails();
         final Table targetTable = (Table) taregtDet.getTarget();
-        final Set<TargetIdName> targetSelected = HawkbitCommonUtil.getSelectedTargetDetails(targetTable);
+        final Set<TargetIdName> targetSelected = getTableValue(targetTable);
         final Set<String> targetList = new HashSet<>();
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
         final Object targetItemId = dropData.getItemIdOver();
@@ -688,14 +633,9 @@ public class TargetTable extends AbstractTable implements Handler {
 
     private static Set<DistributionSetIdName> getDraggedDistributionSet(final TableTransferable transferable,
             final Table source) {
-        final Set<DistributionSetIdName> distSelected = HawkbitCommonUtil.getSelectedDSDetails(source);
-        final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
-        if (!distSelected.contains(transferable.getData(ITEMID))) {
-            distributionIdSet.add((DistributionSetIdName) transferable.getData(ITEMID));
-        } else {
-            distributionIdSet.addAll(distSelected);
-        }
-        return distributionIdSet;
+        @SuppressWarnings("unchecked")
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) source;
+        return distTable.getDeletedEntityByTransferable(transferable);
     }
 
     private Boolean validateDragAndDropWrapper(final Component compsource) {
@@ -912,6 +852,7 @@ public class TargetTable extends AbstractTable implements Handler {
         eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.REFRESH_TARGETS));
     }
 
+    @SuppressWarnings("unchecked")
     private void updateVisibleItemOnEvent(final TargetInfo targetInfo, final Target target,
             final TargetIdName targetIdName) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
@@ -934,8 +875,8 @@ public class TargetTable extends AbstractTable implements Handler {
      * @param targetInfoUpdateEvents
      *            list of target info update event
      */
-    @SuppressWarnings("unchecked")
     private void onTargetInfoUpdateEvents(final List<TargetInfoUpdateEvent> targetInfoUpdateEvents) {
+        @SuppressWarnings("unchecked")
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
         boolean shoulTargetsUpdated = false;
         Target lastSelectedTarget = null;
@@ -962,7 +903,7 @@ public class TargetTable extends AbstractTable implements Handler {
             refreshTargets();
         }
         if (lastSelectedTarget != null) {
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELECTED_TARGET, lastSelectedTarget));
+            eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.SELECTED_ENTITY, lastSelectedTarget));
         }
     }
 
@@ -1042,13 +983,9 @@ public class TargetTable extends AbstractTable implements Handler {
         setValue(null);
     }
 
-    private void setNoDataAvailable() {
-        final int tableSize = getContainerDataSource().size();
-        if (tableSize == 0) {
-            managementUIState.setNoDataAvilableTarget(true);
-        } else {
-            managementUIState.setNoDataAvilableTarget(false);
-        }
+    @Override
+    protected void setDataAvailable(final boolean available) {
+        managementUIState.setNoDataAvilableTarget(!available);
     }
 
     /**

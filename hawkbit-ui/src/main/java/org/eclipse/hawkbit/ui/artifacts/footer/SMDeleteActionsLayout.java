@@ -8,16 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.footer;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -28,7 +27,6 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableTransferable;
 import com.vaadin.ui.UI;
@@ -156,13 +154,9 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addToDeleteList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final Set<Long> swModuleSelected = (Set<Long>) sourceTable.getValue();
-        final Set<Long> swModuleIdNameSet = new HashSet<>();
-        if (!swModuleSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            swModuleIdNameSet.add((Long) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            swModuleIdNameSet.addAll(swModuleSelected);
-        }
+        final AbstractTable<?, Long> swTable = (AbstractTable<?, Long>) sourceTable;
+        final Set<Long> swModuleIdNameSet = swTable.getDeletedEntityByTransferable(transferable);
+
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
                     .getItemProperty(SPUILabelDefinitions.NAME_VERSION).getValue();
@@ -191,7 +185,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected Component getUnsavedActionsWindowContent() {
-        uploadViewConfirmationWindowLayout.init();
+        uploadViewConfirmationWindowLayout.initialize();
         return uploadViewConfirmationWindowLayout;
     }
 
@@ -199,35 +193,6 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
     protected boolean hasUnsavedActions() {
         return !artifactUploadState.getDeleteSofwareModules().isEmpty()
                 || !artifactUploadState.getSelectedDeleteSWModuleTypes().isEmpty();
-    }
-
-    @Override
-    protected boolean hasCountMessage() {
-        return false;
-    }
-
-    @Override
-    protected Label getCountMessageLabel() {
-        return null;
-    }
-
-    @Override
-    protected boolean hasBulkUploadPermission() {
-        return false;
-    }
-
-    @Override
-    protected void showBulkUploadWindow() {
-        /**
-         * Bulk upload not supported .No implementation required.
-         */
-    }
-
-    @Override
-    protected void restoreBulkUploadStatusCount() {
-        /**
-         * Bulk upload not supported .No implementation required.
-         */
     }
 
 }
