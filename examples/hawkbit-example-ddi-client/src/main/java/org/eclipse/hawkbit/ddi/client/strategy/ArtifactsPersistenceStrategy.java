@@ -12,17 +12,19 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Implementation of {@link PersistenceStrategy} for not downloading any
- * artifacts.
+ * Interface of persistence strategy.
  */
-public class DoNotSaveArtifactsStrategy implements PersistenceStrategy {
+public interface ArtifactsPersistenceStrategy {
 
-    @Override
-    public void handleInputStream(final InputStream in, final String artifactName) throws IOException {
-
-        while (in.read() != -1) {
-            ;
-        }
-    }
+    /**
+     * Method handling the artifact download.
+     * 
+     * @param in
+     *            the input stream
+     * @param artifactName
+     *            the name of the artifact
+     * @throws IOException
+     */
+    public void handleInputStream(InputStream in, String artifactName) throws IOException;
 
 }

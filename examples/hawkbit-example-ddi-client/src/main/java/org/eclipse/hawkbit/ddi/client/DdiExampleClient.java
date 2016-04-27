@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.hawkbit.ddi.client.authenctication.AuthenticationInterceptor;
 import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
-import org.eclipse.hawkbit.ddi.client.strategy.PersistenceStrategy;
+import org.eclipse.hawkbit.ddi.client.strategy.ArtifactsPersistenceStrategy;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
@@ -45,12 +45,12 @@ public class DdiExampleClient implements Runnable {
     private final String controllerId;
     private Long actionIdOfLastInstalltion;
     private final RootControllerResourceClient rootControllerResourceClient;
-    private final PersistenceStrategy persistenceStrategy;
+    private final ArtifactsPersistenceStrategy persistenceStrategy;
     private DdiClientStatus clientStatus;
-    
+
     private FinalResult finalResultOfCurrentUpdate;
 
-   /**
+    /**
      * Constructor for the DDI example client.
      * 
      * @param baseUrl
@@ -63,7 +63,7 @@ public class DdiExampleClient implements Runnable {
      *            the persistence strategy for downloading artifacts
      */
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
-            final PersistenceStrategy persistenceStrategy) {
+            final ArtifactsPersistenceStrategy persistenceStrategy) {
         this(baseUrl, controllerId, tenant, persistenceStrategy, null);
     }
 
@@ -83,7 +83,7 @@ public class DdiExampleClient implements Runnable {
      *            might be {@code null}
      */
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
-            final PersistenceStrategy persistenceStrategy, final AuthenticationInterceptor authenticationInterceptor) {
+            final ArtifactsPersistenceStrategy persistenceStrategy, final AuthenticationInterceptor authenticationInterceptor) {
         this.controllerId = controllerId;
         this.rootControllerResourceClient = new DdiDefaultFeignClient(baseUrl, tenant, authenticationInterceptor)
                 .getRootControllerResourceClient();
@@ -129,26 +129,32 @@ public class DdiExampleClient implements Runnable {
     }
 
     private void startDownload(final Long actionId, final Integer resource) {
-
         final ResponseEntity<DdiDeploymentBase> respone = rootControllerResourceClient
                 .getControllerBasedeploymentAction(controllerId, Long.valueOf(actionId), Integer.valueOf(resource));
         final DdiDeploymentBase ddiDeploymentBase = respone.getBody();
         final List<DdiChunk> chunks = ddiDeploymentBase.getDeployment().getChunks();
         for (final DdiChunk chunk : chunks) {
             final List<DdiArtifact> artifactList = chunk.getArtifacts();
-            final Link downloadLink = ddiDeploymentBase.getDeployment().getChunks().get(0).getArtifacts().get(0)
-                    .getLink("download-http");
-            final String[] downloadLinkSep = downloadLink.getHref().split(Pattern.quote("/"));
-            final Long softwareModuleId = Long.valueOf(downloadLinkSep[8]);
-            for (final DdiArtifact ddiArtifact : artifactList) {
-                if (finalResultOfCurrentUpdate != FinalResult.FAILURE) {
-                    downloadArtifact(actionId, softwareModuleId, ddiArtifact.getFilename());
+            if (artifactList.isEmpty()) {
+                sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
+                        "No artifacts to download for softwaremodule " + chunk.getName());
+            } else {
+                for (final DdiArtifact ddiArtifact : artifactList) {
+                    if (finalResultOfCurrentUpdate != FinalResult.FAILURE) {
+                        downloadArtifact(actionId, ddiArtifact);
+                    }
                 }
             }
+
         }
     }
 
-    private void downloadArtifact(final Long actionId, final Long softwareModuleId, final String artifact) {
+    private void downloadArtifact(final Long actionId, final DdiArtifact ddiArtifact) {
+
+        final String artifact = ddiArtifact.getFilename();
+        final Link downloadLink = ddiArtifact.getLink("download-http");
+        final String[] downloadLinkSep = downloadLink.getHref().split(Pattern.quote("/"));
+        final Long softwareModuleId = Long.valueOf(downloadLinkSep[8]);
 
         sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
                 "Starting download of artifact " + artifact);
