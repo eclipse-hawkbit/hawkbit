@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
+@ConditionalOnProperty(prefix = "com.bosch.hawkbit.simulator", name = "generateOnStartup", matchIfMissing = true)
 public class SimulatorStartup implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorStartup.class);
 
