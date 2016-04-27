@@ -45,8 +45,8 @@ public class DdiExampleClient implements Runnable {
     private final RootControllerResourceClient rootControllerResourceClient;
     private final PersistenceStrategy persistenceStrategy;
     private DdiClientStatus clientStatus;
-
-    private FinalResult finalReusltOfCurrentUpdate;
+    private final DdiDefaultFeignClient sdiDefaultFeignClient;
+    private FinalResult finalResultOfCurrentUpdate;
 
     /**
      * Constructor for the DDI example client.
@@ -63,11 +63,16 @@ public class DdiExampleClient implements Runnable {
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
             final PersistenceStrategy persistenceStrategy) {
         this.controllerId = controllerId;
-        this.rootControllerResourceClient = new DdiDefaultFeignClient(baseUrl, tenant)
-                .getRootControllerResourceClient();
+        sdiDefaultFeignClient = new DdiDefaultFeignClient(baseUrl, tenant);
+
+        this.rootControllerResourceClient = sdiDefaultFeignClient.getRootControllerResourceClient();
         this.actionIdOfLastInstalltion = null;
         this.persistenceStrategy = persistenceStrategy;
         this.clientStatus = DdiClientStatus.DOWN;
+    }
+
+    public DdiDefaultFeignClient getSdiDefaultFeignClient() {
+        return sdiDefaultFeignClient;
     }
 
     @Override
@@ -85,7 +90,7 @@ public class DdiExampleClient implements Runnable {
                 final Long actionId = getActionIdOutOfLink(controllerDeploymentBaseLink);
                 final Integer resource = getResourceOutOfLink(controllerDeploymentBaseLink);
                 if (actionId != actionIdOfLastInstalltion) {
-                    finalReusltOfCurrentUpdate = FinalResult.NONE;
+                    finalResultOfCurrentUpdate = FinalResult.NONE;
                     startDownload(actionId, resource);
                     finishUpdateProcess(actionId);
                     actionIdOfLastInstalltion = actionId;
@@ -119,7 +124,7 @@ public class DdiExampleClient implements Runnable {
             final String[] downloadLinkSep = downloadLink.getHref().split(Pattern.quote("/"));
             final Long softwareModuleId = Long.valueOf(downloadLinkSep[8]);
             for (final DdiArtifact ddiArtifact : artifactList) {
-                if (finalReusltOfCurrentUpdate != FinalResult.FAILURE) {
+                if (finalResultOfCurrentUpdate != FinalResult.FAILURE) {
                     downloadArtifact(actionId, softwareModuleId, ddiArtifact.getFilename());
                 }
             }
@@ -144,7 +149,7 @@ public class DdiExampleClient implements Runnable {
         } catch (final IOException e) {
             sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
                     "Downloaded of artifact " + artifact + "failed");
-            finalReusltOfCurrentUpdate = FinalResult.FAILURE;
+            finalResultOfCurrentUpdate = FinalResult.FAILURE;
         }
 
     }
@@ -163,11 +168,11 @@ public class DdiExampleClient implements Runnable {
 
     private void finishUpdateProcess(final Long actionId) {
 
-        if (finalReusltOfCurrentUpdate == FinalResult.FAILURE) {
+        if (finalResultOfCurrentUpdate == FinalResult.FAILURE) {
             sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.FAILURE, "Error during update process");
         }
 
-        if (finalReusltOfCurrentUpdate == FinalResult.NONE) {
+        if (finalResultOfCurrentUpdate == FinalResult.NONE) {
             sendFeedBackMessage(actionId, ExecutionStatus.CLOSED, FinalResult.SUCESS,
                     "Simulated installation successful");
         }

@@ -26,7 +26,7 @@ public class SaveArtifactsStrategy implements PersistenceStrategy {
     @Override
     public void handleInputStream(final InputStream in, final String artifactName) throws IOException {
         final File tempDir = Files.createTempDir();
-        final File file = new File(tempDir + "\\" + artifactName);
+        final File file = new File(tempDir, artifactName);
         final OutputStream out = new FileOutputStream(file);
         ByteStreams.copy(in, out);
     }

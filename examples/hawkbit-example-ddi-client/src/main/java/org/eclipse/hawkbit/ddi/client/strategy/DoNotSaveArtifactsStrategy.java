@@ -19,7 +19,10 @@ public class DoNotSaveArtifactsStrategy implements PersistenceStrategy {
 
     @Override
     public void handleInputStream(final InputStream in, final String artifactName) throws IOException {
-        // do nothing
+
+        while (in.read() != -1) {
+            ;
+        }
     }
 
 }
