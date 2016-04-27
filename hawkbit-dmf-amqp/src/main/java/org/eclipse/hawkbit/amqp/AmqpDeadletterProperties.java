@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class AmqpDeadletterProperties {
      * Message time to live (ttl) for the deadletter queue. Default ttl is 3
      * weeks.
      */
-    private int ttl = 1_814_400_000;
+    private long ttl = Duration.ofDays(21).toMillis();
 
     /**
      * Return the deadletter arguments.
@@ -57,11 +58,11 @@ public class AmqpDeadletterProperties {
         return args;
     }
 
-    public int getTtl() {
+    public long getTtl() {
         return ttl;
     }
 
-    public void setTtl(final int ttl) {
+    public void setTtl(final long ttl) {
         this.ttl = ttl;
     }
 
