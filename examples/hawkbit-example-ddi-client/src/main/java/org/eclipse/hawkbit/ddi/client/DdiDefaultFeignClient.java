@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ddi.client;
 
 import org.apache.commons.lang.Validate;
+import org.eclipse.hawkbit.ddi.client.authenctication.AuthenticationInterceptor;
 import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
 import org.eclipse.hawkbit.feign.core.client.ApplicationJsonRequestHeaderInterceptor;
 import org.eclipse.hawkbit.feign.core.client.IgnoreMultipleConsumersProducersSpringMvcContract;
@@ -31,10 +32,20 @@ public class DdiDefaultFeignClient {
     private final String tenant;
 
     public DdiDefaultFeignClient(final String baseUrl, final String tenant) {
+        this(baseUrl, tenant, null);
+    }
+
+    public DdiDefaultFeignClient(final String baseUrl, final String tenant,
+            final AuthenticationInterceptor authenticationInterceptor) {
         feignBuilder = Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract())
                 .requestInterceptor(new ApplicationJsonRequestHeaderInterceptor())
                 .requestInterceptor(new DdiAcceptedRequestInterceptor()).logLevel(Level.FULL)
                 .logger(new Logger.ErrorLogger()).encoder(new JacksonEncoder()).decoder(new DdiDecoder());
+
+        if (authenticationInterceptor != null) {
+            feignBuilder.requestInterceptor(authenticationInterceptor);
+        }
+
         Validate.notNull(baseUrl, "A baseUrl has to be set");
         Validate.notNull(tenant, "A tenant has to be set");
         this.baseUrl = baseUrl;
