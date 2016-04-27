@@ -14,10 +14,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  * Client binding for the Rootcontroller resource of the DDI API.
  */
-
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + RootControllerResourceClient.PATH)
+@FeignClient(url = "${hawkbit.url:localhost:8080}/" + RootControllerResourceClientConstants.PATH)
 public interface RootControllerResourceClient extends DdiRootControllerRestApi {
-
-    static String PATH = "{tenant}/controller/v1";
 
 }

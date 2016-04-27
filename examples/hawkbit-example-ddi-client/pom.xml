@@ -73,16 +73,14 @@
          <version>2.5</version>
       </dependency>
       <dependency>
-    <groupId>com.google.guava</groupId>
-    <artifactId>guava</artifactId>
-</dependency>
-<dependency>
-    <groupId>commons-lang</groupId>
-    <artifactId>commons-lang</artifactId>
-    <version>2.3</version>
-</dependency>
-
-
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>commons-lang</groupId>
+         <artifactId>commons-lang</artifactId>
+         <version>2.3</version>
+      </dependency>
 
       <!-- Test -->
       <dependency>

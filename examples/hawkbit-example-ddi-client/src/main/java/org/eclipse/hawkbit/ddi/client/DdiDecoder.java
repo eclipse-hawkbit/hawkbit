@@ -20,9 +20,7 @@ import org.springframework.http.ResponseEntity;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import feign.FeignException;
 import feign.Response;
-import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 
@@ -32,8 +30,9 @@ import feign.jackson.JacksonDecoder;
  */
 public class DdiDecoder implements Decoder {
 
-    ObjectMapper mapper;
-    private final String octentTypeOctetStream = "[application/octet-stream]";
+    private static final String OCTET_STREAM = "[application/octet-stream]";
+
+    private final ObjectMapper mapper;
 
     public DdiDecoder() {
         mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -41,11 +40,11 @@ public class DdiDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(final Response response, final Type type) throws IOException, DecodeException, FeignException {
+    public Object decode(final Response response, final Type type) throws IOException {
 
         final Map<String, Collection<String>> header = response.headers();
         final String contentType = String.valueOf(header.get("Content-Type"));
-        if (contentType.equals(octentTypeOctetStream)) {
+        if (contentType.equals(OCTET_STREAM)) {
             return ResponseEntity.ok(response.body().asInputStream());
         }
         final ResponseEntityDecoder responseEntityDecoder = new ResponseEntityDecoder(new JacksonDecoder(mapper));

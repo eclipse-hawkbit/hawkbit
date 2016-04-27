@@ -14,6 +14,7 @@ import java.io.InputStream;
 /**
  * Interface of persistence strategy.
  */
+@FunctionalInterface
 public interface ArtifactsPersistenceStrategy {
 
     /**

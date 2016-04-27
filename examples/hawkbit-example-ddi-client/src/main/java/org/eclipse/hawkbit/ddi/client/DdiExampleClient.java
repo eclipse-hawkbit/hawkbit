@@ -47,7 +47,6 @@ public class DdiExampleClient implements Runnable {
     private final RootControllerResourceClient rootControllerResourceClient;
     private final ArtifactsPersistenceStrategy persistenceStrategy;
     private DdiClientStatus clientStatus;
-
     private FinalResult finalResultOfCurrentUpdate;
 
     /**
@@ -83,7 +82,8 @@ public class DdiExampleClient implements Runnable {
      *            might be {@code null}
      */
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
-            final ArtifactsPersistenceStrategy persistenceStrategy, final AuthenticationInterceptor authenticationInterceptor) {
+            final ArtifactsPersistenceStrategy persistenceStrategy,
+            final AuthenticationInterceptor authenticationInterceptor) {
         this.controllerId = controllerId;
         this.rootControllerResourceClient = new DdiDefaultFeignClient(baseUrl, tenant, authenticationInterceptor)
                 .getRootControllerResourceClient();
@@ -130,22 +130,25 @@ public class DdiExampleClient implements Runnable {
 
     private void startDownload(final Long actionId, final Integer resource) {
         final ResponseEntity<DdiDeploymentBase> respone = rootControllerResourceClient
-                .getControllerBasedeploymentAction(controllerId, Long.valueOf(actionId), Integer.valueOf(resource));
+                .getControllerBasedeploymentAction(controllerId, actionId, resource);
         final DdiDeploymentBase ddiDeploymentBase = respone.getBody();
         final List<DdiChunk> chunks = ddiDeploymentBase.getDeployment().getChunks();
         for (final DdiChunk chunk : chunks) {
-            final List<DdiArtifact> artifactList = chunk.getArtifacts();
-            if (artifactList.isEmpty()) {
-                sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
-                        "No artifacts to download for softwaremodule " + chunk.getName());
-            } else {
-                for (final DdiArtifact ddiArtifact : artifactList) {
-                    if (finalResultOfCurrentUpdate != FinalResult.FAILURE) {
-                        downloadArtifact(actionId, ddiArtifact);
-                    }
-                }
-            }
+            downloadArtifacts(chunk, actionId);
+        }
+    }
 
+    private void downloadArtifacts(final DdiChunk chunk, final Long actionId) {
+        final List<DdiArtifact> artifactList = chunk.getArtifacts();
+        if (artifactList.isEmpty()) {
+            sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
+                    "No artifacts to download for softwaremodule " + chunk.getName());
+            return;
+        }
+        for (final DdiArtifact ddiArtifact : artifactList) {
+            if (finalResultOfCurrentUpdate != FinalResult.FAILURE) {
+                downloadArtifact(actionId, ddiArtifact);
+            }
         }
     }
 
@@ -170,8 +173,9 @@ public class DdiExampleClient implements Runnable {
             sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
                     "Downloaded artifact " + artifact);
         } catch (final IOException e) {
+            LOGGER.error("Download of artifact failed", e);
             sendFeedBackMessage(actionId, ExecutionStatus.PROCEEDING, FinalResult.NONE,
-                    "Downloaded of artifact " + artifact + "failed");
+                    "Download of artifact " + artifact + "failed");
             finalResultOfCurrentUpdate = FinalResult.FAILURE;
         }
 
