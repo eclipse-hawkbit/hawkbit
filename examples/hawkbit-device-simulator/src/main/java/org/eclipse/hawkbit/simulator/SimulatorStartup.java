@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-@ConditionalOnProperty(prefix = "com.bosch.hawkbit.simulator", name = "generateOnStartup", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "hawkbit.device.simulator", name = "autostart", matchIfMissing = true)
 public class SimulatorStartup implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorStartup.class);
 
