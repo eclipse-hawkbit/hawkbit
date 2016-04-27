@@ -18,23 +18,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -189,61 +186,25 @@ public final class DashboardMenu extends CustomComponent {
         return links;
     }
 
-    private UserDetails getCurrentUser() {
-        final SecurityContext context = (SecurityContext) VaadinService.getCurrentRequest().getWrappedSession()
-                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        return (UserDetails) context.getAuthentication().getPrincipal();
-    }
-
     private Component buildUserMenu() {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
-        final UserDetails user = getCurrentUser();
+        settings.setHtmlContentAllowed(true);
         final MenuItem settingsItem = settings.addItem("", new ThemeResource("images/profile-pic-57px.jpg"), null);
-        if (user instanceof UserPrincipal
-                && (((UserPrincipal) user).getFirstname() != null || ((UserPrincipal) user).getLastname() != null)) {
-            settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
-                    + concateFNameLName(((UserPrincipal) user).getFirstname(), ((UserPrincipal) user).getLastname()));
-            settingsItem.setDescription(
-                    ((UserPrincipal) user).getFirstname() + " / " + ((UserPrincipal) user).getLastname());
-        } else if (user instanceof UserPrincipal) {
-            if (((UserPrincipal) user).getLoginname().length() > 10) {
-                settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
-                        + ((UserPrincipal) user).getLoginname().substring(0, 10) + "..");
-            } else {
-                settingsItem.setText(
-                        trimTanent(((UserPrincipal) user).getTenant()) + "\n" + ((UserPrincipal) user).getLoginname());
-            }
-            settingsItem.setDescription(((UserPrincipal) user).getLoginname());
-        } else if (user != null) {
-            settingsItem.setText(user.getUsername());
-            settingsItem.setDescription(user.getUsername());
+
+        final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
+        final String formattedUsername = UserDetailsFormatter.loadAndFormatCurrentUsername();
+        String tenantAndUsernameHtml = "";
+        if (!StringUtils.isEmpty(formattedTenant)) {
+            tenantAndUsernameHtml += formattedTenant + "<br>";
         }
+        tenantAndUsernameHtml += formattedUsername;
+        settingsItem.setText(tenantAndUsernameHtml);
+        settingsItem.setDescription(formattedUsername);
+        settingsItem.setStyleName("user-menuitem");
 
         settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation("/UI/logout"));
         return settings;
-    }
-
-    private String concateFNameLName(final String fName, final String lName) {
-        final StringBuilder userName = new StringBuilder();
-        if (fName != null && fName.length() > 6) {
-            userName.append(fName.substring(0, 6) + ".." + ", ");
-        } else {
-            userName.append(fName).append(", ");
-        }
-        if (lName != null && lName.length() > 6) {
-            userName.append(lName.substring(0, 6) + "..");
-        } else {
-            userName.append(lName);
-        }
-        return userName.toString();
-    }
-
-    private String trimTanent(final String tanent) {
-        if (tanent != null && tanent.length() > 8) {
-            return tanent.substring(0, 8) + "..";
-        }
-        return tanent;
     }
 
     private Component buildToggleButton() {

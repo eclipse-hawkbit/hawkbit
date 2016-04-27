@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
@@ -747,7 +748,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
                     .setValue(updatedTarget.getTargetInfo().getLastTargetQuery());
 
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                    .setValue(HawkbitCommonUtil.getIMUser(updatedTarget.getLastModifiedBy()));
+                    .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(updatedTarget));
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
                     .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());
