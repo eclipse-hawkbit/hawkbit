@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Condition;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
 
 /**
  * 
@@ -25,6 +25,7 @@ public class RolloutBuilder {
     private long distributionSetId;
     private String successThreshold;
     private String errorThreshold;
+    private String description;
 
     /**
      * @param name
@@ -54,6 +55,16 @@ public class RolloutBuilder {
      */
     public RolloutBuilder targetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = targetFilterQuery;
+        return this;
+    }
+
+    /**
+     * @param description
+     *            the description
+     * @return the builder itself
+     */
+    public RolloutBuilder description(final String description) {
+        this.description = description;
         return this;
     }
 
@@ -105,6 +116,7 @@ public class RolloutBuilder {
         body.setAmountGroups(groupSize);
         body.setTargetFilterQuery(targetFilterQuery);
         body.setDistributionSetId(distributionSetId);
+        body.setDescription(description);
         body.setSuccessCondition(new MgmtRolloutCondition(Condition.THRESHOLD, successThreshold));
         body.setErrorCondition(new MgmtRolloutCondition(Condition.THRESHOLD, errorThreshold));
         return body;
