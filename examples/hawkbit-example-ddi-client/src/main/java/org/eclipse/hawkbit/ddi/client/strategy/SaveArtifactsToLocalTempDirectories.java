@@ -18,15 +18,15 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 /**
- * Implementation of {@link PersistenceStrategy} for downloading artifacts to
+ * Implementation of {@link ArtifactsPersistenceStrategy} for downloading artifacts to
  * the temp directory.
  */
-public class SaveArtifactsStrategy implements PersistenceStrategy {
+public class SaveArtifactsToLocalTempDirectories implements ArtifactsPersistenceStrategy {
 
     @Override
     public void handleInputStream(final InputStream in, final String artifactName) throws IOException {
         final File tempDir = Files.createTempDir();
-        final File file = new File(tempDir + "\\" + artifactName);
+        final File file = new File(tempDir, artifactName);
         final OutputStream out = new FileOutputStream(file);
         ByteStreams.copy(in, out);
     }
