@@ -79,6 +79,22 @@ public class MultiTenancyEntityTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description(value = "Ensures that tenant with proper permissions can read and delete other tenants.")
+    @WithUser(tenantId = "mytenant", allSpPermissions = true)
+    public void deleteAnotherTenantPossible() throws Exception {
+        // create target for another tenant
+        final String anotherTenant = "anotherTenant";
+        final String controllerAnotherTenant = "anotherController";
+        createTargetForTenant(controllerAnotherTenant, anotherTenant);
+
+        assertThat(systemManagement.findTenants()).as("Expected number if tenants before deletion is").hasSize(3);
+
+        systemManagement.deleteTenant(anotherTenant);
+
+        assertThat(systemManagement.findTenants()).as("Expected number if tenants after deletion is").hasSize(2);
+    }
+
+    @Test
     @Description(value = "Ensures that tenant metadata is retrieved for the current tenant.")
     @WithUser(tenantId = "mytenant", autoCreateTenant = false, allSpPermissions = true)
     public void getTenanatMetdata() throws Exception {
