@@ -12,10 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.eclipse.hawkbit.ddi.client.authenctication.AuthenticationInterceptor;
 import org.eclipse.hawkbit.ddi.client.resource.RootControllerResourceClient;
 import org.eclipse.hawkbit.ddi.client.strategy.PersistenceStrategy;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
@@ -62,8 +64,28 @@ public class DdiExampleClient implements Runnable {
      */
     public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
             final PersistenceStrategy persistenceStrategy) {
+        this(baseUrl, controllerId, tenant, persistenceStrategy, null);
+    }
+
+    /**
+     * Constructor for the DDI example client.
+     * 
+     * @param baseUrl
+     *            the base url of the hawkBit server
+     * @param controllerId
+     *            the controller id that will be simulated
+     * @param tenant
+     *            the tenant
+     * @param persistenceStrategy
+     *            the persistence strategy for downloading artifacts
+     * @param authenticationInterceptor
+     *            the authentication intercepter to authenticate the DDI client,
+     *            might be {@code null}
+     */
+    public DdiExampleClient(final String baseUrl, final String controllerId, final String tenant,
+            final PersistenceStrategy persistenceStrategy, final AuthenticationInterceptor authenticationInterceptor) {
         this.controllerId = controllerId;
-        this.rootControllerResourceClient = new DdiDefaultFeignClient(baseUrl, tenant)
+        this.rootControllerResourceClient = new DdiDefaultFeignClient(baseUrl, tenant, authenticationInterceptor)
                 .getRootControllerResourceClient();
         this.actionIdOfLastInstalltion = null;
         this.persistenceStrategy = persistenceStrategy;
@@ -79,7 +101,7 @@ public class DdiExampleClient implements Runnable {
             response = rootControllerResourceClient.getControllerBase(controllerId);
             final String pollingTimeFormReponse = response.getBody().getConfig().getPolling().getSleep();
             final LocalTime localtime = LocalTime.parse(pollingTimeFormReponse);
-            final long pollingIntervalInMillis = localtime.toNanoOfDay();
+            final long pollingIntervalInMillis = localtime.getLong(ChronoField.MILLI_OF_DAY);
             final Link controllerDeploymentBaseLink = response.getBody().getLink("deploymentBase");
             if (controllerDeploymentBaseLink != null) {
                 final Long actionId = getActionIdOutOfLink(controllerDeploymentBaseLink);
