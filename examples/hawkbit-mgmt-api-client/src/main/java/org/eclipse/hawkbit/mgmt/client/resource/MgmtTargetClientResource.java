@@ -17,5 +17,5 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 @FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtTargetClientResource.PATH)
 public interface MgmtTargetClientResource extends MgmtTargetRestApi {
 
-    static String PATH = "/rest/v1/targets";
+    static String PATH = "rest/v1/targets";
 }
