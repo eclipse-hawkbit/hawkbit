@@ -25,6 +25,21 @@
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
+         <!-- need to overwrite for the interface inheritance feature of feign-core -->
+         <version>8.14.2</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-web</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.cloud</groupId>
+         <artifactId>spring-cloud-netflix-core</artifactId>
+         <version>1.0.7.RELEASE</version>
+      </dependency>
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
       </dependency>
    </dependencies>
 </project>
