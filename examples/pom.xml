@@ -25,7 +25,8 @@
       <module>hawkbit-example-feign-core-client</module>
       <module>hawkbit-device-simulator</module>
       <module>hawkbit-example-app</module>
-      <module>hawkbit-mgmt-api-client</module>
+      <module>hawkbit-example-mgmt-client</module>
+      <module>hawkbit-example-mgmt-spring-client</module>
       <module>hawkbit-example-ddi-client</module>
   </modules>
 

@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <packaging>jar</packaging>
-   <artifactId>hawkbit-mgmt-api-client</artifactId>
+   <artifactId>hawkbit-example-mgmt-spring-client</artifactId>
    <name>hawkBit Management API example client</name>
 
    <build>
@@ -57,17 +57,7 @@
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-example-feign-core-client</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-mgmt-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-system-api</artifactId>
+         <artifactId>hawkbit-example-mgmt-client</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -98,10 +88,10 @@
          <groupId>org.springframework.cloud</groupId>
          <artifactId>spring-cloud-starter-feign</artifactId>
       </dependency>
-<!--       <dependency> -->
-<!--          <groupId>org.springframework.boot</groupId> -->
-<!--          <artifactId>spring-boot-starter-logging</artifactId> -->
-<!--       </dependency> -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-logging</artifactId>
+      </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-configuration-processor</artifactId>
