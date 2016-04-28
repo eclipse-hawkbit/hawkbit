@@ -38,8 +38,9 @@
          <version>1.0.7.RELEASE</version>
       </dependency>
       <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
+        <groupId>com.netflix.feign</groupId>
+        <artifactId>feign-slf4j</artifactId>
+        <version>8.14.2</version>
       </dependency>
    </dependencies>
 </project>
