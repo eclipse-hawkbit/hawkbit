@@ -73,6 +73,11 @@ public final class HawkbitCommonUtil {
      */
     public static final String SPAN_CLOSE = "</span>";
 
+    public static final String HTML_LI_CLOSE_TAG = "</li>";
+    public static final String HTML_LI_OPEN_TAG = "<li>";
+    public static final String HTML_UL_CLOSE_TAG = "</ul>";
+    public static final String HTML_UL_OPEN_TAG = "<ul>";
+
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitCommonUtil.class);
 
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";

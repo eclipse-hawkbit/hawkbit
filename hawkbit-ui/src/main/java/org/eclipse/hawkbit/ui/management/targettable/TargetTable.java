@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1089,7 +1094,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         private static final long serialVersionUID = 688730421728162456L;
 
         @Override
-        public String generateDescription(Component source, Object itemId, Object propertyId) {
+        public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
             final DistributionSet distributionSet;
             final Item item = getItem(itemId);
             if (propertyId != null) {
@@ -1105,34 +1110,34 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         }
 
         private String getDSDetails(final DistributionSet distributionSet) {
-            StringBuilder swModuleNames = new StringBuilder();
-            StringBuilder swModuleVendors = new StringBuilder();
-            final Set<SoftwareModule> swModules = (Set<SoftwareModule>) distributionSet.getModules();
+            final StringBuilder swModuleNames = new StringBuilder();
+            final StringBuilder swModuleVendors = new StringBuilder();
+            final Set<SoftwareModule> swModules = distributionSet.getModules();
             swModules.forEach(swModule -> {
                 swModuleNames.append(swModule.getName());
                 swModuleNames.append(" , ");
                 swModuleVendors.append(swModule.getVendor());
                 swModuleVendors.append(" , ");
             });
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("<ul>");
-            stringBuilder.append("<li>");
-            stringBuilder.append(" DistributionSet Description : ").append((String) distributionSet.getDescription());
-            stringBuilder.append("</li>");
-            stringBuilder.append("<li>");
+            final StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(HTML_UL_OPEN_TAG);
+            stringBuilder.append(HTML_LI_OPEN_TAG);
+            stringBuilder.append(" DistributionSet Description : ").append(distributionSet.getDescription());
+            stringBuilder.append(HTML_LI_CLOSE_TAG);
+            stringBuilder.append(HTML_LI_OPEN_TAG);
             stringBuilder.append(" DistributionSet Type : ").append((distributionSet.getType()).getName());
-            stringBuilder.append("</li>");
-            stringBuilder.append("<li>");
+            stringBuilder.append(HTML_LI_CLOSE_TAG);
+            stringBuilder.append(HTML_LI_OPEN_TAG);
             stringBuilder.append(" Required Migration step : ")
                     .append(distributionSet.isRequiredMigrationStep() ? "Yes" : "No");
-            stringBuilder.append("</li>");
-            stringBuilder.append("<li>");
+            stringBuilder.append(HTML_LI_CLOSE_TAG);
+            stringBuilder.append(HTML_LI_OPEN_TAG);
             stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
-            stringBuilder.append("</li>");
-            stringBuilder.append("<li>");
+            stringBuilder.append(HTML_LI_CLOSE_TAG);
+            stringBuilder.append(HTML_LI_OPEN_TAG);
             stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
-            stringBuilder.append("</li>");
-            stringBuilder.append("</ul>");
+            stringBuilder.append(HTML_LI_CLOSE_TAG);
+            stringBuilder.append(HTML_UL_CLOSE_TAG);
             return stringBuilder.toString();
         }
     }

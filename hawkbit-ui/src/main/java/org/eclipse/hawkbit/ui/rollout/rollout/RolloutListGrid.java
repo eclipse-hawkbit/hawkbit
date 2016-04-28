@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -477,14 +482,14 @@ public class RolloutListGrid extends AbstractGrid {
             return DistributionBarHelper
                     .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
         } else if (SPUILabelDefinitions.VAR_DIST_NAME_VERSION.equals(cell.getPropertyId())) {
-            return getDSDetails((Item) cell.getItem());
+            return getDSDetails(cell.getItem());
         }
         return null;
     }
 
     private String getDSDetails(final Item rolloutItem) {
-        StringBuilder swModuleNames = new StringBuilder();
-        StringBuilder swModuleVendors = new StringBuilder();
+        final StringBuilder swModuleNames = new StringBuilder();
+        final StringBuilder swModuleVendors = new StringBuilder();
         final Set<SoftwareModule> swModules = (Set<SoftwareModule>) rolloutItem.getItemProperty(SW_MODULES).getValue();
         swModules.forEach(swModule -> {
             swModuleNames.append(swModule.getName());
@@ -492,30 +497,30 @@ public class RolloutListGrid extends AbstractGrid {
             swModuleVendors.append(swModule.getVendor());
             swModuleVendors.append(" , ");
         });
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("<ul>");
-        stringBuilder.append("<li>");
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(HTML_UL_OPEN_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
         stringBuilder.append(" DistributionSet Description : ")
                 .append((String) rolloutItem.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue());
-        stringBuilder.append("</li>");
-        stringBuilder.append("<li>");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
         stringBuilder.append(" DistributionSet Type : ")
                 .append((String) rolloutItem.getItemProperty(DS_TYPE).getValue());
-        stringBuilder.append("</li>");
-        stringBuilder.append("<li>");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
         stringBuilder.append("Required Migration step : ")
                 .append((boolean) rolloutItem.getItemProperty(IS_REQUIRED_MIGRATION_STEP).getValue() ? "Yes" : "No");
-        stringBuilder.append("</li>");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
 
-        stringBuilder.append("<li>");
+        stringBuilder.append(HTML_LI_OPEN_TAG);
         stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
-        stringBuilder.append("</li>");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
 
-        stringBuilder.append("<li>");
+        stringBuilder.append(HTML_LI_OPEN_TAG);
         stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
-        stringBuilder.append("</li>");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
 
-        stringBuilder.append("</ul>");
+        stringBuilder.append(HTML_UL_CLOSE_TAG);
         return stringBuilder.toString();
     }
 
