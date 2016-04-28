@@ -164,7 +164,7 @@ public class SystemManagement {
      * @return the {@link CurrentTenantKeyGenerator}
      */
     @Bean
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.SUPPORTS)
     public CurrentTenantKeyGenerator currentTenantKeyGenerator() {
         return new CurrentTenantKeyGenerator();
     }
