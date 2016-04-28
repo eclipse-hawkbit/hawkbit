@@ -131,8 +131,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
 			prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
 			prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
 			prxyTarget.setCreatedAt(targ.getCreatedAt());
-			prxyTarget.setCreatedByUser(HawkbitCommonUtil.getIMUser(targ.getCreatedBy()));
-			prxyTarget.setModifiedByUser(HawkbitCommonUtil.getIMUser(targ.getLastModifiedBy()));
+			prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
+            prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
 
 			if (pinnedDistId == null) {
 				prxyTarget.setInstalledDistributionSet(null);
