@@ -35,6 +35,10 @@
          <artifactId>spring-cloud-netflix-core</artifactId>
          <version>1.0.7.RELEASE</version>
       </dependency>
+       <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
+      </dependency>
       <dependency>
         <groupId>com.netflix.feign</groupId>
         <artifactId>feign-slf4j</artifactId>
