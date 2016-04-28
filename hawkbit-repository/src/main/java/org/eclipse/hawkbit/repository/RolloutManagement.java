@@ -299,7 +299,7 @@ public class RolloutManagement {
      * amount of given groups. In same cases this will lead to less rollout
      * groups than given by client.
      * 
-     * @param amountGroup
+     * @param amountOfGroups
      *            the amount of groups
      * @param conditions
      *            the rollout group conditions
@@ -307,18 +307,17 @@ public class RolloutManagement {
      *            the rollout
      * @return the rollout with created groups
      */
-    private Rollout createRolloutGroups(final int amountGroup, final RolloutGroupConditions conditions,
+    private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,
             final Rollout savedRollout) {
         int pageIndex = 0;
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
-        final int groupSize = (int) Math.ceil((double) totalCount / (double) amountGroup);
-        // validate if the amount of groups that will be created are the
-        // amount
+        final int groupSize = (int) Math.ceil((double) totalCount / (double) amountOfGroups);
+        // validate if the amount of groups that will be created are the amount
         // of groups that the client what's to have created.
-        int amountGroupValidated = amountGroup;
+        int amountGroupValidated = amountOfGroups;
         final int amountGroupCreation = (int) (Math.ceil((double) totalCount / (double) groupSize));
-        if (amountGroupCreation == (amountGroup - 1)) {
+        if (amountGroupCreation == (amountOfGroups - 1)) {
             amountGroupValidated--;
         }
         RolloutGroup lastSavedGroup = null;
