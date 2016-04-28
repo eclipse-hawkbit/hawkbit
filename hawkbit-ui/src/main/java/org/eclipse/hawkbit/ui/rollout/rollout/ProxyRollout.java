@@ -22,197 +22,196 @@ import com.vaadin.server.FontAwesome;
  */
 public class ProxyRollout extends Rollout {
 
-	private static final long serialVersionUID = 4539849939617681918L;
+    private static final long serialVersionUID = 4539849939617681918L;
 
-	private String distributionSetNameVersion;
+    private String distributionSetNameVersion;
 
-	private String createdDate;
+    private String createdDate;
 
-	private String modifiedDate;
+    private String modifiedDate;
 
-	private Long numberOfGroups;
+    private Long numberOfGroups;
 
-	private Boolean isActionRecieved = Boolean.FALSE;
-	
-	private Boolean isRequiredMigrationStep = Boolean.FALSE;
+    private Boolean isActionRecieved = Boolean.FALSE;
 
-	private String totalTargetsCount;
+    private Boolean isRequiredMigrationStep = Boolean.FALSE;
 
-	private RolloutRendererData rolloutRendererData;
-	
-	private String discription;
+    private String totalTargetsCount;
 
-	private String type;
-	
-	private Set<SoftwareModule> swModules;
-	
-	
-	
-	/**
-	 * @return the isRequiredMigrationStep
-	 */
+    private RolloutRendererData rolloutRendererData;
 
-	public Boolean getIsRequiredMigrationStep() {
-		return isRequiredMigrationStep;
-	}
+    private String discription;
 
-	/**
-	 * @param isRequiredMigrationStep
-	 *            the isRequiredMigrationStep to set
-	 */
+    private String type;
 
-	public void setIsRequiredMigrationStep(Boolean isRequiredMigrationStep) {
-		this.isRequiredMigrationStep = isRequiredMigrationStep;
-	}
+    private Set<SoftwareModule> swModules;
 
-	
-	/**
-	 * @return the discription
-	 */
+    /**
+     * @return the isRequiredMigrationStep
+     */
 
-	public String getDiscription() {
-		return discription;
-	}
+    public Boolean getIsRequiredMigrationStep() {
+        return isRequiredMigrationStep;
+    }
 
-	/**
-	 * @param discription
-	 *            the discription to set
-	 */
+    /**
+     * @param isRequiredMigrationStep
+     *            the isRequiredMigrationStep to set
+     */
 
-	public void setDiscription(String discription) {
-		this.discription = discription;
-	}
+    public void setIsRequiredMigrationStep(Boolean isRequiredMigrationStep) {
+        this.isRequiredMigrationStep = isRequiredMigrationStep;
+    }
 
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * @return the discription
+     */
 
-	/**
-	 * @param type
-	 *            the type to set
-	 */
+    public String getDiscription() {
+        return discription;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
-	/**
-	 * 
-	 * @return the Set of Software modules
-	 */
-	public Set<SoftwareModule> getSwModules() {
-		return swModules;
-	}
-	/**
-	 * @param swModules
-	 *        Set<SoftwareModule> to set
-	 */
-	public void setSwModules(Set<SoftwareModule> swModules) {
-		this.swModules = swModules;
-	}
+    /**
+     * @param discription
+     *            the discription to set
+     */
 
-	public RolloutRendererData getRolloutRendererData() {
-		return rolloutRendererData;
-	}
+    public void setDiscription(String discription) {
+        this.discription = discription;
+    }
 
-	public void setRolloutRendererData(RolloutRendererData rendererData) {
-		this.rolloutRendererData = rendererData;
-	}
+    /**
+     * @return the type
+     */
+    public String getType() {
+        return type;
+    }
 
-	/**
-	 * @return the distributionSetNameVersion
-	 */
-	public String getDistributionSetNameVersion() {
-		return distributionSetNameVersion;
-	}
+    /**
+     * @param type
+     *            the type to set
+     */
 
-	/**
-	 * @param distributionSetNameVersion
-	 *            the distributionSetNameVersion to set
-	 */
-	public void setDistributionSetNameVersion(final String distributionSetNameVersion) {
-		this.distributionSetNameVersion = distributionSetNameVersion;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	/**
-	 * @return the numberOfGroups
-	 */
-	public Long getNumberOfGroups() {
-		return numberOfGroups;
-	}
+    /**
+     * 
+     * @return the Set of Software modules
+     */
+    public Set<SoftwareModule> getSwModules() {
+        return swModules;
+    }
 
-	/**
-	 * @param numberOfGroups
-	 *            the numberOfGroups to set
-	 */
-	public void setNumberOfGroups(final Long numberOfGroups) {
-		this.numberOfGroups = numberOfGroups;
-	}
+    /**
+     * @param swModules
+     *            Set<SoftwareModule> to set
+     */
+    public void setSwModules(Set<SoftwareModule> swModules) {
+        this.swModules = swModules;
+    }
 
-	/**
-	 * @return the createdDate
-	 */
-	public String getCreatedDate() {
-		return createdDate;
-	}
+    public RolloutRendererData getRolloutRendererData() {
+        return rolloutRendererData;
+    }
 
-	/**
-	 * @param createdDate
-	 *            the createdDate to set
-	 */
-	public void setCreatedDate(final String createdDate) {
-		this.createdDate = createdDate;
-	}
+    public void setRolloutRendererData(RolloutRendererData rendererData) {
+        this.rolloutRendererData = rendererData;
+    }
 
-	/**
-	 * @return the modifiedDate
-	 */
-	public String getModifiedDate() {
-		return modifiedDate;
-	}
+    /**
+     * @return the distributionSetNameVersion
+     */
+    public String getDistributionSetNameVersion() {
+        return distributionSetNameVersion;
+    }
 
-	/**
-	 * @param modifiedDate
-	 *            the modifiedDate to set
-	 */
-	public void setModifiedDate(final String modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
+    /**
+     * @param distributionSetNameVersion
+     *            the distributionSetNameVersion to set
+     */
+    public void setDistributionSetNameVersion(final String distributionSetNameVersion) {
+        this.distributionSetNameVersion = distributionSetNameVersion;
+    }
 
-	/**
-	 * @return the isActionRecieved
-	 */
-	public Boolean getIsActionRecieved() {
-		return isActionRecieved;
-	}
+    /**
+     * @return the numberOfGroups
+     */
+    public Long getNumberOfGroups() {
+        return numberOfGroups;
+    }
 
-	/**
-	 * @param isActionRecieved
-	 *            the isActionRecieved to set
-	 */
-	public void setIsActionRecieved(final Boolean isActionRecieved) {
-		this.isActionRecieved = isActionRecieved;
-	}
+    /**
+     * @param numberOfGroups
+     *            the numberOfGroups to set
+     */
+    public void setNumberOfGroups(final Long numberOfGroups) {
+        this.numberOfGroups = numberOfGroups;
+    }
 
-	/**
-	 * @return the totalTargetsCount
-	 */
-	public String getTotalTargetsCount() {
-		return totalTargetsCount;
-	}
+    /**
+     * @return the createdDate
+     */
+    public String getCreatedDate() {
+        return createdDate;
+    }
 
-	/**
-	 * @param totalTargetsCount
-	 *            the totalTargetsCount to set
-	 */
-	public void setTotalTargetsCount(final String totalTargetsCount) {
-		this.totalTargetsCount = totalTargetsCount;
-	}
+    /**
+     * @param createdDate
+     *            the createdDate to set
+     */
+    public void setCreatedDate(final String createdDate) {
+        this.createdDate = createdDate;
+    }
 
-	public String getAction() {
-		return FontAwesome.CIRCLE_O.getHtml();
-	}
+    /**
+     * @return the modifiedDate
+     */
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    /**
+     * @param modifiedDate
+     *            the modifiedDate to set
+     */
+    public void setModifiedDate(final String modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    /**
+     * @return the isActionRecieved
+     */
+    public Boolean getIsActionRecieved() {
+        return isActionRecieved;
+    }
+
+    /**
+     * @param isActionRecieved
+     *            the isActionRecieved to set
+     */
+    public void setIsActionRecieved(final Boolean isActionRecieved) {
+        this.isActionRecieved = isActionRecieved;
+    }
+
+    /**
+     * @return the totalTargetsCount
+     */
+    public String getTotalTargetsCount() {
+        return totalTargetsCount;
+    }
+
+    /**
+     * @param totalTargetsCount
+     *            the totalTargetsCount to set
+     */
+    public void setTotalTargetsCount(final String totalTargetsCount) {
+        this.totalTargetsCount = totalTargetsCount;
+    }
+
+    public String getAction() {
+        return FontAwesome.CIRCLE_O.getHtml();
+    }
 
 }
