@@ -37,6 +37,10 @@
          <version>${project.version}</version>
       </dependency>
       <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
          <!-- need to overwrite for the interface inheritance feature of feign-core -->
