@@ -29,5 +29,34 @@
       <module>hawkbit-example-mgmt-spring-client</module>
       <module>hawkbit-example-ddi-client</module>
   </modules>
+  
+  
+   <properties>
+      <feign.version>8.14.2</feign.version>
+   </properties>
+
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-core</artifactId>
+            <!-- need to overwrite for the interface inheritance feature of feign-core -->
+            <!-- <version>8.16.0</version> -->
+            <version>${feign.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-jackson</artifactId>
+            <!-- need to overwrite for the interface inheritance feature of feign-core -->
+            <!-- <version>8.16.0</version> -->
+            <version>${feign.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+            <version>${feign.version}</version>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
 
 </project>

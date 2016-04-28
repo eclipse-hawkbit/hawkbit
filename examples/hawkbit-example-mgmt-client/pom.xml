@@ -44,12 +44,10 @@
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
          <!-- need to overwrite for the interface inheritance feature of feign-core -->
-         <version>8.14.2</version>
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-jackson</artifactId>
-         <version>8.14.2</version>
       </dependency>
       <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
