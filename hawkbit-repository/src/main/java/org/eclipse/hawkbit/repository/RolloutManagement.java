@@ -284,13 +284,13 @@ public class RolloutManagement {
         }
     }
 
-    private Rollout createRolloutGroupsInNewTransaction(final int amountGroup, final RolloutGroupConditions conditions,
+    private Rollout createRolloutGroupsInNewTransaction(final int amountOfGroups, final RolloutGroupConditions conditions,
             final Rollout savedRollout) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("creatingRollout");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         return new TransactionTemplate(txManager, def)
-                .execute(status -> createRolloutGroups(amountGroup, conditions, savedRollout));
+                .execute(status -> createRolloutGroups(amountOfGroups, conditions, savedRollout));
     }
 
     /**
