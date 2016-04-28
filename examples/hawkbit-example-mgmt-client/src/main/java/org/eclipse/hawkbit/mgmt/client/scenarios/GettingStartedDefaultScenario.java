@@ -25,14 +25,12 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * 
  * Default getting started scenario.
  *
  */
-@Component
 public class GettingStartedDefaultScenario {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GettingStartedDefaultScenario.class);

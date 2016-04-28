@@ -8,16 +8,19 @@
  */
 package org.eclipse.hawkbit.mgmt.client;
 
+import org.eclipse.hawkbit.feign.core.client.FeignClientConfiguration;
 import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
 import org.eclipse.hawkbit.mgmt.client.scenarios.GettingStartedDefaultScenario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import feign.auth.BasicAuthRequestInterceptor;
 
@@ -25,6 +28,8 @@ import feign.auth.BasicAuthRequestInterceptor;
 @EnableFeignClients
 @EnableConfigurationProperties(ClientConfigurationProperties.class)
 @Configuration
+@AutoConfigureAfter(FeignClientConfiguration.class)
+@Import(FeignClientConfiguration.class)
 public class Application implements CommandLineRunner {
 
     @Autowired
@@ -55,6 +60,16 @@ public class Application implements CommandLineRunner {
     @Bean
     public BasicAuthRequestInterceptor basicAuthRequestInterceptor() {
         return new BasicAuthRequestInterceptor(configuration.getUsername(), configuration.getPassword());
+    }
+
+    @Bean
+    public GettingStartedDefaultScenario gettingStartedDefaultScenario() {
+        return new GettingStartedDefaultScenario();
+    }
+
+    @Bean
+    public CreateStartedRolloutExample createStartedRolloutExample() {
+        return new CreateStartedRolloutExample();
     }
 
     private boolean containsArg(final String containsArg, final String... args) {
