@@ -193,7 +193,7 @@ public final class DashboardMenu extends CustomComponent {
         final MenuItem settingsItem = settings.addItem("", new ThemeResource("images/profile-pic-57px.jpg"), null);
 
         final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
-        final String formattedUsername = UserDetailsFormatter.loadAndFormatCurrentUsername();
+        final String formattedUsername = UserDetailsFormatter.formatCurrentUsername();
         String tenantAndUsernameHtml = "";
         if (!StringUtils.isEmpty(formattedTenant)) {
             tenantAndUsernameHtml += formattedTenant + "<br>";

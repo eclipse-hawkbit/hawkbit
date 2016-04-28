@@ -88,12 +88,10 @@ public final class UserDetailsFormatter {
      * name to max 12 characters. @see
      * {@link UserDetailsFormatter#loadAndFormatUsername(String, int)}
      * 
-     * @param baseEntity
-     *            the entity
      * @return the formatted user name (max 12 characters) cannot be <null>
      */
-    public static String loadAndFormatCurrentUsername() {
-        return loadAndFormatUsername(getCurrentUser().getUsername(), 12);
+    public static String formatCurrentUsername() {
+        return loadAndFormatUsername(getCurrentUser().getUsername(), 5);
     }
 
     /**
@@ -114,6 +112,10 @@ public final class UserDetailsFormatter {
      */
     public static String loadAndFormatUsername(final String username, final int expectedNameLength) {
         final UserDetails userDetails = loadUserByUsername(username);
+        return formatUserName(expectedNameLength, userDetails);
+    }
+
+    private static String formatUserName(final int expectedNameLength, final UserDetails userDetails) {
         if (!(userDetails instanceof UserPrincipal)) {
             return userDetails.getUsername();
         }
@@ -134,7 +136,7 @@ public final class UserDetailsFormatter {
         if (StringUtils.isEmpty(trimmedUsername)) {
             return trimAndFormatDetail(userPrincipal.getLoginname(), expectedNameLength);
         }
-        return firstAndLastname;
+        return trimmedUsername;
     }
 
     /**
