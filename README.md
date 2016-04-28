@@ -57,16 +57,29 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 
 
 # Modules
-`hawkbit-core` : core elements.  
-`hawkbit-security-core` : core security elements.  
-`hawkbit-security-integration` : security integration elements to integrate security into hawkbit.  
-`hawkbit-artifact-repository-mongo` : artifact repository implementation to mongoDB.    
-`hawkbit-autoconfigure` : spring-boot auto-configuration.  
+
+`examples` : HawkBit examples 
+`hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
+`hawkbit-autoconfigure` : Spring-boot auto-configuration. 
+`hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
+`hawkbit-core` : Core elements.  
+`hawkbit-ddi-api` : The hawkBit DDI API.
+`hawkbit-ddi-resource` : Implementation of the hawkBit DDI API
+`hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API. 
 `hawkbit-dmf-api` : API for the Device Management Integration.  
-`hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API.  
-`hawkbit-repository` : repository implemenation based on SQL for all meta-data.    
-`hawkbit-http-security` : implementation for security filters for HTTP.    
-`hawkbit-rest-api` : API classes for the REST Management API.  
-`hawkbit-rest-resource` : HTTP REST endpoints for the Management and the Direct Device API.  
+`hawkbit-http-security` : Implementation for security filters for HTTP.  
+`hawkbit-mgmt-api` : The hawkBit Management API
+`hawkbit-mgmt-resource` : Implementation of the hawkBit Management API
+`hawkbit-repository` : Repository implementation based on SQL for all meta-data.   
+`hawkbit-rest-core` : Core elements for the rest modules.
+`hawkbit-security-core` : Core security elements.  
+`hawkbit-security-integration` : Security integration elements to integrate security into hawkbit.  
+`hawkbit-system-api` : The hawkBit System API
+`hawkbit-system-resource` : Implementation of the hawkBit System API
+`hawkbit-test-report` : Test reports
 `hawkbit-ui` : Vaadin UI.  
-`hawkbit-cache-redis` : spring cache manager configuration and implementation with redis, distributed cache and distributed events.
+ 
+
+
+
+
