@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.client;
 
+import org.eclipse.hawkbit.feign.core.client.FeignClientConfiguration;
 import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
 import org.eclipse.hawkbit.mgmt.client.scenarios.GettingStartedDefaultScenario;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import feign.auth.BasicAuthRequestInterceptor;
 
@@ -25,6 +27,7 @@ import feign.auth.BasicAuthRequestInterceptor;
 @EnableFeignClients
 @EnableConfigurationProperties(ClientConfigurationProperties.class)
 @Configuration
+@Import(FeignClientConfiguration.class)
 public class Application implements CommandLineRunner {
 
     @Autowired
