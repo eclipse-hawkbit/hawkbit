@@ -12,7 +12,7 @@ public class RootControllerResourceClientConstants {
     public static final String PATH = "{tenant}/controller/v1";
 
     /**
-     * Default constructor.
+     * Private constructor to prevent instantiation.
      */
     private RootControllerResourceClientConstants() {
 

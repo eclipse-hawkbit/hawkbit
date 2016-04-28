@@ -11,7 +11,7 @@ public class AppTest {
 
     @Test
     public void AppTest() {
-        final DdiExampleClient ddiClient = new DdiExampleClient("http://localhost:8080/", "Einstein17", "DEFAULT",
+        final DdiExampleClient ddiClient = new DdiExampleClient("http://localhost:8080/", "Einstein21", "DEFAULT",
                 new SaveArtifactsToLocalTempDirectories());
         final Thread thread = new Thread(ddiClient);
         thread.run();
