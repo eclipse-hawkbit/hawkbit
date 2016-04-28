@@ -22,6 +22,7 @@ import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -72,6 +73,11 @@ public final class HawkbitCommonUtil {
      */
     public static final String SPAN_CLOSE = "</span>";
 
+    public static final String HTML_LI_CLOSE_TAG = "</li>";
+    public static final String HTML_LI_OPEN_TAG = "<li>";
+    public static final String HTML_UL_CLOSE_TAG = "</ul>";
+    public static final String HTML_UL_OPEN_TAG = "<ul>";
+
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitCommonUtil.class);
 
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
@@ -102,6 +108,9 @@ public final class HawkbitCommonUtil {
     private static final String TARGET_TAG_DROP_REMOVE_SCRIPT = "var m = document.getElementById('show-filter-drop-hint'); if(m) { document.head.removeChild(m); } ";
     private static final String DELETE_DROP_CREATE_SCRIPT = "var q = document.getElementById('show-delete-drop-hint'); if(q) { } else { showDeleteDrop = document.createElement('style'); showDeleteDrop.id=\"show-delete-drop-hint\";  document.head.appendChild(showDeleteDrop); }";
     private static final String DELETE_TAG_DROP_REMOVE_SCRIPT = "var o = document.getElementById('show-delete-drop-hint'); if(o) { document.head.removeChild(o); } ";
+
+    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
+    private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     /**
      * Define empty string.
@@ -1037,6 +1046,10 @@ public final class HawkbitCommonUtil {
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
+
+        targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
+        targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
+
     }
 
     /**

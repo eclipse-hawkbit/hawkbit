@@ -137,11 +137,16 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             if (pinnedDistId == null) {
                 prxyTarget.setInstalledDistributionSet(null);
                 prxyTarget.setAssignedDistributionSet(null);
+
             } else {
                 final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
                 final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
+                prxyTarget.setInstalledDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
+                        installedDistributionSet.getName(), installedDistributionSet.getVersion()));
                 prxyTarget.setInstalledDistributionSet(installedDistributionSet);
                 final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
+                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
+                        assignedDistributionSet.getName(), assignedDistributionSet.getVersion()));
                 prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
             }
 
