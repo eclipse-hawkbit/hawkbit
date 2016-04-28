@@ -26,5 +26,5 @@ executorService.execute(ddiExampleClient);
 #### Getting started with hawkBit Example DDI Client
 
 After the hawkBit Example DDI Client has started it will poll once against the given hawkBit server and form then on depending on your polling configuration.
-Once the hawkBit Example DDI Client has polled successful your will see a target in the deployment view regarding the given controller id of your hawkBit Example DDI Client. 
+After the hawkBit Example DDI Client has polled successful your will see a target in the deployment view regarding the given controller id of your hawkBit Example DDI Client. 
 
