@@ -25,6 +25,7 @@ public class DistributionSetTypeBuilder {
 
     private String key;
     private String name;
+    private String description;
     private final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules = Lists.newArrayList();
     private final List<MgmtSoftwareModuleTypeAssigment> optionalmodules = Lists.newArrayList();
 
@@ -45,6 +46,16 @@ public class DistributionSetTypeBuilder {
      */
     public DistributionSetTypeBuilder name(final String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * @param description
+     *            the description
+     * @return the builder itself
+     */
+    public DistributionSetTypeBuilder description(final String description) {
+        this.description = description;
         return this;
     }
 
@@ -81,20 +92,21 @@ public class DistributionSetTypeBuilder {
 
     /**
      * Builds a list with a single entry of
-     * {@link MgmtDistributionSetTypeRequestBodyPost} which can directly be used in
-     * the RESTful-API.
+     * {@link MgmtDistributionSetTypeRequestBodyPost} which can directly be used
+     * in the RESTful-API.
      * 
-     * @return a single entry list of {@link MgmtDistributionSetTypeRequestBodyPost}
+     * @return a single entry list of
+     *         {@link MgmtDistributionSetTypeRequestBodyPost}
      */
     public List<MgmtDistributionSetTypeRequestBodyPost> build() {
         return Lists.newArrayList(doBuild(name, key));
     }
 
     /**
-     * Builds a list of multiple {@link MgmtDistributionSetTypeRequestBodyPost} to
-     * create multiple distribution set types at once. An increasing number will
-     * be added to the name and key of the distribution set type. The optional
-     * and mandatory software module types will remain the same.
+     * Builds a list of multiple {@link MgmtDistributionSetTypeRequestBodyPost}
+     * to create multiple distribution set types at once. An increasing number
+     * will be added to the name and key of the distribution set type. The
+     * optional and mandatory software module types will remain the same.
      * 
      * @param count
      *            the amount of distribution sets type body which should be
@@ -114,6 +126,7 @@ public class DistributionSetTypeBuilder {
         final MgmtDistributionSetTypeRequestBodyPost body = new MgmtDistributionSetTypeRequestBodyPost();
         body.setKey(prefixKey);
         body.setName(prefixName);
+        body.setDescription(description);
         body.setMandatorymodules(mandatorymodules);
         body.setOptionalmodules(optionalmodules);
         return body;

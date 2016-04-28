@@ -26,6 +26,8 @@ public class SoftwareModuleBuilder {
     private String name;
     private String version;
     private String type;
+    private String vendor;
+    private String description;
 
     /**
      * @param name
@@ -59,9 +61,29 @@ public class SoftwareModuleBuilder {
     }
 
     /**
+     * @param vendor
+     *            the vendor
+     * @return the builder itself
+     */
+    public SoftwareModuleBuilder vendor(final String vendor) {
+        this.vendor = vendor;
+        return this;
+    }
+
+    /**
+     * @param description
+     *            the description
+     * @return the builder itself
+     */
+    public SoftwareModuleBuilder description(final String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
      * Builds a list with a single entry of
-     * {@link MgmtSoftwareModuleRequestBodyPost} which can directly be used in the
-     * RESTful-API.
+     * {@link MgmtSoftwareModuleRequestBodyPost} which can directly be used in
+     * the RESTful-API.
      * 
      * @return a single entry list of {@link MgmtSoftwareModuleRequestBodyPost}
      */
@@ -70,10 +92,10 @@ public class SoftwareModuleBuilder {
     }
 
     /**
-     * Builds a list of multiple {@link MgmtSoftwareModuleRequestBodyPost} to create
-     * multiple software module at once. An increasing number will be added to
-     * the name of the software module. The version and type will remain the
-     * same.
+     * Builds a list of multiple {@link MgmtSoftwareModuleRequestBodyPost} to
+     * create multiple software module at once. An increasing number will be
+     * added to the name of the software module. The version and type will
+     * remain the same.
      * 
      * @param count
      *            the amount of software module body which should be created
@@ -93,6 +115,8 @@ public class SoftwareModuleBuilder {
         body.setName(prefixName);
         body.setVersion(version);
         body.setType(type);
+        body.setVendor(vendor);
+        body.setDescription(description);
         return body;
     }
 

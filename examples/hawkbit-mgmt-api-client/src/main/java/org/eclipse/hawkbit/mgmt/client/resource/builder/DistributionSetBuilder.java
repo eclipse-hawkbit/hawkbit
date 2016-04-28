@@ -24,6 +24,7 @@ public class DistributionSetBuilder {
     private String name;
     private String version;
     private String type;
+    private String description;
     private final List<MgmtSoftwareModuleAssigment> modules = new ArrayList<>();
 
     /**
@@ -64,9 +65,19 @@ public class DistributionSetBuilder {
     }
 
     /**
+     * @param description
+     *            the description
+     * @return the builder itself
+     */
+    public DistributionSetBuilder description(final String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
      * Builds a list with a single entry of
-     * {@link MgmtDistributionSetRequestBodyPost} which can directly be used to post
-     * on the RESTful-API.
+     * {@link MgmtDistributionSetRequestBodyPost} which can directly be used to
+     * post on the RESTful-API.
      * 
      * @return a single entry list of {@link MgmtDistributionSetRequestBodyPost}
      */
@@ -98,6 +109,7 @@ public class DistributionSetBuilder {
         body.setName(prefixName);
         body.setVersion(version);
         body.setType(type);
+        body.setDescription(description);
         body.setModules(modules);
         return body;
     }
