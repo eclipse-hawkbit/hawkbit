@@ -11,7 +11,6 @@ package org.eclipse.hawkbit;
 import javax.persistence.EntityManager;
 import javax.transaction.Transaction;
 
-import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +40,8 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
         final EntityManager em = emHolder.getEntityManager();
 
         final String currentTenant = tenantAware.getCurrentTenant();
-        if (currentTenant == null) {
-            throw new TenantNotExistException("Tenant Unknown. Canceling transaction.");
+        if (currentTenant != null) {
+            em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
         }
-
-        em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
-
     }
 }
