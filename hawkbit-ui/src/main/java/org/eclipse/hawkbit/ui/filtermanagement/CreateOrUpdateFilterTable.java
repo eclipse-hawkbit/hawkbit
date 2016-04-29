@@ -8,27 +8,22 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
+import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -99,7 +94,7 @@ public class CreateOrUpdateFilterTable extends Table {
         setId(SPUIComponetIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
         setSelectable(false);
         eventBus.subscribe(this);
-        setItemDescriptionGenerator(new TooltipGenerator());
+        setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
     @PreDestroy
@@ -188,13 +183,13 @@ public class CreateOrUpdateFilterTable extends Table {
         container.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, Date.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false, true);
         container.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null, false, true);
-        container.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "");
-        container.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
 
         container.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
         container.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
+        container.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "");
+        container.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class, null);
     }
 
     private List<TableColumn> getVisbleColumns() {
@@ -205,12 +200,12 @@ public class CreateOrUpdateFilterTable extends Table {
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
         columnList.add(
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
                 i18n.get("header.assigned.ds"), 0.125F));
         columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
                 i18n.get("header.installed.ds"), 0.125F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
         return columnList;
     }
 
@@ -263,58 +258,5 @@ public class CreateOrUpdateFilterTable extends Table {
         populateTableData();
         eventBus.publish(this, CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON);
     }
-
-    public class TooltipGenerator implements ItemDescriptionGenerator {
-        private static final long serialVersionUID = 688730421728162456L;
-
-        @Override
-        public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
-            final DistributionSet distributionSet;
-            final Item item = getItem(itemId);
-            if (propertyId != null) {
-                if (propertyId.equals(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER)) {
-                    distributionSet = (DistributionSet) item.getItemProperty(ASSIGN_DIST_SET).getValue();
-                    return getDSDetails(distributionSet);
-                } else if (propertyId.equals(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER)) {
-                    distributionSet = (DistributionSet) item.getItemProperty(INSTALL_DIST_SET).getValue();
-                    return getDSDetails(distributionSet);
-                }
-            }
-            return null;
-        }
-
-        private String getDSDetails(final DistributionSet distributionSet) {
-            final StringBuilder swModuleNames = new StringBuilder();
-            final StringBuilder swModuleVendors = new StringBuilder();
-            final Set<SoftwareModule> swModules = distributionSet.getModules();
-            swModules.forEach(swModule -> {
-                swModuleNames.append(swModule.getName());
-                swModuleNames.append(" , ");
-                swModuleVendors.append(swModule.getVendor());
-                swModuleVendors.append(" , ");
-            });
-            final StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(HTML_UL_OPEN_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append(" DistributionSet Description : ").append(distributionSet.getDescription());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append(" DistributionSet Type : ").append((distributionSet.getType()).getName());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append(" Required Migration step : ")
-                    .append(distributionSet.isRequiredMigrationStep() ? "Yes" : "No");
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-
-            stringBuilder.append(HTML_UL_CLOSE_TAG);
-            return stringBuilder.toString();
-        }
-
-    }
+   
 }

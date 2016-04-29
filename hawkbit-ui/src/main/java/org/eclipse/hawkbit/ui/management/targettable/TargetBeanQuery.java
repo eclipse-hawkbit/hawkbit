@@ -134,22 +134,21 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
             prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
 
-            if (pinnedDistId == null) {
-                prxyTarget.setInstalledDistributionSet(null);
-                prxyTarget.setAssignedDistributionSet(null);
+            final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
+            final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
+            final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
 
-            } else {
-                final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
-                final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
+            prxyTarget.setInstalledDistributionSet(installedDistributionSet);
+            prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
+
+            if (installedDistributionSet != null) {
                 prxyTarget.setInstalledDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
                         installedDistributionSet.getName(), installedDistributionSet.getVersion()));
-                prxyTarget.setInstalledDistributionSet(installedDistributionSet);
-                final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
+            }
+            if (assignedDistributionSet != null) {
                 prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
                         assignedDistributionSet.getName(), assignedDistributionSet.getVersion()));
-                prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
             }
-
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
             prxyTarget.setTargetInfo(targ.getTargetInfo());
