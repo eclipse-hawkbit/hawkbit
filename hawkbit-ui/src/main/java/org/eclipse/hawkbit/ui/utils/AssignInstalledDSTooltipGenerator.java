@@ -9,9 +9,6 @@
 
 package org.eclipse.hawkbit.ui.utils;
 
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
@@ -19,21 +16,24 @@ import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
 
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+
 import com.vaadin.data.Item;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 
-public class AssignInstalledDSTooltipGenerator  implements ItemDescriptionGenerator {
+public class AssignInstalledDSTooltipGenerator implements ItemDescriptionGenerator {
     private static final long serialVersionUID = 688730421728162456L;
-    
+
     private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
     private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     @Override
     public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
         final DistributionSet distributionSet;
-        final Item item = ((Table)source).getItem(itemId);
+        final Item item = ((Table) source).getItem(itemId);
         if (propertyId != null) {
             if (propertyId.equals(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER)) {
                 distributionSet = (DistributionSet) item.getItemProperty(ASSIGN_DIST_SET).getValue();
@@ -47,6 +47,9 @@ public class AssignInstalledDSTooltipGenerator  implements ItemDescriptionGenera
     }
 
     private String getDSDetails(final DistributionSet distributionSet) {
+        if (distributionSet == null) {
+            return null;
+        }
         final StringBuilder swModuleNames = new StringBuilder();
         final StringBuilder swModuleVendors = new StringBuilder();
         final Set<SoftwareModule> swModules = distributionSet.getModules();
@@ -77,6 +80,4 @@ public class AssignInstalledDSTooltipGenerator  implements ItemDescriptionGenera
         stringBuilder.append(HTML_UL_CLOSE_TAG);
         return stringBuilder.toString();
     }
-  }
-
-
+}
