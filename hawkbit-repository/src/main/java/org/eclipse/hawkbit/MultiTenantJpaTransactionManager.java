@@ -35,12 +35,11 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
     protected void doBegin(final Object transaction, final TransactionDefinition definition) {
         super.doBegin(transaction, definition);
 
-        final EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager
-                .getResource(getEntityManagerFactory());
-        final EntityManager em = emHolder.getEntityManager();
-
         final String currentTenant = tenantAware.getCurrentTenant();
         if (currentTenant != null) {
+            final EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager
+                    .getResource(getEntityManagerFactory());
+            final EntityManager em = emHolder.getEntityManager();
             em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
         }
     }
