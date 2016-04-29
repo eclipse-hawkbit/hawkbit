@@ -8,11 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
-import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,6 +54,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
+import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -117,9 +113,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
     private static final int PROPERTY_DEPT = 3;
     private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
-    private static final String INSTALL_DIST_SET = "installedDistributionSet";
-
+   
     @Autowired
     private transient TargetManagement targetManagement;
 
@@ -147,7 +141,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         addActionHandler(this);
         actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
         actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
-        setItemDescriptionGenerator(new TooltipGenerator());
+        setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
     /**
@@ -341,6 +335,11 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
+        }else{
+            columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
+                    i18n.get("header.assigned.ds"), 0.1F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
+                    i18n.get("header.installed.ds"), 0.1F));
         }
         return columnList;
 
@@ -1084,61 +1083,5 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     private boolean isFilteredByTags() {
         return !managementUIState.getTargetTableFilters().getClickedTargetTags().isEmpty();
-    }
-
-    /**
-     * tooltip for assignedDS and installedDS
-     */
-
-    protected class TooltipGenerator implements ItemDescriptionGenerator {
-        private static final long serialVersionUID = 688730421728162456L;
-
-        @Override
-        public String generateDescription(final Component source, final Object itemId, final Object propertyId) {
-            final DistributionSet distributionSet;
-            final Item item = getItem(itemId);
-            if (propertyId != null) {
-                if (propertyId.equals(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER)) {
-                    distributionSet = (DistributionSet) item.getItemProperty(ASSIGN_DIST_SET).getValue();
-                    return getDSDetails(distributionSet);
-                } else if (propertyId.equals(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER)) {
-                    distributionSet = (DistributionSet) item.getItemProperty(INSTALL_DIST_SET).getValue();
-                    return getDSDetails(distributionSet);
-                }
-            }
-            return null;
-        }
-
-        private String getDSDetails(final DistributionSet distributionSet) {
-            final StringBuilder swModuleNames = new StringBuilder();
-            final StringBuilder swModuleVendors = new StringBuilder();
-            final Set<SoftwareModule> swModules = distributionSet.getModules();
-            swModules.forEach(swModule -> {
-                swModuleNames.append(swModule.getName());
-                swModuleNames.append(" , ");
-                swModuleVendors.append(swModule.getVendor());
-                swModuleVendors.append(" , ");
-            });
-            final StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(HTML_UL_OPEN_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append(" DistributionSet Description : ").append(distributionSet.getDescription());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append(" DistributionSet Type : ").append((distributionSet.getType()).getName());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append(" Required Migration step : ")
-                    .append(distributionSet.isRequiredMigrationStep() ? "Yes" : "No");
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_LI_OPEN_TAG);
-            stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
-            stringBuilder.append(HTML_LI_CLOSE_TAG);
-            stringBuilder.append(HTML_UL_CLOSE_TAG);
-            return stringBuilder.toString();
-        }
     }
 }
