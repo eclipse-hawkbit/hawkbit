@@ -4,9 +4,9 @@ The hawkBit example application is a standalone spring-boot application with an 
 We have have described several options for you to get access to the example.
 
 ## Try out the example application in our hawkBit sandbox on Bluemix
-- try out Management UI https://hawkbit.eu-gb.mybluemix.net/UI
-- try out Management API https://hawkbit.eu-gb.mybluemix.net/rest/v1/targets (don't forget basic auth header)
-- try out DDI API https://hawkbit.eu-gb.mybluemix.net/DEFAULT/controller/v1/MYTESTDEVICE
+- try out Management UI https://hawkbit.eu-gb.mybluemix.net/UI (username: admin, passwd: admin)
+- try out Management API https://hawkbit.eu-gb.mybluemix.net/rest/v1/targets (don't forget basic auth header; username: admin, passwd: admin)
+- try out DDI API https://hawkbit.eu-gb.mybluemix.net/DEFAULT/controller/v1/MYTESTDEVICE (authentication disabled)
 
 ## On your own workstation
 ### Run
