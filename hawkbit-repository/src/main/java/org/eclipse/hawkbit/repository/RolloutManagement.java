@@ -59,10 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
-<<<<<<< HEAD
-=======
 import org.springframework.transaction.annotation.Propagation;
->>>>>>> eclipse/master
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -287,8 +284,8 @@ public class RolloutManagement {
         }
     }
 
-    private Rollout createRolloutGroupsInNewTransaction(final int amountOfGroups, final RolloutGroupConditions conditions,
-            final Rollout savedRollout) {
+    private Rollout createRolloutGroupsInNewTransaction(final int amountOfGroups,
+            final RolloutGroupConditions conditions, final Rollout savedRollout) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("creatingRollout");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
