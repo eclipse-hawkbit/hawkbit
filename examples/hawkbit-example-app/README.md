@@ -14,7 +14,7 @@ We have have described several options for you to get access to the example.
 java -jar examples/hawkbit-example-app/target/hawkbit-example-app-*-SNAPSHOT.jar
 ```
 
-(Note: if you intend to user another database than H2 you have to add the JDBC driver to your class path).
+_(Note: you have to add the JDBC driver also to your class path if you intend to use another database than H2.)_
 
 Or:
 
