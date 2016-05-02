@@ -52,7 +52,7 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 * The master branch contains future development towards 0.2. We are currently focusing on:
   * Rollout Management for large scale rollouts.
   * Clustering capabilities for the update server.
-  * Upgrade of Spring Boot and Vaadin depedencies.
+  * Upgrade of Spring Boot and Vaadin dependencies.
   * And of course tons of usability improvements and bug fixes.
 
 
@@ -64,7 +64,7 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 `hawkbit-autoconfigure` : spring-boot auto-configuration.  
 `hawkbit-dmf-api` : API for the Device Management Integration.  
 `hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API.  
-`hawkbit-repository` : repository implemenation based on SQL for all meta-data.    
+`hawkbit-repository` : repository implementation based on SQL for all meta-data.    
 `hawkbit-http-security` : implementation for security filters for HTTP.    
 `hawkbit-rest-api` : API classes for the REST Management API.  
 `hawkbit-rest-resource` : HTTP REST endpoints for the Management and the Direct Device API.  

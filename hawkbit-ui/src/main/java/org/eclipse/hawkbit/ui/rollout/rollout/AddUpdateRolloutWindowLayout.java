@@ -209,6 +209,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
                 actionTypeOptionGroupLayout, linkToHelp, getSaveDiscardButtonLayout());
         mainLayout.setComponentAlignment(linkToHelp, Alignment.BOTTOM_RIGHT);
         setCompositionRoot(mainLayout);
+        rolloutName.focus();
     }
 
     private HorizontalLayout getGroupDetailsLayout() {
