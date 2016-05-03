@@ -8,21 +8,19 @@
  */
 package org.eclipse.hawkbit.simulator.ui;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
-import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.ResponseStatus;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Status;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.SimulatedDeviceFactory;
+import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.eclipse.hawkbit.simulator.event.InitUpdate;
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
 import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
-import org.eclipse.hawkbit.simulator.ui.GenerateDialog.GenerateDialogCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
@@ -52,8 +50,6 @@ import com.vaadin.ui.renderers.ProgressBarRenderer;
  * Vaadin view which allows to generate devices through the DMF API and show the
  * current simulated devices in a grid with their current status and update
  * progress.
- * 
- * @author Michael Hirsch
  *
  */
 @SpringView(name = "")
@@ -153,18 +149,12 @@ public class SimulatorView extends VerticalLayout implements View {
     @Subscribe
     public void pollCounterUpdate(final NextPollCounterUpdate update) {
         final List<AbstractSimulatedDevice> devices = update.getDevices();
-        this.getUI().access(new Runnable() {
-            
-            @Override
-            public void run() {
-                devices.forEach(device -> {
-                    final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
-                    if (item != null) {
-                        item.getItemProperty("nextPollCounterSec").setValue(device.getNextPollCounterSec());
-                    }
-                });
+        this.getUI().access(() -> devices.forEach(device -> {
+            final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
+            if (item != null) {
+                item.getItemProperty("nextPollCounterSec").setValue(device.getNextPollCounterSec());
             }
-        });
+        }));
     }
 
     /**
@@ -176,18 +166,14 @@ public class SimulatorView extends VerticalLayout implements View {
     @Subscribe
     public void initUpdate(final InitUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
-        this.getUI().access(new Runnable() {
-            
-            @Override
-            public void run() {
-                final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
-                if (item != null) {
-                    item.getItemProperty("progress").setValue(device.getProgress());
-                    item.getItemProperty("status").setValue(Status.PEDNING);
-                    item.getItemProperty("swversion").setValue(device.getSwversion());
-                }
-
+        this.getUI().access(() -> {
+            final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
+            if (item != null) {
+                item.getItemProperty("progress").setValue(device.getProgress());
+                item.getItemProperty("status").setValue(Status.PEDNING);
+                item.getItemProperty("swversion").setValue(device.getSwversion());
             }
+
         });
     }
 
@@ -200,29 +186,26 @@ public class SimulatorView extends VerticalLayout implements View {
     @Subscribe
     public void progessUpdate(final ProgressUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
-        this.getUI().access(new Runnable() {
-            @Override
-            public void run() {
-                final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
-                if (item != null) {
-                    item.getItemProperty("progress").setValue(device.getProgress());
-                    if (device.getProgress() >= 1) {
-                        switch (device.getResponseStatus()) {
-                        case SUCCESSFUL:
-                            item.getItemProperty("status").setValue(Status.FINISH);
-                            break;
-                        case ERROR:
-                            item.getItemProperty("status").setValue(Status.ERROR);
-                            break;
-                        default:
-                            item.getItemProperty("status").setValue(Status.UNKNWON);
-                        }
-                    } else {
-                        item.getItemProperty("status").setValue(Status.PEDNING);
+        this.getUI().access(() -> {
+            final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
+            if (item != null) {
+                item.getItemProperty("progress").setValue(device.getProgress());
+                if (device.getProgress() >= 1) {
+                    switch (device.getUpdateStatus().getResponseStatus()) {
+                    case SUCCESSFUL:
+                        item.getItemProperty("status").setValue(Status.FINISH);
+                        break;
+                    case ERROR:
+                        item.getItemProperty("status").setValue(Status.ERROR);
+                        break;
+                    default:
+                        item.getItemProperty("status").setValue(Status.UNKNWON);
                     }
+                } else {
+                    item.getItemProperty("status").setValue(Status.PEDNING);
                 }
-
             }
+
         });
     }
 
@@ -246,18 +229,15 @@ public class SimulatorView extends VerticalLayout implements View {
     }
 
     private void openGenerateDialog() {
-        UI.getCurrent().addWindow(new GenerateDialog(new GenerateDialogCallback() {
-            @Override
-            public void okButton(final String namePrefix, final String tenant, final int amount, final int pollDelay,
-                    final URL basePollUrl, final String gatewayToken, final Protocol protocol) {
-                for (int index = 0; index < amount; index++) {
-                    final String deviceId = namePrefix + index;
-                    beanContainer.addBean(repository.add(deviceFactory.createSimulatedDevice(deviceId,
-                            tenant.toLowerCase(), protocol, pollDelay, basePollUrl, gatewayToken)));
-                    spSenderService.createOrUpdateThing(tenant, deviceId);
-                }
-            }
-        }));
+        UI.getCurrent().addWindow(
+                new GenerateDialog((namePrefix, tenant, amount, pollDelay, basePollUrl, gatewayToken, protocol) -> {
+                    for (int index = 0; index < amount; index++) {
+                        final String deviceId = namePrefix + index;
+                        beanContainer.addBean(repository.add(deviceFactory.createSimulatedDevice(deviceId,
+                                tenant.toLowerCase(), protocol, pollDelay, basePollUrl, gatewayToken)));
+                        spSenderService.createOrUpdateThing(tenant, deviceId);
+                    }
+                }));
     }
 
     private Converter<String, Protocol> createProtocolConverter() {
