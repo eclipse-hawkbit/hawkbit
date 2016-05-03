@@ -64,6 +64,7 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 * `hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
 * `hawkbit-core` : Core elements.  
 * `hawkbit-ddi-api` : The hawkBit DDI API.
+* `hawkbit-ddi-dl-api` : The hawkBit DDI Download API.
 * `hawkbit-ddi-resource` : Implementation of the hawkBit DDI API
 * `hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API. 
 * `hawkbit-dmf-api` : API for the Device Management Integration.  
