@@ -317,7 +317,7 @@ public class ArtifactManagement {
         for (final LocalArtifact lArtifact : localArtifactRepository
                 .findByGridFsFileName(existing.getGridFsFileName())) {
             if (!lArtifact.getSoftwareModule().isDeleted()
-                    && lArtifact.getSoftwareModule().getId() != existing.getSoftwareModule().getId()) {
+                    && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
                 artifactIsOnlyUsedByOneSoftwareModule = false;
                 break;
             }
