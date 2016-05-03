@@ -337,9 +337,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = checkActionExist(message, actionUpdateStatus);
 
         final ActionStatus actionStatus = new ActionStatus();
-        final List<String> messageText = actionUpdateStatus.getMessage();
-        final String messageString = String.join(", ", messageText);
-        actionStatus.addMessage(messageString);
+        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
+
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 
