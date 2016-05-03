@@ -143,9 +143,11 @@ public class ArtifactStoreController {
         actionStatus.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            actionStatus.addMessage("It is a partial download request: " + range);
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
+                    + " of: " + request.getRequestURI());
         } else {
-            actionStatus.addMessage("Target downloads");
+            actionStatus.addMessage(
+                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
         controllerManagement.addActionStatusMessage(actionStatus);
         return action;
