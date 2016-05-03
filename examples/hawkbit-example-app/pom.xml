@@ -84,7 +84,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-ui</artifactId>
+         <artifactId>hawkbit-mgmt-ui</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>

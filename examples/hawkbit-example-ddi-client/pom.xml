@@ -62,11 +62,6 @@
 
       <!-- Move to parent or use different framework -->
       <dependency>
-         <groupId>commons-io</groupId>
-         <artifactId>commons-io</artifactId>
-         <version>2.5</version>
-      </dependency>
-      <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
       </dependency>
@@ -75,16 +70,5 @@
          <artifactId>commons-lang</artifactId>
       </dependency>
 
-      <!-- Test -->
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>ru.yandex.qatools.allure</groupId>
-         <artifactId>allure-junit-adaptor</artifactId>
-         <scope>test</scope>
-      </dependency>
    </dependencies>
 </project>
