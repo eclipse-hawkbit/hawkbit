@@ -27,7 +27,7 @@ public class DownloadAndUpdateRequest {
     private Long actionId;
 
     @JsonProperty
-    private String targetToken;
+    private String targetSecurityToken;
 
     @JsonProperty
     private final List<SoftwareModule> softwareModules = new LinkedList<>();
@@ -40,12 +40,12 @@ public class DownloadAndUpdateRequest {
         this.actionId = correlator;
     }
 
-    public String getTargetToken() {
-        return targetToken;
+    public String getTargetSecurityToken() {
+        return targetSecurityToken;
     }
 
-    public void setTargetToken(final String targetToken) {
-        this.targetToken = targetToken;
+    public void setTargetSecurityToken(final String targetSecurityToken) {
+        this.targetSecurityToken = targetSecurityToken;
     }
 
     public List<SoftwareModule> getSoftwareModules() {

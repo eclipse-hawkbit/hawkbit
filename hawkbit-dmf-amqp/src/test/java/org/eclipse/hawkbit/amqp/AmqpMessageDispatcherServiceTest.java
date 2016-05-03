@@ -192,7 +192,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
                 downloadAndUpdateRequest.getActionId(), Long.valueOf(1));
         assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
-        assertEquals("Security token of target", downloadAndUpdateRequest.getTargetToken(), TEST_TOKEN);
+        assertEquals("Security token of target", downloadAndUpdateRequest.getTargetSecurityToken(), TEST_TOKEN);
 
         return downloadAndUpdateRequest;
 
