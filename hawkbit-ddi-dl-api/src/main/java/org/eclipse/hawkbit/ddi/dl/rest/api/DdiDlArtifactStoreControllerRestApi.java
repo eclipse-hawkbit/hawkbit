@@ -6,11 +6,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ddi.rest.api;
+package org.eclipse.hawkbit.ddi.dl.rest.api;
 
 import java.io.InputStream;
 
-import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -22,19 +21,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * REST resource handling for artifact download operations.
  */
-@RequestMapping(DdiRestConstants.ARTIFACTS_V1_REQUEST_MAPPING)
-public interface DdiArtifactStoreControllerRestApi {
+@RequestMapping(DdiDlRestConstants.ARTIFACTS_V1_REQUEST_MAPPING)
+public interface DdiDlArtifactStoreControllerRestApi {
 
     /**
-     * Handles GET {@link DdiArtifact} download request. This could be full or
-     * partial download request.
+     * Handles GET download request. This could be full or partial download
+     * request.
      *
      * @param fileName
      *            to search for
-     * @param response
-     *            to write to
-     * @param request
-     *            from the client
      * @param targetid
      *            of authenticated target
      *
@@ -42,24 +37,21 @@ public interface DdiArtifactStoreControllerRestApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}")
+    @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}")
     @ResponseBody
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
-
             @AuthenticationPrincipal final String targetid);
 
     /**
-     * Handles GET {@link DdiArtifact} MD5 checksum file download request.
+     * Handles GET MD5 checksum file download request.
      *
      * @param fileName
      *            to search for
-     * @param response
-     *            to write to
      *
      * @return response of the servlet
      */
-    @RequestMapping(method = RequestMethod.GET, value = DdiRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}"
-            + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
+    @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}"
+            + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX)
     @ResponseBody
     public ResponseEntity<Void> downloadArtifactMD5ByFilename(@PathVariable("fileName") final String fileName);
 

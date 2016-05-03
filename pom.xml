@@ -32,13 +32,14 @@
       <module>hawkbit-mgmt-api</module>
       <module>hawkbit-mgmt-resource</module>
       <module>hawkbit-ddi-api</module>
+      <module>hawkbit-ddi-dl-api</module>
       <module>hawkbit-ddi-resource</module>
       <module>hawkbit-dmf-api</module>
       <module>hawkbit-dmf-amqp</module>
       <module>hawkbit-repository</module>
       <module>hawkbit-security-integration</module>
       <module>hawkbit-http-security</module>
-      <module>hawkbit-ui</module>
+      <module>hawkbit-mgmt-ui</module>
       <module>hawkbit-artifact-repository-mongo</module>
       <module>hawkbit-autoconfigure</module>
       <module>hawkbit-cache-redis</module>

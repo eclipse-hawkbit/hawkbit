@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
-import org.eclipse.hawkbit.ddi.rest.api.DdiArtifactStoreControllerRestApi;
+import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlArtifactStoreControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -49,7 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class DdiArtifactStoreController implements DdiArtifactStoreControllerRestApi {
+public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DdiArtifactStoreController.class);
 

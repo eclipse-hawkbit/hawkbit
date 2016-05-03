@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.UrlProtocol;
+import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlRestConstants;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
@@ -93,9 +94,9 @@ public final class DataConversionHelper {
             final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
                     artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
             file.add(new Link(linkHttps).withRel("download"));
-            file.add(new Link(linkHttps + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
+            file.add(new Link(linkHttps + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
             file.add(new Link(linkHttp).withRel("download-http"));
-            file.add(new Link(linkHttp + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
+            file.add(new Link(linkHttp + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
 
             files.add(file);
         });
@@ -147,7 +148,7 @@ public final class DataConversionHelper {
         final StringBuilder header = new StringBuilder();
         header.append("attachment;filename=");
         header.append(fileName);
-        header.append(DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX);
+        header.append(DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX);
 
         response.setContentLength(content.length);
         response.setHeader("Content-Disposition", header.toString());
