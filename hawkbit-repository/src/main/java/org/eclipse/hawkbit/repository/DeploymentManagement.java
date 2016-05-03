@@ -389,8 +389,8 @@ public class DeploymentManagement {
                         softwareModules));
     }
 
-    private Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final Target target,
-            final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
+    private static Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
+            final Target target, final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
         final Action actionForTarget = new Action();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
         actionForTarget.setActionType(targetWithActionType.getActionType());
@@ -421,13 +421,14 @@ public class DeploymentManagement {
         afterCommit.afterCommit(() -> {
             eventBus.post(new TargetInfoUpdateEvent(target.getTargetInfo()));
             eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
-                    target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress()));
+                    target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress(),
+                    target.getSecurityToken()));
         });
     }
 
     /**
      * Removes {@link UpdateAction}s that are no longer necessary and sends
-     * cancelations to the controller.
+     * cancellations to the controller.
      *
      * @param myTarget
      *            to override {@link UpdateAction}s

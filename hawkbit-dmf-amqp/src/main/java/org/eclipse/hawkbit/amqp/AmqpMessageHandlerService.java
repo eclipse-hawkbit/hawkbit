@@ -305,7 +305,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
-                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
+                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress(),
+                target.getSecurityToken()));
 
     }
 

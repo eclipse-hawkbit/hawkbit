@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 /**
  * Event that gets sent when a distribution set gets assigned to a target.
  *
- *
- *
  */
 public class TargetAssignDistributionSetEvent extends AbstractEvent {
 
@@ -25,6 +23,7 @@ public class TargetAssignDistributionSetEvent extends AbstractEvent {
     private final String controllerId;
     private final Long actionId;
     private final URI targetAdress;
+    private final String targetToken;
 
     /**
      * Creates a new {@link TargetAssignDistributionSetEvent}.
@@ -41,14 +40,18 @@ public class TargetAssignDistributionSetEvent extends AbstractEvent {
      *            the software modules which have been assigned to the target
      * @param targetAdress
      *            the targetAdress of the target
+     * @param targetToken
+     *            the authentication token of the target
      */
     public TargetAssignDistributionSetEvent(final long revision, final String tenant, final String controllerId,
-            final Long actionId, final Collection<SoftwareModule> softwareModules, final URI targetAdress) {
+            final Long actionId, final Collection<SoftwareModule> softwareModules, final URI targetAdress,
+            final String targetToken) {
         super(revision, tenant);
         this.controllerId = controllerId;
         this.actionId = actionId;
         this.softwareModules = softwareModules;
         this.targetAdress = targetAdress;
+        this.targetToken = targetToken;
     }
 
     /**
@@ -77,4 +80,7 @@ public class TargetAssignDistributionSetEvent extends AbstractEvent {
         return targetAdress;
     }
 
+    public String getTargetToken() {
+        return targetToken;
+    }
 }

@@ -339,14 +339,14 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests TODO")
-    public void lookupNextUpdateActionAfterFinished() throws IllegalArgumentException, IllegalAccessException {
+    public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any(), Matchers.any())).thenReturn(action);
         // for the test the same action can be used
-        final List<Action> actionList = new ArrayList<Action>();
+        final List<Action> actionList = new ArrayList<>();
         actionList.add(action);
         when(controllerManagementMock.findActionByTargetAndActive(Matchers.any())).thenReturn(actionList);
 
@@ -372,6 +372,8 @@ public class AmqpMessageHandlerServiceTest {
 
         assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
                 .isEqualTo("target1");
+        assertThat(targetAssignDistributionSetEvent.getTargetToken()).as("targetoken not filled correctly")
+                .isEqualTo(action.getTarget().getSecurityToken());
         assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
         assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
                 .isEqualTo(softwareModuleList);
@@ -411,8 +413,7 @@ public class AmqpMessageHandlerServiceTest {
         return softwareModuleList;
     }
 
-    private Action createActionWithTarget(final Long targetId, final Status status)
-            throws IllegalArgumentException, IllegalAccessException {
+    private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
         // is needed for the creation of targets
         initalizeSecurityTokenGenerator();
 

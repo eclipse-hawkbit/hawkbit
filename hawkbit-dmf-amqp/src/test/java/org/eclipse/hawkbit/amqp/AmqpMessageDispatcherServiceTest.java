@@ -58,6 +58,12 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("AmqpMessage Dispatcher Service Test")
 public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
 
+    private static final String TENANT = "default";
+
+    private static final URI AMQP_URI = IpUtil.createAmqpUri("vHost", "mytest");
+
+    private static final String TEST_TOKEN = "testToken";
+
     private AmqpMessageDispatcherService amqpMessageDispatcherService;
 
     private RabbitTemplate rabbitTemplate;
@@ -89,8 +95,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Description("Verfies that download and install event with no software modul works")
     public void testSendDownloadRequesWithEmptySoftwareModules() {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, "default", CONTROLLER_ID, 1l, new ArrayList<SoftwareModule>(),
-                IpUtil.createAmqpUri("vHost", "mytest"));
+                1L, TENANT, CONTROLLER_ID, 1L, new ArrayList<SoftwareModule>(), AMQP_URI, TEST_TOKEN);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
@@ -104,7 +109,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, "default", CONTROLLER_ID, 1l, dsA.getModules(), IpUtil.createAmqpUri("vHost", "mytest"));
+                1L, TENANT, CONTROLLER_ID, 1L, dsA.getModules(), AMQP_URI, TEST_TOKEN);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
@@ -143,7 +148,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                1L, "default", CONTROLLER_ID, 1l, dsA.getModules(), IpUtil.createAmqpUri("vHost", "mytest"));
+                1L, TENANT, CONTROLLER_ID, 1L, dsA.getModules(), AMQP_URI, TEST_TOKEN);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
@@ -162,7 +167,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Description("Verfies that send cancel event works")
     public void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                1L, "default", CONTROLLER_ID, 1l, IpUtil.createAmqpUri("vHost", "mytest"));
+                1L, TENANT, CONTROLLER_ID, 1L, AMQP_URI);
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(cancelTargetAssignmentDistributionSetEvent.getTargetAdress());
@@ -187,13 +192,12 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
                 downloadAndUpdateRequest.getActionId(), Long.valueOf(1));
         assertEquals("The topic of the event shuold contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
+        assertEquals("Security token of target", downloadAndUpdateRequest.getTargetToken(), TEST_TOKEN);
+
         return downloadAndUpdateRequest;
 
     }
 
-    /**
-     * @param sendMessage
-     */
     private void assertEventMessage(final Message sendMessage) {
         assertNotNull("The message should not be null", sendMessage);
 

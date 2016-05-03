@@ -82,6 +82,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .getSoftwareModules();
         final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
         downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
+        downloadAndUpdateRequest.setTargetToken(targetAssignDistributionSetEvent.getTargetToken());
 
         for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {
             final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(controllerId, softwareModule);
