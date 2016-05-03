@@ -183,6 +183,7 @@ public class DeviceSimulatorUpdater {
                 final Artifact artifact) {
             artifact.getUrls().entrySet().forEach(entry -> {
                 switch (entry.getKey()) {
+                case HTTP:
                 case HTTPS:
                     status.add(downloadUrl(entry.getValue(), targetToken, artifact.getHashes().getSha1()));
                     break;
