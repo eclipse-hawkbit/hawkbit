@@ -117,7 +117,7 @@ public final class DashboardMenu extends CustomComponent {
         menus.setComponentAlignment(links, Alignment.BOTTOM_CENTER);
         menus.setExpandRatio(links, 1.0f);
         menuContent.addComponent(menus);
-        menuContent.setExpandRatio(menus, 1.0f);
+        menuContent.setExpandRatio(menus, 1.0F);
 
         dashboardMenuLayout.addComponent(menuContent);
         return dashboardMenuLayout;
@@ -264,7 +264,7 @@ public final class DashboardMenu extends CustomComponent {
     private VerticalLayout buildMenuItems() {
         final VerticalLayout menuItemsLayout = new VerticalLayout();
         menuItemsLayout.addStyleName("valo-menuitems");
-        menuItemsLayout.setHeight(100.0f, Unit.PERCENTAGE);
+        menuItemsLayout.setHeight(100.0F, Unit.PERCENTAGE);
 
         final List<DashboardMenuItem> accessibleViews = getAccessibleViews();
         if (accessibleViews.isEmpty()) {
