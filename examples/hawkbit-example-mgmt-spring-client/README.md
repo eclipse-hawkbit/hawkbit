@@ -1,6 +1,6 @@
-# hawkBit Management API example client
+# Eclipse.IoT hawkBit - Management API Example Client
 
-Example client that shows how to efficiently use the hawkBit management API.
+Example Spring Boot client that shows how to efficiently use the hawkBit Example Management Client and the hawkBit Management API.
 
 Powered by [Feign](https://github.com/Netflix/feign).
 

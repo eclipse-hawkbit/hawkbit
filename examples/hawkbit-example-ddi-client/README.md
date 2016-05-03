@@ -1,6 +1,6 @@
 # Eclipse.IoT hawkBit - Example DDI Client 
 
-The hawkBit Example DDI Client is an implementation of a simulated device/controller that communicates with the hawkBit server via the DDI API.  
+The hawkBit Example DDI Client is an implementation of a simulated device/target that communicates with the hawkBit server via the DDI API.  
 
 # Compile, Run and Getting Started
 
@@ -25,6 +25,5 @@ executorService.execute(ddiExampleClient);
 
 #### Getting started with hawkBit Example DDI Client
 
-After the hawkBit Example DDI Client has started it will poll once against the given hawkBit server and form then on depending on your polling configuration.
-After the hawkBit Example DDI Client has polled successful your will see a target in the deployment view regarding the given controller id of your hawkBit Example DDI Client. 
+After the hawkBit Example DDI Client has started it will poll once against the given hawkBit server and form then depending on your polling configuration. After the hawkBit Example DDI Client has polled successful you will see a target in the deployment view regarding the given controller id of your hawkBit Example DDI Client. You can know assign a distributionSet to the target and let the hawkBit Example DDI Client simulated an update. 
 
