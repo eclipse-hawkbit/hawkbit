@@ -58,26 +58,27 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 
 # Modules
 
-`examples` : HawkBit examples 
-`hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
-`hawkbit-autoconfigure` : Spring-boot auto-configuration. 
-`hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
-`hawkbit-core` : Core elements.  
-`hawkbit-ddi-api` : The hawkBit DDI API.
-`hawkbit-ddi-resource` : Implementation of the hawkBit DDI API
-`hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API. 
-`hawkbit-dmf-api` : API for the Device Management Integration.  
-`hawkbit-http-security` : Implementation for security filters for HTTP.  
-`hawkbit-mgmt-api` : The hawkBit Management API
-`hawkbit-mgmt-resource` : Implementation of the hawkBit Management API
-`hawkbit-repository` : Repository implementation based on SQL for all meta-data.   
-`hawkbit-rest-core` : Core elements for the rest modules.
-`hawkbit-security-core` : Core security elements.  
-`hawkbit-security-integration` : Security integration elements to integrate security into hawkbit.  
-`hawkbit-system-api` : The hawkBit System API
-`hawkbit-system-resource` : Implementation of the hawkBit System API
-`hawkbit-test-report` : Test reports
-`hawkbit-ui` : Vaadin UI.  
+* `examples` : hawkBit examples 
+* `hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
+* `hawkbit-autoconfigure` : Spring-boot auto-configuration. 
+* `hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
+* `hawkbit-core` : Core elements.  
+* `hawkbit-ddi-api` : The hawkBit DDI API.
+* `hawkbit-ddi-resource` : Implementation of the hawkBit DDI API
+* `hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API. 
+* `hawkbit-dmf-api` : API for the Device Management Integration.  
+* `hawkbit-http-security` : Implementation for security filters for HTTP.  
+* `hawkbit-mgmt-api` : The hawkBit Management API
+* `hawkbit-mgmt-resource` : Implementation of the hawkBit Management API
+* `hawkbit-mgmt-ui` : Vaadin UI.  
+* `hawkbit-repository` : Repository implementation based on SQL for all meta-data.   
+* `hawkbit-rest-core` : Core elements for the rest modules.
+* `hawkbit-security-core` : Core security elements.  
+* `hawkbit-security-integration` : Security integration elements to integrate security into hawkBit.  
+* `hawkbit-system-api` : The hawkBit System API
+* `hawkbit-system-resource` : Implementation of the hawkBit System API
+* `hawkbit-test-report` : Test reports
+
  
 
 
