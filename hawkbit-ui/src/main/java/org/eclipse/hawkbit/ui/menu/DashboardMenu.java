@@ -115,7 +115,7 @@ public final class DashboardMenu extends CustomComponent {
         final VerticalLayout links = buildLinksAndVersion();
         menus.addComponent(links);
         menus.setComponentAlignment(links, Alignment.BOTTOM_CENTER);
-        menus.setExpandRatio(links, 1.0f);
+        menus.setExpandRatio(links, 1.0F);
         menuContent.addComponent(menus);
         menuContent.setExpandRatio(menus, 1.0F);
 
