@@ -341,6 +341,8 @@ public class SystemManagement {
      */
     private class CurrentTenantKeyGenerator implements KeyGenerator {
         @Override
+        // Exception squid:S923 - override
+        @SuppressWarnings({ "squid:S923" })
         public Object generate(final Object target, final Method method, final Object... params) {
             final String initialTenantCreation = createInitialTenant.get();
             if (initialTenantCreation == null) {

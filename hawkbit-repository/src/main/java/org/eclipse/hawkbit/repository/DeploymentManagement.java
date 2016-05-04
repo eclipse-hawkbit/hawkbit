@@ -198,6 +198,9 @@ public class DeploymentManagement {
     @Transactional
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
+    // Exception squid:S2095: see
+    // https://jira.sonarsource.com/browse/SONARJAVA-1478
+    @SuppressWarnings({ "squid:S2095" })
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID, final ActionType actionType,
             final long forcedTimestamp, @NotEmpty final String... targetIDs) {
         return assignDistributionSet(dsID, Arrays.stream(targetIDs)
