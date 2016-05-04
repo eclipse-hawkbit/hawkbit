@@ -97,6 +97,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private Button breadcrumbButton;
 
+    private Label breadcrumbName;
+
     private Label headerCaption;
 
     private TextField queryTextField;
@@ -173,6 +175,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             oldFilterName = filterManagementUIState.getTfQuery().get().getName();
             oldFilterQuery = filterManagementUIState.getTfQuery().get().getQuery();
         }
+        breadcrumbName.setValue(nameLabel.getValue());
         showValidationSuccesIcon();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
         headerCaption.setVisible(false);
@@ -181,6 +184,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void resetComponents() {
         headerCaption.setVisible(true);
+        breadcrumbName.setValue(headerCaption.getValue());
         nameLabel.setValue("");
         queryTextField.setValue("");
         setInitialStatusIconStyle(validationIcon);
@@ -298,8 +302,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         breadcrumbLayout = new HorizontalLayout();
         breadcrumbLayout.addComponent(breadcrumbButton);
         breadcrumbLayout.addComponent(new Label(">"));
-        headerCaption.addStyleName("breadcrumbPaddingLeft");
-        breadcrumbLayout.addComponent(headerCaption);
+        breadcrumbName = SPUIComponentProvider.getLabel(null, SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        breadcrumbLayout.addComponent(breadcrumbName);
+        breadcrumbName.addStyleName("breadcrumbPaddingLeft");
 
         final HorizontalLayout titleFilterLayout = new HorizontalLayout();
         titleFilterLayout.setSizeFull();
