@@ -164,6 +164,7 @@ public class SystemManagement {
      * @return the {@link CurrentTenantKeyGenerator}
      */
     @Bean
+    @Transactional(propagation = Propagation.SUPPORTS)
     public CurrentTenantKeyGenerator currentTenantKeyGenerator() {
         return new CurrentTenantKeyGenerator();
     }
@@ -206,7 +207,6 @@ public class SystemManagement {
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
-    // tenant independent
     public List<String> findTenants() {
         return tenantMetaDataRepository.findAll().stream().map(md -> md.getTenant()).collect(Collectors.toList());
     }
@@ -221,7 +221,6 @@ public class SystemManagement {
     @Transactional
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    // tenant independent
     public void deleteTenant(@NotNull final String tenant) {
         cacheManager.evictCaches(tenant);
         cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));

@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
@@ -188,13 +189,8 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     private void addInDeleteDistributionList(final Table sourceTable, final TableTransferable transferable) {
         @SuppressWarnings("unchecked")
-        final Set<DistributionSetIdName> distSelected = (Set<DistributionSetIdName>) sourceTable.getValue();
-        final Set<DistributionSetIdName> distributionIdNameSet = new HashSet<>();
-        if (!distSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            distributionIdNameSet.add((DistributionSetIdName) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            distributionIdNameSet.addAll(distSelected);
-        }
+        final AbstractTable<?, DistributionSetIdName> table = (AbstractTable<?, DistributionSetIdName>) sourceTable;
+        final Set<DistributionSetIdName> distributionIdNameSet = table.getDeletedEntityByTransferable(transferable);
         /*
          * Flags to identify whether all dropped distributions are already in
          * the deleted list (or) some distributions are already in the deleted
@@ -224,15 +220,10 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private void addToSWDeleteList(final Table sourceTable, final TableTransferable transferable) {
-
         @SuppressWarnings("unchecked")
-        final Set<Long> swModuleSelected = (Set<Long>) sourceTable.getValue();
-        final Set<Long> swModuleIdNameSet = new HashSet<>();
-        if (!swModuleSelected.contains(transferable.getData(SPUIDefinitions.ITEMID))) {
-            swModuleIdNameSet.add((Long) transferable.getData(SPUIDefinitions.ITEMID));
-        } else {
-            swModuleIdNameSet.addAll(swModuleSelected);
-        }
+        final AbstractTable<?, Long> swTable = (AbstractTable<?, Long>) sourceTable;
+        final Set<Long> swModuleIdNameSet = swTable.getDeletedEntityByTransferable(transferable);
+
         swModuleIdNameSet.forEach(id -> {
             final String swModuleName = (String) sourceTable.getContainerDataSource().getItem(id)
                     .getItemProperty(SPUILabelDefinitions.NAME_VERSION).getValue();

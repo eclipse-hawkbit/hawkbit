@@ -145,11 +145,12 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         setSizeUndefined();
         addComponents(madatoryLabel, distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea,
                 reqMigStepCheckbox);
-
+        
         addComponent(buttonsLayout);
         setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
-
-    }
+        distNameTextField.focus();
+        
+     }
 
     /**
      * Create required UI components.
