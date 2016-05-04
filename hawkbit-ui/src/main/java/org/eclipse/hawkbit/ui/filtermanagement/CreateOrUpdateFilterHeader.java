@@ -68,6 +68,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private static final long serialVersionUID = 7474232427119031474L;
 
+    private static final String breadcrumbCustomFilters = "breadcrumb.target.filter.custom.filters";
+
     @Autowired
     private I18N i18n;
 
@@ -237,8 +239,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final Button createFilterViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         createFilterViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
-        createFilterViewLink.setDescription(i18n.get("breadcrumb.target.filter.custom.filters"));
-        createFilterViewLink.setCaption(i18n.get("breadcrumb.target.filter.custom.filters"));
+        createFilterViewLink.setDescription(i18n.get(breadcrumbCustomFilters));
+        createFilterViewLink.setCaption(i18n.get(breadcrumbCustomFilters));
         createFilterViewLink.addClickListener(value -> showCustomFiltersView());
 
         return createFilterViewLink;

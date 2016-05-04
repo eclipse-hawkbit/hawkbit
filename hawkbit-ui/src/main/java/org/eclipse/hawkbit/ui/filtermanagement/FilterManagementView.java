@@ -122,11 +122,11 @@ public class FilterManagementView extends VerticalLayout implements View {
         tableHeaderLayout.setComponentAlignment(createNewFilterHeader, Alignment.TOP_CENTER);
         tableHeaderLayout.addComponent(createNewFilterTable);
         tableHeaderLayout.setComponentAlignment(createNewFilterTable, Alignment.TOP_CENTER);
-        tableHeaderLayout.setExpandRatio(createNewFilterTable, 1.0f);
+        tableHeaderLayout.setExpandRatio(createNewFilterTable, 1.0F);
 
         addComponent(tableHeaderLayout);
         setComponentAlignment(tableHeaderLayout, Alignment.TOP_CENTER);
-        setExpandRatio(tableHeaderLayout, 1.0f);
+        setExpandRatio(tableHeaderLayout, 1.0F);
 
         final HorizontalLayout targetsCountmessageLabelLayout = addTargetFilterMessageLabel();
         addComponent(targetsCountmessageLabelLayout);
@@ -145,7 +145,7 @@ public class FilterManagementView extends VerticalLayout implements View {
         tableListViewLayout.setComponentAlignment(targetFilterHeader, Alignment.TOP_CENTER);
         tableListViewLayout.addComponent(targetFilterTable);
         tableListViewLayout.setComponentAlignment(targetFilterTable, Alignment.TOP_CENTER);
-        tableListViewLayout.setExpandRatio(targetFilterTable, 1.0f);
+        tableListViewLayout.setExpandRatio(targetFilterTable, 1.0F);
         addComponent(tableListViewLayout);
     }
 
