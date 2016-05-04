@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -54,8 +55,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *         directly, e.g. JPA entities.
      */
     @Bean
-    public TenantConfigurationManagement tenantConfigurationManagement() {
-        return TenantConfigurationManagement.getInstance();
+    public TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
+        return TenantConfigurationManagementHolder.getInstance();
     }
 
     /**
