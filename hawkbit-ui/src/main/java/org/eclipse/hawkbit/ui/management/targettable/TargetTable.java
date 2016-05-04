@@ -24,9 +24,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -113,7 +111,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
     private static final int PROPERTY_DEPT = 3;
     private static final String ACTION_NOT_ALLOWED_MSG = "message.action.not.allowed";
 
-   
     @Autowired
     private transient TargetManagement targetManagement;
 
@@ -335,13 +332,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
-        }else{
-            columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
-                    i18n.get("header.assigned.ds"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
-                    i18n.get("header.installed.ds"), 0.1F));
-            setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
-        }
+        }        
         return columnList;
 
     }
