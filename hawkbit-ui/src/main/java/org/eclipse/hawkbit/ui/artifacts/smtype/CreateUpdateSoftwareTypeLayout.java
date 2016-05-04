@@ -553,7 +553,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
                     .findSoftwareModuleTypeByName(typeName.getValue());
             if (createOptiongroup.getValue().equals(createTypeStr)) {
                 if (!checkIsKeyDuplicate(typeKey.getValue()) && !checkIsDuplicate(existingType)) {
-                    crateNewSWModuleType();
+                    createNewSWModuleType();
                 }
             } else {
 
@@ -610,7 +610,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     /**
      * Create new tag.
      */
-    private void crateNewSWModuleType() {
+    private void createNewSWModuleType() {
         int assignNumber = 0;
         final String colorPicked = getColorPickedString();
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeName.getValue());
