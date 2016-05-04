@@ -134,11 +134,6 @@
          <optional>true</optional>
       </dependency>
       <dependency>
-         <groupId>org.scala-lang</groupId>
-         <artifactId>scala-library</artifactId>
-         <version>2.10.4</version>
-      </dependency>
-      <dependency>
          <groupId>org.apache.httpcomponents</groupId>
          <artifactId>httpclient</artifactId>
       </dependency>
