@@ -340,6 +340,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
                     i18n.get("header.assigned.ds"), 0.1F));
             columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
                     i18n.get("header.installed.ds"), 0.1F));
+            setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
         }
         return columnList;
 
