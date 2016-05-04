@@ -100,7 +100,7 @@ public class DeviceSimulatorUpdater {
 
         device.setProgress(0.0);
 
-        if (modules == null) {
+        if (modules == null || modules.isEmpty()) {
             device.setSwversion(swVersion);
         } else {
             device.setSwversion(modules.stream().map(sm -> sm.getModuleVersion()).collect(Collectors.joining(", ")));
