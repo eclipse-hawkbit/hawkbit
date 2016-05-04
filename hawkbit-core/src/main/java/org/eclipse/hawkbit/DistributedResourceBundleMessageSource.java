@@ -24,7 +24,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * same name. All properties files will be merged.
  */
 public class DistributedResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {
-    // Follows our upper case convention
+    // Exception squid:S2387 - Follows our upper case convention
     @SuppressWarnings({ "squid:S2387" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedResourceBundleMessageSource.class);
     private static final String PROPERTIES_SUFFIX = ".properties";
