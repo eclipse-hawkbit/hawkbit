@@ -21,8 +21,9 @@ import com.google.common.collect.Lists;
  * Builder pattern for building {@link DistributionSetTypeRequestBodyPost}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class DistributionSetTypeBuilder {
-
     private String key;
     private String name;
     private final List<SoftwareModuleTypeAssigmentRest> mandatorymodules = Lists.newArrayList();

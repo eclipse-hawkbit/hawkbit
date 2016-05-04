@@ -19,6 +19,8 @@ import com.google.common.collect.Lists;
  * Builder pattern for building {@link TagRequestBodyPut}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class TagBuilder {
 
     private String name;
