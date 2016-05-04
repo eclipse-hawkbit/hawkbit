@@ -29,6 +29,8 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
     private static final ThreadLocal<List<Runnable>> THREAD_LOCAL_RUNNABLES = new ThreadLocal<>();
 
     @Override
+    // Exception squid:S1217 - Is aspectJ proxy
+    @SuppressWarnings({ "squid:S1217" })
     public void afterCommit() {
         final List<Runnable> afterCommitRunnables = THREAD_LOCAL_RUNNABLES.get();
         LOGGER.debug("Transaction successfully committed, executing {} runnables", afterCommitRunnables.size());
@@ -60,6 +62,7 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
     }
 
     @Override
+    @SuppressWarnings({ "squid:S1217" })
     public void afterCompletion(final int status) {
         final String transactionStatus = status == STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK";
         LOGGER.debug("Transaction completed after commit with status {}", transactionStatus);

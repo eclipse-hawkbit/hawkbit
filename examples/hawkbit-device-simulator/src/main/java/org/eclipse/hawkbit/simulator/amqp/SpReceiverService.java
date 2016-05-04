@@ -88,6 +88,8 @@ public class SpReceiverService extends ReceiverService {
         if (eventHeader == null) {
             logAndThrowMessageError(message, "Event Topic is not set");
         }
+        // Exception squid:S2259 - Checked before
+        @SuppressWarnings({ "squid:S2259" })
         final EventTopic eventTopic = EventTopic.valueOf(eventHeader.toString());
         switch (eventTopic) {
         case DOWNLOAD_AND_INSTALL:

@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Import;
 @EnableHawkbitManagedSecurityConfiguration
 @EnableRestResources
 @EnableDirectDeviceApi
+// Exception squid:S1118 - Spring boot standard behavior
+@SuppressWarnings({ "squid:S1118" })
 public class Start {
 
     /**
@@ -34,6 +36,8 @@ public class Start {
      * @param args
      *            the VM arguments.
      */
+    // Exception squid:S2095 - Spring boot standard behavior
+    @SuppressWarnings({ "squid:S2095" })
     public static void main(final String[] args) {
         SpringApplication.run(Start.class, args);
     }
