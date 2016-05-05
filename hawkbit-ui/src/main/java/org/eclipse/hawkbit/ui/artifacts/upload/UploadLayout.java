@@ -103,7 +103,7 @@ public class UploadLayout extends VerticalLayout {
 
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
-    private Button processBtn;
+    private Button processBtn ;
 
     private Button discardBtn;
 
@@ -119,6 +119,8 @@ public class UploadLayout extends VerticalLayout {
 
     private Boolean hasDirectory = Boolean.FALSE;
 
+    private Button uploadStatusButton;
+
     /**
      * Initialize the upload layout.
      */
@@ -127,12 +129,13 @@ public class UploadLayout extends VerticalLayout {
         createComponents();
         buildLayout();
         updateActionCount();
+        restoreState();
         eventBus.subscribe(this);
         ui = UI.getCurrent();
     }
 
     private void createComponents() {
-
+        createUploadStatusButton();
         createProcessButton();
         createDiscardBtn();
     }
@@ -154,12 +157,15 @@ public class UploadLayout extends VerticalLayout {
 
         fileUploadLayout = new HorizontalLayout();
         fileUploadLayout.setSpacing(true);
+        fileUploadLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         fileUploadLayout.addComponent(upload);
         fileUploadLayout.setComponentAlignment(upload, Alignment.MIDDLE_LEFT);
         fileUploadLayout.addComponent(processBtn);
         fileUploadLayout.setComponentAlignment(processBtn, Alignment.MIDDLE_RIGHT);
         fileUploadLayout.addComponent(discardBtn);
         fileUploadLayout.setComponentAlignment(discardBtn, Alignment.MIDDLE_RIGHT);
+        fileUploadLayout.addComponent(uploadStatusButton);
+        fileUploadLayout.setComponentAlignment(uploadStatusButton, Alignment.MIDDLE_RIGHT);
         setMargin(false);
 
         /* create drag-drop wrapper for drop area */
@@ -167,7 +173,13 @@ public class UploadLayout extends VerticalLayout {
         dropAreaWrapper.setDropHandler(new DropAreahandler());
         setSizeFull();
         setSpacing(true);
+    }
 
+    private void restoreState() {
+        if (artifactUploadState.isStatusPopupMinimized()) {
+            showUploadStatusButton();
+            setUploadStatusButtonIconToFinished();
+        }
     }
 
     public DragAndDropWrapper getDropAreaWrapper() {
@@ -324,8 +336,8 @@ public class UploadLayout extends VerticalLayout {
 
             final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
 
-            final String currentBaseSoftwareModuleKey = HawkbitCommonUtil
-                    .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
+            final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
+                    selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
             final CustomFile customFile = new CustomFile(name, size, tempFile.getAbsolutePath(),
                     selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion(), mimeType);
@@ -403,8 +415,8 @@ public class UploadLayout extends VerticalLayout {
     public Boolean checkIfFileIsDuplicate(final String name) {
         Boolean isDuplicate = false;
         final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil
-                .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
+        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
+                selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
         for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
             final String fileSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
@@ -469,8 +481,8 @@ public class UploadLayout extends VerticalLayout {
 
     void updateFileSize(final String name, final long size) {
         final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil
-                .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
+        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
+                selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
         for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
             final String fileSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
@@ -507,9 +519,10 @@ public class UploadLayout extends VerticalLayout {
         if (event.getButton().equals(discardBtn)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
-
             } else {
                 clearFileList();
+                uploadInfoWindow.clearWindow();
+                hideUploadStatusButton();
             }
         }
     }
@@ -536,12 +549,12 @@ public class UploadLayout extends VerticalLayout {
 
     private void setConfirmationPopupHeightWidth(final float newWidth, final float newHeight) {
         if (currentUploadConfirmationwindow != null) {
-            currentUploadConfirmationwindow.getUploadArtifactDetails().setWidth(HawkbitCommonUtil
-                    .getArtifactUploadPopupWidth(newWidth, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH),
-                    Unit.PIXELS);
-            currentUploadConfirmationwindow.getUploadDetailsTable().setHeight(HawkbitCommonUtil
-                    .getArtifactUploadPopupHeight(newHeight, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT),
-                    Unit.PIXELS);
+            currentUploadConfirmationwindow.getUploadArtifactDetails().setWidth(
+                    HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
+            currentUploadConfirmationwindow.getUploadDetailsTable().setHeight(
+                    HawkbitCommonUtil.getArtifactUploadPopupHeight(newHeight,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
         }
     }
 
@@ -558,10 +571,12 @@ public class UploadLayout extends VerticalLayout {
                 && currentUploadConfirmationwindow.getCurrentUploadResultWindow() != null) {
             final UploadResultWindow uploadResultWindow = currentUploadConfirmationwindow
                     .getCurrentUploadResultWindow();
-            uploadResultWindow.getUploadResultsWindow().setWidth(HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
-                    SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
-            uploadResultWindow.getUploadResultTable().setHeight(HawkbitCommonUtil.getArtifactUploadPopupHeight(
-                    newHeight, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
+            uploadResultWindow.getUploadResultsWindow().setWidth(
+                    HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
+            uploadResultWindow.getUploadResultTable().setHeight(
+                    HawkbitCommonUtil.getArtifactUploadPopupHeight(newHeight,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
         }
     }
 
@@ -572,8 +587,8 @@ public class UploadLayout extends VerticalLayout {
             } else {
                 currentUploadConfirmationwindow = new UploadConfirmationwindow(this, artifactUploadState);
                 UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
-                setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
-                        Page.getCurrent().getBrowserWindowHeight());
+                setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(), Page.getCurrent()
+                        .getBrowserWindowHeight());
             }
         }
     }
@@ -608,7 +623,20 @@ public class UploadLayout extends VerticalLayout {
     void onEvent(final UploadArtifactUIEvent event) {
         if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
             ui.access(() -> updateActionCount());
+        } else if (event == UploadArtifactUIEvent.MINIMIZED_STATUS_POPUP) {
+            ui.access(() -> showUploadStatusButton());
+        } else if (event == UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP) {
+            ui.access(() -> maximizeStatusPopup());
+        } else if (event == UploadArtifactUIEvent.UPLOAD_FINISHED) {
+            ui.access(() -> setUploadStatusButtonIconToFinished());
+        } else if (event == UploadArtifactUIEvent.UPLOAD_STARTED) {
+            ui.access(() -> setUploadStatusButtonIconToInProgress());
+        }else if (event == UploadArtifactUIEvent.UPLOAD_STREAMINING_FINISHED) {
+            //TODO re-check
+            updateActionCount();
+            enableProcessBtn();
         }
+
     }
 
     @PreDestroy
@@ -637,8 +665,8 @@ public class UploadLayout extends VerticalLayout {
      * @param selectedBaseSoftwareModule
      */
     public void refreshArtifactDetailsLayout(final SoftwareModule selectedBaseSoftwareModule) {
-        eventBus.publish(this,
-                new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, selectedBaseSoftwareModule));
+        eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED,
+                selectedBaseSoftwareModule));
     }
 
     /**
@@ -654,5 +682,56 @@ public class UploadLayout extends VerticalLayout {
 
     public void setHasDirectory(final Boolean hasDirectory) {
         this.hasDirectory = hasDirectory;
+    }
+
+    private void createUploadStatusButton() {
+        uploadStatusButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
+                false, null, SPUIButtonStyleSmall.class);
+        uploadStatusButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadStatusButton.setWidth("100px");
+        uploadStatusButton.setHtmlContentAllowed(true);
+        uploadStatusButton.addClickListener(event -> onClickOfUploadStatusButton());
+        uploadStatusButton.setVisible(false);
+    }
+
+    private void onClickOfUploadStatusButton() {
+        artifactUploadState.setStatusPopupMinimized(false);
+        eventBus.publish(this, UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP);
+    }
+
+    private void showUploadStatusButton() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.setVisible(true);
+    }
+
+    private void hideUploadStatusButton() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.setVisible(false);
+    }
+
+    private void maximizeStatusPopup() {
+        hideUploadStatusButton();
+        uploadInfoWindow.maximizeStatusPopup();
+    }
+
+    private void setUploadStatusButtonIconToFinished() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.removeStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadStatusButton.setIcon(FontAwesome.UPLOAD);
+    }
+
+    private void setUploadStatusButtonIconToInProgress() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadStatusButton.setIcon(null);
     }
 }

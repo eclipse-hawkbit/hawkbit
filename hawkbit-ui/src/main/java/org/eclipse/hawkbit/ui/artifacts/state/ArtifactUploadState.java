@@ -9,14 +9,17 @@
 package org.eclipse.hawkbit.ui.artifacts.state;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.upload.UploadStatusObject;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -58,8 +61,42 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     private final Set<String> selectedDeleteSWModuleTypes = new HashSet<>();
 
     private boolean noDataAvilableSoftwareModule = Boolean.FALSE;
+    
+    private boolean isStatusPopupMinimized  = Boolean.FALSE;
+    
+    private boolean isUploadCompleted = Boolean.FALSE;
+    
+    private List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
+    
+    public List<UploadStatusObject> getUploadedFileStatusList() {
+        return uploadedFileStatusList;
+    }
+    
+    public void setUploadedFileStatusList(List<UploadStatusObject> uploadedFileStatusList) {
+        this.uploadedFileStatusList = uploadedFileStatusList;
+    }
+    
+    public boolean isUploadCompleted() {
+        return isUploadCompleted;
+    }
+    
+    public void setUploadCompleted(boolean isUploadCompleted) {
+        this.isUploadCompleted = isUploadCompleted;
+    }
 
-    /**
+    
+    public void setStatusPopupMinimized(boolean isStatusPopupMinimized) {
+		this.isStatusPopupMinimized = isStatusPopupMinimized;
+	}
+    
+    public boolean isStatusPopupMinimized() {
+		return isStatusPopupMinimized;
+	}
+
+
+
+
+	/**
      * Set software.
      *
      * @return

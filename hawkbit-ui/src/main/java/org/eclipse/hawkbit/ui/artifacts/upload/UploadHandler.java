@@ -13,11 +13,13 @@ import java.io.OutputStream;
 
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.server.StreamVariable;
 import com.vaadin.ui.Upload;
@@ -66,6 +68,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private volatile boolean interrupted = false;
     private String failureReason;
     private final I18N i18n;
+    private transient EventBus.SessionEventBus eventBus;
+
 
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view,
             final UploadStatusInfoWindow infoWindow, final long maxSize, final Upload upload, final String mimeType) {
@@ -78,7 +82,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.upload = upload;
         this.mimeType = mimeType;
         this.i18n = SpringContextHelper.getBean(I18N.class);
-
+        this.eventBus =  SpringContextHelper.getBean(EventBus.SessionEventBus.class);
     }
 
     /**
@@ -166,7 +170,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         if (view.enableProcessBtn()) {
             infoWindow.uploadSessionFinished();
         }
-        view.updateActionCount();
+        eventBus.publish(this, UploadArtifactUIEvent.UPLOAD_STREAMINING_FINISHED);
 
         // display the duplicate message after streaming all files
         view.displayDuplicateValidationMessage();
@@ -237,10 +241,12 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void updateProgress(final long readBytes, final long contentLength) {
         if (readBytes > maxSize || contentLength > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
+
             view.decreaseNumberOfFileUploadsExpected();
             final SoftwareModule sw = view.getSoftwareModuleSelected();
             view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
             view.updateActionCount();
+            
             failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
             infoWindow.uploadFailed(fileName, failureReason);
             upload.interruptUpload();
@@ -261,10 +267,12 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void onProgress(final StreamingProgressEvent event) {
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
+
             view.decreaseNumberOfFileUploadsExpected();
             final SoftwareModule sw = view.getSoftwareModuleSelected();
             view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
-            view.updateActionCount();
+            eventBus.publish(this, UploadArtifactUIEvent.UPLOAD_STREAMINING_FINISHED);
+        
             failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
             infoWindow.uploadFailed(event.getFileName(), failureReason);
             interrupted = true;
@@ -285,11 +293,19 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void streamingFailed(final StreamingErrorEvent event) {
         LOG.info("Streaming failed for file :{}", event.getFileName());
+
         view.decreaseNumberOfFileUploadsExpected();
         final SoftwareModule sw = view.getSoftwareModuleSelected();
         view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
-        view.updateActionCount();
-        infoWindow.uploadFailed(event.getFileName(), failureReason);
+        eventBus.publish(this, UploadArtifactUIEvent.UPLOAD_STREAMINING_FINISHED);
+    
+        if (failureReason != null) {
+            // Display custom error message
+            infoWindow.uploadFailed(event.getFileName(), failureReason);
+        } else {
+            // internal upload error
+            infoWindow.uploadFailed(event.getFileName(), event.getException().getMessage());
+        }
         // check if we are finished
         if (view.enableProcessBtn()) {
             infoWindow.uploadSessionFinished();
@@ -298,6 +314,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
 
         LOG.info("Streaming failed due to  :{}", event.getException());
     }
+
 
     /**
      * Upload failed for {@link Upload} variant.
