@@ -22,14 +22,17 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @Import({ RepositoryApplicationConfiguration.class })
 @EnableHawkbitManagedSecurityConfiguration
+// Exception squid:S1118 - Spring boot standard behavior
+@SuppressWarnings({ "squid:S1118" })
 public class Start {
-
     /**
      * Main method to start the spring-boot application.
      *
      * @param args
      *            the VM arguments.
      */
+    // Exception squid:S2095 - Spring boot standard behavior
+    @SuppressWarnings({ "squid:S2095" })
     public static void main(final String[] args) {
         SpringApplication.run(Start.class, args);
     }

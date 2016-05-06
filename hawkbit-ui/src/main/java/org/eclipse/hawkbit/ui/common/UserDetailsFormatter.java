@@ -170,6 +170,8 @@ public final class UserDetailsFormatter {
         return trimmedDetail;
     }
 
+    // Exception squid:S1166 - exception has to be hidden
+    @SuppressWarnings({ "squid:S1166" })
     private static UserDetails loadUserByUsername(final String username) {
         final UserDetailsService userDetailsService = SpringContextHelper.getBean(UserDetailsService.class);
         try {
