@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -52,7 +53,7 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class RolloutGroupManagement {
 
     @Autowired
@@ -189,7 +190,7 @@ public class RolloutGroupManagement {
             final ListJoin<Target, RolloutTargetGroup> rolloutTargetJoin = root.join(Target_.rolloutTargetGroup);
             return criteriaBuilder.and(specification.toPredicate(root, query, criteriaBuilder),
                     criteriaBuilder.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
-        } , page);
+        }, page);
     }
 
     /**
@@ -213,7 +214,7 @@ public class RolloutGroupManagement {
         return targetRepository.findByActionsRolloutGroup(rolloutGroup, page);
     }
 
-    private boolean isRolloutStatusReady(final RolloutGroup rolloutGroup) {
+    private static boolean isRolloutStatusReady(final RolloutGroup rolloutGroup) {
         return rolloutGroup != null && RolloutStatus.READY.equals(rolloutGroup.getRollout().getStatus());
     }
 
@@ -259,5 +260,4 @@ public class RolloutGroupManagement {
                 .collect(Collectors.toList());
         return new PageImpl<>(targetWithActionStatus, pageRequest, totalCount);
     }
-
 }

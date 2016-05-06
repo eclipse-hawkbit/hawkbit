@@ -14,13 +14,11 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
- *
- *
- *
  *
  * @param <T>
  *            type if the entity type
@@ -28,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
  *            of the entity type
  */
 @NoRepositoryBean
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface BaseEntityRepository<T extends TenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I> {
 
@@ -39,7 +37,7 @@ public interface BaseEntityRepository<T extends TenantAwareBaseEntity, I extends
      *            to delete data from
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     void deleteByTenantIgnoreCase(String tenant);
 
 }

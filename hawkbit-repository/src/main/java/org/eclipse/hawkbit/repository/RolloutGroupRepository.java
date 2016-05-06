@@ -18,12 +18,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The repository interface for the {@link RolloutGroup} model.
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface RolloutGroupRepository
         extends BaseEntityRepository<RolloutGroup, Long>, JpaSpecificationExecutor<RolloutGroup> {
 

@@ -67,6 +67,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -78,7 +79,7 @@ import com.google.common.eventbus.EventBus;
  *
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class DeploymentManagement {
@@ -133,7 +134,7 @@ public class DeploymentManagement {
      *        {@link SoftwareModuleType} are not assigned as define by the
      *        {@link DistributionSetType}. *
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
@@ -167,7 +168,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
@@ -195,7 +196,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     // Exception squid:S2095: see
@@ -222,7 +223,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
@@ -246,8 +247,8 @@ public class DeploymentManagement {
      *            a list of all targets and their action type
      * @param rollout
      *            the rollout for this assignment
-     * @param rolloutgroup
-     *            the rolloutgroup for this assignment
+     * @param rolloutGroup
+     *            the rollout group for this assignment
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -255,7 +256,7 @@ public class DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
@@ -279,8 +280,8 @@ public class DeploymentManagement {
      *            a list of all targets and their action type
      * @param rollout
      *            the rollout for this assignment
-     * @param rolloutgroup
-     *            the rolloutgroup for this assignment
+     * @param rolloutGroup
+     *            the rollout group for this assignment
      * @return the assignment result
      *
      * @throw IncompleteDistributionSetException if mandatory
@@ -392,8 +393,8 @@ public class DeploymentManagement {
                         softwareModules));
     }
 
-    private Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap, final Target target,
-            final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
+    private static Action createTargetAction(final Map<String, TargetWithActionType> targetsWithActionMap,
+            final Target target, final DistributionSet set, final Rollout rollout, final RolloutGroup rolloutGroup) {
         final Action actionForTarget = new Action();
         final TargetWithActionType targetWithActionType = targetsWithActionMap.get(target.getControllerId());
         actionForTarget.setActionType(targetWithActionType.getActionType());
@@ -515,7 +516,7 @@ public class DeploymentManagement {
      *             action
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Action cancelAction(@NotNull final Action action, @NotNull final Target target) {
         LOG.debug("cancelAction({}, {})", action, target);
@@ -572,7 +573,7 @@ public class DeploymentManagement {
      *             in case the given action is not active
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Action forceQuitAction(@NotNull final Action action) {
         final Action mergedAction = entityManager.merge(action);
@@ -617,7 +618,7 @@ public class DeploymentManagement {
      *            the rolloutgroup for this action
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public void createScheduledAction(final List<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final long forcedTime, final Rollout rollout,
@@ -651,7 +652,7 @@ public class DeploymentManagement {
      * @return the action which has been started
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     public Action startScheduledAction(@NotNull final Action action) {
@@ -914,7 +915,7 @@ public class DeploymentManagement {
      * @return the updated or the found {@link TargetAction}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public Action forceTargetAction(final Long actionId) {
         final Action action = actionRepository.findOne(actionId);
@@ -926,7 +927,7 @@ public class DeploymentManagement {
     }
 
     /**
-     * retrieves all the {@link ActionStatus} entries of the given
+     * Retrieves all the {@link ActionStatus} entries of the given
      * {@link Action} and {@link Target}.
      *
      * @param pageReq
@@ -984,11 +985,11 @@ public class DeploymentManagement {
      * @param rollout
      *            the rollout the actions belong to
      * @param rolloutGroupParent
-     *            the parent rolloutgroup the actions should reference
+     *            the parent rollout group the actions should reference
      * @param actionStatus
      *            the status the actions have
      * @return the actions referring a specific rollout and a specific parent
-     *         rolloutgroup in a specific status
+     *         rollout group in a specific status
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)

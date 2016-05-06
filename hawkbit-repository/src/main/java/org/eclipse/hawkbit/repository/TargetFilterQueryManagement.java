@@ -26,6 +26,7 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -35,10 +36,8 @@ import com.google.common.base.Strings;
 /**
  * Business service facade for managing {@link TargetFilterQuery}s.
  *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class TargetFilterQueryManagement {
@@ -53,7 +52,7 @@ public class TargetFilterQueryManagement {
      * @return the created {@link TargetFilterQuery}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public TargetFilterQuery createTargetFilterQuery(@NotNull final TargetFilterQuery customTargetFilter) {
@@ -71,7 +70,7 @@ public class TargetFilterQueryManagement {
      *            IDs of target filter query to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     public void deleteTargetFilterQuery(@NotNull final Long targetFilterQueryId) {
         targetFilterQueryRepository.delete(targetFilterQueryId);
@@ -161,7 +160,7 @@ public class TargetFilterQueryManagement {
      * @return the updated {@link TargetFilterQuery}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetFilterQuery updateTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {

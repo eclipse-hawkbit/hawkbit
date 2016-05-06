@@ -27,15 +27,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Target} repository.
  *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetRepository extends BaseEntityRepository<Target, Long>, JpaSpecificationExecutor<Target> {
 
     /**
@@ -64,7 +63,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *            to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("DELETE FROM Target t WHERE t.id IN ?1")
     void deleteByIdIn(final Collection<Long> targetIDs);
@@ -153,7 +152,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      */
     @Override
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     <S extends Target> List<S> save(Iterable<S> entities);
 
@@ -167,7 +166,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      */
     @Override
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     <S extends Target> S save(S entity);
 
@@ -276,7 +275,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *            to update
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("UPDATE Target t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
     void setAssignedDistributionSet(@Param("set") DistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);

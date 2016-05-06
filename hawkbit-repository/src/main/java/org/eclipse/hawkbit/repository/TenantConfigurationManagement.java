@@ -25,13 +25,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
  * Central tenant configuration management operations of the SP server.
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class TenantConfigurationManagement implements EnvironmentAware {
@@ -213,7 +214,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             if the property cannot be converted to the given
      */
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public <T> TenantConfigurationValue<T> addOrUpdateConfiguration(final TenantConfigurationKey configurationKey,
@@ -256,7 +257,7 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *            the configuration key to be deleted
      */
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKey.getKeyName()")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     public void deleteConfiguration(final TenantConfigurationKey configurationKey) {

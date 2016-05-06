@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.transaction.Transactional;
 
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -20,15 +19,16 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Usually a JPA spring data repository to handle {@link TargetInfo} entity.
  * However, do to an eclipselink bug with spring boot now a regular interface
  * that is implemented by {@link EclipseLinkTargetInfoRepository}.
  *
- *
- *
  */
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetInfoRepository {
 
     /**
@@ -41,7 +41,7 @@ public interface TargetInfoRepository {
      *            to set it for
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("update TargetInfo ti set ti.updateStatus = :status where ti.targetId in :targets and ti.updateStatus != :status")
     void setTargetUpdateStatus(@Param("status") TargetUpdateStatus status, @Param("targets") List<Long> targets);
 
@@ -63,7 +63,7 @@ public interface TargetInfoRepository {
      *            to delete
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     void deleteByTargetIdIn(final Collection<Long> targetIDs);
 }

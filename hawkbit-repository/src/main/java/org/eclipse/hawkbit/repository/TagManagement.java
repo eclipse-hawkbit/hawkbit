@@ -38,21 +38,17 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.eventbus.EventBus;
 
 /**
- *
- * Mangement service class for {@link Tag}s.
- *
- *
- *
- *
+ * Management service class for {@link Tag}s.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class TagManagement {
@@ -102,7 +98,7 @@ public class TagManagement {
      *             if given object already exists
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public TargetTag createTargetTag(@NotNull final TargetTag targetTag) {
@@ -133,7 +129,7 @@ public class TagManagement {
      *             if given object has already an ID.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     public List<TargetTag> createTargetTags(@NotNull final Iterable<TargetTag> targetTags) {
@@ -155,7 +151,7 @@ public class TagManagement {
      *            tag name of the {@link TargetTag} to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     public void deleteTargetTag(@NotEmpty final String targetTagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
@@ -220,7 +216,7 @@ public class TagManagement {
      * @return the new {@link TargetTag}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public TargetTag updateTargetTag(@NotNull final TargetTag targetTag) {
@@ -254,7 +250,7 @@ public class TagManagement {
      *
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSetTag createDistributionSetTag(@NotNull final DistributionSetTag distributionSetTag) {
         if (null != distributionSetTag.getId()) {
@@ -282,7 +278,7 @@ public class TagManagement {
      *             if a given entity already exists
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSetTag> createDistributionSetTags(
             @NotNull final Iterable<DistributionSetTag> distributionSetTags) {
@@ -306,7 +302,7 @@ public class TagManagement {
      *            to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteDistributionSetTag(@NotEmpty final String tagName) {
         final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName);
@@ -335,7 +331,7 @@ public class TagManagement {
      *             of {@link DistributionSetTag#getName()} is <code>null</code>
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetTag updateDistributionSetTag(@NotNull final DistributionSetTag distributionSetTag) {
