@@ -9,16 +9,14 @@
 package org.eclipse.hawkbit.repository;
 
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for {@link ExternalArtifactProvider}.
  *
- *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface ExternalArtifactProviderRepository extends BaseEntityRepository<ExternalArtifactProvider, Long> {
 
 }

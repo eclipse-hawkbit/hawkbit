@@ -24,13 +24,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.eclipse.persistence.annotations.ExistenceChecking;
+import org.eclipse.persistence.annotations.ExistenceType;
+
 /**
- * @author Michael Hirsch
- *
+ * Entity with JPA annotation to store the information which {@link Target} is
+ * in a specific {@link RolloutGroup}.
+ * 
  */
 @IdClass(RolloutTargetGroupId.class)
 @Entity
 @Table(name = "sp_rollouttargetgroup")
+@ExistenceChecking(ExistenceType.ASSUME_NON_EXISTENCE)
 public class RolloutTargetGroup implements Serializable {
 
     private static final long serialVersionUID = 1L;

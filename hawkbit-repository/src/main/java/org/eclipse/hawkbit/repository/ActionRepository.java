@@ -29,13 +29,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Action} repository.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface ActionRepository extends BaseEntityRepository<Action, Long>, JpaSpecificationExecutor<Action> {
     /**
      * Retrieves an Action with all lazy attributes.
@@ -172,7 +173,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            active
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("UPDATE Action a SET a.active = false WHERE a IN :keySet AND a.target IN :targetsIds")
     void setToInactive(@Param("keySet") List<Action> keySet, @Param("targetsIds") List<Long> targetsIds);
 
@@ -191,7 +192,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            the current status of the actions which are affected
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("UPDATE Action a SET a.status = :statusToSet WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
     void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
@@ -211,7 +212,7 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      *            the current status of the actions which are affected
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("UPDATE Action a SET a.status = :statusToSet WHERE a.rollout = :rollout AND a.active = :active AND a.status = :currentStatus")
     void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("rollout") Rollout rollout,
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
@@ -385,7 +386,5 @@ public interface ActionRepository extends BaseEntityRepository<Action, Long>, Jp
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.target)) FROM Action a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
-
-    // Asha-ends here
 
 }

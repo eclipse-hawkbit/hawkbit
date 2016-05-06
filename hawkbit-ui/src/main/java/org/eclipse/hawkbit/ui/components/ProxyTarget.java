@@ -36,6 +36,8 @@ public class ProxyTarget extends Target {
 
     private DistributionSet installedDistributionSet;
 
+    private DistributionSet assignedDistributionSet;
+
     private TargetIdName targetIdName;
 
     private String assignedDistNameVersion;
@@ -250,6 +252,21 @@ public class ProxyTarget extends Target {
     }
 
     /**
+     * @return the assignedDistributionSet
+     */
+    public DistributionSet getAssignedDistributionSet() {
+        return assignedDistributionSet;
+    }
+
+    /**
+     * @param assignedDistributionSet
+     *            the assignedDistributionSet to set
+     */
+    public void setAssignedDistributionSet(DistributionSet assignedDistributionSet) {
+        this.assignedDistributionSet = assignedDistributionSet;
+    }
+
+    /**
      * @return the targetIdName
      */
     @Override
@@ -297,4 +314,5 @@ public class ProxyTarget extends Target {
     public void setStatus(final Status status) {
         this.status = status;
     }
+
 }

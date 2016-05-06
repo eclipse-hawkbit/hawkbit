@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIComboBoxDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIHeaderLayoutDecorator;
@@ -20,6 +22,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUILabelDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextAreaDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUITextFieldDecorator;
 import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -326,6 +329,50 @@ public final class SPUIComponentProvider {
         nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
         nameValueLabel.addStyleName("label-style");
         return nameValueLabel;
+    }
+
+    private static Label createUsernameLabel(final String label, final String username) {
+        String loadAndFormatUsername = StringUtils.EMPTY;
+        if (!StringUtils.isEmpty(username)) {
+            loadAndFormatUsername = UserDetailsFormatter.loadAndFormatUsername(username);
+        }
+
+        final Label nameValueLabel = new Label(getBoldHTMLText(label) + loadAndFormatUsername, ContentMode.HTML);
+        nameValueLabel.setSizeFull();
+        nameValueLabel.addStyleName(SPUIDefinitions.TEXT_STYLE);
+        nameValueLabel.addStyleName("label-style");
+        nameValueLabel.setDescription(loadAndFormatUsername);
+        return nameValueLabel;
+    }
+
+    /**
+     * Create label which represents the {@link BaseEntity#getCreatedBy()} by
+     * user name
+     * 
+     * @param i18n
+     *            the i18n
+     * @param baseEntity
+     *            the entity
+     * @return the label
+     */
+    public static Label createCreatedByLabel(final I18N i18n, final BaseEntity baseEntity) {
+        return createUsernameLabel(i18n.get("label.created.by"),
+                baseEntity == null ? StringUtils.EMPTY : baseEntity.getCreatedBy());
+    }
+
+    /**
+     * Create label which represents the
+     * {@link BaseEntity#getLastModifiedBy()()} by user name
+     * 
+     * @param i18n
+     *            the i18n
+     * @param baseEntity
+     *            the entity
+     * @return the label
+     */
+    public static Label createLastModifiedByLabel(final I18N i18n, final BaseEntity baseEntity) {
+        return createUsernameLabel(i18n.get("label.modified.by"),
+                baseEntity == null ? StringUtils.EMPTY : baseEntity.getLastModifiedBy());
     }
 
     /**

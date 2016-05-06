@@ -39,6 +39,8 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
     }
 
     @Override
+    // Exception squid:S1166 - Hide origin exception
+    @SuppressWarnings({ "squid:S1166" })
     public void validate(final Object tenantConfigurationObject) {
         TenantConfigurationValidator.super.validate(tenantConfigurationObject);
         final String tenantConfigurationString = (String) tenantConfigurationObject;

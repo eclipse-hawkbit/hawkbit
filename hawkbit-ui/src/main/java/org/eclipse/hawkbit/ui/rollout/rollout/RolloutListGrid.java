@@ -8,18 +8,25 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
@@ -77,6 +84,12 @@ public class RolloutListGrid extends AbstractGrid {
     private static final String PAUSE_OPTION = "Pause";
 
     private static final String START_OPTION = "Start";
+
+    private static final String DS_TYPE = "type";
+
+    private static final String SW_MODULES = "swModules";
+
+    private static final String IS_REQUIRED_MIGRATION_STEP = "isRequiredMigrationStep";
 
     private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
@@ -160,8 +173,11 @@ public class RolloutListGrid extends AbstractGrid {
     protected void addContainerProperties() {
         final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) getContainerDataSource();
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
+        rolloutGridContainer.addContainerProperty(DS_TYPE, String.class, null, false, false);
+        rolloutGridContainer.addContainerProperty(SW_MODULES, Set.class, null, false, false);
         rolloutGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
+        rolloutGridContainer.addContainerProperty(IS_REQUIRED_MIGRATION_STEP, boolean.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, String.class, null, false,
@@ -216,6 +232,9 @@ public class RolloutListGrid extends AbstractGrid {
     @Override
     protected void setColumnHeaderNames() {
         getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.get("header.name"));
+        getColumn(DS_TYPE).setHeaderCaption("Type");
+        getColumn(SW_MODULES).setHeaderCaption("swModules");
+        getColumn(IS_REQUIRED_MIGRATION_STEP).setHeaderCaption("IsRequiredMigrationStep");
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setHeaderCaption(i18n.get("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.get("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.get("header.total.targets"));
@@ -240,6 +259,9 @@ public class RolloutListGrid extends AbstractGrid {
         final List<Object> columnList = new ArrayList<>();
         columnList.add(ROLLOUT_RENDERER_DATA);
         columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
+        columnList.add(DS_TYPE);
+        columnList.add(SW_MODULES);
+        columnList.add(IS_REQUIRED_MIGRATION_STEP);
         columnList.add(SPUILabelDefinitions.VAR_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
@@ -264,6 +286,9 @@ public class RolloutListGrid extends AbstractGrid {
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
+        columnsToBeHidden.add(IS_REQUIRED_MIGRATION_STEP);
+        columnsToBeHidden.add(DS_TYPE);
+        columnsToBeHidden.add(SW_MODULES);
         for (final Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
@@ -456,8 +481,47 @@ public class RolloutListGrid extends AbstractGrid {
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
             return DistributionBarHelper
                     .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
+        } else if (SPUILabelDefinitions.VAR_DIST_NAME_VERSION.equals(cell.getPropertyId())) {
+            return getDSDetails(cell.getItem());
         }
         return null;
+    }
+
+    private String getDSDetails(final Item rolloutItem) {
+        final StringBuilder swModuleNames = new StringBuilder();
+        final StringBuilder swModuleVendors = new StringBuilder();
+        final Set<SoftwareModule> swModules = (Set<SoftwareModule>) rolloutItem.getItemProperty(SW_MODULES).getValue();
+        swModules.forEach(swModule -> {
+            swModuleNames.append(swModule.getName());
+            swModuleNames.append(" , ");
+            swModuleVendors.append(swModule.getVendor());
+            swModuleVendors.append(" , ");
+        });
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(HTML_UL_OPEN_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append(" DistributionSet Description : ")
+                .append((String) rolloutItem.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append(" DistributionSet Type : ")
+                .append((String) rolloutItem.getItemProperty(DS_TYPE).getValue());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append("Required Migration step : ")
+                .append((boolean) rolloutItem.getItemProperty(IS_REQUIRED_MIGRATION_STEP).getValue() ? "Yes" : "No");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+
+        stringBuilder.append(HTML_UL_CLOSE_TAG);
+        return stringBuilder.toString();
     }
 
     enum ACTION {
@@ -569,14 +633,14 @@ public class RolloutListGrid extends AbstractGrid {
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
                 final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                        throws com.vaadin.data.util.converter.Converter.ConversionException {
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
                 final Class<? extends String> targetType, final Locale locale)
-                        throws com.vaadin.data.util.converter.Converter.ConversionException {
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 

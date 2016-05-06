@@ -90,16 +90,22 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
         populateTagNameCombo();
     }

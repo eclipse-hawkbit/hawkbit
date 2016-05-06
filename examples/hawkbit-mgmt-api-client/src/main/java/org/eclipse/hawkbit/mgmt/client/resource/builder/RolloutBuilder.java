@@ -17,6 +17,8 @@ import org.eclipse.hawkbit.rest.resource.model.rollout.RolloutRestRequestBody;
  * Builder pattern for building {@link RolloutRestRequestBody}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class RolloutBuilder {
 
     private String name;

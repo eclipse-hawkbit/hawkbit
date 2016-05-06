@@ -239,12 +239,13 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         mainLayout.addComponent(hLayout);
         mainLayout.setComponentAlignment(hLayout, Alignment.MIDDLE_LEFT);
         mainLayout.addComponents(nameTextField, versionTextField, vendorTextField, descTextArea, buttonsLayout);
-
+        
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW);
         window.setContent(mainLayout);
         window.setModal(true);
+        nameTextField.focus();
     }
 
     private void addDescriptionTextChangeListener() {
