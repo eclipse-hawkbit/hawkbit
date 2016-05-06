@@ -19,6 +19,8 @@ import com.google.common.collect.Lists;
  * Builder pattern for building {@link MgmtTagRequestBodyPut}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class TagBuilder {
 
     private String name;
@@ -56,8 +58,8 @@ public class TagBuilder {
     }
 
     /**
-     * Builds a list with a single entry of {@link MgmtTagRequestBodyPut} which can
-     * directly be used in the RESTful-API.
+     * Builds a list with a single entry of {@link MgmtTagRequestBodyPut} which
+     * can directly be used in the RESTful-API.
      * 
      * @return a single entry list of {@link MgmtTagRequestBodyPut}
      */
@@ -66,9 +68,9 @@ public class TagBuilder {
     }
 
     /**
-     * Builds a list of multiple {@link MgmtTagRequestBodyPut} to create multiple
-     * tags at once. An increasing number will be added to the name of the tag.
-     * The color and description will remain the same.
+     * Builds a list of multiple {@link MgmtTagRequestBodyPut} to create
+     * multiple tags at once. An increasing number will be added to the name of
+     * the tag. The color and description will remain the same.
      * 
      * @param count
      *            the amount of distribution sets body which should be created

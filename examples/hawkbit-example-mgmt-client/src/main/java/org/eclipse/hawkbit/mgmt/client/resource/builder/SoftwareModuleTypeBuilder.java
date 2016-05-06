@@ -21,6 +21,8 @@ import com.google.common.collect.Lists;
  * Builder pattern for building {@link MgmtSoftwareModuleRequestBodyPost}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class SoftwareModuleTypeBuilder {
 
     private String key;
@@ -60,19 +62,20 @@ public class SoftwareModuleTypeBuilder {
 
     /**
      * Builds a list with a single entry of
-     * {@link MgmtSoftwareModuleTypeRequestBodyPost} which can directly be used in
-     * the RESTful-API.
+     * {@link MgmtSoftwareModuleTypeRequestBodyPost} which can directly be used
+     * in the RESTful-API.
      * 
-     * @return a single entry list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
+     * @return a single entry list of
+     *         {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtSoftwareModuleTypeRequestBodyPost> build() {
         return Lists.newArrayList(doBuild(key, name));
     }
 
     /**
-     * Builds a list of multiple {@link MgmtSoftwareModuleTypeRequestBodyPost} to
-     * create multiple software module types at once. An increasing number will
-     * be added to the name and key of the software module type.
+     * Builds a list of multiple {@link MgmtSoftwareModuleTypeRequestBodyPost}
+     * to create multiple software module types at once. An increasing number
+     * will be added to the name and key of the software module type.
      * 
      * @param count
      *            the amount of software module type bodies which should be

@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Import;
 @EnableMgmtApi
 @EnableDdiApi
 @EnableSystemApi
+// Exception squid:S1118 - Spring boot standard behavior
+@SuppressWarnings({ "squid:S1118" })
 public class Start {
 
     /**

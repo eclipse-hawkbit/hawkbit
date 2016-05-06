@@ -18,6 +18,8 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
  * Builder pattern for building {@link MgmtSoftwareModuleAssigment}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class SoftwareModuleAssigmentBuilder {
 
     private final List<Long> ids;

@@ -21,6 +21,8 @@ import com.google.common.collect.Lists;
  * Builder pattern for building {@link MgmtTargetRequestBody}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class TargetBuilder {
 
     private String controllerId;
@@ -58,8 +60,8 @@ public class TargetBuilder {
     }
 
     /**
-     * Builds a list with a single entry of {@link MgmtTargetRequestBody} which can
-     * directly be used in the RESTful-API.
+     * Builds a list with a single entry of {@link MgmtTargetRequestBody} which
+     * can directly be used in the RESTful-API.
      * 
      * @return a single entry list of {@link MgmtTargetRequestBody}
      */
@@ -68,9 +70,9 @@ public class TargetBuilder {
     }
 
     /**
-     * Builds a list of multiple {@link MgmtTargetRequestBody} to create multiple
-     * targets at once. An increasing number will be added to the controllerId
-     * of the target. The name and description will remain.
+     * Builds a list of multiple {@link MgmtTargetRequestBody} to create
+     * multiple targets at once. An increasing number will be added to the
+     * controllerId of the target. The name and description will remain.
      * 
      * @param count
      *            the amount of software module type bodies which should be
