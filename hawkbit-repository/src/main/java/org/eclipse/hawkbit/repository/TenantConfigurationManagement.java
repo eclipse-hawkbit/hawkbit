@@ -150,7 +150,8 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
     public TenantConfigurationValue<?> getConfigurationValue(final TenantConfigurationKey configurationKey) {
         return getConfigurationValue(configurationKey, configurationKey.getDataType());
     }
@@ -175,7 +176,8 @@ public class TenantConfigurationManagement implements EnvironmentAware {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
     public <T> T getGlobalConfigurationValue(final TenantConfigurationKey configurationKey,
             final Class<T> propertyType) {
 
