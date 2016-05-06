@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -653,37 +654,64 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
-            DistributionSetType newDistType = new DistributionSetType(typeKeyValue, typeNameValue, typeDescValue);
-            for (final Long id : itemIds) {
-                final Item item = selectedTable.getItem(id);
-                final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
-                final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
-                final Boolean isMandatory = mandatoryCheckBox.getValue();
-                final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
-                if (isMandatory) {
-                    newDistType.addMandatoryModuleType(swModuleType);
-
-                } else {
-                    newDistType.addOptionalModuleType(swModuleType);
-                }
-
+            boolean isNameExceedLimit = typeNameValue.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            boolean isKeyExceedLimit = typeKeyValue.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            if (isNameExceedLimit || isKeyExceedLimit) {
+                // open pop up to confirm
+                final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                        i18n.get("caption.nameversion.length.confirmbox"),
+                        i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                        i18n.get("button.cancel"), ok -> {
+                            if (ok) {
+                                saveDSType(typeKeyValue, typeNameValue, typeDescValue, itemIds, colorPicked);
+                            } else {
+                                if (isNameExceedLimit) {
+                                    typeName.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                                if (isKeyExceedLimit) {
+                                    typeKey.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                            }
+                        });
+                UI.getCurrent().addWindow(confirmDialog.getWindow());
+                confirmDialog.getWindow().bringToFront();
+            } else {
+                saveDSType(typeKeyValue, typeNameValue, typeDescValue, itemIds, colorPicked);
             }
-            if (null != typeDescValue) {
-                newDistType.setDescription(typeDescValue);
-            }
-
-            newDistType.setColour(colorPicked);
-
-            newDistType = distributionSetManagement.createDistributionSetType(newDistType);
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
-            closeWindow();
-            eventBus.publish(this,
-                    new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
 
         }
+    }
+
+    private void saveDSType(final String typeKeyValue, final String typeNameValue, final String typeDescValue,
+            final List<Long> itemIds, final String colorPicked) {
+        DistributionSetType newDistType = new DistributionSetType(typeKeyValue, typeNameValue, typeDescValue);
+        for (final Long id : itemIds) {
+            final Item item = selectedTable.getItem(id);
+            final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
+            final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
+            final Boolean isMandatory = mandatoryCheckBox.getValue();
+            final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
+            if (isMandatory) {
+                newDistType.addMandatoryModuleType(swModuleType);
+
+            } else {
+                newDistType.addOptionalModuleType(swModuleType);
+            }
+
+        }
+        if (null != typeDescValue) {
+            newDistType.setDescription(typeDescValue);
+        }
+
+        newDistType.setColour(colorPicked);
+
+        newDistType = distributionSetManagement.createDistributionSetType(newDistType);
+        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
+        closeWindow();
+        eventBus.publish(this, new DistributionSetTypeEvent(DistributionSetTypeEnum.ADD_DIST_SET_TYPE, newDistType));
+
     }
 
     /**
@@ -1155,6 +1183,9 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         typeDesc.addStyleName(SPUIDefinitions.DIST_SET_TYPE_DESC);
         typeKey.addStyleName(SPUIDefinitions.DIST_SET_TYPE_KEY);
         getPreviewButtonColor(DEFAULT_COLOR);
+        
+        typeName.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        typeKey.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
     }
 
 }

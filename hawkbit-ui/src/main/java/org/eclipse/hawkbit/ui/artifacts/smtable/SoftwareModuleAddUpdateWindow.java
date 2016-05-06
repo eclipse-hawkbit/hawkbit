@@ -12,7 +12,9 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -196,6 +198,9 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
     private void resetOldValues() {
         oldDescriptionValue = null;
         oldVendorValue = null;
+        
+        nameTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        versionTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
     }
 
     /**
@@ -276,18 +281,49 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
                 uiNotifcation.displayValidationError(
                         i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
             } else {
-                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(name, version, vendor,
-                        softwareManagement.findSoftwareModuleTypeByName(type), description);
-                if (newBaseSoftwareModule != null) {
-                    /* display success message */
-                    uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {
-                            newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-                    eventBus.publish(this,
-                            new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
+                boolean isNameExceedLimit = name.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+                boolean isVersionExceedLimit =  version.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+                if (isNameExceedLimit || isVersionExceedLimit) {
+                    // open pop up to confirm
+                    final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                            i18n.get("caption.nameversion.length.confirmbox"),
+                            i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                            i18n.get("button.cancel"), ok -> {
+                                if (ok) {
+                                    saveSWModule(name, version, vendor,
+                                            softwareManagement.findSoftwareModuleTypeByName(type), description);
+                                    // close the window
+                                    closeThisWindow();
+                                }else{
+                                    if(isNameExceedLimit){
+                                        nameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                    }if(isVersionExceedLimit){
+                                        versionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);                                        
+                                    }
+                                }
+                            });
+                    UI.getCurrent().addWindow(confirmDialog.getWindow());
+                    confirmDialog.getWindow().bringToFront();
+
+                } else {
+                    saveSWModule(name, version, vendor, softwareManagement.findSoftwareModuleTypeByName(type),
+                            description);
+                    // close the window
+                    closeThisWindow();
                 }
-                // close the window
-                closeThisWindow();
             }
+        }
+    }
+
+    private void saveSWModule(final String name, final String version, final String vendor,
+            final SoftwareModuleType swModuleType, final String description) {
+        final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(name, version, vendor,
+                swModuleType, description);
+        if (newBaseSoftwareModule != null) {
+            /* display success message */
+            uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                    new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
+            eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
         }
     }
 

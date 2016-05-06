@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -183,6 +184,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         validationFailed = false;
         saveButton.setEnabled(false);
         titleFilterIconsLayout.removeStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
+        nameTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        
     }
 
     private Label createStatusIcon() {
@@ -473,6 +476,28 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final TargetFilterQuery targetFilterQuery = new TargetFilterQuery();
         targetFilterQuery.setName(nameTextField.getValue());
         targetFilterQuery.setQuery(queryTextField.getValue());
+        boolean isNameExceedLimit = nameTextField.getValue().length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+        if (isNameExceedLimit) {
+            // open pop up to confirm
+            final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                    i18n.get("caption.nameversion.length.confirmbox"),
+                    i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                    i18n.get("button.cancel"), ok -> {
+                        if (ok) {
+                            saveTargetFilterQuery(targetFilterQuery);
+                            nameTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                        } else {
+                            nameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                          }
+                    });
+            UI.getCurrent().addWindow(confirmDialog.getWindow());
+            confirmDialog.getWindow().bringToFront();
+        } else {
+            saveTargetFilterQuery(targetFilterQuery);
+          } 
+    }
+    
+    private void saveTargetFilterQuery(final TargetFilterQuery targetFilterQuery){
         targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
         notification.displaySuccess(
                 i18n.get("message.create.filter.success", new Object[] { targetFilterQuery.getName() }));

@@ -989,14 +989,14 @@ public final class HawkbitCommonUtil {
         scriptBuilder.append(NEW_PREVIEW_COLOR_REMOVE_SCRIPT).append(NEW_PREVIEW_COLOR_CREATE_SCRIPT)
                 .append("var newColorPreviewStyle = \".v-app .new-tag-name{ border: solid 3px ")
                 .append(colorPickedPreview)
-                .append(" !important; width:138px; margin-left:2px !important; box-shadow:none !important; } \"; ")
+                .append("; width:138px; margin-left:2px !important; box-shadow:none !important; } \"; ")
                 .append("newColorPreviewStyle = newColorPreviewStyle + \".v-app .new-tag-desc{ border: solid 3px ")
                 .append(colorPickedPreview)
                 .append(" !important; width:138px; height:75px !important; margin-top:4px !important; margin-left:2px !important;;box-shadow:none !important;} \"; ")
                 .append(NEW_PREVIEW_COLOR_SET_STYLE_SCRIPT);
         return scriptBuilder.toString();
     }
-
+      
     /**
      * Get javascript to reflect new color selection for preview button.
      * 

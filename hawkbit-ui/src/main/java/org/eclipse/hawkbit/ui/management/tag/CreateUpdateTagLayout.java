@@ -500,6 +500,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         tagName.addStyleName(SPUIDefinitions.TAG_NAME);
         tagDesc.addStyleName(SPUIDefinitions.TAG_DESC);
         getPreviewButtonColor(DEFAULT_COLOR);
+        
+        tagName.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
     }
 
     /**

@@ -61,8 +61,8 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
 
   //Style to highlight the textfield on any validation error
   .textfield-error {
-    color: $red-color;
-  }
+    border-color: $red-color !important;
+   }
 
   //Style to highlight the combobox on any validation error
   .v-filterselect-combobox-error .v-filterselect-input {
