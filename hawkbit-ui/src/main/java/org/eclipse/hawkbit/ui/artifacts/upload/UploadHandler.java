@@ -333,8 +333,12 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             final SoftwareModule sw = view.getSoftwareModuleSelected();
             view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
         }
-        view.updateActionCount();
-        infoWindow.uploadFailed(event.getFilename(), failureReason);
+        eventBus.publish(this, UploadArtifactUIEvent.UPLOAD_STREAMINING_FINISHED);
+        if (failureReason != null) {
+            infoWindow.uploadFailed(event.getFilename(), failureReason);
+        } else {
+            infoWindow.uploadFailed(event.getFilename(), event.getReason().getMessage());
+        }
         LOG.info("Upload failed for file :{}", event.getReason());
 
     }
