@@ -144,7 +144,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
             if (optiongroup.getValue().equals(createTagNw)) {
                 if (!checkIsDuplicate(existingTag)) {
-                    crateNewTag();
+                    createNewTag();
                 }
             } else {
 
@@ -182,7 +182,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     /**
      * Create new tag.
      */
-    private void crateNewTag() {
+    private void createNewTag() {
         final String colorPicked = getColorPickedString();
         final String tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
@@ -218,7 +218,6 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             tagManagement.updateTargetTag(targetObj);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
             closeWindow();
-            eventBus.publish(this, new TargetTagUpdateEvent(targetObj));
         } else {
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
