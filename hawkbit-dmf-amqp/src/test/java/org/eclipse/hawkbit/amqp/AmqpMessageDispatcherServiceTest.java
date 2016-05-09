@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.TestDataUtil;
@@ -159,7 +160,19 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
             if (!softwareModule.getModuleId().equals(module.getId())) {
                 continue;
             }
-            assertFalse("The software module artifacts should not be empty", softwareModule.getArtifacts().isEmpty());
+            assertThat(softwareModule.getArtifacts().size()).isEqualTo(module.getArtifacts().size()).isGreaterThan(0);
+
+            module.getArtifacts().forEach(dbArtifact -> {
+                final Optional<org.eclipse.hawkbit.dmf.json.model.Artifact> found = softwareModule.getArtifacts()
+                        .stream().filter(dmfartifact -> dmfartifact.getFilename()
+                                .equals(((LocalArtifact) dbArtifact).getFilename()))
+                        .findFirst();
+
+                assertTrue("The artifact should exist in message", found.isPresent());
+                assertThat(found.get().getSize()).isEqualTo(dbArtifact.getSize());
+                assertThat(found.get().getHashes().getMd5()).isEqualTo(dbArtifact.getMd5Hash());
+                assertThat(found.get().getHashes().getSha1()).isEqualTo(dbArtifact.getSha1Hash());
+            });
         }
     }
 

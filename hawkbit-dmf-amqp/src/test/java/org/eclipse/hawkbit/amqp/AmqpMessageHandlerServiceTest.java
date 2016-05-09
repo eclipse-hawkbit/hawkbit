@@ -333,6 +333,8 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
+        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo("sha1");
+        assertThat(downloadResponse.getArtifact().getHashes().getMd5()).as("Wrong md5 hash").isEqualTo("md5");
         assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
                 .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
     }
@@ -381,7 +383,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status) {
-        return createActionUpdateStatus(status, 2l);
+        return createActionUpdateStatus(status, 2L);
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status, final Long id) {
@@ -406,7 +408,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private List<SoftwareModule> createSoftwareModuleList() {
-        final List<SoftwareModule> softwareModuleList = new ArrayList<SoftwareModule>();
+        final List<SoftwareModule> softwareModuleList = new ArrayList<>();
         final SoftwareModule softwareModule = new SoftwareModule();
         softwareModule.setId(777L);
         softwareModuleList.add(softwareModule);
@@ -428,7 +430,7 @@ public class AmqpMessageHandlerServiceTest {
         return action;
     }
 
-    private void initalizeSecurityTokenGenerator() throws IllegalArgumentException, IllegalAccessException {
+    private void initalizeSecurityTokenGenerator() throws IllegalAccessException {
         final SecurityTokenGeneratorHolder instance = SecurityTokenGeneratorHolder.getInstance();
         final Field[] fields = instance.getClass().getDeclaredFields();
         for (final Field field : fields) {
