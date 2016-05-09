@@ -200,9 +200,9 @@ public class ArtifactStore implements ArtifactRepository {
         String sha1Hash;
         // compute digest
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
-        final DigestOutputStream dos = new DigestOutputStream(os, md);
-        ByteStreams.copy(stream, dos);
-        dos.close();
+        try (final DigestOutputStream dos = new DigestOutputStream(os, md)) {
+            ByteStreams.copy(stream, dos);
+        }
         sha1Hash = BaseEncoding.base16().lowerCase().encode(md.digest());
         if (providedSHA1Sum != null && !providedSHA1Sum.equalsIgnoreCase(sha1Hash)) {
             throw new HashNotMatchException(

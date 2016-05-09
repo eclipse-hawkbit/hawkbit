@@ -26,9 +26,6 @@ import com.google.common.eventbus.EventBus;
 /**
  * Poll time trigger which executes the {@link DDISimulatedDevice#poll()} every
  * second.
- *
- * @author Michael Hirsch
- *
  */
 @Component
 public class NextPollTimeController {
@@ -59,16 +56,15 @@ public class NextPollTimeController {
 
             devices.forEach(device -> {
                 int nextCounter = device.getNextPollCounterSec() - 1;
-                if (nextCounter < 0) {
-                    if (device instanceof DDISimulatedDevice) {
-                        try {
-                            pollService.submit(() -> ((DDISimulatedDevice) device).poll());
-                        } catch (final IllegalStateException e) {
-                            LOGGER.trace("Device could not be polled", e);
-                        }
-                        nextCounter = ((DDISimulatedDevice) device).getPollDelaySec();
+                if (nextCounter < 0 && device instanceof DDISimulatedDevice) {
+                    try {
+                        pollService.submit(() -> ((DDISimulatedDevice) device).poll());
+                    } catch (final IllegalStateException e) {
+                        LOGGER.trace("Device could not be polled", e);
                     }
+                    nextCounter = ((DDISimulatedDevice) device).getPollDelaySec();
                 }
+
                 device.setNextPollCounterSec(nextCounter);
             });
             eventBus.post(new NextPollCounterUpdate(devices));
