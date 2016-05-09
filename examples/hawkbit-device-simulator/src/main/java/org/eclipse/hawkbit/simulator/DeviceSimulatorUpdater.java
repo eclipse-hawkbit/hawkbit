@@ -138,7 +138,7 @@ public class DeviceSimulatorUpdater {
         public void run() {
             if (device.getProgress() <= 0 && modules != null) {
                 device.setUpdateStatus(simulateDownloads(device.getTargetSecurityToken()));
-                if (device.getUpdateStatus().getResponseStatus().equals(ResponseStatus.ERROR)) {
+                if (isErrorResponse(device.getUpdateStatus())) {
                     callback.updateFinished(device, actionId);
                     eventbus.post(new ProgressUpdate(device));
                     return;
@@ -169,7 +169,7 @@ public class DeviceSimulatorUpdater {
             result.getStatusMessages().add("Simulation complete!");
             status.forEach(download -> {
                 result.getStatusMessages().addAll(download.getStatusMessages());
-                if (download.getResponseStatus().equals(ResponseStatus.ERROR)) {
+                if (isErrorResponse(download)) {
                     result.setResponseStatus(ResponseStatus.ERROR);
                 }
             });
@@ -177,6 +177,14 @@ public class DeviceSimulatorUpdater {
             LOGGER.info("Download simulations complete for {}", device.getId());
 
             return result;
+        }
+
+        private boolean isErrorResponse(final UpdateStatus status) {
+            if (status == null) {
+                return false;
+            }
+
+            return ResponseStatus.ERROR.equals(status.getResponseStatus());
         }
 
         private static void handleArtifacts(final String targetToken, final List<UpdateStatus> status,
@@ -195,7 +203,7 @@ public class DeviceSimulatorUpdater {
         }
 
         private static UpdateStatus downloadUrl(final String url, final String targetToken, final String sha1Hash) {
-            LOGGER.debug("Downloading " + url);
+            LOGGER.debug("Downloading {}", url);
 
             long overallread = 0;
             try {
@@ -245,7 +253,7 @@ public class DeviceSimulatorUpdater {
     /**
      * Callback interface which is called when the simulated update process has
      * been finished and the caller of starting the simulated update process can
-     * send the result to the hawkBit update server back. *
+     * send the result back to the hawkBit update server.
      */
     @FunctionalInterface
     public interface UpdaterCallback {

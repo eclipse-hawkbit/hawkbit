@@ -16,15 +16,30 @@ import java.util.List;
  *
  */
 public class UpdateStatus {
-    private ResponseStatus responseStatus = ResponseStatus.SUCCESSFUL;
-    private final List<String> statusMessages = new ArrayList<>();
+    private ResponseStatus responseStatus;
+    private List<String> statusMessages;
 
+    /**
+     * Constructor.
+     * 
+     * @param responseStatus
+     *            of the update
+     */
     public UpdateStatus(final ResponseStatus responseStatus) {
         this.responseStatus = responseStatus;
     }
 
+    /**
+     * Constructor including status message.
+     * 
+     * @param responseStatus
+     *            of the update
+     * @param message
+     *            of the update status
+     */
     public UpdateStatus(final ResponseStatus responseStatus, final String message) {
         this(responseStatus);
+        statusMessages = new ArrayList<>();
         statusMessages.add(message);
     }
 
@@ -37,6 +52,10 @@ public class UpdateStatus {
     }
 
     public List<String> getStatusMessages() {
+        if (statusMessages == null) {
+            statusMessages = new ArrayList<>();
+        }
+
         return statusMessages;
     }
 
@@ -46,11 +65,12 @@ public class UpdateStatus {
      */
     public enum ResponseStatus {
         /**
-         * updated has been successful and response the successful update.
+         * Update has been successful and response the successful update.
          */
         SUCCESSFUL,
+
         /**
-         * updated has been not successful and response the error update.
+         * Update has been not successful and response the error update.
          */
         ERROR;
     }

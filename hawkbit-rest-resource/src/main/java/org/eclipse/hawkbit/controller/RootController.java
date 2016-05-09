@@ -220,7 +220,7 @@ public class RootController {
                     + " of: " + request.getRequestURI());
         } else {
             statusMessage.addMessage(
-                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
+                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
         controllerManagement.addActionStatusMessage(statusMessage);
         return action;
@@ -390,7 +390,7 @@ public class RootController {
             LOG.debug("Controller confirmed cancel (actionid: {}, targetid: {}) as we got {} report.", actionid,
                     targetid, feedback.getStatus().getExecution());
             actionStatus.setStatus(Status.CANCELED);
-            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation.");
             break;
         case REJECTED:
             LOG.info("Controller reported internal error (actionid: {}, targetid: {}) as we got {} report.", actionid,
@@ -424,7 +424,7 @@ public class RootController {
                 targetid, feedback.getStatus().getExecution());
         actionStatus.setStatus(Status.RUNNING);
         actionStatus.addMessage(
-                ControllerManagement.SERVER_MESSAGE_PREFIX + "Target reported: " + feedback.getStatus().getExecution());
+                ControllerManagement.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
     }
 
     private static void handleClosedUpdateStatus(final ActionFeedback feedback, final String targetid,
