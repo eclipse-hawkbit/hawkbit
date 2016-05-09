@@ -520,11 +520,15 @@ public class UploadLayout extends VerticalLayout {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
             } else {
-                clearFileList();
-                uploadInfoWindow.clearWindow();
-                hideUploadStatusButton();
+                removeUploadedFileDetails();
             }
         }
+    }
+
+    protected void removeUploadedFileDetails() {
+        clearFileList();
+        uploadInfoWindow.clearWindow();
+        hideUploadStatusButton();
     }
 
     /**
@@ -707,7 +711,7 @@ public class UploadLayout extends VerticalLayout {
         uploadStatusButton.setVisible(true);
     }
 
-    private void hideUploadStatusButton() {
+    protected void hideUploadStatusButton() {
         if (uploadStatusButton == null) {
             return;
         }

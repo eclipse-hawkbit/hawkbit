@@ -544,7 +544,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
         if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_ARTIFACT_DETAILS_CLOSE)) {
             uploadConfrimationWindow.close();
         } else if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON)) {
-            uploadLayout.clearFileList();
+            uploadLayout.removeUploadedFileDetails();
             uploadConfrimationWindow.close();
         } else if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_BUTTON)) {
             processArtifactUpload();
