@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -122,7 +125,11 @@ public class ArtifactStore implements ArtifactRepository {
             LOGGER.debug("storing file {} of content {}", filename, contentType);
             tempFile = File.createTempFile("uploadFile", null);
             try (final FileOutputStream os = new FileOutputStream(tempFile)) {
-                return store(content, contentType, os, tempFile, hash);
+                try (BufferedOutputStream bos = new BufferedOutputStream(os)) {
+                    try (BufferedInputStream bis = new BufferedInputStream(content)) {
+                        return store(content, contentType, bos, tempFile, hash);
+                    }
+                }
             }
         } catch (final IOException | MongoException e1) {
             throw new ArtifactStoreException(e1.getMessage(), e1);
@@ -162,7 +169,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private DbArtifact store(final InputStream content, final String contentType, final FileOutputStream os,
+    private DbArtifact store(final InputStream content, final String contentType, final OutputStream os,
             final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
         try {
@@ -196,8 +203,8 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private static String computeSHA1Hash(final InputStream stream, final FileOutputStream os,
-            final String providedSHA1Sum) throws NoSuchAlgorithmException, IOException {
+    private static String computeSHA1Hash(final InputStream stream, final OutputStream os, final String providedSHA1Sum)
+            throws NoSuchAlgorithmException, IOException {
         String sha1Hash;
         // compute digest
         final MessageDigest md = MessageDigest.getInstance("SHA-1");

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -232,9 +234,15 @@ public class DeviceSimulatorUpdater {
                     final MessageDigest md = MessageDigest.getInstance("SHA-1");
 
                     try (final DigestOutputStream dos = new DigestOutputStream(new FileOutputStream(tempFile), md)) {
-                        overallread = ByteStreams.copy(response.getEntity().getContent(), dos);
+                        try (final BufferedOutputStream bdos = new BufferedOutputStream(dos)) {
+                            try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
+                                overallread = ByteStreams.copy(bis, bdos);
+                            }
+                        }
                     } finally {
-                        tempFile.delete();
+                        if (tempFile != null && !tempFile.delete()) {
+                            LOGGER.error("Could not delete temporary file: {}", tempFile);
+                        }
                     }
 
                     if (overallread != size) {
