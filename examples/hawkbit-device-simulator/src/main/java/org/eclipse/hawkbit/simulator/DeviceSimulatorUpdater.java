@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -117,6 +118,11 @@ public class DeviceSimulatorUpdater {
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
+        /**
+         * 
+         */
+        private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
+
         private static final Random rndSleep = new SecureRandom();
 
         private final AbstractSimulatedDevice device;
@@ -215,7 +221,7 @@ public class DeviceSimulatorUpdater {
             try {
                 final CloseableHttpClient httpclient = createHttpClientThatAcceptsAllServerCerts();
                 final HttpGet request = new HttpGet(url);
-                request.addHeader("Authorization", "TargetToken " + targetToken);
+                request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
 
                 final String sha1HashResult;
                 try (final CloseableHttpResponse response = httpclient.execute(request)) {
@@ -273,7 +279,7 @@ public class DeviceSimulatorUpdater {
                 return "<EMTPTY!>";
             }
 
-            if (targetToken.length() <= 6) {
+            if (targetToken.length() <= MINIMUM_TOKENLENGTH_FOR_HINT) {
                 return "***";
             }
 
