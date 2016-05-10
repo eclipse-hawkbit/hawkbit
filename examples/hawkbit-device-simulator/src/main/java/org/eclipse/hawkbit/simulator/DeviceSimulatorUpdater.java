@@ -265,12 +265,12 @@ public class DeviceSimulatorUpdater {
                 return "<EMTPTY!>";
             }
 
-            if (targetToken.length() <= 3) {
+            if (targetToken.length() <= 6) {
                 return "***";
             }
 
-            return targetToken.substring(0, 3) + "***"
-                    + targetToken.substring(targetToken.length() - 3, targetToken.length());
+            return targetToken.substring(0, 2) + "***"
+                    + targetToken.substring(targetToken.length() - 2, targetToken.length());
         }
 
         private static String wrongHash(final String url, final String sha1Hash, final long overallread,
