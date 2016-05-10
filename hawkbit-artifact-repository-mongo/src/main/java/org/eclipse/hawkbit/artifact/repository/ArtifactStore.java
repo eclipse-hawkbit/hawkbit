@@ -185,7 +185,8 @@ public class ArtifactStore implements ArtifactRepository {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
 
-        if (hash != null && hash.getMd5() != null && !storedArtifact.getHashes().getMd5().equals(hash.getMd5())) {
+        if (hash != null && hash.getMd5() != null
+                && !storedArtifact.getHashes().getMd5().equalsIgnoreCase(hash.getMd5())) {
             throw new HashNotMatchException("The given md5 hash " + hash.getMd5()
                     + " not matching the calculated md5 hash " + storedArtifact.getHashes().getMd5(),
                     HashNotMatchException.MD5);
