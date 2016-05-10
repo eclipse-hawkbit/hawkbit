@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,6 +43,8 @@ import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.google.common.eventbus.EventBus;
@@ -114,6 +118,11 @@ public class DeviceSimulatorUpdater {
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
+        /**
+         * 
+         */
+        private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
+
         private static final Random rndSleep = new SecureRandom();
 
         private final AbstractSimulatedDevice device;
@@ -193,7 +202,8 @@ public class DeviceSimulatorUpdater {
                 switch (entry.getKey()) {
                 case HTTP:
                 case HTTPS:
-                    status.add(downloadUrl(entry.getValue(), targetToken, artifact.getHashes().getSha1()));
+                    status.add(downloadUrl(entry.getValue(), targetToken, artifact.getHashes().getSha1(),
+                            artifact.getSize()));
                     break;
                 default:
                     // not supported yet
@@ -202,43 +212,108 @@ public class DeviceSimulatorUpdater {
             });
         }
 
-        private static UpdateStatus downloadUrl(final String url, final String targetToken, final String sha1Hash) {
-            LOGGER.debug("Downloading {}", url);
+        private static UpdateStatus downloadUrl(final String url, final String targetToken, final String sha1Hash,
+                final long size) {
+            LOGGER.debug("Downloading {} with token {}, expected sha1 hash {} and size {}", url,
+                    hideTokenDetails(targetToken), sha1Hash, size);
 
             long overallread = 0;
             try {
                 final CloseableHttpClient httpclient = createHttpClientThatAcceptsAllServerCerts();
                 final HttpGet request = new HttpGet(url);
-                request.addHeader("TargetToken", targetToken);
+                request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
 
                 final String sha1HashResult;
                 try (final CloseableHttpResponse response = httpclient.execute(request)) {
+
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
+                        final String message = wrongStatusCode(url, response);
+                        return new UpdateStatus(ResponseStatus.ERROR, message);
+                    }
+
+                    if (response.getEntity().getContentLength() != size) {
+                        final String message = wrongContentLength(url, size, response);
+                        return new UpdateStatus(ResponseStatus.ERROR, message);
+                    }
+
                     final File tempFile = File.createTempFile("uploadFile", null);
                     final MessageDigest md = MessageDigest.getInstance("SHA-1");
 
                     try (final DigestOutputStream dos = new DigestOutputStream(new FileOutputStream(tempFile), md)) {
-                        overallread = ByteStreams.copy(response.getEntity().getContent(), dos);
-                        sha1HashResult = BaseEncoding.base16().lowerCase().encode(md.digest());
+                        try (final BufferedOutputStream bdos = new BufferedOutputStream(dos)) {
+                            try (BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent())) {
+                                overallread = ByteStreams.copy(bis, bdos);
+                            }
+                        }
                     } finally {
-                        tempFile.delete();
+                        if (tempFile != null && !tempFile.delete()) {
+                            LOGGER.error("Could not delete temporary file: {}", tempFile);
+                        }
                     }
+
+                    if (overallread != size) {
+                        final String message = incompleteRead(url, size, overallread);
+                        return new UpdateStatus(ResponseStatus.ERROR, message);
+                    }
+
+                    sha1HashResult = BaseEncoding.base16().lowerCase().encode(md.digest());
                 }
 
-                if (!sha1Hash.equals(sha1HashResult)) {
-                    final String message = "Download " + url + " failed with SHA1 hash missmatch (Expected: " + sha1Hash
-                            + " but got: " + sha1HashResult + ")";
-                    LOGGER.debug(message);
+                if (!sha1Hash.equalsIgnoreCase(sha1HashResult)) {
+                    final String message = wrongHash(url, sha1Hash, overallread, sha1HashResult);
                     return new UpdateStatus(ResponseStatus.ERROR, message);
                 }
 
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                LOGGER.error("Failed to download {}", url, e);
+                LOGGER.error("Failed to download {} with {}", url, e.getMessage());
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 
             final String message = "Downloaded " + url + " (" + overallread + " bytes)";
             LOGGER.debug(message);
             return new UpdateStatus(ResponseStatus.SUCCESSFUL, message);
+        }
+
+        private static String hideTokenDetails(final String targetToken) {
+            if (targetToken.isEmpty()) {
+                return "<EMTPTY!>";
+            }
+
+            if (targetToken.length() <= MINIMUM_TOKENLENGTH_FOR_HINT) {
+                return "***";
+            }
+
+            return targetToken.substring(0, 2) + "***"
+                    + targetToken.substring(targetToken.length() - 2, targetToken.length());
+        }
+
+        private static String wrongHash(final String url, final String sha1Hash, final long overallread,
+                final String sha1HashResult) {
+            final String message = "Download " + url + " failed with SHA1 hash missmatch (Expected: " + sha1Hash
+                    + " but got: " + sha1HashResult + ") (" + overallread + " bytes)";
+            LOGGER.error(message);
+            return message;
+        }
+
+        private static String incompleteRead(final String url, final long size, final long overallread) {
+            final String message = "Download " + url + " is incomplete (Expected: " + size + " but got: " + overallread
+                    + ")";
+            LOGGER.error(message);
+            return message;
+        }
+
+        private static String wrongContentLength(final String url, final long size,
+                final CloseableHttpResponse response) {
+            final String message = "Download " + url + " has wrong content length (Expected: " + size + " but got: "
+                    + response.getEntity().getContentLength() + ")";
+            LOGGER.error(message);
+            return message;
+        }
+
+        private static String wrongStatusCode(final String url, final CloseableHttpResponse response) {
+            final String message = "Download " + url + " failed (" + response.getStatusLine().getStatusCode() + ")";
+            LOGGER.error(message);
+            return message;
         }
 
         private static CloseableHttpClient createHttpClientThatAcceptsAllServerCerts()
