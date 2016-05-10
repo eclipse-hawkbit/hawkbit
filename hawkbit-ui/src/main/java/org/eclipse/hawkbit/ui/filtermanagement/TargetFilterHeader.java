@@ -78,9 +78,8 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel(getHeaderCaption(),
+        return SPUIComponentProvider.getLabel(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION,
                 SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
     }
 
     private void buildLayout() {
@@ -109,8 +108,8 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Button createAddButton() {
-        final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
-                SPUIButtonStyleSmallNoBorder.class);
+        final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.TARGET_FILTER_ADD_ICON_ID, "", "",
+                null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> addNewFilter());
         return button;
     }
@@ -185,11 +184,4 @@ public class TargetFilterHeader extends VerticalLayout {
         eventBus.publish(this, CustomFilterUIEvent.FILTER_BY_CUST_FILTER_TEXT_REMOVE);
     }
 
-    protected String getAddIconId() {
-        return SPUIComponetIdProvider.TARGET_FILTER_ADD_ICON_ID;
-    }
-
-    protected String getHeaderCaption() {
-        return SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION;
-    }
 }
