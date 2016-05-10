@@ -150,7 +150,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private void buildLayout() {
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
-        nameEditLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
         nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
         if (hasEditPermission()) {
