@@ -150,20 +150,20 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private void buildLayout() {
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
-        nameEditLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
-        nameEditLayout.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
+        nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
         if (hasEditPermission()) {
             nameEditLayout.addComponent(editButton);
-            nameEditLayout.setComponentAlignment(editButton, Alignment.MIDDLE_RIGHT);
+            nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
         }
-        nameEditLayout.setExpandRatio(caption, 1.0f);
+        nameEditLayout.setExpandRatio(caption, 1.0F);
         nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
 
         addComponent(nameEditLayout);
-        setComponentAlignment(nameEditLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
         addComponent(detailsTab);
-        setComponentAlignment(nameEditLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
 
         setSizeFull();
         setHeightUndefined();
@@ -171,9 +171,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel(getDefaultCaption(),
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
+        return SPUIComponentProvider.getLabel(getDefaultCaption(), SPUILabelDefinitions.SP_WIDGET_CAPTION);
     }
 
     protected VerticalLayout getTabLayout() {
@@ -213,22 +211,22 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateDetailsWidget();
     }
 
-    protected void updateLogLayout(final VerticalLayout changeLogLayout, final Long lastModifiedAt,
-            final String lastModifiedBy, final Long createdAt, final String createdBy, final I18N i18n) {
-        changeLogLayout.removeAllComponents();
-        changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
-                createdAt == null ? "" : SPDateTimeUtil.getFormattedDate(createdAt)));
+    protected void populateLog() {
+        logLayout.removeAllComponents();
 
-        changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.by"),
-                createdBy == null ? "" : HawkbitCommonUtil.getIMUser(createdBy)));
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
+                SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
 
-        if (null != lastModifiedAt) {
-            changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
-                    SPDateTimeUtil.getFormattedDate(lastModifiedAt)));
+        logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
 
-            changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.by"),
-                    lastModifiedBy == null ? "" : HawkbitCommonUtil.getIMUser(lastModifiedBy)));
+        if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
+            return;
         }
+
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
+                SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
+
+        logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
     }
 
     protected void updateDescriptionLayout(final String descriptionLabel, final String description) {
@@ -318,19 +316,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     public VerticalLayout getDetailsLayout() {
         return detailsLayout;
-    }
-
-    public VerticalLayout getLogLayout() {
-        return logLayout;
-    }
-
-    private void populateLog() {
-        if (selectedBaseEntity == null) {
-            updateLogLayout(getLogLayout(), null, StringUtils.EMPTY, null, null, i18n);
-            return;
-        }
-        updateLogLayout(getLogLayout(), selectedBaseEntity.getLastModifiedAt(), selectedBaseEntity.getLastModifiedBy(),
-                selectedBaseEntity.getCreatedAt(), selectedBaseEntity.getCreatedBy(), i18n);
     }
 
     private void populateDescription() {

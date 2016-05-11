@@ -61,16 +61,22 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
         refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
         refreshTagTable();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
         refreshTagTable();
     }

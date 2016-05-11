@@ -78,6 +78,12 @@ public class ArtifactUrlHandlerProperties {
          * @return the pattern to build the URL.
          */
         String getPattern();
+
+        /**
+         * @return <code>true</code> if the {@link ProtocolProperties} is
+         *         enabled.
+         */
+        boolean isEnabled();
     }
 
     /**
@@ -92,6 +98,20 @@ public class ArtifactUrlHandlerProperties {
          * have specific artifact placeholder.
          */
         private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
+
+        /**
+         * Enables HTTP URI generation in DDI and DMF.
+         */
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
 
         @Override
         public String getHostname() {
@@ -143,6 +163,20 @@ public class ArtifactUrlHandlerProperties {
          */
         private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
 
+        /**
+         * Enables HTTPS URI generation in DDI and DMF.
+         */
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
+
         @Override
         public String getHostname() {
             return hostname;
@@ -192,6 +226,20 @@ public class ArtifactUrlHandlerProperties {
          * have specific artifact placeholder.
          */
         private String pattern = "{protocol}://{ip}:{port}/fw/{tenant}/{targetId}/sha1/{artifactSHA1}";
+
+        /**
+         * Enables CoAP URI generation in DMF.
+         */
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
 
         @Override
         public String getHostname() {

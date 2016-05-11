@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.api;
  * URLs to specific artifacts.
  *
  */
-@FunctionalInterface
 public interface ArtifactUrlHandler {
 
     /**
@@ -34,4 +33,11 @@ public interface ArtifactUrlHandler {
      */
     String getUrl(String controllerId, final Long softwareModuleId, final String filename, final String sha1Hash,
             final UrlProtocol protocol);
+
+    /**
+     * @param protocol
+     *            to check support for
+     * @return <code>true</code> of the handler supports given protocol.
+     */
+    boolean protocolSupported(UrlProtocol protocol);
 }

@@ -9,8 +9,6 @@
 package org.eclipse.hawkbit.simulator;
 
 import java.net.URL;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.eclipse.hawkbit.simulator.http.ControllerResource;
@@ -24,15 +22,9 @@ import feign.Logger;
 /**
  * The simulated device factory to create either {@link DMFSimulatedDevice} or
  * {@link DDISimulatedDevice#}.
- * 
- * @author Michael Hirsch
- *
  */
 @Service
 public class SimulatedDeviceFactory {
-
-    private static final ScheduledExecutorService pollThreadPool = Executors.newScheduledThreadPool(4);
-
     @Autowired
     private DeviceSimulatorUpdater deviceUpdater;
 
@@ -47,7 +39,8 @@ public class SimulatedDeviceFactory {
      *            the protocol of the device
      * @return the created simulated device
      */
-    public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant, final Protocol protocol) {
+    public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant,
+            final Protocol protocol) {
         return createSimulatedDevice(id, tenant, protocol, 30, null, null);
     }
 
@@ -80,7 +73,7 @@ public class SimulatedDeviceFactory {
             final ControllerResource controllerResource = Feign.builder().logger(new Logger.ErrorLogger())
                     .requestInterceptor(new GatewayTokenInterceptor(gatewayToken)).logLevel(Logger.Level.BASIC)
                     .target(ControllerResource.class, baseEndpoint.toString());
-            return new DDISimulatedDevice(id, tenant, pollDelaySec, controllerResource, pollThreadPool, deviceUpdater);
+            return new DDISimulatedDevice(id, tenant, pollDelaySec, controllerResource, deviceUpdater);
         default:
             throw new IllegalArgumentException("Protocol " + protocol + " unknown");
         }

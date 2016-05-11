@@ -12,11 +12,14 @@ import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.model.RolloutTargetGroupId;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- *
+ * Spring data repository for {@link RolloutTargetGroup}.
  *
  */
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface RolloutTargetGroupRepository
         extends CrudRepository<RolloutTargetGroup, RolloutTargetGroupId>, JpaSpecificationExecutor<RolloutTargetGroup> {
 }

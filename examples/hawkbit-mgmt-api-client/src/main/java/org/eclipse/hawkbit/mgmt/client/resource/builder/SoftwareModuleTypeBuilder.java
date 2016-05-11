@@ -21,6 +21,8 @@ import com.google.common.collect.Lists;
  * Builder pattern for building {@link SoftwareModuleRequestBodyPost}.
  *
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class SoftwareModuleTypeBuilder {
 
     private String key;

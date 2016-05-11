@@ -15,13 +15,14 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link LocalArtifact} repository.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface LocalArtifactRepository extends BaseEntityRepository<LocalArtifact, Long> {
 
     /**

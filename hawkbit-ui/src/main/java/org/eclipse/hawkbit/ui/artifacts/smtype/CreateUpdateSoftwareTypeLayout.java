@@ -257,6 +257,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         mainLayout = new HorizontalLayout();
         mainLayout.addComponent(fieldButtonLayout);
         setCompositionRoot(mainLayout);
+        typeName.focus();
     }
 
     private void addListeners() {

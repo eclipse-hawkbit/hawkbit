@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -18,6 +15,7 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -31,14 +29,30 @@ import org.springframework.context.annotation.Bean;
  * {@code amqp} to use a AMQP for communication with SP enabled devices.
  *
  */
-@EnableConfigurationProperties(AmqpProperties.class)
+@EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
 public class AmqpConfiguration {
 
     @Autowired
     protected AmqpProperties amqpProperties;
 
     @Autowired
+    protected AmqpDeadletterProperties amqpDeadletterProperties;
+
+    @Autowired
     private ConnectionFactory connectionFactory;
+
+    /**
+     * Create a {@link RabbitAdmin} and ignore declaration exceptions.
+     * {@link RabbitAdmin#setIgnoreDeclarationExceptions(boolean)}
+     * 
+     * @return the bean
+     */
+    @Bean
+    public RabbitAdmin rabbitAdmin() {
+        final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+        rabbitAdmin.setIgnoreDeclarationExceptions(true);
+        return rabbitAdmin;
+    }
 
     /**
      * Method to set the Jackson2JsonMessageConverter.
@@ -59,7 +73,8 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue receiverQueue() {
-        return new Queue(amqpProperties.getReceiverQueue(), true, false, false, getDeadLetterExchangeArgs());
+        return new Queue(amqpProperties.getReceiverQueue(), true, false, false,
+                amqpDeadletterProperties.getDeadLetterExchangeArgs(amqpProperties.getDeadLetterExchange()));
     }
 
     /**
@@ -79,7 +94,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue deadLetterQueue() {
-        return new Queue(amqpProperties.getDeadLetterQueue());
+        return amqpDeadletterProperties.createDeadletterQueue(amqpProperties.getDeadLetterQueue());
     }
 
     /**
@@ -147,12 +162,6 @@ public class AmqpConfiguration {
         containerFactory.setConnectionFactory(connectionFactory);
         containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
         return containerFactory;
-    }
-
-    private Map<String, Object> getDeadLetterExchangeArgs() {
-        final Map<String, Object> args = new HashMap<>();
-        args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
-        return args;
     }
 
 }

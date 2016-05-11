@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.table;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -211,9 +212,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         item.getItemProperty(SPUILabelDefinitions.VAR_ID).setValue(baseEntity.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(baseEntity.getDescription());
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getCreatedBy()));
+                .setValue(UserDetailsFormatter.loadAndFormatCreatedBy(baseEntity));
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getLastModifiedBy()));
+                .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(baseEntity));
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
                 .setValue(SPDateTimeUtil.getFormattedDate(baseEntity.getCreatedAt()));
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
@@ -229,6 +230,30 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         } else if (BaseEntityEventType.NEW_ENTITY == event.getEventType()) {
             UI.getCurrent().access(() -> addEntity(event.getEntity()));
         }
+    }
+
+    /**
+     * Return the entity which should be deleted by a transferable
+     * 
+     * @param transferable
+     *            the table transferable
+     * @return set of entities id which will deleted
+     */
+    @SuppressWarnings("unchecked")
+    public Set<I> getDeletedEntityByTransferable(final TableTransferable transferable) {
+        final Set<I> selectedEntities = (Set<I>) getTableValue(this);
+        final Set<I> ids = new HashSet<>();
+        final Object tranferableData = transferable.getData(SPUIDefinitions.ITEMID);
+        if (tranferableData == null) {
+            return ids;
+        }
+
+        if (!selectedEntities.contains(tranferableData)) {
+            ids.add((I) tranferableData);
+        } else {
+            ids.addAll(selectedEntities);
+        }
+        return ids;
     }
 
     protected abstract E findEntityByTableValue(I lastSelectedId);
@@ -304,6 +329,17 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         columnList.add(
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
+        setItemDescriptionGenerator((source, itemId, propertyId) -> {
+
+            if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
+            }
+            if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue().toString();
+            }
+            return null;
+        });
+
         return columnList;
     }
 
