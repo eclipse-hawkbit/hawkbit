@@ -150,20 +150,20 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private void buildLayout() {
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
-        nameEditLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
-        nameEditLayout.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
+        nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
         if (hasEditPermission()) {
             nameEditLayout.addComponent(editButton);
-            nameEditLayout.setComponentAlignment(editButton, Alignment.MIDDLE_RIGHT);
+            nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
         }
-        nameEditLayout.setExpandRatio(caption, 1.0f);
+        nameEditLayout.setExpandRatio(caption, 1.0F);
         nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
 
         addComponent(nameEditLayout);
-        setComponentAlignment(nameEditLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
         addComponent(detailsTab);
-        setComponentAlignment(nameEditLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
 
         setSizeFull();
         setHeightUndefined();

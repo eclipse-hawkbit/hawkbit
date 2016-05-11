@@ -290,7 +290,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         searchLayout.setSpacing(false);
         searchLayout.addComponents(validationIcon, queryTextField);
         searchLayout.addStyleName("custom-search-layout");
-        searchLayout.setComponentAlignment(validationIcon, Alignment.MIDDLE_CENTER);
+        searchLayout.setComponentAlignment(validationIcon, Alignment.TOP_CENTER);
 
         final HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.setSizeUndefined();

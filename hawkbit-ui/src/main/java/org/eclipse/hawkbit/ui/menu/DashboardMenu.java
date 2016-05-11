@@ -112,9 +112,9 @@ public final class DashboardMenu extends CustomComponent {
         final VerticalLayout links = buildLinksAndVersion();
         menus.addComponent(links);
         menus.setComponentAlignment(links, Alignment.BOTTOM_CENTER);
-        menus.setExpandRatio(links, 1.0f);
+        menus.setExpandRatio(links, 1.0F);
         menuContent.addComponent(menus);
-        menuContent.setExpandRatio(menus, 1.0f);
+        menuContent.setExpandRatio(menus, 1.0F);
 
         dashboardMenuLayout.addComponent(menuContent);
         return dashboardMenuLayout;
@@ -136,7 +136,7 @@ public final class DashboardMenu extends CustomComponent {
         final Label logo = new Label("<strong>" + i18n.get("menu.title") + "</strong>", ContentMode.HTML);
         logo.setSizeUndefined();
         final HorizontalLayout logoWrapper = new HorizontalLayout(logo);
-        logoWrapper.setComponentAlignment(logo, Alignment.MIDDLE_CENTER);
+        logoWrapper.setComponentAlignment(logo, Alignment.TOP_CENTER);
         logoWrapper.addStyleName("valo-menu-title");
         return logoWrapper;
     }
@@ -225,7 +225,7 @@ public final class DashboardMenu extends CustomComponent {
     private VerticalLayout buildMenuItems() {
         final VerticalLayout menuItemsLayout = new VerticalLayout();
         menuItemsLayout.addStyleName("valo-menuitems");
-        menuItemsLayout.setHeight(100.0f, Unit.PERCENTAGE);
+        menuItemsLayout.setHeight(100.0F, Unit.PERCENTAGE);
 
         final List<DashboardMenuItem> accessibleViews = getAccessibleViews();
         if (accessibleViews.isEmpty()) {
