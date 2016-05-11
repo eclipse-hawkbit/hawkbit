@@ -245,16 +245,16 @@ public class UploadConfirmationwindow implements Button.ClickListener {
             deleteIcon.setData(itemId);
             newItem.getItemProperty(ACTION).setValue(deleteIcon);
 
-            final TextField sha1 = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null, null,
-                    true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+            final TextField sha1 = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
+                    null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
             sha1.setId(swNameVersion + "/" + customFile.getFileName() + "/sha1");
 
-            final TextField md5 = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null, null,
-                    true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+            final TextField md5 = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
+                    null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
             md5.setId(swNameVersion + "/" + customFile.getFileName() + "/md5");
 
-            final TextField customFileName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false,
-                    null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+            final TextField customFileName = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY,
+                    false, null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
             customFileName.setId(swNameVersion + "/" + customFile.getFileName() + "/customFileName");
             newItem.getItemProperty(SHA1_CHECKSUM).setValue(sha1);
             newItem.getItemProperty(MD5_CHECKSUM).setValue(md5);
@@ -265,8 +265,8 @@ public class UploadConfirmationwindow implements Button.ClickListener {
     private void addFileNameLayout(final Item newItem, final String baseSoftwareModuleNameVersion,
             final String customFileName, final String itemId) {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        final TextField fileNameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false,
-                null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        final TextField fileNameTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY,
+                false, null, null, true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         fileNameTextField.setId(baseSoftwareModuleNameVersion + "/" + customFileName + "/customFileName");
         fileNameTextField.setData(baseSoftwareModuleNameVersion + "/" + customFileName);
         fileNameTextField.setValue(customFileName);

@@ -54,7 +54,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
@@ -77,7 +76,6 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String START_OPTION = "Start";
 
-
     @Autowired
     private transient RolloutManagement rolloutManagement;
 
@@ -94,7 +92,6 @@ public class RolloutListGrid extends AbstractGrid {
     private transient SpPermissionChecker permissionChecker;
 
     private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
-
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final RolloutEvent event) {
@@ -393,10 +390,8 @@ public class RolloutListGrid extends AbstractGrid {
 
     private void onUpdate(final ContextMenuData contextMenuData) {
         addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
-        final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
-        addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
-        UI.getCurrent().addWindow(addTargetWindow);
-        addTargetWindow.setVisible(Boolean.TRUE);
+        UI.getCurrent().addWindow(addUpdateRolloutWindow);
+        addUpdateRolloutWindow.setVisible(Boolean.TRUE);
     }
 
     private void refreshGrid() {

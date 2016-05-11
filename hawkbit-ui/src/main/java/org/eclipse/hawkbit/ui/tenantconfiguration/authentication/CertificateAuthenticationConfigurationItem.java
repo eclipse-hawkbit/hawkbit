@@ -70,8 +70,8 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         caRootAuthorityLabel.setDescription(
                 "The SSL Issuer iRules.X509 hash, to validate against the controller request certifcate.");
 
-        caRootAuthorityTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null, "",
-                true, 128);
+        caRootAuthorityTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
+                "", true, 128);
         caRootAuthorityTextField.setWidth("500px");
         caRootAuthorityTextField.setImmediate(true);
         caRootAuthorityTextField.addTextChangeListener(event -> caRootAuthorityChanged());

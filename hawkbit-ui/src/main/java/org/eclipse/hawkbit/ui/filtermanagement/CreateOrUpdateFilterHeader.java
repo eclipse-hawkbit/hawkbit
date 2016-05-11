@@ -222,8 +222,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private TextField createNameTextField() {
-        final TextField nameField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.customfiltername"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        final TextField nameField = SPUIComponentProvider.getTextField(i18n.get("textfield.customfiltername"), "",
+                ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.customfiltername"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameField.setId(SPUIComponetIdProvider.CUSTOM_FILTER_ADD_NAME);
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(event -> onFiterNameChange(event));
@@ -414,8 +415,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, "", "",
-                true, SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
+        final TextField textField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, "",
+                "", true, SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
         textField.setId("custom.query.text.Id");
         textField.addStyleName("target-filter-textfield");
         textField.setWidth(900.0F, Unit.PIXELS);

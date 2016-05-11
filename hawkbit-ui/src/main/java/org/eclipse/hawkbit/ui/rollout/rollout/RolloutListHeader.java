@@ -27,7 +27,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 
 /**
  * 
@@ -55,7 +54,6 @@ public class RolloutListHeader extends AbstractGridHeader {
     @PostConstruct
     protected void init() {
         super.init();
-        addUpdateRolloutWindow.init();
     }
 
     @Override
@@ -91,11 +89,10 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        addUpdateRolloutWindow.resetComponents();
-        final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
-        UI.getCurrent().addWindow(addTargetWindow);
-        addTargetWindow.setVisible(Boolean.TRUE);
-
+        // addUpdateRolloutWindow.resetComponents();
+        addUpdateRolloutWindow.init();
+        UI.getCurrent().addWindow(addUpdateRolloutWindow);
+        addUpdateRolloutWindow.setVisible(Boolean.TRUE);
     }
 
     @Override

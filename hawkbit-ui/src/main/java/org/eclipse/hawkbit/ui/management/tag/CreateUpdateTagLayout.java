@@ -173,19 +173,20 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        tagName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME,
-                true, "", i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME, true, "", i18n.get("textfield.name"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
 
-        tagDesc = SPUIComponentProvider.getTextArea("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC,
+        tagDesc = SPUIComponentProvider.getTextArea(null, "", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC,
                 false, "", i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
         tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
-                i18n.get("label.combobox.tag"));
+        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.tag"), "", "", null, null, false,
+                "", i18n.get("label.combobox.tag"));
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
 

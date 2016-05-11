@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
+import org.eclipse.hawkbit.ui.common.CommonDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
@@ -61,9 +61,10 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -79,7 +80,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class AddUpdateRolloutWindowLayout extends CustomComponent {
+public class AddUpdateRolloutWindowLayout extends CommonDialog {
 
     private static final long serialVersionUID = 2999293468801479916L;
 
@@ -113,6 +114,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
 
+    private Label madatoryLabel;
+
     private TextField rolloutName;
 
     private ComboBox distributionSet;
@@ -135,7 +138,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private OptionGroup errorThresholdOptionGroup;
 
-    // private Link linkToHelp;
+    private Link linkToHelp;
 
     private Window addUpdateRolloutWindow;
 
@@ -149,12 +152,21 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private TextArea targetFilterQuery;
 
+    public AddUpdateRolloutWindowLayout() {
+        super();
+    }
+
+    public AddUpdateRolloutWindowLayout(final String title, final FormLayout form, final String helpLink) {
+        super(title, form, helpLink);
+    }
+
     /**
      * Create components and layout.
      */
     public void init() {
-        createRequiredComponents();
-        buildLayout();
+        // createRequiredComponents();
+        // buildLayout();
+        initForm();
     }
 
     public Window getWindow() {
@@ -202,17 +214,13 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.setSizeUndefined();
 
-        // mainLayout.addComponents(getMandatoryLabelLinkToHelp(), rolloutName,
-        // distributionSet, getTargetFilterLayout(),
-        // getGroupDetailsLayout(), getTriggerThresoldLayout(),
-        // getErrorThresoldLayout(), description,
-        // actionTypeOptionGroupLayout, getSaveDiscardButtonLayout());
+        mainLayout.addComponents(madatoryLabel, rolloutName, distributionSet, getTargetFilterLayout(),
+                getGroupDetailsLayout(), getTriggerThresoldLayout(), getErrorThresoldLayout(), description,
+                actionTypeOptionGroupLayout, linkToHelp, getSaveDiscardButtonLayout());
 
-        mainLayout.addComponents(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRolloutView()),
-                createMandatoryLabel(), rolloutName, distributionSet, getTargetFilterLayout(), getGroupDetailsLayout(),
-                getTriggerThresoldLayout(), getErrorThresoldLayout(), description, actionTypeOptionGroupLayout,
-                getSaveDiscardButtonLayout());
-        setCompositionRoot(mainLayout);
+        mainLayout.addComponent(new Label("TEST TEST TEST"));
+        mainLayout.setComponentAlignment(linkToHelp, Alignment.BOTTOM_RIGHT);
+        rolloutName.focus();
     }
 
     private HorizontalLayout getGroupDetailsLayout() {
@@ -225,9 +233,12 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private HorizontalLayout getErrorThresoldLayout() {
+        createErrorThresold();
+        createErrorThresholdOptionGroup();
         final HorizontalLayout errorThresoldLayout = new HorizontalLayout();
         errorThresoldLayout.setSizeFull();
-        errorThresoldLayout.addComponents(errorThreshold, errorThresholdOptionGroup);
+        errorThresoldLayout.addComponents(SPUIComponentProvider.getLabel(i18n.get("prompt.error.threshold"), null),
+                errorThreshold, errorThresholdOptionGroup);
         errorThresoldLayout.setExpandRatio(errorThreshold, 1.0F);
         return errorThresoldLayout;
     }
@@ -244,10 +255,12 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private HorizontalLayout getTriggerThresoldLayout() {
+        createTriggerThresold();
         final HorizontalLayout triggerThresholdLayout = new HorizontalLayout();
         triggerThresholdLayout.setSizeFull();
-        triggerThresholdLayout.addComponents(triggerThreshold, getPercentHintLabel());
-        triggerThresholdLayout.setExpandRatio(triggerThreshold, 1.0F);
+        triggerThresholdLayout.addComponents(SPUIComponentProvider.getLabel(i18n.get("prompt.tigger.thresold"), null),
+                triggerThreshold, getPercentHintLabel());
+        triggerThresholdLayout.setExpandRatio(triggerThreshold, 2.0F);
         return triggerThresholdLayout;
     }
 
@@ -268,20 +281,28 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         return buttonsLayout;
     }
 
-    // private HorizontalLayout getMandatoryLabelLinkToHelp() {
-    // final HorizontalLayout mandatoryLabelLinkToHelpLayout = new
-    // HorizontalLayout();
-    // mandatoryLabelLinkToHelpLayout.setSizeFull();
-    // mandatoryLabelLinkToHelpLayout.addComponents(madatoryLabel, linkToHelp);
-    // mandatoryLabelLinkToHelpLayout.setComponentAlignment(madatoryLabel,
-    // Alignment.MIDDLE_LEFT);
-    // mandatoryLabelLinkToHelpLayout.setComponentAlignment(linkToHelp,
-    // Alignment.MIDDLE_RIGHT);
-    // mandatoryLabelLinkToHelpLayout.addStyleName("window-style");
-    // return mandatoryLabelLinkToHelpLayout;
-    // }
+    private void initForm() {
+
+        getFormLayout().addComponent(createMandatoryLabel());
+        getFormLayout().addComponent(createRolloutNameField());
+        getFormLayout().addComponent(createDistributionSetCombo());
+        populateDistributionSet();
+        getFormLayout().addComponent(createTargetFilterQueryCombo());
+        populateTargetFilterQuery();
+        getFormLayout().addComponent(createNoOfGroupsField());
+        getFormLayout().addComponent(createGroupSizeLabel());
+        getFormLayout().addComponent(getTriggerThresoldLayout());
+        getFormLayout().addComponent(getErrorThresoldLayout());
+        getFormLayout().addComponent(createDescription());
+        getFormLayout().addComponent(actionTypeOptionGroupLayout);
+        actionTypeOptionGroupLayout.selectDefaultOption();
+
+        getFormLayout().addComponent(createTotalTargetsLabel());
+        getFormLayout().addComponent(createTargetFilterQuery());
+    }
 
     private void createRequiredComponents() {
+        madatoryLabel = createMandatoryLabel();
         rolloutName = createRolloutNameField();
         distributionSet = createDistributionSetCombo();
         populateDistributionSet();
@@ -291,10 +312,10 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
         noOfGroups = createNoOfGroupsField();
         groupSizeLabel = createGroupSizeLabel();
-        triggerThreshold = createTriggerThresold();
-        errorThreshold = createErrorThresold();
-        description = createDescription();
-        errorThresholdOptionGroup = createErrorThresholdOptionGroup();
+        // triggerThreshold = createTriggerThresold();
+        // errorThreshold = createErrorThresold();
+        // description = createDescription();
+        // errorThresholdOptionGroup = createErrorThresholdOptionGroup();
         setDefaultSaveStartGroupOption();
         saveRolloutBtn = createSaveButton();
         discardRollloutBtn = createDiscardButton();
@@ -303,15 +324,10 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         totalTargetsLabel = createTotalTargetsLabel();
         targetFilterQuery = createTargetFilterQuery();
 
-        // linkToHelp = createLinkToHelp();
+        linkToHelp = SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
     }
-
-    // private Link createLinkToHelp() {
-    // return
-    // SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
-    // }
 
     private Label createGroupSizeLabel() {
         final Label groupSize = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
@@ -323,8 +339,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private TextArea createTargetFilterQuery() {
-        final TextArea filterField = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY,
-                false, null, null, SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
+        final TextArea filterField = SPUIComponentProvider.getTextArea(null, "text-area-style",
+                ValoTheme.TEXTFIELD_TINY, false, null, null,
+                SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
         filterField.setId(SPUIComponetIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         filterField.setVisible(false);
@@ -342,17 +359,17 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         return targetCountLabel;
     }
 
-    private OptionGroup createErrorThresholdOptionGroup() {
-        final OptionGroup errorThresoldOptions = new OptionGroup();
+    private void createErrorThresholdOptionGroup() {
+        errorThresholdOptionGroup = new OptionGroup();
         for (final ERRORTHRESOLDOPTIONS option : ERRORTHRESOLDOPTIONS.values()) {
-            errorThresoldOptions.addItem(option.getValue());
+            errorThresholdOptionGroup.addItem(option.getValue());
         }
-        errorThresoldOptions.setId(SPUIComponetIdProvider.ROLLOUT_ERROR_THRESOLD_OPTION_ID);
-        errorThresoldOptions.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-        errorThresoldOptions.addStyleName(SPUIStyleDefinitions.ROLLOUT_OPTION_GROUP);
-        errorThresoldOptions.setSizeUndefined();
-        errorThresoldOptions.addValueChangeListener(event -> onErrorThresoldOptionChange(event));
-        return errorThresoldOptions;
+        errorThresholdOptionGroup.setId(SPUIComponetIdProvider.ROLLOUT_ERROR_THRESOLD_OPTION_ID);
+        errorThresholdOptionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        errorThresholdOptionGroup.addStyleName(SPUIStyleDefinitions.ROLLOUT_OPTION_GROUP);
+        errorThresholdOptionGroup.setSizeUndefined();
+        errorThresholdOptionGroup.addValueChangeListener(event -> onErrorThresoldOptionChange(event));
+        setDefaultSaveStartGroupOption();
     }
 
     private void onErrorThresoldOptionChange(final ValueChangeEvent event) {
@@ -361,21 +378,21 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         if (event.getProperty().getValue().equals(ERRORTHRESOLDOPTIONS.COUNT.getValue())) {
             errorThreshold.addValidator(new ErrorThresoldOptionValidator());
         } else {
-            errorThreshold.addValidator(new ThresoldFieldValidator());
+            errorThreshold.addValidator(new ThresholdFieldValidator());
         }
         errorThreshold.getValidators();
     }
 
     private ComboBox createTargetFilterQueryCombo() {
-        final ComboBox targetFilter = SPUIComponentProvider.getComboBox("", "", null, null, true, "",
-                i18n.get("prompt.target.filter"));
-        targetFilter.setImmediate(true);
-        targetFilter.setPageLength(7);
-        targetFilter.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        targetFilter.setId(SPUIComponetIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID);
-        targetFilter.setSizeFull();
-        targetFilter.addValueChangeListener(event -> onTargetFilterChange());
-        return targetFilter;
+        targetFilterQueryCombo = SPUIComponentProvider.getComboBox(i18n.get("prompt.target.filter"), "", "", null, null,
+                true, "", i18n.get("prompt.target.filter"));
+        targetFilterQueryCombo.setImmediate(true);
+        targetFilterQueryCombo.setPageLength(7);
+        targetFilterQueryCombo.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+        targetFilterQueryCombo.setId(SPUIComponetIdProvider.ROLLOUT_TARGET_FILTER_COMBO_ID);
+        targetFilterQueryCombo.setSizeFull();
+        targetFilterQueryCombo.addValueChangeListener(event -> onTargetFilterChange());
+        return targetFilterQueryCombo;
     }
 
     private void onTargetFilterChange() {
@@ -606,37 +623,37 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private TextArea createDescription() {
-        final TextArea descriptionField = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY,
-                false, null, i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        final TextArea descriptionField = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"),
+                "text-area-style", ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descriptionField.setId(SPUIComponetIdProvider.ROLLOUT_DESCRIPTION_ID);
         descriptionField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         descriptionField.setSizeFull();
         return descriptionField;
     }
 
-    private TextField createErrorThresold() {
-        final TextField errorField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
+    private void createErrorThresold() {
+        errorThreshold = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("prompt.error.threshold"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        errorField.addValidator(new ThresoldFieldValidator());
-        errorField.setId(SPUIComponetIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
-        errorField.setMaxLength(7);
-        errorField.setSizeFull();
-        return errorField;
+        errorThreshold.addValidator(new ThresholdFieldValidator());
+        errorThreshold.setId(SPUIComponetIdProvider.ROLLOUT_ERROR_THRESOLD_ID);
+        errorThreshold.setMaxLength(7);
+        errorThreshold.setSizeFull();
     }
 
-    private TextField createTriggerThresold() {
-        final TextField thresholdField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
+    private void createTriggerThresold() {
+        triggerThreshold = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("prompt.tigger.thresold"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        thresholdField.setId(SPUIComponetIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
-        thresholdField.addValidator(new ThresoldFieldValidator());
-        thresholdField.setSizeFull();
-        thresholdField.setMaxLength(3);
-        return thresholdField;
+        triggerThreshold.setId(SPUIComponetIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
+        triggerThreshold.addValidator(new ThresholdFieldValidator());
+        triggerThreshold.setSizeUndefined();
+        triggerThreshold.setMaxLength(3);
     }
 
     private TextField createNoOfGroupsField() {
-        final TextField noOfGroupsField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("prompt.number.of.groups"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        final TextField noOfGroupsField = SPUIComponentProvider.getTextField(i18n.get("prompt.number.of.groups"), "",
+                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("prompt.number.of.groups"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         noOfGroupsField.setId(SPUIComponetIdProvider.ROLLOUT_NO_OF_GROUPS_ID);
         noOfGroupsField.addValidator(new GroupNumberValidator());
         noOfGroupsField.setSizeFull();
@@ -655,14 +672,14 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private ComboBox createDistributionSetCombo() {
-        final ComboBox dsSet = SPUIComponentProvider.getComboBox("", "", null, null, true, "",
-                i18n.get("prompt.distribution.set"));
-        dsSet.setImmediate(true);
-        dsSet.setPageLength(7);
-        dsSet.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-        dsSet.setId(SPUIComponetIdProvider.ROLLOUT_DS_ID);
-        dsSet.setSizeFull();
-        return dsSet;
+        distributionSet = SPUIComponentProvider.getComboBox(i18n.get("prompt.distribution.set"), "", "", null, null,
+                true, "", i18n.get("prompt.distribution.set"));
+        distributionSet.setImmediate(true);
+        distributionSet.setPageLength(7);
+        distributionSet.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+        distributionSet.setId(SPUIComponetIdProvider.ROLLOUT_DS_ID);
+        distributionSet.setSizeFull();
+        return distributionSet;
     }
 
     private void populateDistributionSet() {
@@ -680,8 +697,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private TextField createRolloutNameField() {
-        final TextField rolloutNameField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        final TextField rolloutNameField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
+                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.name"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         rolloutNameField.setId(SPUIComponetIdProvider.ROLLOUT_NAME_FIELD_ID);
         rolloutNameField.setSizeFull();
         return rolloutNameField;
@@ -728,7 +746,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         return (int) Math.ceil((double) totalTargetsCount / Double.parseDouble(noOfGroups.getValue()));
     }
 
-    class ThresoldFieldValidator implements Validator {
+    class ThresholdFieldValidator implements Validator {
         private static final long serialVersionUID = 9049939751976326550L;
 
         @Override

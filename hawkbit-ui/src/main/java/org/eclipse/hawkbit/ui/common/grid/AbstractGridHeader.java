@@ -102,7 +102,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("filter-box", "text-style filter-box-hide",
+        final TextField textField = SPUIComponentProvider.getTextField("", "filter-box", "text-style filter-box-hide",
                 false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         textField.setId(getSearchBoxId());
         textField.setWidth(100.0f, Unit.PERCENTAGE);

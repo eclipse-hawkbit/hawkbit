@@ -124,7 +124,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField campSearchTextField = SPUIComponentProvider.getTextField("filter-box",
+        final TextField campSearchTextField = SPUIComponentProvider.getTextField(null, "filter-box",
                 "text-style filter-box-hide", false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         campSearchTextField.setId("target.filter.search.text.Id");
         campSearchTextField.setWidth(500.0f, Unit.PIXELS);

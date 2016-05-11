@@ -44,7 +44,7 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractTableHeader extends VerticalLayout {
 
     private static final long serialVersionUID = 4881626370291837175L;
-    
+
     @Autowired
     protected I18N i18n;
 
@@ -53,7 +53,6 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     @Autowired
     protected transient EventBus.SessionEventBus eventbus;
-    
 
     private Label headerCaption;
 
@@ -83,7 +82,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         restoreState();
         eventbus.subscribe(this);
     }
-    
+
     @PreDestroy
     void destroy() {
         eventbus.unsubscribe(this);
@@ -214,7 +213,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     }
 
     private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("filter-box", "text-style filter-box-hide",
+        final TextField textField = SPUIComponentProvider.getTextField("", "filter-box", "text-style filter-box-hide",
                 false, "", "", false, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         textField.setId(getSearchBoxId());
         textField.setWidth(100.0f, Unit.PERCENTAGE);

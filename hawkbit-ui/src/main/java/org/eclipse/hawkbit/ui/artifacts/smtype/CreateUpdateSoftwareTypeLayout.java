@@ -165,23 +165,26 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        typeName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME,
-                true, "", i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        typeName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
 
-        typeKey = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY,
-                true, "", i18n.get("textfield.key"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY, true, "", i18n.get("textfield.key"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
 
-        typeDesc = SPUIComponentProvider.getTextArea("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC,
-                false, "", i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        typeDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
+                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
         typeDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
         typeDesc.setImmediate(true);
         typeDesc.setNullRepresentation("");
 
-        typeNameComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
-                i18n.get("label.combobox.type"));
+        typeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
+                "", i18n.get("label.combobox.type"));
         typeNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         typeNameComboBox.setImmediate(true);
 

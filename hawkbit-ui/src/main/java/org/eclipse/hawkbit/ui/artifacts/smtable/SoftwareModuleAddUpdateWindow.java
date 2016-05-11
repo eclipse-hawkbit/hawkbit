@@ -133,22 +133,24 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     private void createRequiredComponents() {
         /* name textfield */
-        nameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
+                true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_NAME);
 
         /* version text field */
-        versionTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.version"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
+                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         versionTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_VERSION);
 
         /* Vendor text field */
-        vendorTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
+                false, null, i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         vendorTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_VENDOR);
 
-        descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTAREA_TINY, false, null,
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
+                ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponetIdProvider.ADD_SW_MODULE_DESCRIPTION);
         addDescriptionTextChangeListener();
         addVendorTextChangeListener();
@@ -158,8 +160,8 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         madatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         madatoryLabel.addStyleName(ValoTheme.LABEL_SMALL);
 
-        typeComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, null,
-                i18n.get("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, false,
+                null, i18n.get("upload.swmodule.type"));
         typeComboBox.setId(SPUIComponetIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);

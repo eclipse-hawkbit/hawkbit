@@ -105,17 +105,17 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private void createRequiredComponents() {
         /* Textfield for controller Id */
-        controllerIDTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
+        controllerIDTextField = SPUIComponentProvider.getTextField( i18n.get("prompt.target.id"), "", ValoTheme.TEXTFIELD_TINY, true, null,
                 i18n.get("prompt.target.id"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         controllerIDTextField.setId(SPUIComponetIdProvider.TARGET_ADD_CONTROLLER_ID);
 
         /* Textfield for target name */
-        nameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
+        nameTextField = SPUIComponentProvider.getTextField( i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponetIdProvider.TARGET_ADD_NAME);
 
         /* Textarea for target description */
-        descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY, false, null,
+        descTextArea = SPUIComponentProvider.getTextArea( i18n.get("textfield.description"), "text-area-style", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponetIdProvider.TARGET_ADD_DESC);
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);

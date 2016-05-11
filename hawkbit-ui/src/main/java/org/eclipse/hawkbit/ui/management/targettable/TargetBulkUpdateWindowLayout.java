@@ -195,8 +195,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private TextArea getDescriptionTextArea() {
-        final TextArea description = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY,
-                false, null, i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        final TextArea description = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"),
+                "text-area-style", ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         description.setId(SPUIComponetIdProvider.BULK_UPLOAD_DESC);
         description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         description.setWidth("100%");
@@ -205,8 +206,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private ComboBox getDsComboField() {
         final Container container = createContainer();
-        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, "",
-                i18n.get("bulkupload.ds.name"));
+        final ComboBox dsComboBox = SPUIComponentProvider.getComboBox(i18n.get("bulkupload.ds.name"), "", "", null,
+                null, false, "", i18n.get("bulkupload.ds.name"));
         dsComboBox.setSizeUndefined();
         dsComboBox.addStyleName(SPUIDefinitions.BULK_UPLOD_DS_COMBO_STYLE);
         dsComboBox.setImmediate(true);
