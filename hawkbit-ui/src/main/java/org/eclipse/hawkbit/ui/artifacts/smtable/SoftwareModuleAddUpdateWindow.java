@@ -12,7 +12,9 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -65,6 +67,9 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     private Label madatoryLabel;
 
@@ -227,8 +232,10 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
          * (controller Id, name & description) and action buttons layout
          */
         final VerticalLayout mainLayout = new VerticalLayout();
+        mainLayout.setSizeUndefined();
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.addStyleName("lay-color");
+        mainLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
         mainLayout.addComponent(madatoryLabel);
         mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
         mainLayout.addComponent(hLayout);

@@ -14,6 +14,8 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -69,6 +71,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient UINotification uINotification;
+    
+    @Autowired
+    private transient UiProperties uiProperties;
 
     private TextField controllerIDTextField;
     private TextField nameTextField;
@@ -83,7 +88,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     private String oldTargetName;
     private String oldTargetDesc;
-
+    
     /**
      * Initialize the Add Update Window Component for Target.
      */
@@ -146,6 +151,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.addStyleName("lay-color");
         mainLayout.setSizeUndefined();
+        mainLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
         mainLayout.addComponent(madatoryLabel);
         mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
         if (Boolean.TRUE.equals(editTarget)) {

@@ -19,8 +19,10 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
@@ -115,6 +117,9 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
     @Autowired
     private transient DistributionSetRepository distributionSetRepository;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     /**
      * Instance of ColorPickerPreview.
@@ -295,6 +300,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         colorLayout.addComponent(sliderLayout);
 
         final VerticalLayout mainWindowLayout = new VerticalLayout();
+        mainWindowLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
         mainWindowLayout.addComponent(mainLayout);
         mainWindowLayout.addComponent(colorLayout);
         mainWindowLayout.addComponent(buttonLayout);

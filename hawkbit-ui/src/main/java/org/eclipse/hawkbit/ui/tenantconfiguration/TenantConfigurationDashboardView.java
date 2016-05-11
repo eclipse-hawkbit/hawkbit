@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
@@ -32,7 +33,6 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -90,6 +90,11 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         rootLayout.setMargin(true);
         rootLayout.setSpacing(true);
 
+        final PopupWindowHelp help = new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRolloutView());
+        help.setSpacing(true);
+        rootLayout.addComponent(help);
+        rootLayout.setComponentAlignment(help, Alignment.BOTTOM_RIGHT);
+
         configurationViews.forEach(view -> rootLayout.addComponent(view));
 
         final HorizontalLayout buttonContent = saveConfigurationButtonsLayout();
@@ -119,9 +124,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         undoConfigurationBtn.addClickListener(event -> undoConfiguration());
         hlayout.addComponent(undoConfigurationBtn);
 
-        final Link linkToSystemConfigHelp = SPUIComponentProvider
-                .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
-        hlayout.addComponent(linkToSystemConfigHelp);
+        // final Link linkToSystemConfigHelp = SPUIComponentProvider
+        // .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
+        // hlayout.addComponent(linkToSystemConfigHelp);
 
         return hlayout;
     }

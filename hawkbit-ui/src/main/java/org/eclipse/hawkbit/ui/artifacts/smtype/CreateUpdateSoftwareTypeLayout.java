@@ -16,9 +16,11 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -95,6 +97,9 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     private String createTypeStr;
     private String updateTypeStr;
@@ -226,10 +231,12 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         colorPickerLayout.addComponent(colorSelect);
 
         fieldLayout = new VerticalLayout();
+        fieldLayout.setSizeUndefined();
         fieldLayout.setSpacing(true);
         fieldLayout.setMargin(false);
-        fieldLayout.setWidth("100%");
-        fieldLayout.setHeight(null);
+        // fieldLayout.setWidth("100%");
+        // fieldLayout.setHeight(null);
+        fieldLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
         fieldLayout.addComponent(createOptiongroup);
         fieldLayout.addComponent(comboLayout);
         fieldLayout.addComponent(madatoryLabel);
@@ -450,6 +457,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
     private void createOptionGroupByValues(final List<String> tagOptions) {
         createOptiongroup = new OptionGroup("", tagOptions);
+        createOptiongroup.setCaption(null);
         createOptiongroup.setStyleName(ValoTheme.OPTIONGROUP_SMALL);
         createOptiongroup.addStyleName("custom-option-group");
         createOptiongroup.setNullSelectionAllowed(false);

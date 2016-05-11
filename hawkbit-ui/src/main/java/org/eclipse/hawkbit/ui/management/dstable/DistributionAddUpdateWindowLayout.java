@@ -22,7 +22,9 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -94,6 +96,9 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     @Autowired
     private transient TenantMetaDataRepository tenantMetaDataRepository;
 
+    @Autowired
+    private transient UiProperties uiProperties;
+
     private Button saveDistributionBtn;
     private Button discardDistributionBtn;
     private TextField distNameTextField;
@@ -143,8 +148,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         setSpacing(Boolean.TRUE);
         addStyleName("lay-color");
         setSizeUndefined();
-        addComponents(madatoryLabel, distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea,
-                reqMigStepCheckbox);
+        addComponents(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()), madatoryLabel,
+                distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea, reqMigStepCheckbox);
 
         addComponent(buttonsLayout);
         setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);

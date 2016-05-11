@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
@@ -63,7 +64,6 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -113,8 +113,6 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
 
-    private Label madatoryLabel;
-
     private TextField rolloutName;
 
     private ComboBox distributionSet;
@@ -137,7 +135,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private OptionGroup errorThresholdOptionGroup;
 
-    private Link linkToHelp;
+    // private Link linkToHelp;
 
     private Window addUpdateRolloutWindow;
 
@@ -204,9 +202,16 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.setSizeUndefined();
 
-        mainLayout.addComponents(getMandatoryLabelLinkToHelp(), rolloutName, distributionSet, getTargetFilterLayout(),
-                getGroupDetailsLayout(), getTriggerThresoldLayout(), getErrorThresoldLayout(), description,
-                actionTypeOptionGroupLayout, getSaveDiscardButtonLayout());
+        // mainLayout.addComponents(getMandatoryLabelLinkToHelp(), rolloutName,
+        // distributionSet, getTargetFilterLayout(),
+        // getGroupDetailsLayout(), getTriggerThresoldLayout(),
+        // getErrorThresoldLayout(), description,
+        // actionTypeOptionGroupLayout, getSaveDiscardButtonLayout());
+
+        mainLayout.addComponents(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRolloutView()),
+                createMandatoryLabel(), rolloutName, distributionSet, getTargetFilterLayout(), getGroupDetailsLayout(),
+                getTriggerThresoldLayout(), getErrorThresoldLayout(), description, actionTypeOptionGroupLayout,
+                getSaveDiscardButtonLayout());
         setCompositionRoot(mainLayout);
     }
 
@@ -263,18 +268,20 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         return buttonsLayout;
     }
 
-    private HorizontalLayout getMandatoryLabelLinkToHelp() {
-        final HorizontalLayout mandatoryLabelLinkToHelpLayout = new HorizontalLayout();
-        mandatoryLabelLinkToHelpLayout.setSizeFull();
-        mandatoryLabelLinkToHelpLayout.addComponents(madatoryLabel, linkToHelp);
-        mandatoryLabelLinkToHelpLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
-        mandatoryLabelLinkToHelpLayout.setComponentAlignment(linkToHelp, Alignment.MIDDLE_RIGHT);
-        mandatoryLabelLinkToHelpLayout.addStyleName("window-style");
-        return mandatoryLabelLinkToHelpLayout;
-    }
+    // private HorizontalLayout getMandatoryLabelLinkToHelp() {
+    // final HorizontalLayout mandatoryLabelLinkToHelpLayout = new
+    // HorizontalLayout();
+    // mandatoryLabelLinkToHelpLayout.setSizeFull();
+    // mandatoryLabelLinkToHelpLayout.addComponents(madatoryLabel, linkToHelp);
+    // mandatoryLabelLinkToHelpLayout.setComponentAlignment(madatoryLabel,
+    // Alignment.MIDDLE_LEFT);
+    // mandatoryLabelLinkToHelpLayout.setComponentAlignment(linkToHelp,
+    // Alignment.MIDDLE_RIGHT);
+    // mandatoryLabelLinkToHelpLayout.addStyleName("window-style");
+    // return mandatoryLabelLinkToHelpLayout;
+    // }
 
     private void createRequiredComponents() {
-        madatoryLabel = createMandatoryLabel();
         rolloutName = createRolloutNameField();
         distributionSet = createDistributionSetCombo();
         populateDistributionSet();
@@ -296,14 +303,15 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         totalTargetsLabel = createTotalTargetsLabel();
         targetFilterQuery = createTargetFilterQuery();
 
-        linkToHelp = createLinkToHelp();
+        // linkToHelp = createLinkToHelp();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
 
     }
 
-    private Link createLinkToHelp() {
-        return SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
-    }
+    // private Link createLinkToHelp() {
+    // return
+    // SPUIComponentProvider.getHelpLink(uiProperties.getLinks().getDocumentation().getRolloutView());
+    // }
 
     private Label createGroupSizeLabel() {
         final Label groupSize = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);

@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -48,6 +49,9 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
 
     @Autowired
     private I18N i18n;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     private Long currentDefaultDisSetType;
 

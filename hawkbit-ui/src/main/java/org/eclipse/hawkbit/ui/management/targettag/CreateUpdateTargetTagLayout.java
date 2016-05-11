@@ -66,6 +66,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     private void createOptionGroup(final List<String> tagOptions) {
         optiongroup = new OptionGroup("", tagOptions);
+        optiongroup.setCaption(null);
         optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         optiongroup.addStyleName("custom-option-group");
 

@@ -17,7 +17,9 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
+import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -68,6 +70,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     protected String createTagNw;
     protected String updateTagNw;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     @Autowired
     protected I18N i18n;
@@ -251,15 +256,16 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         buttonLayout.setWidth("152px");
 
         final VerticalLayout fieldButtonLayout = new VerticalLayout();
+        fieldButtonLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
         fieldButtonLayout.addComponent(fieldLayout);
         fieldButtonLayout.addComponent(buttonLayout);
         fieldButtonLayout.setComponentAlignment(buttonLayout, Alignment.BOTTOM_CENTER);
 
         mainLayout = new HorizontalLayout();
+        mainLayout.setSizeFull();
         mainLayout.addComponent(fieldButtonLayout);
 
         setCompositionRoot(mainLayout);
-
     }
 
     private void addListeners() {
