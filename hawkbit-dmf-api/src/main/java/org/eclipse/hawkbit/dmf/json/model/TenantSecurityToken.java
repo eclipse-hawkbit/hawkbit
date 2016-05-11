@@ -26,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class TenantSecurityToken {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String COAP_AUTHORIZATION_HEADER = "Coap-Authorization";
-    public static final String COAP_TOKEN_VALUE = "CoapToken";
 
     @JsonProperty
     private final String tenant;
