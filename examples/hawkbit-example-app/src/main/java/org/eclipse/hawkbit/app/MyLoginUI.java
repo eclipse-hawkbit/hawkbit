@@ -20,11 +20,11 @@ import com.vaadin.spring.annotation.SpringUI;
  * login path. The easiest way to get an hawkBit login UI running is to extend
  * the {@link HawkbitLoginUI} and to annotated it with {@link SpringUI} as in
  * this example to the defined {@link HawkbitTheme#LOGIN_UI_PATH}.
- * 
- *
- *
  */
 @SpringUI(path = HawkbitTheme.LOGIN_UI_PATH)
+// Exception squid:MaximumInheritanceDepth - Most of the inheritance comes from
+// Vaadin.
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class MyLoginUI extends HawkbitLoginUI {
 
     private static final long serialVersionUID = 1L;

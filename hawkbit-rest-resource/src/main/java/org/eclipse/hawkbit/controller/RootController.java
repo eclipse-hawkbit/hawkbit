@@ -318,8 +318,8 @@ public class RootController {
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", targetid, base);
 
-            controllerManagement.registerRetrieved(action,
-                    "Controller retrieved update action and should start now the download.");
+            controllerManagement.registerRetrieved(action, ControllerManagement.SERVER_MESSAGE_PREFIX
+                    + "Target retrieved update action and should start now the download.");
 
             return new ResponseEntity<>(base, HttpStatus.OK);
         }
@@ -497,8 +497,8 @@ public class RootController {
 
             LOG.debug("Found an active CancelAction for target {}. returning cancel: {}", targetid, cancel);
 
-            controllerManagement.registerRetrieved(action,
-                    "Controller retrieved cancel action and should start now the cancelation.");
+            controllerManagement.registerRetrieved(action, ControllerManagement.SERVER_MESSAGE_PREFIX
+                    + "Target retrieved cancel action and should start now the cancelation.");
 
             return new ResponseEntity<>(cancel, HttpStatus.OK);
         }
