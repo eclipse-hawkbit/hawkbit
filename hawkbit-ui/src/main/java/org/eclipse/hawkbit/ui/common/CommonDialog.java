@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.FormLayout;
@@ -67,13 +68,17 @@ public class CommonDialog extends Window {
 
         saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
+        saveButton.setCaption("save");
         // saveButton.setDescription(i18n.get("configuration.savebutton.tooltip"));
         hlayout.addComponent(saveButton);
+        hlayout.setComponentAlignment(saveButton, Alignment.MIDDLE_LEFT);
 
         cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "", "", "",
                 true, FontAwesome.UNDO, SPUIButtonStyleSmallNoBorder.class);
+        cancelButton.setCaption("cancel");
         // cancelButton.setDescription(i18n.get("configuration.cancellbutton.tooltip"));
         hlayout.addComponent(cancelButton);
+        hlayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_RIGHT);
 
         return hlayout;
     }
