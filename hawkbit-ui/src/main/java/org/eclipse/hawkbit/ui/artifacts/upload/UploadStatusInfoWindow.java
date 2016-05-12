@@ -11,7 +11,12 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -19,6 +24,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.Item;
@@ -69,9 +76,9 @@ public class UploadStatusInfoWindow extends Window {
 
     private static final long serialVersionUID = 1L;
 
-    private final Grid grid;
+    private Grid grid;
 
-    private final IndexedContainer uploads;
+    private IndexedContainer uploads;
 
     private volatile boolean errorOccured = false;
 
@@ -84,12 +91,15 @@ public class UploadStatusInfoWindow extends Window {
     private Button closeButton;
 
     private Button resizeButton;
+    
+    private UI ui;
+
 
     /**
      * Default Constructor.
      */
-    UploadStatusInfoWindow() {
-        super();
+    @PostConstruct
+    void init() {
 
         setPopupProperties();
         createStatusPopupHeaderComponents();
@@ -106,8 +116,45 @@ public class UploadStatusInfoWindow extends Window {
         mainLayout.addComponents(getCaptionLayout(), grid);
         mainLayout.setExpandRatio(grid, 1.0F);
         setContent(mainLayout);
+        eventBus.subscribe(this);
+        ui = UI.getCurrent();
+
     }
 
+    
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final UploadStatusEvent event) {
+        if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_IN_PROGRESS) {
+            UI.getCurrent().access(
+                    () -> updateProgress(event.getUploadStatus().getFileName(), event.getUploadStatus().getBytesRead(),
+                            event.getUploadStatus().getContentLength()));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STARTED) {
+            UI.getCurrent().access(() -> onStartOfUpload(event));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FAILED) {
+            ui.access(() -> uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
+                    .getFailureReason()));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_SUCCESSFUL) {
+            UI.getCurrent().access(() -> uploadSucceeded(event.getUploadStatus().getFileName()));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FINISHED) {
+            ui.access(() -> uploadSucceeded(event.getUploadStatus().getFileName()));
+        }
+    }
+    
+    private void onStartOfUpload(UploadStatusEvent event) {
+        uploadSessionStarted();
+        uploadStarted(event.getUploadStatus().getFileName());
+    }
+
+
+    @PreDestroy
+    void destroy() {
+        /*
+         * It's good manners to do this, even though vaadin-spring will
+         * automatically unsubscribe when this UI is garbage collected.
+         */
+        eventBus.unsubscribe(this);
+    }
+    
     private void restoreState() {
         Indexed container = grid.getContainerDataSource();
         if (container.getItemIds().isEmpty()) {
@@ -119,8 +166,10 @@ public class UploadStatusInfoWindow extends Window {
                 item.getItemProperty(PROGRESS).setValue(statusObject.getProgress());
                 item.getItemProperty(FILE_NAME).setValue(statusObject.getFilename());
             }
-            artifactUploadState.setUploadCompleted(true);
-            minimizeButton.setEnabled(false);
+            // artifactUploadState.setUploadCompleted(true);
+            if (artifactUploadState.isUploadCompleted()) {
+                minimizeButton.setEnabled(false);
+            }
         }
     }
 
@@ -130,6 +179,7 @@ public class UploadStatusInfoWindow extends Window {
         setResizable(false);
         setDraggable(true);
         setClosable(false);
+        setModal(true);
     }
 
     private void setGridColumnProperties() {
@@ -192,6 +242,8 @@ public class UploadStatusInfoWindow extends Window {
 
     private static class StatusRenderer extends HtmlRenderer {
 
+        private static final long serialVersionUID = -5365795450234970943L;
+
         @Override
         public JsonValue encode(final String value) {
             String result ;
@@ -216,18 +268,17 @@ public class UploadStatusInfoWindow extends Window {
     void uploadSessionFinished() {
         if (!errorOccured) {
             close();
-            eventBus.publish(this, UploadArtifactUIEvent.UPLOAD_FINISHED);
-            artifactUploadState.setUploadCompleted(true);
-            minimizeButton.setEnabled(false);
         }
-
+        artifactUploadState.setUploadCompleted(true);
+        minimizeButton.setEnabled(false);
     }
 
     void uploadSessionStarted() {
-        close();
-        openWindow();
+        if (!artifactUploadState.isStatusPopupMinimized()) {
+            close();
+            openWindow();
+        }
         minimizeButton.setEnabled(true);
-        eventBus.publish(this, UploadArtifactUIEvent.UPLOAD_STARTED);
         artifactUploadState.setUploadCompleted(false);
     }
 
@@ -287,22 +338,22 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     void uploadFailed(final String filename, final String errorReason) {
+        if (!errorOccured) {
+            errorOccured = true;
+        }
+        String status = "Failed";
         final Item item = uploads.getItem(filename);
         if (item != null) {
-            if (!errorOccured) {
-                errorOccured = true;
-            }
             item.getItemProperty(REASON).setValue(errorReason);
-            String status = "Failed";
             item.getItemProperty(STATUS).setValue(status);
-            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
-                    .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
-                    .collect(Collectors.toList());
-            if (!uploadStatusObjectList.isEmpty()) {
-                UploadStatusObject uploadStatusObject = uploadStatusObjectList.get(0);
-                uploadStatusObject.setStatus(status);
-                uploadStatusObject.setReason(errorReason);
-            }
+        }
+        List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
+                .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
+                .collect(Collectors.toList());
+        if (!uploadStatusObjectList.isEmpty()) {
+            UploadStatusObject uploadStatusObject = uploadStatusObjectList.get(0);
+            uploadStatusObject.setStatus(status);
+            uploadStatusObject.setReason(errorReason);
         }
     }
 
@@ -370,4 +421,5 @@ public class UploadStatusInfoWindow extends Window {
         closeBtn.addClickListener(event -> clearWindow());
         return closeBtn;
     }
+    
 }

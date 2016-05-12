@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadStatusObject;
@@ -67,6 +68,19 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
     private boolean isUploadCompleted = Boolean.FALSE;
     
     private List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
+    
+    private final AtomicInteger numberOfFileUploadsExpected = new AtomicInteger();
+
+    private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
+    
+    public AtomicInteger getNumberOfFilesActuallyUpload() {
+        return numberOfFilesActuallyUpload;
+    }
+    
+    public AtomicInteger getNumberOfFileUploadsExpected() {
+        return numberOfFileUploadsExpected;
+    }
+    
     
     public List<UploadStatusObject> getUploadedFileStatusList() {
         return uploadedFileStatusList;
