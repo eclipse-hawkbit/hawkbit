@@ -166,20 +166,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final LocalArtifact localArtifact = findLocalArtifactByFileResource(fileResource);
 
             if (localArtifact == null) {
+                LOG.info("target {} requested file resource {} which does not exists to download",
+                        secruityToken.getControllerId(), fileResource);
                 throw new EntityNotFoundException();
             }
 
-            // check action for this download purposes, the method will throw an
-            // EntityNotFoundException in case the controller is not allowed to
-            // download this file because it's not assigned to an action and not
-            // assigned to this controller. Otherwise no controllerId is set =
-            // anonymous download
-            if (secruityToken.getControllerId() != null) {
-                final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(
-                        secruityToken.getControllerId(), localArtifact.getSoftwareModule());
-                LOG.info("Found action for download authentication request action: {}, resource: {}", action,
-                        secruityToken.getFileResource());
-            }
+            checkIfArtifactIsAssignedToTarget(secruityToken, localArtifact);
 
             final Artifact artifact = convertDbArtifact(artifactManagement.loadLocalArtifactBinary(localArtifact));
             if (artifact == null) {
@@ -211,6 +203,35 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         return getMessageConverter().toMessage(authentificationResponse, messageProperties);
+    }
+
+    /**
+     * check action for this download purposes, the method will throw an
+     * EntityNotFoundException in case the controller is not allowed to download
+     * this file because it's not assigned to an action and not assigned to this
+     * controller. Otherwise no controllerId is set = anonymous download
+     * 
+     * @param secruityToken
+     *            the security token which holds the target ID to check on
+     * @param localArtifact
+     *            the local artifact to verify if the given target is allowed to
+     *            download this artifact
+     */
+    private void checkIfArtifactIsAssignedToTarget(final TenantSecurityToken secruityToken,
+            final LocalArtifact localArtifact) {
+        final String controllerId = secruityToken.getControllerId();
+        if (controllerId == null) {
+            LOG.info("anonymous download no authentication check for artifact {}", localArtifact);
+            return;
+        }
+        LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
+                controllerId, localArtifact);
+        if (!controllerManagement.hasTargetArtifactAssigned(controllerId, localArtifact)) {
+            LOG.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
+                    localArtifact);
+            throw new EntityNotFoundException();
+        }
+        LOG.info("download security check for target {} and artifact {} granted", controllerId, localArtifact);
     }
 
     private LocalArtifact findLocalArtifactByFileResource(final FileResource fileResource) {
@@ -284,7 +305,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
-                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
+                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress(),
+                target.getSecurityToken()));
 
     }
 
@@ -315,9 +337,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = checkActionExist(message, actionUpdateStatus);
 
         final ActionStatus actionStatus = new ActionStatus();
-        final List<String> messageText = actionUpdateStatus.getMessage();
-        final String messageString = String.join(", ", messageText);
-        actionStatus.addMessage(messageString);
+        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
+
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 

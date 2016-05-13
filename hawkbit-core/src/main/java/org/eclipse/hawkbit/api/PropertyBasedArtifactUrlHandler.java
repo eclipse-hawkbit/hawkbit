@@ -84,4 +84,15 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         return replaceMap;
     }
 
+    @Override
+    public boolean protocolSupported(final UrlProtocol protocol) {
+        final String protocolString = protocol.name().toLowerCase();
+        final ProtocolProperties properties = urlHandlerProperties.getProperties(protocolString);
+        if (properties == null || properties.getPattern() == null) {
+            return false;
+        }
+
+        return properties.isEnabled();
+    }
+
 }

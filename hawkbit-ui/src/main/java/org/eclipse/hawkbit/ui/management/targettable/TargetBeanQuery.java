@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -130,8 +131,8 @@ public class TargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(targ.getLastModifiedAt()));
             prxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(targ.getCreatedAt()));
             prxyTarget.setCreatedAt(targ.getCreatedAt());
-            prxyTarget.setCreatedByUser(HawkbitCommonUtil.getIMUser(targ.getCreatedBy()));
-            prxyTarget.setModifiedByUser(HawkbitCommonUtil.getIMUser(targ.getLastModifiedBy()));
+            prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
+            prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
 
             if (pinnedDistId == null) {
                 prxyTarget.setInstalledDistributionSet(null);

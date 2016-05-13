@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.CoapAnonymousPreAuthenticatedFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousDownload;
 import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousFilter;
@@ -97,7 +96,6 @@ public class AmqpControllerAuthentfication {
         filterChain.add(anonymousDownloadFilter);
 
         filterChain.add(new ControllerPreAuthenticatedAnonymousFilter(ddiSecruityProperties));
-        filterChain.add(new CoapAnonymousPreAuthenticatedFilter());
     }
 
     /**

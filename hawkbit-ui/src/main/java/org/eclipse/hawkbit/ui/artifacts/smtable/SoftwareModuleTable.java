@@ -157,22 +157,26 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected Item addEntity(final SoftwareModule baseEntity) {
         final Item item = super.addEntity(baseEntity);
-
-        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
-                baseEntity.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
-
-        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
         if (!artifactUploadState.getSelectedSoftwareModules().isEmpty()) {
             artifactUploadState.getSelectedSoftwareModules().stream().forEach(this::unselect);
         }
         select(baseEntity.getId());
         return item;
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
+        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
+                baseEntity.getVersion());
+        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
+        item.getItemProperty("swId").setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
+        super.updateEntity(baseEntity, item);
     }
 
     @Override

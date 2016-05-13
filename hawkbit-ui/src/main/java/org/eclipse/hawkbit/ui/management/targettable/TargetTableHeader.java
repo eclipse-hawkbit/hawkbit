@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
@@ -379,15 +378,9 @@ public class TargetTableHeader extends AbstractTableHeader {
     }
 
     private Set<DistributionSetIdName> getDropppedDistributionDetails(final TableTransferable transferable) {
-        final Set<DistributionSetIdName> distSelected = AbstractTable.getTableValue(transferable.getSourceComponent());
-        final Set<DistributionSetIdName> distributionIdSet = new HashSet<>();
-        if (!distSelected.contains(transferable.getData("itemId"))) {
-            distributionIdSet.add((DistributionSetIdName) transferable.getData("itemId"));
-        } else {
-            distributionIdSet.addAll(distSelected);
-        }
-
-        return distributionIdSet;
+        @SuppressWarnings("unchecked")
+        final AbstractTable<?, DistributionSetIdName> distTable = (AbstractTable<?, DistributionSetIdName>) transferable.getSourceComponent();
+        return distTable.getDeletedEntityByTransferable(transferable);
     }
 
     private void addFilterTextField(final DistributionSetIdName distributionSetIdName) {

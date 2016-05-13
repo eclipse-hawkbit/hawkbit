@@ -37,6 +37,8 @@ public class UiProperties {
         /**
          * Demo user password.
          */
+        // Exception squid:S2068 - Empty password
+        @SuppressWarnings({ "squid:S2068" })
         private String password = "";
 
         public String getPassword() {
@@ -64,6 +66,7 @@ public class UiProperties {
         }
 
     }
+
     /**
      * Links to potentially other systems (e.g. support, user management,
      * documentation etc.).
@@ -227,6 +230,7 @@ public class UiProperties {
         }
 
     }
+
     /**
      * Configuration of login view.
      *

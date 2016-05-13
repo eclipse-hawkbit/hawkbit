@@ -267,6 +267,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         mainLayout.addComponent(fieldButtonLayout);
 
         setCompositionRoot(mainLayout);
+        tagName.focus();
     }
 
     private void addListeners() {

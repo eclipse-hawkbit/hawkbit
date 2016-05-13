@@ -39,6 +39,12 @@ public class AmqpProperties {
      */
     private String deadLetterExchange = "simulator.deadletter";
 
+    /**
+     * Message time to live (ttl) for the deadletter queue. Default ttl is 1
+     * hour.
+     */
+    private int deadLetterTtl = 60_000;
+
     public String getReceiverConnectorQueueFromSp() {
         return receiverConnectorQueueFromSp;
     }
@@ -69,5 +75,13 @@ public class AmqpProperties {
 
     public void setSenderForSpExchange(final String senderForSpExchange) {
         this.senderForSpExchange = senderForSpExchange;
+    }
+
+    public int getDeadLetterTtl() {
+        return deadLetterTtl;
+    }
+
+    public void setDeadLetterTtl(final int deadLetterTtl) {
+        this.deadLetterTtl = deadLetterTtl;
     }
 }

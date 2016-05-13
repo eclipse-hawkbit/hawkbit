@@ -289,7 +289,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
 
         mainLayout.addComponent(fieldLayout);
         mainLayout.addComponent(twinTableLayout);
-
+       
         colorLayout = new HorizontalLayout();
         sliderLayout = new VerticalLayout();
         final HorizontalLayout chooseColorLayout = new HorizontalLayout();
@@ -305,6 +305,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         mainWindowLayout.addComponent(colorLayout);
         mainWindowLayout.addComponent(buttonLayout);
         setCompositionRoot(mainWindowLayout);
+        typeName.focus();
     }
 
     private HorizontalLayout createTwinColumnLayout() {

@@ -158,7 +158,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             madatoryLabel.setVisible(Boolean.FALSE);
         }
         mainLayout.addComponents(madatoryLabel, controllerIDTextField, nameTextField, descTextArea, buttonsLayout);
-
+        nameTextField.focus();
     }
 
     private void addListeners() {

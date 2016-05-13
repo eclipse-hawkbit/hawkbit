@@ -43,10 +43,6 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringComponent
 @VaadinSessionScope
 public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayout {
-
-    /**
-    * 
-    */
     private static final long serialVersionUID = 444276149954167545L;
 
     @Autowired
@@ -289,16 +285,22 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
         populateTagNameCombo();
     }

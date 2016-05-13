@@ -222,6 +222,10 @@ public class AddUpdateRolloutWindowLayout extends CommonDialog {
 
         mainLayout.addComponent(new Label("TEST TEST TEST"));
         mainLayout.setComponentAlignment(linkToHelp, Alignment.BOTTOM_RIGHT);
+<<<<<<< HEAD
+=======
+        setCompositionRoot(mainLayout);
+>>>>>>> refs/heads/master
         rolloutName.focus();
     }
 

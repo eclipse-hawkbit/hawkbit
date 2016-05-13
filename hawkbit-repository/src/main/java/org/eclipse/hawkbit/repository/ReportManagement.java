@@ -48,14 +48,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Service layer for generating SP reportings.
+ * Service layer for generating hawkBit reports.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class ReportManagement {
@@ -404,7 +405,7 @@ public class ReportManagement {
         return innerOuterReport;
     }
 
-    private final class InnerOuter {
+    private static final class InnerOuter {
         final DSName name;
         long count;
         final List<InnerOuter> outer;
@@ -432,9 +433,6 @@ public class ReportManagement {
 
     /**
      * Object contains the name and the id of an entity.
-     *
-     *
-     *
      *
      */
     private static final class DSName {
@@ -510,9 +508,6 @@ public class ReportManagement {
      * Return DateTypes.
      */
     public static final class DateTypes implements Serializable {
-        /**
-         *
-         */
         private static final long serialVersionUID = 1L;
         private static final PerMonth PER_MONTH = new PerMonth();
 

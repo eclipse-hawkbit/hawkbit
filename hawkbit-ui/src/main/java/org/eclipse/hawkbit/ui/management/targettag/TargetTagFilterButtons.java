@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,8 +77,6 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Autowired
     private transient TargetManagement targetManagement;
-
-    private static final String ITEMID = "itemId";
 
     TargetTagFilterButtonClick filterButtonClickBehaviour;
 
@@ -213,35 +210,46 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     private void processTargetDrop(final DragAndDropEvent event) {
-
         final com.vaadin.event.dd.TargetDetails targetDetails = event.getTargetDetails();
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
+        @SuppressWarnings("unchecked")
+        final AbstractTable<?, TargetIdName> targetTable = (AbstractTable<?, TargetIdName>) transferable
+                .getSourceComponent();
 
-        final Set<TargetIdName> targetSelected = AbstractTable.getTableValue(source);
-        final Set<String> targetList = new HashSet<>();
-        if (transferable.getData(ITEMID) != null) {
-            if (!targetSelected.contains(transferable.getData(ITEMID))) {
-                targetList.add(((TargetIdName) transferable.getData(ITEMID)).getControllerId());
-            } else {
-                targetList.addAll(targetSelected.stream().map(t -> t.getControllerId()).collect(Collectors.toList()));
-            }
+        final Set<TargetIdName> targetSelected = targetTable.getDeletedEntityByTransferable(transferable);
+        final Set<String> targetList = targetSelected.stream().map(t -> t.getControllerId())
+                .collect(Collectors.toSet());
 
-            final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
-                    SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
+        final String targTagName = HawkbitCommonUtil.removePrefix(targetDetails.getTarget().getId(),
+                SPUIDefinitions.TARGET_TAG_ID_PREFIXS);
 
-            final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
+        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
+        notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
 
-            final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, targTagName);
-            notification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(targTagName, result, i18n));
+        publishAssignTargetTagEvent(result);
 
-            if (result.getAssigned() >= 1 && managementUIState.getTargetTableFilters().isNoTagSelected()) {
-                eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
-            }
-            if (result.getUnassigned() >= 1 && !tagsClickedList.isEmpty() && tagsClickedList.contains(targTagName)) {
-                eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
-            }
+        publishUnAssignTargetTagEvent(targTagName, result);
+
+    }
+
+    private void publishUnAssignTargetTagEvent(final String targTagName, final TargetTagAssignmentResult result) {
+        final List<String> tagsClickedList = managementUIState.getTargetTableFilters().getClickedTargetTags();
+        final boolean isTargetTagUnAssigned = result.getUnassigned() >= 1 && !tagsClickedList.isEmpty()
+                && tagsClickedList.contains(targTagName);
+
+        if (!isTargetTagUnAssigned) {
+            return;
         }
+        eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
+    }
+
+    private void publishAssignTargetTagEvent(final TargetTagAssignmentResult result) {
+        final boolean isNewTargetTagAssigned = result.getAssigned() >= 1
+                && managementUIState.getTargetTableFilters().isNoTagSelected();
+        if (!isNewTargetTagAssigned) {
+            return;
+        }
+        eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
     }
 
     private boolean validateIfSourceisTargetTable(final Table source) {
@@ -259,16 +267,22 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEvent(final TargetTagUpdateEvent event) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
         refreshContainer();
     }
@@ -288,6 +302,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addNewTargetTag(final TargetTag newTargetTag) {
         final LazyQueryContainer targetTagContainer = (LazyQueryContainer) getContainerDataSource();
         final Object addItem = targetTagContainer.addItem();

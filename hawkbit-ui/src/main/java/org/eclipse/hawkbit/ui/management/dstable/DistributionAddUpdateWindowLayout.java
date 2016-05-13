@@ -150,11 +150,12 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         setSizeUndefined();
         addComponents(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()), madatoryLabel,
                 distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea, reqMigStepCheckbox);
-
+        
         addComponent(buttonsLayout);
         setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
-
-    }
+        distNameTextField.focus();
+        
+     }
 
     /**
      * Create required UI components.

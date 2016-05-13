@@ -52,6 +52,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -62,7 +63,7 @@ import com.google.common.collect.Sets;
  * Business facade for managing {@link SoftwareModule}s.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class SoftwareManagement {
@@ -108,7 +109,7 @@ public class SoftwareManagement {
      *             of {@link SoftwareModule#getId()} is <code>null</code>
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModule updateSoftwareModule(@NotNull final SoftwareModule sm) {
         checkNotNull(sm.getId());
@@ -138,7 +139,7 @@ public class SoftwareManagement {
      * @return updated {@link Entity}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModuleType updateSoftwareModuleType(@NotNull final SoftwareModuleType sm) {
         checkNotNull(sm.getId());
@@ -283,7 +284,7 @@ public class SoftwareManagement {
      *            is the {@link SoftwareModule} to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteSoftwareModule(@NotNull final SoftwareModule bsm) {
 
@@ -314,10 +315,10 @@ public class SoftwareManagement {
      * Deletes {@link SoftwareModule}s which is any if the given ids.
      *
      * @param ids
-     *            of the Software Moduels to be deleted
+     *            of the Software Modules to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteSoftwareModules(@NotNull final Iterable<Long> ids) {
         final List<SoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
@@ -579,7 +580,7 @@ public class SoftwareManagement {
         return new SliceImpl<>(resultList);
     }
 
-    private List<Specification<SoftwareModule>> buildSpecificationList(final String searchText,
+    private static List<Specification<SoftwareModule>> buildSpecificationList(final String searchText,
             final SoftwareModuleType type) {
         final List<Specification<SoftwareModule>> specList = new ArrayList<>();
         if (!Strings.isNullOrEmpty(searchText)) {
@@ -700,7 +701,7 @@ public class SoftwareManagement {
      * @return created {@link Entity}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public SoftwareModuleType createSoftwareModuleType(@NotNull final SoftwareModuleType type) {
         if (type.getId() != null) {
@@ -718,7 +719,7 @@ public class SoftwareManagement {
      * @return created {@link Entity}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<SoftwareModuleType> createSoftwareModuleType(@NotNull final Collection<SoftwareModuleType> types) {
         return types.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
@@ -731,7 +732,7 @@ public class SoftwareManagement {
      *            to delete
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteSoftwareModuleType(@NotNull final SoftwareModuleType type) {
 
@@ -785,7 +786,7 @@ public class SoftwareManagement {
      *             in case the meta data entry already exists for the specific
      *             key
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModuleMetadata createSoftwareModuleMetadata(@NotNull final SoftwareModuleMetadata metadata) {
@@ -810,7 +811,7 @@ public class SoftwareManagement {
      *             in case one of the meta data entry already exists for the
      *             specific key
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public List<SoftwareModuleMetadata> createSoftwareModuleMetadata(
@@ -832,7 +833,7 @@ public class SoftwareManagement {
      *             in case the meta data entry does not exists and cannot be
      *             updated
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModuleMetadata updateSoftwareModuleMetadata(@NotNull final SoftwareModuleMetadata metadata) {
@@ -851,7 +852,7 @@ public class SoftwareManagement {
      * @param id
      *            the ID of the software module meta data to delete
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public void deleteSoftwareModuleMetadata(@NotNull final SwMetadataCompositeKey id) {
@@ -925,7 +926,7 @@ public class SoftwareManagement {
         }
     }
 
-    private void throwMetadataKeyAlreadyExists(final String metadataKey) {
+    private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
         throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataKey + "' already exists");
     }
 

@@ -79,7 +79,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Bean for the downlod id cache.
+     * Bean for the download id cache.
      * 
      * @return the cache
      */

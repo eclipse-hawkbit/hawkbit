@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
+import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
@@ -210,15 +211,9 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     private void onDrop(final DragAndDropEvent event) {
         final TableTransferable transferable = (TableTransferable) event.getTransferable();
-        final Table source = transferable.getSourceComponent();
-        final Set<Long> softwareModuleSelected = (Set<Long>) source.getValue();
-        final Set<Long> softwareModulesIdList = new HashSet<>();
-
-        if (!softwareModuleSelected.contains(transferable.getData("itemId"))) {
-            softwareModulesIdList.add((Long) transferable.getData("itemId"));
-        } else {
-            softwareModulesIdList.addAll(softwareModuleSelected);
-        }
+        @SuppressWarnings("unchecked")
+        final AbstractTable<?, Long> source = (AbstractTable<SoftwareModule, Long>) transferable.getSourceComponent();
+        final Set<Long> softwareModulesIdList = source.getDeletedEntityByTransferable(transferable);
 
         final AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
 
@@ -229,11 +224,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         }
     }
 
-    /**
-     * @param source
-     * @param softwareModulesIdList
-     * @param item
-     */
     private void handleDropEvent(final Table source, final Set<Long> softwareModulesIdList, final Item item) {
         final Long distId = (Long) item.getItemProperty("id").getValue();
         final String distName = (String) item.getItemProperty("name").getValue();
@@ -459,17 +449,21 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Item addEntity(final DistributionSet baseEntity) {
         final Item item = super.addEntity(baseEntity);
-        item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(baseEntity.isComplete());
-
         if (manageDistUIState.getSelectedDistributions().isPresent()) {
             manageDistUIState.getSelectedDistributions().get().stream().forEach(this::unselect);
         }
         select(baseEntity.getDistributionSetIdName());
         return item;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void updateEntity(final DistributionSet baseEntity, final Item item) {
+        item.getItemProperty(SPUILabelDefinitions.DIST_ID).setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_IS_DISTRIBUTION_COMPLETE).setValue(baseEntity.isComplete());
+        super.updateEntity(baseEntity, item);
     }
 
     @Override
