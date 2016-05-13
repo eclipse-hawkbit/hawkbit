@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;

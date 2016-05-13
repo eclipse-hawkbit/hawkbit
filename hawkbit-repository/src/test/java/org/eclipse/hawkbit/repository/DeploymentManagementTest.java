@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.jpa.TargetRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -104,7 +105,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag. Not exists  distribution set will be ignored for the assignment.")
     public void assignAndUnassignDistributionSetToTag() {
-        final List<Long> assignDS = new ArrayList<Long>();
+        final List<Long> assignDS = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             assignDS.add(TestDataUtil.generateDistributionSet("DS" + i, "1.0", softwareManagement,
                     distributionSetManagement, new ArrayList<DistributionSetTag>()).getId());
@@ -199,8 +200,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         secondAction = deploymentManagement.findActionWithDetails(secondAction.getId());
         // confirm cancellation
         secondAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(
-                new ActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()), secondAction);
+        controllerManagement
+                .addCancelActionStatus(new ActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()));
         assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(4);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).as("wrong ds")
                 .isEqualTo(dsFirst);
@@ -213,8 +214,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         firstAction = deploymentManagement.findActionWithDetails(firstAction.getId());
         // confirm cancellation
         firstAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(
-                new ActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()), firstAction);
+        controllerManagement
+                .addCancelActionStatus(new ActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()));
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(6);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsInstalled);
@@ -256,8 +257,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // confirm cancellation
         firstAction = deploymentManagement.findActionWithDetails(firstAction.getId());
         firstAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(
-                new ActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()), firstAction);
+        controllerManagement
+                .addCancelActionStatus(new ActionStatus(firstAction, Status.CANCELED, System.currentTimeMillis()));
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(dsSecond);
@@ -273,8 +274,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
                 .as("wrong assigned ds").isEqualTo(dsSecond);
         // confirm cancellation
         secondAction.setStatus(Status.CANCELED);
-        controllerManagement.addCancelActionStatus(
-                new ActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()), secondAction);
+        controllerManagement
+                .addCancelActionStatus(new ActionStatus(secondAction, Status.CANCELED, System.currentTimeMillis()));
         // cancelled success -> back to dsInstalled
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet())
                 .as("wrong installed ds").isEqualTo(dsInstalled);
@@ -742,7 +743,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         for (final String msg : msgs) {
             statusMessages.addMessage(msg);
         }
-        controllerManagament.addUpdateActionStatus(statusMessages, updActA);
+        controllerManagament.addUpdateActionStatus(statusMessages);
         return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 
@@ -786,7 +787,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final Action action = updAct.getContent().get(0);
         action.setStatus(Status.FINISHED);
         final ActionStatus statusMessage = new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "");
-        controllerManagament.addUpdateActionStatus(statusMessage, action);
+        controllerManagament.addUpdateActionStatus(statusMessage);
 
         targ = targetManagement.findTargetByControllerID(targ.getControllerId());
 

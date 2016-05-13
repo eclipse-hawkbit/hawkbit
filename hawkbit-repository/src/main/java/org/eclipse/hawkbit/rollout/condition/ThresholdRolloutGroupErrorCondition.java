@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.rollout.condition;
 
-import org.eclipse.hawkbit.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;

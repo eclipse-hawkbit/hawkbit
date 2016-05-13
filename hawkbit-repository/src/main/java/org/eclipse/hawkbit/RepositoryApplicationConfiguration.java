@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.SystemManagement;
 import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;

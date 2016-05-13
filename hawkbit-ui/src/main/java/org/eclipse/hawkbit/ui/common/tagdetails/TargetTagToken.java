@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;

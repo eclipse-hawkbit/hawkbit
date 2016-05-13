@@ -75,7 +75,7 @@ public class RSQLRolloutGroupFields extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsByPredicate(rollout,
+        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsAll(rollout,
                 RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), new PageRequest(0, 100));
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();

@@ -187,7 +187,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final Action action = deploymentManagement.findActionWithDetails(result.getActions().get(0));
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
-                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
+                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
         deploymentManagement.assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.findTargetByControllerIDWithDetails("4711");

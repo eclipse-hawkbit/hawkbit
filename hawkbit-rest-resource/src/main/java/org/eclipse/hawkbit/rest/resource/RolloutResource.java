@@ -178,7 +178,7 @@ public class RolloutResource implements RolloutRestApi {
 
         final Page<RolloutGroup> findRolloutGroupsAll;
         if (rsqlParam != null) {
-            findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsByPredicate(rollout,
+            findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsAll(rollout,
                     RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), pageable);
         } else {
             findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsByRolloutId(rolloutId, pageable);

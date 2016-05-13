@@ -18,10 +18,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.exception.EntityLockedException;
+import org.eclipse.hawkbit.repository.jpa.SoftwareManagement;
+import org.eclipse.hawkbit.repository.jpa.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -322,11 +321,11 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         if (!validateSoftwareModule(sm, ds)) {
             return false;
         }
-        try {
-            distributionSetManagement.checkDistributionSetAlreadyUse(ds);
-        } catch (final EntityLockedException exception) {
-            LOG.error("Unable to update distribution : ", exception);
-            notification.displayValidationError(exception.getMessage());
+
+        if (distributionSetManagement.isDistributionSetInUse(ds)) {
+            notification.displayValidationError(
+                    String.format("Distribution set %s:%s is already assigned to targets and cannot be changed",
+                            ds.getName(), ds.getVersion()));
             return false;
         }
         return true;

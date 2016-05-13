@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.TargetRepository;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -66,7 +66,7 @@ public class EntityChangeEventListener {
      *             in case exception happens in the
      *             {@link ProceedingJoinPoint#proceed()}
      */
-    @Around("execution(* org.eclipse.hawkbit.repository.TargetInfoRepository.save(..))")
+    @Around("execution(* org.eclipse.hawkbit.repository.jpa.TargetInfoRepository.save(..))")
     // Exception squid:S00112 - Is aspectJ proxy
     @SuppressWarnings({ "squid:S00112" })
     public Object targetCreated(final ProceedingJoinPoint joinpoint) throws Throwable {
@@ -93,7 +93,7 @@ public class EntityChangeEventListener {
      *             in case exception happens in the
      *             {@link ProceedingJoinPoint#proceed()}
      */
-    @Around("execution(* org.eclipse.hawkbit.repository.TargetRepository.deleteByIdIn(..))")
+    @Around("execution(* org.eclipse.hawkbit.repository.jpa.TargetRepository.deleteByIdIn(..))")
     // Exception squid:S00112 - Is aspectJ proxy
     @SuppressWarnings({ "squid:S00112" })
     public Object targetDeletedById(final ProceedingJoinPoint joinpoint) throws Throwable {
@@ -115,8 +115,8 @@ public class EntityChangeEventListener {
      *             in case exception happens in the
      *             {@link ProceedingJoinPoint#proceed()}
      */
-    @Around("execution(* org.eclipse.hawkbit.repository.TargetRepository.delete(..))")
- // Exception squid:S00112 - Is aspectJ proxy
+    @Around("execution(* org.eclipse.hawkbit.repository.jpa.TargetRepository.delete(..))")
+    // Exception squid:S00112 - Is aspectJ proxy
     @SuppressWarnings({ "squid:S00112", "unchecked" })
     public Object targetDeleted(final ProceedingJoinPoint joinpoint) throws Throwable {
         final String currentTenant = tenantAware.getCurrentTenant();
@@ -146,7 +146,7 @@ public class EntityChangeEventListener {
         afterCommit.afterCommit(() -> eventBus.post(new TargetDeletedEvent(tenant, targetId)));
     }
 
-    private boolean isTargetInfoNew(final Object targetInfo) {
+    private static boolean isTargetInfoNew(final Object targetInfo) {
         return ((TargetInfo) targetInfo).isNew();
     }
 

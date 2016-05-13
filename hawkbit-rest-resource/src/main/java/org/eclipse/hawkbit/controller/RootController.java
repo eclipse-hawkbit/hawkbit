@@ -30,8 +30,8 @@ import org.eclipse.hawkbit.controller.model.DeploymentBase;
 import org.eclipse.hawkbit.controller.model.Result.FinalResult;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -150,7 +150,7 @@ public class RootController {
 
         return new ResponseEntity<>(
                 DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
-                        controllerManagement.findPollingTime(), tenantAware),
+                        controllerManagement.getPollingTime(), tenantAware),
                 HttpStatus.OK);
     }
 
@@ -222,7 +222,7 @@ public class RootController {
             statusMessage.addMessage(
                     ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
-        controllerManagement.addActionStatusMessage(statusMessage);
+        controllerManagement.addInformationalActionStatus(statusMessage);
         return action;
     }
 
@@ -371,8 +371,7 @@ public class RootController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action),
-                action);
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action));
 
         return new ResponseEntity<>(HttpStatus.OK);
 
@@ -546,7 +545,7 @@ public class RootController {
         }
 
         controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), action), action);
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), action));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

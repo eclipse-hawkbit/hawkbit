@@ -96,7 +96,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final Action action = deploymentManagement.findActionWithDetails(actionId);
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
-                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
+                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
         deploymentManagement.assignDistributionSet(setA.getId(), installedC);
 
         final List<TargetUpdateStatus> unknown = new ArrayList<>();
@@ -745,7 +745,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
             final Action action = deploymentManagement.findActionWithDetails(actionId);
             action.setStatus(Status.FINISHED);
             controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
+                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
         });
         deploymentManagement.assignDistributionSet(assignedSet, assignedtargets);
 
@@ -773,7 +773,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
             final Action action = deploymentManagement.findActionWithDetails(actionId);
             action.setStatus(Status.FINISHED);
             controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
+                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
         });
         deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
 
@@ -802,7 +802,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
             final Action action = deploymentManagement.findActionWithDetails(actionId);
             action.setStatus(Status.FINISHED);
             controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"), action);
+                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
         });
         deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
 
@@ -840,7 +840,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         for (final String msg : msgs) {
             statusMessages.addMessage(msg);
         }
-        controllerManagament.addUpdateActionStatus(statusMessages, updActA);
+        controllerManagament.addUpdateActionStatus(statusMessages);
         return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 

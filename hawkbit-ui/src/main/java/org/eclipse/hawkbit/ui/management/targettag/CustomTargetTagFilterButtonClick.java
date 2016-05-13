@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.jpa.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterSingleButtonClick;
 import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;

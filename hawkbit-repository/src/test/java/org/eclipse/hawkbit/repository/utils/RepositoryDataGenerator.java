@@ -30,9 +30,9 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.SoftwareManagement;
+import org.eclipse.hawkbit.repository.jpa.TagManagement;
+import org.eclipse.hawkbit.repository.jpa.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -207,14 +207,14 @@ public final class RepositoryDataGenerator {
                 download.setAction(action);
                 download.setStatus(Status.DOWNLOAD);
                 download.addMessage("Controller started download.");
-                action = controllerManagement.addUpdateActionStatus(download, action);
+                action = controllerManagement.addUpdateActionStatus(download);
 
                 // warning
                 final ActionStatus warning = new ActionStatus();
                 warning.setAction(action);
                 warning.setStatus(Status.WARNING);
                 warning.addMessage("Some warning: " + jlorem.words(new Random().nextInt(50)));
-                action = controllerManagement.addUpdateActionStatus(warning, action);
+                action = controllerManagement.addUpdateActionStatus(warning);
 
                 // garbage
                 for (int i = 0; i < new Random().nextInt(10); i++) {
@@ -222,13 +222,13 @@ public final class RepositoryDataGenerator {
                     running.setAction(action);
                     running.setStatus(Status.RUNNING);
                     running.addMessage("Still running: " + jlorem.words(new Random().nextInt(50)));
-                    action = controllerManagement.addUpdateActionStatus(running, action);
+                    action = controllerManagement.addUpdateActionStatus(running);
                     for (int g = 0; g < new Random().nextInt(5); g++) {
                         final ActionStatus rand = new ActionStatus();
                         rand.setAction(action);
                         rand.setStatus(Status.RUNNING);
                         rand.addMessage(jlorem.words(new Random().nextInt(50)));
-                        action = controllerManagement.addUpdateActionStatus(rand, action);
+                        action = controllerManagement.addUpdateActionStatus(rand);
                     }
                 }
 
@@ -241,13 +241,13 @@ public final class RepositoryDataGenerator {
                 if (incrementAndGet % 5 == 0) {
                     close.setStatus(Status.ERROR);
                     close.addMessage("Controller reported CLOSED with ERROR!");
-                    action = controllerManagement.addUpdateActionStatus(close, action);
+                    action = controllerManagement.addUpdateActionStatus(close);
                 }
                 // with OK
                 else {
                     close.setStatus(Status.FINISHED);
                     close.addMessage("Controller reported CLOSED with OK!");
-                    action = controllerManagement.addUpdateActionStatus(close, action);
+                    action = controllerManagement.addUpdateActionStatus(close);
                 }
 
                 index++;
@@ -266,7 +266,7 @@ public final class RepositoryDataGenerator {
                 close.setAction(action);
                 close.setStatus(Status.FINISHED);
                 close.addMessage("Controller reported CLOSED with OK!");
-                action = controllerManagement.addUpdateActionStatus(close, action);
+                action = controllerManagement.addUpdateActionStatus(close);
 
             }
         }
@@ -339,8 +339,8 @@ public final class RepositoryDataGenerator {
 
                 // garbage DS
                 LOG.debug("initDemoRepo - start now DS garbage");
-                TestDataUtil.generateDistributionSets("Generic Software Package", sizeMultiplikator,
-                        softwareManagement, distributionSetManagement);
+                TestDataUtil.generateDistributionSets("Generic Software Package", sizeMultiplikator, softwareManagement,
+                        distributionSetManagement);
                 LOG.debug("initDemoRepo - DS garbage finished");
 
                 LOG.debug("initDemoRepo - start now Extra Software Modules and types");

@@ -821,7 +821,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         for (final String msg : msgs) {
             statusMessages.addMessage(msg);
         }
-        controllerManagament.addUpdateActionStatus(statusMessages, updActA);
+        controllerManagament.addUpdateActionStatus(statusMessages);
         return targetManagement.findTargetByControllerID(t.getControllerId());
     }
 

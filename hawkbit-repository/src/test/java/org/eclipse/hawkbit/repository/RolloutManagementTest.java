@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -136,8 +137,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // 50%
         final Action action = runningActions.get(0);
         action.setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(
-                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), ""), action);
+        controllerManagament
+                .addUpdateActionStatus(new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), ""));
 
         // check running rollouts again, now the finish condition should be hit
         // and should start the next group
@@ -178,8 +179,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // finish actions with error
         for (final Action action : runningActions) {
             action.setStatus(Status.ERROR);
-            controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.ERROR, System.currentTimeMillis(), ""), action);
+            controllerManagament
+                    .addUpdateActionStatus(new ActionStatus(action, Status.ERROR, System.currentTimeMillis(), ""));
         }
 
         // check running rollouts again, now the error condition should be hit
@@ -220,8 +221,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // finish actions with error
         for (final Action action : runningActions) {
             action.setStatus(Status.ERROR);
-            controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.ERROR, System.currentTimeMillis(), ""), action);
+            controllerManagament
+                    .addUpdateActionStatus(new ActionStatus(action, Status.ERROR, System.currentTimeMillis(), ""));
         }
 
         // check running rollouts again, now the error condition should be hit
@@ -977,8 +978,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         for (final Action action : runningActions) {
             action.setStatus(status);
-            controllerManagament.addUpdateActionStatus(new ActionStatus(action, status, System.currentTimeMillis(), ""),
-                    action);
+            controllerManagament
+                    .addUpdateActionStatus(new ActionStatus(action, status, System.currentTimeMillis(), ""));
         }
         return runningActions.size();
     }
@@ -989,14 +990,13 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
         for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
             controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(runningActions.get(i), status, System.currentTimeMillis(), ""),
-                    runningActions.get(i));
+                    new ActionStatus(runningActions.get(i), status, System.currentTimeMillis(), ""));
         }
         return runningActions.size();
     }
 
     private Map<TotalTargetCountStatus.Status, Long> createInitStatusMap() {
-        final Map<TotalTargetCountStatus.Status, Long> map = new HashMap<TotalTargetCountStatus.Status, Long>();
+        final Map<TotalTargetCountStatus.Status, Long> map = new HashMap<>();
         for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
             map.put(status, 0L);
         }

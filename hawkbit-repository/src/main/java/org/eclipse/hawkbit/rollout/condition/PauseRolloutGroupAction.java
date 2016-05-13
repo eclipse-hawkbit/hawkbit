@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.rollout.condition;
 
 import java.util.concurrent.Callable;
 
-import org.eclipse.hawkbit.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.jpa.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;

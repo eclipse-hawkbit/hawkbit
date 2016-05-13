@@ -58,14 +58,14 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
                 System.currentTimeMillis());
         actionStatusMessage.addMessage("foobar");
         savedAction.setStatus(Status.RUNNING);
-        controllerManagament.addUpdateActionStatus(actionStatusMessage, savedAction);
+        controllerManagament.addUpdateActionStatus(actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
         actionStatusMessage = new ActionStatus(savedAction, Action.Status.FINISHED, System.currentTimeMillis());
         actionStatusMessage.addMessage(RandomStringUtils.randomAscii(512));
         savedAction.setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(actionStatusMessage, savedAction);
+        controllerManagament.addUpdateActionStatus(actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
@@ -111,21 +111,21 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         final ActionStatus actionStatusMessage = new ActionStatus(savedAction, Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage.addMessage("running");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage, savedAction);
+        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
         final ActionStatus actionStatusMessage2 = new ActionStatus(savedAction, Action.Status.ERROR,
                 System.currentTimeMillis());
         actionStatusMessage2.addMessage("error");
-        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage2, savedAction);
+        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage2);
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
 
         final ActionStatus actionStatusMessage3 = new ActionStatus(savedAction, Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage3.addMessage("finish");
-        controllerManagament.addUpdateActionStatus(actionStatusMessage3, savedAction);
+        controllerManagament.addUpdateActionStatus(actionStatusMessage3);
 
         targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus();
 

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.TargetManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 
