@@ -118,7 +118,6 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
-    private Boolean changesDiscarded = Boolean.FALSE;
 
     /**
      * Initialize the upload layout.
@@ -242,7 +241,6 @@ public class UploadLayout extends VerticalLayout {
 
         @Override
         public void drop(final DragAndDropEvent event) {
-            changesDiscarded = Boolean.FALSE;
             if (validate(event)) {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
                 // reset the flag
@@ -569,8 +567,6 @@ public class UploadLayout extends VerticalLayout {
     }
 
     protected void clearUploadedFileDetails() {
-        eventBus.publish(this, UploadArtifactUIEvent.DISCARD_UPLOAD);
-        changesDiscarded = Boolean.TRUE;
         clearFileList();
         closeUploadStatusPopup();
     }
@@ -669,13 +665,11 @@ public class UploadLayout extends VerticalLayout {
     /**
      * @return
      */
-
     VerticalLayout getDropAreaLayout() {
         return dropAreaLayout;
     }
 
     private void onStartOfUpload() {
-        changesDiscarded = Boolean.FALSE;
         setUploadStatusButtonIconToInProgress();
         if (artifactUploadState.isStatusPopupMinimized()) {
             updateStatusButtonCount();
@@ -695,7 +689,6 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void onUploadStreamingFailure(UploadStatusEvent event) {
-        if (!changesDiscarded) {
             /**
              * If upload interrupted because of duplicate file,do not remove the
              * file already in upload list
@@ -720,7 +713,6 @@ public class UploadLayout extends VerticalLayout {
                 setUploadStatusButtonIconToFinished();
             }
             displayDuplicateValidationMessage();
-        }
     }
 
     private void onUploadSuccess(UploadStatusEvent event) {
@@ -753,9 +745,8 @@ public class UploadLayout extends VerticalLayout {
          * If upload interrupted because of duplicate file,do not remove the
          * file already in upload list
          **/
-        if ((getDuplicateFileNamesList().isEmpty() || !getDuplicateFileNamesList().contains(
-                event.getUploadStatus().getFileName()))
-                && !changesDiscarded) {
+        if (getDuplicateFileNamesList().isEmpty() || !getDuplicateFileNamesList().contains(
+                event.getUploadStatus().getFileName())) {
             final SoftwareModule sw = getSoftwareModuleSelected();
             getFileSelected().remove(
                     new CustomFile(event.getUploadStatus().getFileName(), sw.getName(), sw.getVersion()));

@@ -88,24 +88,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.mimeType = mimeType;
         this.i18n = SpringContextHelper.getBean(I18N.class);
         this.eventBus = SpringContextHelper.getBean(EventBus.SessionEventBus.class);
-        eventBus.subscribe(this);
-    }
-    
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final UploadArtifactUIEvent event) {
-     if (event == UploadArtifactUIEvent.DISCARD_UPLOAD) {
-            UI.getCurrent().access(() ->intreruptUploadOnDiscard());
-        }
-    }
-
-//
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
     }
 
     /**
@@ -372,12 +354,4 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         return true;
     }
     
-    protected void intreruptUploadOnDiscard(){
-        if(upload!=null && upload.isUploading()){
-            upload.interruptUpload();
-            uploadInterrupted = true;
-        }
-        streamingInterrupted = true;
-    }
-
 }
