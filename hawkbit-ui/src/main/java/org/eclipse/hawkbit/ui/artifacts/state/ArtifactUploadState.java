@@ -73,6 +73,12 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
 
     private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
     
+    private final AtomicInteger numberOfFileUploadsFailed = new AtomicInteger();
+
+    public AtomicInteger getNumberOfFileUploadsFailed() {
+        return numberOfFileUploadsFailed;
+    }
+    
     public AtomicInteger getNumberOfFilesActuallyUpload() {
         return numberOfFilesActuallyUpload;
     }

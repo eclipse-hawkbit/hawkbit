@@ -544,7 +544,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
         if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_ARTIFACT_DETAILS_CLOSE)) {
             uploadConfrimationWindow.close();
         } else if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON)) {
-            uploadLayout.removeUploadedFileDetails();
+            uploadLayout.clearUploadedFileDetails();
             uploadConfrimationWindow.close();
         } else if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_BUTTON)) {
             processArtifactUpload();
@@ -568,10 +568,10 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
             uploadDetailsTable.removeItem(((Button) event.getComponent()).getData());
             uploadLayout.getFileSelected().remove(customFile);
-            uploadLayout.updateActionCount();
+            uploadLayout.updateUploadCounts();
             if (uploadDetailsTable.getItemIds().isEmpty()) {
-                uploadLayout.clearFileList();
                 uploadConfrimationWindow.close();
+                uploadLayout.clearUploadedFileDetails();
             }
 
         }

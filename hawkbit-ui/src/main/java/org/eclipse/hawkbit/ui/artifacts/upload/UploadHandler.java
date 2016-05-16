@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.annotation.PreDestroy;
+
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
@@ -21,8 +23,11 @@ import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.StreamVariable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
@@ -83,6 +88,24 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.mimeType = mimeType;
         this.i18n = SpringContextHelper.getBean(I18N.class);
         this.eventBus = SpringContextHelper.getBean(EventBus.SessionEventBus.class);
+        eventBus.subscribe(this);
+    }
+    
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final UploadArtifactUIEvent event) {
+     if (event == UploadArtifactUIEvent.DISCARD_UPLOAD) {
+            UI.getCurrent().access(() ->intreruptUploadOnDiscard());
+        }
+    }
+
+//
+    @PreDestroy
+    void destroy() {
+        /*
+         * It's good manners to do this, even though vaadin-spring will
+         * automatically unsubscribe when this UI is garbage collected.
+         */
+        eventBus.unsubscribe(this);
     }
 
     /**
@@ -93,6 +116,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public final OutputStream getOutputStream() {
         try {
+            streamingInterrupted = false;
             return view.saveUploadedFileDetails(fileName, fileSize, mimeType);
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
@@ -110,18 +134,15 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
+        uploadInterrupted = false;
         this.fileName = fileName;
         this.mimeType = mimeType;
         // reset has directory flag before upload
         view.setHasDirectory(false);
         try {
-            if (view.checkIfSoftwareModuleIsSelected()) {
-                if (view.checkForDuplicate(fileName)) {
-                    view.showDuplicateMessage();
-                } else {
-                    view.increaseNumberOfFileUploadsExpected();
-                    return view.saveUploadedFileDetails(fileName, 0, mimeType);
-                }
+            if (view.checkIfSoftwareModuleIsSelected() && !view.checkForDuplicate(fileName)) {
+                view.increaseNumberOfFileUploadsExpected();
+                return view.saveUploadedFileDetails(fileName, 0, mimeType);
             }
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
@@ -349,6 +370,14 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             return false;
         }
         return true;
+    }
+    
+    protected void intreruptUploadOnDiscard(){
+        if(upload!=null && upload.isUploading()){
+            upload.interruptUpload();
+            uploadInterrupted = true;
+        }
+        streamingInterrupted = true;
     }
 
 }

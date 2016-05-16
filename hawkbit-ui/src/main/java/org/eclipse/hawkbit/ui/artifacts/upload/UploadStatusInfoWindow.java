@@ -166,7 +166,6 @@ public class UploadStatusInfoWindow extends Window {
                 item.getItemProperty(PROGRESS).setValue(statusObject.getProgress());
                 item.getItemProperty(FILE_NAME).setValue(statusObject.getFilename());
             }
-            // artifactUploadState.setUploadCompleted(true);
             if (artifactUploadState.isUploadCompleted()) {
                 minimizeButton.setEnabled(false);
             }
@@ -294,7 +293,9 @@ public class UploadStatusInfoWindow extends Window {
 
     void uploadStarted(final String filename) {
         final Item item = uploads.addItem(filename);
-        item.getItemProperty(FILE_NAME).setValue(filename);
+        if (item != null) {
+            item.getItemProperty(FILE_NAME).setValue(filename);
+        }
         grid.scrollToEnd();
         UploadStatusObject uploadStatus = new UploadStatusObject(filename);
         uploadStatus.setStatus("Active");
@@ -302,11 +303,11 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     void updateProgress(final String filename, final long readBytes, final long contentLength) {
-        final Item item = uploads.getItem(filename);
+         final Item item = uploads.getItem(filename);
         if (item != null) {
             double progress = (double) readBytes / (double) contentLength;
             item.getItemProperty(PROGRESS).setValue(progress);
-            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
+            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState 
                     .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
                     .collect(Collectors.toList());
             if (!uploadStatusObjectList.isEmpty()) {
@@ -363,6 +364,7 @@ public class UploadStatusInfoWindow extends Window {
         setWindowMode(WindowMode.NORMAL);
         this.close();
         artifactUploadState.getUploadedFileStatusList().clear();
+        artifactUploadState.getNumberOfFileUploadsFailed().set(0);
     }
 
     private void setPopupSizeInMinMode() {
@@ -421,5 +423,4 @@ public class UploadStatusInfoWindow extends Window {
         closeBtn.addClickListener(event -> clearWindow());
         return closeBtn;
     }
-    
 }
