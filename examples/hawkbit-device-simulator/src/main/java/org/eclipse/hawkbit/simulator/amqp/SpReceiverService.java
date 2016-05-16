@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
+
 /**
  * Handle all incoming Messages from hawkBit update server.
  *
@@ -111,7 +113,7 @@ public class SpReceiverService extends ReceiverService {
         final Long actionId = convertMessage(message, Long.class);
 
         final SimulatedUpdate update = new SimulatedUpdate(tenant, thingId, actionId);
-        spSenderService.finishUpdateProcess(update, "Simulation canceled");
+        spSenderService.finishUpdateProcess(update, Lists.newArrayList("Simulation canceled"));
     }
 
     private void handleUpdateProcess(final Message message, final String thingId) {
@@ -122,19 +124,20 @@ public class SpReceiverService extends ReceiverService {
         final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
                 DownloadAndUpdateRequest.class);
         final Long actionId = downloadAndUpdateRequest.getActionId();
+        final String targetSecurityToken = downloadAndUpdateRequest.getTargetSecurityToken();
 
-        deviceUpdater.startUpdate(tenant, thingId, actionId,
-                downloadAndUpdateRequest.getSoftwareModules().get(0).getModuleVersion(), (device, actionId1) -> {
-                    switch (device.getResponseStatus()) {
+        deviceUpdater.startUpdate(tenant, thingId, actionId, null, downloadAndUpdateRequest.getSoftwareModules(),
+                targetSecurityToken, (device, actionId1) -> {
+                    switch (device.getUpdateStatus().getResponseStatus()) {
                     case SUCCESSFUL:
                         spSenderService.finishUpdateProcess(
                                 new SimulatedUpdate(device.getTenant(), device.getId(), actionId1),
-                                "Simulation complete!");
+                                device.getUpdateStatus().getStatusMessages());
                         break;
                     case ERROR:
                         spSenderService.finishUpdateProcessWithError(
                                 new SimulatedUpdate(device.getTenant(), device.getId(), actionId1),
-                                "Simulation complete with error!");
+                                device.getUpdateStatus().getStatusMessages());
                         break;
                     default:
                         break;

@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.simulator;
 
 /**
- * An simulated device using the DMF API of the hawkbit update server.
- * 
- * @author Michael Hirsch
- *
+ * A simulated device using the DMF API of the hawkBit update server.
  */
 public class DMFSimulatedDevice extends AbstractSimulatedDevice {
 

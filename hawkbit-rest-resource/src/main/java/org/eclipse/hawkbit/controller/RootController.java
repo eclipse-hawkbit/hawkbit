@@ -216,9 +216,11 @@ public class RootController {
         statusMessage.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            statusMessage.addMessage("It is a partial download request: " + range);
+            statusMessage.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
+                    + " of: " + request.getRequestURI());
         } else {
-            statusMessage.addMessage("Controller downloads");
+            statusMessage.addMessage(
+                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
         controllerManagement.addActionStatusMessage(statusMessage);
         return action;
@@ -316,8 +318,8 @@ public class RootController {
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", targetid, base);
 
-            controllerManagement.registerRetrieved(action,
-                    "Controller retrieved update action and should start now the download.");
+            controllerManagement.registerRetrieved(action, ControllerManagement.SERVER_MESSAGE_PREFIX
+                    + "Target retrieved update action and should start now the download.");
 
             return new ResponseEntity<>(base, HttpStatus.OK);
         }
@@ -388,13 +390,13 @@ public class RootController {
             LOG.debug("Controller confirmed cancel (actionid: {}, targetid: {}) as we got {} report.", actionid,
                     targetid, feedback.getStatus().getExecution());
             actionStatus.setStatus(Status.CANCELED);
-            actionStatus.addMessage("Controller confirmed cancelation");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target confirmed cancelation.");
             break;
         case REJECTED:
             LOG.info("Controller reported internal error (actionid: {}, targetid: {}) as we got {} report.", actionid,
                     targetid, feedback.getStatus().getExecution());
             actionStatus.setStatus(Status.WARNING);
-            actionStatus.addMessage("Controller reported internal ERROR and REJECTED update.");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target REJECTED update.");
             break;
         case CLOSED:
             handleClosedUpdateStatus(feedback, targetid, actionid, actionStatus);
@@ -421,7 +423,8 @@ public class RootController {
         LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.", actionid,
                 targetid, feedback.getStatus().getExecution());
         actionStatus.setStatus(Status.RUNNING);
-        actionStatus.addMessage("Controller reported: " + feedback.getStatus().getExecution());
+        actionStatus.addMessage(
+                ControllerManagement.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
     }
 
     private static void handleClosedUpdateStatus(final ActionFeedback feedback, final String targetid,
@@ -430,10 +433,10 @@ public class RootController {
                 feedback.getStatus().getExecution());
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             actionStatus.setStatus(Status.ERROR);
-            actionStatus.addMessage("Controller reported CLOSED with ERROR!");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with ERROR!");
         } else {
             actionStatus.setStatus(Status.FINISHED);
-            actionStatus.addMessage("Controller reported CLOSED with OK!");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target reported CLOSED with OK!");
         }
     }
 
@@ -494,8 +497,8 @@ public class RootController {
 
             LOG.debug("Found an active CancelAction for target {}. returning cancel: {}", targetid, cancel);
 
-            controllerManagement.registerRetrieved(action,
-                    "Controller retrieved cancel action and should start now the cancelation.");
+            controllerManagement.registerRetrieved(action, ControllerManagement.SERVER_MESSAGE_PREFIX
+                    + "Target retrieved cancel action and should start now the cancelation.");
 
             return new ResponseEntity<>(cancel, HttpStatus.OK);
         }

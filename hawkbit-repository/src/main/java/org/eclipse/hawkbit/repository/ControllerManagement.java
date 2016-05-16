@@ -64,6 +64,8 @@ public class ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
     private static final Logger LOG_DOS = LoggerFactory.getLogger("server-security.dos");
 
+    public static final String SERVER_MESSAGE_PREFIX = "Update Server: ";
+
     @Autowired
     private EntityManager entityManager;
 
@@ -342,13 +344,14 @@ public class ControllerManagement {
             break;
         case CANCELED:
         case FINISHED:
-            // in case of successful cancelation we also report the success at
+            // in case of successful cancellation we also report the success at
             // the canceled action itself.
-            actionStatus.addMessage("Cancelation completion is finished sucessfully.");
+            actionStatus.addMessage(
+                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
             deploymentManagement.successCancellation(action);
             break;
         case RETRIEVED:
-            actionStatus.addMessage("Cancelation request retrieved");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
             break;
         default:
         }

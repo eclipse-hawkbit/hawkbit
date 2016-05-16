@@ -19,15 +19,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * JSON representation of download and update request.
  *
- *
- *
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DownloadAndUpdateRequest {
     @JsonProperty
     private Long actionId;
+
+    @JsonProperty
+    private String targetSecurityToken;
+
     @JsonProperty
     private final List<SoftwareModule> softwareModules = new LinkedList<>();
 
@@ -37,6 +38,14 @@ public class DownloadAndUpdateRequest {
 
     public void setActionId(final Long correlator) {
         this.actionId = correlator;
+    }
+
+    public String getTargetSecurityToken() {
+        return targetSecurityToken;
+    }
+
+    public void setTargetSecurityToken(final String targetSecurityToken) {
+        this.targetSecurityToken = targetSecurityToken;
     }
 
     public List<SoftwareModule> getSoftwareModules() {
