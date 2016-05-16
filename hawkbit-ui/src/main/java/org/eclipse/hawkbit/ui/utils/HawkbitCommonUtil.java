@@ -432,26 +432,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Format the lengthy text.
-     *
-     * @param orgText
-     *            text to be formatted
-     * @return String formatted text
-     */
-    public static String getFormattedText(final String orgText) {
-        if (orgText == null) {
-            return StringUtils.EMPTY;
-        }
-
-        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
-        if (orgText.length() > txtLengthAllowed) {
-            return new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
-        }
-
-        return orgText;
-    }
-
-    /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
      * 
@@ -952,7 +932,7 @@ public final class HawkbitCommonUtil {
                 .append(NEW_PREVIEW_COLOR_SET_STYLE_SCRIPT);
         return scriptBuilder.toString();
     }
-      
+
     /**
      * Get javascript to reflect new color selection for preview button.
      * 
