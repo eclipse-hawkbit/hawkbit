@@ -46,6 +46,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -56,12 +57,14 @@ import org.springframework.validation.annotation.Validated;
  *
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class ControllerManagement {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerManagement.class);
     private static final Logger LOG_DOS = LoggerFactory.getLogger("server-security.dos");
+
+    public static final String SERVER_MESSAGE_PREFIX = "Update Server: ";
 
     @Autowired
     private EntityManager entityManager;
@@ -131,7 +134,7 @@ public class ControllerManagement {
      *             if target with given ID could not be found
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public Target updateLastTargetQuery(@NotEmpty final String targetid, final URI address) {
         final Target target = targetRepository.findByControllerId(targetid);
@@ -205,7 +208,7 @@ public class ControllerManagement {
      *
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public TargetInfo updateLastTargetQuery(@NotNull final TargetInfo target, final URI address) {
         return updateTargetStatus(target, null, System.currentTimeMillis(), address);
@@ -262,7 +265,7 @@ public class ControllerManagement {
      * @return target reference
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public Target findOrRegisterTargetIfItDoesNotexist(@NotEmpty final String targetid, final URI address) {
         final Specification<Target> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(Target_.controllerId),
@@ -298,7 +301,7 @@ public class ControllerManagement {
      * @return the updated TargetInfo
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public TargetInfo updateTargetStatus(@NotNull final TargetInfo targetInfo, final TargetUpdateStatus status,
             final Long lastTargetQuery, final URI address) {
@@ -327,7 +330,7 @@ public class ControllerManagement {
      * 
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public Action addCancelActionStatus(@NotNull final ActionStatus actionStatus, final Action action) {
 
@@ -341,13 +344,14 @@ public class ControllerManagement {
             break;
         case CANCELED:
         case FINISHED:
-            // in case of successful cancelation we also report the success at
+            // in case of successful cancellation we also report the success at
             // the canceled action itself.
-            actionStatus.addMessage("Cancelation completion is finished sucessfully.");
+            actionStatus.addMessage(
+                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
             deploymentManagement.successCancellation(action);
             break;
         case RETRIEVED:
-            actionStatus.addMessage("Cancelation request retrieved");
+            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
             break;
         default:
         }
@@ -373,7 +377,7 @@ public class ControllerManagement {
      *             inserted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus, final Action action) {
 
@@ -481,7 +485,7 @@ public class ControllerManagement {
      */
     @Modifying
     @NotNull
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public Target updateControllerAttributes(@NotEmpty final String targetid, @NotNull final Map<String, String> data) {
         final Target target = targetRepository.findByControllerId(targetid);
@@ -519,7 +523,7 @@ public class ControllerManagement {
      *         {@link Status#RETRIEVED}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     public Action registerRetrieved(final Action action, final String message) {
         return handleRegisterRetrieved(action, message);
@@ -583,7 +587,7 @@ public class ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void addActionStatusMessage(final ActionStatus statusMessage) {
         actionStatusRepository.save(statusMessage);
     }
@@ -600,7 +604,7 @@ public class ControllerManagement {
      * @return the security context of the target, in case no target exists for
      *         the given controllerId {@code null} is returned
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public String getSecurityTokenByControllerId(final String controllerId) {
         final Target target = targetRepository.findByControllerId(controllerId);
         return target != null ? target.getSecurityToken() : null;

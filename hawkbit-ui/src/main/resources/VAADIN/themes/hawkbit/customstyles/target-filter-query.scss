@@ -28,12 +28,12 @@
 
 .error-icon{
 	color:$success-icon-color !important;
-	padding:2px;
+	padding-left:2px !important;
 }
 
 .success-icon{
 	color:$error-icon-color !important;
-	padding:2px;
+	padding-left:2px !important;
 }
 
 .on-focus-no-border:focus::after{

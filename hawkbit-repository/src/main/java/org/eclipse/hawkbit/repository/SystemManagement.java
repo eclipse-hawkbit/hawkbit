@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +44,7 @@ import org.springframework.validation.annotation.Validated;
  * Central system management operations of the SP server.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class SystemManagement {
@@ -180,7 +181,7 @@ public class SystemManagement {
      * @return
      */
     @Cacheable(value = "tenantMetadata", key = "#tenant.toUpperCase()")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @NotNull
     public TenantMetaData getTenantMetadata(@NotNull final String tenant) {
@@ -218,7 +219,7 @@ public class SystemManagement {
      *            to delete
      */
     @CacheEvict(value = { "tenantMetadata" }, key = "#tenant.toUpperCase()")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     public void deleteTenant(@NotNull final String tenant) {
@@ -249,7 +250,7 @@ public class SystemManagement {
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
      */
     @Cacheable(value = "tenantMetadata", keyGenerator = "tenantKeyGenerator")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @NotNull
     public TenantMetaData getTenantMetadata() {
@@ -278,7 +279,7 @@ public class SystemManagement {
     // suspend the transaction here to do a read-request against the medata
     // table, when the current
     // tenant is not cached anyway already.
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, isolation = Isolation.READ_UNCOMMITTED)
     public String currentTenant() {
         final String initialTenantCreation = createInitialTenant.get();
         if (initialTenantCreation == null) {
@@ -297,7 +298,7 @@ public class SystemManagement {
      * @return updated {@link TenantMetaData} entity
      */
     @CachePut(value = "tenantMetadata", key = "#metaData.tenant.toUpperCase()")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @NotNull
     public TenantMetaData updateTenantMetadata(@NotNull final TenantMetaData metaData) {
@@ -341,6 +342,8 @@ public class SystemManagement {
      */
     private class CurrentTenantKeyGenerator implements KeyGenerator {
         @Override
+        // Exception squid:S923 - override
+        @SuppressWarnings({ "squid:S923" })
         public Object generate(final Object target, final Method method, final Object... params) {
             final String initialTenantCreation = createInitialTenant.get();
             if (initialTenantCreation == null) {

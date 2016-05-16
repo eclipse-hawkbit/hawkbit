@@ -15,15 +15,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link TargetTag} repository.
  *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface DistributionSetTagRepository
         extends BaseEntityRepository<DistributionSetTag, Long>, JpaSpecificationExecutor<DistributionSetTag> {
     /**
@@ -34,7 +33,7 @@ public interface DistributionSetTagRepository
      * @return 1 if tag was deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     Long deleteByName(final String tagName);
 
     /**

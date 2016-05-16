@@ -74,7 +74,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @EnableScheduling
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class RolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);
 
@@ -136,7 +136,7 @@ public class RolloutManagement {
 
     /**
      * Retrieves all rollouts.
-     * 
+     *
      * @param page
      *            the page request to sort and limit the result
      * @return a page of found rollouts
@@ -148,7 +148,7 @@ public class RolloutManagement {
 
     /**
      * Retrieves all rollouts found by the given specification.
-     * 
+     *
      * @param specification
      *            the specification to filter rollouts
      * @param page
@@ -165,7 +165,7 @@ public class RolloutManagement {
 
     /**
      * Retrieves a specific rollout by its ID.
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout to retrieve
      * @return the founded rollout or {@code null} if rollout with given ID does
@@ -182,13 +182,13 @@ public class RolloutManagement {
      * which are effected by this rollout to create. The targets will then be
      * split up into groups. The size of the groups can be defined in the
      * {@code groupSize} parameter.
-     * 
+     *
      * The rollout is not started. Only the preparation of the rollout is done,
      * persisting and creating all the necessary groups. The Rollout and the
      * groups are persisted in {@link RolloutStatus#READY} and
      * {@link RolloutGroupStatus#READY} so they can be started
      * {@link #startRollout(Rollout)}.
-     * 
+     *
      * @param rollout
      *            the rollout entity to create
      * @param amountGroup
@@ -197,11 +197,11 @@ public class RolloutManagement {
      *            the rolloutgroup conditions and actions which should be
      *            applied for each {@link RolloutGroup}
      * @return the persisted rollout.
-     * 
+     *
      * @throws IllegalArgumentException
      *             in case the given groupSize is zero or lower.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout createRollout(final Rollout rollout, final int amountGroup,
@@ -217,22 +217,22 @@ public class RolloutManagement {
      * will be done synchronously and will be returned. The targets will then be
      * split up into groups. The size of the groups can be defined in the
      * {@code groupSize} parameter.
-     * 
+     *
      * The creation of the rollout groups is executed asynchronously due it
      * might take some time to split up the targets into groups. The creation of
      * the {@link RolloutGroup} is published as event
      * {@link RolloutGroupCreatedEvent}.
-     * 
+     *
      * The rollout is in status {@link RolloutStatus#CREATING} until all rollout
      * groups has been created and the targets are split up, then the rollout
      * will change the status to {@link RolloutStatus#READY}.
-     * 
+     *
      * The rollout is not started. Only the preparation of the rollout is done,
      * persisting and creating all the necessary groups. The Rollout and the
      * groups are persisted in {@link RolloutStatus#READY} and
      * {@link RolloutGroupStatus#READY} so they can be started
      * {@link #startRollout(Rollout)}.
-     * 
+     *
      * @param rollout
      *            the rollout to be created
      * @param amountGroup
@@ -244,7 +244,7 @@ public class RolloutManagement {
      * @return the created rollout entity in state
      *         {@link RolloutStatus#CREATING}
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
@@ -276,7 +276,7 @@ public class RolloutManagement {
         return rolloutRepository.save(rollout);
     }
 
-    private void verifyRolloutGroupParameter(final int amountGroup) {
+    private static void verifyRolloutGroupParameter(final int amountGroup) {
         if (amountGroup <= 0) {
             throw new IllegalArgumentException("the amountGroup must be greater than zero");
         } else if (amountGroup > 500) {
@@ -284,8 +284,8 @@ public class RolloutManagement {
         }
     }
 
-    private Rollout createRolloutGroupsInNewTransaction(final int amountOfGroups, final RolloutGroupConditions conditions,
-            final Rollout savedRollout) {
+    private Rollout createRolloutGroupsInNewTransaction(final int amountOfGroups,
+            final RolloutGroupConditions conditions, final Rollout savedRollout) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("creatingRollout");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -298,7 +298,7 @@ public class RolloutManagement {
      * sizes are calculated by dividing the total count of targets through the
      * amount of given groups. In same cases this will lead to less rollout
      * groups than given by client.
-     * 
+     *
      * @param amountOfGroups
      *            the amount of groups
      * @param conditions
@@ -361,17 +361,19 @@ public class RolloutManagement {
      * for each affected target in the rollout. The actions of the first group
      * will be started immediately {@link RolloutGroupStatus#RUNNING} as the
      * other groups will be {@link RolloutGroupStatus#SCHEDULED} state.
-     * 
+     *
      * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
-     * 
+     *
      * @param rollout
      *            the rollout to be started
-     * 
+     *
+     * @return started rollout
+     *
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -388,12 +390,14 @@ public class RolloutManagement {
      * actions of the first group will be started immediately
      * {@link RolloutGroupStatus#RUNNING} as the other groups will be
      * {@link RolloutGroupStatus#SCHEDULED} state.
-     * 
+     *
      * The rollout itself will be then also in {@link RolloutStatus#RUNNING}.
-     * 
+     *
      * @param rollout
      *            the rollout to be started
-     * 
+     *
+     * @return the started rollout
+     *
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#READY}. Only
      *             ready rollouts can be started.
@@ -461,19 +465,19 @@ public class RolloutManagement {
      * {@link RolloutGroupStatus#SCHEDULED} will not be started and keep in
      * {@link RolloutGroupStatus#SCHEDULED} state until the rollout is
      * {@link RolloutManagement#resumeRollout(Rollout)}.
-     * 
+     *
      * Switching the rollout status to {@link RolloutStatus#PAUSED} is
      * sufficient due the {@link #checkRunningRollouts(long)} will not check
      * this rollout anymore.
-     * 
+     *
      * @param rollout
      *            the rollout to be paused.
-     * 
+     *
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *             Only running rollouts can be paused.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -496,14 +500,14 @@ public class RolloutManagement {
      * Resumes a paused rollout. The rollout switches back to
      * {@link RolloutStatus#RUNNING} state which is then picked up again by the
      * {@link #checkRunningRollouts(long)}.
-     * 
+     *
      * @param rollout
      *            the rollout to be resumed
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#PAUSED}. Only
      *             paused rollouts can be resumed.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -521,7 +525,7 @@ public class RolloutManagement {
      * Checking running rollouts. Rollouts which are checked updating the
      * {@link Rollout#setLastCheck(long)} to indicate that the current instance
      * is handling the specific rollout. This code should run as system-code.
-     * 
+     *
      * <pre>
      * {@code
      *  SystemSecurityContext.runAsSystem(new Callable<Void>() {
@@ -531,15 +535,15 @@ public class RolloutManagement {
      * });
      *  }
      * </pre>
-     * 
+     *
      * This method is attend to be called by a scheduler.
      * {@link RolloutScheduler}. And must be running in an transaction so it's
      * splitted from the scheduler.
-     * 
+     *
      * Rollouts which are currently running are investigated, by means the
      * error- and finish condition of running groups in this rollout are
      * evaluated.
-     * 
+     *
      * @param delayBetweenChecks
      *            the time in milliseconds of the delay between the further and
      *            this check. This check is only applied if the last check is
@@ -728,7 +732,7 @@ public class RolloutManagement {
 
     /**
      * Count rollouts by specified filter text.
-     * 
+     *
      * @param searchText
      *            name or description
      * @return total count rollouts for specified filter text.
@@ -750,7 +754,7 @@ public class RolloutManagement {
 
     /**
      * * Retrieves a specific rollout by its ID.
-     * 
+     *
      * @param pageable
      *            the page request to sort and limit the result
      * @param searchText
@@ -768,7 +772,7 @@ public class RolloutManagement {
 
     /**
      * Retrieves a specific rollout by its name.
-     * 
+     *
      * @param rolloutName
      *            the name of the rollout to retrieve
      * @return the founded rollout or {@code null} if rollout with given name
@@ -781,14 +785,14 @@ public class RolloutManagement {
 
     /**
      * Update rollout details.
-     * 
+     *
      * @param rollout
      *            rollout to be updated
-     * 
+     *
      * @return Rollout updated rollout
      */
     @NotNull
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     public Rollout updateRollout(@NotNull final Rollout rollout) {
@@ -798,7 +802,7 @@ public class RolloutManagement {
 
     /**
      * Get count of targets in different status in rollout.
-     * 
+     *
      * @param page
      *            the page request to sort and limit the result
      * @return a list of rollouts with details of targets count for different
@@ -850,7 +854,7 @@ public class RolloutManagement {
         }
     }
 
-    private void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
+    private static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
         if (!(RolloutStatus.READY.equals(mergedRollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
                     + rollout.getStatus().name().toLowerCase());
@@ -860,7 +864,7 @@ public class RolloutManagement {
     /***
      * Get finished percentage details for a specified group which is in running
      * state.
-     * 
+     *
      * @param rolloutId
      *            the ID of the {@link Rollout}
      * @param rolloutGroup

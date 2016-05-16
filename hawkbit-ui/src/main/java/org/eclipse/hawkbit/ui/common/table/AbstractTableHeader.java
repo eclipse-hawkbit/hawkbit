@@ -44,7 +44,7 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractTableHeader extends VerticalLayout {
 
     private static final long serialVersionUID = 4881626370291837175L;
-    
+
     @Autowired
     protected I18N i18n;
 
@@ -53,7 +53,6 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     @Autowired
     protected transient EventBus.SessionEventBus eventbus;
-    
 
     private Label headerCaption;
 
@@ -83,7 +82,7 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         restoreState();
         eventbus.subscribe(this);
     }
-    
+
     @PreDestroy
     void destroy() {
         eventbus.unsubscribe(this);
@@ -171,8 +170,8 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         }
         titleFilterIconsLayout.addComponent(maxMinIcon);
         titleFilterIconsLayout.setComponentAlignment(maxMinIcon, Alignment.TOP_RIGHT);
-        titleFilterIconsLayout.setExpandRatio(headerCaption, 0.4f);
-        titleFilterIconsLayout.setExpandRatio(searchField, 0.6f);
+        titleFilterIconsLayout.setExpandRatio(headerCaption, 0.4F);
+        titleFilterIconsLayout.setExpandRatio(searchField, 0.6F);
 
         addComponent(titleFilterIconsLayout);
 
@@ -192,10 +191,10 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
             dropHintDropFilterLayout.addComponent(dropFilterLayout);
             dropHintDropFilterLayout.setComponentAlignment(dropFilterLayout, Alignment.TOP_CENTER);
-            dropHintDropFilterLayout.setExpandRatio(dropFilterLayout, 1.0f);
+            dropHintDropFilterLayout.setExpandRatio(dropFilterLayout, 1.0F);
         }
         addComponent(dropHintDropFilterLayout);
-        setComponentAlignment(dropHintDropFilterLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(dropHintDropFilterLayout, Alignment.TOP_CENTER);
         addStyleName("bordered-layout");
         addStyleName("no-border-bottom");
     }

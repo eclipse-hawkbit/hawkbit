@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -202,10 +201,7 @@ public class CreateOrUpdateFilterTable extends Table {
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
-                i18n.get("header.assigned.ds"), 0.125F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
-                i18n.get("header.installed.ds"), 0.125F));
+
         return columnList;
     }
 
@@ -258,5 +254,5 @@ public class CreateOrUpdateFilterTable extends Table {
         populateTableData();
         eventBus.publish(this, CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON);
     }
-   
+
 }

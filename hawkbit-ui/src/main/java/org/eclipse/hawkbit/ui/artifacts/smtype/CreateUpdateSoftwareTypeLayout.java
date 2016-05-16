@@ -554,7 +554,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
                     .findSoftwareModuleTypeByName(typeName.getValue());
             if (createOptiongroup.getValue().equals(createTypeStr)) {
                 if (!checkIsKeyDuplicate(typeKey.getValue()) && !checkIsDuplicate(existingType)) {
-                    crateNewSWModuleType();
+                    createNewSWModuleType();
                 }
             } else {
 
@@ -611,9 +611,9 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     /**
      * Create new tag.
      */
-    private void crateNewSWModuleType() {
+    private void createNewSWModuleType() {
         int assignNumber = 0;
-        final String colorPicked = getColorPickedSting();
+        final String colorPicked = getColorPickedString();
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeName.getValue());
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
@@ -650,7 +650,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      *
      * @return String of color picked value.
      */
-    private String getColorPickedSting() {
+    private String getColorPickedString() {
         return "rgb(" + getSelPreview().getColor().getRed() + "," + getSelPreview().getColor().getGreen() + ","
                 + getSelPreview().getColor().getBlue() + ")";
     }
@@ -676,7 +676,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
             existingType.setDescription(null != typeDescValue ? typeDescValue : null);
 
-            existingType.setColour(getColorPickedSting());
+            existingType.setColour(getColorPickedString());
             swTypeManagementService.updateSoftwareModuleType(existingType);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
             closeWindow();

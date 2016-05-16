@@ -38,7 +38,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
@@ -245,18 +246,21 @@ public class TargetInfo implements Persistable<Long>, Serializable {
         if (lastTargetQuery == null) {
             return null;
         }
-
-        final Duration pollTime = DurationHelper.formattedStringToDuration(TenantConfigurationManagement.getInstance()
-                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
-        final Duration overdueTime = DurationHelper.formattedStringToDuration(TenantConfigurationManagement
-                .getInstance().getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
-                .getValue());
-        final LocalDateTime currentDate = LocalDateTime.now();
-        final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
-                ZoneId.systemDefault());
-        final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
-        final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
-        return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext().runAsSystem(() -> {
+            final Duration pollTime = DurationHelper.formattedStringToDuration(TenantConfigurationManagementHolder
+                    .getInstance().getTenantConfigurationManagement()
+                    .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+            final Duration overdueTime = DurationHelper.formattedStringToDuration(
+                    TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement()
+                            .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                            .getValue());
+            final LocalDateTime currentDate = LocalDateTime.now();
+            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
+                    ZoneId.systemDefault());
+            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
+            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
+            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        });
     }
 
     /**

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.simulator;
 
+import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
+
 /**
  * The bean of a simulated device which can be stored in the
  * {@link DeviceSimulatorRepository} or shown in the UI.
@@ -22,16 +24,15 @@ public abstract class AbstractSimulatedDevice {
     private Status status;
     private double progress;
     private String swversion = "unknown";
-    private ResponseStatus responseStatus = ResponseStatus.SUCCESSFUL;
+    private UpdateStatus updateStatus = new UpdateStatus(ResponseStatus.SUCCESSFUL, "Simulation complete!");
     private Protocol protocol = Protocol.DMF_AMQP;
+    private String targetSecurityToken;
 
     private int nextPollCounterSec;
 
     /**
      * Enum definition of the protocol to be used for the simulated device.
      * 
-     * @author Michael Hirsch
-     *
      */
     public enum Protocol {
         /**
@@ -65,24 +66,6 @@ public abstract class AbstractSimulatedDevice {
         FINISH,
         /**
          * device has been updated with an error.
-         */
-        ERROR;
-    }
-
-    /**
-     * The status to response to the hawkbit update server if an simulated
-     * update process should be respond with successful or failure update.
-     * 
-     * @author Michael Hirsch
-     *
-     */
-    public enum ResponseStatus {
-        /**
-         * updated has been successful and response the successful update.
-         */
-        SUCCESSFUL,
-        /**
-         * updated has been not successful and response the error update.
          */
         ERROR;
     }
@@ -158,12 +141,12 @@ public abstract class AbstractSimulatedDevice {
         this.swversion = swversion;
     }
 
-    public ResponseStatus getResponseStatus() {
-        return responseStatus;
+    public UpdateStatus getUpdateStatus() {
+        return updateStatus;
     }
 
-    public void setResponseStatus(final ResponseStatus responseStatus) {
-        this.responseStatus = responseStatus;
+    public void setUpdateStatus(final UpdateStatus updateStatus) {
+        this.updateStatus = updateStatus;
     }
 
     public Protocol getProtocol() {
@@ -177,4 +160,13 @@ public abstract class AbstractSimulatedDevice {
     public void setNextPollCounterSec(final int nextPollDelayInSec) {
         this.nextPollCounterSec = nextPollDelayInSec;
     }
+
+    public String getTargetSecurityToken() {
+        return targetSecurityToken;
+    }
+
+    public void setTargetSecurityToken(final String targetSecurityToken) {
+        this.targetSecurityToken = targetSecurityToken;
+    }
+
 }

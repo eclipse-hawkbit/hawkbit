@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyTarget;
@@ -121,20 +120,7 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             prxyTarget.setCreatedAt(targ.getCreatedAt());
             prxyTarget.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(targ));
             prxyTarget.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(targ));
-            final Target target = getTargetManagement().findTargetByControllerIDWithDetails(targ.getControllerId());
-            final DistributionSet installedDistributionSet = target.getTargetInfo().getInstalledDistributionSet();
-            prxyTarget.setInstalledDistributionSet(installedDistributionSet);
-            final DistributionSet assignedDistributionSet = target.getAssignedDistributionSet();
-            prxyTarget.setAssignedDistributionSet(assignedDistributionSet);
 
-            if (null != assignedDistributionSet) {
-                prxyTarget.setAssignedDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
-                        assignedDistributionSet.getName(), assignedDistributionSet.getVersion()));
-            }
-            if (null != installedDistributionSet) {
-                prxyTarget.setInstalledDistNameVersion(HawkbitCommonUtil.getFormattedNameVersion(
-                        installedDistributionSet.getName(), installedDistributionSet.getVersion()));
-            }
             prxyTarget.setUpdateStatus(targ.getTargetInfo().getUpdateStatus());
             prxyTarget.setLastTargetQuery(targ.getTargetInfo().getLastTargetQuery());
             prxyTarget.setTargetInfo(targ.getTargetInfo());

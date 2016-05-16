@@ -18,8 +18,9 @@ import com.google.common.collect.Lists;
 /**
  * Builder pattern for building {@link DistributionSetRequestBodyPost}.
  */
+// Exception squid:S1701 - builder pattern
+@SuppressWarnings({ "squid:S1701" })
 public class DistributionSetBuilder {
-
     private String name;
     private String version;
     private String type;
