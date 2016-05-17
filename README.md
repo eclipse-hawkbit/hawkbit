@@ -57,7 +57,7 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 
 
 # Modules
-`hawkbit-core` : internal interfaces and utility classes..  
+`hawkbit-core` : internal interfaces and utility classes. 
 `hawkbit-security-core` : authentication and authorization.  
 `hawkbit-security-integration` : authentication and authorization integrated with the APIs.  
 `hawkbit-artifact-repository-mongo` : artifact repository implementation to MongoDB.    
@@ -66,7 +66,13 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 `hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API.  
 `hawkbit-repository` : repository implementation based on SQL for all meta-data.    
 `hawkbit-http-security` : implementation for security filters for HTTP.    
-`hawkbit-rest-api` : API classes for the REST Management API.  
-`hawkbit-rest-resource` : HTTP REST endpoints for the Management and the Direct Device API.  
-`hawkbit-ui` : Vaadin UI.  
+`hawkbit-rest-core` : internal utility classes for rest.
+`hawkbit-ddi-api` : Rest interfaces for the Direct Device API.
+`hawkbit-ddi-dl-api` :  Rest interfaces for Direct Device download part.
+`hawkbit-ddi-resource` : Rest implementation for the Direct Device API with download part.
+`hawkbit-mgmt-api` : Rest interfaces for REST Management API.
+`hawkbit-mgmt-resource` : Rest implementation for the REST Management API.
+`hawkbit-mgmt-ui` : Vaadin UI for Management API.
+`hawkbit-system-api` : internal rest system API.
+`hawkbit-system-resource` : internal rest system implementation.
 `hawkbit-cache-redis` : spring cache manager configuration and implementation with redis, distributed cache and distributed events.
