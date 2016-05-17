@@ -160,19 +160,23 @@ public class WithSpringAuthorityRule implements TestRule {
     }
 
     public static WithUser withUser(final String principal, final String... authorities) {
-        return withUserAndTenant(principal, "default", true, authorities);
+        return withUserAndTenant(principal, "default", true, true, authorities);
+    }
+    
+    public static WithUser withUser(final String principal, final boolean allSpPermision, final String... authorities) {
+        return withUserAndTenant(principal, "default", true, allSpPermision, authorities);
     }
 
     public static WithUser withUser(final boolean autoCreateTenant) {
-        return withUserAndTenant("bumlux", "default", autoCreateTenant, new String[] {});
+        return withUserAndTenant("bumlux", "default", autoCreateTenant, true, new String[] {});
     }
 
     public static WithUser withUserAndTenant(final String principal, final String tenant, final String... authorities) {
-        return withUserAndTenant(principal, tenant, true, new String[] {});
+        return withUserAndTenant(principal, tenant, true, true, new String[] {});
     }
 
     public static WithUser withUserAndTenant(final String principal, final String tenant,
-            final boolean autoCreateTenant, final String... authorities) {
+            final boolean autoCreateTenant, final boolean allSpPermission, final String... authorities) {
         return new WithUser() {
 
             @Override
@@ -197,7 +201,7 @@ public class WithSpringAuthorityRule implements TestRule {
 
             @Override
             public boolean allSpPermissions() {
-                return true;
+                return allSpPermission;
             }
 
             @Override
