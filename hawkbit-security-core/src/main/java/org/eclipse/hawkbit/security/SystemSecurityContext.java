@@ -88,10 +88,7 @@ public class SystemSecurityContext {
      *         code block.
      */
     public boolean isCurrentThreadSystemCode() {
-        if (SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication) {
-            return true;
-        }
-        return false;
+        return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
     }
 
     private static void setSystemContext() {
