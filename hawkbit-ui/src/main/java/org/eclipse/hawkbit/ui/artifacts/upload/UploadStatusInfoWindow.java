@@ -173,6 +173,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void setPopupProperties() {
+        setId(SPUIComponetIdProvider.UPLOAD_STATUS_POPUP_ID);
         addStyleName(SPUIStyleDefinitions.UPLOAD_INFO);
         setImmediate(true);
         setResizable(false);

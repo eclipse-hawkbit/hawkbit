@@ -902,6 +902,11 @@ public final class SPUIComponetIdProvider {
      * Artifact upload view - upload status button id.
      */
     public static final String UPLOAD_STATUS_BUTTON = "artficat.upload.status.button.id";
+    
+    /**
+     * Artifact uplaod view - uplod status popup id.
+     */
+    public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
 
     
     /**

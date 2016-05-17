@@ -181,7 +181,7 @@ public class UploadLayout extends VerticalLayout {
 
         final Upload upload = new Upload();
         final UploadHandler uploadHandler = new UploadHandler(null, 0, this, spInfo.getMaxArtifactFileSize(), upload,
-                null);
+                null, null);
         upload.setButtonCaption(i18n.get("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -243,15 +243,16 @@ public class UploadLayout extends VerticalLayout {
         public void drop(final DragAndDropEvent event) {
             if (validate(event)) {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
+                // selected software module at the time of file drop is
+                // considered for upload
+                SoftwareModule selectedSw = artifactUploadState.getSelectedBaseSoftwareModule().get();
                 // reset the flag
                 hasDirectory = Boolean.FALSE;
                 for (final Html5File file : files) {
-                    processFile(file);
+                    processFile(file, selectedSw);
                 }
                 if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
                     processBtn.setEnabled(false);
-                    // reset before we start
-                    // uploadInfoWindow.uploadSessionStarted();
                 } else {
                     // If the upload is not started, it signifies all
                     // dropped files as either duplicate or directory.So
@@ -261,20 +262,20 @@ public class UploadLayout extends VerticalLayout {
             }
         }
 
-        private void processFile(final Html5File file) {
+        private void processFile(final Html5File file, SoftwareModule selectedSw) {
             if (!isDirectory(file)) {
                 if (!checkForDuplicate(file.getFileName())) {
                     artifactUploadState.getNumberOfFileUploadsExpected().incrementAndGet();
-                    file.setStreamVariable(createStreamVariable(file));
+                    file.setStreamVariable(createStreamVariable(file,selectedSw));
                 }
             } else {
                 hasDirectory = Boolean.TRUE;
             }
         }
 
-        private StreamVariable createStreamVariable(final Html5File file) {
+        private StreamVariable createStreamVariable(final Html5File file, SoftwareModule selectedSw) {
             return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
-                    spInfo.getMaxArtifactFileSize(), null, file.getType());
+                    spInfo.getMaxArtifactFileSize(), null, file.getType(),selectedSw);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -357,29 +358,28 @@ public class UploadLayout extends VerticalLayout {
      *            file size
      * @param mimeType
      *            the mimeType of the file
+     * @param selectedSw 
      * @throws IOException
      *             in case of upload errors
      */
-    OutputStream saveUploadedFileDetails(final String name, final long size, final String mimeType) {
+    OutputStream saveUploadedFileDetails(final String name, final long size, final String mimeType, SoftwareModule selectedSw) {
         File tempFile = null;
         try {
             tempFile = File.createTempFile("spUiArtifactUpload", null);
 
             final OutputStream out = new FileOutputStream(tempFile);
 
-            final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-
             final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
-                    selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
+                    selectedSw.getName(), selectedSw.getVersion());
 
             final CustomFile customFile = new CustomFile(name, size, tempFile.getAbsolutePath(),
-                    selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion(), mimeType);
+                    selectedSw.getName(), selectedSw.getVersion(), mimeType);
 
             artifactUploadState.getFileSelected().add(customFile);
             processBtn.setEnabled(false);
 
             if (!artifactUploadState.getBaseSwModuleList().keySet().contains(currentBaseSoftwareModuleKey)) {
-                artifactUploadState.getBaseSwModuleList().put(currentBaseSoftwareModuleKey, selectedSoftwareModule);
+                artifactUploadState.getBaseSwModuleList().put(currentBaseSoftwareModuleKey, selectedSw);
             }
             return out;
         } catch (final FileNotFoundException e) {
@@ -689,30 +689,32 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void onUploadStreamingFailure(UploadStatusEvent event) {
-            /**
-             * If upload interrupted because of duplicate file,do not remove the
-             * file already in upload list
-             **/
-            if (getDuplicateFileNamesList().isEmpty()
-                    || !getDuplicateFileNamesList().contains(event.getUploadStatus().getFileName())) {
-                final SoftwareModule sw = getSoftwareModuleSelected();
+        /**
+         * If upload interrupted because of duplicate file,do not remove the
+         * file already in upload list
+         **/
+        if (getDuplicateFileNamesList().isEmpty()
+                || !getDuplicateFileNamesList().contains(event.getUploadStatus().getFileName())) {
+            final SoftwareModule sw = event.getUploadStatus().getSoftwareModule();
+            if (sw != null) {
                 getFileSelected().remove(
                         new CustomFile(event.getUploadStatus().getFileName(), sw.getName(), sw.getVersion()));
-                // failed reason to be updated only if there is error other than
-                // duplicate file error
-                uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
-                        .getFailureReason());
-                increaseNumberOfFileUploadsFailed();
             }
-            decreaseNumberOfFileUploadsExpected();
-            updateUploadCounts();
-            enableProcessBtn();
-            // check if we are finished
-            if (isUploadComplete()) {
-                uploadInfoWindow.uploadSessionFinished();
-                setUploadStatusButtonIconToFinished();
-            }
-            displayDuplicateValidationMessage();
+            // failed reason to be updated only if there is error other than
+            // duplicate file error
+            uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
+                    .getFailureReason());
+            increaseNumberOfFileUploadsFailed();
+        }
+        decreaseNumberOfFileUploadsExpected();
+        updateUploadCounts();
+        enableProcessBtn();
+        // check if we are finished
+        if (isUploadComplete()) {
+            uploadInfoWindow.uploadSessionFinished();
+            setUploadStatusButtonIconToFinished();
+        }
+        displayDuplicateValidationMessage();
     }
 
     private void onUploadSuccess(UploadStatusEvent event) {
@@ -745,11 +747,13 @@ public class UploadLayout extends VerticalLayout {
          * If upload interrupted because of duplicate file,do not remove the
          * file already in upload list
          **/
-        if (getDuplicateFileNamesList().isEmpty() || !getDuplicateFileNamesList().contains(
-                event.getUploadStatus().getFileName())) {
-            final SoftwareModule sw = getSoftwareModuleSelected();
-            getFileSelected().remove(
-                    new CustomFile(event.getUploadStatus().getFileName(), sw.getName(), sw.getVersion()));
+        if (getDuplicateFileNamesList().isEmpty()
+                || !getDuplicateFileNamesList().contains(event.getUploadStatus().getFileName())) {
+            final SoftwareModule sw = event.getUploadStatus().getSoftwareModule();
+            if (sw != null) {
+                getFileSelected().remove(
+                        new CustomFile(event.getUploadStatus().getFileName(), sw.getName(), sw.getVersion()));
+            }
             // failed reason to be updated only if there is error other than
             // duplicate file error
             uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()

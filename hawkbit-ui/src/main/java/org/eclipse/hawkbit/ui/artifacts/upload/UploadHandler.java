@@ -14,10 +14,12 @@ import java.io.OutputStream;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
@@ -68,9 +70,12 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     private String failureReason;
     private final I18N i18n;
     private transient EventBus.SessionEventBus eventBus;
+    private final SoftwareModule selectedSw;
+    private SoftwareModule selectedSwForUpload;
+    private ArtifactUploadState artifactUploadState;
 
-    UploadHandler(final String fileName, final long fileSize, final UploadLayout view,
-             final long maxSize, final Upload upload, final String mimeType) {
+    UploadHandler(final String fileName, final long fileSize, final UploadLayout view, final long maxSize,
+            final Upload upload, final String mimeType, SoftwareModule selectedSw) {
         super();
         this.fileName = fileName;
         this.fileSize = fileSize;
@@ -78,8 +83,10 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         this.maxSize = maxSize;
         this.upload = upload;
         this.mimeType = mimeType;
+        this.selectedSw = selectedSw;
         this.i18n = SpringContextHelper.getBean(I18N.class);
         this.eventBus = SpringContextHelper.getBean(EventBus.SessionEventBus.class);
+        this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
     }
 
     /**
@@ -91,7 +98,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public final OutputStream getOutputStream() {
         try {
             streamingInterrupted = false;
-            return view.saveUploadedFileDetails(fileName, fileSize, mimeType);
+            return view.saveUploadedFileDetails(fileName, fileSize, mimeType, selectedSw);
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
             failureReason = e.getMessage();
@@ -116,7 +123,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         try {
             if (view.checkIfSoftwareModuleIsSelected() && !view.checkForDuplicate(fileName)) {
                 view.increaseNumberOfFileUploadsExpected();
-                return view.saveUploadedFileDetails(fileName, 0, mimeType);
+                selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().get();
+                return view.saveUploadedFileDetails(fileName, 0, mimeType, selectedSwForUpload);
             }
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
@@ -217,13 +225,14 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void updateProgress(final long readBytes, final long contentLength) {
-        //Update progress is called event after upload interrupted in uploadStarted method
+        // Update progress is called event after upload interrupted in
+        // uploadStarted method
         if (!uploadInterrupted) {
             if (readBytes > maxSize || contentLength > maxSize) {
                 LOG.error("User tried to upload more than was allowed ({}).", maxSize);
                 failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
                 eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
-                        fileName, failureReason)));
+                        fileName, failureReason, selectedSwForUpload)));
                 upload.interruptUpload();
                 uploadInterrupted = true;
                 return;
@@ -245,7 +254,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
             failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
             eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
-                    fileName, failureReason)));
+                    fileName, failureReason, selectedSw)));
             streamingInterrupted = true;
             return;
         }
@@ -268,7 +277,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             failureReason = event.getException().getMessage();
         }
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STREAMING_FAILED,
-                new UploadFileStatus(fileName, failureReason)));
+                new UploadFileStatus(fileName, failureReason, selectedSw)));
 
         LOG.info("Streaming failed due to  :{}", event.getException());
     }
@@ -284,9 +293,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         if (failureReason == null) {
             failureReason = event.getReason().getMessage();
         }
-        System.out.println("failureReason:::"+failureReason);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
-                fileName, failureReason)));
+                fileName, failureReason, selectedSwForUpload)));
         LOG.info("Upload failed for file :{}", event.getReason());
     }
 
@@ -335,5 +343,5 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         }
         return true;
     }
-    
+
 }

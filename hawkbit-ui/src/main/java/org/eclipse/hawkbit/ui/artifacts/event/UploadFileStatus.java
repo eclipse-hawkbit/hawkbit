@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.event;
 
 import java.io.Serializable;
 
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+
 /**
  * 
  * Holds file and upload status details.Meta data sent with upload events.
@@ -27,6 +29,8 @@ public class UploadFileStatus implements Serializable {
 
     private String failureReason;
 
+    private SoftwareModule softwareModule;
+    
     public UploadFileStatus(String fileName) {
         this.fileName = fileName;
     }
@@ -37,9 +41,10 @@ public class UploadFileStatus implements Serializable {
         this.bytesRead = bytesRead;
     }
 
-    public UploadFileStatus(String fileName, String failureReason) {
+    public UploadFileStatus(String fileName, String failureReason,SoftwareModule selectedSw) {
         this.failureReason = failureReason;
         this.fileName = fileName;
+        this.softwareModule = selectedSw;
     }
 
     public String getFileName() {
@@ -56,5 +61,9 @@ public class UploadFileStatus implements Serializable {
 
     public String getFailureReason() {
         return failureReason;
+    }
+    
+    public SoftwareModule getSoftwareModule() {
+        return softwareModule;
     }
 }
