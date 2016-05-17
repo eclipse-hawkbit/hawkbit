@@ -102,8 +102,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", targetid);
 
-        // SecurityContextHolder.getContext().getAuthentication().
-
         final SoftwareModule softwareModule = softwareManagement.findSoftwareModuleById(softwareModuleId);
 
         if (softwareModule == null) {
@@ -250,7 +248,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", targetid, base);
 
             controllerManagement.registerRetrieved(action,
-                    "Controller retrieved update action and should start now the download.");
+                    ControllerManagement.SERVER_MESSAGE_PREFIX
+                    + "Target retrieved update action and should start now the download.");
 
             return new ResponseEntity<>(base, HttpStatus.OK);
         }
@@ -287,7 +286,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         controllerManagement.addUpdateActionStatus(
-
                 generateUpdateStatus(feedback, targetid, feedback.getId(), action), action);
 
         return new ResponseEntity<>(HttpStatus.OK);

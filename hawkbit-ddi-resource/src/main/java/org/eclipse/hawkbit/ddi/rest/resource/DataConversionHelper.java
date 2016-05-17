@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 
 import com.google.common.base.Charsets;
@@ -42,10 +41,6 @@ import com.google.common.base.Charsets;
  * Utility class for the DDI API.
  */
 public final class DataConversionHelper {
-
-    @Autowired
-    ArtifactUrlHandler artifactUrlHandler;
-
     // utility class, private constructor.
     private DataConversionHelper() {
 
@@ -84,23 +79,33 @@ public final class DataConversionHelper {
             final org.eclipse.hawkbit.repository.model.SoftwareModule module,
             final ArtifactUrlHandler artifactUrlHandler) {
         final List<DdiArtifact> files = new ArrayList<>();
-        module.getLocalArtifacts().forEach(artifact -> {
-            final DdiArtifact file = new DdiArtifact();
-            file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
-            file.setFilename(artifact.getFilename());
-            file.setSize(artifact.getSize());
+        
+        module.getLocalArtifacts()
+        .forEach(artifact -> files.add(createArtifact(targetid, artifactUrlHandler, artifact)));
+        return files;
+    }
+    
+    private static DdiArtifact createArtifact(final String targetid, final ArtifactUrlHandler artifactUrlHandler,
+            final LocalArtifact artifact) {
+        final DdiArtifact file = new DdiArtifact();
+        file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()));
+        file.setFilename(artifact.getFilename());
+        file.setSize(artifact.getSize());
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
             final String linkHttp = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
                     artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTP);
+            file.add(new Link(linkHttp).withRel("download-http"));
+            file.add(new Link(linkHttp + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
+        }
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
             final String linkHttps = artifactUrlHandler.getUrl(targetid, artifact.getSoftwareModule().getId(),
                     artifact.getFilename(), artifact.getSha1Hash(), UrlProtocol.HTTPS);
             file.add(new Link(linkHttps).withRel("download"));
             file.add(new Link(linkHttps + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum"));
-            file.add(new Link(linkHttp).withRel("download-http"));
-            file.add(new Link(linkHttp + DdiDlRestConstants.ARTIFACT_MD5_DWNL_SUFFIX).withRel("md5sum-http"));
-
-            files.add(file);
-        });
-        return files;
+        }
+        return file;
     }
 
     static DdiControllerBase fromTarget(final Target target, final List<Action> actions,
