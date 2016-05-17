@@ -212,7 +212,6 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void createComponents() {
 
-        // Breadcrumb
         breadcrumbButton = createBreadcrumbButton();
 
         headerCaption = SPUIComponentProvider.getLabel(SPUILabelDefinitions.VAR_CREATE_FILTER,
