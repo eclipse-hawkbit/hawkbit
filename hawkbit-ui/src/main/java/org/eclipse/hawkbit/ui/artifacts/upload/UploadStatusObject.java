@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+/**
+ * 
+ * Holds uploaded file status.Used to display the details in upload status
+ * popup.
+ *
+ */
 public class UploadStatusObject {
     private String status;
     private Double progress;

@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * 
- * Holds file and upload status details.
+ * Holds file and upload status details.Meta data sent with upload events.
  *
  */
 public class UploadFileStatus implements Serializable {
@@ -27,10 +27,10 @@ public class UploadFileStatus implements Serializable {
 
     private String failureReason;
 
-    public UploadFileStatus(String fileName){
+    public UploadFileStatus(String fileName) {
         this.fileName = fileName;
     }
-    
+
     public UploadFileStatus(String fileName, long bytesRead, long contentLength) {
         this.fileName = fileName;
         this.contentLength = contentLength;
