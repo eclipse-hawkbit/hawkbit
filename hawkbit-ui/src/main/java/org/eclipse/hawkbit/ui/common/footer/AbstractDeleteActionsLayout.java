@@ -130,7 +130,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             addComponent(hLayout);
             setComponentAlignment(hLayout, Alignment.BOTTOM_CENTER);
         }
-        setStyleName("footer-layout");
+        setStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         setWidth("100%");
     }
 
@@ -168,7 +168,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
                 "", false, null, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        button.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        button.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         button.setWidth("100px");
         button.setHtmlContentAllowed(true);
         button.addClickListener(event -> onClickBulkUploadNotificationButton());
@@ -199,7 +199,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         if (bulkUploadStatusButton == null) {
             return;
         }
-        bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        bulkUploadStatusButton.removeStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         bulkUploadStatusButton.setIcon(FontAwesome.UPLOAD);
     }
 
@@ -207,7 +207,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
         if (bulkUploadStatusButton == null) {
             return;
         }
-        bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.BULK_UPLOAD_PROGRESS_INDICATOR_STYLE);
+        bulkUploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         bulkUploadStatusButton.setIcon(null);
     }
 

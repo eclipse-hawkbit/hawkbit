@@ -11,15 +11,23 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.annotation.PreDestroy;
+
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadFileStatus;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.spring.events.EventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.server.StreamVariable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
@@ -49,28 +57,29 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
 
     private final long fileSize;
     private final UploadLayout view;
-    private final UploadStatusInfoWindow infoWindow;
     private final long maxSize;
     private final Upload upload;
 
     private volatile String fileName = null;
     private volatile String mimeType = null;
-    private volatile boolean interrupted = false;
+    private volatile boolean streamingInterrupted = false;
+    private volatile boolean uploadInterrupted = false;
+
     private String failureReason;
     private final I18N i18n;
+    private transient EventBus.SessionEventBus eventBus;
 
     UploadHandler(final String fileName, final long fileSize, final UploadLayout view,
-            final UploadStatusInfoWindow infoWindow, final long maxSize, final Upload upload, final String mimeType) {
+             final long maxSize, final Upload upload, final String mimeType) {
         super();
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.view = view;
-        this.infoWindow = infoWindow;
         this.maxSize = maxSize;
         this.upload = upload;
         this.mimeType = mimeType;
         this.i18n = SpringContextHelper.getBean(I18N.class);
-
+        this.eventBus = SpringContextHelper.getBean(EventBus.SessionEventBus.class);
     }
 
     /**
@@ -81,11 +90,12 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public final OutputStream getOutputStream() {
         try {
+            streamingInterrupted = false;
             return view.saveUploadedFileDetails(fileName, fileSize, mimeType);
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
             failureReason = e.getMessage();
-            interrupted = true;
+            streamingInterrupted = true;
             return new NullOutputStream();
         }
     }
@@ -98,23 +108,21 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
+        uploadInterrupted = false;
         this.fileName = fileName;
         this.mimeType = mimeType;
         // reset has directory flag before upload
         view.setHasDirectory(false);
         try {
-            if (view.checkIfSoftwareModuleIsSelected()) {
-                if (view.checkForDuplicate(fileName)) {
-                    view.showDuplicateMessage();
-                } else {
-                    view.increaseNumberOfFileUploadsExpected();
-                    return view.saveUploadedFileDetails(fileName, 0, mimeType);
-                }
+            if (view.checkIfSoftwareModuleIsSelected() && !view.checkForDuplicate(fileName)) {
+                view.increaseNumberOfFileUploadsExpected();
+                return view.saveUploadedFileDetails(fileName, 0, mimeType);
             }
         } catch (final ArtifactUploadFailedException e) {
             LOG.error("Atifact upload failed {} ", e);
             failureReason = e.getMessage();
             upload.interruptUpload();
+            uploadInterrupted = true;
         }
         // if final validation fails ,final no upload ,return NullOutputStream
         return new NullOutputStream();
@@ -129,13 +137,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadSucceeded(final SucceededEvent event) {
         LOG.debug("Streaming finished for file :{}", event.getFilename());
-        view.updateFileSize(event.getFilename(), event.getLength());
-
-        // recorded that we now one more uploaded
-        view.increaseNumberOfFilesActuallyUpload();
-
-        // inform upload status window
-        infoWindow.uploadSucceeded(event.getFilename());
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL, new UploadFileStatus(
+                event.getFilename(), 0, event.getLength())));
     }
 
     /**
@@ -148,20 +151,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void streamingFinished(final StreamingEndEvent event) {
         LOG.debug("Streaming finished for file :{}", event.getFileName());
-        // record that we now one more uploaded
-        view.increaseNumberOfFilesActuallyUpload();
-
-        // inform upload status window
-        infoWindow.uploadSucceeded(event.getFileName());
-
-        // check if we are finished
-        if (view.enableProcessBtn()) {
-            infoWindow.uploadSessionFinished();
-        }
-        view.updateActionCount();
-
-        // display the duplicate message after streaming all files
-        view.displayDuplicateValidationMessage();
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STREAMING_FINISHED,
+                new UploadFileStatus(event.getFileName(), 0, event.getContentLength())));
     }
 
     /**
@@ -173,12 +164,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadFinished(final FinishedEvent event) {
         LOG.debug("Upload finished for file :{}", event.getFilename());
-        // check if we are finished
-        if (view.enableProcessBtn()) {
-            infoWindow.uploadSessionFinished();
-        }
-        view.updateActionCount();
-
+        eventBus.publish(this,
+                new UploadStatusEvent(UploadStatusEventType.UPLOAD_FINISHED, new UploadFileStatus(event.getFilename())));
     }
 
     /**
@@ -189,7 +176,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void streamingStarted(final StreamingStartEvent event) {
         LOG.debug("Streaming started for file :{}", fileName);
-        infoWindow.uploadStarted(fileName);
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, new UploadFileStatus(
+                fileName, 0, 0)));
     }
 
     /**
@@ -201,12 +189,14 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void uploadStarted(final StartedEvent event) {
         // single file session
         if (view.isSoftwareModuleSelected() && !view.checkIfFileIsDuplicate(event.getFilename())) {
-            infoWindow.uploadSessionStarted();
             LOG.debug("Upload started for file :{}", event.getFilename());
-            infoWindow.uploadStarted(event.getFilename());
+            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, new UploadFileStatus(
+                    event.getFilename(), 0, 0)));
         } else {
             failureReason = i18n.get("message.upload.failed");
             upload.interruptUpload();
+            // actual interrupt will happen a bit late so setting the below flag
+            uploadInterrupted = true;
         }
     }
 
@@ -227,21 +217,21 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void updateProgress(final long readBytes, final long contentLength) {
-        if (readBytes > maxSize || contentLength > maxSize) {
-            LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            view.decreaseNumberOfFileUploadsExpected();
-            final SoftwareModule sw = view.getSoftwareModuleSelected();
-            view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
-            view.updateActionCount();
-            failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
-            infoWindow.uploadFailed(fileName, failureReason);
-            upload.interruptUpload();
-            interrupted = true;
-            return;
+        //Update progress is called event after upload interrupted in uploadStarted method
+        if (!uploadInterrupted) {
+            if (readBytes > maxSize || contentLength > maxSize) {
+                LOG.error("User tried to upload more than was allowed ({}).", maxSize);
+                failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
+                eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
+                        fileName, failureReason)));
+                upload.interruptUpload();
+                uploadInterrupted = true;
+                return;
+            }
+            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
+                    new UploadFileStatus(fileName, readBytes, contentLength)));
+            LOG.info("Update progress - {} : {}", fileName, (double) readBytes / (double) contentLength);
         }
-
-        infoWindow.updateProgress(fileName, readBytes, contentLength);
-        LOG.info("Update progress - {} : {}", fileName, (double) readBytes / (double) contentLength);
     }
 
     /**
@@ -253,17 +243,14 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void onProgress(final StreamingProgressEvent event) {
         if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
             LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            view.decreaseNumberOfFileUploadsExpected();
-            final SoftwareModule sw = view.getSoftwareModuleSelected();
-            view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
-            view.updateActionCount();
             failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
-            infoWindow.uploadFailed(event.getFileName(), failureReason);
-            interrupted = true;
+            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
+                    fileName, failureReason)));
+            streamingInterrupted = true;
             return;
         }
-
-        infoWindow.updateProgress(event.getFileName(), event.getBytesReceived(), event.getContentLength());
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS, new UploadFileStatus(
+                fileName, event.getBytesReceived(), event.getContentLength())));
         // Logging to solve sonar issue
         LOG.trace("Streaming in progress for file :{}", event.getFileName());
     }
@@ -277,16 +264,11 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void streamingFailed(final StreamingErrorEvent event) {
         LOG.info("Streaming failed for file :{}", event.getFileName());
-        view.decreaseNumberOfFileUploadsExpected();
-        final SoftwareModule sw = view.getSoftwareModuleSelected();
-        view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
-        view.updateActionCount();
-        infoWindow.uploadFailed(event.getFileName(), failureReason);
-        // check if we are finished
-        if (view.enableProcessBtn()) {
-            infoWindow.uploadSessionFinished();
+        if (failureReason == null) {
+            failureReason = event.getException().getMessage();
         }
-        view.displayDuplicateValidationMessage();
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STREAMING_FAILED,
+                new UploadFileStatus(fileName, failureReason)));
 
         LOG.info("Streaming failed due to  :{}", event.getException());
     }
@@ -299,19 +281,13 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void uploadFailed(final FailedEvent event) {
         LOG.info("Upload failed for file :{}", event.getFilename());
-        view.decreaseNumberOfFileUploadsExpected();
-        /**
-         * If upload interrupted because of duplicate file,do not remove the
-         * file already in upload list
-         **/
-        if (!view.getDuplicateFileNamesList().isEmpty()) {
-            final SoftwareModule sw = view.getSoftwareModuleSelected();
-            view.getFileSelected().remove(new CustomFile(fileName, sw.getName(), sw.getVersion()));
+        if (failureReason == null) {
+            failureReason = event.getReason().getMessage();
         }
-        view.updateActionCount();
-        infoWindow.uploadFailed(event.getFilename(), failureReason);
+        System.out.println("failureReason:::"+failureReason);
+        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
+                fileName, failureReason)));
         LOG.info("Upload failed for file :{}", event.getReason());
-
     }
 
     /**
@@ -319,7 +295,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public boolean isInterrupted() {
-        return interrupted;
+        return streamingInterrupted;
     }
 
     private static class NullOutputStream extends OutputStream {
@@ -359,5 +335,5 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         }
         return true;
     }
-
+    
 }
