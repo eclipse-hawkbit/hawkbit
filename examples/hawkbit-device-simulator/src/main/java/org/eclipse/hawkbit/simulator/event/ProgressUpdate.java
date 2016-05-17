@@ -13,8 +13,6 @@ import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 /**
  * Event definition object which is published if the simulated device updated
  * its update progress.
- * 
- * @author Michael Hirsch
  *
  */
 public class ProgressUpdate {

@@ -31,10 +31,7 @@ import cz.jirutka.rsql.parser.RSQLParserException;
  * 
  * Validates the target filter query.
  * 
- *
- *
  */
-
 public final class FilterQueryValidation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterQueryValidation.class);
@@ -103,6 +100,9 @@ public final class FilterQueryValidation {
      * @param expectedTokens
      * @return
      */
+    // Exception squid:S2095 - see
+    // https://jira.sonarsource.com/browse/SONARJAVA-1478
+    @SuppressWarnings({ "squid:S2095" })
     public static List<String> processExpectedTokens(final List<Integer> expectedTokens) {
         final List<String> expectToken = new ArrayList<>();
         if (expectedTokens.size() == 2 && expectedTokens.contains(9) && expectedTokens.contains(4)) {

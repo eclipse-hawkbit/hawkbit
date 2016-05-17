@@ -22,11 +22,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * This resource bundles using specified basenames, to resource loading. This
  * MessageSource implementation supports more than 1 properties file with the
  * same name. All properties files will be merged.
- * 
- *
- *
  */
 public class DistributedResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {
+    // Exception squid:S2387 - Follows our upper case convention
+    @SuppressWarnings({ "squid:S2387" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedResourceBundleMessageSource.class);
     private static final String PROPERTIES_SUFFIX = ".properties";
     private ResourceLoader resourceLoader;

@@ -17,13 +17,15 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.LinkRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
@@ -59,8 +61,13 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 public class RolloutGroupListGrid extends AbstractGrid {
     private static final long serialVersionUID = 4060904914954370524L;
 
+    private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
+
     @Autowired
     private transient RolloutGroupManagement rolloutGroupManagement;
+
+    @Autowired
+    private transient RolloutManagement rolloutManagement;
 
     @Autowired
     private transient RolloutUIState rolloutUIState;
@@ -103,6 +110,13 @@ public class RolloutGroupListGrid extends AbstractGrid {
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rolloutGroup.getStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
                 .setValue(rolloutGroup.getTotalTargetCountStatus());
+        item.getItemProperty(SPUILabelDefinitions.ROLLOUT_GROUP_INSTALLED_PERCENTAGE)
+                .setValue(calculateFinishedPercentage(rolloutGroup));
+    }
+
+    private String calculateFinishedPercentage(final RolloutGroup rolloutGroup) {
+        return HawkbitCommonUtil.formattingFinishedPercentage(rolloutGroup,
+                rolloutManagement.getFinishedPercentForRunningGroup(rolloutGroup.getRollout().getId(), rolloutGroup));
     }
 
     @Override
@@ -116,6 +130,9 @@ public class RolloutGroupListGrid extends AbstractGrid {
     protected void addContainerProperties() {
         final LazyQueryContainer rolloutGroupGridContainer = (LazyQueryContainer) getContainerDataSource();
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
+
+        rolloutGroupGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false,
+                false);
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
         rolloutGroupGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutGroupStatus.class, null,
                 false, false);
@@ -145,8 +162,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnExpandRatio() {
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(200);
+        getColumn(ROLLOUT_RENDERER_DATA).setMinimumWidth(40);
+        getColumn(ROLLOUT_RENDERER_DATA).setMaximumWidth(200);
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setMaximumWidth(100);
@@ -170,7 +187,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnHeaderNames() {
-        getColumn(SPUILabelDefinitions.VAR_NAME).setHeaderCaption(i18n.get("header.name"));
+        getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.get("header.name"));
         getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.get("header.status"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS)
                 .setHeaderCaption(i18n.get("header.detail.status"));
@@ -196,7 +213,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
     @Override
     protected void setColumnProperties() {
         final List<Object> columnList = new ArrayList<>();
-        columnList.add(SPUILabelDefinitions.VAR_NAME);
+        columnList.add(ROLLOUT_RENDERER_DATA);
         columnList.add(SPUILabelDefinitions.VAR_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
@@ -221,14 +238,15 @@ public class RolloutGroupListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
         if (permissionChecker.hasRolloutTargetsReadPermission()) {
-            getColumn(SPUILabelDefinitions.VAR_NAME)
-                    .setRenderer(new LinkRenderer(event -> onClickOfRolloutGroupName(event)));
+            getColumn(ROLLOUT_RENDERER_DATA)
+                    .setRenderer(new RolloutRenderer(event -> onClickOfRolloutGroupName(event)));
         }
     }
 
     @Override
     protected void setHiddenColumns() {
         final List<Object> columnsToBeHidden = new ArrayList<>();
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_NAME);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
@@ -268,8 +286,8 @@ public class RolloutGroupListGrid extends AbstractGrid {
             return cell.getProperty().getValue().toString().toLowerCase();
         } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
             return SPUILabelDefinitions.ACTION.toLowerCase();
-        } else if (SPUILabelDefinitions.VAR_NAME.equals(cell.getPropertyId())) {
-            return cell.getProperty().getValue().toString();
+        } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
+            return ((RolloutRendererData) cell.getProperty().getValue()).getName();
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
             return DistributionBarHelper
                     .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
@@ -306,14 +324,14 @@ public class RolloutGroupListGrid extends AbstractGrid {
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
                 final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                        throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
                 final Class<? extends String> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                        throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 

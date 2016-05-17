@@ -21,15 +21,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link SoftwareModule} repository.
  *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface SoftwareModuleRepository
         extends BaseEntityRepository<SoftwareModule, Long>, JpaSpecificationExecutor<SoftwareModule> {
 
@@ -69,7 +68,7 @@ public interface SoftwareModuleRepository
      *
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("UPDATE SoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.id IN :ids")
     void deleteSoftwareModule(@Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
             @Param("ids") final Long... ids);

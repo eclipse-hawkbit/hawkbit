@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
+import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -136,6 +138,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         addActionHandler(this);
         actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
         actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
+        setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
     /**
@@ -329,7 +332,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
-        }
+        }        
         return columnList;
 
     }
@@ -739,7 +742,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
                     .setValue(updatedTarget.getTargetInfo().getLastTargetQuery());
 
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                    .setValue(HawkbitCommonUtil.getIMUser(updatedTarget.getLastModifiedBy()));
+                    .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(updatedTarget));
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
                     .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());

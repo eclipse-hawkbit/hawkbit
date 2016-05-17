@@ -12,13 +12,14 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- *
+ * Spring data repositories for {@link TargetFilterQuery}s.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetFilterQueryRepository
         extends BaseEntityRepository<TargetFilterQuery, Long>, JpaSpecificationExecutor<TargetFilterQuery> {
 

@@ -11,15 +11,14 @@ package org.eclipse.hawkbit.repository;
 import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link ExternalArtifact} repository.
  *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface ExternalArtifactRepository extends BaseEntityRepository<ExternalArtifact, Long> {
 
     /**

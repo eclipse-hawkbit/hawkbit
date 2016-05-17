@@ -59,6 +59,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -69,7 +70,7 @@ import com.google.common.eventbus.EventBus;
  * Business facade for managing the {@link DistributionSet}s.
  *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
 public class DistributionSetManagement {
@@ -142,7 +143,7 @@ public class DistributionSetManagement {
      *         the assignment outcome.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty final List<DistributionSet> sets,
@@ -164,7 +165,7 @@ public class DistributionSetManagement {
      *         the assignment outcome.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty final Collection<Long> dsIds,
@@ -229,7 +230,7 @@ public class DistributionSetManagement {
      * @throw DataDependencyViolationException in case of illegal update
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSet updateDistributionSet(@NotNull final DistributionSet ds) {
         checkNotNull(ds.getId());
@@ -254,7 +255,7 @@ public class DistributionSetManagement {
      *            to delete
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteDistributionSet(@NotNull final DistributionSet set) {
         deleteDistributionSet(set.getId());
@@ -269,7 +270,7 @@ public class DistributionSetManagement {
      *            to be deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteDistributionSet(@NotEmpty final Long... distributionSetIDs) {
         final List<Long> toHardDelete = new ArrayList<>();
@@ -310,7 +311,7 @@ public class DistributionSetManagement {
      *             {@link SoftwareModule}s.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSet createDistributionSet(@NotNull final DistributionSet dSet) {
         prepareDsSave(dSet);
@@ -344,7 +345,7 @@ public class DistributionSetManagement {
      *             {@link SoftwareModule}s.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSet> createDistributionSets(@NotNull final Iterable<DistributionSet> distributionSets) {
         for (final DistributionSet ds : distributionSets) {
@@ -366,7 +367,7 @@ public class DistributionSetManagement {
      * @return the updated {@link DistributionSet}.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSet assignSoftwareModules(@NotNull final DistributionSet ds,
             final Set<SoftwareModule> softwareModules) {
@@ -388,7 +389,7 @@ public class DistributionSetManagement {
      * @return the updated {@link DistributionSet}.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSet unassignSoftwareModule(@NotNull final DistributionSet ds,
             final SoftwareModule softwareModule) {
@@ -413,7 +414,7 @@ public class DistributionSetManagement {
      *             s while the DS type is already in use.
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetType updateDistributionSetType(@NotNull final DistributionSetType dsType) {
         checkNotNull(dsType.getId());
@@ -715,7 +716,7 @@ public class DistributionSetManagement {
      * @return created {@link Entity}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSetType createDistributionSetType(@NotNull final DistributionSetType type) {
         if (type.getId() != null) {
@@ -732,7 +733,7 @@ public class DistributionSetManagement {
      *            to delete
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void deleteDistributionSetType(@NotNull final DistributionSetType type) {
 
@@ -755,7 +756,7 @@ public class DistributionSetManagement {
      *             in case the meta data entry already exists for the specific
      *             key
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetMetadata createDistributionSetMetadata(@NotNull final DistributionSetMetadata metadata) {
@@ -780,7 +781,7 @@ public class DistributionSetManagement {
      *             in case one of the meta data entry already exists for the
      *             specific key
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public List<DistributionSetMetadata> createDistributionSetMetadata(
@@ -802,7 +803,7 @@ public class DistributionSetManagement {
      *             in case the meta data entry does not exists and cannot be
      *             updated
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetMetadata updateDistributionSetMetadata(@NotNull final DistributionSetMetadata metadata) {
@@ -820,7 +821,7 @@ public class DistributionSetManagement {
      * @param id
      *            the ID of the distribution set meta data to delete
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public void deleteDistributionSetMetadata(@NotNull final DsMetadataCompositeKey id) {
@@ -913,7 +914,7 @@ public class DistributionSetManagement {
      * @return created {@link Entity}
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSetType> createDistributionSetTypes(@NotNull final Collection<DistributionSetType> types) {
         return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
@@ -926,7 +927,7 @@ public class DistributionSetManagement {
      * @param softwareModules
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public void checkDistributionSetAlreadyUse(final DistributionSet distributionSet) {
         checkDistributionSetSoftwareModulesIsAllowedToModify(distributionSet);
@@ -992,14 +993,14 @@ public class DistributionSetManagement {
         }
     }
 
-    private Boolean isDSWithNoTagSelected(final DistributionSetFilter distributionSetFilter) {
+    private static Boolean isDSWithNoTagSelected(final DistributionSetFilter distributionSetFilter) {
         if (distributionSetFilter.getSelectDSWithNoTag() != null && distributionSetFilter.getSelectDSWithNoTag()) {
             return true;
         }
         return false;
     }
 
-    private Boolean isTagsSelected(final DistributionSetFilter distributionSetFilter) {
+    private static Boolean isTagsSelected(final DistributionSetFilter distributionSetFilter) {
         if (distributionSetFilter.getTagNames() != null && !distributionSetFilter.getTagNames().isEmpty()) {
             return true;
         }
@@ -1033,7 +1034,7 @@ public class DistributionSetManagement {
         }
     }
 
-    private void throwMetadataKeyAlreadyExists(final String metadataKey) {
+    private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
         throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataKey + "' already exists");
     }
 
@@ -1048,7 +1049,7 @@ public class DistributionSetManagement {
      * @return list of assigned ds
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public List<DistributionSet> assignTag(@NotEmpty final Collection<Long> dsIds,
@@ -1077,7 +1078,7 @@ public class DistributionSetManagement {
      * @return list of unassigned ds
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @NotNull
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public List<DistributionSet> unAssignAllDistributionSetsByTag(@NotNull final DistributionSetTag tag) {
@@ -1095,7 +1096,7 @@ public class DistributionSetManagement {
      * @return the unassigned ds or <null> if no ds is unassigned
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     public DistributionSet unAssignTag(@NotNull final Long dsId, @NotNull final DistributionSetTag distributionSetTag) {
         final List<DistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));

@@ -113,7 +113,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView
 
         downloadAnonymousCheckBox = SPUIComponentProvider.getCheckBox("", DIST_CHECKBOX_STYLE, null, false, "");
         downloadAnonymousCheckBox.setId("downloadanonymouscheckbox");
-        downloadAnonymousCheckBox.setValue(targetSecurityTokenAuthenticationConfigurationItem.isConfigEnabled());
+        downloadAnonymousCheckBox.setValue(anonymousDownloadAuthenticationConfigurationItem.isConfigEnabled());
         downloadAnonymousCheckBox.addValueChangeListener(this);
         anonymousDownloadAuthenticationConfigurationItem.addChangeListener(this);
         gridLayout.addComponent(downloadAnonymousCheckBox, 0, 3);

@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 
 /**
  * The default hawkbit event provider.
@@ -39,6 +40,7 @@ public class HawkbitEventProvider implements UIEventProvider {
         SINGLE_EVENTS.add(DistributionSetTagUpdateEvent.class);
         SINGLE_EVENTS.add(RolloutGroupChangeEvent.class);
         SINGLE_EVENTS.add(RolloutChangeEvent.class);
+        SINGLE_EVENTS.add(TargetTagUpdateEvent.class);
 
         BULK_EVENTS.add(TargetCreatedEvent.class);
         BULK_EVENTS.add(TargetInfoUpdateEvent.class);

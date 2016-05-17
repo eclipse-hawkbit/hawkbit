@@ -21,7 +21,7 @@ public class AmqpProperties {
     /**
      * DMF API dead letter queue.
      */
-    private String deadLetterQueue = "dmf_connector_deadletter";
+    private String deadLetterQueue = "dmf_connector_deadletter_ttl";
 
     /**
      * DMF API dead letter exchange.

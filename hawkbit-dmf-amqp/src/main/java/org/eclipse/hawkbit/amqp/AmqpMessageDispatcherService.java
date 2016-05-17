@@ -82,6 +82,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .getSoftwareModules();
         final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
         downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
+        downloadAndUpdateRequest.setTargetSecurityToken(targetAssignDistributionSetEvent.getTargetToken());
 
         for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {
             final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(controllerId, softwareModule);
@@ -154,18 +155,26 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private Artifact convertArtifact(final String targetId, final LocalArtifact localArtifact) {
         final Artifact artifact = new Artifact();
 
-        artifact.getUrls().put(Artifact.UrlProtocol.COAP,
-                artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                        localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.COAP));
-        artifact.getUrls().put(Artifact.UrlProtocol.HTTP,
-                artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                        localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTP));
-        artifact.getUrls().put(Artifact.UrlProtocol.HTTPS,
-                artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
-                        localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTPS));
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.COAP)) {
+            artifact.getUrls().put(Artifact.UrlProtocol.COAP,
+                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
+                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.COAP));
+        }
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
+            artifact.getUrls().put(Artifact.UrlProtocol.HTTP,
+                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
+                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTP));
+        }
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
+            artifact.getUrls().put(Artifact.UrlProtocol.HTTPS,
+                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
+                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTPS));
+        }
 
         artifact.setFilename(localArtifact.getFilename());
-        artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), null));
+        artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
     }
