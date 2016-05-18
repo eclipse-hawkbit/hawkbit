@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 /**
  * Constants for RESTful API.
  *
- *
- *
  */
 public final class MgmtRestConstants {
 
@@ -46,7 +44,20 @@ public final class MgmtRestConstants {
     public static final String SOFTWAREMODULE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/softwaremodules";
 
     public static final String DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE = "/api/" + API_VERSION + "/downloadserver/";
+
     public static final String DOWNLOAD_ID_V1_REQUEST_MAPPING = "downloadId/{downloadId}";
+
+    /**
+     * The base URL mapping for the spring acuator management context path.
+     */
+    public static final String BASE_SYSTEM_MAPPING = "/system";
+
+    /**
+     * URL mapping for system admin operations.
+     */
+    public static final String SYSTEM_ADMIN_MAPPING = BASE_SYSTEM_MAPPING + "/admin";
+
+    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
 
     /**
      * The target URL mapping, href link for assigned distribution set.

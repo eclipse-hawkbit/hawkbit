@@ -16,27 +16,12 @@
       <artifactId>hawkbit-examples-parent</artifactId>
       <version>0.2.0-SNAPSHOT</version>
    </parent>
-   <artifactId>hawkbit-custom-theme-example</artifactId>
-   <name>hawkBit :: Custom Theme Example App</name>
+   <packaging>jar</packaging>
+   <artifactId>hawkbit-example-mgmt-simulator</artifactId>
+   <name>hawkBit-example :: Management Feign Client</name>
 
    <build>
       <plugins>
-         <plugin>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-maven-plugin</artifactId>
-            <version>${vaadin.plugin.version}</version>
-            <configuration>
-               <warSourceDirectory>src/main/resources</warSourceDirectory>
-            </configuration>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>update-theme</goal>
-                     <goal>compile-theme</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
          <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
@@ -48,7 +33,7 @@
                   <configuration>
                      <outputDirectory>${baseDir}</outputDirectory>
                      <addResources>false</addResources>
-                     <mainClass>org.eclipse.hawkbit.app.Start</mainClass>
+                     <mainClass>org.eclipse.hawkbit.mgmt.client.Application</mainClass>
                      <layout>JAR</layout>
                   </configuration>
                </execution>
@@ -57,56 +42,56 @@
       </plugins>
    </build>
 
-   <dependencies>
-      <!-- Hawkbit -->
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-autoconfigure</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-ui</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-security-integration</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-http-security</artifactId>
-         <version>${project.version}</version>
-      </dependency>
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-netflix</artifactId>
+            <version>1.0.7.RELEASE</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
 
-      <!-- Spring -->
+   <dependencies>
       <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-web</artifactId>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-example-mgmt-feign-client</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>com.netflix.feign</groupId>
+         <artifactId>feign-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.netflix.feign</groupId>
+         <artifactId>feign-jackson</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+      </dependency>
+      <dependency>
+         <artifactId>hibernate-validator</artifactId>
+         <groupId>org.hibernate</groupId>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.springframework.boot</groupId>
-               <artifactId>spring-boot-starter-logging</artifactId>
-            </exclusion>
-         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.cloud</groupId>
+         <artifactId>spring-cloud-starter-feign</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-log4j2</artifactId>
+         <artifactId>spring-boot-starter-logging</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.springframework.security</groupId>
-         <artifactId>spring-security-aspects</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-configuration-processor</artifactId>
+         <optional>true</optional>
       </dependency>
    </dependencies>
-
 </project>

@@ -48,7 +48,7 @@ import org.springframework.web.context.WebApplicationContext;
  * for legacy controllers that can not be fed with a download URI at runtime.
  */
 @RestController
-@Scope(value = WebApplicationContext.SCOPE_REQUEST)
+@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DdiArtifactStoreController.class);

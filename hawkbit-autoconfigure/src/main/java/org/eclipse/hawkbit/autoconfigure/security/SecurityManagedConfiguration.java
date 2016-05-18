@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationToken;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -40,7 +41,6 @@ import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeader
 import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.system.rest.api.SystemRestConstant;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,9 +292,9 @@ public class SecurityManagedConfiguration {
                             new AuthenticationSuccessTenantMetadataCreationFilter(tenantAware, systemManagement),
                             RequestHeaderAuthenticationFilter.class)
                     .authorizeRequests().anyRequest().authenticated()
-                    .antMatchers(SystemRestConstant.BASE_SYSTEM_MAPPING + "/admin/**")
+                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
-                    .antMatchers(SystemRestConstant.BASE_SYSTEM_MAPPING + "/**")
+                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_DIAG);
         }
     }

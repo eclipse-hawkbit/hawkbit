@@ -69,11 +69,6 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-system-resource</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ddi-resource</artifactId>
          <version>${project.version}</version>
       </dependency>
@@ -84,7 +79,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-mgmt-ui</artifactId>
+         <artifactId>hawkbit-ui</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.autoconfigure.web;
 
 import org.eclipse.hawkbit.ddi.EnableDdiApi;
 import org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi;
-import org.eclipse.hawkbit.system.annotation.EnableSystemApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -20,8 +19,8 @@ import org.springframework.context.annotation.Import;
  *
  */
 @Configuration
-@ConditionalOnClass({ EnableDdiApi.class, EnableMgmtApi.class, EnableSystemApi.class })
-@Import({ EnableDdiApi.class, EnableMgmtApi.class, EnableSystemApi.class })
+@ConditionalOnClass({ EnableDdiApi.class, EnableMgmtApi.class })
+@Import({ EnableDdiApi.class, EnableMgmtApi.class })
 public class ResourceControllerAutoConfiguration {
 
 }

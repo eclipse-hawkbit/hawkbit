@@ -22,12 +22,12 @@
    <packaging>pom</packaging>
 
    <modules>
-      <module>hawkbit-example-feign-core-client</module>
       <module>hawkbit-device-simulator</module>
       <module>hawkbit-example-app</module>
-      <module>hawkbit-example-mgmt-client</module>
-      <module>hawkbit-example-mgmt-spring-client</module>
-      <module>hawkbit-example-ddi-client</module>
+      <module>hawkbit-example-core-feign-client</module>
+      <module>hawkbit-example-ddi-feign-client</module>
+      <module>hawkbit-example-mgmt-feign-client</module>
+      <module>hawkbit-example-mgmt-simulator</module>
   </modules>
   
   
