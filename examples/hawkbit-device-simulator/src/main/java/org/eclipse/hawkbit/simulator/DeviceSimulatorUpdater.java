@@ -264,7 +264,7 @@ public class DeviceSimulatorUpdater {
                 }
 
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                LOGGER.error("Failed to download {} with {}", url, e.getMessage());
+                LOGGER.error("Failed to download" + url, e);
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 
