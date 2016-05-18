@@ -68,6 +68,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private static final long serialVersionUID = 7474232427119031474L;
 
+    private static final String breadcrumbCustomFilters = "breadcrumb.target.filter.custom.filters";
+
     @Autowired
     private I18N i18n;
 
@@ -92,6 +94,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     @Autowired
     @Qualifier("uiExecutor")
     private transient Executor executor;
+
+    private HorizontalLayout breadcrumbLayout;
+
+    private Button breadcrumbButton;
+
+    private Label breadcrumbName;
 
     private Label headerCaption;
 
@@ -169,6 +177,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
             oldFilterName = filterManagementUIState.getTfQuery().get().getName();
             oldFilterQuery = filterManagementUIState.getTfQuery().get().getQuery();
         }
+        breadcrumbName.setValue(nameLabel.getValue());
         showValidationSuccesIcon();
         titleFilterIconsLayout.addStyleName(SPUIStyleDefinitions.TARGET_FILTER_CAPTION_LAYOUT);
         headerCaption.setVisible(false);
@@ -177,6 +186,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private void resetComponents() {
         headerCaption.setVisible(true);
+        breadcrumbName.setValue(headerCaption.getValue());
         nameLabel.setValue("");
         queryTextField.setValue("");
         setInitialStatusIconStyle(validationIcon);
@@ -201,6 +211,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createComponents() {
+
+        breadcrumbButton = createBreadcrumbButton();
+
         headerCaption = SPUIComponentProvider.getLabel(SPUILabelDefinitions.VAR_CREATE_FILTER,
                 SPUILabelDefinitions.SP_WIDGET_CAPTION);
 
@@ -221,12 +234,23 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         closeIcon = createSearchResetIcon();
     }
 
+    private Button createBreadcrumbButton() {
+        final Button createFilterViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
+                SPUIButtonStyleSmallNoBorder.class);
+        createFilterViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
+        createFilterViewLink.setDescription(i18n.get(breadcrumbCustomFilters));
+        createFilterViewLink.setCaption(i18n.get(breadcrumbCustomFilters));
+        createFilterViewLink.addClickListener(value -> showCustomFiltersView());
+
+        return createFilterViewLink;
+    }
+
     private TextField createNameTextField() {
         final TextField nameField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.customfiltername"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameField.setId(SPUIComponetIdProvider.CUSTOM_FILTER_ADD_NAME);
         nameField.setPropertyDataSource(nameLabel);
-        nameField.addTextChangeListener(event -> onFiterNameChange(event));
+        nameField.addTextChangeListener(event -> onFilterNameChange(event));
         return nameField;
     }
 
@@ -256,7 +280,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         };
     }
 
-    private void onFiterNameChange(final TextChangeEvent event) {
+    private void onFilterNameChange(final TextChangeEvent event) {
         if (isNameAndQueryEmpty(event.getText(), queryTextField.getValue())
                 || (event.getText().equals(oldFilterName) && queryTextField.getValue().equals(oldFilterQuery))) {
             saveButton.setEnabled(false);
@@ -275,6 +299,13 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         titleFilterIconsLayout = new HorizontalLayout();
         titleFilterIconsLayout.addComponents(headerCaption, captionLayout);
         titleFilterIconsLayout.setSpacing(true);
+
+        breadcrumbLayout = new HorizontalLayout();
+        breadcrumbLayout.addComponent(breadcrumbButton);
+        breadcrumbLayout.addComponent(new Label(">"));
+        breadcrumbName = SPUIComponentProvider.getLabel(null, SPUILabelDefinitions.SP_WIDGET_CAPTION);
+        breadcrumbLayout.addComponent(breadcrumbName);
+        breadcrumbName.addStyleName("breadcrumbPaddingLeft");
 
         final HorizontalLayout titleFilterLayout = new HorizontalLayout();
         titleFilterLayout.setSizeFull();
@@ -302,10 +333,12 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         queryLayout.setSpacing(true);
         queryLayout.addComponents(searchLayout, iconLayout);
 
+        addComponent(breadcrumbLayout);
         addComponent(titleFilterLayout);
         addComponent(queryLayout);
         setSpacing(true);
         addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
+        addStyleName("bordered-layout");
     }
 
     private void setUpCaptionLayout(final boolean isCreateView) {
@@ -522,6 +555,10 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         if (!validationFailed && !Strings.isNullOrEmpty(queryTextField.getValue())) {
             showValidationSuccesIcon();
         }
+    }
+
+    private void showCustomFiltersView() {
+        eventBus.publish(this, CustomFilterUIEvent.SHOW_FILTER_MANAGEMENT);
     }
 
 }

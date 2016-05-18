@@ -161,6 +161,7 @@ public class RolloutGroupsListHeader extends AbstractGridHeader {
         final HorizontalLayout headerCaptionLayout = new HorizontalLayout();
         headerCaptionLayout.addComponent(rolloutsListViewLink);
         headerCaptionLayout.addComponent(new Label(">"));
+        headerCaption.addStyleName("breadcrumbPaddingLeft");
         headerCaptionLayout.addComponent(headerCaption);
 
         return headerCaptionLayout;
