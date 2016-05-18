@@ -18,7 +18,7 @@
    </parent>
    <packaging>jar</packaging>
    <artifactId>hawkbit-example-mgmt-spring-client</artifactId>
-   <name>hawkBit Management API example client</name>
+   <name>hawkBit-example :: Management Feign Client</name>
 
    <build>
       <plugins>

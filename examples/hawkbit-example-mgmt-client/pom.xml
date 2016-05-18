@@ -18,7 +18,7 @@
    </parent>
    <packaging>jar</packaging>
    <artifactId>hawkbit-example-mgmt-client</artifactId>
-   <name>hawkBit Management client API</name>
+   <name>hawkBit-example :: Management client API</name>
 
    <dependencies>
       <dependency>

@@ -18,7 +18,7 @@
    </parent>
 
    <artifactId>hawkbit-examples-parent</artifactId>
-   <name>hawkBit :: Examples Parent</name>
+   <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
 
    <modules>

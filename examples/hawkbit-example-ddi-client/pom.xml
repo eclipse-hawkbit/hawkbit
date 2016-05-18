@@ -18,7 +18,7 @@
    </parent>
    <artifactId>hawkbit-example-ddi-client</artifactId>
 
-   <name>hawkbit-example-ddi-client</name>
+   <name>hawkBit-example :: DDI Feign Client</name>
 
    <dependencyManagement>
       <dependencies>
