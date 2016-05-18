@@ -132,4 +132,14 @@ $v-included-components: remove($v-included-components, form);
     left: 50%;
     margin-left: -20px;
   }
+  .v-generated-body &.v-app , .v-generated-body .v-app {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: $app-background-image, linear-gradient(to bottom, $app-background-image-gradient) !important;
+    background-image: $app-background-image, -webkit-linear-gradient(top, $app-background-image-gradient) !important;
+    background-image: $app-background-image, -moz-linear-gradient(top, $app-background-image-gradient) !important;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    height:100%;
+    width:100%;
+  }
 }
