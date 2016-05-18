@@ -18,8 +18,8 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 /**
- * Implementation of {@link ArtifactsPersistenceStrategy} for downloading artifacts to
- * the temp directory.
+ * Implementation of {@link ArtifactsPersistenceStrategy} for downloading
+ * artifacts to the temp directory.
  */
 public class SaveArtifactsToLocalTempDirectories implements ArtifactsPersistenceStrategy {
 

@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Implementation of {@link ArtifactsPersistenceStrategy} for not downloading any
- * artifacts.
+ * Implementation of {@link ArtifactsPersistenceStrategy} for not downloading
+ * any artifacts.
  */
 public class DoNotSaveArtifacts implements ArtifactsPersistenceStrategy {
 
