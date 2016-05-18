@@ -40,49 +40,30 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-ddi-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-ddi-dl-api</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
-         <groupId>org.springframework.cloud</groupId>
-         <artifactId>spring-cloud-starter-feign</artifactId>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-ddi-api</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
+         <!-- need to overwrite for the interface inheritance feature of feign-core -->
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-jackson</artifactId>
       </dependency>
       <dependency>
-         <groupId>javax.servlet</groupId>
-         <artifactId>javax.servlet-api</artifactId>
-         <!-- <scope>provided</scope> -->
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.plugin</groupId>
-         <artifactId>spring-plugin-core</artifactId>
-      </dependency>
-      <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-databind</artifactId>
       </dependency>
-
-      <!-- Move to parent or use different framework -->
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>commons-lang</groupId>
-         <artifactId>commons-lang</artifactId>
-      </dependency>
-
    </dependencies>
 </project>
