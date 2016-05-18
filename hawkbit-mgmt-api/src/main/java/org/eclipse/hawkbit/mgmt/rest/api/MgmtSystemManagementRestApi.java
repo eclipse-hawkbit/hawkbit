@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * {@link SystemManagement} capabilities by REST.
+ * System management capabilities by REST.
  *
  */
 @RequestMapping(MgmtRestConstants.SYSTEM_ADMIN_MAPPING)

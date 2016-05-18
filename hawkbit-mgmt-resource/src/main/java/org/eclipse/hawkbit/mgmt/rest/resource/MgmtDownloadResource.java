@@ -58,8 +58,6 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
      * 
      * @param downloadId
      *            the generated download id
-     * @param response
-     *            of the servlet
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */

@@ -38,8 +38,6 @@ public interface MgmtTargetRestApi {
      * @param targetId
      *            the ID of the target to retrieve
      * @return a single target with status OK.
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
      */
 
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}", produces = { "application/hal+json",
@@ -127,8 +125,6 @@ public interface MgmtTargetRestApi {
      * @param targetId
      *            the ID of the target to retrieve the attributes.
      * @return the target attributes as map response with status OK
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/attributes", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -189,10 +185,6 @@ public interface MgmtTargetRestApi {
      * @param force
      *            optional parameter, which indicates a force cancel
      * @return status no content in case cancellation was successful
-     * @throws CancelActionNotAllowedException
-     *             if the given action is not active and cannot be canceled.
-     * @throws EntityNotFoundException
-     *             if the target or the action is not found
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{targetId}/actions/{actionId}")
     ResponseEntity<Void> cancelAction(@PathVariable("targetId") final String targetId,
@@ -236,8 +228,6 @@ public interface MgmtTargetRestApi {
      *            the ID of the target to retrieve the assigned distribution
      * @return the assigned distribution set with status OK, if none is assigned
      *         than {@code null} content (e.g. "{}")
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/assignedDS", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -251,10 +241,6 @@ public interface MgmtTargetRestApi {
      * @param dsId
      *            of the distributionset that is to be assigned
      * @return http status
-     *
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
-     *
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{targetId}/assignedDS", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
@@ -269,8 +255,6 @@ public interface MgmtTargetRestApi {
      *            the ID of the target to retrieve
      * @return the assigned installed set with status OK, if none is installed
      *         than {@code null} content (e.g. "{}")
-     * @throws EntityNotFoundException
-     *             in case no target with the given {@code targetId} exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetId}/installedDS", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })

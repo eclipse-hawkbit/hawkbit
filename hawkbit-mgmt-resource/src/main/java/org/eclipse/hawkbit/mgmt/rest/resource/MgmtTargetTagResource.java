@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST Resource handling for {@link Tag} CRUD operations.
+ * REST Resource handling for tag CRUD operations.
  *
  */
 @RestController

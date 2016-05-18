@@ -43,9 +43,8 @@ import org.springframework.web.context.WebApplicationContext;
  * The {@link DdiArtifactStoreController} of the HawkBit server controller API
  * that is queried by the HawkBit target in order to download artifacts
  * independent of their own individual resource. This is offered in addition to
- * the
- * {@link DdiRootController#downloadArtifact(String, Long, Long, javax.servlet.http.HttpServletResponse)}
- * for legacy controllers that can not be fed with a download URI at runtime.
+ * the {@link DdiRootController#downloadArtifact(String, Long, String)} for
+ * legacy controllers that can not be fed with a download URI at runtime.
  */
 @RestController
 @Scope(WebApplicationContext.SCOPE_REQUEST)

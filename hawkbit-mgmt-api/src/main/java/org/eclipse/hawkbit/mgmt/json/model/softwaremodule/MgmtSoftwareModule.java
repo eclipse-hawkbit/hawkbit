@@ -24,15 +24,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModule extends MgmtNamedEntity {
     /**
-     * API definition for {@link SoftwareModule.Type#RUNTIME}.
+     * API definition for Software module type#RUNTIME.
      */
     public static final String SM_RUNTIME = "runtime";
     /**
-     * API definition for {@link SoftwareModule.Type#OS}.
+     * API definition for for Software module type#OS.
      */
     public static final String SM_OS = "os";
     /**
-     * API definition for {@link SoftwareModule.Type#APPLICATION}.
+     * API definition for for Software module type#APPLICATION.
      */
     public static final String SM_APPLICATION = "application";
 

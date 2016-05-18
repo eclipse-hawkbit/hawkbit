@@ -15,7 +15,7 @@ import org.springframework.hateoas.ResourceSupport;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * {@link UpdateAction} resource.
+ * Update action resource.
  */
 public class DdiDeploymentBase extends ResourceSupport {
 
@@ -30,7 +30,7 @@ public class DdiDeploymentBase extends ResourceSupport {
      * Constructor.
      *
      * @param id
-     *            of the {@link UpdateAction}
+     *            of the update action
      * @param deployment
      *            details.
      */

@@ -23,9 +23,6 @@ import org.springframework.stereotype.Controller;
  * Annotation to enable {@link ComponentScan} in the resource package to setup
  * all {@link Controller} annotated classes and setup the REST-Resources for the
  * Management API.
- * 
- *
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

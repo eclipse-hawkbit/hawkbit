@@ -64,9 +64,6 @@ public interface MgmtDistributionSetTagRestApi {
      *            the ID of the distribution set tag to retrieve
      *
      * @return a single distribution set tag with status OK.
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionsetTagId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -97,9 +94,6 @@ public interface MgmtDistributionSetTagRestApi {
      *            the the request body to be updated
      * @return status OK if update is successful and the updated distribution
      *         set tag.
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{distributionsetTagId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
@@ -113,9 +107,6 @@ public interface MgmtDistributionSetTagRestApi {
      * @param distributionsetTagId
      *            the ID of the distribution set tag
      * @return status OK if delete as successfully.
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      *
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionsetTagId}")
@@ -130,9 +121,6 @@ public interface MgmtDistributionSetTagRestApi {
      *            the ID of the distribution set tag
      *
      * @return the list of assigned distribution sets.
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
     ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
@@ -149,9 +137,6 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution sets and unassigned
      *         distribution sets.
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING
             + "/toggleTagAssignment")
@@ -168,9 +153,6 @@ public interface MgmtDistributionSetTagRestApi {
      *            list of distribution sets ids to be assigned
      *
      * @return the list of assigned distribution set.
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
     ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
@@ -184,9 +166,6 @@ public interface MgmtDistributionSetTagRestApi {
      * @param distributionsetTagId
      *            the ID of the distribution set tag to retrieve
      * @return http status code
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING)
     ResponseEntity<Void> unassignDistributionSets(
@@ -201,9 +180,6 @@ public interface MgmtDistributionSetTagRestApi {
      * @param distributionsetId
      *            the ID of the distribution set to unassign
      * @return http status code
-     * @throws EntityNotFoundException
-     *             in case the given {@code distributionsetTagId} doesn't
-     *             exists.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.DISTRIBUTIONSET_REQUEST_MAPPING
             + "/{distributionsetId}")

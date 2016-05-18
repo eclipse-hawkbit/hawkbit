@@ -69,7 +69,7 @@ public final class RestResourceConversionHelper {
     /**
      * <p>
      * Write response with target relation and publishes events concerning the
-     * download progress based on given {@link UpdateActionStatus}.
+     * download progress based on given update action status.
      * </p>
      *
      * <p>
@@ -88,9 +88,6 @@ public final class RestResourceConversionHelper {
      *            to write progress updates to
      * @param statusId
      *            of the UpdateActionStatus
-     *
-     * @throws IOException
-     *             in case of exceptions
      *
      * @return http code
      *

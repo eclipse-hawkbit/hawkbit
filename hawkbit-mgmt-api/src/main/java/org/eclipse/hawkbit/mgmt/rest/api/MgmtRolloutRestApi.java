@@ -60,8 +60,6 @@ public interface MgmtRolloutRestApi {
      * @param rolloutId
      *            the ID of the rollout to retrieve
      * @return a single rollout with status OK.
-     * @throws EntityNotFoundException
-     *             in case no rollout with the given {@code rolloutId} exists.
      */
     @RequestMapping(value = "/{rolloutId}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE,
             "application/hal+json" })
@@ -76,7 +74,6 @@ public interface MgmtRolloutRestApi {
      *         status code 201 with the successfully created rollout. In any
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
-     * @throws EntityNotFoundException
      */
     @RequestMapping(method = RequestMethod.POST, consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
@@ -89,9 +86,6 @@ public interface MgmtRolloutRestApi {
      *            the ID of the rollout to be started.
      * @return OK response (200) if rollout could be started. In case of any
      *         exception the corresponding errors occur.
-     * @throws EntityNotFoundException
-     * @see RolloutManagement#startRollout(Rollout)
-     * @see ResponseExceptionHandler
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/start", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -105,9 +99,6 @@ public interface MgmtRolloutRestApi {
      *            the ID of the rollout to be paused.
      * @return OK response (200) if rollout could be paused. In case of any
      *         exception the corresponding errors occur.
-     * @throws EntityNotFoundException
-     * @see RolloutManagement#pauseRollout(Rollout)
-     * @see ResponseExceptionHandler
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/pause", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -120,9 +111,6 @@ public interface MgmtRolloutRestApi {
      *            the ID of the rollout to be resumed.
      * @return OK response (200) if rollout could be resumed. In case of any
      *         exception the corresponding errors occur.
-     * @throws EntityNotFoundException
-     * @see RolloutManagement#resumeRollout(Rollout)
-     * @see ResponseExceptionHandler
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{rolloutId}/resume", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -167,7 +155,6 @@ public interface MgmtRolloutRestApi {
      * @param groupId
      *            the groupId to retrieve the rollout group
      * @return the OK response containing the MgmtRolloutGroupResponseBody
-     * @throws EntityNotFoundException
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{rolloutId}/deploygroups/{groupId}", produces = {
             MediaType.APPLICATION_JSON_VALUE, "application/hal+json" })

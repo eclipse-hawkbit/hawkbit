@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 import javax.validation.constraints.NotNull;
 
 /**
- * The {@link Action} that has to be stopped by the target.
+ * The action that has to be stopped by the target.
  */
 public class DdiCancelActionToStop {
 
@@ -22,7 +22,7 @@ public class DdiCancelActionToStop {
      * Parameterized constructor.
      *
      * @param stopId
-     *            ID of the {@link Action} to be stoppedW
+     *            ID of the action to be stoppedW
      */
     public DdiCancelActionToStop(final String stopId) {
         super();

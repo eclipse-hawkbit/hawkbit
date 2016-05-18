@@ -68,8 +68,6 @@ public interface MgmtDistributionSetRestApi {
      *
      * @return a single DistributionSet with status OK.
      *
-     * @throws EntityNotFoundException
-     *             in case no DistributionSet with the given ID exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -298,9 +296,6 @@ public interface MgmtDistributionSetRestApi {
      *            the list of software modules ids to assign
      * @return http status
      *
-     * @throws EntityNotFoundException
-     *             in case no distribution set with the given
-     *             {@code distributionSetId} exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = "/{distributionSetId}/assignedSM", consumes = {
             MediaType.APPLICATION_JSON_VALUE,
@@ -318,9 +313,6 @@ public interface MgmtDistributionSetRestApi {
      *            the software module id to get rejected form the distribution
      *            set
      * @return status OK if rejection was successful.
-     * @throws EntityNotFoundException
-     *             in case no distribution set with the given
-     *             {@code distributionSetId} exists.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{distributionSetId}/assignedSM/{softwareModuleId}")
     ResponseEntity<Void> deleteAssignSoftwareModules(@PathVariable("distributionSetId") final Long distributionSetId,
@@ -343,9 +335,6 @@ public interface MgmtDistributionSetRestApi {
      *            {@code field:direction, field:direction}
      * @return a list of the assigned software modules of a distribution set
      *         with status OK, if none is assigned than {@code null}
-     * @throws EntityNotFoundException
-     *             in case no distribution set with the given
-     *             {@code distributionSetId} exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetId}/assignedSM", produces = {
             "application/hal+json", MediaType.APPLICATION_JSON_VALUE })

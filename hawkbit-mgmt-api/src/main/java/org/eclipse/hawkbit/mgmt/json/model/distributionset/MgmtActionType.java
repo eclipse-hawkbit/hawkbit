@@ -11,10 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Definition of the {@link ActionType} for the REST management API.
- * 
- *
- *
+ * Definition of the Action type for the REST management API.
  *
  */
 public enum MgmtActionType {
@@ -39,9 +36,6 @@ public enum MgmtActionType {
         this.name = name;
     }
 
-    /**
-     * @return the name
-     */
     @JsonValue
     public String getName() {
         return name;

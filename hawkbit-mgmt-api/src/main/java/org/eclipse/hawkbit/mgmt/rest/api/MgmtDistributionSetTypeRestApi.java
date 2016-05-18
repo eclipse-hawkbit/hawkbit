@@ -68,8 +68,6 @@ public interface MgmtDistributionSetTypeRestApi {
      *            the ID of the module type to retrieve
      *
      * @return a single softwareModule with status OK.
-     * @throws EntityNotFoundException
-     *             in case no with the given {@code softwareModuleId} exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{distributionSetTypeId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })

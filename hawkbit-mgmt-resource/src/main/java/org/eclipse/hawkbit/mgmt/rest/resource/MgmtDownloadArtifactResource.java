@@ -53,10 +53,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
      *            of the parent SoftwareModule
      * @param artifactId
      *            of the related LocalArtifact
-     * @param servletResponse
-     *            of the servlet
-     * @param request
-     *            of the client
      *
      * @return responseEntity with status ok if successful
      */

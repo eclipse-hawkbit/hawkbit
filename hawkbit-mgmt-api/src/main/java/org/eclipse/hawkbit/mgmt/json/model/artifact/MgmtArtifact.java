@@ -108,11 +108,7 @@ public class MgmtArtifact extends MgmtBaseEntity {
     }
 
     /**
-     * Type maps to either {@link LocalArtifact} or {@link ExternalArtifact}.
-     *
-     *
-     *
-     *
+     * Type maps to either local artifact} or external artifact.
      */
     public enum ArtifactType {
         LOCAL("local"), EXTERNAL("external");

@@ -64,8 +64,6 @@ public interface MgmtTargetTagRestApi {
      *            the ID of the target tag to retrieve
      *
      * @return a single target tag with status OK.
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetTagId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })
@@ -94,8 +92,6 @@ public interface MgmtTargetTagRestApi {
      * @param restTargetTagRest
      *            the the request body to be updated
      * @return status OK if update is successful and the updated target tag.
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.PUT, value = "/{targetTagId}", consumes = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE }, produces = { "application/hal+json", MediaType.APPLICATION_JSON_VALUE })
@@ -108,8 +104,6 @@ public interface MgmtTargetTagRestApi {
      * @param targetTagId
      *            the ID of the target tag
      * @return status OK if delete as successfully.
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      *
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "/{targetTagId}")
@@ -123,8 +117,6 @@ public interface MgmtTargetTagRestApi {
      *            the ID of the target tag to retrieve
      *
      * @return the list of assigned targets.
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
     ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId);
@@ -139,8 +131,6 @@ public interface MgmtTargetTagRestApi {
      *            list of target ids to be toggled
      *
      * @return the list of assigned targets and unassigned targets.
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING
             + "/toggleTagAssignment")
@@ -157,8 +147,6 @@ public interface MgmtTargetTagRestApi {
      *            list of target ids to be assigned
      *
      * @return the list of assigned targets.
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.POST, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
     ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
@@ -170,8 +158,6 @@ public interface MgmtTargetTagRestApi {
      * @param targetTagId
      *            the ID of the target tag to retrieve
      * @return http status code
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING)
     ResponseEntity<Void> unassignTargets(@PathVariable("targetTagId") final Long targetTagId);
@@ -184,8 +170,6 @@ public interface MgmtTargetTagRestApi {
      * @param controllerId
      *            the ID of the target to unassign
      * @return http status code
-     * @throws EntityNotFoundException
-     *             in case the given {@code targetTagId} doesn't exists.
      */
     @RequestMapping(method = RequestMethod.DELETE, value = MgmtRestConstants.TARGET_TAG_TAGERTS_REQUEST_MAPPING
             + "/{controllerId}")

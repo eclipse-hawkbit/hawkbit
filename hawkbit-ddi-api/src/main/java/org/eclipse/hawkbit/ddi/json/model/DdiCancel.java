@@ -24,7 +24,7 @@ public class DdiCancel {
      * Parameterized constructor.
      *
      * @param id
-     *            of the {@link CancelAction}
+     *            of the cancel action
      * @param cancelAction
      *            the action
      */

@@ -40,10 +40,9 @@ public interface DdiRootControllerRestApi {
      * Returns all artifacts of a given software module and target.
      *
      * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
+     *            of the target that matches to controller id
      * @param softwareModuleId
-     *            of the {@link SoftwareModule}
+     *            of the software module
      * @return the response
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{targetid}/softwaremodules/{softwareModuleId}/artifacts", produces = {
@@ -56,8 +55,7 @@ public interface DdiRootControllerRestApi {
      * Root resource for an individual {@link Target}.
      *
      * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
+     *            of the target that matches to controller id
      * @param request
      *            the HTTP request injected by spring
      * @return the response
@@ -71,11 +69,11 @@ public interface DdiRootControllerRestApi {
      * partial (as specified by RFC7233 (Range Requests)) download request.
      *
      * @param targetid
-     *            of the related
+     *            of the related target
      * @param softwareModuleId
-     *            of the parent {@link SoftwareModule}
+     *            of the parent software module
      * @param fileName
-     *            of the related {@link LocalArtifact}
+     *            of the related local artifact
      * @param response
      *            of the servlet
      * @param request
@@ -94,11 +92,11 @@ public interface DdiRootControllerRestApi {
      * Handles GET {@link DdiArtifact} MD5 checksum file download request.
      *
      * @param targetid
-     *            of the related
+     *            of the related target
      * @param softwareModuleId
-     *            of the parent {@link SoftwareModule}
+     *            of the parent software module
      * @param fileName
-     *            of the related {@link LocalArtifact}
+     *            of the related local artifact
      * @param response
      *            of the servlet
      * @param request
@@ -114,14 +112,13 @@ public interface DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName);
 
     /**
-     * Resource for {@link SoftwareModule} {@link UpdateAction}s.
+     * Resource for software module.
      *
      * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
+     *            of the target that matches to controller id
      * @param actionId
-     *            of the {@link DdiDeploymentBase} that matches to
-     *            {@link Target#getActiveActions()}
+     *            of the {@link DdiDeploymentBase} that matches to active
+     *            actions.
      * @param resource
      *            an hashcode of the resource which indicates if the action has
      *            been changed, e.g. from 'soft' to 'force' and the eTag needs
@@ -143,8 +140,7 @@ public interface DdiRootControllerRestApi {
      * @param feedback
      *            to provide
      * @param targetid
-     *            of the {@link Target} that matches to
-     *            {@link Target#getControllerId()}
+     *            of the target that matches to controller id
      * @param actionId
      *            of the action we have feedback for
      * @param request
@@ -175,7 +171,7 @@ public interface DdiRootControllerRestApi {
             @PathVariable("targetid") final String targetid);
 
     /**
-     * {@link RequestMethod.GET} method for the {@link DdiCancel} action.
+     * RequestMethod.GET method for the {@link DdiCancel} action.
      *
      * @param targetid
      *            ID of the calling target
@@ -192,8 +188,8 @@ public interface DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
-     * {@link RequestMethod.POST} method receiving the {@link DdiActionFeedback}
-     * from the target.
+     * RequestMethod.POST method receiving the {@link DdiActionFeedback} from
+     * the target.
      *
      * @param feedback
      *            the {@link DdiActionFeedback} from the target.

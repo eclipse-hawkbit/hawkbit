@@ -24,12 +24,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtAction extends MgmtBaseEntity {
 
     /**
-     * API definition for {@link UpdateAction}.
+     * API definition for update action}.
      */
     public static final String ACTION_UPDATE = "update";
 
     /**
-     * API definition for {@link CancelAction}.
+     * API definition for cancel action.
      */
     public static final String ACTION_CANCEL = "cancel";
 

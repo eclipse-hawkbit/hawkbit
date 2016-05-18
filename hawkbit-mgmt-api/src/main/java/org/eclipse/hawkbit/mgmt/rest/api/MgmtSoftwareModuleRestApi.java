@@ -143,8 +143,6 @@ public interface MgmtSoftwareModuleRestApi {
      *            the ID of the module to retrieve
      *
      * @return a single softwareModule with status OK.
-     * @throws EntityNotFoundException
-     *             in case no with the given {@code softwareModuleId} exists.
      */
     @RequestMapping(method = RequestMethod.GET, value = "/{softwareModuleId}", produces = { "application/hal+json",
             MediaType.APPLICATION_JSON_VALUE })

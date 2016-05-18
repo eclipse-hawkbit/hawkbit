@@ -13,7 +13,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Detailed {@link UpdateAction} information.
+ * Detailed update action information.
  */
 public class DdiDeployment {
 
@@ -57,7 +57,7 @@ public class DdiDeployment {
     }
 
     /**
-     * The handling type for the update {@link Action}.
+     * The handling type for the update action.
      */
     public enum HandlingType {
 
