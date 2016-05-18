@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Window;
 
 /**
@@ -26,6 +29,38 @@ public final class SPUIWindowDecorator {
      */
     private SPUIWindowDecorator() {
 
+    }
+
+    /**
+     * Decorates window based on type.
+     * 
+     * @param caption
+     *            window caption
+     * @param id
+     *            window id
+     * @param type
+     *            window type
+     * @return Window
+     */
+    public static CommonDialogWindow getDeocratedWindow(final String caption, final String id, final String type,
+            final Component content, final ClickListener saveButtonClickListener,
+            final ClickListener CancelButtonClickListener) {
+        // TODO helpLink
+        final CommonDialogWindow window = new CommonDialogWindow(caption, content, null, saveButtonClickListener,
+                CancelButtonClickListener);
+        if (null != id) {
+            window.setId(id);
+        }
+        if (SPUIDefinitions.CONFIRMATION_WINDOW.equals(type)) {
+            window.setDraggable(false);
+            window.setClosable(true);
+            window.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+
+        } else if (SPUIDefinitions.CREATE_UPDATE_WINDOW.equals(type)) {
+            window.setDraggable(true);
+            window.setClosable(true);
+        }
+        return window;
     }
 
     /**

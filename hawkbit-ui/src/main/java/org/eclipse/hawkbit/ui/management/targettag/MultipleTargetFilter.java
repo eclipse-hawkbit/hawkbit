@@ -62,7 +62,7 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
     private CustomTargetTagFilterButtonClick customTargetTagFilterButtonClick;
 
     @Autowired
-    private CreateUpdateTargetTagLayout createUpdateTargetTagLayout;
+    private CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
 
     @Autowired
     private SpPermissionChecker permChecker;

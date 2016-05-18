@@ -8,52 +8,53 @@
  */
 package org.eclipse.hawkbit.ui.management.tag;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
+import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorPicker.ColorPickerLayout;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.ui.AbstractColorPicker.Coordinates2Color;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.Slider;
-import com.vaadin.ui.Slider.ValueOutOfBoundsException;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
-import com.vaadin.ui.components.colorpicker.ColorPickerGradient;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -63,13 +64,15 @@ import com.vaadin.ui.themes.ValoTheme;
 public abstract class CreateUpdateTagLayout extends CustomComponent implements ColorChangeListener, ColorSelector {
     private static final long serialVersionUID = 4229177824620576456L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateTagLayout.class);
-    protected static final String DEFAULT_COLOR = "rgb(44,151,32)";
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
     private static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
+    protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
 
     protected String createTagNw;
     protected String updateTagNw;
+
+    protected CommonDialogWindow window;
 
     @Autowired
     private transient UiProperties uiProperties;
@@ -85,42 +88,37 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     @Autowired
     protected SpPermissionChecker permChecker;
-    /**
-     * Local Instance of ColorPickerPreview.
-     */
-    protected SpColorPickerPreview selPreview;
 
-    protected Label createTag;
-    protected Label updateTag;
+    @Autowired
+    protected transient UINotification uiNotification;
+
+    private final FormLayout formLayout = new FormLayout();
+
     private Label comboLabel;
-    private Label colorLabel;
-    private Label madatoryLabel;
+    protected Label colorLabel;
+    protected Label madatoryLabel;
     protected TextField tagName;
     protected TextArea tagDesc;
-    private Button saveTag;
-    private Button discardTag;
-    private Button tagColorPreviewBtn;
-    protected OptionGroup optiongroup;
+    protected Button tagColorPreviewBtn;
+    protected OptionGroup optiongroup = new OptionGroup();
     protected ComboBox tagNameComboBox;
 
-    protected ColorPickerGradient colorSelect;
-    private Set<ColorSelector> selectors;
-    protected Color selectedColor;
-
-    private Slider redSlider;
-    private Slider greenSlider;
-    private Slider blueSlider;
-
-    private VerticalLayout comboLayout;
-    private VerticalLayout sliders;
-    private VerticalLayout colorPickerLayout;
-    private HorizontalLayout mainLayout;
-    private VerticalLayout fieldLayout;
-
-    /** RGB color converter. */
-    private final Coordinates2Color rgbConverter = new CoordinatesToColor();
+    protected final VerticalLayout comboLayout = new VerticalLayout();
+    private final ColorPickerLayout colorPickerLayout = new ColorPickerLayout();
+    private final HorizontalLayout mainLayout = new HorizontalLayout();
+    final VerticalLayout contentLayout = new VerticalLayout();
 
     protected boolean tagPreviewBtnClicked = false;
+
+    private String colorPicked;
+    private String tagNameValue;
+    private String tagDescValue;
+
+    protected void createWindow() {
+        reset();
+        setWindow(SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event)));
+    }
 
     /**
      * Save new tag / update new tag.
@@ -134,12 +132,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      *
      * @param event
      */
-    protected abstract void discard(final Button.ClickEvent event);
-
-    /**
-     * create option group with Create tag/Update tag based on permissions.
-     */
-    protected abstract void createOptionGroup();
+    protected void discard(final Button.ClickEvent event) {
+        UI.getCurrent().removeWindow(window);
+    }
 
     /**
      * Populate target name combo.
@@ -152,9 +147,11 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * Init the layout.
      */
     public void init() {
+
         createRequiredComponents();
-        addListeners();
         buildLayout();
+        createWindow();
+        addListeners();
         eventBus.subscribe(this);
     }
 
@@ -163,11 +160,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         eventBus.unsubscribe(this);
     }
 
-    private void createRequiredComponents() {
+    protected void createRequiredComponents() {
         createTagNw = i18n.get("label.create.tag");
         updateTagNw = i18n.get("label.update.tag");
-        createTag = SPUIComponentProvider.getLabel(createTagNw, null);
-        updateTag = SPUIComponentProvider.getLabel(i18n.get("label.update.tag"), null);
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag"), null);
         madatoryLabel = getMandatoryLabel();
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
@@ -178,103 +173,57 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
 
-        tagDesc = SPUIComponentProvider.getTextArea(null, "", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC,
-                false, "", i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
+                ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC, false, "", i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
         tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.tag"), "", "", null, null, false,
-                "", i18n.get("label.combobox.tag"));
+        tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", "", null, null, false, "",
+                i18n.get("label.combobox.tag"));
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
 
-        saveTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_SAVE, "", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-
-        discardTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_DISRACD, "", "",
-                "discard-button-style", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-
         tagColorPreviewBtn = new Button();
         tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
-        getPreviewButtonColor(DEFAULT_COLOR);
+        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        selectors = new HashSet<>();
-        selectedColor = new Color(44, 151, 32);
-        selPreview = new SpColorPickerPreview(selectedColor);
-
-        colorSelect = new ColorPickerGradient("rgb-gradient", rgbConverter);
-        colorSelect.setColor(selectedColor);
-        colorSelect.setWidth("220px");
-
-        redSlider = createRGBSlider("", "red");
-        greenSlider = createRGBSlider("", "green");
-        blueSlider = createRGBSlider("", "blue");
-        setRgbSliderValues(selectedColor);
-
-        createOptionGroup();
-
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
     }
 
-    private void buildLayout() {
-        comboLayout = new VerticalLayout();
-
-        sliders = new VerticalLayout();
-        sliders.addComponents(redSlider, greenSlider, blueSlider);
-
-        selectors.add(colorSelect);
-
-        colorPickerLayout = new VerticalLayout();
-        colorPickerLayout.setStyleName("rgb-vertical-layout");
-        colorPickerLayout.addComponent(selPreview);
-        colorPickerLayout.addComponent(colorSelect);
-
-        fieldLayout = new VerticalLayout();
-        fieldLayout.setSpacing(false);
-        fieldLayout.setMargin(false);
-        fieldLayout.setWidth("100%");
-        fieldLayout.setHeight(null);
-        fieldLayout.addComponent(optiongroup);
-        fieldLayout.addComponent(comboLayout);
-        fieldLayout.addComponent(madatoryLabel);
-        fieldLayout.addComponent(tagName);
-        fieldLayout.addComponent(tagDesc);
+    protected void buildLayout() {
 
         final HorizontalLayout colorLabelLayout = new HorizontalLayout();
+        colorLabelLayout.setMargin(false);
         colorLabelLayout.addComponents(colorLabel, tagColorPreviewBtn);
-        fieldLayout.addComponent(colorLabelLayout);
 
-        final HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.addComponent(saveTag);
-        buttonLayout.addComponent(discardTag);
-        buttonLayout.setComponentAlignment(discardTag, Alignment.BOTTOM_RIGHT);
-        buttonLayout.setComponentAlignment(saveTag, Alignment.BOTTOM_LEFT);
-        buttonLayout.addStyleName("window-style");
-        buttonLayout.setWidth("152px");
+        formLayout.addComponent(optiongroup);
+        formLayout.addComponent(comboLayout);
+        formLayout.addComponent(madatoryLabel);
+        formLayout.addComponent(tagName);
+        formLayout.addComponent(tagDesc);
+        formLayout.addStyleName("form-lastrow");
+        formLayout.setSizeFull();
 
-        final VerticalLayout fieldButtonLayout = new VerticalLayout();
-        fieldButtonLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
-        fieldButtonLayout.addComponent(fieldLayout);
-        fieldButtonLayout.addComponent(buttonLayout);
-        fieldButtonLayout.setComponentAlignment(buttonLayout, Alignment.BOTTOM_CENTER);
+        contentLayout.addComponent(formLayout);
+        contentLayout.addComponent(colorLabelLayout);
+        contentLayout.setComponentAlignment(formLayout, Alignment.MIDDLE_CENTER);
+        contentLayout.setComponentAlignment(colorLabelLayout, Alignment.MIDDLE_LEFT);
+        contentLayout.setSizeFull();
 
-        mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
-        mainLayout.addComponent(fieldButtonLayout);
+        mainLayout.addComponent(contentLayout);
 
         setCompositionRoot(mainLayout);
         tagName.focus();
     }
 
     private void addListeners() {
-        saveTag.addClickListener(event -> save(event));
-        discardTag.addClickListener(event -> discard(event));
-        colorSelect.addColorChangeListener(this);
-        selPreview.addColorChangeListener(this);
+        colorPickerLayout.getColorSelect().addColorChangeListener(this);
+        colorPickerLayout.getSelPreview().addColorChangeListener(this);
         tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
         optiongroup.addValueChangeListener(event -> optionValueChanged(event));
         tagNameComboBox.addValueChangeListener(event -> tagNameChosen(event));
@@ -285,11 +234,11 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * Open color picker on click of preview button. Auto select the color based
      * on target tag if already selected.
      */
-    private void previewButtonClicked() {
+    protected void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             setColor();
-            selPreview.setColor(selectedColor);
-            fieldLayout.addComponent(sliders);
+            colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
+            contentLayout.addComponent(colorPickerLayout.getSliders());
             mainLayout.addComponent(colorPickerLayout);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.BOTTOM_CENTER);
         }
@@ -303,7 +252,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         }
 
         if (tagNameComboBox.getValue() == null) {
-            selectedColor = rgbToColorConverter(DEFAULT_COLOR);
+            colorPickerLayout
+                    .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
             return;
         }
 
@@ -312,40 +262,18 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         if (targetTagSelected == null) {
             final DistributionSetTag distTag = tagManagement
                     .findDistributionSetTag(tagNameComboBox.getValue().toString());
-            selectedColor = distTag.getColour() != null ? rgbToColorConverter(distTag.getColour())
-                    : rgbToColorConverter(DEFAULT_COLOR);
+            colorPickerLayout.setSelectedColor(
+                    distTag.getColour() != null ? ColorPickerHelper.rgbToColorConverter(distTag.getColour())
+                            : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
         } else {
-            selectedColor = targetTagSelected.getColour() != null ? rgbToColorConverter(targetTagSelected.getColour())
-                    : rgbToColorConverter(DEFAULT_COLOR);
+            colorPickerLayout.setSelectedColor(targetTagSelected.getColour() != null
+                    ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
+                    : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
         }
 
     }
 
-    /**
-     * Covert RGB code to {@Color}.
-     *
-     * @param value
-     *            RGB vale
-     * @return Color
-     */
-    protected Color rgbToColorConverter(final String value) {
-        if (!value.startsWith("rgb")) {
-            return null;
-        }
-        // RGB color format rgb/rgba(255,255,255,0.1)
-        final String[] colors = value.substring(value.indexOf('(') + 1, value.length() - 1).split(",");
-        final int red = Integer.parseInt(colors[0]);
-        final int green = Integer.parseInt(colors[1]);
-        final int blue = Integer.parseInt(colors[2]);
-        if (colors.length > 3) {
-            final int alpha = (int) (Double.parseDouble(colors[3]) * 255d);
-            return new Color(red, green, blue, alpha);
-        } else {
-            return new Color(red, green, blue);
-        }
-    }
-
-    private Label getMandatoryLabel() {
+    protected Label getMandatoryLabel() {
         final Label label = new Label(i18n.get("label.mandatory.field"));
         label.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_SMALL);
         return label;
@@ -366,12 +294,11 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
         tagDesc.clear();
         restoreComponentStyles();
-        fieldLayout.removeComponent(sliders);
+        // fieldLayout.removeComponent(colorPickerLayout.getSliders());
         mainLayout.removeComponent(colorPickerLayout);
-        selectedColor = new Color(44, 151, 32);
-        selPreview.setColor(selectedColor);
+        colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
+        colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
-
     }
 
     /**
@@ -381,6 +308,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      *            ValueChangeEvent
      */
     private void optionValueChanged(final ValueChangeEvent event) {
+
         if ("Update Tag".equals(event.getProperty().getValue())) {
             tagName.clear();
             tagDesc.clear();
@@ -399,14 +327,14 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         }
         // close the color picker layout
         tagPreviewBtnClicked = false;
-        // reset the selected color - Set defualt color
+        // reset the selected color - Set default color
         restoreComponentStyles();
-        getPreviewButtonColor(DEFAULT_COLOR);
-        selPreview.setColor(rgbToColorConverter(DEFAULT_COLOR));
+        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
+        colorPickerLayout.getSelPreview()
+                .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
         // remove the sliders and color picker layout
-        fieldLayout.removeComponent(sliders);
+        // fieldLayout.removeComponent(colorPickerLayout.getSliders());
         mainLayout.removeComponent(colorPickerLayout);
-
     }
 
     /**
@@ -421,14 +349,14 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         // hide target name combo
         comboLayout.removeComponent(comboLabel);
         comboLayout.removeComponent(tagNameComboBox);
-        fieldLayout.removeComponent(sliders);
+        contentLayout.removeComponent(colorPickerLayout.getSliders());
         mainLayout.removeComponent(colorPickerLayout);
 
         optiongroup.select(createTagNw);
 
         // Default green color
-        selectedColor = new Color(44, 151, 32);
-        selPreview.setColor(selectedColor);
+        colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
+        colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
     }
 
@@ -439,12 +367,13 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     @Override
     public void colorChanged(final ColorChangeEvent event) {
         setColor(event.getColor());
-        for (final ColorSelector select : selectors) {
-            if (!event.getSource().equals(select) && select.equals(this) && !select.getColor().equals(selectedColor)) {
-                select.setColor(selectedColor);
+        for (final ColorSelector select : colorPickerLayout.getSelectors()) {
+            if (!event.getSource().equals(select) && select.equals(this)
+                    && !select.getColor().equals(colorPickerLayout.getSelectedColor())) {
+                select.setColor(colorPickerLayout.getSelectedColor());
             }
         }
-        setRgbSliderValues(selectedColor);
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
         getPreviewButtonColor(event.getColor().getCSS());
         createDynamicStyleForComponents(tagName, tagDesc, event.getColor().getCSS());
     }
@@ -459,28 +388,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      */
     protected void getPreviewButtonColor(final String color) {
         Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.getPreviewButtonColorScript(color));
-    }
-
-    private Slider createRGBSlider(final String caption, final String styleName) {
-        final Slider slider = new Slider(caption, 0, 255);
-        slider.setImmediate(true);
-        slider.setWidth("150px");
-        slider.addStyleName(styleName);
-        return slider;
-    }
-
-    private void setRgbSliderValues(final Color color) {
-        try {
-            final double redColorValue = color.getRed();
-            redSlider.setValue(new Double(redColorValue));
-            final double blueColorValue = color.getBlue();
-            blueSlider.setValue(new Double(blueColorValue));
-            final double greenColorValue = color.getGreen();
-            greenSlider.setValue(new Double(greenColorValue));
-        } catch (final ValueOutOfBoundsException e) {
-            LOG.error("Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
-                    + color.getBlue(), e);
-        }
     }
 
     /**
@@ -507,7 +414,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         tagDesc.removeStyleName(TAG_DESC_DYNAMIC_STYLE);
         tagName.addStyleName(SPUIDefinitions.TAG_NAME);
         tagDesc.addStyleName(SPUIDefinitions.TAG_DESC);
-        getPreviewButtonColor(DEFAULT_COLOR);
+        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
     }
 
     /**
@@ -531,56 +438,44 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         if (color == null) {
             return;
         }
-        selectedColor = color;
-        selPreview.setColor(selectedColor);
-        final String colorPickedPreview = selPreview.getColor().getCSS();
-        if (tagName.isEnabled() && null != colorSelect) {
+        colorPickerLayout.setSelectedColor(color);
+        colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
+        final String colorPickedPreview = colorPickerLayout.getSelPreview().getColor().getCSS();
+        if (tagName.isEnabled() && null != colorPickerLayout.getColorSelect()) {
             createDynamicStyleForComponents(tagName, tagDesc, colorPickedPreview);
-            colorSelect.setColor(selPreview.getColor());
+            colorPickerLayout.getColorSelect().setColor(colorPickerLayout.getSelPreview().getColor());
         }
     }
 
-    /**
-     * Value change listeners implementations of sliders.
-     */
-    private void slidersValueChangeListeners() {
-        redSlider.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = -8336732888800920839L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double red = (Double) event.getProperty().getValue();
-                final Color newColor = new Color((int) red, selectedColor.getGreen(), selectedColor.getBlue());
-                setColorToComponents(newColor);
-            }
-        });
-        greenSlider.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1236358037766775663L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double green = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(selectedColor.getRed(), (int) green, selectedColor.getBlue());
-                setColorToComponents(newColor);
-            }
-        });
-        blueSlider.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 8466370763686043947L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double blue = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(selectedColor.getRed(), selectedColor.getGreen(), (int) blue);
-                setColorToComponents(newColor);
-            }
-        });
+    protected void closeWindow() {
+        window.close();
+        UI.getCurrent().removeWindow(window);
     }
 
-    private void setColorToComponents(final Color newColor) {
-        setColor(newColor);
-        colorSelect.setColor(newColor);
-        getPreviewButtonColor(newColor.getCSS());
-        createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
+    /**
+     * create option group with Create tag/Update tag based on permissions.
+     */
+    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePersmission) {
+        final List<String> optionValues = new ArrayList<>();
+        if (hasCreatePermission) {
+            optionValues.add(createTagNw);
+        }
+        if (hasUpdatePersmission) {
+            optionValues.add(updateTagNw);
+        }
+        createOptionGroup(optionValues);
+    }
+
+    protected void createOptionGroup(final List<String> tagOptions) {
+        optiongroup = new OptionGroup("", tagOptions);
+        optiongroup.setCaption("Select Action");
+        optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
+        optiongroup.addStyleName("custom-option-group");
+
+        optiongroup.setNullSelectionAllowed(false);
+        if (!tagOptions.isEmpty()) {
+            optiongroup.select(tagOptions.get(0));
+        }
     }
 
     @Override
@@ -589,6 +484,170 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     @Override
     public void removeColorChangeListener(final ColorChangeListener listener) {
+    }
+
+    public ColorPickerLayout getColorPickerLayout() {
+        return colorPickerLayout;
+    }
+
+    public CommonDialogWindow getWindow() {
+        reset();
+        return window;
+    }
+
+    public void setWindow(final CommonDialogWindow window) {
+        this.window = window;
+    }
+
+    /**
+     * Value change listeners implementations of sliders.
+     */
+    private void slidersValueChangeListeners() {
+        colorPickerLayout.getRedSlider().addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = -8336732888800920839L;
+
+            @Override
+            public void valueChange(final ValueChangeEvent event) {
+                final double red = (Double) event.getProperty().getValue();
+                final Color newColor = new Color((int) red, colorPickerLayout.getSelectedColor().getGreen(),
+                        colorPickerLayout.getSelectedColor().getBlue());
+                setColorToComponents(newColor);
+            }
+        });
+        colorPickerLayout.getGreenSlider().addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 1236358037766775663L;
+
+            @Override
+            public void valueChange(final ValueChangeEvent event) {
+                final double green = (Double) event.getProperty().getValue();
+                final Color newColor = new Color(colorPickerLayout.getSelectedColor().getRed(), (int) green,
+                        colorPickerLayout.getSelectedColor().getBlue());
+                setColorToComponents(newColor);
+            }
+        });
+        colorPickerLayout.getBlueSlider().addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 8466370763686043947L;
+
+            @Override
+            public void valueChange(final ValueChangeEvent event) {
+                final double blue = (Double) event.getProperty().getValue();
+                final Color newColor = new Color(colorPickerLayout.getSelectedColor().getRed(),
+                        colorPickerLayout.getSelectedColor().getGreen(), (int) blue);
+                setColorToComponents(newColor);
+            }
+        });
+    }
+
+    private void setColorToComponents(final Color newColor) {
+        setColor(newColor);
+        colorPickerLayout.getColorSelect().setColor(newColor);
+        getPreviewButtonColor(newColor.getCSS());
+        createDynamicStyleForComponents(tagName, tagDesc, newColor.getCSS());
+    }
+
+    /**
+     * Create new tag.
+     */
+    protected void createNewTag() {
+        colorPicked = ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview());
+        tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
+        tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
+    }
+
+    /**
+     * update tag.
+     */
+    protected void updateExistingTag(final Tag targetObj) {
+        final String nameUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
+        final String descUpdateValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
+
+        if (null != nameUpdateValue) {
+            targetObj.setName(nameUpdateValue);
+            targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
+            targetObj.setColour(ColorPickerHelper.getColorPickedString(colorPickerLayout.getSelPreview()));
+            if (targetObj instanceof TargetTag) {
+                tagManagement.updateTargetTag((TargetTag) targetObj);
+            } else if (targetObj instanceof DistributionSetTag) {
+                tagManagement.updateDistributionSetTag((DistributionSetTag) targetObj);
+            }
+            uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
+            closeWindow();
+        } else {
+            uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
+        }
+    }
+
+    protected void displaySuccess(final String tagName) {
+        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { tagName }));
+    }
+
+    protected void displayValidationError(final String errorMessage) {
+        uiNotification.displayValidationError(errorMessage);
+    }
+
+    protected void setTagColor(final Color selectedColor, final String previewColor) {
+        getColorPickerLayout().setSelectedColor(selectedColor);
+        getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+        getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
+        createDynamicStyleForComponents(tagName, tagDesc, previewColor);
+        getPreviewButtonColor(previewColor);
+    }
+
+    /**
+     * 
+     * @return
+     */
+    protected Boolean mandatoryValuesPresent() {
+        if (Strings.isNullOrEmpty(tagName.getValue())) {
+            if (optiongroup.getValue().equals(createTagNw)) {
+                displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
+            }
+            if (optiongroup.getValue().equals(updateTagNw)) {
+                if (null == tagNameComboBox.getValue()) {
+                    displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));
+                } else {
+                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
+                }
+            }
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    protected Boolean checkIsDuplicate(final Tag existingTag) {
+        if (existingTag != null) {
+            displayValidationError(i18n.get("message.tag.duplicate.check", new Object[] { existingTag.getName() }));
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
+    public String getColorPicked() {
+        return colorPicked;
+    }
+
+    public void setColorPicked(final String colorPicked) {
+        this.colorPicked = colorPicked;
+    }
+
+    public String getTagNameValue() {
+        return tagNameValue;
+    }
+
+    public void setTagNameValue(final String tagNameValue) {
+        this.tagNameValue = tagNameValue;
+    }
+
+    public String getTagDescValue() {
+        return tagDescValue;
+    }
+
+    public void setTagDescValue(final String tagDescValue) {
+        this.tagDescValue = tagDescValue;
+    }
+
+    public FormLayout getFormLayout() {
+        return formLayout;
     }
 
 }

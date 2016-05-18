@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -45,6 +44,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
@@ -280,14 +280,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
         final HorizontalLayout uploaderLayout = new HorizontalLayout();
         uploaderLayout.addComponent(bulkUploader);
-        // uploaderLayout.addComponent(linkToSystemConfigHelp);
-        // uploaderLayout.setComponentAlignment(linkToSystemConfigHelp,
-        // Alignment.BOTTOM_RIGHT);
-        // uploaderLayout.setExpandRatio(bulkUploader, 1.0F);
+        uploaderLayout.addComponent(linkToSystemConfigHelp);
+        uploaderLayout.setComponentAlignment(linkToSystemConfigHelp, Alignment.BOTTOM_RIGHT);
+        uploaderLayout.setExpandRatio(bulkUploader, 1.0F);
         uploaderLayout.setSizeFull();
-        mainLayout.addComponents(captionLayout,
-                new PopupWindowHelp(uiproperties.getLinks().getDocumentation().getDeploymentView()), dsNamecomboBox,
-                descTextArea, tokenVerticalLayout, descTextArea, progressBar, targetsCountLabel, uploaderLayout);
+        mainLayout.addComponents(captionLayout, dsNamecomboBox, descTextArea, tokenVerticalLayout, descTextArea,
+                progressBar, targetsCountLabel, uploaderLayout);
     }
 
     /**

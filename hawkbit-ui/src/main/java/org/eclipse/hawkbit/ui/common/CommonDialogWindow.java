@@ -2,105 +2,126 @@ package org.eclipse.hawkbit.ui.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class CommonDialog extends Window {
+@Service
+public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = -1321949234316858703L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommonDialog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CommonDialogWindow.class);
 
     private final VerticalLayout mainLayout = new VerticalLayout();
 
-    private FormLayout formLayout = new FormLayout();
+    private String caption;
+
+    private Component content;
+
+    private String helpLink;
 
     private Button saveButton;
 
     private Button cancelButton;
 
-    public CommonDialog() {
+    public CommonDialogWindow() {
 
-        mainLayout.addComponent(formLayout);
-        mainLayout.addComponent(createActionButtonsLayout());
-        setContent(mainLayout);
-
-        setResizable(false);
-        center();
+        init(null, null);
     }
 
-    public CommonDialog(final String title, final FormLayout form, final String helpLink) {
+    public CommonDialogWindow(final String caption, final Component content, final String helpLink,
+            final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener) {
 
-        if (formLayout != null) {
-            formLayout = form;
+        this.caption = caption;
+        this.content = content;
+        this.helpLink = helpLink;
+
+        if (null == content) {
+            // TODO
+            // throw Exception
         }
-        formLayout.setSpacing(true);
-        formLayout.setMargin(true);
+        init(saveButtonClickListener, cancelButtonClickListener);
+    }
+
+    public void init(final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener) {
+
+        if (content instanceof AbstractOrderedLayout) {
+            ((AbstractOrderedLayout) content).setSpacing(true);
+            ((AbstractOrderedLayout) content).setMargin(true);
+        }
 
         if (StringUtils.isNotEmpty(helpLink)) {
             mainLayout.addComponent(createLinkToHelp(helpLink));
         }
-        mainLayout.addComponent(formLayout);
-        mainLayout.addComponent(createActionButtonsLayout());
+        if (null != content) {
+            mainLayout.addComponent(content);
+        }
+        final HorizontalLayout buttonLayout = createActionButtonsLayout(saveButtonClickListener,
+                cancelButtonClickListener);
+        mainLayout.addComponent(buttonLayout);
+        mainLayout.setComponentAlignment(buttonLayout, Alignment.MIDDLE_CENTER);
 
-        setCaption(title);
+        setSizeUndefined();
+        setCaption(caption);
         setContent(mainLayout);
         setResizable(false);
         center();
+        setModal(true);
     }
 
-    private HorizontalLayout createActionButtonsLayout() {
+    private HorizontalLayout createActionButtonsLayout(final ClickListener saveButtonClickListener,
+            final ClickListener cancelButtonClickListener) {
 
         final HorizontalLayout hlayout = new HorizontalLayout();
         hlayout.setSpacing(true);
 
-        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveButton.setCaption("save");
-        // saveButton.setDescription(i18n.get("configuration.savebutton.tooltip"));
+        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "save", "", "",
+                true, FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
+        if (null != saveButtonClickListener) {
+            saveButton.addClickListener(saveButtonClickListener);
+        } else {
+            LOG.warn("No ClickListener for saveButton specified");
+        }
         hlayout.addComponent(saveButton);
         hlayout.setComponentAlignment(saveButton, Alignment.MIDDLE_LEFT);
 
-        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "", "", "",
-                true, FontAwesome.UNDO, SPUIButtonStyleSmallNoBorder.class);
-        cancelButton.setCaption("cancel");
-        // cancelButton.setDescription(i18n.get("configuration.cancellbutton.tooltip"));
+        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel", "",
+                "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+        if (null != cancelButtonClickListener) {
+            cancelButton.addClickListener(cancelButtonClickListener);
+        } else {
+            LOG.warn("No ClickListener for cancelButton specified");
+        }
         hlayout.addComponent(cancelButton);
         hlayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_RIGHT);
 
         return hlayout;
     }
 
-    public void setSaveButtonClickListener(final ClickListener clickListener) {
-        saveButton.addClickListener(clickListener);
+    public void setSaveButtonEnabled(final boolean enabled) {
+        saveButton.setEnabled(enabled);
     }
 
-    public void setCancelButtonClickListener(final ClickListener clickListener) {
-        cancelButton.addClickListener(clickListener);
+    public void setCancelButtonEnabled(final boolean enabled) {
+        cancelButton.setEnabled(enabled);
     }
 
     private Link createLinkToHelp(final String link) {
         return SPUIComponentProvider.getHelpLink(link);
-    }
-
-    public FormLayout getFormLayout() {
-        return formLayout;
-    }
-
-    public void setFormLayout(final FormLayout formLayout) {
-        this.formLayout = formLayout;
     }
 
 }

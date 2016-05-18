@@ -19,11 +19,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
 import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -41,7 +41,6 @@ import org.vaadin.spring.events.EventBus;
 import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -60,7 +59,6 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import com.vaadin.ui.components.colorpicker.ColorPickerGradient;
@@ -115,8 +113,8 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     private TextField typeName;
     private TextField typeKey;
     private TextArea typeDesc;
-    private Button saveTag;
-    private Button discardTag;
+    // private Button saveTag;
+    // private Button discardTag;
     private Button tagColorPreviewBtn;
     private OptionGroup createOptiongroup;
     private OptionGroup assignOptiongroup;
@@ -131,7 +129,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     private Slider redSlider;
     private Slider greenSlider;
     private Slider blueSlider;
-    private Window swTypeWindow;
+    private CommonDialogWindow swTypeWindow;
     protected boolean tagPreviewBtnClicked = false;
     private VerticalLayout comboLayout;
     private VerticalLayout sliders;
@@ -150,6 +148,8 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         buildLayout();
         addListeners();
     }
+
+    // TODO MR WINDOW
 
     private void createComponents() {
         createTypeStr = i18n.get("label.create.type");
@@ -188,13 +188,18 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         typeNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         typeNameComboBox.setImmediate(true);
 
-        saveTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_SW_TYPE_SAVE, "", "", "", true, FontAwesome.SAVE,
-                SPUIButtonStyleSmallNoBorder.class);
-        saveTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-
-        discardTag = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_DISRACD, "", "",
-                "discard-button-style", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        // saveTag =
+        // SPUIComponentProvider.getButton(SPUIDefinitions.NEW_SW_TYPE_SAVE, "",
+        // "", "", true, FontAwesome.SAVE,
+        // SPUIButtonStyleSmallNoBorder.class);
+        // saveTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        //
+        // discardTag =
+        // SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_DISRACD,
+        // "", "",
+        // "discard-button-style", true, FontAwesome.TIMES,
+        // SPUIButtonStyleSmallNoBorder.class);
+        // discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
         tagColorPreviewBtn = new Button();
         tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
@@ -252,17 +257,20 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         colorLabelLayout.addComponents(colorLabel, tagColorPreviewBtn);
         fieldLayout.addComponent(colorLabelLayout);
 
-        final HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.addComponent(saveTag);
-        buttonLayout.addComponent(discardTag);
-        buttonLayout.setComponentAlignment(discardTag, Alignment.BOTTOM_RIGHT);
-        buttonLayout.setComponentAlignment(saveTag, Alignment.BOTTOM_LEFT);
-        buttonLayout.addStyleName("window-style");
-        buttonLayout.setWidth("152px");
+        // final HorizontalLayout buttonLayout = new HorizontalLayout();
+        // buttonLayout.addComponent(saveTag);
+        // buttonLayout.addComponent(discardTag);
+        // buttonLayout.setComponentAlignment(discardTag,
+        // Alignment.BOTTOM_RIGHT);
+        // buttonLayout.setComponentAlignment(saveTag, Alignment.BOTTOM_LEFT);
+        // buttonLayout.addStyleName("window-style");
+        // buttonLayout.setWidth("152px");
+
+        // TODO MR WINDOW
 
         final VerticalLayout fieldButtonLayout = new VerticalLayout();
         fieldButtonLayout.addComponent(fieldLayout);
-        fieldButtonLayout.addComponent(buttonLayout);
+        // fieldButtonLayout.addComponent(buttonLayout);
 
         mainLayout = new HorizontalLayout();
         mainLayout.addComponent(fieldButtonLayout);
@@ -271,8 +279,6 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     }
 
     private void addListeners() {
-        saveTag.addClickListener(event -> save());
-        discardTag.addClickListener(event -> discard());
         colorSelect.addColorChangeListener(this);
         selPreview.addColorChangeListener(this);
         tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
@@ -281,13 +287,11 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         slidersValueChangeListeners();
     }
 
-    public Window getWindow() {
+    public CommonDialogWindow getWindow() {
         reset();
         swTypeWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW);
-        swTypeWindow.setContent(this);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> discard());
         return swTypeWindow;
-
     }
 
     /**

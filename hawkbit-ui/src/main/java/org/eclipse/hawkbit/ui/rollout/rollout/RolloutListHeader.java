@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -27,6 +28,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 
 /**
  * 
@@ -48,12 +50,16 @@ public class RolloutListHeader extends AbstractGridHeader {
     private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
+    private I18N i18n;
+
+    @Autowired
     private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     @Override
     @PostConstruct
     protected void init() {
         super.init();
+        addUpdateRolloutWindow.init();
     }
 
     @Override
@@ -89,11 +95,11 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        addUpdateRolloutWindow.init();
         addUpdateRolloutWindow.resetComponents();
-        addUpdateRolloutWindow.init();
-        UI.getCurrent().addWindow(addUpdateRolloutWindow);
-        addUpdateRolloutWindow.setVisible(Boolean.TRUE);
+        final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
+        UI.getCurrent().addWindow(addTargetWindow);
+        addTargetWindow.setVisible(Boolean.TRUE);
+
     }
 
     @Override

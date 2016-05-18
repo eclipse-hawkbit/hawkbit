@@ -96,8 +96,8 @@ public class RolloutListGrid extends AbstractGrid {
     @Autowired
     private transient RolloutManagement rolloutManagement;
 
-    @Autowired
-    private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
+    // @Autowired
+    private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout();
 
     @Autowired
     private UINotification uiNotification;
@@ -109,7 +109,6 @@ public class RolloutListGrid extends AbstractGrid {
     private transient SpPermissionChecker permissionChecker;
 
     private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
-
 
     /**
      * Handles the RolloutEvent to refresh Grid.

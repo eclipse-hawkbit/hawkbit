@@ -288,4 +288,13 @@
 	font-style:normal;
 	font-weight:normal;
   }
+  
+  .hawkbit [class*="margin-bottom"] > tbody > [class*="lastrow"] > td {
+	padding-bottom: 12px !important;
+  }
+  
+  .form-lastrow {
+	padding-bottom: 12px !important;
+  }
+  
 }

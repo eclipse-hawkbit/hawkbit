@@ -62,7 +62,6 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
         final Window addUpdateWindow = createUpdateDistSetTypeLayout.getWindow();
         UI.getCurrent().addWindow(addUpdateWindow);
         addUpdateWindow.setVisible(Boolean.TRUE);
-
     }
 
     @Override

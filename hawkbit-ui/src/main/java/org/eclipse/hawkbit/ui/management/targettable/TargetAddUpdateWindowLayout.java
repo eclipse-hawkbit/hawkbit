@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -37,9 +38,11 @@ import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
+import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -79,12 +82,12 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private TextField nameTextField;
     private TextArea descTextArea;
     private Label madatoryLabel;
-    private Button saveTarget;
-    private Button discardTarget;
+//    private Button saveTarget;
+//    private Button discardTarget;
     private boolean editTarget = Boolean.FALSE;
     private String controllerId;
     private VerticalLayout mainLayout;
-    private Window addTargetWindow;
+    private CommonDialogWindow addTargetWindow;
 
     private String oldTargetName;
     private String oldTargetDesc;
@@ -100,7 +103,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         /* register all listeners related to the Window */
         addListeners();
         setCompositionRoot(mainLayout);
-
     }
 
     private void createRequiredComponents() {
@@ -124,25 +126,26 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         madatoryLabel = new Label(i18n.get("label.mandatory.field"));
         madatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_SMALL);
 
-        /* save or update button */
-        saveTarget = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_SAVE, "", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveTarget.addClickListener(event -> saveTargetListner());
+//        /* save or update button */
+//        saveTarget = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_SAVE, "", "", "", true,
+//                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
+//        saveTarget.addClickListener(event -> saveTargetListner());
 
-        /* close button */
-        discardTarget = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_DISCARD, "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardTarget.addClickListener(event -> discardTargetListner());
+//        /* close button */
+//        discardTarget = SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_DISCARD, "", "", "", true,
+//                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+//        discardTarget.addClickListener(event -> discardTargetListner());
     }
 
     private void buildLayout() {
         /* action button layout (save & dicard) */
-        final HorizontalLayout buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
-        buttonsLayout.addComponents(saveTarget, discardTarget);
-        buttonsLayout.setComponentAlignment(saveTarget, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(discardTarget, Alignment.BOTTOM_RIGHT);
-        buttonsLayout.addStyleName("window-style");
+//        final HorizontalLayout buttonsLayout = new HorizontalLayout();
+//        buttonsLayout.setSizeFull();
+//        buttonsLayout.addComponents(saveTarget, discardTarget);
+//        buttonsLayout.setComponentAlignment(saveTarget, Alignment.BOTTOM_LEFT);
+//        buttonsLayout.setComponentAlignment(discardTarget, Alignment.BOTTOM_RIGHT);
+//        buttonsLayout.addStyleName("window-style");
+        
         /*
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
@@ -151,13 +154,21 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.addStyleName("lay-color");
         mainLayout.setSizeUndefined();
-        mainLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
-        mainLayout.addComponent(madatoryLabel);
-        mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
+//        mainLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
+//        mainLayout.addComponent(madatoryLabel);
+//        mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
+
+        FormLayout formLayout = new FormLayout();
+        formLayout.addComponent(madatoryLabel);
+        formLayout.addComponent(controllerIDTextField);
+        formLayout.addComponent(nameTextField);
+        formLayout.addComponent(descTextArea);
+        mainLayout.addComponent(formLayout);
+        
         if (Boolean.TRUE.equals(editTarget)) {
             madatoryLabel.setVisible(Boolean.FALSE);
         }
-        mainLayout.addComponents(madatoryLabel, controllerIDTextField, nameTextField, descTextArea, buttonsLayout);
+//        mainLayout.addComponents(madatoryLabel, controllerIDTextField, nameTextField, descTextArea, buttonsLayout);
         nameTextField.focus();
     }
 
@@ -179,9 +190,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             @Override
             public void textChange(final TextChangeEvent event) {
                 if (event.getText().equals(oldTargetName) && descTextArea.getValue().equals(oldTargetDesc)) {
-                    saveTarget.setEnabled(false);
+                    addTargetWindow.setSaveButtonEnabled(false);
                 } else {
-                    saveTarget.setEnabled(true);
+                    addTargetWindow.setSaveButtonEnabled(true);
                 }
 
             }
@@ -200,14 +211,14 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             @Override
             public void textChange(final TextChangeEvent event) {
                 if (event.getText().equals(oldTargetDesc) && nameTextField.getValue().equals(oldTargetName)) {
-                    saveTarget.setEnabled(false);
+                    addTargetWindow.setSaveButtonEnabled(false);
                 } else {
-                    saveTarget.setEnabled(true);
+                    addTargetWindow.setSaveButtonEnabled(true);
                 }
 
             }
         });
-    }
+    } 
 
     /**
      * Update the Target if modified.
@@ -271,8 +282,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         addTargetWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW);
-        addTargetWindow.setContent(this);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(),event -> discardTargetListner());
         return addTargetWindow;
     }
 
@@ -335,7 +345,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         if (target.getDescription() != null) {
             descTextArea.setValue(target.getDescription());
         }
-        saveTarget.setEnabled(Boolean.FALSE);
+        addTargetWindow.setSaveButtonEnabled(Boolean.FALSE);
 
         oldTargetDesc = descTextArea.getValue();
         oldTargetName = nameTextField.getValue();

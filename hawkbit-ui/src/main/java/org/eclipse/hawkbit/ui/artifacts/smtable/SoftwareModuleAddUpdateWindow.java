@@ -14,11 +14,11 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -30,12 +30,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
-import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -52,7 +51,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class SoftwareModuleAddUpdateWindow implements Serializable {
+public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Serializable {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
@@ -79,15 +78,15 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     private TextField vendorTextField;
 
-    private Button saveSoftware;
-
-    private Button closeWindow;
+    // private Button saveSoftware;
+    //
+    // private Button closeWindow;
 
     private ComboBox typeComboBox;
 
     private TextArea descTextArea;
 
-    private Window window;
+    private CommonDialogWindow window;
 
     private String oldDescriptionValue;
 
@@ -103,7 +102,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
      * @return reference of {@link com.vaadin.ui.Window} to add new software
      *         module.
      */
-    public Window createAddSoftwareModuleWindow() {
+    public CommonDialogWindow createAddSoftwareModuleWindow() {
         editSwModule = Boolean.FALSE;
         createRequiredComponents();
         createWindow();
@@ -170,22 +169,19 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         populateTypeNameCombo();
 
         /* save or update button */
-        saveSoftware = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_SAVE, "", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveSoftware.addClickListener(event -> {
-            if (editSwModule) {
-                updateSwModule();
-            } else {
-                /* add new or update software module */
-                addNewBaseSoftware();
-            }
-        });
-
-        /* close button */
-        closeWindow = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_DISCARD, "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        /* Just close this window when this button is clicked */
-        closeWindow.addClickListener(event -> closeThisWindow());
+        // saveSoftware =
+        // SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_SAVE,
+        // "", "", "", true,
+        // FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
+        // saveSoftware.addClickListener(event -> save());
+        //
+        // /* close button */
+        // closeWindow =
+        // SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_DISCARD,
+        // "", "", "", true,
+        // FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
+        // /* Just close this window when this button is clicked */
+        // closeWindow.addClickListener(event -> closeThisWindow());
 
         resetOldValues();
     }
@@ -212,12 +208,14 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
      */
     private void createWindow() {
         /* action button layout (save & dicard) */
-        final HorizontalLayout buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
-        buttonsLayout.addComponents(saveSoftware, closeWindow);
-        buttonsLayout.setComponentAlignment(saveSoftware, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(closeWindow, Alignment.BOTTOM_RIGHT);
-        buttonsLayout.addStyleName("window-style");
+        // final HorizontalLayout buttonsLayout = new HorizontalLayout();
+        // buttonsLayout.setSizeFull();
+        // buttonsLayout.addComponents(saveSoftware, closeWindow);
+        // buttonsLayout.setComponentAlignment(saveSoftware,
+        // Alignment.BOTTOM_LEFT);
+        // buttonsLayout.setComponentAlignment(closeWindow,
+        // Alignment.BOTTOM_RIGHT);
+        // buttonsLayout.addStyleName("window-style");
 
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
@@ -242,22 +240,26 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
         mainLayout.addComponent(hLayout);
         mainLayout.setComponentAlignment(hLayout, Alignment.MIDDLE_LEFT);
-        mainLayout.addComponents(nameTextField, versionTextField, vendorTextField, descTextArea, buttonsLayout);
-        
+        // mainLayout.addComponents(nameTextField, versionTextField,
+        // vendorTextField, descTextArea, buttonsLayout);
+
+        // TODO MR WINDOW
+        mainLayout.addComponents(nameTextField, versionTextField, vendorTextField, descTextArea);
+
+        setCompositionRoot(mainLayout);
+
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW);
-        window.setContent(mainLayout);
-        window.setModal(true);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> closeThisWindow());
         nameTextField.focus();
     }
 
     private void addDescriptionTextChangeListener() {
         descTextArea.addTextChangeListener(event -> {
             if (event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue)) {
-                saveSoftware.setEnabled(false);
+                window.setSaveButtonEnabled(false);
             } else {
-                saveSoftware.setEnabled(true);
+                window.setSaveButtonEnabled(true);
             }
         });
     }
@@ -265,9 +267,9 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
     private void addVendorTextChangeListener() {
         vendorTextField.addTextChangeListener(event -> {
             if (event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue)) {
-                saveSoftware.setEnabled(false);
+                window.setSaveButtonEnabled(false);
             } else {
-                saveSoftware.setEnabled(true);
+                window.setSaveButtonEnabled(true);
             }
         });
     }
@@ -331,7 +333,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
             typeComboBox.addItem(swModle.getType().getName());
         }
         typeComboBox.setValue(swModle.getType().getName());
-        saveSoftware.setEnabled(Boolean.FALSE);
+        window.setSaveButtonEnabled(Boolean.FALSE);
     }
 
     /**
@@ -368,5 +370,14 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
             isValid = false;
         }
         return isValid;
+    }
+
+    private void save() {
+        if (editSwModule) {
+            updateSwModule();
+        } else {
+            /* add new or update software module */
+            addNewBaseSoftware();
+        }
     }
 }
