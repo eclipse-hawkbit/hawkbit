@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2011-2016 Bosch Software Innovations GmbH, Germany. All rights reserved.
- * 
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,8 @@ public interface DdiDlArtifactStoreControllerRestApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME + "/{fileName}")
+    @RequestMapping(method = RequestMethod.GET, value = DdiDlRestConstants.ARTIFACT_DOWNLOAD_BY_FILENAME
+            + "/{fileName}")
     @ResponseBody
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
             @AuthenticationPrincipal final String targetid);
