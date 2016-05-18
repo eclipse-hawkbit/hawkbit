@@ -18,14 +18,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -659,5 +660,27 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetTag tag) {
         distributionSets.forEach(ds -> ds.getTags().remove(tag));
         return distributionSetRepository.save(distributionSets);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public List<DistributionSetType> createDistributionSetTypes(final Collection<DistributionSetType> types) {
+        return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public void deleteDistributionSet(final DistributionSet set) {
+        deleteDistributionSet(set.getId());
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
+            final DistributionSetTag tag) {
+        return toggleTagAssignment(sets.stream().map(ds -> ds.getId()).collect(Collectors.toList()), tag.getName());
     }
 }

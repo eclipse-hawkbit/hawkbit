@@ -371,18 +371,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
-        final Action addUpdateActionStatus = getUpdateActionStatus(action, actionStatus);
+        final Action addUpdateActionStatus = getUpdateActionStatus(actionStatus);
 
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
     }
 
-    private Action getUpdateActionStatus(final Action action, final ActionStatus actionStatus) {
+    private Action getUpdateActionStatus(final ActionStatus actionStatus) {
         if (actionStatus.getStatus().equals(Status.CANCELED)) {
-            return controllerManagement.addCancelActionStatus(actionStatus, action);
+            return controllerManagement.addCancelActionStatus(actionStatus);
         }
-        return controllerManagement.addUpdateActionStatus(actionStatus, action);
+        return controllerManagement.addUpdateActionStatus(actionStatus);
     }
 
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {

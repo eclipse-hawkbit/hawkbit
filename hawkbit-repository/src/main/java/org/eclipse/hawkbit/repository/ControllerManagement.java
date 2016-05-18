@@ -249,9 +249,7 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    default TargetInfo updateLastTargetQuery(@NotNull final TargetInfo target, @NotNull final URI address) {
-        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
-    }
+    TargetInfo updateLastTargetQuery(@NotNull TargetInfo target, @NotNull URI address);
 
     /**
      * Update selective the target status of a given {@code target}.

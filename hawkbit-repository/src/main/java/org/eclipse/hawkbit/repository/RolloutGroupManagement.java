@@ -21,6 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+/**
+ * Repository management service for RolloutGroup.
+ *
+ */
 public interface RolloutGroupManagement {
 
     /**

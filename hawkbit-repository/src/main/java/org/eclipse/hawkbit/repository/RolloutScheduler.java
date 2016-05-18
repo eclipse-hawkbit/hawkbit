@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Profile("!test")
 public class RolloutScheduler {
 
-    private static final Logger logger = LoggerFactory.getLogger(RolloutScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutScheduler.class);
 
     @Autowired
     private TenantAware tenantAware;
@@ -57,7 +57,7 @@ public class RolloutScheduler {
      */
     @Scheduled(initialDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = RolloutProperties.Scheduler.PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void rolloutScheduler() {
-        logger.debug("rollout schedule checker has been triggered.");
+        LOGGER.debug("rollout schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
         systemSecurityContext.runAsSystem(() -> {
@@ -68,7 +68,7 @@ public class RolloutScheduler {
             // iterate through all tenants and execute the rollout check for
             // each tenant seperately.
             final List<String> tenants = systemManagement.findTenants();
-            logger.info("Checking rollouts for {} tenants", tenants.size());
+            LOGGER.info("Checking rollouts for {} tenants", tenants.size());
             for (final String tenant : tenants) {
                 tenantAware.runAsTenant(tenant, () -> {
                     rolloutManagement.checkRunningRollouts(rolloutProperties.getScheduler().getFixedDelay());

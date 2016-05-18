@@ -14,9 +14,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
  * Holds distribution set filter parameters.
- *
- *
- *
  */
 public final class DistributionSetFilter {
     private final Boolean isDeleted;

@@ -267,4 +267,20 @@ public class JpaArtifactManagement implements ArtifactManagement {
         LOG.debug("storing new artifact into repository {}", artifact);
         return localArtifactRepository.save(artifact);
     }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public LocalArtifact createLocalArtifact(final InputStream inputStream, final Long moduleId, final String filename,
+            final boolean overrideExisting) {
+        return createLocalArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public LocalArtifact createLocalArtifact(final InputStream inputStream, final Long moduleId, final String filename,
+            final boolean overrideExisting, final String contentType) {
+        return createLocalArtifact(inputStream, moduleId, filename, null, null, overrideExisting, contentType);
+    }
 }

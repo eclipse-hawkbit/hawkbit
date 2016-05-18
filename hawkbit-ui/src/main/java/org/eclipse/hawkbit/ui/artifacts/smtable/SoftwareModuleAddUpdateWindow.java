@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
 
-import org.eclipse.hawkbit.repository.jpa.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;

@@ -409,9 +409,15 @@ public class JpaControllerManagement implements ControllerManagement {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public String getSecurityTokenByControllerId(final String controllerId) {
         final Target target = targetRepository.findByControllerId(controllerId);
         return target != null ? target.getSecurityToken() : null;
+    }
+
+    @Override
+    @Modifying
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public TargetInfo updateLastTargetQuery(final TargetInfo target, final URI address) {
+        return updateTargetStatus(target, null, System.currentTimeMillis(), address);
     }
 }

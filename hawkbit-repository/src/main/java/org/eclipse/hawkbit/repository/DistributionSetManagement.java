@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
@@ -163,9 +162,7 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    default List<DistributionSetType> createDistributionSetTypes(@NotNull final Collection<DistributionSetType> types) {
-        return types.stream().map(this::createDistributionSetType).collect(Collectors.toList());
-    }
+    List<DistributionSetType> createDistributionSetTypes(@NotNull Collection<DistributionSetType> types);
 
     /**
      * <p>
@@ -183,10 +180,7 @@ public interface DistributionSetManagement {
      *            to delete
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    default void deleteDistributionSet(@NotNull final DistributionSet set) {
-        deleteDistributionSet(set.getId());
-    }
+    void deleteDistributionSet(@NotNull DistributionSet set);
 
     /**
      * Deleted {@link DistributionSet}s by their IDs. That is either a soft
@@ -235,11 +229,8 @@ public interface DistributionSetManagement {
      *            to look for.
      * @return {@link DistributionSet} or <code>null</code> if it does not exist
      */
-    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    default DistributionSet findDistributionSetById(@NotNull final Long distid) {
-        return findDistributionSetByIdWithDetails(distid);
-    }
+    DistributionSet findDistributionSetById(@NotNull Long distid);
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded)
@@ -487,11 +478,8 @@ public interface DistributionSetManagement {
      *         the assignment outcome.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    default DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty final Collection<DistributionSet> sets,
-            @NotNull final DistributionSetTag tag) {
-        return toggleTagAssignment(sets.stream().map(ds -> ds.getId()).collect(Collectors.toList()), tag.getName());
-    }
+    DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<DistributionSet> sets,
+            @NotNull DistributionSetTag tag);
 
     /**
      * Toggles {@link DistributionSetTag} assignment to given

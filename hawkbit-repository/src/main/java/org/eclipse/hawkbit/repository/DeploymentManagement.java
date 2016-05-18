@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -82,14 +80,8 @@ public interface DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    // Exception squid:S2095: see
-    // https://jira.sonarsource.com/browse/SONARJAVA-1478
-    @SuppressWarnings({ "squid:S2095" })
-    default DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID, final ActionType actionType,
-            final long forcedTimestamp, @NotEmpty final String... targetIDs) {
-        return assignDistributionSet(dsID, Arrays.stream(targetIDs)
-                .map(t -> new TargetWithActionType(t, actionType, forcedTimestamp)).collect(Collectors.toList()));
-    }
+    DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID, final ActionType actionType,
+            final long forcedTimestamp, @NotEmpty final String... targetIDs);
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -154,10 +146,7 @@ public interface DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    default DistributionSetAssignmentResult assignDistributionSet(@NotNull final Long dsID,
-            @NotEmpty final String... targetIDs) {
-        return assignDistributionSet(dsID, ActionType.FORCED, Action.NO_FORCE_TIME, targetIDs);
-    }
+    DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID, @NotEmpty String... targetIDs);
 
     /**
      * Cancels given {@link Action} for given {@link Target}. The method will

@@ -346,7 +346,7 @@ public class AmqpMessageHandlerServiceTest {
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
-        when(controllerManagementMock.addUpdateActionStatus(Matchers.any(), Matchers.any())).thenReturn(action);
+        when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
         // for the test the same action can be used
         final List<Action> actionList = new ArrayList<>();
         actionList.add(action);

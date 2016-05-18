@@ -270,7 +270,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Searches for software modules based on a list of IDs.")
     public void findSoftwareModulesById() {
 
-        final List<Long> modules = new ArrayList<Long>();
+        final List<Long> modules = new ArrayList<>();
 
         modules.add(softwareManagement.createSoftwareModule(new SoftwareModule(osType, "poky-una", "3.0.2", null, ""))
                 .getId());

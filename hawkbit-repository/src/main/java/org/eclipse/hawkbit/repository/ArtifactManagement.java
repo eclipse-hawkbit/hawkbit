@@ -32,8 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for {@link Artifact} management operations.
@@ -99,11 +97,8 @@ public interface ArtifactManagement {
      * @throw ArtifactUploadFailedException if upload fails
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    default LocalArtifact createLocalArtifact(final InputStream inputStream, final Long moduleId, final String filename,
-            final boolean overrideExisting) {
-        return createLocalArtifact(inputStream, moduleId, filename, null, null, overrideExisting, null);
-    }
+    LocalArtifact createLocalArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId, final String filename,
+            final boolean overrideExisting);
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the
@@ -126,11 +121,8 @@ public interface ArtifactManagement {
      * @throw ArtifactUploadFailedException if upload fails
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    default LocalArtifact createLocalArtifact(final InputStream inputStream, final Long moduleId, final String filename,
-            final boolean overrideExisting, final String contentType) {
-        return createLocalArtifact(inputStream, moduleId, filename, null, null, overrideExisting, contentType);
-    }
+    LocalArtifact createLocalArtifact(@NotNull InputStream inputStream, @NotNull Long moduleId,
+            @NotNull String filename, final boolean overrideExisting, @NotNull String contentType);
 
     /**
      * Persists artifact binary as provided by given InputStream. assign the
@@ -282,14 +274,7 @@ public interface ArtifactManagement {
      * @return the found {@link SoftwareModule}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    default SoftwareModule findSoftwareModuleWithDetails(@NotNull final Long id) {
-        final SoftwareModule result = findSoftwareModuleById(id);
-        if (result != null) {
-            result.getArtifacts().size();
-        }
-
-        return result;
-    }
+    SoftwareModule findSoftwareModuleWithDetails(@NotNull Long id);
 
     /**
      * Loads {@link org.eclipse.hawkbit.artifact.server.json.model.Artifact}

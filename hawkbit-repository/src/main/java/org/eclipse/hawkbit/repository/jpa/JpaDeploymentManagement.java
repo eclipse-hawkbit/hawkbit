@@ -133,7 +133,6 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String... targetIDs) {
         return assignDistributionSet(dsID, ActionType.FORCED, Action.NO_FORCE_TIME, targetIDs);
