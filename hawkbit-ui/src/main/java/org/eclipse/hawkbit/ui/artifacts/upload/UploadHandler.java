@@ -121,9 +121,8 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         // reset has directory flag before upload
         view.setHasDirectory(false);
         try {
-            if (view.checkIfSoftwareModuleIsSelected() && !view.checkForDuplicate(fileName)) {
+            if (view.checkIfSoftwareModuleIsSelected() && !view.checkForDuplicate(fileName, selectedSwForUpload)) {
                 view.increaseNumberOfFileUploadsExpected();
-                selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().get();
                 return view.saveUploadedFileDetails(fileName, 0, mimeType, selectedSwForUpload);
             }
         } catch (final ArtifactUploadFailedException e) {
@@ -146,7 +145,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void uploadSucceeded(final SucceededEvent event) {
         LOG.debug("Streaming finished for file :{}", event.getFilename());
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_SUCCESSFUL, new UploadFileStatus(
-                event.getFilename(), 0, event.getLength())));
+                event.getFilename(), 0, event.getLength(), selectedSwForUpload)));
     }
 
     /**
@@ -160,7 +159,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void streamingFinished(final StreamingEndEvent event) {
         LOG.debug("Streaming finished for file :{}", event.getFileName());
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STREAMING_FINISHED,
-                new UploadFileStatus(event.getFileName(), 0, event.getContentLength())));
+                new UploadFileStatus(event.getFileName(), 0, event.getContentLength(), selectedSw)));
     }
 
     /**
@@ -185,7 +184,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public void streamingStarted(final StreamingStartEvent event) {
         LOG.debug("Streaming started for file :{}", fileName);
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, new UploadFileStatus(
-                fileName, 0, 0)));
+                fileName, 0, 0, selectedSw)));
     }
 
     /**
@@ -195,11 +194,13 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void uploadStarted(final StartedEvent event) {
+        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().get();
+
         // single file session
-        if (view.isSoftwareModuleSelected() && !view.checkIfFileIsDuplicate(event.getFilename())) {
+        if (view.isSoftwareModuleSelected() && !view.checkIfFileIsDuplicate(event.getFilename(), selectedSwForUpload)) {
             LOG.debug("Upload started for file :{}", event.getFilename());
             eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, new UploadFileStatus(
-                    event.getFilename(), 0, 0)));
+                    event.getFilename(), 0, 0, selectedSwForUpload)));
         } else {
             failureReason = i18n.get("message.upload.failed");
             upload.interruptUpload();
@@ -238,7 +239,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
                 return;
             }
             eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS,
-                    new UploadFileStatus(fileName, readBytes, contentLength)));
+                    new UploadFileStatus(fileName, readBytes, contentLength, selectedSwForUpload)));
             LOG.info("Update progress - {} : {}", fileName, (double) readBytes / (double) contentLength);
         }
     }
@@ -259,7 +260,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
             return;
         }
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_IN_PROGRESS, new UploadFileStatus(
-                fileName, event.getBytesReceived(), event.getContentLength())));
+                fileName, event.getBytesReceived(), event.getContentLength(), selectedSw)));
         // Logging to solve sonar issue
         LOG.trace("Streaming in progress for file :{}", event.getFileName());
     }

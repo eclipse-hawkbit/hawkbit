@@ -35,10 +35,11 @@ public class UploadFileStatus implements Serializable {
         this.fileName = fileName;
     }
 
-    public UploadFileStatus(String fileName, long bytesRead, long contentLength) {
+    public UploadFileStatus(String fileName, long bytesRead, long contentLength,SoftwareModule softwareModule) {
         this.fileName = fileName;
         this.contentLength = contentLength;
         this.bytesRead = bytesRead;
+        this.softwareModule = softwareModule;
     }
 
     public UploadFileStatus(String fileName, String failureReason,SoftwareModule selectedSw) {

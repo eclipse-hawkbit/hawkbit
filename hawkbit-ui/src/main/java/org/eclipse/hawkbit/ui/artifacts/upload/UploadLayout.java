@@ -118,7 +118,6 @@ public class UploadLayout extends VerticalLayout {
 
     private Button uploadStatusButton;
 
-
     /**
      * Initialize the upload layout.
      */
@@ -139,8 +138,7 @@ public class UploadLayout extends VerticalLayout {
             ui.access(() -> showUploadStatusButton());
         } else if (event == UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP) {
             ui.access(() -> maximizeStatusPopup());
-        }
-        else if(event == UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED){
+        } else if (event == UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED) {
             ui.access(() -> closeUploadStatusPopup());
         }
     }
@@ -264,9 +262,9 @@ public class UploadLayout extends VerticalLayout {
 
         private void processFile(final Html5File file, SoftwareModule selectedSw) {
             if (!isDirectory(file)) {
-                if (!checkForDuplicate(file.getFileName())) {
+                if (!checkForDuplicate(file.getFileName(), selectedSw)) {
                     artifactUploadState.getNumberOfFileUploadsExpected().incrementAndGet();
-                    file.setStreamVariable(createStreamVariable(file,selectedSw));
+                    file.setStreamVariable(createStreamVariable(file, selectedSw));
                 }
             } else {
                 hasDirectory = Boolean.TRUE;
@@ -275,7 +273,7 @@ public class UploadLayout extends VerticalLayout {
 
         private StreamVariable createStreamVariable(final Html5File file, SoftwareModule selectedSw) {
             return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
-                    spInfo.getMaxArtifactFileSize(), null, file.getType(),selectedSw);
+                    spInfo.getMaxArtifactFileSize(), null, file.getType(), selectedSw);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -339,8 +337,8 @@ public class UploadLayout extends VerticalLayout {
         discardBtn.addClickListener(event -> discardUploadData(event));
     }
 
-    boolean checkForDuplicate(final String filename) {
-        final Boolean isDuplicate = checkIfFileIsDuplicate(filename);
+    boolean checkForDuplicate(final String filename, final SoftwareModule selectedSw) {
+        final Boolean isDuplicate = checkIfFileIsDuplicate(filename, selectedSw);
         if (isDuplicate) {
             getDuplicateFileNamesList().add(filename);
         }
@@ -358,22 +356,23 @@ public class UploadLayout extends VerticalLayout {
      *            file size
      * @param mimeType
      *            the mimeType of the file
-     * @param selectedSw 
+     * @param selectedSw
      * @throws IOException
      *             in case of upload errors
      */
-    OutputStream saveUploadedFileDetails(final String name, final long size, final String mimeType, SoftwareModule selectedSw) {
+    OutputStream saveUploadedFileDetails(final String name, final long size, final String mimeType,
+            SoftwareModule selectedSw) {
         File tempFile = null;
         try {
             tempFile = File.createTempFile("spUiArtifactUpload", null);
 
             final OutputStream out = new FileOutputStream(tempFile);
 
-            final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
-                    selectedSw.getName(), selectedSw.getVersion());
+            final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(selectedSw.getName(),
+                    selectedSw.getVersion());
 
-            final CustomFile customFile = new CustomFile(name, size, tempFile.getAbsolutePath(),
-                    selectedSw.getName(), selectedSw.getVersion(), mimeType);
+            final CustomFile customFile = new CustomFile(name, size, tempFile.getAbsolutePath(), selectedSw.getName(),
+                    selectedSw.getVersion(), mimeType);
 
             artifactUploadState.getFileSelected().add(customFile);
             processBtn.setEnabled(false);
@@ -424,13 +423,6 @@ public class UploadLayout extends VerticalLayout {
         return true;
     }
 
-    SoftwareModule getSoftwareModuleSelected() {
-        if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
-            return artifactUploadState.getSelectedBaseSoftwareModule().get();
-        }
-        return null;
-    }
-
     Boolean isSoftwareModuleSelected() {
         if (!artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
             return false;
@@ -446,9 +438,8 @@ public class UploadLayout extends VerticalLayout {
      *            file name
      * @return Boolean
      */
-    public Boolean checkIfFileIsDuplicate(final String name) {
+    public Boolean checkIfFileIsDuplicate(final String name, final SoftwareModule selectedSoftwareModule) {
         Boolean isDuplicate = false;
-        final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
         final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
                 selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
@@ -514,8 +505,7 @@ public class UploadLayout extends VerticalLayout {
         artifactUploadState.getNumberOfFileUploadsExpected().incrementAndGet();
     }
 
-    void updateFileSize(final String name, final long size) {
-        final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
+    void updateFileSize(final String name, final long size, SoftwareModule selectedSoftwareModule) {
         final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
                 selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
@@ -718,7 +708,8 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void onUploadSuccess(UploadStatusEvent event) {
-        updateFileSize(event.getUploadStatus().getFileName(), event.getUploadStatus().getContentLength());
+        updateFileSize(event.getUploadStatus().getFileName(), event.getUploadStatus().getContentLength(), event
+                .getUploadStatus().getSoftwareModule());
         // recorded that we now one more uploaded
         increaseNumberOfFilesActuallyUpload();
     }
@@ -734,7 +725,6 @@ public class UploadLayout extends VerticalLayout {
         enableProcessBtn();
         duplicateFileNamesList.clear();
     }
-
 
     private boolean isUploadComplete() {
         int uploadedCount = artifactUploadState.getNumberOfFilesActuallyUpload().intValue();
@@ -868,7 +858,6 @@ public class UploadLayout extends VerticalLayout {
         uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
         uploadStatusButton.setIcon(null);
     }
-
 
     protected void updateUploadCounts() {
         updateActionCount();
