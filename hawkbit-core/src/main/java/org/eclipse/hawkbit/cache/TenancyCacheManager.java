@@ -13,7 +13,7 @@ import org.springframework.cache.CacheManager;
 
 /**
  *
- *
+ * A cache interface which handles multi tenancy.
  */
 public interface TenancyCacheManager extends CacheManager {
 

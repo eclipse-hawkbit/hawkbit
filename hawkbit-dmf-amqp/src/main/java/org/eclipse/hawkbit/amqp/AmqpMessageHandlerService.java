@@ -107,6 +107,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         super(defaultTemplate);
     }
 
+    // Method is not unused. It is called by the spring rabbit listener.
+    @SuppressWarnings("squid:UnusedPrivateMethod")
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
     private Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
             @Header(MessageHeaderKey.TENANT) final String tenant) {
@@ -417,7 +419,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private void checkContentTypeJson(final Message message) {
+    private static void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;

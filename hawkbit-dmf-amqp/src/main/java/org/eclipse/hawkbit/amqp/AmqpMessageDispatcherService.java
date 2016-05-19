@@ -55,8 +55,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Constructor.
      * 
-     * @param messageConverter
-     *            message converter
+     * @param rabbitTemplate
+     *            the rabbitTemplate
      */
     @Autowired
     public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate) {
