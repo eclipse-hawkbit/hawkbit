@@ -18,8 +18,10 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,9 @@ public class UploadStatusInfoWindow extends Window {
     @Autowired
     private ArtifactUploadState artifactUploadState;
 
+    @Autowired
+    private I18N i18n;
+
     private static final String PROGRESS = "Progress";
 
     private static final String FILE_NAME = "File name";
@@ -82,6 +87,8 @@ public class UploadStatusInfoWindow extends Window {
 
     private volatile boolean errorOccured = false;
 
+    private volatile boolean uploadAborted = false;
+
     private Button minimizeButton;
 
     private VerticalLayout mainLayout;
@@ -91,9 +98,10 @@ public class UploadStatusInfoWindow extends Window {
     private Button closeButton;
 
     private Button resizeButton;
-    
-    private UI ui;
 
+    private UI ui;
+    
+    private ConfirmationDialog confirmDialog;
 
     /**
      * Default Constructor.
@@ -118,10 +126,10 @@ public class UploadStatusInfoWindow extends Window {
         setContent(mainLayout);
         eventBus.subscribe(this);
         ui = UI.getCurrent();
-
+        
+        createConfirmDialog();
     }
 
-    
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final UploadStatusEvent event) {
         if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_IN_PROGRESS) {
@@ -139,12 +147,11 @@ public class UploadStatusInfoWindow extends Window {
             ui.access(() -> uploadSucceeded(event.getUploadStatus().getFileName()));
         }
     }
-    
+
     private void onStartOfUpload(UploadStatusEvent event) {
         uploadSessionStarted();
         uploadStarted(event.getUploadStatus().getFileName());
     }
-
 
     @PreDestroy
     void destroy() {
@@ -154,7 +161,7 @@ public class UploadStatusInfoWindow extends Window {
          */
         eventBus.unsubscribe(this);
     }
-    
+
     private void restoreState() {
         Indexed container = grid.getContainerDataSource();
         if (container.getItemIds().isEmpty()) {
@@ -246,7 +253,7 @@ public class UploadStatusInfoWindow extends Window {
 
         @Override
         public JsonValue encode(final String value) {
-            String result ;
+            String result;
             switch (value) {
             case "Finished":
                 result = "<div class=\"statusIconGreen\">" + FontAwesome.CHECK_CIRCLE.getHtml() + "</div>";
@@ -266,20 +273,28 @@ public class UploadStatusInfoWindow extends Window {
      * Automatically close if not error has occured.
      */
     void uploadSessionFinished() {
-        if (!errorOccured) {
-            close();
+        uploadAborted = false;
+        if (!errorOccured && !artifactUploadState.isStatusPopupMinimized()) {
+            clearWindow();
         }
         artifactUploadState.setUploadCompleted(true);
         minimizeButton.setEnabled(false);
+        closeButton.setEnabled(true);
+        confirmDialog.getWindow().close();
+        UI.getCurrent().removeWindow(confirmDialog.getWindow());
     }
 
     void uploadSessionStarted() {
-        if (!artifactUploadState.isStatusPopupMinimized()) {
-            close();
+        if (artifactUploadState.getNumberOfFilesActuallyUpload().intValue() == 0
+                && artifactUploadState.getNumberOfFileUploadsFailed().intValue() == 0
+                && !artifactUploadState.isStatusPopupMinimized()) {
             openWindow();
         }
-        minimizeButton.setEnabled(true);
-        artifactUploadState.setUploadCompleted(false);
+        if (!uploadAborted) {
+            minimizeButton.setEnabled(true);
+            closeButton.setEnabled(true);
+            artifactUploadState.setUploadCompleted(false);
+        }
     }
 
     void openWindow() {
@@ -304,11 +319,11 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     void updateProgress(final String filename, final long readBytes, final long contentLength) {
-         final Item item = uploads.getItem(filename);
+        final Item item = uploads.getItem(filename);
         if (item != null) {
             double progress = (double) readBytes / (double) contentLength;
             item.getItemProperty(PROGRESS).setValue(progress);
-            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState 
+            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
                     .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
                     .collect(Collectors.toList());
             if (!uploadStatusObjectList.isEmpty()) {
@@ -340,9 +355,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     void uploadFailed(final String filename, final String errorReason) {
-        if (!errorOccured) {
-            errorOccured = true;
-        }
+        errorOccured = true;
         String status = "Failed";
         final Item item = uploads.getItem(filename);
         if (item != null) {
@@ -363,6 +376,9 @@ public class UploadStatusInfoWindow extends Window {
         errorOccured = false;
         uploads.removeAllItems();
         setWindowMode(WindowMode.NORMAL);
+        setColumnWidth();
+        setPopupSizeInMinMode();
+        resizeButton.setIcon(FontAwesome.EXPAND);
         this.close();
         artifactUploadState.getUploadedFileStatusList().clear();
         artifactUploadState.getNumberOfFileUploadsFailed().set(0);
@@ -421,7 +437,34 @@ public class UploadStatusInfoWindow extends Window {
                 SPUIComponetIdProvider.UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID, "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleSmallNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        closeBtn.addClickListener(event -> clearWindow());
+        closeBtn.addClickListener(event -> onClose());
         return closeBtn;
     }
+
+    private void onClose() {
+        if (!artifactUploadState.isUploadCompleted()) {
+            confirmAbortAction();
+        } else {
+            clearWindow();
+        }
+    }
+
+    private void confirmAbortAction() {
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
+    }
+
+    private void createConfirmDialog() {
+        confirmDialog = new ConfirmationDialog(i18n.get("caption.cancel.action.confirmbox"),
+                i18n.get("message.abort.upload"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                    if (ok) {
+                        eventBus.publish(this, UploadStatusEventType.ABORT_UPLOAD);
+                        uploadAborted = true;
+                        errorOccured = true;
+                        minimizeButton.setEnabled(false);
+                        closeButton.setEnabled(false);
+            }
+        });
+    }
+
 }

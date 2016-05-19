@@ -532,8 +532,7 @@ public class UploadLayout extends VerticalLayout {
      */
     boolean enableProcessBtn() {
         if (artifactUploadState.getNumberOfFilesActuallyUpload().intValue() >= artifactUploadState
-                .getNumberOfFileUploadsExpected().intValue()
-                && artifactUploadState.getNumberOfFilesActuallyUpload().get() != 0) {
+                .getNumberOfFileUploadsExpected().intValue() && !getFileSelected().isEmpty()) {
             processBtn.setEnabled(true);
             artifactUploadState.getNumberOfFilesActuallyUpload().set(0);
             artifactUploadState.getNumberOfFileUploadsExpected().set(0);
@@ -729,7 +728,7 @@ public class UploadLayout extends VerticalLayout {
     private boolean isUploadComplete() {
         int uploadedCount = artifactUploadState.getNumberOfFilesActuallyUpload().intValue();
         int expectedUploadsCount = artifactUploadState.getNumberOfFileUploadsExpected().intValue();
-        return uploadedCount == expectedUploadsCount;
+        return uploadedCount  == expectedUploadsCount;
     }
 
     private void onUploadFailure(final UploadStatusEvent event) {
