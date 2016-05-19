@@ -41,6 +41,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Management service for {@link DistributionSet}s.
+ *
+ */
 public interface DistributionSetManagement {
 
     // TODO rename/document the whole with details thing (document what the

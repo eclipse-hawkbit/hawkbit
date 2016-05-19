@@ -27,6 +27,8 @@ import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -59,7 +61,7 @@ import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 
 /**
- * Business facade for managing the {@link DistributionSet}s.
+ * JPA implementation of {@link DistributionSetManagement}.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)

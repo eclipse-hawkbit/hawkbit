@@ -18,12 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("hawkbit.rollout")
 public class RolloutProperties {
-    private final Scheduler scheduler = new Scheduler();
-
-    public Scheduler getScheduler() {
-        return scheduler;
-    }
-
     /**
      * Rollout scheduler configuration.
      */
@@ -45,6 +39,12 @@ public class RolloutProperties {
             this.fixedDelay = fixedDelay;
         }
 
+    }
+
+    private final Scheduler scheduler = new Scheduler();
+
+    public Scheduler getScheduler() {
+        return scheduler;
     }
 
 }

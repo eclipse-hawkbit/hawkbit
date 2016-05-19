@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.jpa.TagManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;

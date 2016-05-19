@@ -28,6 +28,38 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface RolloutGroupManagement {
 
     /**
+     * Retrieves a page of {@link RolloutGroup}s filtered by a given
+     * {@link Rollout} with the detailed status.
+     * 
+     * @param rolloutId
+     *            the ID of the rollout to filter the {@link RolloutGroup}s
+     * @param page
+     *            the page request to sort and limit the result
+     * @return a page of found {@link RolloutGroup}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(@NotNull Long rolloutId, @NotNull Pageable page);
+
+    // TODO discuss: target read perm missing?
+    /**
+     * 
+     * Find all targets with action status by rollout group id. The action
+     * status might be {@code null} if for the target within the rollout no
+     * actions as been created, e.g. the target already had assigned the same
+     * distribution set we do not create an action for it but the target is in
+     * the result list of the rollout-group.
+     * 
+     * @param pageRequest
+     *            the page request to sort and limit the result
+     * @param rolloutGroup
+     *            rollout group
+     * @return {@link TargetWithActionStatus} target with action status
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull PageRequest pageRequest,
+            @NotNull RolloutGroup rolloutGroup);
+
+    /**
      * Retrieves a single {@link RolloutGroup} by its ID.
      * 
      * @param rolloutGroupId
@@ -37,19 +69,6 @@ public interface RolloutGroupManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     RolloutGroup findRolloutGroupById(@NotNull Long rolloutGroupId);
-
-    /**
-     * Retrieves a page of {@link RolloutGroup}s filtered by a given
-     * {@link Rollout}.
-     * 
-     * @param rolloutId
-     *            the ID of the rollout to filter the {@link RolloutGroup}s
-     * @param page
-     *            the page request to sort and limit the result
-     * @return a page of found {@link RolloutGroup}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findRolloutGroupsByRolloutId(@NotNull Long rolloutId, @NotNull Pageable page);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -70,7 +89,7 @@ public interface RolloutGroupManagement {
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
-     * {@link Rollout} with the detailed status.
+     * {@link Rollout}.
      * 
      * @param rolloutId
      *            the ID of the rollout to filter the {@link RolloutGroup}s
@@ -79,17 +98,21 @@ public interface RolloutGroupManagement {
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(@NotNull Long rolloutId, @NotNull Pageable page);
+    Page<RolloutGroup> findRolloutGroupsByRolloutId(@NotNull Long rolloutId, @NotNull Pageable page);
 
+    // TODO discuss: target read perm missing?
     /**
-     * Get count of targets in different status in rollout group.
-     *
-     * @param rolloutGroupId
-     *            rollout group id
-     * @return rolloutGroup with details of targets count for different statuses
+     * Get targets of specified rollout group.
+     * 
+     * @param rolloutGroup
+     *            rollout group
+     * @param page
+     *            the page request to sort and limit the result
+     * 
+     * @return Page<Target> list of targets of a rollout group
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
+    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull Pageable page);
 
     // TODO discuss: target read perm missing?
     /**
@@ -108,37 +131,14 @@ public interface RolloutGroupManagement {
     Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup,
             @NotNull Specification<Target> specification, @NotNull Pageable page);
 
-    // TODO discuss: target read perm missing?
     /**
-     * Get targets of specified rollout group.
-     * 
-     * @param rolloutGroup
-     *            rollout group
-     * @param page
-     *            the page request to sort and limit the result
-     * 
-     * @return Page<Target> list of targets of a rollout group
+     * Get count of targets in different status in rollout group.
+     *
+     * @param rolloutGroupId
+     *            rollout group id
+     * @return rolloutGroup with details of targets count for different statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull Pageable page);
-
-    // TODO discuss: target read perm missing?
-    /**
-     * 
-     * Find all targets with action status by rollout group id. The action
-     * status might be {@code null} if for the target within the rollout no
-     * actions as been created, e.g. the target already had assigned the same
-     * distribution set we do not create an action for it but the target is in
-     * the result list of the rollout-group.
-     * 
-     * @param pageRequest
-     *            the page request to sort and limit the result
-     * @param rolloutGroup
-     *            rollout group
-     * @return {@link TargetWithActionStatus} target with action status
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<TargetWithActionStatus> findAllTargetsWithActionStatus(@NotNull PageRequest pageRequest,
-            @NotNull RolloutGroup rolloutGroup);
+    RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
 
 }

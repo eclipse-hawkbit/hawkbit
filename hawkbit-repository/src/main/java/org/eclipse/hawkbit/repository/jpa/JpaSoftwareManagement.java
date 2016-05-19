@@ -59,7 +59,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
 /**
- * JPA implementation of SoftwareManagement.
+ * JPA implementation of {@link SoftwareManagement}.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
@@ -148,7 +148,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<SoftwareModule> createSoftwareModule(final Iterable<SoftwareModule> swModules) {
+    public List<SoftwareModule> createSoftwareModule(final Collection<SoftwareModule> swModules) {
         swModules.forEach(swModule -> {
             if (null != swModule.getId()) {
                 throw new EntityAlreadyExistsException();
@@ -222,7 +222,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteSoftwareModules(final Iterable<Long> ids) {
+    public void deleteSoftwareModules(final Collection<Long> ids) {
         final List<SoftwareModule> swModulesToDelete = softwareModuleRepository.findByIdIn(ids);
         final Set<Long> assignedModuleIds = new HashSet<>();
         swModulesToDelete.forEach(swModule -> {

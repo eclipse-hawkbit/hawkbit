@@ -40,15 +40,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * RolloutGroupManagement to control rollout groups. This service secures all
- * the functionality based on the {@link PreAuthorize} annotation on methods.
+ * JPA implementation of {@link RolloutGroupManagement}.
  */
 @Validated
 @Service

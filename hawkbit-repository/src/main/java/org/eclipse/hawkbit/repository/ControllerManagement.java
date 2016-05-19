@@ -44,16 +44,6 @@ public interface ControllerManagement {
     String SERVER_MESSAGE_PREFIX = "Update Server: ";
 
     /**
-     * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
-     * . No state changes.
-     * 
-     * @param statusMessage
-     *            to add to the action
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    void addInformationalActionStatus(@NotNull ActionStatus statusMessage);
-
-    /**
      * Adds an {@link ActionStatus} for a cancel {@link Action} including
      * potential state changes for the target and the {@link Action} itself.
      * 
@@ -67,6 +57,16 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
+
+    /**
+     * Simple addition of a new {@link ActionStatus} entry to the {@link Action}
+     * . No state changes.
+     * 
+     * @param statusMessage
+     *            to add to the action
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    void addInformationalActionStatus(@NotNull ActionStatus statusMessage);
 
     /**
      * Adds an {@link ActionStatus} entry for an update {@link Action} including
@@ -133,14 +133,14 @@ public interface ControllerManagement {
     List<SoftwareModule> findSoftwareModulesByDistributionSet(@NotNull DistributionSet distributionSet);
 
     /**
-     * Retrieves last {@link UpdateAction} for a download of an artifact of
-     * given module and target.
+     * Retrieves last {@link Action} for a download of an artifact of given
+     * module and target.
      *
      * @param controllerId
      *            to look for
      * @param module
      *            that should be assigned to the target
-     * @return last {@link UpdateAction} for given combination
+     * @return last {@link Action} for given combination
      *
      * @throws EntityNotFoundException
      *             if action for given combination could not be found

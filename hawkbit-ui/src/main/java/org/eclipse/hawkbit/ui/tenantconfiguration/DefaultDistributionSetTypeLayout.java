@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.jpa.SystemManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;

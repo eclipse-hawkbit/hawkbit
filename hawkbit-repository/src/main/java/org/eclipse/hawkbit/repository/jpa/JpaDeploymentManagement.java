@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -75,7 +77,7 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
 /**
- * JPA implementation for DeploymentManagement.
+ * JPA implementation for {@link DeploymentManagement}.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
@@ -156,7 +158,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
-            final List<TargetWithActionType> targets) {
+            final Collection<TargetWithActionType> targets) {
         final DistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(
@@ -171,7 +173,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID,
-            final List<TargetWithActionType> targets, final Rollout rollout, final RolloutGroup rolloutGroup) {
+            final Collection<TargetWithActionType> targets, final Rollout rollout, final RolloutGroup rolloutGroup) {
         final DistributionSet set = distributoinSetRepository.findOne(dsID);
         if (set == null) {
             throw new EntityNotFoundException(
@@ -200,7 +202,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
      *        {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(@NotNull final DistributionSet set,
-            final List<TargetWithActionType> targetsWithActionType, final Rollout rollout,
+            final Collection<TargetWithActionType> targetsWithActionType, final Rollout rollout,
             final RolloutGroup rolloutGroup) {
 
         if (!set.isComplete()) {
@@ -456,7 +458,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void createScheduledAction(final List<Target> targets, final DistributionSet distributionSet,
+    public void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final long forcedTime, final Rollout rollout,
             final RolloutGroup rolloutGroup) {
         // cancel all current scheduled actions for this target. E.g. an action

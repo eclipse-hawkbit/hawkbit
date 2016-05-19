@@ -20,6 +20,7 @@ import javax.persistence.EntityManager;
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -52,7 +53,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -65,9 +65,7 @@ import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * RolloutManagement to control rollouts e.g. like creating, starting, resuming
- * and pausing rollouts. This service secures all the functionality based on the
- * {@link PreAuthorize} annotation on methods.
+ * JPA implementation of {@link RolloutManagement}.
  */
 @Validated
 @Service

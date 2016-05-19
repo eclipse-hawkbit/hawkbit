@@ -51,7 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Service layer for generating hawkBit reports.
+ * JPA implementation of {@link ReportManagement}.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)

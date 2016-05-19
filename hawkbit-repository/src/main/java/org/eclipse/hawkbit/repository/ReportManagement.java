@@ -32,15 +32,81 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface ReportManagement {
 
     /**
-     * Generates a report of all targets of their current update status count.
-     * For each {@link TargetUpdateStatus} an total count of targets which are
-     * in this status currently.
+     * Data base format.
      *
-     * @return a data report series which contains the target count for each
-     *         target update status
+     *
+     *
+     * @param <T>
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    DataReportSeries<TargetUpdateStatus> targetStatus();
+    public interface DateType<T> {
+        /**
+         * @param s
+         * @return T
+         */
+        T format(String s);
+
+        /**
+         * h2 format.
+         *
+         * @return String
+         */
+        String h2Format();
+
+        /**
+         * mysql format.
+         *
+         * @return String
+         */
+        String mySqlFormat();
+    }
+
+    /**
+     * Return DateTypes.
+     */
+    public static final class DateTypes implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private static final PerMonth PER_MONTH = new PerMonth();
+
+        /**
+         * @return PerMonth
+         */
+        public static PerMonth perMonth() {
+            return PER_MONTH;
+        }
+
+        private DateTypes() {
+
+        }
+    }
+
+    /**
+     * Gives the date format based on DB H2 or mySql.
+     *
+     *
+     *
+     */
+    public static final class PerMonth implements DateType<LocalDate>, Serializable {
+        private static final long serialVersionUID = 1L;
+        private static final String DATE_PATTERN = "yyyy-MM";
+
+        @Override
+        public LocalDate format(final String s) {
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
+            final YearMonth ym = YearMonth.parse(s, formatter);
+            return ym.atDay(1);
+        }
+
+        @Override
+        public String h2Format() {
+            return DATE_PATTERN;
+        }
+
+        @Override
+        public String mySqlFormat() {
+            return "%Y-%m";
+        }
+
+    }
 
     /**
      * Generates a report of the top x distribution set assigned usage as a list
@@ -82,22 +148,6 @@ public interface ReportManagement {
     List<InnerOuterDataReportSeries<String>> distributionUsageInstalled(int topXEntries);
 
     /**
-     * Generates report for target created over period.
-     *
-     * @param dateType
-     *            {@link PerMonth}
-     * @param from
-     *            start date
-     * @param to
-     *            end date
-     * @return <T> DataReportSeries<T> ListReportSeries list of target created
-     *         count
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    <T extends Serializable> DataReportSeries<T> targetsCreatedOverPeriod(@NotNull DateType<T> dateType,
-            @NotNull LocalDateTime from, @NotNull LocalDateTime to);
-
-    /**
      * Generates report for feedback over period.
      *
      * @param dateType
@@ -111,6 +161,22 @@ public interface ReportManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     <T extends Serializable> DataReportSeries<T> feedbackReceivedOverTime(@NotNull DateType<T> dateType,
+            @NotNull LocalDateTime from, @NotNull LocalDateTime to);
+
+    /**
+     * Generates report for target created over period.
+     *
+     * @param dateType
+     *            {@link PerMonth}
+     * @param from
+     *            start date
+     * @param to
+     *            end date
+     * @return <T> DataReportSeries<T> ListReportSeries list of target created
+     *         count
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    <T extends Serializable> DataReportSeries<T> targetsCreatedOverPeriod(@NotNull DateType<T> dateType,
             @NotNull LocalDateTime from, @NotNull LocalDateTime to);
 
     /**
@@ -130,80 +196,14 @@ public interface ReportManagement {
     DataReportSeries<SeriesTime> targetsLastPoll();
 
     /**
-     * Return DateTypes.
+     * Generates a report of all targets of their current update status count.
+     * For each {@link TargetUpdateStatus} an total count of targets which are
+     * in this status currently.
+     *
+     * @return a data report series which contains the target count for each
+     *         target update status
      */
-    public static final class DateTypes implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private static final PerMonth PER_MONTH = new PerMonth();
-
-        private DateTypes() {
-
-        }
-
-        /**
-         * @return PerMonth
-         */
-        public static PerMonth perMonth() {
-            return PER_MONTH;
-        }
-    }
-
-    /**
-     * Data base format.
-     *
-     *
-     *
-     * @param <T>
-     */
-    public interface DateType<T> {
-        /**
-         * @param s
-         * @return T
-         */
-        T format(String s);
-
-        /**
-         * h2 format.
-         *
-         * @return String
-         */
-        String h2Format();
-
-        /**
-         * mysql format.
-         *
-         * @return String
-         */
-        String mySqlFormat();
-    }
-
-    /**
-     * Gives the date format based on DB H2 or mySql.
-     *
-     *
-     *
-     */
-    public static final class PerMonth implements DateType<LocalDate>, Serializable {
-        private static final long serialVersionUID = 1L;
-        private static final String DATE_PATTERN = "yyyy-MM";
-
-        @Override
-        public LocalDate format(final String s) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
-            final YearMonth ym = YearMonth.parse(s, formatter);
-            return ym.atDay(1);
-        }
-
-        @Override
-        public String h2Format() {
-            return DATE_PATTERN;
-        }
-
-        @Override
-        public String mySqlFormat() {
-            return "%Y-%m";
-        }
-
-    }
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    DataReportSeries<TargetUpdateStatus> targetStatus();
 
 }

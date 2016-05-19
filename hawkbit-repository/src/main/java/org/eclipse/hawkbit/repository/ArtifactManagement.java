@@ -277,13 +277,11 @@ public interface ArtifactManagement {
     SoftwareModule findSoftwareModuleWithDetails(@NotNull Long id);
 
     /**
-     * Loads {@link org.eclipse.hawkbit.artifact.server.json.model.Artifact}
-     * from store for given {@link LocalArtifact}.
+     * Loads {@link DbArtifact} from store for given {@link LocalArtifact}.
      *
      * @param artifact
      *            to search for
-     * @return loaded
-     *         {@link org.eclipse.hawkbit.artifact.server.json.model.Artifact}
+     * @return loaded {@link DbArtifact}
      *
      * @throws GridFSDBFileNotFoundException
      *             if file could not be found in store

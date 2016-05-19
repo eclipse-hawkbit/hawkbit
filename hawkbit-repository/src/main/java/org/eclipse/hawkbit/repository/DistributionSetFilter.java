@@ -16,32 +16,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
  * Holds distribution set filter parameters.
  */
 public final class DistributionSetFilter {
-    private final Boolean isDeleted;
-    private final Boolean isComplete;
-    private final DistributionSetType type;
-    private final String searchText;
-    private final Boolean selectDSWithNoTag;
-    private final Collection<String> tagNames;
-    private final String assignedTargetId;
-    private final String installedTargetId;
-
-    /**
-     * Parametric constructor.
-     *
-     * @param builder
-     *            DistributionSetFilterBuilder
-     */
-    public DistributionSetFilter(final DistributionSetFilterBuilder builder) {
-        this.isDeleted = builder.isDeleted;
-        this.isComplete = builder.isComplete;
-        this.type = builder.type;
-        this.searchText = builder.searchText;
-        this.selectDSWithNoTag = builder.selectDSWithNoTag;
-        this.tagNames = builder.tagNames;
-        this.assignedTargetId = builder.assignedTargetId;
-        this.installedTargetId = builder.installedTargetId;
-    }
-
     /**
      *
      * Distribution set filter builder.
@@ -68,8 +42,13 @@ public final class DistributionSetFilter {
             return new DistributionSetFilter(this);
         }
 
-        public DistributionSetFilterBuilder setIsDeleted(final Boolean isDeleted) {
-            this.isDeleted = isDeleted;
+        public DistributionSetFilterBuilder setAssignedTargetId(final String assignedTargetId) {
+            this.assignedTargetId = assignedTargetId;
+            return this;
+        }
+
+        public DistributionSetFilterBuilder setInstalledTargetId(final String installedTargetId) {
+            this.installedTargetId = installedTargetId;
             return this;
         }
 
@@ -78,8 +57,8 @@ public final class DistributionSetFilter {
             return this;
         }
 
-        public DistributionSetFilterBuilder setType(final DistributionSetType type) {
-            this.type = type;
+        public DistributionSetFilterBuilder setIsDeleted(final Boolean isDeleted) {
+            this.isDeleted = isDeleted;
             return this;
         }
 
@@ -98,28 +77,53 @@ public final class DistributionSetFilter {
             return this;
         }
 
-        public DistributionSetFilterBuilder setAssignedTargetId(final String assignedTargetId) {
-            this.assignedTargetId = assignedTargetId;
-            return this;
-        }
-
-        public DistributionSetFilterBuilder setInstalledTargetId(final String installedTargetId) {
-            this.installedTargetId = installedTargetId;
+        public DistributionSetFilterBuilder setType(final DistributionSetType type) {
+            this.type = type;
             return this;
         }
 
     }
+    private final Boolean isDeleted;
+    private final Boolean isComplete;
+    private final DistributionSetType type;
+    private final String searchText;
+    private final Boolean selectDSWithNoTag;
+    private final Collection<String> tagNames;
+    private final String assignedTargetId;
 
-    public Boolean getIsDeleted() {
-        return isDeleted;
+    private final String installedTargetId;
+
+    /**
+     * Parametric constructor.
+     *
+     * @param builder
+     *            DistributionSetFilterBuilder
+     */
+    public DistributionSetFilter(final DistributionSetFilterBuilder builder) {
+        this.isDeleted = builder.isDeleted;
+        this.isComplete = builder.isComplete;
+        this.type = builder.type;
+        this.searchText = builder.searchText;
+        this.selectDSWithNoTag = builder.selectDSWithNoTag;
+        this.tagNames = builder.tagNames;
+        this.assignedTargetId = builder.assignedTargetId;
+        this.installedTargetId = builder.installedTargetId;
+    }
+
+    public String getAssignedTargetId() {
+        return assignedTargetId;
+    }
+
+    public String getInstalledTargetId() {
+        return installedTargetId;
     }
 
     public Boolean getIsComplete() {
         return isComplete;
     }
 
-    public DistributionSetType getType() {
-        return type;
+    public Boolean getIsDeleted() {
+        return isDeleted;
     }
 
     public String getSearchText() {
@@ -134,12 +138,8 @@ public final class DistributionSetFilter {
         return tagNames;
     }
 
-    public String getAssignedTargetId() {
-        return assignedTargetId;
-    }
-
-    public String getInstalledTargetId() {
-        return installedTargetId;
+    public DistributionSetType getType() {
+        return type;
     }
 
 }

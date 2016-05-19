@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.tagdetails;
 
 import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.repository.jpa.TagManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.beans.factory.annotation.Autowired;

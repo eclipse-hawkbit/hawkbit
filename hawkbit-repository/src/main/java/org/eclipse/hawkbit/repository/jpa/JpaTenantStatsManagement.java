@@ -10,10 +10,9 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.report.model.TenantUsage;
+import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,12 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Management service for stats of a single tenant.
+ * Management service for statistics of a single tenant.
  *
  */
 @Validated
 @Service
-public class TenantStatsManagement {
+public class JpaTenantStatsManagement implements TenantStatsManagement {
 
     @Autowired
     private TargetRepository targetRepository;
@@ -37,17 +36,8 @@ public class TenantStatsManagement {
     @Autowired
     private ActionRepository actionRepository;
 
-    /**
-     * Service for stats of a single tenant. Opens a new transaction and as a
-     * result can an be used for multiple tenants, i.e. to allow in one session
-     * to collect data of all tenants in the system.
-     *
-     * @param tenant
-     *            to collect for
-     * @return collected statistics
-     */
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_UNCOMMITTED)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     public TenantUsage getStatsOfTenant(final String tenant) {
         final TenantUsage result = new TenantUsage(tenant);
 

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetFields;
-import org.eclipse.hawkbit.repository.jpa.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.rsql.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.rsql.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;

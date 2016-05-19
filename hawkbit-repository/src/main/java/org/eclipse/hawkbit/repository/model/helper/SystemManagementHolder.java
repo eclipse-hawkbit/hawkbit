@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model.helper;
 
-import org.eclipse.hawkbit.repository.jpa.SystemManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

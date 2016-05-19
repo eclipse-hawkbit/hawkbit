@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -99,7 +100,7 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
-            @NotEmpty List<TargetWithActionType> targets);
+            @NotEmpty Collection<TargetWithActionType> targets);
 
     // TODO document: why are rollouts in the signature ? can all the parameters
     // be null or the list empty?
@@ -123,7 +124,7 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     DistributionSetAssignmentResult assignDistributionSet(@NotNull Long dsID,
-            @NotEmpty List<TargetWithActionType> targets, Rollout rollout, RolloutGroup rolloutGroup);
+            @NotEmpty Collection<TargetWithActionType> targets, Rollout rollout, RolloutGroup rolloutGroup);
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
@@ -210,7 +211,7 @@ public interface DeploymentManagement {
      *            the roll out group for this action
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void createScheduledAction(List<Target> targets, DistributionSet distributionSet, ActionType actionType,
+    void createScheduledAction(Collection<Target> targets, DistributionSet distributionSet, ActionType actionType,
             long forcedTime, Rollout rollout, RolloutGroup rolloutGroup);
 
     /**

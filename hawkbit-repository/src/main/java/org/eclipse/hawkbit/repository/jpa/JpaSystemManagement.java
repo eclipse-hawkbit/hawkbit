@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.report.model.SystemUsageReport;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -33,7 +33,6 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,13 +40,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Central system management operations of the SP server.
+ * JPA implementation of {@link SystemManagement}.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
-public class SystemManagement {
+public class JpaSystemManagement implements SystemManagement {
     @Autowired
     private EntityManager entityManager;
 
@@ -107,14 +106,7 @@ public class SystemManagement {
 
     private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
 
-    /**
-     * Calculated system usage statistics, both overall for the entire system
-     * and per tenant;
-     *
-     * @return SystemUsageReport of the current system
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    @Override
     public SystemUsageReport getSystemUsageStatistics() {
 
         BigDecimal sumOfArtifacts = (BigDecimal) entityManager
@@ -156,35 +148,18 @@ public class SystemManagement {
         }));
     }
 
-    /**
-     * Registers the key generator for the {@link #currentTenant()} method
-     * because this key generator is aware of the {@link #createInitialTenant}
-     * thread local in case we are currently creating a tenant and insert the
-     * default distribution set types.
-     *
-     * @return the {@link CurrentTenantKeyGenerator}
-     */
-    @Bean
+    @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public CurrentTenantKeyGenerator currentTenantKeyGenerator() {
+    @Bean
+    public KeyGenerator currentTenantKeyGenerator() {
         return new CurrentTenantKeyGenerator();
     }
 
-    /**
-     * Returns {@link TenantMetaData} of given and current tenant.
-     *
-     * DISCLAIMER: this variant is used during initial login (where the tenant
-     * is not yet in the session). Please user {@link #getTenantMetadata()} for
-     * regular requests.
-     *
-     * @param tenant
-     * @return
-     */
+    @Override
     @Cacheable(value = "tenantMetadata", key = "#tenant.toUpperCase()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    @NotNull
-    public TenantMetaData getTenantMetadata(@NotNull final String tenant) {
+    public TenantMetaData getTenantMetadata(final String tenant) {
         final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
 
         // Create if it does not exist
@@ -201,28 +176,16 @@ public class SystemManagement {
         return result;
     }
 
-    /**
-     *
-     * @return list of all tenant names in the system.
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @Override
     public List<String> findTenants() {
         return tenantMetaDataRepository.findAll().stream().map(md -> md.getTenant()).collect(Collectors.toList());
     }
 
-    /**
-     * Deletes all data related to a given tenant.
-     *
-     * @param tenant
-     *            to delete
-     */
+    @Override
     @CacheEvict(value = { "tenantMetadata" }, key = "#tenant.toUpperCase()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    public void deleteTenant(@NotNull final String tenant) {
+    public void deleteTenant(final String tenant) {
         cacheManager.evictCaches(tenant);
         cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
         tenantAware.runAsTenant(tenant, () -> {
@@ -246,13 +209,10 @@ public class SystemManagement {
         });
     }
 
-    /**
-     * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
-     */
+    @Override
     @Cacheable(value = "tenantMetadata", keyGenerator = "tenantKeyGenerator")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    @NotNull
     public TenantMetaData getTenantMetadata() {
         if (tenantAware.getCurrentTenant() == null) {
             throw new IllegalStateException("Tenant not set");
@@ -261,13 +221,7 @@ public class SystemManagement {
         return getTenantMetadata(tenantAware.getCurrentTenant());
     }
 
-    /**
-     * Checks if a specific tenant exists. The tenant will not be created lazy.
-     *
-     * @param tenant
-     *            the tenant to check
-     * @return {@code true} in case the tenant exits or {@code false} if not
-     */
+    @Override
     @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator")
     // set transaction to not supported, due we call this in
     // BaseEntity#prePersist methods
@@ -290,18 +244,11 @@ public class SystemManagement {
         return initialTenantCreation;
     }
 
-    /**
-     * Update call for {@link TenantMetaData}.
-     *
-     * @param metaData
-     *            to update
-     * @return updated {@link TenantMetaData} entity
-     */
+    @Override
     @CachePut(value = "tenantMetadata", key = "#metaData.tenant.toUpperCase()")
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    @NotNull
-    public TenantMetaData updateTenantMetadata(@NotNull final TenantMetaData metaData) {
+    public TenantMetaData updateTenantMetadata(final TenantMetaData metaData) {
         if (!tenantMetaDataRepository.exists(metaData.getId())) {
             throw new EntityNotFoundException("Metadata does not exist: " + metaData.getId());
         }
@@ -340,7 +287,7 @@ public class SystemManagement {
      * currently created and not the one currently in the {@link TenantAware}.
      *
      */
-    private class CurrentTenantKeyGenerator implements KeyGenerator {
+    public class CurrentTenantKeyGenerator implements KeyGenerator {
         @Override
         // Exception squid:S923 - override
         @SuppressWarnings({ "squid:S923" })

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Target;

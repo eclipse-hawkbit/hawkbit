@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -27,17 +26,14 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.Constants;
 import org.eclipse.hawkbit.eventbus.event.TargetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSet_;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -50,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.specifications.TargetSpecifications;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -61,7 +56,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,13 +67,13 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 
 /**
- * Business service facade for managing {@link Target}s.
+ * JPA implementation of {@link TargetManagement}.
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
-public class TargetManagement {
+public class JpaTargetManagement implements TargetManagement {
 
     @Autowired
     private EntityManager entityManager;
@@ -102,34 +96,13 @@ public class TargetManagement {
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
 
-    /**
-     * Find {@link Target} based on given ID returns found Target without
-     * details, i.e. NO {@link Target#getTags()} and
-     * {@link Target#getActiveActions()} possible.
-     *
-     * @param controllerId
-     *            to look for.
-     * @return {@link Target} or <code>null</code> if it does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Target findTargetByControllerID(@NotEmpty final String controllerId) {
+    @Override
+    public Target findTargetByControllerID(final String controllerId) {
         return targetRepository.findByControllerId(controllerId);
     }
 
-    /**
-     * Find {@link Target} based on given ID returns found Target with details,
-     * i.e. {@link Target#getTags()} and {@link Target#getActiveActions()} are
-     * possible.
-     *
-     * Note: try to use {@link #findTargetByControllerID(String)} as much as
-     * possible.
-     *
-     * @param controllerId
-     *            to look for.
-     * @return {@link Target} or <code>null</code> if it does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Target findTargetByControllerIDWithDetails(@NotEmpty final String controllerId) {
+    @Override
+    public Target findTargetByControllerIDWithDetails(final String controllerId) {
         final Target result = targetRepository.findByControllerId(controllerId);
         // load lazy relations
         if (result != null) {
@@ -146,40 +119,18 @@ public class TargetManagement {
         return result;
     }
 
-    /**
-     * Find {@link Target} based on given ID returns found Target without
-     * details, i.e. NO {@link Target#getTags()} and
-     * {@link Target#getActiveActions()} possible.
-     *
-     * @param controllerIDs
-     *            to look for.
-     * @return List of found{@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public List<Target> findTargetByControllerID(@NotEmpty final Collection<String> controllerIDs) {
+    @Override
+    public List<Target> findTargetByControllerID(final Collection<String> controllerIDs) {
         return targetRepository.findAll(TargetSpecifications.byControllerIdWithStatusAndAssignedInJoin(controllerIDs));
     }
 
-    /**
-     * Counts all {@link Target}s in the repository.
-     *
-     * @return number of targets
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @Override
     public Long countTargetsAll() {
         return targetRepository.count();
     }
 
-    /**
-     * Retrieves all targets without details, i.e. NO {@link Target#getTags()}
-     * and {@link Target#getActiveActions()} possible
-     *
-     * @param pageable
-     *            pagination parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Slice<Target> findTargetsAll(@NotNull final Pageable pageable) {
+    @Override
+    public Slice<Target> findTargetsAll(final Pageable pageable) {
         // workarround - no join fetch allowed that is why we need specification
         // instead of query for
         // count() of Pageable
@@ -192,113 +143,50 @@ public class TargetManagement {
         return criteriaNoCountDao.findAll(spec, pageable, Target.class);
     }
 
-    /**
-     * Retrieves all targets without details, i.e. NO {@link Target#getTags()}
-     * and {@link Target#getActiveActions()} possible based on
-     * {@link TargetFilterQuery#getQuery()}
-     *
-     * @param targetFilterQuery
-     * @param pageable
-     * @return
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Slice<Target> findTargetsAll(@NotNull final TargetFilterQuery targetFilterQuery,
-            @NotNull final Pageable pageable) {
+    @Override
+    public Slice<Target> findTargetsAll(final TargetFilterQuery targetFilterQuery, final Pageable pageable) {
         return findTargetsAll(RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class), pageable);
     }
 
-    /**
-     * Retrieves all targets without details, i.e. NO {@link Target#getTags()}
-     * and {@link Target#getActiveActions()} possible based on
-     * {@link TargetFilterQuery#getQuery()}
-     *
-     * @param targetFilterQuery
-     * @param pageable
-     * @return
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Slice<Target> findTargetsAll(@NotNull final String targetFilterQuery, @NotNull final Pageable pageable) {
+    @Override
+    public Slice<Target> findTargetsAll(final String targetFilterQuery, final Pageable pageable) {
         return findTargetsAll(RSQLUtility.parse(targetFilterQuery, TargetFields.class), pageable);
     }
 
-    /**
-     * Retrieves all targets based on the given specification.
-     *
-     * @param spec
-     *            the specification for the query
-     * @param pageable
-     *            pagination parameter
-     * @return the found {@link Target}s, never {@code null}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Page<Target> findTargetsAll(@NotNull final Specification<Target> spec, @NotNull final Pageable pageable) {
+    @Override
+    public Page<Target> findTargetsAll(final Specification<Target> spec, final Pageable pageable) {
         return targetRepository.findAll(spec, pageable);
     }
 
-    /**
-     * retrieves a list of {@link Target}s by their controller ID with details,
-     * i.e. {@link Target#getTags()} are possible.
-     *
-     * Note: try to use {@link #findTargetByControllerID(String)} as much as
-     * possible.
-     *
-     * @param controllerIDs
-     *            {@link Target}s Names parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public List<Target> findTargetsByControllerIDsWithTags(@NotNull final List<String> controllerIDs) {
+    @Override
+    public List<Target> findTargetsByControllerIDsWithTags(final List<String> controllerIDs) {
         final List<List<String>> partition = Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT);
         return partition.stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(ids)))
                 .flatMap(t -> t.stream()).collect(Collectors.toList());
     }
 
-    /**
-     * updates the {@link Target}.
-     *
-     * @param target
-     *            to be updated
-     * @return the updated {@link Target}
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
-    public Target updateTarget(@NotNull final Target target) {
+    public Target updateTarget(final Target target) {
         Assert.notNull(target.getId());
         target.setNew(false);
         return targetRepository.save(target);
     }
 
-    /**
-     * updates multiple {@link Target}s.
-     *
-     * @param targets
-     *            to be updated
-     * @return the updated {@link Target}s
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
-    public List<Target> updateTargets(@NotNull final List<Target> targets) {
+    public List<Target> updateTargets(final Iterable<Target> targets) {
         targets.forEach(target -> target.setNew(false));
         return targetRepository.save(targets);
     }
 
-    /**
-     * Deletes all targets with the given IDs.
-     *
-     * @param targetIDs
-     *            the technical IDs of the targets to be deleted
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    public void deleteTargets(@NotEmpty final Long... targetIDs) {
+    public void deleteTargets(final Long... targetIDs) {
         // we need to select the target IDs first to check the if the targetIDs
         // belonging to the
         // tenant! Delete statement are not automatically enhanced with the
@@ -312,81 +200,25 @@ public class TargetManagement {
         }
     }
 
-    /**
-     * retrieves {@link Target}s by the assigned {@link DistributionSet} without
-     * details, i.e. NO {@link Target#getTags()} and
-     * {@link Target#getActiveActions()} possible.
-     *
-     *
-     * @param distributionSetID
-     *            the ID of the {@link DistributionSet}
-     * @param pageReq
-     *            page parameter
-     * @return the found {@link Target}s
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    public Page<Target> findTargetByAssignedDistributionSet(@NotNull final Long distributionSetID,
-            @NotNull final Pageable pageReq) {
+    @Override
+    public Page<Target> findTargetByAssignedDistributionSet(final Long distributionSetID, final Pageable pageReq) {
         return targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
     }
 
-    /**
-     * Retrieves {@link Target}s by the assigned {@link DistributionSet} without
-     * details, i.e. NO {@link Target#getTags()} and
-     * {@link Target#getActiveActions()} possible including additional filtering
-     * based on the given {@code spec}.
-     *
-     * @param distributionSetID
-     *            the ID of the {@link DistributionSet}
-     * @param spec
-     *            the specification to filter the result set
-     * @param pageReq
-     *            page parameter
-     * @return the found {@link Target}s, never {@code null}
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    public Page<Target> findTargetByAssignedDistributionSet(@NotNull final Long distributionSetID,
-            final Specification<Target> spec, @NotNull final Pageable pageReq) {
+    @Override
+    public Page<Target> findTargetByAssignedDistributionSet(final Long distributionSetID,
+            final Specification<Target> spec, final Pageable pageReq) {
         return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
                 TargetSpecifications.hasAssignedDistributionSet(distributionSetID).toPredicate(root, query, cb),
                 spec.toPredicate(root, query, cb)), pageReq);
     }
 
-    /**
-     * retrieves {@link Target}s by the installed {@link DistributionSet}without
-     * details, i.e. NO {@link Target#getTags()} and
-     * {@link Target#getActiveActions()} possible.
-     *
-     * @param distributionSetID
-     *            the ID of the {@link DistributionSet}
-     * @param pageReq
-     *            page parameter
-     * @return the found {@link Target}s
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    public Page<Target> findTargetByInstalledDistributionSet(@NotNull final Long distributionSetID,
-            @NotNull final Pageable pageReq) {
+    @Override
+    public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetID, final Pageable pageReq) {
         return targetRepository.findByTargetInfoInstalledDistributionSetId(pageReq, distributionSetID);
     }
 
-    /**
-     * retrieves {@link Target}s by the installed {@link DistributionSet}without
-     * details, i.e. NO {@link Target#getTags()} and
-     * {@link Target#getActiveActions()} possible including additional filtering
-     * based on the given {@code spec}.
-     *
-     * @param distributionSetId
-     *            the ID of the {@link DistributionSet}
-     * @param spec
-     *            the specification to filter the result
-     * @param pageable
-     *            page parameter
-     * @return the found {@link Target}s, never {@code null}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @Override
     public Page<Target> findTargetByInstalledDistributionSet(final Long distributionSetId,
             final Specification<Target> spec, final Pageable pageable) {
         return targetRepository.findAll((Specification<Target>) (root, query, cb) -> cb.and(
@@ -394,82 +226,21 @@ public class TargetManagement {
                 spec.toPredicate(root, query, cb)), pageable);
     }
 
-    /**
-     * Retrieves the {@link Target} which have a certain
-     * {@link TargetUpdateStatus} without details, i.e. NO
-     * {@link Target#getTags()} and {@link Target#getActiveActions()} possible.
-     *
-     * @param pageable
-     *            page parameter
-     * @param status
-     *            the {@link TargetUpdateStatus} to be filtered on
-     * @return the found {@link Target}s
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Page<Target> findTargetByUpdateStatus(@NotNull final Pageable pageable,
-            @NotNull final TargetUpdateStatus status) {
+    @Override
+    public Page<Target> findTargetByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
         return targetRepository.findByTargetInfoUpdateStatus(pageable, status);
     }
 
-    /**
-     * Filter {@link Target}s for all the given parameters. If all parameters
-     * except pageable are null, all available {@link Target}s are returned.
-     *
-     * @param pageable
-     *            page parameters
-     * @param status
-     *            find targets having this {@link TargetUpdateStatus}s. Set to
-     *            <code>null</code> in case this is not required.
-     * @param searchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param tagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     *
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Slice<Target> findTargetByFilters(@NotNull final Pageable pageable,
-            final Collection<TargetUpdateStatus> status, final String searchText,
-            final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
-            final String... tagNames) {
+    @Override
+    public Slice<Target> findTargetByFilters(final Pageable pageable, final Collection<TargetUpdateStatus> status,
+            final String searchText, final Long installedOrAssignedDistributionSetId,
+            final Boolean selectTargetWithNoTag, final String... tagNames) {
         final List<Specification<Target>> specList = buildSpecificationList(status, searchText,
                 installedOrAssignedDistributionSetId, selectTargetWithNoTag, true, tagNames);
         return findByCriteriaAPI(pageable, specList);
     }
 
-    /**
-     * Count {@link Target}s for all the given filter parameters.
-     *
-     * @param status
-     *            find targets having on of these {@link TargetUpdateStatus}s.
-     *            Set to <code>null</code> in case this is not required.
-     * @param searchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param tagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     *
-     * @return the found number {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @Override
     public Long countTargetByFilters(final Collection<TargetUpdateStatus> status, final String searchText,
             final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
             final String... tagNames) {
@@ -498,15 +269,6 @@ public class TargetManagement {
         return specList;
     }
 
-    /**
-     * executes findAll with the given {@link Target} {@link Specification}s.
-     *
-     * @param pageable
-     *            paging parameter
-     * @param specList
-     *            list of @link {@link Specification}
-     * @return the page with the found {@link Target}
-     */
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<Target>> specList) {
         if (specList == null || specList.isEmpty()) {
             return criteriaNoCountDao.findAll(pageable, Target.class);
@@ -522,44 +284,18 @@ public class TargetManagement {
         return targetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
-    /**
-     * {@link Entity} based method call for
-     * {@link #toggleTagAssignment(Collection, String)}.
-     *
-     * @param targets
-     *            to toggle for
-     * @param tag
-     *            to toggle
-     * @return TagAssigmentResult with all metadata of the assignment outcome.
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public TargetTagAssignmentResult toggleTagAssignment(@NotEmpty final List<Target> targets,
-            @NotNull final TargetTag tag) {
+    public TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {
         return toggleTagAssignment(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()), tag.getName());
     }
 
-    /**
-     * Toggles {@link TargetTag} assignment to given {@link Target}s by means
-     * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. If all of theme have the tag already assigned
-     * they will be removed instead.
-     *
-     * @param targetIds
-     *            to toggle for
-     * @param tagName
-     *            to toogle
-     * @return TagAssigmentResult with all metadata of the assigment outcome.
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public TargetTagAssignmentResult toggleTagAssignment(@NotEmpty final Collection<String> targetIds,
-            @NotNull final String tagName) {
+    public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> targetIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
         final List<Target> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName, targetIds);
         final List<Target> allTargets = targetRepository
@@ -588,20 +324,10 @@ public class TargetManagement {
         return result;
     }
 
-    /**
-     * Assign a {@link TargetTag} assignment to given {@link Target}s.
-     *
-     * @param targetIds
-     *            to assign for
-     * @param tagName
-     *            to assign
-     * @return list of assigned targets
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public List<Target> assignTag(@NotEmpty final Collection<String> targetIds, @NotNull final TargetTag tag) {
+    public List<Target> assignTag(final Collection<String> targetIds, final TargetTag tag) {
         final List<Target> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(targetIds));
 
@@ -617,7 +343,7 @@ public class TargetManagement {
         return save;
     }
 
-    private List<Target> unAssignTag(@NotEmpty final Collection<Target> targets, @NotNull final TargetTag tag) {
+    private List<Target> unAssignTag(final Collection<Target> targets, final TargetTag tag) {
         targets.forEach(target -> target.getTags().remove(tag));
 
         final List<Target> save = targetRepository.save(targets);
@@ -629,83 +355,26 @@ public class TargetManagement {
         return save;
     }
 
-    /**
-     * Unassign all {@link Target} from a given {@link TargetTag} .
-     *
-     * @param tag
-     *            to unassign all targets
-     * @return list of unassigned targets
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public List<Target> unAssignAllTargetsByTag(@NotNull final TargetTag tag) {
+    public List<Target> unAssignAllTargetsByTag(final TargetTag tag) {
         return unAssignTag(tag.getAssignedToTargets(), tag);
     }
 
-    /**
-     * Unassign a {@link TargetTag} assignment to given {@link Target}.
-     *
-     * @param controllerID
-     *            to unassign for
-     * @param targetTag
-     *            to unassign
-     * @return the unassigned target or <null> if no target is unassigned
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    public Target unAssignTag(@NotNull final String controllerID, @NotNull final TargetTag targetTag) {
+    public Target unAssignTag(final String controllerID, final TargetTag targetTag) {
         final List<Target> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID)));
         final List<Target> unAssignTag = unAssignTag(allTargets, targetTag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
     }
 
-    /**
-     * method retrieves all {@link Target}s from the repo in the following
-     * order:
-     * <p>
-     * 1) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getTargetStatus()}
-     * {@link TargetStatus#getInstalledDistributionSet()}
-     * <p>
-     * 2) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getAssignedDistributionSet()}
-     * <p>
-     * 3) {@link Target}s which have no connection to the given
-     * {@link DistributionSet}.
-     *
-     * @param pageable
-     *            the page request to page the result set
-     * @param orderByDistributionId
-     *            {@link DistributionSet#getId()} to be ordered by
-     * @param filterByDistributionId
-     *            {@link DistributionSet#getId()} to be filter the result. Set
-     *            to <code>null</code> in case this is not required.
-     * @param filterByStatus
-     *            find targets having this {@link TargetUpdateStatus}s. Set to
-     *            <code>null</code> in case this is not required.
-     * @param filterBySearchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param filterByTagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     * @return a paged result {@link Page} of the {@link Target}s in a defined
-     *         order.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Slice<Target> findTargetsAllOrderByLinkedDistributionSet(@NotNull final Pageable pageable,
-            @NotNull final Long orderByDistributionId, final Long filterByDistributionId,
+    @Override
+    public Slice<Target> findTargetsAllOrderByLinkedDistributionSet(final Pageable pageable,
+            final Long orderByDistributionId, final Long filterByDistributionId,
             final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
             final Boolean selectTargetWithNoTag, final String... filterByTagNames) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -756,9 +425,6 @@ public class TargetManagement {
         return new SliceImpl<>(resultList, pageable, hasNext);
     }
 
-    /**
-     * @param specifications
-     */
     private static Predicate[] specificationsToPredicate(final List<Specification<Target>> specifications,
             final Root<Target> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
         final Predicate[] predicates = new Predicate[specifications.size()];
@@ -768,40 +434,17 @@ public class TargetManagement {
         return predicates;
     }
 
-    /**
-     * Counts number of targets with given
-     * {@link Target#getAssignedDistributionSet()}.
-     *
-     * @param distId
-     *            to search for
-     *
-     * @return number of found {@link Target}s.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @Override
     public Long countTargetByAssignedDistributionSet(final Long distId) {
         return targetRepository.countByAssignedDistributionSetId(distId);
     }
 
-    /**
-     * Counts number of targets with given
-     * {@link TargetStatus#getInstalledDistributionSet()}.
-     *
-     * @param distId
-     *            to search for
-     * @return number of found {@link Target}s.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @Override
     public Long countTargetByInstalledDistributionSet(final Long distId) {
         return targetRepository.countByTargetInfoInstalledDistributionSetId(distId);
     }
 
-    /**
-     * finds all {@link Target#getControllerId()} which are currently in the
-     * database.
-     *
-     * @return all IDs of all {@link Target} in the system
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @Override
     public List<TargetIdName> findAllTargetIds() {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<TargetIdName> query = cb.createQuery(TargetIdName.class);
@@ -811,34 +454,8 @@ public class TargetManagement {
 
     }
 
-    /**
-     * Finds all targets for all the given parameters but returns not the full
-     * target but {@link TargetIdName}.
-     *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
-     * 
-     * @param filterByStatus
-     *            find targets having this {@link TargetUpdateStatus}s. Set to
-     *            <code>null</code> in case this is not required.
-     * @param filterBySearchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param filterByTagNames
-     *            to find targets which are having any one in this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     *
-     * @return the found {@link TargetIdName}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public List<TargetIdName> findAllTargetIdsByFilters(@NotNull final Pageable pageRequest,
+    @Override
+    public List<TargetIdName> findAllTargetIdsByFilters(final Pageable pageRequest,
             final Collection<TargetUpdateStatus> filterByStatus, final String filterBySearchText,
             final Long installedOrAssignedDistributionSetId, final Boolean selectTargetWithNoTag,
             final String... filterByTagNames) {
@@ -871,19 +488,9 @@ public class TargetManagement {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and returns not the full target but {@link TargetIdName}.
-     *
-     * @param pageRequest
-     *            the pageRequest to enhance the query for paging and sorting
-     * @param targetFilterQuery
-     *            {@link TargetFilterQuery}
-     * @return the found {@link TargetIdName}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @Override
     public List<TargetIdName> findAllTargetIdsByTargetFilterQuery(final Pageable pageRequest,
-            @NotNull final TargetFilterQuery targetFilterQuery) {
+            final TargetFilterQuery targetFilterQuery) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<Target> targetRoot = query.from(Target.class);
@@ -918,31 +525,12 @@ public class TargetManagement {
         eventBus.unregister(this);
     }
 
-    /**
-     * creating new {@link Target}s including poll status data. useful
-     * especially in plug and play scenarios.
-     *
-     * @param target
-     *            to be created *
-     * @param status
-     *            of the target
-     * @param lastTargetQuery
-     *            if a plug and play case
-     * @param address
-     *            if a plug and play case
-     *
-     * @throws EntityAlreadyExistsException
-     *
-     * @return
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
     @CacheEvict(value = { "targetsCreatedOverPeriod" }, allEntries = true)
-    public Target createTarget(@NotNull final Target target, @NotNull final TargetUpdateStatus status,
-            final Long lastTargetQuery, final URI address) {
+    public Target createTarget(final Target target, final TargetUpdateStatus status, final Long lastTargetQuery,
+            final URI address) {
 
         if (targetRepository.findByControllerId(target.getControllerId()) != null) {
             throw new EntityAlreadyExistsException(target.getControllerId());
@@ -965,43 +553,18 @@ public class TargetManagement {
 
     }
 
-    /**
-     * creating a new {@link Target}.
-     *
-     * @param target
-     *            to be created
-     * @return the created {@link Target}
-     *
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
     @CacheEvict(value = { "targetsCreatedOverPeriod" }, allEntries = true)
-    public Target createTarget(@NotNull final Target target) {
+    public Target createTarget(final Target target) {
         return createTarget(target, TargetUpdateStatus.UNKNOWN, null, null);
     }
 
-    /**
-     * creates multiple {@link Target}s. If some of the given {@link Target}s
-     * already exists in the DB a {@link EntityAlreadyExistsException} is
-     * thrown. {@link Target}s contain all objects of the parameter targets,
-     * including duplicates.
-     *
-     * @param targets
-     *            to be created.
-     * @return the created {@link Target}s
-     *
-     * @throws {@link
-     *             EntityAlreadyExistsException} of one of the given targets
-     *             already exist.
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    public List<Target> createTargets(@NotNull final List<Target> targets) {
+    public List<Target> createTargets(final Collection<Target> targets) {
         if (!targets.isEmpty() && targetRepository.countByControllerIdIn(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
@@ -1014,27 +577,11 @@ public class TargetManagement {
         return savedTargets;
     }
 
-    /**
-     * creating a new {@link Target} including poll status data. useful
-     * especially in plug and play scenarios.
-     *
-     * @param targets
-     *            to be created *
-     * @param status
-     *            of the target
-     * @param lastTargetQuery
-     *            if a plug and play case
-     * @param address
-     *            if a plug and play case
-     *
-     * @return newly created target
-     */
+    @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    public List<Target> createTargets(@NotNull final Collection<Target> targets,
-            @NotNull final TargetUpdateStatus status, final long lastTargetQuery, final URI address) {
+    public List<Target> createTargets(final Collection<Target> targets, final TargetUpdateStatus status,
+            final Long lastTargetQuery, final URI address) {
         if (targetRepository.countByControllerIdIn(
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
             throw new EntityAlreadyExistsException();
@@ -1047,42 +594,20 @@ public class TargetManagement {
         return savedTargets;
     }
 
-    /**
-     * Find targets by tag name.
-     *
-     * @param tagName
-     *            tag name
-     * @return list of matching targets
-     */
-    @NotNull
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public List<Target> findTargetsByTag(@NotNull final String tagName) {
+    @Override
+    public List<Target> findTargetsByTag(final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName);
         return targetRepository.findByTag(tag);
     }
 
-    /**
-     * Count {@link TargetFilterQuery}s for given filter parameter.
-     *
-     * @param targetFilterQuery
-     *            {link TargetFilterQuery}
-     * @return the found number {@link TargetFilterQuery}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Long countTargetByTargetFilterQuery(@NotNull final TargetFilterQuery targetFilterQuery) {
+    @Override
+    public Long countTargetByTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
         final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class);
         return targetRepository.count(specs);
     }
 
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param targetFilterQuery
-     *            {link TargetFilterQuery}
-     * @return the found number {@link TargetFilterQuery}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    public Long countTargetByTargetFilterQuery(@NotNull final String targetFilterQuery) {
+    @Override
+    public Long countTargetByTargetFilterQuery(final String targetFilterQuery) {
         final Specification<Target> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class);
         return targetRepository.count(specs);
     }

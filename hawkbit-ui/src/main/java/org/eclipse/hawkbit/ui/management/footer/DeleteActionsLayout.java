@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.footer;
 
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.jpa.TagManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
