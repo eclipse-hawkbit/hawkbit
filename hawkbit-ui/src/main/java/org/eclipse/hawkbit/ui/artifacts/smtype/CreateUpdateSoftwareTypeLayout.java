@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -546,6 +547,9 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         typeDesc.removeStyleName(TYPE_DESC_DYNAMIC_STYLE);
         typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
         getPreviewButtonColor(DEFAULT_COLOR);
+        
+        typeName.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        typeKey.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
     }
 
     private void save() {
@@ -612,37 +616,69 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      * Create new tag.
      */
     private void createNewSWModuleType() {
-        int assignNumber = 0;
+        int assignedNumber = 0;
         final String colorPicked = getColorPickedString();
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeName.getValue());
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
         final String assignValue = (String) assignOptiongroup.getValue();
         if (null != assignValue && assignValue.equalsIgnoreCase(singleAssignStr)) {
-            assignNumber = 1;
+            assignedNumber = 1;
         } else if (null != assignValue && assignValue.equalsIgnoreCase(multiAssignStr)) {
-            assignNumber = Integer.MAX_VALUE;
+            assignedNumber = Integer.MAX_VALUE;
         }
-
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue,
-                    assignNumber, colorPicked);
-            if (null != typeDescValue) {
-                newSWType.setDescription(typeDescValue);
+            boolean isNameExceedLimit = typeNameValue.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            boolean isKeyExceedLimit = typeKeyValue.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            if (isNameExceedLimit || isKeyExceedLimit) {
+                // open pop up to confirm
+                final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                        i18n.get("caption.nameversion.length.confirmbox"),
+                        i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                        i18n.get("button.cancel"), ok -> {
+                            if (ok) {
+                                int assignNumber = 0;
+                                if (null != assignValue && assignValue.equalsIgnoreCase(singleAssignStr)) {
+                                    assignNumber = 1;
+                                } else if (null != assignValue && assignValue.equalsIgnoreCase(multiAssignStr)) {
+                                    assignNumber = Integer.MAX_VALUE;
+                                }
+                                saveSWModuleType(typeKeyValue, typeNameValue, typeDescValue, assignNumber, colorPicked);
+                            } else {
+                                if (isNameExceedLimit) {
+                                    typeName.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                                if (isKeyExceedLimit) {
+                                    typeKey.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                            }
+                        });
+                UI.getCurrent().addWindow(confirmDialog.getWindow());
+                confirmDialog.getWindow().bringToFront();
+            }else{
+                saveSWModuleType(typeKeyValue, typeNameValue, typeDescValue, assignedNumber, colorPicked);
             }
-
-            newSWType.setColour(colorPicked);
-
-            newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
-            closeWindow();
-            eventBus.publish(this,
-                    new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
-
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.typenameorkey"));
-
         }
+
+    }
+
+    private void saveSWModuleType(final String typeKeyValue, final String typeNameValue, final String typeDescValue,
+            final int assignNumber, final String colorPicked) {
+        SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue, assignNumber,
+                colorPicked);
+        if (null != typeDescValue) {
+            newSWType.setDescription(typeDescValue);
+        }
+
+        newSWType.setColour(colorPicked);
+
+        newSWType = swTypeManagementService.createSoftwareModuleType(newSWType);
+        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newSWType.getName() }));
+        closeWindow();
+        eventBus.publish(this, new SoftwareModuleTypeEvent(SoftwareModuleTypeEnum.ADD_SOFTWARE_MODULE_TYPE, newSWType));
+
     }
 
     /**

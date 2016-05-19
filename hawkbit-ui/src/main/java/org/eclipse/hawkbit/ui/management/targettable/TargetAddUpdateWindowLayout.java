@@ -14,6 +14,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -243,25 +244,53 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         if (mandatoryCheck(newControlllerId) && duplicateCheck(newControlllerId)) {
             final String newName = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
-
             /* create new target entity */
             Target newTarget = new Target(newControlllerId);
             /* set values to the new target entity */
             setTargetValues(newTarget, newName, newDesc);
-            /* save new target */
-            newTarget = targetManagement.createTarget(newTarget);
-            final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
-            final Set<TargetIdName> s = new HashSet<>();
-            s.add(newTarget.getTargetIdName());
-            targetTable.setValue(s);
-
-            /* display success msg */
-            uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
-            /* close the window */
-            closeThisWindow();
+           
+            boolean isNameExceedLimit = newName!=null && newName.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            boolean isContIdExceedLimit  = newControlllerId.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            if (isNameExceedLimit || isContIdExceedLimit) {
+                // open pop up to confirm
+                final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                        i18n.get("caption.nameversion.length.confirmbox"),
+                        i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                        i18n.get("button.cancel"), ok -> {
+                            if (ok) {
+                                saveTarget(newTarget);
+                            } else {
+                                if (isNameExceedLimit) {
+                                    nameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                                if (isContIdExceedLimit) {
+                                    controllerIDTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                            }
+                        });
+                UI.getCurrent().addWindow(confirmDialog.getWindow());
+                confirmDialog.getWindow().bringToFront();
+            } else {
+                saveTarget(newTarget);
+            }
+            
         }
     }
 
+    private void saveTarget(final Target newTarget){
+        /* save new target */
+        targetManagement.createTarget(newTarget);
+        final TargetTable targetTable = SpringContextHelper.getBean(TargetTable.class);
+        final Set<TargetIdName> s = new HashSet<>();
+        s.add(newTarget.getTargetIdName());
+        targetTable.setValue(s);
+
+        /* display success msg */
+        uINotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTarget.getName() }));
+        /* close the window */
+        closeThisWindow();
+     }
+    
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         addTargetWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,

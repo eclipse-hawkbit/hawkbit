@@ -296,8 +296,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(HawkbitCommonUtil
-                    .getFormattedText(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion()));
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion());
+            
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
@@ -440,10 +440,9 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                      * for child items.
                      */
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
-
+                    
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
-                            .setValue(HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
-                                    + action.getDistributionSet().getVersion()));
+                    .setValue(action.getDistributionSet().getName() + ":" + action.getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));

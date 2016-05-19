@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.TargetFilterBeanQuery;
@@ -150,6 +151,8 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     private Label totalTargetsLabel;
 
     private TextArea targetFilterQuery;
+    
+    private Rollout rolloutToCreate;
 
     /**
      * Create components and layout.
@@ -470,15 +473,12 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     private void createRollout() {
         if (mandatoryCheck() && validateFields() && duplicateCheck()) {
-            final Rollout rolloutToCreate = saveRollout();
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { rolloutToCreate.getName() }));
-            eventBus.publish(this, RolloutEvent.CREATE_ROLLOUT);
-            closeThisWindow();
+             createNewRollout();
         }
     }
 
-    private Rollout saveRollout() {
-        Rollout rolloutToCreate = new Rollout();
+    private Rollout createNewRollout() {
+        rolloutToCreate = new Rollout();
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
         final String targetFilter = getTargetFilterQuery();
         final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
@@ -497,11 +497,33 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
                 .setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetIdName.getId()));
         rolloutToCreate.setActionType(getActionType());
         rolloutToCreate.setForcedTime(getForcedTimeStamp());
-
-        rolloutToCreate = rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
-        return rolloutToCreate;
+        boolean isNameExceedLimit = rolloutName.getValue().length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+        if (isNameExceedLimit) {
+            // open pop up to confirm
+            final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                    i18n.get("caption.nameversion.length.confirmbox"),
+                    i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                    i18n.get("button.cancel"), ok -> {
+                        if (ok) {
+                           saveRollout(rolloutToCreate, amountGroup, conditions);
+                        } else {
+                            rolloutName.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                          }
+                    });
+            UI.getCurrent().addWindow(confirmDialog.getWindow());
+            confirmDialog.getWindow().bringToFront();
+        } else {
+            saveRollout(rolloutToCreate, amountGroup, conditions);
+          } 
+      return rolloutToCreate;
     }
-
+   private  void saveRollout(final Rollout rolloutToCreate, final int amountGroup,final RolloutGroupConditions conditions){
+       rolloutManagement.createRolloutAsync(rolloutToCreate, amountGroup, conditions);
+       uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { rolloutToCreate.getName() }));
+       eventBus.publish(this, RolloutEvent.CREATE_ROLLOUT);
+       closeThisWindow();
+   }
+    
     private String getTargetFilterQuery() {
         if (null != targetFilterQueryCombo.getValue()
                 && HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) != null) {
@@ -730,7 +752,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
         public void validate(final Object value) {
             try {
                 new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
-                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
+                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 1, 500), 1, 500)
                         .validate(Integer.valueOf(value.toString()));
             } catch (final InvalidValueException ex) {
                 throw ex;

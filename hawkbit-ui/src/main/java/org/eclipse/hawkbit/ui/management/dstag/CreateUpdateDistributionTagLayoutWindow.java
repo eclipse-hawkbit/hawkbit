@@ -15,12 +15,14 @@ import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -106,16 +108,38 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
             if (colorPicked != null) {
                 newDistTag.setColour(colorPicked);
             }
-            newDistTag = tagManagement.createDistributionSetTag(newDistTag);
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistTag.getName() }));
-            resetDistTagValues();
+            boolean isNameExceedLimit = tagNameValue.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            if (isNameExceedLimit) {
+                // open pop up to confirm
+                final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                        i18n.get("caption.nameversion.length.confirmbox"),
+                        i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                        i18n.get("button.cancel"), ok -> {
+                            if (ok) {
+                                saveDistributionSetTag(newDistTag);
+                            } else {
+                                 tagName.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                              }
+                        });
+                UI.getCurrent().addWindow(confirmDialog.getWindow());
+                confirmDialog.getWindow().bringToFront();
+            } else {
+                saveDistributionSetTag(newDistTag);
+              }           
 
         } else {
             uiNotification.displayValidationError(i18n.get(MISSING_TAG_NAME));
-
         }
 
     }
+    
+    private void saveDistributionSetTag(final DistributionSetTag newDistTag){
+        tagManagement.createDistributionSetTag(newDistTag);
+        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistTag.getName() }));
+        resetDistTagValues();
+        
+    }
+    
 
     /**
      * update tag.

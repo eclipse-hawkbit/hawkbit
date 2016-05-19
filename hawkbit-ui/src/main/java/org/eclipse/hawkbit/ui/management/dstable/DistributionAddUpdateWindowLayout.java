@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -300,15 +301,41 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
             DistributionSet newDist = new DistributionSet();
 
             setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
-            newDist = distributionSetManagement.createDistributionSet(newDist);
-
-            notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
-                    new Object[] { newDist.getName(), newDist.getVersion() }));
-            /* close the window */
-            closeThisWindow();
-
-            eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));
-        }
+            
+            boolean isNameExceedLimit = name.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            boolean isVersionExceedLimit = version.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            if (isNameExceedLimit || isVersionExceedLimit) {
+                // open pop up to confirm
+                final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                        i18n.get("caption.nameversion.length.confirmbox"),
+                        i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                        i18n.get("button.cancel"), ok -> {
+                            if (ok) {
+                                saveDistributionSet(newDist);
+                            } else {
+                                if (isNameExceedLimit) {
+                                    distNameTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                                if (isVersionExceedLimit) {
+                                    distVersionTextField.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                                }
+                            }
+                        });
+                UI.getCurrent().addWindow(confirmDialog.getWindow());
+                confirmDialog.getWindow().bringToFront();
+            } else {
+                saveDistributionSet(newDist);
+            }
+         }
+    }
+    
+    private void saveDistributionSet(final DistributionSet newDist){
+         distributionSetManagement.createDistributionSet(newDist);
+        notificationMessage.displaySuccess(i18n.get("message.new.dist.save.success",
+                new Object[] { newDist.getName(), newDist.getVersion() }));
+        /* close the window */
+        closeThisWindow();
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.NEW_ENTITY, newDist));        
     }
 
     /**

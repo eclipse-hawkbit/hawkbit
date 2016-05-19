@@ -15,18 +15,21 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
+import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -45,6 +48,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     private static final long serialVersionUID = 2446682350481560235L;
+    
+    private static final String TAG_NAME_ERROR_DYNAMIC_STYLE = "#ff0931";
 
     @Autowired
     private transient UINotification uiNotification;
@@ -201,13 +206,36 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             if (colorPicked != null) {
                 newTargetTag.setColour(colorPicked);
             }
-            newTargetTag = tagManagement.createTargetTag(newTargetTag);
-            uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTargetTag.getName() }));
-            closeWindow();
+            boolean isNameExceedLimit = tagNameValue.length() == SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH;
+            if (isNameExceedLimit) {
+                // open pop up to confirm
+                final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                        i18n.get("caption.nameversion.length.confirmbox"),
+                        i18n.get("message.nameversion.length.confirm"), i18n.get("button.ok"),
+                        i18n.get("button.cancel"), ok -> {
+                            if (ok) {
+                                saveTargetTag(newTargetTag);
+                            } else {
+                                tagName.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+                              }
+                        });
+                UI.getCurrent().addWindow(confirmDialog.getWindow());
+                confirmDialog.getWindow().bringToFront();
+            } else {
+                saveTargetTag(newTargetTag);
+            }
+
         } else {
             uiNotification.displayValidationError(i18n.get("message.error.missing.tagname"));
 
         }
+    }
+
+    private void saveTargetTag(final TargetTag newTargetTag) {
+        tagManagement.createTargetTag(newTargetTag);
+        uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newTargetTag.getName() }));
+        closeWindow();
+
     }
 
     /**
