@@ -386,15 +386,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         }
     }
 
-    private void addListeners() {
-        getColorPickerLayout().getColorSelect().addColorChangeListener(this);
-        getColorPickerLayout().getSelPreview().addColorChangeListener(this);
-        tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
-        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
-        tagNameComboBox.addValueChangeListener(event -> typeNameChosen(event));
-        slidersValueChangeListeners();
-    }
-
     // private void save() {
     // if (mandatoryValuesPresent()) {
     // final DistributionSetType existingDistTypeByKey =
@@ -677,22 +668,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      */
     @Override
     protected void reset() {
-        tagName.setEnabled(true);
-        tagName.clear();
+
+        super.reset();
         typeKey.clear();
-        tagDesc.clear();
-        colorLayout.removeComponent(getColorPickerLayout());
-        sliderLayout.removeComponent(getColorPickerLayout().getSliders());
         restoreComponentStyles();
-        comboLayout.removeComponent(comboLabel);
-        comboLayout.removeComponent(tagNameComboBox);
         selectedTable.removeAllItems();
         getSourceTableData();
-        optiongroup.select(createDistTypeStr);
-
-        // Default green color
-        getColorPickerLayout().setSelectedColor(getColorPickerLayout().getDefaultColor());
-        getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
     }
 
     /**
@@ -758,28 +739,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         return disttypeContainer;
     }
 
-    private void typeNameChosen(final ValueChangeEvent event) {
-        final String typeSelected = (String) event.getProperty().getValue();
-        if (null != typeSelected) {
-            setTypeTagCombo(typeSelected);
-        } else {
-            resetTypeFields();
-        }
-    }
-
-    private void resetTypeFields() {
-        tagName.setEnabled(false);
+    @Override
+    protected void resetTagNameField() {
+        super.resetTagNameField();
         typeKey.setEnabled(false);
-        tagName.clear();
         typeKey.clear();
-        tagDesc.clear();
-        restoreComponentStyles();
         selectedTable.removeAllItems();
         getSourceTableData();
-        restoreComponentStyles();
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        getColorPickerLayout().getSelPreview()
-                .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
     }
 
     /**
@@ -789,7 +755,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      * @param targetTagSelected
      *            as the selected tag from combo
      */
-    private void setTypeTagCombo(final String distSetTypeSelected) {
+    @Override
+    protected void setTagDetails(final String distSetTypeSelected) {
         tagName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
@@ -875,17 +842,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     /*
      * (non-Javadoc)
      * 
-     * @see com.vaadin.ui.components.colorpicker.ColorSelector#getColor()
-     */
-    @Override
-    public Color getColor() {
-
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see
      * com.vaadin.ui.components.colorpicker.ColorChangeListener#colorChanged(com
      * .vaadin.ui.components .colorpicker.ColorChangeEvent)
@@ -933,12 +889,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
                 updateDistributionSetType(existingDistTypeByKey);
             }
         }
-    }
-
-    @Override
-    protected void setTagDetails(final String tagSelected) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

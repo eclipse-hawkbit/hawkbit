@@ -8,12 +8,12 @@ import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.AbstractColorPicker.Coordinates2Color;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Slider;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.components.colorpicker.ColorPickerGradient;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 
-public class ColorPickerLayout extends VerticalLayout {
+public class ColorPickerLayout extends GridLayout {
 
     private static final long serialVersionUID = -7025970080613796692L;
 
@@ -33,15 +33,22 @@ public class ColorPickerLayout extends VerticalLayout {
     private Slider greenSlider;
     private Slider blueSlider;
 
-    private final VerticalLayout sliders = new VerticalLayout();
-
     public ColorPickerLayout() {
+
+        setColumns(2);
+        setRows(4);
+        setCaption("Choose Color");
 
         init();
 
         setStyleName("rgb-vertical-layout");
-        addComponent(selPreview);
-        addComponent(colorSelect);
+
+        addComponent(redSlider, 0, 1);
+        addComponent(greenSlider, 0, 2);
+        addComponent(blueSlider, 0, 3);
+
+        addComponent(selPreview, 1, 0);
+        addComponent(colorSelect, 1, 1, 1, 3);
     }
 
     public void init() {
@@ -58,7 +65,6 @@ public class ColorPickerLayout extends VerticalLayout {
         greenSlider = createRGBSlider("", "green");
         blueSlider = createRGBSlider("", "blue");
 
-        sliders.addComponents(redSlider, greenSlider, blueSlider);
         selectors.add(colorSelect);
     }
 
@@ -128,10 +134,6 @@ public class ColorPickerLayout extends VerticalLayout {
 
     public void setBlueSlider(final Slider blueSlider) {
         this.blueSlider = blueSlider;
-    }
-
-    public VerticalLayout getSliders() {
-        return sliders;
     }
 
 }

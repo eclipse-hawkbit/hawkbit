@@ -9,34 +9,29 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
-import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
 import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
-import org.vaadin.spring.events.EventBus;
 
 import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -48,20 +43,15 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractColorPicker.Coordinates2Color;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.Slider;
-import com.vaadin.ui.Slider.ValueOutOfBoundsException;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
-import com.vaadin.ui.components.colorpicker.ColorPickerGradient;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -71,34 +61,20 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements ColorChangeListener, ColorSelector {
+public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTagLayout
+        implements ColorChangeListener, ColorSelector {
 
     private static final long serialVersionUID = -5169398523815919367L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateSoftwareTypeLayout.class);
 
     @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private I18N i18n;
-
-    /**
-     * Instance of ColorPickerPreview.
-     */
-    private SpColorPickerPreview selPreview;
-
-    @Autowired
-    private transient UINotification uiNotification;
-
-    @Autowired
     private transient SoftwareManagement swTypeManagementService;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private transient UiProperties uiProperties;
 
+    private VerticalLayout sliderLayout;
+    private HorizontalLayout colorLayout;
     private String createTypeStr;
     private String updateTypeStr;
     private String singleAssignStr;
@@ -108,48 +84,15 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     private Label singleAssign;
     private Label multiAssign;
     private Label comboLabel;
-    private Label colorLabel;
-    private Label madatoryLabel;
-    private TextField typeName;
     private TextField typeKey;
-    private TextArea typeDesc;
-    // private Button saveTag;
-    // private Button discardTag;
-    private Button tagColorPreviewBtn;
     private OptionGroup createOptiongroup;
     private OptionGroup assignOptiongroup;
-    private ComboBox typeNameComboBox;
-    protected static final String DEFAULT_COLOR = "rgb(44,151,32)";
     private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
     private static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
-    private Set<ColorSelector> selectors;
-    private Color selectedColor;
-    private ColorPickerGradient colorSelect;
-    private Slider redSlider;
-    private Slider greenSlider;
-    private Slider blueSlider;
-    private CommonDialogWindow swTypeWindow;
-    protected boolean tagPreviewBtnClicked = false;
-    private VerticalLayout comboLayout;
-    private VerticalLayout sliders;
-    private VerticalLayout colorPickerLayout;
-    private HorizontalLayout mainLayout;
-    private VerticalLayout fieldLayout;
 
     /** RGB color converter. */
     private final Coordinates2Color rgbConverter = new CoordinatesToColor();
-
-    /**
-     * Initialize the artifact details layout.
-     */
-    public void init() {
-        createComponents();
-        buildLayout();
-        addListeners();
-    }
-
-    // TODO MR WINDOW
 
     private void createComponents() {
         createTypeStr = i18n.get("label.create.type");
@@ -165,133 +108,72 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-        typeName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
+        tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        typeName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
+        tagName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
 
         typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY, true, "", i18n.get("textfield.key"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
 
-        typeDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
+        tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
-        typeDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
-        typeDesc.setImmediate(true);
-        typeDesc.setNullRepresentation("");
+        tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
+        tagDesc.setImmediate(true);
+        tagDesc.setNullRepresentation("");
 
-        typeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
+        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
                 "", i18n.get("label.combobox.type"));
-        typeNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
-        typeNameComboBox.setImmediate(true);
-
-        // saveTag =
-        // SPUIComponentProvider.getButton(SPUIDefinitions.NEW_SW_TYPE_SAVE, "",
-        // "", "", true, FontAwesome.SAVE,
-        // SPUIButtonStyleSmallNoBorder.class);
-        // saveTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        //
-        // discardTag =
-        // SPUIComponentProvider.getButton(SPUIDefinitions.NEW_TARGET_TAG_DISRACD,
-        // "", "",
-        // "discard-button-style", true, FontAwesome.TIMES,
-        // SPUIButtonStyleSmallNoBorder.class);
-        // discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
+        tagNameComboBox.setImmediate(true);
 
         tagColorPreviewBtn = new Button();
         tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
-        getPreviewButtonColor(DEFAULT_COLOR);
+        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        selectors = new HashSet<>();
-        selectedColor = new Color(44, 151, 32);
-        selPreview = new SpColorPickerPreview(selectedColor);
-
-        colorSelect = new ColorPickerGradient("rgb-gradient", rgbConverter);
-        colorSelect.setColor(selectedColor);
-        colorSelect.setWidth("220px");
-
-        redSlider = createRGBSlider("", "red");
-        greenSlider = createRGBSlider("", "green");
-        blueSlider = createRGBSlider("", "blue");
-        setRgbSliderValues(selectedColor);
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
 
         createUpdateOptionGroup();
 
         singleMultiOptionGroup();
-
     }
 
-    private void buildLayout() {
-        comboLayout = new VerticalLayout();
+    @Override
+    protected void buildLayout() {
 
-        sliders = new VerticalLayout();
-        sliders.addComponents(redSlider, greenSlider, blueSlider);
+        super.buildLayout();
+        getFormLayout().addComponent(typeKey, 4);
+        getFormLayout().addComponent(assignOptiongroup, 5);
 
-        selectors.add(colorSelect);
+        final HorizontalLayout mainLayout = new HorizontalLayout();
 
-        colorPickerLayout = new VerticalLayout();
-        colorPickerLayout.setStyleName("rgb-vertical-layout");
-        colorPickerLayout.addComponent(selPreview);
-        colorPickerLayout.addComponent(colorSelect);
+        mainLayout.addComponent(getFormLayout());
 
-        fieldLayout = new VerticalLayout();
-        fieldLayout.setSizeUndefined();
-        fieldLayout.setSpacing(true);
-        fieldLayout.setMargin(false);
-        // fieldLayout.setWidth("100%");
-        // fieldLayout.setHeight(null);
-        fieldLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
-        fieldLayout.addComponent(createOptiongroup);
-        fieldLayout.addComponent(comboLayout);
-        fieldLayout.addComponent(madatoryLabel);
-        fieldLayout.addComponent(typeName);
-        fieldLayout.addComponent(typeKey);
-        fieldLayout.addComponent(typeDesc);
-        fieldLayout.addComponent(assignOptiongroup);
+        colorLayout = new HorizontalLayout();
+        sliderLayout = new VerticalLayout();
+        final HorizontalLayout chooseColorLayout = new HorizontalLayout();
+        chooseColorLayout.addComponents(colorLabel, tagColorPreviewBtn);
+        chooseColorLayout.setComponentAlignment(colorLabel, Alignment.TOP_CENTER);
+        chooseColorLayout.setComponentAlignment(tagColorPreviewBtn, Alignment.TOP_CENTER);
+        sliderLayout.addComponent(chooseColorLayout);
+        colorLayout.addComponent(sliderLayout);
 
-        final HorizontalLayout colorLabelLayout = new HorizontalLayout();
-        colorLabelLayout.addComponents(colorLabel, tagColorPreviewBtn);
-        fieldLayout.addComponent(colorLabelLayout);
-
-        // final HorizontalLayout buttonLayout = new HorizontalLayout();
-        // buttonLayout.addComponent(saveTag);
-        // buttonLayout.addComponent(discardTag);
-        // buttonLayout.setComponentAlignment(discardTag,
-        // Alignment.BOTTOM_RIGHT);
-        // buttonLayout.setComponentAlignment(saveTag, Alignment.BOTTOM_LEFT);
-        // buttonLayout.addStyleName("window-style");
-        // buttonLayout.setWidth("152px");
-
-        // TODO MR WINDOW
-
-        final VerticalLayout fieldButtonLayout = new VerticalLayout();
-        fieldButtonLayout.addComponent(fieldLayout);
-        // fieldButtonLayout.addComponent(buttonLayout);
-
-        mainLayout = new HorizontalLayout();
-        mainLayout.addComponent(fieldButtonLayout);
-        setCompositionRoot(mainLayout);
-        typeName.focus();
+        final VerticalLayout mainWindowLayout = new VerticalLayout();
+        mainWindowLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
+        mainWindowLayout.addComponent(mainLayout);
+        mainWindowLayout.addComponent(colorLayout);
     }
 
-    private void addListeners() {
-        colorSelect.addColorChangeListener(this);
-        selPreview.addColorChangeListener(this);
-        tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
-        createOptiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
-        typeNameComboBox.addValueChangeListener(event -> typeNameChosen(event));
-        slidersValueChangeListeners();
-    }
-
-    public CommonDialogWindow getWindow() {
+    @Override
+    public void createWindow() {
         reset();
-        swTypeWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> discard());
-        return swTypeWindow;
+        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event));
     }
 
     /**
@@ -302,71 +184,51 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      */
     private void createOptionValueChanged(final ValueChangeEvent event) {
         if ("Update Type".equals(event.getProperty().getValue())) {
-            typeName.clear();
-            typeDesc.clear();
+            tagName.clear();
+            tagDesc.clear();
             typeKey.clear();
             typeKey.setEnabled(false);
-            typeName.setEnabled(false);
+            tagName.setEnabled(false);
             assignOptiongroup.setEnabled(false);
 
-            populateTypeNameCombo();
+            populateTagNameCombo();
             // show target name combo
             comboLayout.addComponent(comboLabel);
-            comboLayout.addComponent(typeNameComboBox);
+            comboLayout.addComponent(tagNameComboBox);
         } else {
             typeKey.setEnabled(true);
-            typeName.setEnabled(true);
-            typeName.clear();
-            typeDesc.clear();
+            tagName.setEnabled(true);
+            tagName.clear();
+            tagDesc.clear();
             typeKey.clear();
             assignOptiongroup.setEnabled(true);
             // hide target name combo
             comboLayout.removeComponent(comboLabel);
-            comboLayout.removeComponent(typeNameComboBox);
+            comboLayout.removeComponent(tagNameComboBox);
         }
         // close the color picker layout
         tagPreviewBtnClicked = false;
         // reset the selected color - Set defualt color
         restoreComponentStyles();
-        getPreviewButtonColor(DEFAULT_COLOR);
-        selPreview.setColor(rgbToColorConverter(DEFAULT_COLOR));
+        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
+        getColorPickerLayout().getSelPreview()
+                .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
         // remove the sliders and color picker layout
-        fieldLayout.removeComponent(sliders);
-        mainLayout.removeComponent(colorPickerLayout);
 
-    }
-
-    /**
-     * Populate Software Module Type name combo.
-     */
-    public void populateTypeNameCombo() {
-        typeNameComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
-                new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
-        typeNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+        // TODO MR
+        // fieldLayout.removeComponent(sliders);
+        // mainLayout.removeComponent(colorPickerLayout);
     }
 
     /**
      * reset the components.
      */
-    private void reset() {
-        typeName.setEnabled(true);
-        typeName.clear();
+    @Override
+    protected void reset() {
+
+        super.reset();
         typeKey.clear();
-        typeDesc.clear();
-        restoreComponentStyles();
-
-        // hide target name combo
-        comboLayout.removeComponent(comboLabel);
-        comboLayout.removeComponent(typeNameComboBox);
-        fieldLayout.removeComponent(sliders);
-        mainLayout.removeComponent(colorPickerLayout);
-
-        createOptiongroup.select(createTypeStr);
         assignOptiongroup.select(singleAssignStr);
-        // Default green color
-        selectedColor = new Color(44, 151, 32);
-        selPreview.setColor(selectedColor);
-        tagPreviewBtnClicked = false;
     }
 
     private void typeNameChosen(final ValueChangeEvent event) {
@@ -379,21 +241,23 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     }
 
     private void resetTagNameField() {
-        typeName.setEnabled(false);
-        typeName.clear();
+        tagName.setEnabled(false);
+        tagName.clear();
 
         typeKey.clear();
-        typeDesc.clear();
+        tagDesc.clear();
         restoreComponentStyles();
-        fieldLayout.removeComponent(sliders);
-        mainLayout.removeComponent(colorPickerLayout);
+
+        // fieldLayout.removeComponent(sliders);
+        // mainLayout.removeComponent(colorPickerLayout);
 
         assignOptiongroup.select(singleAssignStr);
         // Default green color
-        selectedColor = new Color(44, 151, 32);
-        selPreview.setColor(selectedColor);
-        tagPreviewBtnClicked = false;
 
+        // TODO extra method
+        colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
+        colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
+        tagPreviewBtnClicked = false;
     }
 
     /**
@@ -404,11 +268,11 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      *            as the selected tag from combo
      */
     private void setTypeTagCombo(final String targetTagSelected) {
-        typeName.setValue(targetTagSelected);
+        tagName.setValue(targetTagSelected);
         final SoftwareModuleType selectedTypeTag = swTypeManagementService
                 .findSoftwareModuleTypeByName(targetTagSelected);
         if (null != selectedTypeTag) {
-            typeDesc.setValue(selectedTypeTag.getDescription());
+            tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == Integer.MAX_VALUE) {
                 assignOptiongroup.setValue(multiAssignStr);
@@ -416,33 +280,23 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
                 assignOptiongroup.setValue(singleAssignStr);
             }
 
+            // TODO extra method
             if (null == selectedTypeTag.getColour()) {
-                selectedColor = new Color(44, 151, 32);
-                selPreview.setColor(selectedColor);
-                colorSelect.setColor(selectedColor);
-                createDynamicStyleForComponents(typeName, typeKey, typeDesc, DEFAULT_COLOR);
-                getPreviewButtonColor(DEFAULT_COLOR);
+                getColorPickerLayout()
+                        .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+                getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
+                createDynamicStyleForComponents(tagName, typeKey, tagDesc, ColorPickerConstants.DEFAULT_COLOR);
+                getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
             } else {
-                selectedColor = rgbToColorConverter(selectedTypeTag.getColour());
-                selPreview.setColor(selectedColor);
-                colorSelect.setColor(selectedColor);
-                createDynamicStyleForComponents(typeName, typeKey, typeDesc, selectedTypeTag.getColour());
+                getColorPickerLayout()
+                        .setSelectedColor(ColorPickerHelper.rgbToColorConverter(selectedTypeTag.getColour()));
+                getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+                getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
+                createDynamicStyleForComponents(tagName, typeKey, tagDesc, selectedTypeTag.getColour());
                 getPreviewButtonColor(selectedTypeTag.getColour());
             }
-
         }
-    }
-
-    /**
-     * Dynamic styles for window.
-     *
-     * @param top
-     *            int value
-     * @param marginLeft
-     *            int value
-     */
-    private void getPreviewButtonColor(final String color) {
-        Page.getCurrent().getJavaScript().execute(HawkbitCommonUtil.getPreviewButtonColorScript(color));
     }
 
     private void createUpdateOptionGroup() {
@@ -482,34 +336,6 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         assignOptiongroup.select(tagOptions.get(0));
     }
 
-    private Label getMandatoryLabel() {
-        final Label label = new Label(i18n.get("label.mandatory.field"));
-        label.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_SMALL);
-        return label;
-    }
-
-    private Slider createRGBSlider(final String caption, final String styleName) {
-        final Slider slider = new Slider(caption, 0, 255);
-        slider.setImmediate(true);
-        slider.setWidth("150px");
-        slider.addStyleName(styleName);
-        return slider;
-    }
-
-    private void setRgbSliderValues(final Color color) {
-        try {
-            final double redColorValue = color.getRed();
-            redSlider.setValue(new Double(redColorValue));
-            final double blueColorValue = color.getBlue();
-            blueSlider.setValue(new Double(blueColorValue));
-            final double greenColorValue = color.getGreen();
-            greenSlider.setValue(new Double(greenColorValue));
-        } catch (final ValueOutOfBoundsException e) {
-            LOG.error("Unable to set RGB color value to " + color.getRed() + "," + color.getGreen() + ","
-                    + color.getBlue(), e);
-        }
-    }
-
     /**
      * Value change listeners implementations of sliders.
      */
@@ -546,19 +372,20 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         });
     }
 
+    // TODO extra method
     private void setColorToComponents(final Color newColor) {
         setColor(newColor);
-        colorSelect.setColor(newColor);
+        getColorPickerLayout().getColorSelect().setColor(newColor);
         getPreviewButtonColor(newColor.getCSS());
-        createDynamicStyleForComponents(typeName, typeKey, typeDesc, newColor.getCSS());
+        createDynamicStyleForComponents(tagName, typeKey, tagDesc, newColor.getCSS());
     }
 
     /**
      * reset the tag name and tag description component border color.
      */
     private void restoreComponentStyles() {
-        typeName.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        typeDesc.removeStyleName(TYPE_DESC_DYNAMIC_STYLE);
+        tagName.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
+        tagDesc.removeStyleName(TYPE_DESC_DYNAMIC_STYLE);
         typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
         getPreviewButtonColor(DEFAULT_COLOR);
     }
@@ -566,7 +393,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     private void save() {
         if (mandatoryValuesPresent()) {
             final SoftwareModuleType existingType = swTypeManagementService
-                    .findSoftwareModuleTypeByName(typeName.getValue());
+                    .findSoftwareModuleTypeByName(tagName.getValue());
             if (createOptiongroup.getValue().equals(createTypeStr)) {
                 if (!checkIsKeyDuplicate(typeKey.getValue()) && !checkIsDuplicate(existingType)) {
                     createNewSWModuleType();
@@ -588,14 +415,15 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         return Boolean.FALSE;
     }
 
+    @Override
     private Boolean mandatoryValuesPresent() {
-        if (Strings.isNullOrEmpty(typeName.getValue()) && Strings.isNullOrEmpty(typeKey.getValue())) {
+        if (Strings.isNullOrEmpty(tagName.getValue()) && Strings.isNullOrEmpty(typeKey.getValue())) {
             if (createOptiongroup.getValue().equals(createTypeStr)) {
                 uiNotification.displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
             }
             if (createOptiongroup.getValue().equals(updateTypeStr)) {
-                if (null == typeNameComboBox.getValue()) {
-                    uiNotification.displayValidationError(i18n.get("message.error.missing.typename"));
+                if (null == tagNameComboBox.getValue()) {
+                    uiNotification.displayValidationError(i18n.get("message.error.missing.tagName"));
                 } else {
                     uiNotification.displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
                 }
@@ -614,24 +442,15 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         return Boolean.FALSE;
     }
 
-    private void closeWindow() {
-        swTypeWindow.close();
-        UI.getCurrent().removeWindow(swTypeWindow);
-    }
-
-    private void discard() {
-        UI.getCurrent().removeWindow(swTypeWindow);
-    }
-
     /**
      * Create new tag.
      */
     private void createNewSWModuleType() {
         int assignNumber = 0;
         final String colorPicked = getColorPickedString();
-        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeName.getValue());
+        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
-        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
+        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final String assignValue = (String) assignOptiongroup.getValue();
         if (null != assignValue && assignValue.equalsIgnoreCase(singleAssignStr)) {
             assignNumber = 1;
@@ -684,8 +503,8 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      */
     private void updateSWModuleType(final SoftwareModuleType existingType) {
 
-        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeName.getValue());
-        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
+        final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
+        final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != typeNameValue) {
             existingType.setName(typeNameValue);
 
@@ -708,14 +527,15 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      * Open color picker on click of preview button. Auto select the color based
      * on target tag if already selected.
      */
+    @Override
     private void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             final String selectedOption = (String) createOptiongroup.getValue();
             if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTypeStr)) {
-                if (null != typeNameComboBox.getValue()) {
+                if (null != tagNameComboBox.getValue()) {
 
                     final SoftwareModuleType typeSelected = swTypeManagementService
-                            .findSoftwareModuleTypeByName(typeNameComboBox.getValue().toString());
+                            .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
                     if (null != typeSelected) {
                         selectedColor = typeSelected.getColour() != null ? rgbToColorConverter(typeSelected.getColour())
                                 : rgbToColorConverter(DEFAULT_COLOR);
@@ -776,8 +596,8 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         selectedColor = color;
         selPreview.setColor(selectedColor);
         final String colorPickedPreview = selPreview.getColor().getCSS();
-        if (typeName.isEnabled() && null != colorSelect) {
-            createDynamicStyleForComponents(typeName, typeKey, typeDesc, colorPickedPreview);
+        if (tagName.isEnabled() && null != colorSelect) {
+            createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
             colorSelect.setColor(selPreview.getColor());
         }
 
@@ -798,7 +618,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         }
         setRgbSliderValues(selectedColor);
         getPreviewButtonColor(event.getColor().getCSS());
-        createDynamicStyleForComponents(typeName, typeKey, typeDesc, event.getColor().getCSS());
+        createDynamicStyleForComponents(tagName, typeKey, tagDesc, event.getColor().getCSS());
     }
 
     /**
@@ -808,12 +628,12 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      * @param tagDesc
      * @param taregtTagColor
      */
-    private void createDynamicStyleForComponents(final TextField typeName, final TextField typeKey,
-            final TextArea typeDesc, final String typeTagColor) {
+    private void createDynamicStyleForComponents(final TextField tagName, final TextField typeKey,
+            final TextArea tagDesc, final String typeTagColor) {
         getTargetDynamicStyles(typeTagColor);
-        typeName.addStyleName(TYPE_NAME_DYNAMIC_STYLE);
+        tagName.addStyleName(TYPE_NAME_DYNAMIC_STYLE);
         typeKey.addStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        typeDesc.addStyleName(TYPE_DESC_DYNAMIC_STYLE);
+        tagDesc.addStyleName(TYPE_DESC_DYNAMIC_STYLE);
     }
 
     /**
@@ -825,6 +645,25 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     private void getTargetDynamicStyles(final String colorPickedPreview) {
         Page.getCurrent().getJavaScript()
                 .execute(HawkbitCommonUtil.changeToNewSelectedPreviewColor(colorPickedPreview));
+    }
+
+    @Override
+    protected void save(final ClickEvent event) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    protected void populateTagNameCombo() {
+        tagNameComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
+                new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
+        tagNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
+    }
+
+    @Override
+    protected void setTagDetails(final String tagSelected) {
+        // TODO Auto-generated method stub
+
     }
 
 }

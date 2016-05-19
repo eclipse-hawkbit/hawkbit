@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerLayout;
@@ -75,9 +74,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected CommonDialogWindow window;
 
     @Autowired
-    private transient UiProperties uiProperties;
-
-    @Autowired
     protected I18N i18n;
 
     @Autowired
@@ -104,7 +100,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected ComboBox tagNameComboBox;
 
     protected final VerticalLayout comboLayout = new VerticalLayout();
-    private final ColorPickerLayout colorPickerLayout = new ColorPickerLayout();
+    protected final ColorPickerLayout colorPickerLayout = new ColorPickerLayout();
     private final HorizontalLayout mainLayout = new HorizontalLayout();
     final VerticalLayout contentLayout = new VerticalLayout();
 
@@ -238,7 +234,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         if (!tagPreviewBtnClicked) {
             setColor();
             colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
-            contentLayout.addComponent(colorPickerLayout.getSliders());
             mainLayout.addComponent(colorPickerLayout);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.BOTTOM_CENTER);
         }
@@ -288,13 +283,11 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         }
     }
 
-    private void resetTagNameField() {
+    protected void resetTagNameField() {
         tagName.setEnabled(false);
         tagName.clear();
-
         tagDesc.clear();
         restoreComponentStyles();
-        // fieldLayout.removeComponent(colorPickerLayout.getSliders());
         mainLayout.removeComponent(colorPickerLayout);
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
@@ -349,7 +342,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         // hide target name combo
         comboLayout.removeComponent(comboLabel);
         comboLayout.removeComponent(tagNameComboBox);
-        contentLayout.removeComponent(colorPickerLayout.getSliders());
         mainLayout.removeComponent(colorPickerLayout);
 
         optiongroup.select(createTagNw);
