@@ -158,7 +158,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             detailAndUploadLayout.setComponentAlignment(dadw, Alignment.MIDDLE_CENTER);
         }
 
-        detailAndUploadLayout.setExpandRatio(artifactDetailsLayout, 1.0f);
+        detailAndUploadLayout.setExpandRatio(artifactDetailsLayout, 1.0F);
         detailAndUploadLayout.setSizeFull();
         detailAndUploadLayout.addStyleName("group");
         detailAndUploadLayout.setSpacing(true);
@@ -177,9 +177,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.addComponent(detailAndUploadLayout, 2, 0);
         mainLayout.addComponent(deleteActionsLayout, 1, 1);
         mainLayout.addComponent(uplaodButtonsLayout, 2, 1);
-        mainLayout.setRowExpandRatio(0, 1.0f);
-        mainLayout.setColumnExpandRatio(1, 0.5f);
-        mainLayout.setColumnExpandRatio(2, 0.5f);
+        mainLayout.setRowExpandRatio(0, 1.0F);
+        mainLayout.setColumnExpandRatio(1, 0.5F);
+        mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
         mainLayout.setComponentAlignment(uplaodButtonsLayout, Alignment.BOTTOM_CENTER);
         return mainLayout;
@@ -201,8 +201,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private void maximizeSwTable() {
         mainLayout.removeComponent(detailAndUploadLayout);
         removeOtherComponents();
-        mainLayout.setColumnExpandRatio(1, 1f);
-        mainLayout.setColumnExpandRatio(2, 0f);
+        mainLayout.setColumnExpandRatio(1, 1F);
+        mainLayout.setColumnExpandRatio(2, 0F);
     }
 
     private void minimizeArtifactoryDetails() {
@@ -219,15 +219,15 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.removeComponent(smTableLayout);
         detailAndUploadLayout.removeComponent(dadw);
         removeOtherComponents();
-        mainLayout.setColumnExpandRatio(1, 0f);
-        mainLayout.setColumnExpandRatio(2, 1f);
+        mainLayout.setColumnExpandRatio(1, 0F);
+        mainLayout.setColumnExpandRatio(2, 1F);
     }
 
     private void addOtherComponents() {
         mainLayout.addComponent(deleteActionsLayout, 1, 1);
         mainLayout.addComponent(uplaodButtonsLayout, 2, 1);
-        mainLayout.setColumnExpandRatio(1, 0.5f);
-        mainLayout.setColumnExpandRatio(2, 0.5f);
+        mainLayout.setColumnExpandRatio(1, 0.5F);
+        mainLayout.setColumnExpandRatio(2, 0.5F);
         mainLayout.setComponentAlignment(deleteActionsLayout, Alignment.BOTTOM_CENTER);
         mainLayout.setComponentAlignment(uplaodButtonsLayout, Alignment.BOTTOM_CENTER);
     }
@@ -240,6 +240,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     private void hideDropHints() {
         UI.getCurrent().addClickListener(new ClickListener() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void click(final com.vaadin.event.MouseEvents.ClickEvent event) {
                 eventBus.publish(this, DragEvent.HIDE_DROP_HINT);

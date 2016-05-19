@@ -114,7 +114,7 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication manager without principal")
     public void testAuthenticationeBadCredantialsWithoutPricipal() {
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
-                FileResource.sha1("12345"));
+                FileResource.createFileResourceBySha1("12345"));
         try {
             authenticationManager.doAuthenticate(securityToken);
             fail("BadCredentialsException was excepeted since principal was missing");
@@ -128,7 +128,7 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication manager without wrong credential")
     public void testAuthenticationBadCredantialsWithWrongCredential() {
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
-                FileResource.sha1("12345"));
+                FileResource.createFileResourceBySha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
@@ -146,7 +146,7 @@ public class AmqpControllerAuthenticationTest {
     @Description("Tests authentication successfull")
     public void testSuccessfullAuthentication() {
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
-                FileResource.sha1("12345"));
+                FileResource.createFileResourceBySha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
@@ -161,7 +161,7 @@ public class AmqpControllerAuthenticationTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
 
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
-                FileResource.sha1("12345"));
+                FileResource.createFileResourceBySha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -180,7 +180,7 @@ public class AmqpControllerAuthenticationTest {
     public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
-                FileResource.sha1("12345"));
+                FileResource.createFileResourceBySha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
@@ -203,7 +203,7 @@ public class AmqpControllerAuthenticationTest {
     public void testSuccessfullMessageAuthentication() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, CONTROLLLER_ID,
-                FileResource.sha1("12345"));
+                FileResource.createFileResourceBySha1("12345"));
         when(tenantConfigurationManagement.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);

@@ -22,15 +22,11 @@ import org.springframework.util.AntPathMatcher;
  * An {@link AuthenticationDetailsSource} implementation which retrieves the
  * tenant from a request pattern {@link #TENANT_AWARE_CONTROLLER_PATTERN} and
  * stores the retrieved tenant in the {@link TenantAwareAuthenticationDetails}.
- * 
  *
  */
 public class ControllerTenantAwareAuthenticationDetailsSource
         implements AuthenticationDetailsSource<HttpServletRequest, TenantAwareAuthenticationDetails> {
 
-    /**
-    * 
-    */
     private static final String TENANT_AWARE_CONTROLLER_PATTERN = "/{tenant}/controller/**";
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ControllerTenantAwareAuthenticationDetailsSource.class);
@@ -38,19 +34,12 @@ public class ControllerTenantAwareAuthenticationDetailsSource
     private final AntPathMatcher pathExtractor;
 
     /**
-    * 
-    */
+     * Constructor.
+     */
     public ControllerTenantAwareAuthenticationDetailsSource() {
         pathExtractor = new AntPathMatcher();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.security.authentication.AuthenticationDetailsSource#
-     * buildDetails(java. lang.Object)
-     */
     @Override
     public TenantAwareAuthenticationDetails buildDetails(final HttpServletRequest request) {
         return new TenantAwareWebAuthenticationDetails(getTenantFromRequestUri(request), request.getRemoteAddr(), true);
