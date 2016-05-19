@@ -1,6 +1,6 @@
 # Eclipse.IoT hawkBit - Example Core Feign Client 
 
-This modules contains core resources that are needed by the hawkBit Example DDI Feign Client and the hawkBit Example Mgmt Feign Client.
+This modules contains core beans that are needed to create a [Feign Client](https://github.com/Netflix/feign) with hwakBit.
 
 # Compile
 

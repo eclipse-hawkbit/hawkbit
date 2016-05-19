@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.client.resource;
 
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,8 @@ import feign.Param;
 /**
  * Client binding for the SoftwareModule resource of the management API.
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtSoftwareModuleClientResource.PATH)
+@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
 public interface MgmtSoftwareModuleClientResource extends MgmtSoftwareModuleRestApi {
-
-    static String PATH = "rest/v1/softwaremodules";
 
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/artifacts")
     ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,

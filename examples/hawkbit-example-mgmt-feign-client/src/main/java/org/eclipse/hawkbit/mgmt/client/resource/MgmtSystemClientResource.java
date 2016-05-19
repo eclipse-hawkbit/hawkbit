@@ -8,15 +8,14 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemManagementRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemRestApi;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
- * Client binding for the {@link MgmtSystemManagementRestApi}.
+ * Client binding for the {@link MgmtSystemRestApi}.
  *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + SystemManagementClientResource.PATH)
-public interface SystemManagementClientResource extends MgmtSystemManagementRestApi {
-    static String PATH = "system/admin";
-
+@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING)
+public interface MgmtSystemClientResource extends MgmtSystemRestApi {
 }

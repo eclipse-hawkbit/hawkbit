@@ -9,14 +9,13 @@
 package org.eclipse.hawkbit.mgmt.client.resource;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
  *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtDownloadArtifactClientResource.PATH)
+@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
 public interface MgmtDownloadArtifactClientResource extends MgmtDownloadArtifactRestApi {
-
-    static String PATH = "rest/v1/softwaremodules";
 
 }

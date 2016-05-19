@@ -1,4 +1,4 @@
-# Eclipse.IoT hawkBit - Management API Example Client
+# Eclipse.IoT hawkBit - Example Management Feign Client 
 
 Example Spring Boot client that shows how to efficiently use the hawkBit Example Management Fiegn Client and the hawkBit Management API.
 
@@ -10,13 +10,13 @@ Run getting started example
 
 
 
-    $ java -jar hawkbit-mgmt-api-client-#version#.jar
+    $ java -jar hawkbit-example-mgmt-simulator-#version#.jar
 
 
 Run create and start rollout example
 
 
-    $ java -jar hawkbit-mgmt-api-client-#version#.jar --createrollout
+    $ java -jar hawkbit-example-mgmt-simulator-#version#.jar --createrollout
 
 
 ## This example shows

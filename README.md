@@ -41,9 +41,9 @@ $ java -jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.
 $ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 #### Generate Getting Started data
-[Example Management API Client](examples/hawkbit-mgmt-api-client)
+[Example Management API Client](examples/hawkbit-example-mgmt-simulator)
 ```
-$ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#version#.jar
+$ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
 ```
 
 # Releases and Roadmap
@@ -70,11 +70,9 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 * `hawkbit-http-security` : Implementation for security filters for HTTP.  
 * `hawkbit-mgmt-api` : The hawkBit Management API
 * `hawkbit-mgmt-resource` : Implementation of the hawkBit Management API
-* `hawkbit-mgmt-ui` : Vaadin UI.  
 * `hawkbit-repository` : Repository implementation based on SQL for all meta-data.   
 * `hawkbit-rest-core` : Core elements for the rest modules.
 * `hawkbit-security-core` : Core security elements.  
 * `hawkbit-security-integration` : Security integration elements to integrate security into hawkBit.  
-* `hawkbit-system-api` : The hawkBit System API
-* `hawkbit-system-resource` : Implementation of the hawkBit System API
 * `hawkbit-test-report` : Test reports
+* `hawkbit-ui` : Vaadin UI.  
