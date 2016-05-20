@@ -29,12 +29,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Throwables;
 
 /**
- * 
+ * A Service which provide to run system code.
  */
 @Service
 public class SystemSecurityContext {
 
-    private static final Logger logger = LoggerFactory.getLogger(SystemSecurityContext.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SystemSecurityContext.class);
 
     private final TenantAware tenantAware;
 
@@ -67,19 +67,20 @@ public class SystemSecurityContext {
     public <T> T runAsSystem(final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            logger.debug("entering system code execution");
+            LOGGER.debug("entering system code execution");
             return tenantAware.runAsTenant(tenantAware.getCurrentTenant(), () -> {
                 try {
                     setSystemContext();
                     return callable.call();
-                } catch (final Exception e) {
+                    // The callable API throws a Exception ant to specific
+                } catch (@SuppressWarnings("squid:S2221") final Exception e) {
                     throw Throwables.propagate(e);
                 }
             });
 
         } finally {
             SecurityContextHolder.setContext(oldContext);
-            logger.debug("leaving system code execution");
+            LOGGER.debug("leaving system code execution");
         }
     }
 
@@ -97,6 +98,9 @@ public class SystemSecurityContext {
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
+    /**
+     * Authentication with the system role.
+     */
     public static class SystemCodeAuthentication implements Authentication {
 
         private static final long serialVersionUID = 1L;
