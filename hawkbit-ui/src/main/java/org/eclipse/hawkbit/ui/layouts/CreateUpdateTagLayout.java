@@ -6,10 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.tag;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.eclipse.hawkbit.ui.layouts;
 
 import javax.annotation.PreDestroy;
 
@@ -45,6 +42,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
@@ -65,13 +63,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateTagLayout.class);
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
-    private static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
+    protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
     protected static final String MESSAGE_ERROR_MISSING_TAGNAME = "message.error.missing.tagname";
-
-    protected String createTagNw;
-    protected String updateTagNw;
-
-    protected CommonDialogWindow window;
 
     @Autowired
     protected I18N i18n;
@@ -90,7 +83,11 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     private final FormLayout formLayout = new FormLayout();
 
-    private Label comboLabel;
+    protected String createTagStr;
+    protected String updateTagStr;
+    protected Label comboLabel;
+    protected CommonDialogWindow window;
+
     protected Label colorLabel;
     protected Label madatoryLabel;
     protected TextField tagName;
@@ -101,8 +98,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
     protected final VerticalLayout comboLayout = new VerticalLayout();
     protected final ColorPickerLayout colorPickerLayout = new ColorPickerLayout();
-    private final HorizontalLayout mainLayout = new HorizontalLayout();
-    final VerticalLayout contentLayout = new VerticalLayout();
+    protected final GridLayout mainLayout = new GridLayout(4, 4);
+    protected final VerticalLayout contentLayout = new VerticalLayout();
 
     protected boolean tagPreviewBtnClicked = false;
 
@@ -157,8 +154,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     }
 
     protected void createRequiredComponents() {
-        createTagNw = i18n.get("label.create.tag");
-        updateTagNw = i18n.get("label.update.tag");
+
+        createTagStr = i18n.get("label.create.tag");
+        updateTagStr = i18n.get("label.update.tag");
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag"), null);
         madatoryLabel = getMandatoryLabel();
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
@@ -208,10 +206,10 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         contentLayout.addComponent(colorLabelLayout);
         contentLayout.setComponentAlignment(formLayout, Alignment.MIDDLE_CENTER);
         contentLayout.setComponentAlignment(colorLabelLayout, Alignment.MIDDLE_LEFT);
-        contentLayout.setSizeFull();
+        contentLayout.setSizeUndefined();
 
         mainLayout.setSizeFull();
-        mainLayout.addComponent(contentLayout);
+        mainLayout.addComponent(contentLayout, 0, 0);
 
         setCompositionRoot(mainLayout);
         tagName.focus();
@@ -233,16 +231,15 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             setColor();
-            colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
-            mainLayout.addComponent(colorPickerLayout);
-            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.BOTTOM_CENTER);
+            mainLayout.addComponent(colorPickerLayout, 1, 0);
+            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
         }
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
     private void setColor() {
         final String selectedOption = (String) optiongroup.getValue();
-        if (selectedOption == null || !selectedOption.equalsIgnoreCase(updateTagNw)) {
+        if (selectedOption == null || !selectedOption.equalsIgnoreCase(updateTagStr)) {
             return;
         }
 
@@ -265,7 +262,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
                     ? ColorPickerHelper.rgbToColorConverter(targetTagSelected.getColour())
                     : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
         }
-
     }
 
     protected Label getMandatoryLabel() {
@@ -344,7 +340,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         comboLayout.removeComponent(tagNameComboBox);
         mainLayout.removeComponent(colorPickerLayout);
 
-        optiongroup.select(createTagNw);
+        optiongroup.select(createTagStr);
 
         // Default green color
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
@@ -401,7 +397,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     /**
      * reset the tag name and tag description component border color.
      */
-    private void restoreComponentStyles() {
+    protected void restoreComponentStyles() {
         tagName.removeStyleName(TAG_NAME_DYNAMIC_STYLE);
         tagDesc.removeStyleName(TAG_DESC_DYNAMIC_STYLE);
         tagName.addStyleName(SPUIDefinitions.TAG_NAME);
@@ -447,26 +443,22 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     /**
      * create option group with Create tag/Update tag based on permissions.
      */
-    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePersmission) {
-        final List<String> optionValues = new ArrayList<>();
-        if (hasCreatePermission) {
-            optionValues.add(createTagNw);
-        }
-        if (hasUpdatePersmission) {
-            optionValues.add(updateTagNw);
-        }
-        createOptionGroup(optionValues);
-    }
+    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
-    protected void createOptionGroup(final List<String> tagOptions) {
-        optiongroup = new OptionGroup("", tagOptions);
-        optiongroup.setCaption("Select Action");
+        optiongroup = new OptionGroup("Select Action");
         optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         optiongroup.addStyleName("custom-option-group");
-
         optiongroup.setNullSelectionAllowed(false);
-        if (!tagOptions.isEmpty()) {
-            optiongroup.select(tagOptions.get(0));
+
+        if (hasCreatePermission) {
+            optiongroup.addItem(createTagStr);
+            optiongroup.select(createTagStr);
+        }
+        if (hasUpdatePermission) {
+            optiongroup.addItem(updateTagStr);
+            if (!hasCreatePermission) {
+                optiongroup.select(updateTagStr);
+            }
         }
     }
 
@@ -530,7 +522,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         });
     }
 
-    private void setColorToComponents(final Color newColor) {
+    protected void setColorToComponents(final Color newColor) {
         setColor(newColor);
         colorPickerLayout.getColorSelect().setColor(newColor);
         getPreviewButtonColor(newColor.getCSS());
@@ -591,10 +583,10 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      */
     protected Boolean mandatoryValuesPresent() {
         if (Strings.isNullOrEmpty(tagName.getValue())) {
-            if (optiongroup.getValue().equals(createTagNw)) {
+            if (optiongroup.getValue().equals(createTagStr)) {
                 displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
             }
-            if (optiongroup.getValue().equals(updateTagNw)) {
+            if (optiongroup.getValue().equals(updateTagStr)) {
                 if (null == tagNameComboBox.getValue()) {
                     displayValidationError(i18n.get(MESSAGE_ERROR_MISSING_TAGNAME));
                 } else {

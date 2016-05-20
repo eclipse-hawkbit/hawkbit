@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.CreateUpdateTagLayout;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -93,7 +93,7 @@ public class CreateUpdateTargetTagLayoutWindow extends CreateUpdateTagLayout {
     public void save(final ClickEvent event) {
         if (mandatoryValuesPresent()) {
             final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagNw)) {
+            if (optiongroup.getValue().equals(createTagStr)) {
                 if (!checkIsDuplicate(existingTag)) {
                     createNewTag();
                 }

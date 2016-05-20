@@ -75,10 +75,11 @@ public class CommonDialogWindow extends Window {
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.MIDDLE_CENTER);
 
-        setSizeUndefined();
+        setHeight("60%");
+        setWidth("50%");
         setCaption(caption);
         setContent(mainLayout);
-        setResizable(false);
+        setResizable(true);
         center();
         setModal(true);
     }
@@ -108,6 +109,7 @@ public class CommonDialogWindow extends Window {
         }
         hlayout.addComponent(cancelButton);
         hlayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_RIGHT);
+        hlayout.addStyleName("actionButtonsMargin");
 
         return hlayout;
     }

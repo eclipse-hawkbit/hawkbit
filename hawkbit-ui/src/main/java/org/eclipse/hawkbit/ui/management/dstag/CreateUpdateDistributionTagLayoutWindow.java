@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.CreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.vaadin.spring.events.EventScope;
@@ -77,7 +77,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     public void save(final ClickEvent event) {
         if (mandatoryValuesPresent()) {
             final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagNw)) {
+            if (optiongroup.getValue().equals(createTagStr)) {
                 if (!checkIsDuplicate(existingDistTag)) {
                     crateNewTag();
                 }

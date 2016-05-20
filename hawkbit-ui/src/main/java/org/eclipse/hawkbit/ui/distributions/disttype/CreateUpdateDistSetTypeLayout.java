@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,12 +20,11 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
-import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -38,13 +36,11 @@ import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
@@ -54,13 +50,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
@@ -70,13 +61,12 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout implements ColorChangeListener, ColorSelector {
+public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
+        implements ColorChangeListener, ColorSelector {
 
     private static final long serialVersionUID = -5169398523815877767L;
     private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateDistSetTypeLayout.class);
 
-    private static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
-    private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
     private static final String DIST_TYPE_NAME = "name";
     private static final String DIST_TYPE_DESCRIPTION = "description";
     private static final String DIST_TYPE_MANDATORY = "mandatory";
@@ -94,15 +84,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     @Autowired
     private transient UiProperties uiProperties;
 
-    private String createDistTypeStr;
-    private String updateDistTypeStr;
-    private Label createDistType;
-    private Label updateDistType;
-    private Label comboLabel;
-    private TextField typeKey;
-
-    private VerticalLayout sliderLayout;
-    private HorizontalLayout colorLayout;
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
     private Table selectedTable;
@@ -112,10 +93,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
     @Override
     protected void createRequiredComponents() {
-        createDistTypeStr = i18n.get("label.create.type");
-        updateDistTypeStr = i18n.get("label.update.type");
-        createDistType = SPUIComponentProvider.getLabel(createDistTypeStr, null);
-        updateDistType = SPUIComponentProvider.getLabel(updateDistTypeStr, null);
+        createTypeStr = i18n.get("label.create.type");
+        updateTypeStr = i18n.get("label.update.type");
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
         madatoryLabel = getMandatoryLabel();
 
@@ -144,18 +123,16 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         tagNameComboBox.setImmediate(true);
         tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);
 
-        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
+        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
-
         tagColorPreviewBtn = new Button();
         tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        tagColorPreviewBtn.setStyleName("tag-color-preview");
+        tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        ColorPickerHelper.setRgbSliderValues(getColorPickerLayout());
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
 
-        createUpdateOptionGroup();
+        createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
     }
 
     @Override
@@ -166,30 +143,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
         distTypeSelectLayout = createTwinColumnLayout();
 
-        final HorizontalLayout mainLayout = new HorizontalLayout();
         final VerticalLayout twinTableLayout = new VerticalLayout();
         twinTableLayout.setSizeFull();
         twinTableLayout.addComponent(distTypeSelectLayout);
 
-        mainLayout.addComponent(getFormLayout());
-        mainLayout.addComponent(twinTableLayout);
-
-        colorLayout = new HorizontalLayout();
-        sliderLayout = new VerticalLayout();
-        final HorizontalLayout chooseColorLayout = new HorizontalLayout();
-        chooseColorLayout.addComponents(colorLabel, tagColorPreviewBtn);
-        chooseColorLayout.setComponentAlignment(colorLabel, Alignment.TOP_CENTER);
-        chooseColorLayout.setComponentAlignment(tagColorPreviewBtn, Alignment.TOP_CENTER);
-        sliderLayout.addComponent(chooseColorLayout);
-        colorLayout.addComponent(sliderLayout);
-
-        final VerticalLayout mainWindowLayout = new VerticalLayout();
-        mainWindowLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
-        mainWindowLayout.addComponent(mainLayout);
-        mainWindowLayout.addComponent(colorLayout);
+        mainLayout.addComponent(twinTableLayout, 2, 0);
     }
 
     private HorizontalLayout createTwinColumnLayout() {
+
         final HorizontalLayout twinColumnLayout = new HorizontalLayout();
         twinColumnLayout.setSizeFull();
         twinColumnLayout.setWidth("400px");
@@ -220,13 +182,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         twinColumnLayout.setExpandRatio(selectedTable, 0.48f);
         sourceTable.setVisibleColumns(new Object[] { DIST_TYPE_NAME });
         return twinColumnLayout;
-
     }
 
     /**
     *
     */
     private void buildSelectedTable() {
+
         selectedTable = new Table();
         selectedTable.setId(SPUIDefinitions.TWIN_TABLE_SELECTED_ID);
         selectedTable.setSelectable(true);
@@ -249,6 +211,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     }
 
     private void addTooltTipToSelectedTable() {
+
         selectedTable.setItemDescriptionGenerator(new ItemDescriptionGenerator() {
             private static final long serialVersionUID = 99432397408575324L;
 
@@ -270,6 +233,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     *
     */
     private void buildSourceTable() {
+
         sourceTable = new Table();
         sourceTable.setId(SPUIDefinitions.TWIN_TABLE_SOURCE_ID);
         sourceTable.setSelectable(true);
@@ -294,10 +258,10 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         getSourceTableData();
         addTooltip();
         sourceTable.select(sourceTable.firstItemId());
-
     }
 
     private void createSelectedTableContainer() {
+
         selectedTablecontainer = new IndexedContainer();
         selectedTablecontainer.addContainerProperty(DIST_TYPE_NAME, String.class, "");
         selectedTablecontainer.addContainerProperty(DIST_TYPE_DESCRIPTION, String.class, "");
@@ -306,16 +270,17 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
     @SuppressWarnings("unchecked")
     private void addSMType() {
+
         final Set<Long> selectedIds = (Set<Long>) sourceTable.getValue();
         if (null != selectedIds && !selectedIds.isEmpty()) {
             for (final Long id : selectedIds) {
                 addTargetTableData(id);
             }
         }
-
     }
 
     private void removeSMType() {
+
         @SuppressWarnings("unchecked")
         final Set<Long> selectedIds = (Set<Long>) selectedTable.getValue();
         if (null != selectedIds && !selectedIds.isEmpty()) {
@@ -328,6 +293,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
     @SuppressWarnings("unchecked")
     private void getSourceTableData() {
+
         sourceTablecontainer.removeAllItems();
         final Iterable<SoftwareModuleType> moduleTypeBeans = softwareManagement
                 .findSoftwareModuleTypesAll(new PageRequest(0, 1_000));
@@ -340,6 +306,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     }
 
     private void addTooltip() {
+
         sourceTable.setItemDescriptionGenerator(new ItemDescriptionGenerator() {
             private static final long serialVersionUID = 1L;
 
@@ -356,12 +323,14 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     }
 
     private void addTargetTableData(final Long selectedId) {
+
         getSelectedTableItemData(selectedId);
         sourceTable.removeItem(selectedId);
     }
 
     @SuppressWarnings("unchecked")
     private void getSelectedTableItemData(final Long id) {
+
         Item saveTblitem;
         if (null != selectedTablecontainer) {
             saveTblitem = selectedTablecontainer.addItem(id);
@@ -375,6 +344,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
     @SuppressWarnings("unchecked")
     private void addSourceTableData(final Long selectedId) {
+
         if (null != sourceTablecontainer) {
             Item saveTblitem;
             saveTblitem = sourceTablecontainer.addItem(selectedId);
@@ -386,48 +356,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         }
     }
 
-    // private void save() {
-    // if (mandatoryValuesPresent()) {
-    // final DistributionSetType existingDistTypeByKey =
-    // distributionSetManagement
-    // .findDistributionSetTypeByKey(typeKey.getValue());
-    // final DistributionSetType existingDistTypeByName =
-    // distributionSetManagement
-    // .findDistributionSetTypeByName(tagName.getValue());
-    // if (createOptiongroup.getValue().equals(createDistTypeStr)) {
-    // if (!checkIsDuplicateByKey(existingDistTypeByKey) &&
-    // !checkIsDuplicate(existingDistTypeByName)) {
-    // crateNewDistributionSetType();
-    // }
-    // } else {
-    // updateDistributionSetType(existingDistTypeByKey);
-    // }
-    // }
-    // }
-
-    private Boolean checkIsDuplicate(final DistributionSetType existingDistType) {
-        if (existingDistType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.tag.duplicate.check", new Object[] { existingDistType.getName() }));
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
-    }
-
-    private Boolean checkIsDuplicateByKey(final DistributionSetType existingDistType) {
-        if (existingDistType != null) {
-            uiNotification.displayValidationError(
-                    i18n.get("message.type.key.duplicate.check", new Object[] { existingDistType.getKey() }));
-            return Boolean.TRUE;
-        }
-        return Boolean.FALSE;
-    }
-
     /**
      * Create new DistSet Type tag.
      */
     @SuppressWarnings("unchecked")
     private void crateNewDistributionSetType() {
+
         final String colorPicked = ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview());
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
@@ -447,14 +381,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
                 } else {
                     newDistType.addOptionalModuleType(swModuleType);
                 }
-
             }
             if (null != typeDescValue) {
                 newDistType.setDescription(typeDescValue);
             }
 
             newDistType.setColour(colorPicked);
-
             newDistType = distributionSetManagement.createDistributionSetType(newDistType);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistType.getName() }));
             closeWindow();
@@ -472,6 +404,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      */
     @SuppressWarnings("unchecked")
     private void updateDistributionSetType(final DistributionSetType existingType) {
+
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
@@ -515,6 +448,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     }
 
     private DistributionSetType removeSWModuleTypesFromDistSetType(final String selectedDistSetType) {
+
         final DistributionSetType distSetType = fetchDistributionSetType(selectedDistSetType);
         if (!distSetType.getMandatoryModuleTypes().isEmpty()) {
             for (final SoftwareModuleType smType : distSetType.getMandatoryModuleTypes()) {
@@ -525,115 +459,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
             for (final SoftwareModuleType smType : distSetType.getOptionalModuleTypes()) {
                 distSetType.removeModuleType(smType.getId());
             }
-
         }
-
         return distSetType;
-    }
-
-    /**
-     * Open color picker on click of preview button. Auto select the color based
-     * on target tag if already selected.
-     */
-    // private void previewButtonClicked() {
-    // final String selectedOption = (String) createOptiongroup.getValue();
-    // if (null != selectedOption &&
-    // selectedOption.equalsIgnoreCase(updateDistTypeStr)
-    // && null != typeNameComboBox.getValue()) {
-    //
-    // final DistributionSetType existedDistType = distributionSetManagement
-    // .findDistributionSetTypeByKey(typeNameComboBox.getValue().toString());
-    // if (null != existedDistType) {
-    // getColorPickerLayout().setSelectedColor(existedDistType.getColour() !=
-    // null
-    // ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
-    // :
-    // ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-    // } else {
-    // getColorPickerLayout()
-    // .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-    // }
-    // }
-    // getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-    // sliderLayout.addComponent(sliders);
-    // colorLayout.addComponent(getColorPickerLayout());
-    // colorLayout.setComponentAlignment(getColorPickerLayout(),
-    // Alignment.MIDDLE_CENTER);
-    // }
-
-    /**
-     * Value change listeners implementations of sliders.
-     */
-    private void slidersValueChangeListeners() {
-        getColorPickerLayout().getRedSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = -8336732883300920839L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double red = (Double) event.getProperty().getValue();
-                final Color newColor = new Color((int) red, getColorPickerLayout().getSelectedColor().getGreen(),
-                        getColorPickerLayout().getSelectedColor().getBlue());
-                setColorToComponents(newColor);
-            }
-        });
-        getColorPickerLayout().getGreenSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1236358037711775663L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double green = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(getColorPickerLayout().getSelectedColor().getRed(), (int) green,
-                        getColorPickerLayout().getSelectedColor().getBlue());
-                setColorToComponents(newColor);
-            }
-        });
-        getColorPickerLayout().getBlueSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 8466370744686043947L;
-
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double blue = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(getColorPickerLayout().getSelectedColor().getRed(),
-                        getColorPickerLayout().getSelectedColor().getGreen(), (int) blue);
-                setColorToComponents(newColor);
-            }
-        });
-    }
-
-    private void setColorToComponents(final Color newColor) {
-        setColor(newColor);
-        getColorPickerLayout().getColorSelect().setColor(newColor);
-        getPreviewButtonColor(newColor.getCSS());
-        createDynamicStyleForComponents(tagName, typeKey, tagDesc, newColor.getCSS());
-    }
-
-    /**
-     * Set tag name and desc field border color based on chosen color.
-     *
-     * @param tagName
-     * @param tagDesc
-     * @param taregtTagColor
-     */
-    private void createDynamicStyleForComponents(final TextField tagName, final TextField typeKey,
-            final TextArea typeDesc, final String typeTagColor) {
-        tagName.removeStyleName(SPUIDefinitions.TYPE_NAME);
-        typeKey.removeStyleName(SPUIDefinitions.TYPE_KEY);
-        typeDesc.removeStyleName(SPUIDefinitions.TYPE_DESC);
-        getDistributionDynamicStyles(typeTagColor);
-        tagName.addStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        typeKey.addStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        typeDesc.addStyleName(TYPE_DESC_DYNAMIC_STYLE);
-    }
-
-    /**
-     * Get target style - Dynamically as per the color picked, cannot be done
-     * from the static css.
-     * 
-     * @param colorPickedPreview
-     */
-    private void getDistributionDynamicStyles(final String colorPickedPreview) {
-        Page.getCurrent().getJavaScript()
-                .execute(HawkbitCommonUtil.changeToNewSelectedPreviewColor(colorPickedPreview));
     }
 
     /*
@@ -647,7 +474,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     public void addColorChangeListener(final ColorChangeListener listener) {
 
         LOG.info("in side addColorChangeListener() ");
-
     }
 
     /*
@@ -670,8 +496,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
     protected void reset() {
 
         super.reset();
-        typeKey.clear();
-        restoreComponentStyles();
         selectedTable.removeAllItems();
         getSourceTableData();
     }
@@ -682,39 +506,22 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      * @param event
      *            ValueChangeEvent
      */
-    private void createOptionValueChanged(final ValueChangeEvent event) {
+    @Override
+    protected void createOptionValueChanged(final ValueChangeEvent event) {
+
+        super.createOptionValueChanged(event);
+
         if ("Update Type".equals(event.getProperty().getValue())) {
-            tagName.clear();
-            tagDesc.clear();
-            typeKey.clear();
             selectedTable.getContainerDataSource().removeAllItems();
             getSourceTableData();
-
-            typeKey.setEnabled(false);
-            tagName.setEnabled(false);
             distTypeSelectLayout.setEnabled(false);
-            populateTagNameCombo();
-            comboLayout.addComponent(comboLabel);
-            comboLayout.addComponent(tagNameComboBox);
         } else {
-            typeKey.setEnabled(true);
-            tagName.setEnabled(true);
-            window.setSaveButtonEnabled(true);
             distTypeSelectLayout.setEnabled(true);
-            tagName.clear();
-            tagDesc.clear();
-            typeKey.clear();
             selectedTable.setEnabled(true);
             selectedTable.getContainerDataSource().removeAllItems();
             sourceTable.getContainerDataSource().removeAllItems();
             getSourceTableData();
-            comboLayout.removeComponent(comboLabel);
-            comboLayout.removeComponent(tagNameComboBox);
         }
-        restoreComponentStyles();
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        getColorPickerLayout().getSelPreview()
-                .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
     }
 
     /**
@@ -722,6 +529,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      */
     @Override
     public void populateTagNameCombo() {
+
         tagNameComboBox.setContainerDataSource(getDistSetTypeLazyQueryContainer());
         tagNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
     }
@@ -732,6 +540,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      * @return
      */
     private LazyQueryContainer getDistSetTypeLazyQueryContainer() {
+
         final LazyQueryContainer disttypeContainer = HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<DistributionSetTypeBeanQuery>(DistributionSetTypeBeanQuery.class));
         disttypeContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", true, true);
@@ -741,6 +550,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
     @Override
     protected void resetTagNameField() {
+
         super.resetTagNameField();
         typeKey.setEnabled(false);
         typeKey.clear();
@@ -757,6 +567,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
      */
     @Override
     protected void setTagDetails(final String distSetTypeSelected) {
+
         tagName.setValue(distSetTypeSelected);
         getSourceTableData();
         selectedTable.getContainerDataSource().removeAllItems();
@@ -783,22 +594,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
             for (final SoftwareModuleType swModuleType : selectedTypeTag.getMandatoryModuleTypes()) {
                 addTargetTableforUpdate(swModuleType, true);
             }
-
-            if (null == selectedTypeTag.getColour()) {
-                getColorPickerLayout()
-                        .setSelectedColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-                getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
-                createDynamicStyleForComponents(tagName, typeKey, tagDesc, ColorPickerConstants.DEFAULT_COLOR);
-                getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-            } else {
-                getColorPickerLayout()
-                        .setSelectedColor(ColorPickerHelper.rgbToColorConverter(selectedTypeTag.getColour()));
-                getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-                getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
-                createDynamicStyleForComponents(tagName, typeKey, tagDesc, selectedTypeTag.getColour());
-                getPreviewButtonColor(selectedTypeTag.getColour());
-            }
+            setColorPickerComponentsColor(selectedTypeTag.getColour());
         }
     }
 
@@ -809,6 +605,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
 
     @SuppressWarnings("unchecked")
     private void addTargetTableforUpdate(final SoftwareModuleType swModuleType, final boolean mandatory) {
+
         Item saveTblitem;
         if (null != selectedTablecontainer) {
             saveTblitem = selectedTablecontainer.addItem(swModuleType.getId());
@@ -818,70 +615,26 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.components.colorpicker.ColorSelector#setColor(com.vaadin.
-     * shared.ui.colorpicker .Color)
-     */
-    @Override
-    public void setColor(final Color color) {
-        if (color == null) {
-            return;
-        }
-        getColorPickerLayout().setSelectedColor(color);
-        getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-        final String colorPickedPreview = getColorPickerLayout().getSelPreview().getColor().getCSS();
-        if (tagName.isEnabled() && null != getColorPickerLayout().getColorSelect()) {
-            createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
-            getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelPreview().getColor());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.components.colorpicker.ColorChangeListener#colorChanged(com
-     * .vaadin.ui.components .colorpicker.ColorChangeEvent)
-     */
-    @Override
-    public void colorChanged(final ColorChangeEvent event) {
-        setColor(event.getColor());
-        for (final ColorSelector select : getColorPickerLayout().getSelectors()) {
-            if (!event.getSource().equals(select) && select.equals(this)
-                    && !select.getColor().equals(getColorPickerLayout().getSelectedColor())) {
-                select.setColor(getColorPickerLayout().getSelectedColor());
-            }
-        }
-        ColorPickerHelper.setRgbSliderValues(getColorPickerLayout());
-        getPreviewButtonColor(event.getColor().getCSS());
-        createDynamicStyleForComponents(tagName, typeKey, tagDesc, event.getColor().getCSS());
-
-    }
-
     /**
      * reset the tag name and tag description component border color.
      */
-    private void restoreComponentStyles() {
-        tagName.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        tagDesc.removeStyleName(TYPE_DESC_DYNAMIC_STYLE);
+    @Override
+    protected void restoreComponentStyles() {
+
+        super.restoreComponentStyles();
         typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        tagName.addStyleName(SPUIDefinitions.DIST_SET_TYPE_NAME);
-        tagDesc.addStyleName(SPUIDefinitions.DIST_SET_TYPE_DESC);
         typeKey.addStyleName(SPUIDefinitions.DIST_SET_TYPE_KEY);
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
     }
 
     @Override
     protected void save(final ClickEvent event) {
+
         if (mandatoryValuesPresent()) {
             final DistributionSetType existingDistTypeByKey = distributionSetManagement
                     .findDistributionSetTypeByKey(typeKey.getValue());
             final DistributionSetType existingDistTypeByName = distributionSetManagement
                     .findDistributionSetTypeByName(tagName.getValue());
-            if (optiongroup.getValue().equals(createDistTypeStr)) {
+            if (optiongroup.getValue().equals(createTypeStr)) {
                 if (!checkIsDuplicateByKey(existingDistTypeByKey) && !checkIsDuplicate(existingDistTypeByName)) {
                     crateNewDistributionSetType();
                 }
@@ -898,27 +651,47 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTagLayout impleme
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event));
     }
 
-    private void createUpdateOptionGroup() {
-        final List<String> optionValues = new ArrayList<>();
-        if (permChecker.hasCreateDistributionPermission()) {
-            optionValues.add(createDistType.getValue());
+    @Override
+    protected Boolean mandatoryValuesPresent() {
+        if (Strings.isNullOrEmpty(tagName.getValue()) || Strings.isNullOrEmpty(typeKey.getValue())) {
+            if (optiongroup.getValue().equals(createTypeStr)) {
+                displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
+            }
+            if (optiongroup.getValue().equals(updateTypeStr)) {
+                if (null == tagNameComboBox.getValue()) {
+                    displayValidationError(i18n.get("message.error.missing.tagName"));
+                } else {
+                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
+                }
+            }
+            return Boolean.FALSE;
         }
-        if (permChecker.hasUpdateDistributionPermission()) {
-            optionValues.add(updateDistType.getValue());
-        }
-        createOptionGroupByValues(optionValues);
+        return Boolean.TRUE;
     }
 
-    private void createOptionGroupByValues(final List<String> typeOptions) {
-        optiongroup = new OptionGroup("", typeOptions);
-        optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
-        optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
-        optiongroup.addStyleName("custom-option-group");
-        optiongroup.setNullSelectionAllowed(false);
-        optiongroup.setCaption(null);
-        if (!typeOptions.isEmpty()) {
-            optiongroup.select(typeOptions.get(0));
+    @Override
+    protected void previewButtonClicked() {
+        if (!tagPreviewBtnClicked) {
+            final String selectedOption = (String) optiongroup.getValue();
+            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTypeStr)
+                    && null != tagNameComboBox.getValue()) {
+
+                final DistributionSetType existedDistType = distributionSetManagement
+                        .findDistributionSetTypeByKey(tagNameComboBox.getValue().toString());
+                if (null != existedDistType) {
+                    getColorPickerLayout().setSelectedColor(existedDistType.getColour() != null
+                            ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
+                            : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                } else {
+                    getColorPickerLayout().setSelectedColor(
+                            ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
+                }
+            }
+            getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
+            mainLayout.addComponent(colorPickerLayout, 1, 0);
+            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
         }
+        tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
 }
