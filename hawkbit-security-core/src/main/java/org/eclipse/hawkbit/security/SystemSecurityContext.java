@@ -72,7 +72,7 @@ public class SystemSecurityContext {
                 try {
                     setSystemContext();
                     return callable.call();
-                    // The callable API throws a Exception ant to specific
+                    // The callable API throws a Exception and not a specific
                 } catch (@SuppressWarnings("squid:S2221") final Exception e) {
                     throw Throwables.propagate(e);
                 }
