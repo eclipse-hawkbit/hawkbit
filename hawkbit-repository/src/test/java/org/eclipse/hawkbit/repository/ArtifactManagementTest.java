@@ -27,8 +27,11 @@ import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifactProvider;
+import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -70,15 +73,15 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
 
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        SoftwareModule sm2 = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
                 "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
-        SoftwareModule sm3 = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 3",
+        JpaSoftwareModule sm3 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 3",
                 "version 3", null, null);
         sm3 = softwareModuleRepository.save(sm3);
 
@@ -96,11 +99,11 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(result).isInstanceOf(LocalArtifact.class);
         assertThat(result.getSoftwareModule().getId()).isEqualTo(sm.getId());
         assertThat(result2.getSoftwareModule().getId()).isEqualTo(sm2.getId());
-        assertThat(((LocalArtifact) result).getFilename()).isEqualTo("file1");
-        assertThat(((LocalArtifact) result).getGridFsFileName()).isNotNull();
+        assertThat(((JpaLocalArtifact) result).getFilename()).isEqualTo("file1");
+        assertThat(((JpaLocalArtifact) result).getGridFsFileName()).isNotNull();
         assertThat(result).isNotEqualTo(result2);
-        assertThat(((LocalArtifact) result).getGridFsFileName())
-                .isEqualTo(((LocalArtifact) result2).getGridFsFileName());
+        assertThat(((JpaLocalArtifact) result).getGridFsFileName())
+                .isEqualTo(((JpaLocalArtifact) result2).getGridFsFileName());
 
         assertThat(artifactManagement.findLocalArtifactByFilename("file1").get(0).getSha1Hash())
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
@@ -116,7 +119,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Tests hard delete directly on repository.")
     public void hardDeleteSoftwareModule() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
@@ -137,18 +140,19 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Tests the creation of an external artifact metadata element.")
     public void createExternalArtifact() {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        SoftwareModule sm2 = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
                 "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
         final ExternalArtifactProvider provider = artifactManagement.createExternalArtifactProvider("provider X", null,
                 "https://fhghdfjgh", "/{version}/");
 
-        ExternalArtifact result = artifactManagement.createExternalArtifact(provider, null, sm.getId());
+        JpaExternalArtifact result = (JpaExternalArtifact) artifactManagement.createExternalArtifact(provider, null,
+                sm.getId());
 
         assertNotNull("The result of an external artifact should not be null", result);
         assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(1);
@@ -156,7 +160,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(result.getUrl()).isEqualTo("https://fhghdfjgh/{version}/");
         assertThat(result.getExternalArtifactProvider()).isEqualTo(provider);
 
-        result = artifactManagement.createExternalArtifact(provider, "/test", sm2.getId());
+        result = (JpaExternalArtifact) artifactManagement.createExternalArtifact(provider, "/test", sm2.getId());
         assertNotNull("The newly created external artifact should not be null", result);
         assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(2);
         assertThat(result.getUrl()).isEqualTo("https://fhghdfjgh/test");
@@ -168,14 +172,15 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     public void deleteExternalArtifact() {
         assertThat(artifactRepository.findAll()).isEmpty();
 
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        final ExternalArtifactProvider provider = artifactManagement.createExternalArtifactProvider("provider X", null,
-                "https://fhghdfjgh", "/{version}/");
+        final JpaExternalArtifactProvider provider = (JpaExternalArtifactProvider) artifactManagement
+                .createExternalArtifactProvider("provider X", null, "https://fhghdfjgh", "/{version}/");
 
-        final ExternalArtifact result = artifactManagement.createExternalArtifact(provider, null, sm.getId());
+        final JpaExternalArtifact result = (JpaExternalArtifact) artifactManagement.createExternalArtifact(provider,
+                null, sm.getId());
         assertNotNull("The newly created external artifact should not be null", result);
         assertThat(externalArtifactRepository.findAll()).contains(result).hasSize(1);
 
@@ -194,11 +199,11 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
     public void deleteLocalArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        SoftwareModule sm2 = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
                 "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
@@ -213,26 +218,25 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((LocalArtifact) result).getGridFsFileName())
-                .isNotEqualTo(((LocalArtifact) result2).getGridFsFileName());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
+        assertThat(((JpaLocalArtifact) result).getGridFsFileName())
+                .isNotEqualTo(((JpaLocalArtifact) result2).getGridFsFileName());
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
                         .isNotNull();
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result2).getGridFsFileName()))))
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result2).getGridFsFileName()))))
                         .isNotNull();
 
         artifactManagement.deleteLocalArtifact(result.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
-                        .isNull();
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result2).getGridFsFileName()))))
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName())))).isNull();
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result2).getGridFsFileName()))))
                         .isNotNull();
 
         artifactManagement.deleteLocalArtifact(result2.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result2).getGridFsFileName()))))
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result2).getGridFsFileName()))))
                         .isNull();
 
         assertThat(artifactRepository.findAll()).hasSize(0);
@@ -245,7 +249,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(artifactRepository.findAll()).isEmpty();
 
         // prepare test
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
@@ -272,11 +276,11 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Test the deletion of an artifact metadata where the binary is still linked to another "
             + "metadata element. The expected result is that the metadata is deleted but the binary kept.")
     public void deleteDuplicateArtifacts() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 
-        SoftwareModule sm2 = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
+        JpaSoftwareModule sm2 = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 2",
                 "version 2", null, null);
         sm2 = softwareModuleRepository.save(sm2);
 
@@ -290,21 +294,20 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(artifactRepository.findAll()).hasSize(2);
         assertThat(result.getId()).isNotNull();
         assertThat(result2.getId()).isNotNull();
-        assertThat(((LocalArtifact) result).getGridFsFileName())
-                .isEqualTo(((LocalArtifact) result2).getGridFsFileName());
+        assertThat(((JpaLocalArtifact) result).getGridFsFileName())
+                .isEqualTo(((JpaLocalArtifact) result2).getGridFsFileName());
 
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
                         .isNotNull();
         artifactManagement.deleteLocalArtifact(result.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
                         .isNotNull();
 
         artifactManagement.deleteLocalArtifact(result2.getId());
-        assertThat(operations.findOne(
-                new Query().addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
-                        .isNull();
+        assertThat(operations.findOne(new Query()
+                .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName())))).isNull();
     }
 
     /**
@@ -318,7 +321,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Loads an artifact based on given ID.")
     public void findArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -339,7 +342,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Loads an artifact binary based on given ID.")
     public void loadStreamOfLocalArtifact() throws NoSuchAlgorithmException, IOException {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        SoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -357,7 +360,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadLocalArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         try {
-            artifactManagement.loadLocalArtifactBinary(new LocalArtifact());
+            artifactManagement.loadLocalArtifactBinary(new JpaLocalArtifact());
             fail("Should not have worked with missing permission.");
         } catch (final InsufficientPermissionException e) {
 
@@ -367,10 +370,10 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Searches an artifact through the relations of a software module.")
     public void findLocalArtifactBySoftwareModule() {
-        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
-        SoftwareModule sm2 = new SoftwareModule(osType, "name 2", "version 2", null, null);
+        SoftwareModule sm2 = new JpaSoftwareModule(osType, "name 2", "version 2", null, null);
         sm2 = softwareManagement.createSoftwareModule(sm2);
 
         assertThat(artifactManagement.findLocalArtifactBySoftwareModule(pageReq, sm.getId())).isEmpty();
@@ -384,7 +387,7 @@ public class ArtifactManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Searches an artifact through the relations of a software module and the filename.")
     public void findByFilenameAndSoftwareModule() {
-        SoftwareModule sm = new SoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = new JpaSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         assertThat(artifactManagement.findByFilenameAndSoftwareModule("file1", sm.getId())).isEmpty();

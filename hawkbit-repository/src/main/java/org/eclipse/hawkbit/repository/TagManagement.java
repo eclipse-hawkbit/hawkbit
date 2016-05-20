@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -90,7 +89,7 @@ public interface TagManagement {
      *             if given object has already an ID.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<TargetTag> createTargetTags(@NotNull Iterable<TargetTag> targetTags);
+    List<TargetTag> createTargetTags(@NotNull Collection<TargetTag> targetTags);
 
     /**
      * Deletes {@link DistributionSetTag} by given
@@ -138,8 +137,7 @@ public interface TagManagement {
      * @return the found {@link DistributionSetTag}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetTag> findAllDistributionSetTags(@NotNull Specification<DistributionSetTag> spec,
-            @NotNull Pageable pageable);
+    Page<DistributionSetTag> findAllDistributionSetTags(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * @return all {@link TargetTag}s
@@ -168,7 +166,7 @@ public interface TagManagement {
      * @return the found {@link Target}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findAllTargetTags(@NotNull Specification<TargetTag> spec, @NotNull Pageable pageable);
+    Page<TargetTag> findAllTargetTags(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Find {@link DistributionSet} based on given name.
@@ -232,5 +230,19 @@ public interface TagManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTag updateTargetTag(@NotNull TargetTag targetTag);
+
+    /**
+     * Generates an empty {@link TargetTag} without persisting it.
+     * 
+     * @return {@link TargetTag} object
+     */
+    TargetTag generateTargetTag();
+
+    /**
+     * Generates an empty {@link DistributionSetTag} without persisting it.
+     * 
+     * @return {@link DistributionSetTag} object
+     */
+    DistributionSetTag generateDistributionSetTag();
 
 }

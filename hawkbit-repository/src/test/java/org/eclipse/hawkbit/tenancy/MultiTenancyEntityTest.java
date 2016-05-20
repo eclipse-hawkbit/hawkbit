@@ -13,8 +13,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.WithUser;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -162,7 +164,7 @@ public class MultiTenancyEntityTest extends AbstractIntegrationTest {
 
     private Target createTargetForTenant(final String controllerId, final String tenant) throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> targetManagement.createTarget(new Target(controllerId)));
+                () -> targetManagement.createTarget(new JpaTarget(controllerId)));
     }
 
     private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
@@ -180,12 +182,12 @@ public class MultiTenancyEntityTest extends AbstractIntegrationTest {
     private DistributionSet createDistributionSetForTenant(final String name, final String version, final String tenant)
             throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), () -> {
-            final DistributionSet ds = new DistributionSet();
+            final JpaDistributionSet ds = new JpaDistributionSet();
             ds.setName(name);
             ds.setTenant(tenant);
             ds.setVersion(version);
             ds.setType(distributionSetManagement
-                    .createDistributionSetType(new DistributionSetType("typetest", "test", "foobar")));
+                    .createDistributionSetType(new JpaDistributionSetType("typetest", "test", "foobar")));
             return distributionSetManagement.createDistributionSet(ds);
         });
     }

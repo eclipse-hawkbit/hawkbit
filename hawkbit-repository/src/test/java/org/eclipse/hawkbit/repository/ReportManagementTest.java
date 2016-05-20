@@ -29,13 +29,16 @@ import org.eclipse.hawkbit.report.model.DataReportSeriesItem;
 import org.eclipse.hawkbit.report.model.InnerOuterDataReportSeries;
 import org.eclipse.hawkbit.report.model.SeriesTime;
 import org.eclipse.hawkbit.repository.ReportManagement.DateTypes;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.After;
 import org.junit.Test;
@@ -83,7 +86,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            targetManagement.createTarget(new Target("t" + month));
+            targetManagement.createTarget(new JpaTarget("t" + month));
         }
 
         final LocalDateTime to = LocalDateTime.now();
@@ -105,7 +108,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         // check cache evict
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            targetManagement.createTarget(new Target("t2" + month));
+            targetManagement.createTarget(new JpaTarget("t2" + month));
         }
         targetsCreatedOverPeriod = reportManagement.targetsCreatedOverPeriod(DateTypes.perMonth(), from, to);
         for (final DataReportSeriesItem<LocalDate> reportItem : targetsCreatedOverPeriod.getData()) {
@@ -135,7 +138,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            final Target createTarget = targetManagement.createTarget(new Target("t" + month));
+            final Target createTarget = targetManagement.createTarget(new JpaTarget("t" + month));
             final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
             controllerManagament.registerRetrieved(
@@ -157,7 +160,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         // check cache evict
         for (int month = 0; month < maxMonthBackAmountCreateTargets; month++) {
             dynamicDateTimeProvider.nowMinusMonths(month);
-            final Target createTarget = targetManagement.createTarget(new Target("t2" + month));
+            final Target createTarget = targetManagement.createTarget(new JpaTarget("t2" + month));
             final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(distributionSet,
                     Lists.newArrayList(createTarget));
             controllerManagament.registerRetrieved(
@@ -174,18 +177,18 @@ public class ReportManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Tests correct statistics calculation including a correct cache evict.")
     public void distributionUsageInstalled() {
-        final Target knownTarget1 = targetManagement.createTarget(new Target("t1"));
-        final Target knownTarget2 = targetManagement.createTarget(new Target("t2"));
-        final Target knownTarget3 = targetManagement.createTarget(new Target("t3"));
-        final Target knownTarget4 = targetManagement.createTarget(new Target("t4"));
-        final Target knownTarget5 = targetManagement.createTarget(new Target("t5"));
+        final Target knownTarget1 = targetManagement.createTarget(new JpaTarget("t1"));
+        final Target knownTarget2 = targetManagement.createTarget(new JpaTarget("t2"));
+        final Target knownTarget3 = targetManagement.createTarget(new JpaTarget("t3"));
+        final Target knownTarget4 = targetManagement.createTarget(new JpaTarget("t4"));
+        final Target knownTarget5 = targetManagement.createTarget(new JpaTarget("t5"));
 
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
 
         final DistributionSet distributionSet1 = distributionSetManagement
                 .createDistributionSet(TestDataUtil.buildDistributionSet("ds1", "0.0.0", standardDsType, os, jvm, ah));
@@ -250,7 +253,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         }
 
         // Test cache evict
-        final Target knownTarget6 = targetManagement.createTarget(new Target("t6"));
+        final Target knownTarget6 = targetManagement.createTarget(new JpaTarget("t6"));
         deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget6.getControllerId());
         sendUpdateActionStatusToTargets(distributionSet1, Lists.newArrayList(knownTarget6), Status.FINISHED,
                 "some message");
@@ -349,17 +352,17 @@ public class ReportManagementTest extends AbstractIntegrationTest {
     @Description("Tests correct statistics calculation including a correct cache evict.")
     public void topXDistributionUsage() {
 
-        final Target knownTarget1 = targetManagement.createTarget(new Target("t1"));
-        final Target knownTarget2 = targetManagement.createTarget(new Target("t2"));
-        final Target knownTarget3 = targetManagement.createTarget(new Target("t3"));
-        final Target knownTarget4 = targetManagement.createTarget(new Target("t4"));
+        final Target knownTarget1 = targetManagement.createTarget(new JpaTarget("t1"));
+        final Target knownTarget2 = targetManagement.createTarget(new JpaTarget("t2"));
+        final Target knownTarget3 = targetManagement.createTarget(new JpaTarget("t3"));
+        final Target knownTarget4 = targetManagement.createTarget(new JpaTarget("t4"));
 
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
 
         final DistributionSet distributionSet1 = distributionSetManagement
                 .createDistributionSet(TestDataUtil.buildDistributionSet("ds1", "0.0.0", standardDsType, os, jvm, ah));
@@ -419,7 +422,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         }
 
         // test cache evict
-        final Target knownTarget5 = targetManagement.createTarget(new Target("t5"));
+        final Target knownTarget5 = targetManagement.createTarget(new JpaTarget("t5"));
         deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget5.getControllerId());
         distributionUsage = reportManagement.distributionUsageAssigned(100);
         for (final InnerOuterDataReportSeries<String> innerOuterDataReportSeries : distributionUsage) {
@@ -490,7 +493,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         // create targets for another tenant
         securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", "anotherTenant"), () -> {
             for (int index = 0; index < targetCreateAmount; index++) {
-                targetManagement.createTarget(new Target("t" + index));
+                targetManagement.createTarget(new JpaTarget("t" + index));
             }
             return null;
         });
@@ -513,10 +516,10 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
     private void createTargets(final String prefix, final int amount, final LocalDateTime lastTargetQuery) {
         for (int index = 0; index < amount; index++) {
-            final Target target = new Target(prefix + index);
-            final Target createTarget = targetManagement.createTarget(target);
+            final Target target = new JpaTarget(prefix + index);
+            final JpaTarget createTarget = (JpaTarget) targetManagement.createTarget(target);
             if (lastTargetQuery != null) {
-                final TargetInfo targetInfo = createTarget.getTargetInfo();
+                final JpaTargetInfo targetInfo = (JpaTargetInfo) createTarget.getTargetInfo();
                 targetInfo.setNew(false);
                 targetInfo
                         .setLastTargetQuery(lastTargetQuery.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -527,9 +530,9 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
     private void createTargetsWithStatus(final String prefix, final long amount, final TargetUpdateStatus status) {
         for (int index = 0; index < amount; index++) {
-            final Target target = new Target(prefix + index);
+            final JpaTarget target = new JpaTarget(prefix + index);
             final Target sTarget = targetRepository.save(target);
-            final TargetInfo targetInfo = sTarget.getTargetInfo();
+            final JpaTargetInfo targetInfo = (JpaTargetInfo) sTarget.getTargetInfo();
             targetInfo.setUpdateStatus(status);
             targetInfoRepository.save(targetInfo);
         }
@@ -537,9 +540,9 @@ public class ReportManagementTest extends AbstractIntegrationTest {
 
     private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
             final Status status, final String... msgs) {
-        final List<Target> result = new ArrayList<Target>();
+        final List<Target> result = new ArrayList<>();
         for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget(t);
+            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
             }
@@ -551,7 +554,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
             final String... msgs) {
         updActA.setStatus(status);
 
-        final ActionStatus statusMessages = new ActionStatus();
+        final ActionStatus statusMessages = new JpaActionStatus();
         statusMessages.setAction(updActA);
         statusMessages.setOccurredAt(System.currentTimeMillis());
         statusMessages.setStatus(status);

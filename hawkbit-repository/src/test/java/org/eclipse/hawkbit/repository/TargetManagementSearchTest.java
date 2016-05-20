@@ -19,17 +19,20 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.hawkbit.repository.specifications.TargetSpecifications;
 import org.junit.Test;
 import org.springframework.data.domain.Slice;
 
@@ -50,10 +53,10 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
             + "That includes both the test itself, as a count operation with the same filters "
             + "and query definitions by RSQL (named and un-named).")
     public void targetSearchWithVariousFilterCombinations() {
-        final TargetTag targTagX = tagManagement.createTargetTag(new TargetTag("TargTag-X"));
-        final TargetTag targTagY = tagManagement.createTargetTag(new TargetTag("TargTag-Y"));
-        final TargetTag targTagZ = tagManagement.createTargetTag(new TargetTag("TargTag-Z"));
-        final TargetTag targTagW = tagManagement.createTargetTag(new TargetTag("TargTag-W"));
+        final TargetTag targTagX = tagManagement.createTargetTag(new JpaTargetTag("TargTag-X"));
+        final TargetTag targTagY = tagManagement.createTargetTag(new JpaTargetTag("TargTag-Y"));
+        final TargetTag targTagZ = tagManagement.createTargetTag(new JpaTargetTag("TargTag-Z"));
+        final TargetTag targTagW = tagManagement.createTargetTag(new JpaTargetTag("TargTag-W"));
 
         final DistributionSet setA = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
@@ -96,7 +99,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final Action action = deploymentManagement.findActionWithDetails(actionId);
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
-                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
+                new JpaActionStatus((JpaAction) action, Status.FINISHED, System.currentTimeMillis(), "message"));
         deploymentManagement.assignDistributionSet(setA.getId(), installedC);
 
         final List<TargetUpdateStatus> unknown = new ArrayList<>();
@@ -174,13 +177,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, pending, null, installedSet.getId(),
                 Boolean.FALSE, new String[0])).as("has number of elements").hasSize(1)
                         .as("and contains the following elements").containsExactly(expectedIdName)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findAllTargetIdsByTargetFilterQuery(pageReq, new TargetFilterQuery("test", query)));
+                                .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
 
     }
 
@@ -200,13 +203,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, both, null, null, Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(200).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     private static List<TargetIdName> convertToIdNames(final List<Target> expected) {
@@ -234,13 +237,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, pending, null, null, Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(2).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -260,13 +263,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, pending, null, null, Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(2).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -286,13 +289,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, pending, "%targ-B%", setA.getId(), Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(1).as("and contains the following elements")
                         .containsExactly(expectedIdName).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -312,13 +315,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, pending, "%targ-A%", setA.getId(), Boolean.FALSE,
                 new String[0])).as("has number of elements").hasSize(1).as("and contains the following elements")
                         .containsExactly(expectedIdName).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -337,13 +340,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, pending, null, setA.getId(), Boolean.FALSE,
                 new String[0])).as("has number of elements").hasSize(3).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -361,14 +364,14 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(
                 targetManagement.findAllTargetIdsByFilters(pageReq, pending, null, null, Boolean.FALSE, new String[0]))
                         .as("has number of elements").hasSize(3).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -388,13 +391,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, unknown, "%targ-B%", null, Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(99).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -412,13 +415,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, unknown, "%targ-A%", null, Boolean.FALSE,
                 new String[0])).as("has number of elements").hasSize(99).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -435,12 +438,12 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findTargetsAll(query, pageReq).getContent().size())
                         .as("and NAMED filter query returns the same result").hasSize(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent().size());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent().size());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, unknown, null, setA.getId(), Boolean.FALSE,
                 new String[0])).as("has number of elements").hasSize(0)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findAllTargetIdsByTargetFilterQuery(pageReq, new TargetFilterQuery("test", query)));
+                                .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -459,13 +462,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, unknown, null, null, Boolean.FALSE,
                 targTagY.getName(), targTagW.getName())).as("has number of elements").hasSize(198)
                         .as("and contains the following elements").containsAll(expectedIdNames)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findAllTargetIdsByTargetFilterQuery(pageReq, new TargetFilterQuery("test", query)));
+                                .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -483,14 +486,14 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(
                 targetManagement.findAllTargetIdsByFilters(pageReq, unknown, null, null, Boolean.FALSE, new String[0]))
                         .as("has number of elements").hasSize(397).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -509,13 +512,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, "%targ-A%", setA.getId(), Boolean.FALSE,
                 new String[0])).as("has number of elements").hasSize(1).as("and contains the following elements")
                         .containsExactly(expectedIdName).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -532,13 +535,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, null, setA.getId(), Boolean.FALSE,
                 new String[0])).as("has number of elements").hasSize(3).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -554,12 +557,12 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findTargetsAll(query, pageReq).getContent().size())
                         .as("and NAMED filter query returns the same result").hasSize(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent().size());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent().size());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, "%targ-C%", setA.getId(), Boolean.FALSE,
                 targTagX.getName())).as("has number of elements").hasSize(0)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findAllTargetIdsByTargetFilterQuery(pageReq, new TargetFilterQuery("test", query)));
+                                .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -575,12 +578,12 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findTargetsAll(query, pageReq).getContent().size())
                         .as("and NAMED filter query returns the same result").hasSize(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent().size());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent().size());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, "%targ-A%", setA.getId(), Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(0)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findAllTargetIdsByTargetFilterQuery(pageReq, new TargetFilterQuery("test", query)));
+                                .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -599,13 +602,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, "%targ-C%", setA.getId(), Boolean.FALSE,
                 targTagW.getName())).as("has number of elements").hasSize(1).as("and contains the following elements")
                         .containsExactly(expectedIdName).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
     }
 
     @Step
@@ -623,13 +626,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, "%targ-B%", null, Boolean.FALSE,
                 targTagY.getName(), targTagW.getName())).as("has number of elements").hasSize(100)
                         .as("and contains the following elements").containsAll(expectedIdNames)
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findAllTargetIdsByTargetFilterQuery(pageReq, new TargetFilterQuery("test", query)));
+                                .findAllTargetIdsByTargetFilterQuery(pageReq, new JpaTargetFilterQuery("test", query)));
 
     }
 
@@ -653,13 +656,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findTargetsAll(query, pageReq).getContent())
                         .as("and NAMED filter query returns the same result").containsAll(targetManagement
-                                .findTargetsAll(new TargetFilterQuery("test", query), pageReq).getContent());
+                                .findTargetsAll(new JpaTargetFilterQuery("test", query), pageReq).getContent());
 
         assertThat(targetManagement.findAllTargetIdsByFilters(pageReq, null, null, null, Boolean.FALSE,
                 targTagD.getName())).as("has number of elements").hasSize(200).as("and contains the following elements")
                         .containsAll(expectedIdNames).as("and NAMED filter query returns the same result")
                         .containsAll(targetManagement.findAllTargetIdsByTargetFilterQuery(pageReq,
-                                new TargetFilterQuery("test", query)));
+                                new JpaTargetFilterQuery("test", query)));
 
     }
 
@@ -698,7 +701,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
 
         assertThat(result.getNumberOfElements()).isEqualTo(9);
-        final List<Target> expected = new ArrayList<Target>();
+        final List<Target> expected = new ArrayList<>();
         Collections.sort(targInstalled, byId);
         Collections.sort(targAssigned, byId);
         Collections.sort(notAssigned, byId);
@@ -731,34 +734,6 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that targets with given assigned DS and additonal specification are returned from repository.")
-    public void findTargetByAssignedDistributionSetWithAdditonalSpecification() {
-        final DistributionSet assignedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
-                distributionSetManagement);
-        targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        List<Target> assignedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
-
-        // set on installed and assign another one
-        deploymentManagement.assignDistributionSet(installedSet, assignedtargets).getActions().forEach(actionId -> {
-            final Action action = deploymentManagement.findActionWithDetails(actionId);
-            action.setStatus(Status.FINISHED);
-            controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
-        });
-        deploymentManagement.assignDistributionSet(assignedSet, assignedtargets);
-
-        assignedtargets = targetManagement.findTargetByControllerID(
-                assignedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
-
-        assertThat(targetManagement.findTargetByAssignedDistributionSet(assignedSet.getId(),
-                TargetSpecifications.hasInstalledDistributionSet(installedSet.getId()), pageReq))
-                        .as("Contains the assigned targets").containsAll(assignedtargets)
-                        .as("and that means the following expected amount").hasSize(10);
-    }
-
-    @Test
     @Description("Verfies that targets with given installed DS are returned from repository.")
     public void findTargetByInstalledDistributionSet() {
         final DistributionSet assignedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
@@ -773,7 +748,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
             final Action action = deploymentManagement.findActionWithDetails(actionId);
             action.setStatus(Status.FINISHED);
             controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
+                    new JpaActionStatus((JpaAction) action, Status.FINISHED, System.currentTimeMillis(), "message"));
         });
         deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
 
@@ -787,41 +762,11 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
 
     }
 
-    @Test
-    @Description("Verfies that targets with given installed DS and additonal specification  are returned from repository.")
-    public void findTargetByInstalledDistributionSetWithAdditonalSpecification() {
-        final DistributionSet assignedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
-                distributionSetManagement);
-        targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        List<Target> installedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
-
-        // set on installed and assign another one
-        deploymentManagement.assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {
-            final Action action = deploymentManagement.findActionWithDetails(actionId);
-            action.setStatus(Status.FINISHED);
-            controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
-        });
-        deploymentManagement.assignDistributionSet(assignedSet, installedtargets);
-
-        // get final updated version of targets
-        installedtargets = targetManagement.findTargetByControllerID(
-                installedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
-
-        assertThat(targetManagement.findTargetByInstalledDistributionSet(installedSet.getId(),
-                TargetSpecifications.hasAssignedDistributionSet(assignedSet.getId()), pageReq))
-                        .as("Contains the assigned targets").containsAll(installedtargets)
-                        .as("and that means the following expected amount").hasSize(10);
-
-    }
-
     private List<Target> sendUpdateActionStatusToTargets(final DistributionSet dsA, final Iterable<Target> targs,
             final Status status, final String... msgs) {
         final List<Target> result = new ArrayList<Target>();
         for (final Target t : targs) {
-            final List<Action> findByTarget = actionRepository.findByTarget(t);
+            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
             for (final Action action : findByTarget) {
                 result.add(sendUpdateActionStatusToTarget(status, action, t, msgs));
             }
@@ -833,7 +778,7 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
             final String... msgs) {
         updActA.setStatus(status);
 
-        final ActionStatus statusMessages = new ActionStatus();
+        final ActionStatus statusMessages = new JpaActionStatus();
         statusMessages.setAction(updActA);
         statusMessages.setOccurredAt(System.currentTimeMillis());
         statusMessages.setStatus(status);

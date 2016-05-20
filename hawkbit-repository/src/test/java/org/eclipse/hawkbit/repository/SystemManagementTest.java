@@ -18,8 +18,8 @@ import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.report.model.TenantUsage;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.Test;
 
@@ -132,7 +132,7 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     private void createTestArtifact(final byte[] random) {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 

@@ -8,109 +8,26 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import org.eclipse.hawkbit.repository.jpa.model.DistributionSetTypeElement;
 
-/**
- * A distribution set type defines which software module types can or have to be
- * {@link DistributionSet}.
- *
- */
-@Entity
-@Table(name = "sp_distribution_set_type", indexes = {
-        @Index(name = "sp_idx_distribution_set_type_01", columnList = "tenant,deleted"),
-        @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-                @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
-                @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
-public class DistributionSetType extends NamedEntity {
-    private static final long serialVersionUID = 1L;
-
-    @OneToMany(targetEntity = DistributionSetTypeElement.class, cascade = {
-            CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "distribution_set_type", insertable = false, updatable = false)
-    private final Set<DistributionSetTypeElement> elements = new HashSet<>();
-
-    @Column(name = "type_key", nullable = false, length = 64)
-    private String key;
-
-    @Column(name = "colour", nullable = true, length = 16)
-    private String colour;
-
-    @Column(name = "deleted")
-    private boolean deleted = false;
-
-    public DistributionSetType() {
-        // default public constructor for JPA
-    }
-
-    /**
-     * Standard constructor.
-     *
-     * @param key
-     *            of the type (unique)
-     * @param name
-     *            of the type (unique)
-     * @param description
-     *            of the type
-     */
-    public DistributionSetType(final String key, final String name, final String description) {
-        this(key, name, description, null);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param key
-     *            of the type
-     * @param name
-     *            of the type
-     * @param description
-     *            of the type
-     * @param color
-     *            of the type. It will be null by default
-     */
-    public DistributionSetType(final String key, final String name, final String description, final String color) {
-        super(name, description);
-        this.key = key;
-        colour = color;
-    }
+public interface DistributionSetType extends NamedEntity {
 
     /**
      * @return the deleted
      */
-    public boolean isDeleted() {
-        return deleted;
-    }
+    boolean isDeleted();
 
     /**
      * @param deleted
      *            the deleted to set
      */
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
+    void setDeleted(boolean deleted);
 
-    public Set<SoftwareModuleType> getMandatoryModuleTypes() {
-        return elements.stream().filter(element -> element.isMandatory()).map(element -> element.getSmType())
-                .collect(Collectors.toSet());
-    }
+    Set<SoftwareModuleType> getMandatoryModuleTypes();
 
-    public Set<SoftwareModuleType> getOptionalModuleTypes() {
-        return elements.stream().filter(element -> !element.isMandatory()).map(element -> element.getSmType())
-                .collect(Collectors.toSet());
-    }
+    Set<SoftwareModuleType> getOptionalModuleTypes();
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this
@@ -120,15 +37,7 @@ public class DistributionSetType extends NamedEntity {
      *            search for
      * @return <code>true</code> if found
      */
-    public boolean containsModuleType(final SoftwareModuleType softwareModuleType) {
-        for (final DistributionSetTypeElement distributionSetTypeElement : elements) {
-            if (distributionSetTypeElement.getSmType().equals(softwareModuleType)) {
-                return true;
-            }
-
-        }
-        return false;
-    }
+    boolean containsModuleType(SoftwareModuleType softwareModuleType);
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this
@@ -139,11 +48,7 @@ public class DistributionSetType extends NamedEntity {
      *            search for
      * @return <code>true</code> if found
      */
-    public boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
-        return elements.stream().filter(element -> element.isMandatory())
-                .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
-
-    }
+    boolean containsMandatoryModuleType(SoftwareModuleType softwareModuleType);
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this
@@ -154,11 +59,7 @@ public class DistributionSetType extends NamedEntity {
      *            search for by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
-    public boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
-        return elements.stream().filter(element -> element.isMandatory())
-                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
-
-    }
+    boolean containsMandatoryModuleType(Long softwareModuleTypeId);
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this
@@ -169,11 +70,7 @@ public class DistributionSetType extends NamedEntity {
      *            search for
      * @return <code>true</code> if found
      */
-    public boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
-        return elements.stream().filter(element -> !element.isMandatory())
-                .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
-
-    }
+    boolean containsOptionalModuleType(SoftwareModuleType softwareModuleType);
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this
@@ -184,11 +81,7 @@ public class DistributionSetType extends NamedEntity {
      *            search by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
-    public boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
-        return elements.stream().filter(element -> !element.isMandatory())
-                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
-
-    }
+    boolean containsOptionalModuleType(Long softwareModuleTypeId);
 
     /**
      * Compares the modules of this {@link DistributionSetType} and the given
@@ -198,9 +91,7 @@ public class DistributionSetType extends NamedEntity {
      *            to compare with
      * @return <code>true</code> if the lists are identical.
      */
-    public boolean areModuleEntriesIdentical(final DistributionSetType dsType) {
-        return new HashSet<DistributionSetTypeElement>(dsType.elements).equals(elements);
-    }
+    boolean areModuleEntriesIdentical(DistributionSetType dsType);
 
     /**
      * Adds {@link SoftwareModuleType} that is optional for the
@@ -210,11 +101,7 @@ public class DistributionSetType extends NamedEntity {
      *            to add
      * @return updated instance
      */
-    public DistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
-        elements.add(new DistributionSetTypeElement(this, smType, false));
-
-        return this;
-    }
+    DistributionSetType addOptionalModuleType(SoftwareModuleType smType);
 
     /**
      * Adds {@link SoftwareModuleType} that is mandatory for the
@@ -224,11 +111,7 @@ public class DistributionSetType extends NamedEntity {
      *            to add
      * @return updated instance
      */
-    public DistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
-        elements.add(new DistributionSetTypeElement(this, smType, true));
-
-        return this;
-    }
+    DistributionSetType addMandatoryModuleType(SoftwareModuleType smType);
 
     /**
      * Removes {@link SoftwareModuleType} from the list.
@@ -237,25 +120,11 @@ public class DistributionSetType extends NamedEntity {
      *            to remove
      * @return updated instance
      */
-    public DistributionSetType removeModuleType(final Long smTypeId) {
-        // we search by id (standard equals compares also revison)
-        final Optional<DistributionSetTypeElement> found = elements.stream()
-                .filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst();
+    DistributionSetType removeModuleType(Long smTypeId);
 
-        if (found.isPresent()) {
-            elements.remove(found.get());
-        }
+    String getKey();
 
-        return this;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
+    void setKey(String key);
 
     /**
      * @param distributionSet
@@ -263,26 +132,10 @@ public class DistributionSetType extends NamedEntity {
      * @return <code>true</code> if the all mandatory software module types are
      *         in the system.
      */
-    public boolean checkComplete(final DistributionSet distributionSet) {
-        return distributionSet.getModules().stream().map(module -> module.getType()).collect(Collectors.toList())
-                .containsAll(getMandatoryModuleTypes());
-    }
+    boolean checkComplete(DistributionSet distributionSet);
 
-    public String getColour() {
-        return colour;
-    }
+    String getColour();
 
-    public void setColour(final String colour) {
-        this.colour = colour;
-    }
-
-    public Set<DistributionSetTypeElement> getElements() {
-        return elements;
-    }
-
-    @Override
-    public String toString() {
-        return "DistributionSetType [key=" + key + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
-    }
+    void setColour(final String colour);
 
 }

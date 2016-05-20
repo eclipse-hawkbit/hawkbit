@@ -1,0 +1,310 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.repository.jpa.model;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+
+/**
+ * A distribution set type defines which software module types can or have to be
+ * {@link DistributionSet}.
+ *
+ */
+@Entity
+@Table(name = "sp_distribution_set_type", indexes = {
+        @Index(name = "sp_idx_distribution_set_type_01", columnList = "tenant,deleted"),
+        @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
+                @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
+public class JpaDistributionSetType extends JpaNamedEntity implements DistributionSetType {
+    private static final long serialVersionUID = 1L;
+
+    @OneToMany(targetEntity = DistributionSetTypeElement.class, cascade = {
+            CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "distribution_set_type", insertable = false, updatable = false)
+    private final Set<DistributionSetTypeElement> elements = new HashSet<>();
+
+    @Column(name = "type_key", nullable = false, length = 64)
+    private String key;
+
+    @Column(name = "colour", nullable = true, length = 16)
+    private String colour;
+
+    @Column(name = "deleted")
+    private boolean deleted = false;
+
+    public JpaDistributionSetType() {
+        // default public constructor for JPA
+    }
+
+    /**
+     * Standard constructor.
+     *
+     * @param key
+     *            of the type (unique)
+     * @param name
+     *            of the type (unique)
+     * @param description
+     *            of the type
+     */
+    public JpaDistributionSetType(final String key, final String name, final String description) {
+        this(key, name, description, null);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param key
+     *            of the type
+     * @param name
+     *            of the type
+     * @param description
+     *            of the type
+     * @param color
+     *            of the type. It will be null by default
+     */
+    public JpaDistributionSetType(final String key, final String name, final String description, final String color) {
+        super(name, description);
+        this.key = key;
+        colour = color;
+    }
+
+    /**
+     * @return the deleted
+     */
+    @Override
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    /**
+     * @param deleted
+     *            the deleted to set
+     */
+    @Override
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    @Override
+    public Set<SoftwareModuleType> getMandatoryModuleTypes() {
+        return elements.stream().filter(element -> element.isMandatory()).map(element -> element.getSmType())
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<SoftwareModuleType> getOptionalModuleTypes() {
+        return elements.stream().filter(element -> !element.isMandatory()).map(element -> element.getSmType())
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType}.
+     *
+     * @param softwareModuleType
+     *            search for
+     * @return <code>true</code> if found
+     */
+    @Override
+    public boolean containsModuleType(final SoftwareModuleType softwareModuleType) {
+        for (final DistributionSetTypeElement distributionSetTypeElement : elements) {
+            if (distributionSetTypeElement.getSmType().equals(softwareModuleType)) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType} and defined as
+     * {@link DistributionSetTypeElement#isMandatory()}.
+     *
+     * @param softwareModuleType
+     *            search for
+     * @return <code>true</code> if found
+     */
+    @Override
+    public boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
+        return elements.stream().filter(element -> element.isMandatory())
+                .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
+
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType} and defined as
+     * {@link DistributionSetTypeElement#isMandatory()}.
+     *
+     * @param softwareModuleType
+     *            search for by {@link SoftwareModuleType#getId()}
+     * @return <code>true</code> if found
+     */
+    @Override
+    public boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
+        return elements.stream().filter(element -> element.isMandatory())
+                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
+
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType} and NOT defined as
+     * {@link DistributionSetTypeElement#isMandatory()}.
+     *
+     * @param softwareModuleType
+     *            search for
+     * @return <code>true</code> if found
+     */
+    @Override
+    public boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
+        return elements.stream().filter(element -> !element.isMandatory())
+                .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
+
+    }
+
+    /**
+     * Checks if the given {@link SoftwareModuleType} is in this
+     * {@link DistributionSetType} and NOT defined as
+     * {@link DistributionSetTypeElement#isMandatory()}.
+     *
+     * @param softwareModuleTypeId
+     *            search by {@link SoftwareModuleType#getId()}
+     * @return <code>true</code> if found
+     */
+    @Override
+    public boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
+        return elements.stream().filter(element -> !element.isMandatory())
+                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
+
+    }
+
+    /**
+     * Compares the modules of this {@link DistributionSetType} and the given
+     * one.
+     *
+     * @param dsType
+     *            to compare with
+     * @return <code>true</code> if the lists are identical.
+     */
+    @Override
+    public boolean areModuleEntriesIdentical(final DistributionSetType dsType) {
+        return new HashSet<DistributionSetTypeElement>(((JpaDistributionSetType) dsType).elements).equals(elements);
+    }
+
+    /**
+     * Adds {@link SoftwareModuleType} that is optional for the
+     * {@link DistributionSet}.
+     *
+     * @param smType
+     *            to add
+     * @return updated instance
+     */
+    @Override
+    public DistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
+        elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, false));
+
+        return this;
+    }
+
+    /**
+     * Adds {@link SoftwareModuleType} that is mandatory for the
+     * {@link DistributionSet}.
+     *
+     * @param smType
+     *            to add
+     * @return updated instance
+     */
+    @Override
+    public DistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
+        elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, true));
+
+        return this;
+    }
+
+    /**
+     * Removes {@link SoftwareModuleType} from the list.
+     *
+     * @param smTypeId
+     *            to remove
+     * @return updated instance
+     */
+    @Override
+    public DistributionSetType removeModuleType(final Long smTypeId) {
+        // we search by id (standard equals compares also revison)
+        final Optional<DistributionSetTypeElement> found = elements.stream()
+                .filter(element -> element.getSmType().getId().equals(smTypeId)).findFirst();
+
+        if (found.isPresent()) {
+            elements.remove(found.get());
+        }
+
+        return this;
+    }
+
+    @Override
+    public String getKey() {
+        return key;
+    }
+
+    @Override
+    public void setKey(final String key) {
+        this.key = key;
+    }
+
+    /**
+     * @param distributionSet
+     *            to check for completeness
+     * @return <code>true</code> if the all mandatory software module types are
+     *         in the system.
+     */
+    @Override
+    public boolean checkComplete(final DistributionSet distributionSet) {
+        return distributionSet.getModules().stream().map(module -> module.getType()).collect(Collectors.toList())
+                .containsAll(getMandatoryModuleTypes());
+    }
+
+    @Override
+    public String getColour() {
+        return colour;
+    }
+
+    @Override
+    public void setColour(final String colour) {
+        this.colour = colour;
+    }
+
+    public Set<DistributionSetTypeElement> getElements() {
+        return elements;
+    }
+
+    @Override
+    public String toString() {
+        return "DistributionSetType [key=" + key + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
+    }
+
+}

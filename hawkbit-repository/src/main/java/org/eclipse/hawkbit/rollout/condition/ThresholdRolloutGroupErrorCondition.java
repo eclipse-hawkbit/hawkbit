@@ -9,6 +9,8 @@
 package org.eclipse.hawkbit.rollout.condition;
 
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -30,7 +32,8 @@ public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditio
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-        final Long totalGroup = actionRepository.countByRolloutAndRolloutGroup(rollout, rolloutGroup);
+        final Long totalGroup = actionRepository.countByRolloutAndRolloutGroup((JpaRollout) rollout,
+                (JpaRolloutGroup) rolloutGroup);
         final Long error = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.ERROR);
         try {

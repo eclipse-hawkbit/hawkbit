@@ -10,8 +10,9 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
  * The repository interface for the {@link Rollout} model.
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, JpaSpecificationExecutor<Rollout> {
+public interface RolloutRepository
+        extends BaseEntityRepository<JpaRollout, Long>, JpaSpecificationExecutor<JpaRollout> {
 
     /**
      * Updates the {@code lastCheck} field of the {@link Rollout} for rollouts
@@ -42,7 +44,7 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      */
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Query("UPDATE Rollout r SET r.lastCheck = :lastCheck WHERE r.lastCheck < (:lastCheck - :delay) AND r.status=:status")
+    @Query("UPDATE JpaRollout r SET r.lastCheck = :lastCheck WHERE r.lastCheck < (:lastCheck - :delay) AND r.status=:status")
     int updateLastCheck(@Param("lastCheck") final long lastCheck, @Param("delay") final long delay,
             @Param("status") final RolloutStatus status);
 
@@ -57,7 +59,7 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      * @return the list of {@link Rollout} for specific lastCheck time and
      *         status
      */
-    List<Rollout> findByLastCheckAndStatus(long lastCheck, RolloutStatus status);
+    List<JpaRollout> findByLastCheckAndStatus(long lastCheck, RolloutStatus status);
 
     /**
      * Retrieves all {@link Rollout} for a specific {@code name}
@@ -66,7 +68,7 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      *            the rollout name
      * @return {@link Rollout} for specific name
      */
-    Page<Rollout> findByName(final Pageable pageable, String name);
+    Page<JpaRollout> findByName(final Pageable pageable, String name);
 
     /**
      * Retrieves all {@link Rollout} for a specific {@code name}
@@ -75,7 +77,7 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      *            the rollout name
      * @return {@link Rollout} for specific name
      */
-    Rollout findByName(String name);
+    JpaRollout findByName(String name);
 
     /**
      * Retrieves all {@link Rollout} for a specific status.
@@ -84,5 +86,5 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      *            the status of the rollouts to retrieve
      * @return a list of {@link Rollout} having the given status
      */
-    List<Rollout> findByStatus(final RolloutStatus status);
+    List<JpaRollout> findByStatus(final RolloutStatus status);
 }

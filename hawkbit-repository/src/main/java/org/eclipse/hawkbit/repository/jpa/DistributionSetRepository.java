@@ -11,10 +11,12 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -30,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface DistributionSetRepository
-        extends BaseEntityRepository<DistributionSet, Long>, JpaSpecificationExecutor<DistributionSet> {
+        extends BaseEntityRepository<JpaDistributionSet, Long>, JpaSpecificationExecutor<JpaDistributionSet> {
 
     /**
      * Finds {@link DistributionSet}s by assigned {@link Tag}.
@@ -39,8 +41,8 @@ public interface DistributionSetRepository
      *            to be found
      * @return list of found {@link DistributionSet}s
      */
-    @Query(value = "Select Distinct ds from DistributionSet ds join ds.tags dst where dst = :tag")
-    List<DistributionSet> findByTag(@Param("tag") final DistributionSetTag tag);
+    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst = :tag")
+    List<JpaDistributionSet> findByTag(@Param("tag") final JpaDistributionSetTag tag);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.
@@ -50,8 +52,11 @@ public interface DistributionSetRepository
      */
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Query("update DistributionSet d set d.deleted = 1 where d.id in :ids")
+    @Query("update JpaDistributionSet d set d.deleted = 1 where d.id in :ids")
     void deleteDistributionSet(@Param("ids") Long... ids);
+
+    @Override
+    List<JpaDistributionSet> findAll(Iterable<Long> ids);
 
     /**
      * deletes {@link DistributionSet}s by the given IDs.
@@ -63,7 +68,7 @@ public interface DistributionSetRepository
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("DELETE FROM DistributionSet d WHERE d.id IN ?1")
+    @Query("DELETE FROM JpaDistributionSet d WHERE d.id IN ?1")
     int deleteByIdIn(Collection<Long> ids);
 
     /**
@@ -74,7 +79,7 @@ public interface DistributionSetRepository
      *            to search for
      * @return {@link List} of found {@link DistributionSet}s
      */
-    List<DistributionSet> findByModules(SoftwareModule module);
+    List<DistributionSet> findByModules(JpaSoftwareModule module);
 
     /**
      * Finds {@link DistributionSet}s based on given ID if they are not assigned
@@ -84,7 +89,7 @@ public interface DistributionSetRepository
      *            to search for
      * @return
      */
-    @Query("select ac.distributionSet.id from Action ac where ac.distributionSet.id in :ids")
+    @Query("select ac.distributionSet.id from JpaAction ac where ac.distributionSet.id in :ids")
     List<Long> findAssignedDistributionSetsById(@Param("ids") Long... ids);
 
     /**
@@ -98,7 +103,7 @@ public interface DistributionSetRepository
      * @see org.springframework.data.repository.CrudRepository#save(java.lang.Iterable)
      */
     @Override
-    <S extends DistributionSet> List<S> save(Iterable<S> entities);
+    <S extends JpaDistributionSet> List<S> save(Iterable<S> entities);
 
     /**
      * Finds the distribution set for a specific action.
@@ -107,8 +112,8 @@ public interface DistributionSetRepository
      *            the action associated with the distribution set to find
      * @return the distribution set associated with the given action
      */
-    @Query("select DISTINCT d from DistributionSet d join fetch d.modules m join d.actions a where a = :action")
-    DistributionSet findByAction(@Param("action") Action action);
+    @Query("select DISTINCT d from JpaDistributionSet d join fetch d.modules m join d.actions a where a = :action")
+    JpaDistributionSet findByAction(@Param("action") JpaAction action);
 
     /**
      * Counts {@link DistributionSet} instances of given type in the repository.
@@ -117,7 +122,7 @@ public interface DistributionSetRepository
      *            to search for
      * @return number of found {@link DistributionSet}s
      */
-    long countByType(DistributionSetType type);
+    long countByType(JpaDistributionSetType type);
 
     /**
      * Counts {@link DistributionSet} with given

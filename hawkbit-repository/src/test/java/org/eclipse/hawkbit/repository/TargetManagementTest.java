@@ -34,14 +34,16 @@ import org.eclipse.hawkbit.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
@@ -61,7 +63,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @WithUser(tenantId = "tenantWhichDoesNotExists", allSpPermissions = true, autoCreateTenant = false)
     public void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
         try {
-            targetManagement.createTarget(new Target("targetId123"));
+            targetManagement.createTarget(new JpaTarget("targetId123"));
             fail("should not be possible as the tenant does not exist");
         } catch (final TenantNotExistException e) {
             // ok
@@ -72,14 +74,14 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Verify that a target with empty controller id cannot be created")
     public void createTargetWithNoControllerId() {
         try {
-            targetManagement.createTarget(new Target(""));
+            targetManagement.createTarget(new JpaTarget(""));
             fail("target with empty controller id should not be created");
         } catch (final ConstraintViolationException e) {
             // ok
         }
 
         try {
-            targetManagement.createTarget(new Target(null));
+            targetManagement.createTarget(new JpaTarget(null));
             fail("target with empty controller id should not be created");
         } catch (final ConstraintViolationException e) {
             // ok
@@ -90,13 +92,13 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Ensures that targets can assigned and unassigned to a target tag. Not exists target will be ignored for the assignment.")
     public void assignAndUnassignTargetsToTag() {
         final List<String> assignTarget = new ArrayList<String>();
-        assignTarget.add(targetManagement.createTarget(new Target("targetId123")).getControllerId());
-        assignTarget.add(targetManagement.createTarget(new Target("targetId1234")).getControllerId());
-        assignTarget.add(targetManagement.createTarget(new Target("targetId1235")).getControllerId());
-        assignTarget.add(targetManagement.createTarget(new Target("targetId1236")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new JpaTarget("targetId123")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new JpaTarget("targetId1234")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new JpaTarget("targetId1235")).getControllerId());
+        assignTarget.add(targetManagement.createTarget(new JpaTarget("targetId1236")).getControllerId());
         assignTarget.add("NotExist");
 
-        final TargetTag targetTag = tagManagement.createTargetTag(new TargetTag("Tag1"));
+        final TargetTag targetTag = tagManagement.createTargetTag(new JpaTargetTag("Tag1"));
 
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag);
         assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
@@ -125,7 +127,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that targets can deleted e.g. test all cascades")
     public void deleteAndCreateTargets() {
-        Target target = targetManagement.createTarget(new Target("targetId123"));
+        Target target = targetManagement.createTarget(new JpaTarget("targetId123"));
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(1);
         targetManagement.deleteTargets(target.getId());
         assertThat(targetManagement.countTargetsAll()).as("target count is wrong").isEqualTo(0);
@@ -137,7 +139,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         final List<Long> targets = new ArrayList<Long>();
         for (int i = 0; i < 5; i++) {
-            target = targetManagement.createTarget(new Target("" + i));
+            target = targetManagement.createTarget(new JpaTarget("" + i));
             targets.add(target.getId());
             targets.add(createTargetWithAttributes("" + (i * i + 1000)).getId());
         }
@@ -147,7 +149,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     }
 
     private Target createTargetWithAttributes(final String controllerId) {
-        Target target = new Target(controllerId);
+        Target target = new JpaTarget(controllerId);
         final Map<String, String> testData = new HashMap<>();
         testData.put("test1", "testdata1");
 
@@ -184,10 +186,10 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(set.getId(), "4711");
 
-        final Action action = deploymentManagement.findActionWithDetails(result.getActions().get(0));
+        final JpaAction action = (JpaAction) deploymentManagement.findActionWithDetails(result.getActions().get(0));
         action.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
-                new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
+                new JpaActionStatus(action, Status.FINISHED, System.currentTimeMillis(), "message"));
         deploymentManagement.assignDistributionSet(set2.getId(), "4711");
 
         target = targetManagement.findTargetByControllerIDWithDetails("4711");
@@ -231,9 +233,9 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if a single target with the same controller ID are created twice.")
     public void createTargetDuplicate() {
-        targetManagement.createTarget(new Target("4711"));
+        targetManagement.createTarget(new JpaTarget("4711"));
         try {
-            targetManagement.createTarget(new Target("4711"));
+            targetManagement.createTarget(new JpaTarget("4711"));
             fail("Target already exists");
         } catch (final EntityAlreadyExistsException e) {
         }
@@ -338,7 +340,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         final Target savedExtra = targetManagement.createTarget(extra);
 
-        Iterable<Target> allFound = targetRepository.findAll();
+        final Iterable<JpaTarget> allFound = targetRepository.findAll();
 
         assertThat(Long.valueOf(firstList.size())).as("List size of targets")
                 .isEqualTo(firstSaved.spliterator().getExactSizeIfKnown());
@@ -391,11 +393,11 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         targetManagement.deleteTargets(deletedTargetIDs);
 
-        allFound = targetManagement.findTargetsAll(new PageRequest(0, 200)).getContent();
+        final List<Target> found = targetManagement.findTargetsAll(new PageRequest(0, 200)).getContent();
         assertThat(firstSaved.spliterator().getExactSizeIfKnown() - nr2Del).as("Size of splited list")
-                .isEqualTo(allFound.spliterator().getExactSizeIfKnown());
+                .isEqualTo(found.spliterator().getExactSizeIfKnown());
 
-        assertThat(allFound).as("Not all undeleted found").doesNotContain(deletedTargets);
+        assertThat(found).as("Not all undeleted found").doesNotContain(deletedTargets);
     }
 
     @Test
@@ -404,18 +406,18 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         Iterable<Target> ts = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(100, "myCtrlID", "first description"));
 
-        final Map<String, String> attribs = new HashMap<String, String>();
+        final Map<String, String> attribs = new HashMap<>();
         attribs.put("a.b.c", "abc");
         attribs.put("x.y.z", "");
         attribs.put("1.2.3", "123");
         attribs.put("1.2.3.4", "1234");
         attribs.put("1.2.3.4.5", "12345");
-        final Set<String> attribs2Del = new HashSet<String>();
+        final Set<String> attribs2Del = new HashSet<>();
         attribs2Del.add("x.y.z");
         attribs2Del.add("1.2.3");
 
         for (final Target t : ts) {
-            TargetInfo targetInfo = t.getTargetInfo();
+            JpaTargetInfo targetInfo = (JpaTargetInfo) t.getTargetInfo();
             targetInfo.setNew(false);
             for (final Entry<String, String> attrib : attribs.entrySet()) {
                 final String key = attrib.getKey();
@@ -460,7 +462,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         for (final Target ta : ts2DelAllAttribs) {
             final Target t = targetManagement.findTargetByControllerIDWithDetails(ta.getControllerId());
 
-            final TargetInfo targetStatus = t.getTargetInfo();
+            final JpaTargetInfo targetStatus = (JpaTargetInfo) t.getTargetInfo();
             targetStatus.getControllerAttributes().clear();
             targetInfoRepository.save(targetStatus);
         }
@@ -468,7 +470,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         for (final Target ta : ts2DelAttribs) {
             final Target t = targetManagement.findTargetByControllerIDWithDetails(ta.getControllerId());
 
-            final TargetInfo targetStatus = t.getTargetInfo();
+            final JpaTargetInfo targetStatus = (JpaTargetInfo) t.getTargetInfo();
             for (final String attribKey : attribs2Del) {
                 targetStatus.getControllerAttributes().remove(attribKey);
             }
@@ -477,7 +479,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         // only the number of the remaining targets and controller attributes
         // are checked
-        final Iterable<Target> restTS = targetRepository.findAll();
+        final Iterable<JpaTarget> restTS = targetRepository.findAll();
 
         restTarget_: for (final Target targetl : restTS) {
             final Target target = targetManagement.findTargetByControllerIDWithDetails(targetl.getControllerId());
@@ -552,10 +554,10 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final List<Target> tagABCTargets = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(10, "tagABCTargets", "first description"));
 
-        final TargetTag tagA = tagManagement.createTargetTag(new TargetTag("A"));
-        final TargetTag tagB = tagManagement.createTargetTag(new TargetTag("B"));
-        final TargetTag tagC = tagManagement.createTargetTag(new TargetTag("C"));
-        tagManagement.createTargetTag(new TargetTag("X"));
+        final TargetTag tagA = tagManagement.createTargetTag(new JpaTargetTag("A"));
+        final TargetTag tagB = tagManagement.createTargetTag(new JpaTargetTag("B"));
+        final TargetTag tagC = tagManagement.createTargetTag(new JpaTargetTag("C"));
+        tagManagement.createTargetTag(new JpaTargetTag("X"));
 
         // doing different assignments
         targetManagement.toggleTagAssignment(tagATargets, tagA);
@@ -610,9 +612,9 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Tests the unassigment of tags to multiple targets.")
     public void targetTagBulkUnassignments() {
-        final TargetTag targTagA = tagManagement.createTargetTag(new TargetTag("Targ-A-Tag"));
-        final TargetTag targTagB = tagManagement.createTargetTag(new TargetTag("Targ-B-Tag"));
-        final TargetTag targTagC = tagManagement.createTargetTag(new TargetTag("Targ-C-Tag"));
+        final TargetTag targTagA = tagManagement.createTargetTag(new JpaTargetTag("Targ-A-Tag"));
+        final TargetTag targTagB = tagManagement.createTargetTag(new JpaTargetTag("Targ-B-Tag"));
+        final TargetTag targTagC = tagManagement.createTargetTag(new JpaTargetTag("Targ-C-Tag"));
 
         final List<Target> targAs = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
@@ -673,7 +675,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Retrieves targets by ID with lazy loading of the tags. Checks the successfull load.")
     public void findTargetsByControllerIDsWithTags() {
-        final TargetTag targTagA = tagManagement.createTargetTag(new TargetTag("Targ-A-Tag"));
+        final TargetTag targTagA = tagManagement.createTargetTag(new JpaTargetTag("Targ-A-Tag"));
 
         final List<Target> targAs = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
@@ -711,7 +713,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Test that NO TAG functionality which gives all targets with no tag assigned.")
     public void findTargetsWithNoTag() {
 
-        final TargetTag targTagA = tagManagement.createTargetTag(new TargetTag("Targ-A-Tag"));
+        final TargetTag targTagA = tagManagement.createTargetTag(new JpaTargetTag("Targ-A-Tag"));
         final List<Target> targAs = targetManagement
                 .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
         targetManagement.toggleTagAssignment(targAs, targTagA);

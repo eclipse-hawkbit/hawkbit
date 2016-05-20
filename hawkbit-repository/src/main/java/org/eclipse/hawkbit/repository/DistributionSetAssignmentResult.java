@@ -51,7 +51,7 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
         this.actions = actions;
         this.targetManagement = targetManagement;
     }
-    
+
     /**
      * @return the actionIds
      */
@@ -59,9 +59,10 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
         return actions;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Target> getAssignedEntity() {
-        return targetManagement.findTargetByControllerID(assignedTargets);
+        return (List<Target>) targetManagement.findTargetByControllerID(assignedTargets);
     }
 
 }

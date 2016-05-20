@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifactProvider;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface ExternalArtifactProviderRepository extends BaseEntityRepository<ExternalArtifactProvider, Long> {
+public interface ExternalArtifactProviderRepository extends BaseEntityRepository<JpaExternalArtifactProvider, Long> {
 
 }

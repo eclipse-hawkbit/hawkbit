@@ -17,17 +17,16 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.CustomSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -290,7 +289,7 @@ public interface SoftwareManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull Long softwareModuleId,
-            @NotNull Specification<SoftwareModuleMetadata> spec, @NotNull Pageable pageable);
+            @NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Filter {@link SoftwareModule}s with given
@@ -347,8 +346,7 @@ public interface SoftwareManagement {
      * @return the found {@link SoftwareModule}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModule> findSoftwareModulesByPredicate(@NotNull Specification<SoftwareModule> spec,
-            @NotNull Pageable pageable);
+    Page<SoftwareModule> findSoftwareModulesByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
@@ -411,8 +409,7 @@ public interface SoftwareManagement {
      * @return the found {@link SoftwareModuleType}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleType> findSoftwareModuleTypesByPredicate(@NotNull Specification<SoftwareModuleType> spec,
-            @NotNull Pageable pageable);
+    Page<SoftwareModuleType> findSoftwareModuleTypesByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Retrieves software module including details (
@@ -468,4 +465,17 @@ public interface SoftwareManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleType updateSoftwareModuleType(@NotNull SoftwareModuleType sm);
 
+    /**
+     * Generates an empty {@link SoftwareModuleType} without persisting it.
+     * 
+     * @return {@link SoftwareModuleType} object
+     */
+    SoftwareModuleType generateSoftwareModuleType();
+
+    /**
+     * Generates an empty {@link SoftwareModule} without persisting it.
+     * 
+     * @return {@link SoftwareModule} object
+     */
+    SoftwareModule generateSoftwareModule();
 }

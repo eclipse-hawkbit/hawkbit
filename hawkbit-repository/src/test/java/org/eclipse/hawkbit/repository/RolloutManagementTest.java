@@ -19,23 +19,26 @@ import java.util.concurrent.Callable;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.utils.MultipleInvokeHelper;
 import org.eclipse.hawkbit.repository.utils.SuccessCondition;
 import org.junit.Test;
@@ -45,7 +48,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -135,10 +137,10 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
                 Status.RUNNING);
         // finish one action should be sufficient due the finish condition is at
         // 50%
-        final Action action = runningActions.get(0);
+        final JpaAction action = (JpaAction) runningActions.get(0);
         action.setStatus(Status.FINISHED);
         controllerManagament
-                .addUpdateActionStatus(new ActionStatus(action, Status.FINISHED, System.currentTimeMillis(), ""));
+                .addUpdateActionStatus(new JpaActionStatus(action, Status.FINISHED, System.currentTimeMillis(), ""));
 
         // check running rollouts again, now the finish condition should be hit
         // and should start the next group
@@ -179,8 +181,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // finish actions with error
         for (final Action action : runningActions) {
             action.setStatus(Status.ERROR);
-            controllerManagament
-                    .addUpdateActionStatus(new ActionStatus(action, Status.ERROR, System.currentTimeMillis(), ""));
+            controllerManagament.addUpdateActionStatus(
+                    new JpaActionStatus((JpaAction) action, Status.ERROR, System.currentTimeMillis(), ""));
         }
 
         // check running rollouts again, now the error condition should be hit
@@ -221,8 +223,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         // finish actions with error
         for (final Action action : runningActions) {
             action.setStatus(Status.ERROR);
-            controllerManagament
-                    .addUpdateActionStatus(new ActionStatus(action, Status.ERROR, System.currentTimeMillis(), ""));
+            controllerManagament.addUpdateActionStatus(
+                    new JpaActionStatus((JpaAction) action, Status.ERROR, System.currentTimeMillis(), ""));
         }
 
         // check running rollouts again, now the error condition should be hit
@@ -835,25 +837,24 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountOtherTargets, "others-", "rollout"));
 
         final String rsqlParam = "controllerId==*MyRoll*";
-        final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
 
         rolloutManagement.startRollout(myRollout);
         myRollout = rolloutManagement.findRolloutById(myRollout.getId());
         final List<RolloutGroup> rolloutGroups = myRollout.getRolloutGroups();
 
-        Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0),
-                rsqlSpecification, new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
+        Page<Target> targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(0), rsqlParam,
+                new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
         final List<Target> targetlistGroup1 = targetPage.getContent();
         assertThat(targetlistGroup1.size()).isEqualTo(5);
         assertThat(targetlistGroup1.get(0).getControllerId()).isEqualTo("MyRollout--00000");
 
-        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1), rsqlSpecification,
+        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(1), rsqlParam,
                 new OffsetBasedPageRequest(0, 100, new Sort(Direction.DESC, "controllerId")));
         final List<Target> targetlistGroup2 = targetPage.getContent();
         assertThat(targetlistGroup2.size()).isEqualTo(5);
         assertThat(targetlistGroup2.get(0).getControllerId()).isEqualTo("MyRollout--00009");
 
-        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(2), rsqlSpecification,
+        targetPage = rolloutGroupManagement.findRolloutGroupTargets(rolloutGroups.get(2), rsqlParam,
                 new OffsetBasedPageRequest(0, 100, new Sort(Direction.ASC, "controllerId")));
         final List<Target> targetlistGroup3 = targetPage.getContent();
         assertThat(targetlistGroup3.size()).isEqualTo(5);
@@ -875,11 +876,11 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
                 softwareManagement, distributionSetManagement);
         targetManagement.createTargets(
                 TestDataUtil.buildTargetFixtures(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
-        final RolloutGroupConditions conditions = new RolloutGroup.RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new JpaRolloutGroup.RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-        Rollout myRollout = new Rollout();
+        Rollout myRollout = new JpaRollout();
         myRollout.setName(rolloutName);
         myRollout.setDescription("This is a test description for the rollout");
         myRollout.setTargetFilterQuery("controllerId==" + targetPrefixName + "-*");
@@ -933,11 +934,11 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
             final int amountOtherTargets, final int groupSize, final String successCondition,
             final String errorCondition) {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
         final DistributionSet rolloutDS = distributionSetManagement.createDistributionSet(
                 TestDataUtil.buildDistributionSet("rolloutDS", "0.0.0", standardDsType, os, jvm, ah));
         targetManagement
@@ -962,11 +963,11 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
-        final RolloutGroupConditions conditions = new RolloutGroup.RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new JpaRolloutGroup.RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-        final Rollout rolloutToCreate = new Rollout();
+        final Rollout rolloutToCreate = new JpaRollout();
         rolloutToCreate.setName(rolloutName);
         rolloutToCreate.setDescription(rolloutDescription);
         rolloutToCreate.setTargetFilterQuery(filterQuery);
@@ -978,8 +979,8 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final List<Action> runningActions = deploymentManagement.findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         for (final Action action : runningActions) {
             action.setStatus(status);
-            controllerManagament
-                    .addUpdateActionStatus(new ActionStatus(action, status, System.currentTimeMillis(), ""));
+            controllerManagament.addUpdateActionStatus(
+                    new JpaActionStatus((JpaAction) action, status, System.currentTimeMillis(), ""));
         }
         return runningActions.size();
     }
@@ -990,12 +991,12 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
         for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
             controllerManagament.addUpdateActionStatus(
-                    new ActionStatus(runningActions.get(i), status, System.currentTimeMillis(), ""));
+                    new JpaActionStatus((JpaAction) runningActions.get(i), status, System.currentTimeMillis(), ""));
         }
         return runningActions.size();
     }
 
-    private Map<TotalTargetCountStatus.Status, Long> createInitStatusMap() {
+    private static Map<TotalTargetCountStatus.Status, Long> createInitStatusMap() {
         final Map<TotalTargetCountStatus.Status, Long> map = new HashMap<>();
         for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
             map.put(status, 0L);

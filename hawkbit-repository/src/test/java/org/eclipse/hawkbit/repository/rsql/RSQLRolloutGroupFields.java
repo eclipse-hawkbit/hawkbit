@@ -13,11 +13,12 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditionBuilder;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -75,8 +76,8 @@ public class RSQLRolloutGroupFields extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsAll(rollout,
-                RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), new PageRequest(0, 100));
+        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findRolloutGroupsAll(rollout, rsqlParam,
+                new PageRequest(0, 100));
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);
@@ -84,7 +85,7 @@ public class RSQLRolloutGroupFields extends AbstractIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = new Rollout();
+        final Rollout rollout = new JpaRollout();
         rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
         rollout.setName(name);
         rollout.setTargetFilterQuery(targetFilterQuery);

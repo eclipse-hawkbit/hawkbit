@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,8 @@ import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -57,26 +60,26 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Full DS tag lifecycle tested. Create tags, assign them to sets and delete the tags.")
     public void createAndAssignAndDeleteDistributionSetTags() {
-        final List<DistributionSet> dsAs = TestDataUtil.generateDistributionSets("DS-A", 20, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> dsBs = TestDataUtil.generateDistributionSets("DS-B", 10, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> dsCs = TestDataUtil.generateDistributionSets("DS-C", 25, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> dsABs = TestDataUtil.generateDistributionSets("DS-AB", 5, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> dsACs = TestDataUtil.generateDistributionSets("DS-AC", 11, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> dsBCs = TestDataUtil.generateDistributionSets("DS-BC", 13, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> dsABCs = TestDataUtil.generateDistributionSets("DS-ABC", 9, softwareManagement,
-                distributionSetManagement);
+        final Collection<DistributionSet> dsAs = (Collection) TestDataUtil.generateDistributionSets("DS-A", 20,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsBs = (Collection) TestDataUtil.generateDistributionSets("DS-B", 10,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsCs = (Collection) TestDataUtil.generateDistributionSets("DS-C", 25,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsABs = (Collection) TestDataUtil.generateDistributionSets("DS-AB", 5,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsACs = (Collection) TestDataUtil.generateDistributionSets("DS-AC", 11,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsBCs = (Collection) TestDataUtil.generateDistributionSets("DS-BC", 13,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsABCs = (Collection) TestDataUtil.generateDistributionSets("DS-ABC", 9,
+                softwareManagement, distributionSetManagement);
 
-        final DistributionSetTag tagA = tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
-        final DistributionSetTag tagB = tagManagement.createDistributionSetTag(new DistributionSetTag("B"));
-        final DistributionSetTag tagC = tagManagement.createDistributionSetTag(new DistributionSetTag("C"));
-        final DistributionSetTag tagX = tagManagement.createDistributionSetTag(new DistributionSetTag("X"));
-        final DistributionSetTag tagY = tagManagement.createDistributionSetTag(new DistributionSetTag("Y"));
+        final DistributionSetTag tagA = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
+        final DistributionSetTag tagB = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("B"));
+        final DistributionSetTag tagC = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("C"));
+        final DistributionSetTag tagX = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("X"));
+        final DistributionSetTag tagY = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Y"));
 
         distributionSetManagement.toggleTagAssignment(dsAs, tagA);
         distributionSetManagement.toggleTagAssignment(dsBs, tagB);
@@ -167,20 +170,20 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Description("Verifies the toogle mechanism by means on assigning tag if at least on DS in the list does not have"
             + "the tag yet. Unassign if all of them have the tag already.")
     public void assignAndUnassignDistributionSetTags() {
-        final List<DistributionSet> groupA = TestDataUtil.generateDistributionSets(20, softwareManagement,
-                distributionSetManagement);
-        final List<DistributionSet> groupB = TestDataUtil.generateDistributionSets("unassigned", 20, softwareManagement,
-                distributionSetManagement);
+        final Collection<DistributionSet> groupA = (Collection) TestDataUtil.generateDistributionSets(20,
+                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> groupB = (Collection) TestDataUtil.generateDistributionSets("unassigned", 20,
+                softwareManagement, distributionSetManagement);
 
         final DistributionSetTag tag = tagManagement
-                .createDistributionSetTag(new DistributionSetTag("tag1", "tagdesc1", ""));
+                .createDistributionSetTag(new JpaDistributionSetTag("tag1", "tagdesc1", ""));
 
         // toggle A only -> A is now assigned
         DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(groupA, tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(0);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
-                groupA.stream().map(set -> set.getId()).collect(Collectors.toList())));
+        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
+                .findDistributionSetsAll(groupA.stream().map(set -> set.getId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
@@ -189,8 +192,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
         result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
         assertThat(result.getAlreadyAssigned()).isEqualTo(20);
         assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
-                groupB.stream().map(set -> set.getId()).collect(Collectors.toList())));
+        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
+                .findDistributionSetsAll(groupB.stream().map(set -> set.getId()).collect(Collectors.toList())));
         assertThat(result.getUnassigned()).isEqualTo(0);
         assertThat(result.getUnassignedEntity()).isEmpty();
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
@@ -201,7 +204,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(result.getAssigned()).isEqualTo(0);
         assertThat(result.getAssignedEntity()).isEmpty();
         assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.findDistributionSetsAll(
                 concat(groupB, groupA).stream().map(set -> set.getId()).collect(Collectors.toList())));
         assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
@@ -214,7 +217,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         final List<Target> groupA = targetManagement.createTargets(TestDataUtil.generateTargets(20, ""));
         final List<Target> groupB = targetManagement.createTargets(TestDataUtil.generateTargets(20, "groupb"));
 
-        final TargetTag tag = tagManagement.createTargetTag(new TargetTag("tag1", "tagdesc1", ""));
+        final TargetTag tag = tagManagement.createTargetTag(new JpaTargetTag("tag1", "tagdesc1", ""));
 
         // toggle A only -> A is now assigned
         TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(groupA, tag);
@@ -249,7 +252,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
     }
 
     @SafeVarargs
-    private final <T> List<T> concat(final List<T>... targets) {
+    private final <T> Collection<T> concat(final Collection<T>... targets) {
         final List<T> result = new ArrayList<>();
         Arrays.asList(targets).forEach(result::addAll);
         return result;
@@ -258,16 +261,16 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that all tags are retrieved through repository.")
     public void findAllTargetTags() {
-        final List<TargetTag> tags = createTargetsWithTags();
+        final List<JpaTargetTag> tags = createTargetsWithTags();
 
-        assertThat(targetTagRepository.findAll()).isEqualTo(tagManagement.findAllTargetTags()).isEqualTo(tags)
+        assertThat(targetTagRepository.findAll()).isEqualTo(targetTagRepository.findAll()).isEqualTo(tags)
                 .as("Wrong tag size").hasSize(20);
     }
 
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createTargetTag() {
-        final Tag tag = tagManagement.createTargetTag(new TargetTag("kai1", "kai2", "colour"));
+        final Tag tag = tagManagement.createTargetTag(new JpaTargetTag("kai1", "kai2", "colour"));
 
         assertThat(targetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag ed").isEqualTo("kai2");
         assertThat(tagManagement.findTargetTag("kai1").getColour()).as("wrong tag found").isEqualTo("colour");
@@ -279,7 +282,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
     public void deleteTargetTas() {
 
         // create test data
-        final Iterable<TargetTag> tags = createTargetsWithTags();
+        final Iterable<JpaTargetTag> tags = createTargetsWithTags();
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
@@ -296,13 +299,13 @@ public class TagManagementTest extends AbstractIntegrationTest {
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findOne(toDelete.getId())).as("No tag should be found").isNull();
-        assertThat(tagManagement.findAllTargetTags()).as("Wrong target tag size").hasSize(19);
+        assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(19);
     }
 
     @Test
     @Description("Tests the name update of a target tag.")
     public void updateTargetTag() {
-        final List<TargetTag> tags = createTargetsWithTags();
+        final List<JpaTargetTag> tags = createTargetsWithTags();
 
         // change data
         final TargetTag savedAssigned = tags.iterator().next();
@@ -312,7 +315,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
         tagManagement.updateTargetTag(savedAssigned);
 
         // check data
-        assertThat(tagManagement.findAllTargetTags()).as("Wrong target tag size").hasSize(tags.size());
+        assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(tags.size());
         assertThat(targetTagRepository.findOne(savedAssigned.getId()).getName()).as("wrong target tag is saved")
                 .isEqualTo("test123");
         assertThat(targetTagRepository.findOne(savedAssigned.getId()).getOptLockRevision())
@@ -322,7 +325,7 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that a created tag is persisted in the repository as defined.")
     public void createDistributionSetTag() {
-        final Tag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("kai1", "kai2", "colour"));
+        final Tag tag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("kai1", "kai2", "colour"));
 
         assertThat(distributionSetTagRepository.findByNameEquals("kai1").getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
@@ -366,10 +369,10 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameException() {
-        tagManagement.createTargetTag(new TargetTag("A"));
+        tagManagement.createTargetTag(new JpaTargetTag("A"));
 
         try {
-            tagManagement.createTargetTag(new TargetTag("A"));
+            tagManagement.createTargetTag(new JpaTargetTag("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -379,8 +382,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
-        tagManagement.createTargetTag(new TargetTag("A"));
-        final TargetTag tag = tagManagement.createTargetTag(new TargetTag("B"));
+        tagManagement.createTargetTag(new JpaTargetTag("A"));
+        final TargetTag tag = tagManagement.createTargetTag(new JpaTargetTag("B"));
         tag.setName("A");
 
         try {
@@ -394,9 +397,9 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameException() {
-        tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
         try {
-            tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
+            tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
             fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -406,8 +409,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
-        tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
-        final DistributionSetTag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("B"));
+        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
+        final DistributionSetTag tag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("B"));
         tag.setName("A");
 
         try {
@@ -448,19 +451,19 @@ public class TagManagementTest extends AbstractIntegrationTest {
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags").hasSize(20);
     }
 
-    private List<TargetTag> createTargetsWithTags() {
-        targetManagement.createTargets(TestDataUtil.generateTargets(20));
+    private List<JpaTargetTag> createTargetsWithTags() {
+        final List<Target> targets = targetManagement.createTargets(TestDataUtil.generateTargets(20));
         final Iterable<TargetTag> tags = tagManagement.createTargetTags(TestDataUtil.generateTargetTags(20));
 
-        tags.forEach(tag -> targetManagement.toggleTagAssignment(targetRepository.findAll(), tag));
+        tags.forEach(tag -> targetManagement.toggleTagAssignment(targets, tag));
 
-        return tagManagement.findAllTargetTags();
+        return targetTagRepository.findAll();
     }
 
     private List<DistributionSetTag> createDsSetsWithTags() {
 
-        final List<DistributionSet> sets = TestDataUtil.generateDistributionSets(20, softwareManagement,
-                distributionSetManagement);
+        final Collection<DistributionSet> sets = (Collection) TestDataUtil.generateDistributionSets(20,
+                softwareManagement, distributionSetManagement);
         final Iterable<DistributionSetTag> tags = tagManagement
                 .createDistributionSetTags(TestDataUtil.generateDistributionSetTags(20));
 

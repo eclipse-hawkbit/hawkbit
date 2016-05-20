@@ -15,10 +15,11 @@ import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 
 /**
@@ -48,10 +49,10 @@ public final class DeploymentHelper {
      *
      * @return updated target
      */
-    static Target updateTargetInfo(@NotNull final Target target, @NotNull final TargetUpdateStatus status,
+    static JpaTarget updateTargetInfo(@NotNull final JpaTarget target, @NotNull final TargetUpdateStatus status,
             final boolean setInstalledDate, final TargetInfoRepository targetInfoRepository,
             final EntityManager entityManager) {
-        final TargetInfo ts = target.getTargetInfo();
+        final JpaTargetInfo ts = (JpaTargetInfo) target.getTargetInfo();
         ts.setUpdateStatus(status);
 
         if (setInstalledDate) {
@@ -77,7 +78,7 @@ public final class DeploymentHelper {
      * @param targetInfoRepository
      *            for the operation
      */
-    static void successCancellation(final Action action, final ActionRepository actionRepository,
+    static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
             final TargetManagement targetManagement, final TargetInfoRepository targetInfoRepository,
             final EntityManager entityManager) {
 
@@ -85,7 +86,7 @@ public final class DeploymentHelper {
         action.setActive(false);
         action.setStatus(Status.CANCELED);
 
-        final Target target = action.getTarget();
+        final JpaTarget target = (JpaTarget) action.getTarget();
         final List<Action> nextActiveActions = actionRepository.findByTargetAndActiveOrderByIdAsc(target, true).stream()
                 .filter(a -> !a.getId().equals(action.getId())).collect(Collectors.toList());
 

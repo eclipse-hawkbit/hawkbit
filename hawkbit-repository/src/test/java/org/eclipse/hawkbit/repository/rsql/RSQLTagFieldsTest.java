@@ -12,6 +12,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.TagFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.Before;
@@ -31,9 +33,9 @@ public class RSQLTagFieldsTest extends AbstractIntegrationTest {
     public void seuptBeforeTest() {
 
         for (int i = 0; i < 5; i++) {
-            final TargetTag targetTag = new TargetTag("" + i, "" + i, i % 2 == 0 ? "red" : "blue");
+            final TargetTag targetTag = new JpaTargetTag("" + i, "" + i, i % 2 == 0 ? "red" : "blue");
             tagManagement.createTargetTag(targetTag);
-            final DistributionSetTag distributionSetTag = new DistributionSetTag("" + i, "" + i,
+            final DistributionSetTag distributionSetTag = new JpaDistributionSetTag("" + i, "" + i,
                     i % 2 == 0 ? "red" : "blue");
             tagManagement.createDistributionSetTag(distributionSetTag);
         }
@@ -101,8 +103,8 @@ public class RSQLTagFieldsTest extends AbstractIntegrationTest {
 
     private void assertRSQLQueryDistributionSet(final String rsqlParam, final long expectedEntities) {
 
-        final Page<DistributionSetTag> findEnitity = tagManagement
-                .findAllDistributionSetTags(RSQLUtility.parse(rsqlParam, TagFields.class), new PageRequest(0, 100));
+        final Page<DistributionSetTag> findEnitity = tagManagement.findAllDistributionSetTags(rsqlParam,
+                new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);
@@ -110,8 +112,7 @@ public class RSQLTagFieldsTest extends AbstractIntegrationTest {
 
     private void assertRSQLQueryTarget(final String rsqlParam, final long expectedEntities) {
 
-        final Page<TargetTag> findEnitity = tagManagement
-                .findAllTargetTags(RSQLUtility.parse(rsqlParam, TagFields.class), new PageRequest(0, 100));
+        final Page<TargetTag> findEnitity = tagManagement.findAllTargetTags(rsqlParam, new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

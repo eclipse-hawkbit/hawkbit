@@ -24,28 +24,36 @@ import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
+import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.DistributionSet_;
-import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.specifications.DistributionSetSpecification;
-import org.eclipse.hawkbit.repository.specifications.DistributionSetTypeSpecification;
-import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -54,6 +62,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -111,12 +120,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> dsIds, final String tagName) {
 
-        final Iterable<DistributionSet> sets = findDistributionSetListWithDetails(dsIds);
+        final List<JpaDistributionSet> sets = findDistributionSetListWithDetails(dsIds);
         final DistributionSetTag myTag = tagManagement.findDistributionSetTag(tagName);
 
         DistributionSetTagAssignmentResult result;
-        final List<DistributionSet> toBeChangedDSs = new ArrayList<>();
-        for (final DistributionSet set : sets) {
+        final List<JpaDistributionSet> toBeChangedDSs = new ArrayList<>();
+        for (final JpaDistributionSet set : sets) {
             if (set.getTags().add(myTag)) {
                 toBeChangedDSs.add(set);
             }
@@ -124,17 +133,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // un-assignment case
         if (toBeChangedDSs.isEmpty()) {
-            for (final DistributionSet set : sets) {
+            for (final JpaDistributionSet set : sets) {
                 if (set.getTags().remove(myTag)) {
                     toBeChangedDSs.add(set);
                 }
             }
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), 0,
-                    toBeChangedDSs.size(), Collections.emptyList(), distributionSetRepository.save(toBeChangedDSs),
-                    myTag);
+                    toBeChangedDSs.size(), Collections.emptyList(),
+                    new ArrayList<>(distributionSetRepository.save(toBeChangedDSs)), myTag);
         } else {
             result = new DistributionSetTagAssignmentResult(dsIds.size() - toBeChangedDSs.size(), toBeChangedDSs.size(),
-                    0, distributionSetRepository.save(toBeChangedDSs), Collections.emptyList(), myTag);
+                    0, new ArrayList<>(distributionSetRepository.save(toBeChangedDSs)), Collections.emptyList(), myTag);
         }
 
         final DistributionSetTagAssignmentResult resultAssignment = result;
@@ -145,8 +154,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return result;
     }
 
-    @Override
-    public List<DistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {
+    private List<JpaDistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {
         return distributionSetRepository.findAll(DistributionSetSpecification.byIds(distributionIdSet));
     }
 
@@ -156,8 +164,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSet updateDistributionSet(final DistributionSet ds) {
         checkNotNull(ds.getId());
         final DistributionSet persisted = findDistributionSetByIdWithDetails(ds.getId());
-        checkDistributionSetSoftwareModulesIsAllowedToModify(ds, persisted.getModules());
-        return distributionSetRepository.save(ds);
+        checkDistributionSetSoftwareModulesIsAllowedToModify((JpaDistributionSet) ds, persisted.getModules());
+        return distributionSetRepository.save((JpaDistributionSet) ds);
     }
 
     @Override
@@ -196,7 +204,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (dSet.getType() == null) {
             dSet.setType(systemManagement.getTenantMetadata().getDefaultDsType());
         }
-        return distributionSetRepository.save(dSet);
+        return distributionSetRepository.save((JpaDistributionSet) dSet);
     }
 
     private void prepareDsSave(final DistributionSet dSet) {
@@ -220,18 +228,22 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 ds.setType(systemManagement.getTenantMetadata().getDefaultDsType());
             }
         }
-        return distributionSetRepository.save(distributionSets);
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Collection<JpaDistributionSet> toSave = (Collection) distributionSets;
+
+        return new ArrayList<>(distributionSetRepository.save(toSave));
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSet assignSoftwareModules(final DistributionSet ds, final Set<SoftwareModule> softwareModules) {
-        checkDistributionSetSoftwareModulesIsAllowedToModify(ds, softwareModules);
+        checkDistributionSetSoftwareModulesIsAllowedToModify((JpaDistributionSet) ds, softwareModules);
         for (final SoftwareModule softwareModule : softwareModules) {
             ds.addModule(softwareModule);
         }
-        return distributionSetRepository.save(ds);
+        return distributionSetRepository.save((JpaDistributionSet) ds);
     }
 
     @Override
@@ -241,8 +253,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final Set<SoftwareModule> softwareModules = new HashSet<>();
         softwareModules.add(softwareModule);
         ds.removeModule(softwareModule);
-        checkDistributionSetSoftwareModulesIsAllowedToModify(ds, softwareModules);
-        return distributionSetRepository.save(ds);
+        checkDistributionSetSoftwareModulesIsAllowedToModify((JpaDistributionSet) ds, softwareModules);
+        return distributionSetRepository.save((JpaDistributionSet) ds);
     }
 
     @Override
@@ -251,7 +263,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSetType updateDistributionSetType(final DistributionSetType dsType) {
         checkNotNull(dsType.getId());
 
-        final DistributionSetType persisted = distributionSetTypeRepository.findOne(dsType.getId());
+        final JpaDistributionSetType persisted = distributionSetTypeRepository.findOne(dsType.getId());
 
         // throw exception if user tries to update a DS type that is already in
         // use
@@ -261,25 +273,36 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                             dsType.getName()));
         }
 
-        return distributionSetTypeRepository.save(dsType);
+        return distributionSetTypeRepository.save((JpaDistributionSetType) dsType);
     }
 
     @Override
-    public Page<DistributionSetType> findDistributionSetTypesAll(final Specification<DistributionSetType> spec,
-            final Pageable pageable) {
-        return distributionSetTypeRepository.findAll(spec, pageable);
+    public Page<DistributionSetType> findDistributionSetTypesAll(final String rsqlParam, final Pageable pageable) {
+        final Specification<JpaDistributionSetType> spec = RSQLUtility.parse(rsqlParam,
+                DistributionSetTypeFields.class);
+
+        return convertDsTPage(distributionSetTypeRepository.findAll(spec, pageable));
+    }
+
+    private static Page<DistributionSetType> convertDsTPage(final Page<JpaDistributionSetType> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
     }
 
     @Override
     public Page<DistributionSetType> findDistributionSetTypesAll(final Pageable pageable) {
-        return distributionSetTypeRepository.findByDeleted(pageable, false);
+        return convertDsTPage(distributionSetTypeRepository.findByDeleted(pageable, false));
     }
 
     @Override
     public Page<DistributionSet> findDistributionSetsByFilters(final Pageable pageable,
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<DistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
-        return findByCriteriaAPI(pageable, specList);
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
+        return convertDsPage(findByCriteriaAPI(pageable, specList));
+    }
+
+    private static Page<DistributionSet> convertDsPage(final Page<JpaDistributionSet> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
     }
 
     /**
@@ -291,7 +314,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      */
     private DistributionSet findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<DistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
         if (specList == null || specList.isEmpty()) {
             return null;
         }
@@ -301,30 +325,33 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSet> findDistributionSetsAll(final Pageable pageReq, final Boolean deleted,
             final Boolean complete) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<>();
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
 
         if (deleted != null) {
-            final Specification<DistributionSet> spec = DistributionSetSpecification.isDeleted(deleted);
+            final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isDeleted(deleted);
             specList.add(spec);
         }
 
         if (complete != null) {
-            final Specification<DistributionSet> spec = DistributionSetSpecification.isCompleted(complete);
+            final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isCompleted(complete);
             specList.add(spec);
         }
 
-        return findByCriteriaAPI(pageReq, specList);
+        return convertDsPage(findByCriteriaAPI(pageReq, specList));
     }
 
     @Override
-    public Page<DistributionSet> findDistributionSetsAll(final Specification<DistributionSet> spec,
-            final Pageable pageReq, final Boolean deleted) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<>();
+    public Page<DistributionSet> findDistributionSetsAll(final String rsqlParam, final Pageable pageReq,
+            final Boolean deleted) {
+
+        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class);
+
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
         if (deleted != null) {
             specList.add(DistributionSetSpecification.isDeleted(deleted));
         }
         specList.add(spec);
-        return findByCriteriaAPI(pageReq, specList);
+        return convertDsPage(findByCriteriaAPI(pageReq, specList));
     }
 
     @Override
@@ -371,23 +398,23 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public DistributionSet findDistributionSetByNameAndVersion(final String distributionName, final String version) {
-        final Specification<DistributionSet> spec = DistributionSetSpecification
+        final Specification<JpaDistributionSet> spec = DistributionSetSpecification
                 .equalsNameAndVersionIgnoreCase(distributionName, version);
         return distributionSetRepository.findOne(spec);
 
     }
 
     @Override
-    public Iterable<DistributionSet> findDistributionSetList(final Collection<Long> dist) {
-        return distributionSetRepository.findAll(dist);
+    public List<DistributionSet> findDistributionSetsAll(final Collection<Long> dist) {
+        return new ArrayList<>(distributionSetRepository.findAll(DistributionSetSpecification.byIds(dist)));
     }
 
     @Override
     public Long countDistributionSetsAll() {
 
-        final List<Specification<DistributionSet>> specList = new ArrayList<>();
+        final List<Specification<JpaDistributionSet>> specList = new LinkedList<>();
 
-        final Specification<DistributionSet> spec = DistributionSetSpecification.isDeleted(Boolean.FALSE);
+        final Specification<JpaDistributionSet> spec = DistributionSetSpecification.isDeleted(Boolean.FALSE);
         specList.add(spec);
 
         return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
@@ -421,16 +448,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityAlreadyExistsException("Given type contains an Id!");
         }
 
-        return distributionSetTypeRepository.save(type);
+        return distributionSetTypeRepository.save((JpaDistributionSetType) type);
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteDistributionSetType(final DistributionSetType type) {
+    public void deleteDistributionSetType(final DistributionSetType ty) {
+        final JpaDistributionSetType type = (JpaDistributionSetType) ty;
 
         if (distributionSetRepository.countByType(type) > 0) {
-            final DistributionSetType toDelete = entityManager.merge(type);
+            final JpaDistributionSetType toDelete = entityManager.merge(type);
             toDelete.setDeleted(true);
             distributionSetTypeRepository.save(toDelete);
         } else {
@@ -441,7 +469,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public DistributionSetMetadata createDistributionSetMetadata(final DistributionSetMetadata metadata) {
+    public DistributionSetMetadata createDistributionSetMetadata(final DistributionSetMetadata md) {
+        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) md;
+
         if (distributionSetMetadataRepository.exists(metadata.getId())) {
             throwMetadataKeyAlreadyExists(metadata.getId().getKey());
         }
@@ -449,31 +479,38 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         // log written because
         // modifying metadata is modifying the base distribution set itself for
         // auditing purposes.
-        entityManager.merge(metadata.getDistributionSet()).setLastModifiedAt(0L);
+        entityManager.merge((JpaDistributionSet) metadata.getDistributionSet()).setLastModifiedAt(0L);
         return distributionSetMetadataRepository.save(metadata);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public List<DistributionSetMetadata> createDistributionSetMetadata(
-            final Collection<DistributionSetMetadata> metadata) {
-        for (final DistributionSetMetadata distributionSetMetadata : metadata) {
+    public List<DistributionSetMetadata> createDistributionSetMetadata(final Collection<DistributionSetMetadata> md) {
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        final Collection<JpaDistributionSetMetadata> metadata = (Collection) md;
+
+        for (final JpaDistributionSetMetadata distributionSetMetadata : metadata) {
             checkAndThrowAlreadyIfDistributionSetMetadataExists(distributionSetMetadata.getId());
         }
-        metadata.forEach(m -> entityManager.merge(m.getDistributionSet()).setLastModifiedAt(-1L));
-        return (List<DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata);
+        metadata.forEach(m -> entityManager.merge((JpaDistributionSet) m.getDistributionSet()).setLastModifiedAt(0L));
+
+        return new ArrayList<DistributionSetMetadata>(
+                (Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata));
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
-    public DistributionSetMetadata updateDistributionSetMetadata(final DistributionSetMetadata metadata) {
+    public DistributionSetMetadata updateDistributionSetMetadata(final DistributionSetMetadata md) {
+        final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) md;
+
         // check if exists otherwise throw entity not found exception
         findOne(metadata.getId());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
-        entityManager.merge(metadata.getDistributionSet()).setLastModifiedAt(0L);
+        entityManager.merge((JpaDistributionSet) metadata.getDistributionSet()).setLastModifiedAt(0L);
         return distributionSetMetadataRepository.save(metadata);
     }
 
@@ -488,23 +525,29 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId,
             final Pageable pageable) {
 
-        return distributionSetMetadataRepository.findAll(
-                (Specification<DistributionSetMetadata>) (root, query, cb) -> cb.equal(
-                        root.get(DistributionSetMetadata_.distributionSet).get(DistributionSet_.id), distributionSetId),
-                pageable);
+        return convertMdPage(distributionSetMetadataRepository
+                .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
+                        root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
+                        distributionSetId), pageable));
     }
 
     @Override
     public Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long distributionSetId,
-            final Specification<DistributionSetMetadata> spec, final Pageable pageable) {
-        return distributionSetMetadataRepository
-                .findAll(
-                        (Specification<DistributionSetMetadata>) (root, query,
-                                cb) -> cb.and(
-                                        cb.equal(root.get(DistributionSetMetadata_.distributionSet)
-                                                .get(DistributionSet_.id), distributionSetId),
-                                        spec.toPredicate(root, query, cb)),
-                        pageable);
+            final String rsqlParam, final Pageable pageable) {
+
+        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
+                DistributionSetMetadataFields.class);
+
+        return convertMdPage(
+                distributionSetMetadataRepository
+                        .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.and(
+                                cb.equal(root.get(JpaDistributionSetMetadata_.distributionSet)
+                                        .get(JpaDistributionSet_.id), distributionSetId),
+                                spec.toPredicate(root, query, cb)), pageable));
+    }
+
+    private static Page<DistributionSetMetadata> convertMdPage(final Page<JpaDistributionSetMetadata> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
     }
 
     @Override
@@ -518,19 +561,19 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public DistributionSet findDistributionSetByAction(final Action action) {
-        return distributionSetRepository.findByAction(action);
+        return distributionSetRepository.findByAction((JpaAction) action);
     }
 
     @Override
     public boolean isDistributionSetInUse(final DistributionSet distributionSet) {
-        return actionRepository.countByDistributionSet(distributionSet) > 0;
+        return actionRepository.countByDistributionSet((JpaDistributionSet) distributionSet) > 0;
     }
 
-    private static List<Specification<DistributionSet>> buildDistributionSetSpecifications(
+    private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<DistributionSet>> specList = new ArrayList<>();
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
 
-        Specification<DistributionSet> spec;
+        Specification<JpaDistributionSet> spec;
 
         if (null != distributionSetFilter.getIsComplete()) {
             spec = DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete());
@@ -568,7 +611,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void checkDistributionSetSoftwareModulesIsAllowedToModify(final DistributionSet distributionSet,
+    private void checkDistributionSetSoftwareModulesIsAllowedToModify(final JpaDistributionSet distributionSet,
             final Set<SoftwareModule> softwareModules) {
         if (!new HashSet<SoftwareModule>(distributionSet.getModules()).equals(softwareModules)
                 && actionRepository.countByDistributionSet(distributionSet) > 0) {
@@ -602,8 +645,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      *            list of @link {@link Specification}
      * @return the page with the found {@link DistributionSet}
      */
-    private Page<DistributionSet> findByCriteriaAPI(final Pageable pageable,
-            final List<Specification<DistributionSet>> specList) {
+    private Page<JpaDistributionSet> findByCriteriaAPI(final Pageable pageable,
+            final List<Specification<JpaDistributionSet>> specList) {
 
         if (specList == null || specList.isEmpty()) {
             return distributionSetRepository.findAll(pageable);
@@ -627,10 +670,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<DistributionSet> assignTag(final Collection<Long> dsIds, final DistributionSetTag tag) {
-        final List<DistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
+        final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
 
         allDs.forEach(ds -> ds.getTags().add(tag));
-        final List<DistributionSet> save = distributionSetRepository.save(allDs);
+
+        final List<DistributionSet> save = new ArrayList<>(distributionSetRepository.save(allDs));
 
         afterCommit.afterCommit(() -> {
 
@@ -646,19 +690,23 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public List<DistributionSet> unAssignAllDistributionSetsByTag(final DistributionSetTag tag) {
-        return unAssignTag(tag.getAssignedToDistributionSet(), tag);
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Collection<JpaDistributionSet> distributionSets = (Collection) tag.getAssignedToDistributionSet();
+
+        return new ArrayList<>(unAssignTag(distributionSets, tag));
     }
 
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public DistributionSet unAssignTag(final Long dsId, final DistributionSetTag distributionSetTag) {
-        final List<DistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
-        final List<DistributionSet> unAssignTag = unAssignTag(allDs, distributionSetTag);
+        final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(Arrays.asList(dsId));
+        final List<JpaDistributionSet> unAssignTag = unAssignTag(allDs, distributionSetTag);
         return unAssignTag.isEmpty() ? null : unAssignTag.get(0);
     }
 
-    private List<DistributionSet> unAssignTag(final Collection<DistributionSet> distributionSets,
+    private List<JpaDistributionSet> unAssignTag(final Collection<JpaDistributionSet> distributionSets,
             final DistributionSetTag tag) {
         distributionSets.forEach(ds -> ds.getTags().remove(tag));
         return distributionSetRepository.save(distributionSets);
@@ -684,5 +732,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
             final DistributionSetTag tag) {
         return toggleTagAssignment(sets.stream().map(ds -> ds.getId()).collect(Collectors.toList()), tag.getName());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetType generateDistributionSetType() {
+        return new JpaDistributionSetType();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSet generateDistributionSet() {
+        return new JpaDistributionSet();
     }
 }

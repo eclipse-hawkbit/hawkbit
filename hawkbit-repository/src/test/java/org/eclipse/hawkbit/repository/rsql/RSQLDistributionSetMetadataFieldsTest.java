@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.junit.Before;
@@ -41,7 +42,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractIntegrationTe
 
         final List<DistributionSetMetadata> metadata = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            metadata.add(new DistributionSetMetadata("" + i, distributionSet, "" + i));
+            metadata.add(new JpaDistributionSetMetadata("" + i, distributionSet, "" + i));
         }
 
         distributionSetManagement.createDistributionSetMetadata(metadata);
@@ -68,8 +69,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractIntegrationTe
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<DistributionSetMetadata> findEnitity = distributionSetManagement
-                .findDistributionSetMetadataByDistributionSetId(distributionSetId,
-                        RSQLUtility.parse(rsqlParam, DistributionSetMetadataFields.class), new PageRequest(0, 100));
+                .findDistributionSetMetadataByDistributionSetId(distributionSetId, rsqlParam, new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

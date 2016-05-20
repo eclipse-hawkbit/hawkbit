@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class ActionTest {
         // current time + 1 seconds
         final long sleepTime = 1000;
         final long timeForceTimeAt = System.currentTimeMillis() + sleepTime;
-        final Action timeforcedAction = new Action();
+        final Action timeforcedAction = new JpaAction();
         timeforcedAction.setActionType(ActionType.TIMEFORCED);
         timeforcedAction.setForcedTime(timeForceTimeAt);
         assertThat(timeforcedAction.isForce()).isFalse();

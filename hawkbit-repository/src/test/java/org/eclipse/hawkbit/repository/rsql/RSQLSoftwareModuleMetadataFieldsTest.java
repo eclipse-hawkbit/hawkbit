@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.junit.Before;
@@ -36,13 +38,13 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractIntegrationTes
     @Before
     public void setupBeforeTest() {
         final SoftwareModule softwareModule = softwareManagement.createSoftwareModule(
-                new SoftwareModule(TestDataUtil.findOrCreateSoftwareModuleType(softwareManagement, "application"),
+                new JpaSoftwareModule(TestDataUtil.findOrCreateSoftwareModuleType(softwareManagement, "application"),
                         "application", "1.0.0", "Desc", "vendor Limited, California"));
         softwareModuleId = softwareModule.getId();
 
         final List<SoftwareModuleMetadata> metadata = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            metadata.add(new SoftwareModuleMetadata("" + i, softwareModule, "" + i));
+            metadata.add(new JpaSoftwareModuleMetadata("" + i, softwareModule, "" + i));
         }
 
         softwareManagement.createSoftwareModuleMetadata(metadata);
@@ -70,8 +72,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractIntegrationTes
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
 
         final Page<SoftwareModuleMetadata> findEnitity = softwareManagement
-                .findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId,
-                        RSQLUtility.parse(rsqlParam, SoftwareModuleMetadataFields.class), new PageRequest(0, 100));
+                .findSoftwareModuleMetadataBySoftwareModuleId(softwareModuleId, rsqlParam, new PageRequest(0, 100));
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

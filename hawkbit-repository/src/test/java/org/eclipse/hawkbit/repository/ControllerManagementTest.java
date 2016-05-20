@@ -19,6 +19,8 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -38,7 +40,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Controller adds a new action status.")
     public void controllerAddsActionStatus() {
-        final Target target = new Target("4712");
+        final Target target = new JpaTarget("4712");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         Target savedTarget = targetManagement.createTarget(target);
@@ -54,7 +56,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID(savedTarget.getControllerId()).getTargetInfo()
                 .getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
-        ActionStatus actionStatusMessage = new ActionStatus(savedAction, Action.Status.RUNNING,
+        ActionStatus actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage.addMessage("foobar");
         savedAction.setStatus(Status.RUNNING);
@@ -62,7 +64,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        actionStatusMessage = new ActionStatus(savedAction, Action.Status.FINISHED, System.currentTimeMillis());
+        actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.FINISHED, System.currentTimeMillis());
         actionStatusMessage.addMessage(RandomStringUtils.randomAscii(512));
         savedAction.setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(actionStatusMessage);
@@ -98,7 +100,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
     public void tryToFinishUpdateProcessMoreThenOnce() {
 
         // mock
-        final Target target = new Target("Rabbit");
+        final Target target = new JpaTarget("Rabbit");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         Target savedTarget = targetManagement.createTarget(target);
@@ -108,21 +110,21 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
         Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
 
         // test and verify
-        final ActionStatus actionStatusMessage = new ActionStatus(savedAction, Action.Status.RUNNING,
+        final ActionStatus actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.RUNNING,
                 System.currentTimeMillis());
         actionStatusMessage.addMessage("running");
         savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage);
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
-        final ActionStatus actionStatusMessage2 = new ActionStatus(savedAction, Action.Status.ERROR,
+        final ActionStatus actionStatusMessage2 = new JpaActionStatus(savedAction, Action.Status.ERROR,
                 System.currentTimeMillis());
         actionStatusMessage2.addMessage("error");
         savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage2);
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
 
-        final ActionStatus actionStatusMessage3 = new ActionStatus(savedAction, Action.Status.FINISHED,
+        final ActionStatus actionStatusMessage3 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage3.addMessage("finish");
         controllerManagament.addUpdateActionStatus(actionStatusMessage3);

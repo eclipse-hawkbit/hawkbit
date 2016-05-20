@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface SoftwareModuleTypeRepository
-        extends BaseEntityRepository<SoftwareModuleType, Long>, JpaSpecificationExecutor<SoftwareModuleType> {
+        extends BaseEntityRepository<JpaSoftwareModuleType, Long>, JpaSpecificationExecutor<JpaSoftwareModuleType> {
 
     /**
      * @param pageable
@@ -47,7 +48,7 @@ public interface SoftwareModuleTypeRepository
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getKey()}
      */
-    SoftwareModuleType findByKey(String key);
+    JpaSoftwareModuleType findByKey(String key);
 
     /**
      *
@@ -56,5 +57,5 @@ public interface SoftwareModuleTypeRepository
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getName()}
      */
-    SoftwareModuleType findByName(String name);
+    JpaSoftwareModuleType findByName(String name);
 }

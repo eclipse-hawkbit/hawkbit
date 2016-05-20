@@ -20,6 +20,14 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -42,10 +50,10 @@ import net._01001111.text.LoremIpsum;
 public class TestDataUtil {
     private static final LoremIpsum LOREM = new LoremIpsum();
 
-    public static List<DistributionSet> generateDistributionSets(final String suffix, final int number,
+    public static List<JpaDistributionSet> generateDistributionSets(final String suffix, final int number,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
 
-        final List<DistributionSet> sets = new ArrayList<DistributionSet>();
+        final List<JpaDistributionSet> sets = new ArrayList<>();
         for (int i = 0; i < number; i++) {
             sets.add(generateDistributionSet(suffix, "v1." + i, softwareManagement, distributionSetManagement, false));
         }
@@ -56,32 +64,32 @@ public class TestDataUtil {
     public static DistributionSet generateDistributionSetWithNoSoftwareModules(final String name, final String version,
             final DistributionSetManagement distributionSetManagement) {
 
-        final DistributionSet dis = new DistributionSet();
+        final DistributionSet dis = new JpaDistributionSet();
         dis.setName(name);
         dis.setVersion(version);
         dis.setDescription("Test describtion for " + name);
         return distributionSetManagement.createDistributionSet(dis);
     }
 
-    public static List<DistributionSet> generateDistributionSets(final int number,
+    public static List<JpaDistributionSet> generateDistributionSets(final int number,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
 
         return generateDistributionSets("", number, softwareManagement, distributionSetManagement);
     }
 
-    public static DistributionSet generateDistributionSet(final String suffix, final String version,
+    public static JpaDistributionSet generateDistributionSet(final String suffix, final String version,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final boolean isRequiredMigrationStep) {
 
-        final SoftwareModule ah = softwareManagement.createSoftwareModule(new SoftwareModule(
+        final SoftwareModule ah = softwareManagement.createSoftwareModule(new JpaSoftwareModule(
                 findOrCreateSoftwareModuleType(softwareManagement, "application"), suffix + "application",
                 version + "." + new Random().nextInt(100), LOREM.words(20), suffix + " vendor Limited, California"));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(findOrCreateSoftwareModuleType(softwareManagement, "runtime"),
+        final SoftwareModule jvm = softwareManagement.createSoftwareModule(
+                new JpaSoftwareModule(findOrCreateSoftwareModuleType(softwareManagement, "runtime"),
                         suffix + "app runtime", version + "." + new Random().nextInt(100), LOREM.words(20),
                         suffix + " vendor GmbH, Stuttgart, Germany"));
         final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(findOrCreateSoftwareModuleType(softwareManagement, "os"),
+                .createSoftwareModule(new JpaSoftwareModule(findOrCreateSoftwareModuleType(softwareManagement, "os"),
                         suffix + " Firmware", version + "." + new Random().nextInt(100), LOREM.words(20),
                         suffix + " vendor Limited Inc, California"));
 
@@ -92,7 +100,7 @@ public class TestDataUtil {
         opt.add(findOrCreateSoftwareModuleType(softwareManagement, "application"));
         opt.add(findOrCreateSoftwareModuleType(softwareManagement, "runtime"));
 
-        return distributionSetManagement.createDistributionSet(
+        return (JpaDistributionSet) distributionSetManagement.createDistributionSet(
                 buildDistributionSet(suffix != null && suffix.length() > 0 ? suffix : "DS", version,
                         findOrCreateDistributionSetType(distributionSetManagement, "ecl_os_app_jvm",
                                 "OS mandatory App/JVM optional", mand, opt),
@@ -126,7 +134,7 @@ public class TestDataUtil {
     public static List<Target> generateTargets(final int start, final int number, final String prefix) {
         final List<Target> targets = new ArrayList<>();
         for (int i = start; i < start + number; i++) {
-            targets.add(new Target(prefix + i));
+            targets.add(new JpaTarget(prefix + i));
         }
 
         return targets;
@@ -136,7 +144,7 @@ public class TestDataUtil {
         final List<TargetTag> result = new ArrayList<>();
 
         for (int i = 0; i < number; i++) {
-            result.add(new TargetTag("tag" + i, "tagdesc" + i, "" + i));
+            result.add(new JpaTargetTag("tag" + i, "tagdesc" + i, "" + i));
         }
 
         return result;
@@ -146,30 +154,31 @@ public class TestDataUtil {
         final List<DistributionSetTag> result = new ArrayList<>();
 
         for (int i = 0; i < number; i++) {
-            result.add(new DistributionSetTag("tag" + i, "tagdesc" + i, "" + i));
+            result.add(new JpaDistributionSetTag("tag" + i, "tagdesc" + i, "" + i));
         }
 
         return result;
     }
 
-    public static DistributionSet generateDistributionSet(final String suffix,
+    public static JpaDistributionSet generateDistributionSet(final String suffix,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
             final boolean isRequiredMigrationStep) {
         return generateDistributionSet(suffix, "v1.0", softwareManagement, distributionSetManagement,
                 isRequiredMigrationStep);
     }
 
-    public static DistributionSet generateDistributionSet(final String suffix,
+    public static JpaDistributionSet generateDistributionSet(final String suffix,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
         return generateDistributionSet(suffix, "v1.0", softwareManagement, distributionSetManagement, false);
     }
 
-    public static List<org.eclipse.hawkbit.repository.model.Artifact> generateArtifacts(
-            final ArtifactManagement artifactManagement, final Long moduleId) {
-        final List<org.eclipse.hawkbit.repository.model.Artifact> artifacts = new ArrayList<>();
+    public static List<JpaArtifact> generateArtifacts(final ArtifactManagement artifactManagement,
+            final Long moduleId) {
+        final List<JpaArtifact> artifacts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             final InputStream stubInputStream = IOUtils.toInputStream("some test data" + i);
-            artifacts.add(artifactManagement.createLocalArtifact(stubInputStream, moduleId, "filename" + i, false));
+            artifacts.add((JpaArtifact) artifactManagement.createLocalArtifact(stubInputStream, moduleId,
+                    "filename" + i, false));
 
         }
 
@@ -178,7 +187,7 @@ public class TestDataUtil {
 
     public static Target createTarget(final TargetManagement targetManagement) {
         final String targetExist = "targetExist";
-        final Target target = new Target(targetExist);
+        final Target target = new JpaTarget(targetExist);
         targetManagement.createTarget(target);
         return target;
     }
@@ -196,7 +205,7 @@ public class TestDataUtil {
         if (findSoftwareModuleTypeByKey != null) {
             return findSoftwareModuleTypeByKey;
         }
-        return softwareManagement.createSoftwareModuleType(new SoftwareModuleType(softwareModuleType,
+        return softwareManagement.createSoftwareModuleType(new JpaSoftwareModuleType(softwareModuleType,
                 softwareModuleType, "Standard type " + softwareManagement, 1));
     }
 
@@ -210,7 +219,8 @@ public class TestDataUtil {
             return findDistributionSetTypeByname;
         }
 
-        final DistributionSetType type = new DistributionSetType(dsTypeKey, dsTypeName, "Standard type" + dsTypeName);
+        final DistributionSetType type = new JpaDistributionSetType(dsTypeKey, dsTypeName,
+                "Standard type" + dsTypeName);
         mandatory.forEach(entry -> type.addMandatoryModuleType(entry));
         optional.forEach(entry -> type.addOptionalModuleType(entry));
 
@@ -280,7 +290,7 @@ public class TestDataUtil {
      * @return the created {@link Target}
      */
     public static Target buildTargetFixture(final String ctrlID, final String description, final TargetTag[] tags) {
-        final Target target = new Target(ctrlID);
+        final Target target = new JpaTarget(ctrlID);
         target.setName("Prov.Target ".concat(ctrlID));
         target.setDescription(description);
         if (tags != null && tags.length > 0) {
@@ -322,7 +332,7 @@ public class TestDataUtil {
     public static DistributionSet buildDistributionSet(final String name, final String version,
             final DistributionSetType type, final SoftwareModule os, final SoftwareModule jvm,
             final SoftwareModule agentHub) {
-        final DistributionSet distributionSet = new DistributionSet(name, version, null, type,
+        final DistributionSet distributionSet = new JpaDistributionSet(name, version, null, type,
                 Lists.newArrayList(os, jvm, agentHub));
         distributionSet.setDescription(
                 String.format("description of DistributionSet; name = '%s', version = '%s'", name, version));
@@ -361,6 +371,6 @@ public class TestDataUtil {
      * @return the {@link TargetTag}
      */
     public static TargetTag buildTargetTagFixture(final String tagName) {
-        return new TargetTag(tagName);
+        return new JpaTargetTag(tagName);
     }
 }

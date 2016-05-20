@@ -10,225 +10,53 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
-import org.eclipse.hawkbit.cache.CacheField;
-import org.eclipse.hawkbit.cache.CacheKeys;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
-/**
- * @author Michael Hirsch
- *
- */
-@Entity
-@Table(name = "sp_rollout", indexes = {
-        @Index(name = "sp_idx_rollout_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_rollout"))
-public class Rollout extends NamedEntity {
+public interface Rollout extends NamedEntity {
 
-    private static final long serialVersionUID = 1L;
+    DistributionSet getDistributionSet();
 
-    @OneToMany(targetEntity = RolloutGroup.class)
-    @JoinColumn(name = "rollout", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_rolloutgroup"))
-    private List<RolloutGroup> rolloutGroups;
+    void setDistributionSet(DistributionSet distributionSet);
 
-    @Column(name = "target_filter", length = 1024, nullable = false)
-    private String targetFilterQuery;
+    List<RolloutGroup> getRolloutGroups();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
-    private DistributionSet distributionSet;
+    void setRolloutGroups(List<RolloutGroup> rolloutGroups);
 
-    @Column(name = "status")
-    private RolloutStatus status = RolloutStatus.CREATING;
+    String getTargetFilterQuery();
 
-    @Column(name = "last_check")
-    private long lastCheck = 0L;
+    void setTargetFilterQuery(String targetFilterQuery);
 
-    @Column(name = "action_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ActionType actionType = ActionType.FORCED;
+    RolloutStatus getStatus();
 
-    @Column(name = "forced_time")
-    private long forcedTime;
+    void setStatus(RolloutStatus status);
 
-    @Column(name = "total_targets")
-    private long totalTargets;
+    long getLastCheck();
 
-    @Transient
-    @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
-    private int rolloutGroupsTotal = 0;
+    void setLastCheck(long lastCheck);
 
-    @Transient
-    @CacheField(key = CacheKeys.ROLLOUT_GROUP_CREATED)
-    private int rolloutGroupsCreated = 0;
+    ActionType getActionType();
 
-    @Transient
-    private transient TotalTargetCountStatus totalTargetCountStatus;
+    void setActionType(ActionType actionType);
 
-    public DistributionSet getDistributionSet() {
-        return distributionSet;
-    }
+    long getForcedTime();
 
-    public void setDistributionSet(final DistributionSet distributionSet) {
-        this.distributionSet = distributionSet;
-    }
+    void setForcedTime(long forcedTime);
 
-    public List<RolloutGroup> getRolloutGroups() {
-        return rolloutGroups;
-    }
+    long getTotalTargets();
 
-    public void setRolloutGroups(final List<RolloutGroup> rolloutGroups) {
-        this.rolloutGroups = rolloutGroups;
-    }
+    void setTotalTargets(long totalTargets);
 
-    public String getTargetFilterQuery() {
-        return targetFilterQuery;
-    }
+    int getRolloutGroupsTotal();
 
-    public void setTargetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
-    }
+    void setRolloutGroupsTotal(int rolloutGroupsTotal);
 
-    public RolloutStatus getStatus() {
-        return status;
-    }
+    int getRolloutGroupsCreated();
 
-    public void setStatus(final RolloutStatus status) {
-        this.status = status;
-    }
+    void setRolloutGroupsCreated(int rolloutGroupsCreated);
 
-    public long getLastCheck() {
-        return lastCheck;
-    }
+    TotalTargetCountStatus getTotalTargetCountStatus();
 
-    public void setLastCheck(final long lastCheck) {
-        this.lastCheck = lastCheck;
-    }
+    void setTotalTargetCountStatus(TotalTargetCountStatus totalTargetCountStatus);
 
-    public ActionType getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(final ActionType actionType) {
-        this.actionType = actionType;
-    }
-
-    public long getForcedTime() {
-        return forcedTime;
-    }
-
-    public void setForcedTime(final long forcedTime) {
-        this.forcedTime = forcedTime;
-    }
-
-    public long getTotalTargets() {
-        return totalTargets;
-    }
-
-    public void setTotalTargets(final long totalTargets) {
-        this.totalTargets = totalTargets;
-    }
-
-    public int getRolloutGroupsTotal() {
-        return rolloutGroupsTotal;
-    }
-
-    public void setRolloutGroupsTotal(final int rolloutGroupsTotal) {
-        this.rolloutGroupsTotal = rolloutGroupsTotal;
-    }
-
-    public int getRolloutGroupsCreated() {
-        return rolloutGroupsCreated;
-    }
-
-    public void setRolloutGroupsCreated(final int rolloutGroupsCreated) {
-        this.rolloutGroupsCreated = rolloutGroupsCreated;
-    }
-
-    public TotalTargetCountStatus getTotalTargetCountStatus() {
-        if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets);
-        }
-        return totalTargetCountStatus;
-    }
-
-    public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
-        this.totalTargetCountStatus = totalTargetCountStatus;
-    }
-
-    @Override
-    public String toString() {
-        return "Rollout [rolloutGroups=" + rolloutGroups + ", targetFilterQuery=" + targetFilterQuery
-                + ", distributionSet=" + distributionSet + ", status=" + status + ", lastCheck=" + lastCheck
-                + ", getName()=" + getName() + ", getId()=" + getId() + "]";
-    }
-
-    /**
-     *
-     * State machine for rollout.
-     *
-     */
-    public enum RolloutStatus {
-
-        /**
-         * Rollouts is beeing created.
-         */
-        CREATING,
-
-        /**
-         * Rollout is ready to start.
-         */
-        READY,
-
-        /**
-         * Rollout is paused.
-         */
-        PAUSED,
-
-        /**
-         * Rollout is starting.
-         */
-        STARTING,
-
-        /**
-         * Rollout is stopped.
-         */
-        STOPPED,
-
-        /**
-         * Rollout is running.
-         */
-        RUNNING,
-
-        /**
-         * Rollout is finished.
-         */
-        FINISHED,
-
-        /**
-         * Rollout could not created due errors, might be database problem due
-         * asynchronous creating.
-         */
-        ERROR_CREATING,
-
-        /**
-         * Rollout could not started due errors, might be database problem due
-         * asynchronous starting.
-         */
-        ERROR_STARTING;
-    }
 }

@@ -34,13 +34,13 @@ import org.eclipse.hawkbit.report.model.DataReportSeriesItem;
 import org.eclipse.hawkbit.report.model.InnerOuterDataReportSeries;
 import org.eclipse.hawkbit.report.model.SeriesTime;
 import org.eclipse.hawkbit.repository.ReportManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSet_;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetInfo;
-import org.eclipse.hawkbit.repository.model.TargetInfo_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,13 +88,13 @@ public class JpaReportManagement implements ReportManagement {
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
-        final Root<Target> targetRoot = query.from(Target.class);
-        final Join<Target, TargetInfo> targetInfo = targetRoot.join(Target_.targetInfo);
-        final Expression<Long> countColumn = cb.count(targetInfo.get(TargetInfo_.targetId));
+        final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
+        final Join<JpaTarget, JpaTargetInfo> targetInfo = targetRoot.join(JpaTarget_.targetInfo);
+        final Expression<Long> countColumn = cb.count(targetInfo.get(JpaTargetInfo_.targetId));
         final CriteriaQuery<Object[]> multiselect = query
-                .multiselect(targetInfo.get(TargetInfo_.updateStatus), countColumn)
-                .groupBy(targetInfo.get(TargetInfo_.updateStatus))
-                .orderBy(cb.desc(targetInfo.get(TargetInfo_.updateStatus)));
+                .multiselect(targetInfo.get(JpaTargetInfo_.updateStatus), countColumn)
+                .groupBy(targetInfo.get(JpaTargetInfo_.updateStatus))
+                .orderBy(cb.desc(targetInfo.get(JpaTargetInfo_.updateStatus)));
 
         // | col1 | col2 |
         // | U_STATUS | COUNT |
@@ -114,16 +114,17 @@ public class JpaReportManagement implements ReportManagement {
         // top X entries distribution usage
         final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryTopX = cbTopX.createQuery(Object[].class);
-        final Root<DistributionSet> rootTopX = queryTopX.from(DistributionSet.class);
-        final ListJoin<DistributionSet, Target> joinTopX = rootTopX.join(DistributionSet_.assignedToTargets,
+        final Root<JpaDistributionSet> rootTopX = queryTopX.from(JpaDistributionSet.class);
+        final ListJoin<JpaDistributionSet, JpaTarget> joinTopX = rootTopX.join(JpaDistributionSet_.assignedToTargets,
                 JoinType.LEFT);
         final Expression<Long> countColumn = cbTopX.count(joinTopX);
         // top x usage query
         final CriteriaQuery<Object[]> groupBy = queryTopX
-                .multiselect(rootTopX.get(DistributionSet_.name), rootTopX.get(DistributionSet_.version), countColumn)
-                .where(cbTopX.equal(rootTopX.get(DistributionSet_.deleted), false))
-                .groupBy(rootTopX.get(DistributionSet_.name), rootTopX.get(DistributionSet_.version))
-                .orderBy(cbTopX.desc(countColumn), cbTopX.asc(rootTopX.get(DistributionSet_.name)));
+                .multiselect(rootTopX.get(JpaDistributionSet_.name), rootTopX.get(JpaDistributionSet_.version),
+                        countColumn)
+                .where(cbTopX.equal(rootTopX.get(JpaDistributionSet_.deleted), false))
+                .groupBy(rootTopX.get(JpaDistributionSet_.name), rootTopX.get(JpaDistributionSet_.version))
+                .orderBy(cbTopX.desc(countColumn), cbTopX.asc(rootTopX.get(JpaDistributionSet_.name)));
         // | col1 | col2 | col3 |
         // | NAME | VER | COUNT |
         final List<Object[]> resultListTop = entityManager.createQuery(groupBy).getResultList();
@@ -138,16 +139,17 @@ public class JpaReportManagement implements ReportManagement {
         // top X entries distribution usage
         final CriteriaBuilder cbTopX = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryTopX = cbTopX.createQuery(Object[].class);
-        final Root<DistributionSet> rootTopX = queryTopX.from(DistributionSet.class);
-        final ListJoin<DistributionSet, TargetInfo> joinTopX = rootTopX.join(DistributionSet_.installedAtTargets,
-                JoinType.LEFT);
+        final Root<JpaDistributionSet> rootTopX = queryTopX.from(JpaDistributionSet.class);
+        final ListJoin<JpaDistributionSet, JpaTargetInfo> joinTopX = rootTopX
+                .join(JpaDistributionSet_.installedAtTargets, JoinType.LEFT);
         final Expression<Long> countColumn = cbTopX.count(joinTopX);
         // top x usage query
         final CriteriaQuery<Object[]> groupBy = queryTopX
-                .multiselect(rootTopX.get(DistributionSet_.name), rootTopX.get(DistributionSet_.version), countColumn)
-                .where(cbTopX.equal(rootTopX.get(DistributionSet_.deleted), false))
-                .groupBy(rootTopX.get(DistributionSet_.name), rootTopX.get(DistributionSet_.version))
-                .orderBy(cbTopX.desc(countColumn), cbTopX.asc(rootTopX.get(DistributionSet_.name)));
+                .multiselect(rootTopX.get(JpaDistributionSet_.name), rootTopX.get(JpaDistributionSet_.version),
+                        countColumn)
+                .where(cbTopX.equal(rootTopX.get(JpaDistributionSet_.deleted), false))
+                .groupBy(rootTopX.get(JpaDistributionSet_.name), rootTopX.get(JpaDistributionSet_.version))
+                .orderBy(cbTopX.desc(countColumn), cbTopX.asc(rootTopX.get(JpaDistributionSet_.name)));
         // | col1 | col2 | col3 |
         // | NAME | VER | COUNT |
         final List<Object[]> resultListTop = entityManager.createQuery(groupBy).getResultList();
@@ -213,6 +215,7 @@ public class JpaReportManagement implements ReportManagement {
             final LocalDateTime from, final LocalDateTime to) {
         final Query createNativeQuery = entityManager
                 .createNativeQuery(getFeedbackReceivedQueryTemplate(dateType, from, to));
+        @SuppressWarnings("unchecked")
         final List<Object[]> resultList = createNativeQuery.getResultList();
 
         final List<DataReportSeriesItem<T>> reportItems = resultList.stream()
@@ -275,15 +278,15 @@ public class JpaReportManagement implements ReportManagement {
 
         // count select statement
         final CriteriaQuery<Long> countSelect = cb.createQuery(Long.class);
-        final Root<Target> countSelectRoot = countSelect.from(Target.class);
-        final Join<Target, TargetInfo> targetInfoJoin = countSelectRoot.join(Target_.targetInfo);
+        final Root<JpaTarget> countSelectRoot = countSelect.from(JpaTarget.class);
+        final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = countSelectRoot.join(JpaTarget_.targetInfo);
         countSelect.select(cb.count(countSelectRoot));
         if (start != null && end != null) {
-            countSelect.where(cb.between(targetInfoJoin.get(TargetInfo_.lastTargetQuery), start, end));
+            countSelect.where(cb.between(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), start, end));
         } else if (from == null && to != null) {
-            countSelect.where(cb.lessThanOrEqualTo(targetInfoJoin.get(TargetInfo_.lastTargetQuery), end));
+            countSelect.where(cb.lessThanOrEqualTo(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery), end));
         } else {
-            countSelect.where(cb.isNull(targetInfoJoin.get(TargetInfo_.lastTargetQuery)));
+            countSelect.where(cb.isNull(targetInfoJoin.get(JpaTargetInfo_.lastTargetQuery)));
         }
         return countSelect;
     }

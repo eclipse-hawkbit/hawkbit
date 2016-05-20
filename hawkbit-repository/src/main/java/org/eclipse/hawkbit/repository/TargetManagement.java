@@ -30,7 +30,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -290,8 +289,8 @@ public interface TargetManagement {
      * @return the found {@link Target}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findTargetByAssignedDistributionSet(@NotNull Long distributionSetID,
-            @NotNull Specification<Target> spec, @NotNull Pageable pageReq);
+    Page<Target> findTargetByAssignedDistributionSet(@NotNull Long distributionSetID, @NotNull String rsqlParam,
+            @NotNull Pageable pageReq);
 
     /**
      * Find {@link Target} based on given ID returns found Target without
@@ -390,8 +389,8 @@ public interface TargetManagement {
      * @return the found {@link Target}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findTargetByInstalledDistributionSet(@NotNull Long distributionSetId,
-            @NotNull Specification<Target> spec, @NotNull Pageable pageable);
+    Page<Target> findTargetByInstalledDistributionSet(@NotNull Long distributionSetId, @NotNull String rsqlParam,
+            @NotNull Pageable pageable);
 
     /**
      * Retrieves the {@link Target} which have a certain
@@ -419,18 +418,6 @@ public interface TargetManagement {
     Slice<Target> findTargetsAll(@NotNull Pageable pageable);
 
     /**
-     * Retrieves all targets based on the given specification.
-     *
-     * @param spec
-     *            the specification for the query
-     * @param pageable
-     *            pagination parameter
-     * @return the found {@link Target}s, never {@code null}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findTargetsAll(@NotNull Specification<Target> spec, @NotNull Pageable pageable);
-
-    /**
      * Retrieves all targets without details, i.e. NO {@link Target#getTags()}
      * and {@link Target#getActions()} possible based on
      * {@link TargetFilterQuery#getQuery()}
@@ -442,7 +429,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s, never {@code null}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findTargetsAll(@NotNull String targetFilterQuery, @NotNull Pageable pageable);
+    Page<Target> findTargetsAll(@NotNull String targetFilterQuery, @NotNull Pageable pageable);
 
     /**
      * Retrieves all targets without details, i.e. NO {@link Target#getTags()}
@@ -599,6 +586,16 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    List<Target> updateTargets(@NotNull Iterable<Target> targets);
+    List<Target> updateTargets(@NotNull Collection<Target> targets);
+
+    /**
+     * Generates an empty {@link Target} without persisting it.
+     * 
+     * @param controllerID
+     *            of the {@link Target}
+     * 
+     * @return {@link Target} object
+     */
+    Target generateTarget(@NotEmpty String controllerID);
 
 }

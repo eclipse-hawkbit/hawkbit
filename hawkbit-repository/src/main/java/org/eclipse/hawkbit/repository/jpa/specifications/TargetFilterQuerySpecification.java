@@ -6,10 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.specifications;
+package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery_;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -22,10 +23,10 @@ public class TargetFilterQuerySpecification {
         // utility class
     }
 
-    public static Specification<TargetFilterQuery> likeName(final String searchText) {
+    public static Specification<JpaTargetFilterQuery> likeName(final String searchText) {
         return (targetFilterQueryRoot, query, cb) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return cb.like(cb.lower(targetFilterQueryRoot.get(TargetFilterQuery_.name)), searchTextToLower);
+            return cb.like(cb.lower(targetFilterQueryRoot.get(JpaTargetFilterQuery_.name)), searchTextToLower);
         };
     }
 }

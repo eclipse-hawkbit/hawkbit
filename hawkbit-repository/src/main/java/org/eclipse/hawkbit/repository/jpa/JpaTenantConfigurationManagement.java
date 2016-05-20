@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
@@ -134,16 +135,17 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
 
         configurationKey.validate(applicationContext, value);
 
-        TenantConfiguration tenantConfiguration = tenantConfigurationRepository
+        JpaTenantConfiguration tenantConfiguration = tenantConfigurationRepository
                 .findByKey(configurationKey.getKeyName());
 
         if (tenantConfiguration == null) {
-            tenantConfiguration = new TenantConfiguration(configurationKey.getKeyName(), value.toString());
+            tenantConfiguration = new JpaTenantConfiguration(configurationKey.getKeyName(), value.toString());
         } else {
             tenantConfiguration.setValue(value.toString());
         }
 
-        final TenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository.save(tenantConfiguration);
+        final JpaTenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository
+                .save(tenantConfiguration);
 
         final Class<T> clazzT = (Class<T>) value.getClass();
 

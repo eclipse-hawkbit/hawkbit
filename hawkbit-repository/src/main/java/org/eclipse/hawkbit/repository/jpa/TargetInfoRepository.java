@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.cache.annotation.CacheEvict;
@@ -42,7 +43,7 @@ public interface TargetInfoRepository {
      */
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Query("update TargetInfo ti set ti.updateStatus = :status where ti.targetId in :targets and ti.updateStatus != :status")
+    @Query("update JpaTargetInfo ti set ti.updateStatus = :status where ti.targetId in :targets and ti.updateStatus != :status")
     void setTargetUpdateStatus(@Param("status") TargetUpdateStatus status, @Param("targets") List<Long> targets);
 
     /**
@@ -54,7 +55,7 @@ public interface TargetInfoRepository {
      * @return persisted or updated {@link Entity}
      */
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    <S extends TargetInfo> S save(S entity);
+    <S extends JpaTargetInfo> S save(S entity);
 
     /**
      * Deletes info entries by ID.

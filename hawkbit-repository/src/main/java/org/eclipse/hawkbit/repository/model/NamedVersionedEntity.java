@@ -8,43 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+public interface NamedVersionedEntity extends NamedEntity {
 
-/**
- * Extension for {@link NamedEntity} that are versioned.
- *
- */
-@MappedSuperclass
-public abstract class NamedVersionedEntity extends NamedEntity {
-    private static final long serialVersionUID = 1L;
+    String getVersion();
 
-    @Column(name = "version", nullable = false, length = 64)
-    private String version;
+    void setVersion(String version);
 
-    /**
-     * parameterized constructor.
-     *
-     * @param name
-     *            of the entity
-     * @param version
-     *            of the entity
-     * @param description
-     */
-    public NamedVersionedEntity(final String name, final String version, final String description) {
-        super(name, description);
-        this.version = version;
-    }
-
-    NamedVersionedEntity() {
-        super();
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(final String version) {
-        this.version = version;
-    }
 }

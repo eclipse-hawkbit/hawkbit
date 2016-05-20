@@ -12,6 +12,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.junit.Before;
@@ -29,18 +31,18 @@ public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
 
     @Before
     public void setupBeforeTest() {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "agent-hub", ""));
-        softwareManagement.createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", "aa", ""));
-        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", "aa", ""));
+        final JpaSoftwareModule ah = (JpaSoftwareModule) softwareManagement
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "agent-hub", ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", "aa", ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", "aa", ""));
 
-        final SoftwareModule ah2 = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub2", "1.0.1", "agent-hub2", ""));
+        final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareManagement
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub2", "1.0.1", "agent-hub2", ""));
 
-        final SoftwareModuleMetadata softwareModuleMetadata = new SoftwareModuleMetadata("metaKey", ah, "metaValue");
+        final SoftwareModuleMetadata softwareModuleMetadata = new JpaSoftwareModuleMetadata("metaKey", ah, "metaValue");
         softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata);
 
-        final SoftwareModuleMetadata softwareModuleMetadata2 = new SoftwareModuleMetadata("metaKey", ah2, "value");
+        final SoftwareModuleMetadata softwareModuleMetadata2 = new JpaSoftwareModuleMetadata("metaKey", ah2, "value");
         softwareManagement.createSoftwareModuleMetadata(softwareModuleMetadata2);
     }
 
@@ -101,8 +103,8 @@ public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<SoftwareModule> find = softwareManagement.findSoftwareModulesByPredicate(
-                RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class), new PageRequest(0, 100));
+        final Page<SoftwareModule> find = softwareManagement.findSoftwareModulesByPredicate(rsqlParam,
+                new PageRequest(0, 100));
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();
         assertThat(countAll).isEqualTo(excpectedEntity);

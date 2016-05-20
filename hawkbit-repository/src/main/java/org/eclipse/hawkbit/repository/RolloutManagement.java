@@ -13,16 +13,15 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -179,8 +178,7 @@ public interface RolloutManagement {
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllWithDetailedStatusByPredicate(@NotNull Specification<Rollout> specification,
-            @NotNull Pageable page);
+    Page<Rollout> findAllWithDetailedStatusByPredicate(@NotNull String rsqlParam, @NotNull Pageable page);
 
     /**
      * Finds rollouts by given text in name or description.
@@ -334,5 +332,12 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout updateRollout(@NotNull Rollout rollout);
+
+    /**
+     * Generates an empty {@link Rollout} without persisting it.
+     * 
+     * @return {@link Rollout} object
+     */
+    Rollout generateRollout();
 
 }

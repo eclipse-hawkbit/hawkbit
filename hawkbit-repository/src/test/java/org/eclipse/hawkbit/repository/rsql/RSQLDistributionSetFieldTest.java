@@ -16,8 +16,9 @@ import java.util.Arrays;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,19 +40,20 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
         ds.setDescription("DS");
         ds = distributionSetManagement.updateDistributionSet(ds);
         distributionSetManagement
-                .createDistributionSetMetadata(new DistributionSetMetadata("metaKey", ds, "metaValue"));
+                .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds, "metaValue"));
 
         DistributionSet ds2 = TestDataUtil
                 .generateDistributionSets("NewDS", 3, softwareManagement, distributionSetManagement).get(0);
 
         ds2.setDescription("DS%");
         ds2 = distributionSetManagement.updateDistributionSet(ds2);
-        distributionSetManagement.createDistributionSetMetadata(new DistributionSetMetadata("metaKey", ds2, "value"));
+        distributionSetManagement
+                .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds2, "value"));
 
-        final DistributionSetTag targetTag = tagManagement.createDistributionSetTag(new DistributionSetTag("Tag1"));
-        tagManagement.createDistributionSetTag(new DistributionSetTag("Tag2"));
-        tagManagement.createDistributionSetTag(new DistributionSetTag("Tag3"));
-        tagManagement.createDistributionSetTag(new DistributionSetTag("Tag4"));
+        final DistributionSetTag targetTag = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag1"));
+        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag2"));
+        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag3"));
+        tagManagement.createDistributionSetTag(new JpaDistributionSetTag("Tag4"));
 
         distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag);
     }
@@ -137,8 +139,8 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<DistributionSet> find = distributionSetManagement.findDistributionSetsAll(
-                RSQLUtility.parse(rsqlParam, DistributionSetFields.class), new PageRequest(0, 100), false);
+        final Page<DistributionSet> find = distributionSetManagement.findDistributionSetsAll(rsqlParam,
+                new PageRequest(0, 100), false);
         final long countAll = find.getTotalElements();
         assertThat(find).as("Founded entity is should not be null").isNotNull();
         assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);

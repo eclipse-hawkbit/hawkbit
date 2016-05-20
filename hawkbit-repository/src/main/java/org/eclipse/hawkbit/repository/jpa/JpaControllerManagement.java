@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,19 +25,25 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.ActionStatus_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.Target_;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
-import org.eclipse.hawkbit.repository.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -46,6 +53,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -116,7 +124,8 @@ public class JpaControllerManagement implements ControllerManagement {
     @Override
     public Action getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
             final SoftwareModule module) {
-        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId, module);
+        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId,
+                (JpaSoftwareModule) module);
 
         if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
             throw new EntityNotFoundException(
@@ -137,12 +146,12 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Override
     public List<Action> findActionByTargetAndActive(final Target target) {
-        return actionRepository.findByTargetAndActiveOrderByIdAsc(target, true);
+        return actionRepository.findByTargetAndActiveOrderByIdAsc((JpaTarget) target, true);
     }
 
     @Override
     public List<SoftwareModule> findSoftwareModulesByDistributionSet(final DistributionSet distributionSet) {
-        return softwareModuleRepository.findByAssignedTo(distributionSet);
+        return new ArrayList<>(softwareModuleRepository.findByAssignedTo((JpaDistributionSet) distributionSet));
     }
 
     @Override
@@ -154,13 +163,13 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target findOrRegisterTargetIfItDoesNotexist(final String controllerId, final URI address) {
-        final Specification<Target> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(Target_.controllerId),
-                controllerId);
+        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
+                .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        Target target = targetRepository.findOne(spec);
+        JpaTarget target = targetRepository.findOne(spec);
 
         if (target == null) {
-            target = new Target(controllerId);
+            target = new JpaTarget(controllerId);
             target.setDescription("Plug and Play target: " + controllerId);
             target.setName(controllerId);
             return targetManagement.createTarget(target, TargetUpdateStatus.REGISTERED, System.currentTimeMillis(),
@@ -175,7 +184,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetInfo updateTargetStatus(final TargetInfo targetInfo, final TargetUpdateStatus status,
             final Long lastTargetQuery, final URI address) {
-        final TargetInfo mtargetInfo = entityManager.merge(targetInfo);
+        final JpaTargetInfo mtargetInfo = (JpaTargetInfo) entityManager.merge(targetInfo);
         if (status != null) {
             mtargetInfo.setUpdateStatus(status);
         }
@@ -192,7 +201,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action addCancelActionStatus(final ActionStatus actionStatus) {
-        final Action action = actionStatus.getAction();
+        final JpaAction action = (JpaAction) actionStatus.getAction();
 
         checkForToManyStatusEntries(action);
         action.setStatus(actionStatus.getStatus());
@@ -217,7 +226,7 @@ public class JpaControllerManagement implements ControllerManagement {
         default:
         }
         actionRepository.save(action);
-        actionStatusRepository.save(actionStatus);
+        actionStatusRepository.save((JpaActionStatus) actionStatus);
 
         return action;
     }
@@ -226,14 +235,14 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus) {
-        final Action action = actionStatus.getAction();
+        final JpaAction action = (JpaAction) actionStatus.getAction();
 
         if (!action.isActive()) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
                     actionStatus.getId(), action.getId());
             return action;
         }
-        return handleAddUpdateActionStatus(actionStatus, action);
+        return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, action);
     }
 
     /**
@@ -243,11 +252,11 @@ public class JpaControllerManagement implements ControllerManagement {
      * @param action
      * @return
      */
-    private Action handleAddUpdateActionStatus(final ActionStatus actionStatus, final Action action) {
+    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         LOG.debug("addUpdateActionStatus for action {}", action.getId());
 
-        final Action mergedAction = entityManager.merge(action);
-        Target mergedTarget = mergedAction.getTarget();
+        final JpaAction mergedAction = entityManager.merge(action);
+        JpaTarget mergedTarget = (JpaTarget) mergedAction.getTarget();
         // check for a potential DOS attack
         checkForToManyStatusEntries(action);
 
@@ -284,7 +293,7 @@ public class JpaControllerManagement implements ControllerManagement {
         targetManagement.updateTarget(mergedTarget);
     }
 
-    private void checkForToManyStatusEntries(final Action action) {
+    private void checkForToManyStatusEntries(final JpaAction action) {
         if (securityProperties.getDos().getMaxStatusEntriesPerAction() > 0) {
 
             final Long statusCount = actionStatusRepository.countByAction(action);
@@ -299,11 +308,11 @@ public class JpaControllerManagement implements ControllerManagement {
         }
     }
 
-    private void handleFinishedAndStoreInTargetStatus(final Target target, final Action action) {
+    private void handleFinishedAndStoreInTargetStatus(final JpaTarget target, final JpaAction action) {
         action.setActive(false);
         action.setStatus(Status.FINISHED);
-        final TargetInfo targetInfo = target.getTargetInfo();
-        final DistributionSet ds = entityManager.merge(action.getDistributionSet());
+        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
+        final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
         targetInfo.setInstalledDistributionSet(ds);
         if (target.getAssignedDistributionSet() != null && targetInfo.getInstalledDistributionSet() != null && target
                 .getAssignedDistributionSet().getId().equals(targetInfo.getInstalledDistributionSet().getId())) {
@@ -321,15 +330,16 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data) {
-        final Target target = targetRepository.findByControllerId(controllerId);
+        final JpaTarget target = targetRepository.findByControllerId(controllerId);
 
         if (target == null) {
             throw new EntityNotFoundException(controllerId);
         }
 
-        target.getTargetInfo().getControllerAttributes().putAll(data);
+        final JpaTargetInfo targetInfo = (JpaTargetInfo) target.getTargetInfo();
+        targetInfo.getControllerAttributes().putAll(data);
 
-        if (target.getTargetInfo().getControllerAttributes().size() > securityProperties.getDos()
+        if (targetInfo.getControllerAttributes().size() > securityProperties.getDos()
                 .getMaxAttributeEntriesPerTarget()) {
             LOG_DOS.info("Target tries to insert more than the allowed number of entries ({}). DOS attack anticipated!",
                     securityProperties.getDos().getMaxAttributeEntriesPerTarget());
@@ -337,8 +347,8 @@ public class JpaControllerManagement implements ControllerManagement {
                     String.valueOf(securityProperties.getDos().getMaxAttributeEntriesPerTarget()));
         }
 
-        target.getTargetInfo().setLastTargetQuery(System.currentTimeMillis());
-        target.getTargetInfo().setRequestControllerAttributes(false);
+        targetInfo.setLastTargetQuery(System.currentTimeMillis());
+        targetInfo.setRequestControllerAttributes(false);
         return targetRepository.save(target);
     }
 
@@ -346,7 +356,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Action registerRetrieved(final Action action, final String message) {
-        return handleRegisterRetrieved(action, message);
+        return handleRegisterRetrieved((JpaAction) action, message);
     }
 
     /**
@@ -360,7 +370,7 @@ public class JpaControllerManagement implements ControllerManagement {
      * @return the updated action in case the status has been changed to
      *         {@link Status#RETRIEVED}
      */
-    private Action handleRegisterRetrieved(final Action action, final String message) {
+    private Action handleRegisterRetrieved(final JpaAction action, final String message) {
         // do a manual query with CriteriaBuilder to avoid unnecessary field
         // queries and an extra
         // count query made by spring-data when using pageable requests, we
@@ -369,11 +379,11 @@ public class JpaControllerManagement implements ControllerManagement {
         // or not.
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryActionStatus = cb.createQuery(Object[].class);
-        final Root<ActionStatus> actionStatusRoot = queryActionStatus.from(ActionStatus.class);
+        final Root<JpaActionStatus> actionStatusRoot = queryActionStatus.from(JpaActionStatus.class);
         final CriteriaQuery<Object[]> query = queryActionStatus
-                .multiselect(actionStatusRoot.get(ActionStatus_.id), actionStatusRoot.get(ActionStatus_.status))
-                .where(cb.equal(actionStatusRoot.get(ActionStatus_.action), action))
-                .orderBy(cb.desc(actionStatusRoot.get(ActionStatus_.id)));
+                .multiselect(actionStatusRoot.get(JpaActionStatus_.id), actionStatusRoot.get(JpaActionStatus_.status))
+                .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action), action))
+                .orderBy(cb.desc(actionStatusRoot.get(JpaActionStatus_.id)));
         final List<Object[]> resultList = entityManager.createQuery(query).setFirstResult(0).setMaxResults(1)
                 .getResultList();
 
@@ -387,14 +397,14 @@ public class JpaControllerManagement implements ControllerManagement {
         if (resultList.isEmpty() || resultList.get(0)[1] != Status.RETRIEVED) {
             // document that the status has been retrieved
             actionStatusRepository
-                    .save(new ActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));
+                    .save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));
 
             // don't change the action status itself in case the action is in
             // canceling state otherwise
             // we modify the action status and the controller won't get the
             // cancel job anymore.
             if (!action.isCancelingOrCanceled()) {
-                final Action actionMerge = entityManager.merge(action);
+                final JpaAction actionMerge = entityManager.merge(action);
                 actionMerge.setStatus(Status.RETRIEVED);
                 return actionRepository.save(actionMerge);
             }
@@ -406,7 +416,7 @@ public class JpaControllerManagement implements ControllerManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void addInformationalActionStatus(final ActionStatus statusMessage) {
-        actionStatusRepository.save(statusMessage);
+        actionStatusRepository.save((JpaActionStatus) statusMessage);
     }
 
     @Override
@@ -420,5 +430,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetInfo updateLastTargetQuery(final TargetInfo target, final URI address) {
         return updateTargetStatus(target, null, System.currentTimeMillis(), address);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public ActionStatus generateActionStatus() {
+        return new JpaActionStatus();
     }
 }

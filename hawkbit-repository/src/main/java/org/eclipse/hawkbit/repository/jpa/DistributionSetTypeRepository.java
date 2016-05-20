@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface DistributionSetTypeRepository
-        extends BaseEntityRepository<DistributionSetType, Long>, JpaSpecificationExecutor<DistributionSetType> {
+        extends BaseEntityRepository<JpaDistributionSetType, Long>, JpaSpecificationExecutor<JpaDistributionSetType> {
 
     /**
      *
@@ -34,7 +35,7 @@ public interface DistributionSetTypeRepository
      *            <code>false</code> if undeleted ones
      * @return list of found {@link DistributionSetType}s
      */
-    Page<DistributionSetType> findByDeleted(Pageable pageable, boolean isDeleted);
+    Page<JpaDistributionSetType> findByDeleted(Pageable pageable, boolean isDeleted);
 
     /**
      * @param isDeleted
@@ -54,5 +55,5 @@ public interface DistributionSetTypeRepository
      * @return the number of {@link DistributionSetType}s in the repository
      *         assigned to the given software module type
      */
-    Long countByElementsSmType(SoftwareModuleType softwareModuleType);
+    Long countByElementsSmType(JpaSoftwareModuleType softwareModuleType);
 }

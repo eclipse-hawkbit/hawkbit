@@ -8,125 +8,20 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.net.URL;
+public interface ExternalArtifact extends Artifact {
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+    ExternalArtifactProvider getExternalArtifactProvider();
 
-/**
- * External artifact representation with all the necessary information to
- * generate an artifact {@link URL} at runtime.
- *
- */
-@Table(name = "sp_external_artifact", indexes = {
-        @Index(name = "sp_idx_external_artifact_prim", columnList = "id,tenant") })
-@Entity
-public class ExternalArtifact extends Artifact {
-    private static final long serialVersionUID = 1L;
+    String getUrl();
 
-    @ManyToOne
-    @JoinColumn(name = "provider", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_art_to_ext_provider"))
-    private ExternalArtifactProvider externalArtifactProvider;
+    String getUrlSuffix();
 
-    @Column(name = "url_suffix", length = 512)
-    private String urlSuffix;
-
-    // CascadeType.PERSIST as we register ourself at the BSM
-    @ManyToOne(optional = false, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "software_module", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_external_assigned_sm"))
-    private SoftwareModule softwareModule;
-
-    /**
-     * Default constructor.
-     */
-    public ExternalArtifact() {
-        super();
-    }
-
-    /**
-     * Constructs {@link ExternalArtifact}.
-     *
-     * @param externalArtifactProvider
-     *            of the artifact
-     * @param urlSuffix
-     *            of the artifact
-     * @param softwareModule
-     *            of the artifact
-     */
-    public ExternalArtifact(@NotNull final ExternalArtifactProvider externalArtifactProvider, final String urlSuffix,
-            final SoftwareModule softwareModule) {
-        setSoftwareModule(softwareModule);
-        this.externalArtifactProvider = externalArtifactProvider;
-
-        if (urlSuffix != null) {
-            this.urlSuffix = urlSuffix;
-        } else {
-            this.urlSuffix = externalArtifactProvider.getDefaultSuffix();
-        }
-    }
-
-    /**
-     * @return the softwareModule
-     */
-    @Override
-    public SoftwareModule getSoftwareModule() {
-        return softwareModule;
-    }
-
-    public final void setSoftwareModule(final SoftwareModule softwareModule) {
-        this.softwareModule = softwareModule;
-        this.softwareModule.addArtifact(this);
-    }
-
-    public ExternalArtifactProvider getExternalArtifactProvider() {
-        return externalArtifactProvider;
-    }
-
-    public String getUrl() {
-        return new StringBuilder().append(externalArtifactProvider.getBasePath()).append(urlSuffix).toString();
-    }
-
-    public String getUrlSuffix() {
-        return urlSuffix;
-    }
-
-    public void setExternalArtifactProvider(final ExternalArtifactProvider externalArtifactProvider) {
-        this.externalArtifactProvider = externalArtifactProvider;
-    }
+    void setExternalArtifactProvider(ExternalArtifactProvider externalArtifactProvider);
 
     /**
      * @param urlSuffix
      *            the urlSuffix to set
      */
-    public void setUrlSuffix(final String urlSuffix) {
-        this.urlSuffix = urlSuffix;
-    }
+    void setUrlSuffix(String urlSuffix);
 
-    @Override
-    public int hashCode() { // NOSONAR - as this is generated
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof ExternalArtifact)) {
-            return false;
-        }
-
-        return true;
-    }
 }

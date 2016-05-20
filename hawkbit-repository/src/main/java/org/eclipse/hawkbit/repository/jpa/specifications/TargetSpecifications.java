@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.specifications;
+package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,15 +20,19 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSet_;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
-import org.eclipse.hawkbit.repository.model.TargetInfo_;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTag_;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.Target_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -50,10 +54,11 @@ public final class TargetSpecifications {
      *
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> byControllerIdWithStatusAndTagsInJoin(final Collection<String> controllerIDs) {
+    public static Specification<JpaTarget> byControllerIdWithStatusAndTagsInJoin(
+            final Collection<String> controllerIDs) {
         return (targetRoot, query, cb) -> {
-            final Predicate predicate = targetRoot.get(Target_.controllerId).in(controllerIDs);
-            targetRoot.fetch(Target_.tags, JoinType.LEFT);
+            final Predicate predicate = targetRoot.get(JpaTarget_.controllerId).in(controllerIDs);
+            targetRoot.fetch(JpaTarget_.tags, JoinType.LEFT);
             query.distinct(true);
             return predicate;
         };
@@ -68,12 +73,12 @@ public final class TargetSpecifications {
      *
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> byControllerIdWithStatusAndAssignedInJoin(
+    public static Specification<JpaTarget> byControllerIdWithStatusAndAssignedInJoin(
             final Collection<String> controllerIDs) {
         return (targetRoot, query, cb) -> {
 
-            final Predicate predicate = targetRoot.get(Target_.controllerId).in(controllerIDs);
-            targetRoot.fetch(Target_.assignedDistributionSet);
+            final Predicate predicate = targetRoot.get(JpaTarget_.controllerId).in(controllerIDs);
+            targetRoot.fetch(JpaTarget_.assignedDistributionSet);
             return predicate;
         };
     }
@@ -89,19 +94,19 @@ public final class TargetSpecifications {
      *            join it.
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus,
+    public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus,
             final boolean fetch) {
         return (targetRoot, query, cb) -> {
             if (!query.getResultType().isAssignableFrom(Long.class)) {
                 if (fetch) {
-                    targetRoot.fetch(Target_.targetInfo);
+                    targetRoot.fetch(JpaTarget_.targetInfo);
                 } else {
-                    targetRoot.join(Target_.targetInfo);
+                    targetRoot.join(JpaTarget_.targetInfo);
                 }
-                return targetRoot.get(Target_.targetInfo).get(TargetInfo_.updateStatus).in(updateStatus);
+                return targetRoot.get(JpaTarget_.targetInfo).get(JpaTargetInfo_.updateStatus).in(updateStatus);
             }
-            final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
-            return targetInfoJoin.get(TargetInfo_.updateStatus).in(updateStatus);
+            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
+            return targetInfoJoin.get(JpaTargetInfo_.updateStatus).in(updateStatus);
         };
     }
 
@@ -113,11 +118,11 @@ public final class TargetSpecifications {
      *            to be filtered on
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> likeNameOrDescriptionOrIp(final String searchText) {
+    public static Specification<JpaTarget> likeNameOrDescriptionOrIp(final String searchText) {
         return (targetRoot, query, cb) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return cb.or(cb.like(cb.lower(targetRoot.get(Target_.name)), searchTextToLower),
-                    cb.like(cb.lower(targetRoot.get(Target_.description)), searchTextToLower));
+            return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower),
+                    cb.like(cb.lower(targetRoot.get(JpaTarget_.description)), searchTextToLower));
         };
     }
 
@@ -129,14 +134,14 @@ public final class TargetSpecifications {
      *            to be filtered on
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
+    public static Specification<JpaTarget> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
         return (targetRoot, query, cb) -> {
-            final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
+            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
             return cb.or(
-                    cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
+                    cb.equal(targetInfoJoin.get(JpaTargetInfo_.installedDistributionSet).get(JpaDistributionSet_.id),
                             distributionId),
-                    cb.equal(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(DistributionSet_.id),
-                            distributionId));
+                    cb.equal(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
+                            .get(JpaDistributionSet_.id), distributionId));
         };
     }
 
@@ -150,13 +155,12 @@ public final class TargetSpecifications {
      *            set that is not yet assigned
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
+    public static Specification<JpaTarget> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
             @NotNull final Long distributionId) {
-        return (targetRoot, query, cb) -> cb
-                .and(targetRoot.get(Target_.controllerId).in(tIDs),
-                        cb.or(cb.notEqual(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet)
-                                .get(DistributionSet_.id), distributionId),
-                                cb.isNull(targetRoot.<DistributionSet> get(Target_.assignedDistributionSet))));
+        return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs),
+                cb.or(cb.notEqual(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
+                        .get(JpaDistributionSet_.id), distributionId),
+                        cb.isNull(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet))));
     }
 
     /**
@@ -169,7 +173,7 @@ public final class TargetSpecifications {
      *            flag to get targets with no tag assigned
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
+    public static Specification<JpaTarget> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
         return (targetRoot, query, cb) -> {
             final Predicate predicate = getPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
             query.distinct(true);
@@ -177,10 +181,10 @@ public final class TargetSpecifications {
         };
     }
 
-    private static Predicate getPredicate(final Root<Target> targetRoot, final CriteriaBuilder cb,
+    private static Predicate getPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
             final Boolean selectTargetWithNoTag, final String[] tagNames) {
-        final SetJoin<Target, TargetTag> tags = targetRoot.join(Target_.tags, JoinType.LEFT);
-        final Path<String> exp = tags.get(TargetTag_.name);
+        final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
+        final Path<String> exp = tags.get(JpaTargetTag_.name);
         if (selectTargetWithNoTag) {
             if (tagNames != null) {
                 return cb.or(exp.isNull(), exp.in(tagNames));
@@ -200,9 +204,9 @@ public final class TargetSpecifications {
      *            the ID of the distribution set which must be assigned
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> hasAssignedDistributionSet(final Long distributionSetId) {
+    public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
         return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.<DistributionSet> get(Target_.assignedDistributionSet).get(DistributionSet_.id),
+                targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
                 distributionSetId);
     }
 
@@ -214,10 +218,10 @@ public final class TargetSpecifications {
      *            the ID of the distribution set which must be assigned
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<Target> hasInstalledDistributionSet(final Long distributionSetId) {
+    public static Specification<JpaTarget> hasInstalledDistributionSet(final Long distributionSetId) {
         return (targetRoot, query, cb) -> {
-            final Join<Target, TargetInfo> targetInfoJoin = targetRoot.join(Target_.targetInfo);
-            return cb.equal(targetInfoJoin.get(TargetInfo_.installedDistributionSet).get(DistributionSet_.id),
+            final Join<JpaTarget, JpaTargetInfo> targetInfoJoin = targetRoot.join(JpaTarget_.targetInfo);
+            return cb.equal(targetInfoJoin.get(JpaTargetInfo_.installedDistributionSet).get(JpaDistributionSet_.id),
                     distributionSetId);
         };
     }

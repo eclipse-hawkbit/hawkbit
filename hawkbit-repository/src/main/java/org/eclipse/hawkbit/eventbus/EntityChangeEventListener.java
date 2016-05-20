@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -147,7 +148,7 @@ public class EntityChangeEventListener {
     }
 
     private static boolean isTargetInfoNew(final Object targetInfo) {
-        return ((TargetInfo) targetInfo).isNew();
+        return ((JpaTargetInfo) targetInfo).isNew();
     }
 
 }

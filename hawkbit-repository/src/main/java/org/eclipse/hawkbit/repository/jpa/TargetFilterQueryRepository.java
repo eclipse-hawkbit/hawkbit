@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetFilterQueryRepository
-        extends BaseEntityRepository<TargetFilterQuery, Long>, JpaSpecificationExecutor<TargetFilterQuery> {
+        extends BaseEntityRepository<JpaTargetFilterQuery, Long>, JpaSpecificationExecutor<JpaTargetFilterQuery> {
 
     /**
      * Find customer target filter by name
@@ -35,11 +36,11 @@ public interface TargetFilterQueryRepository
      * Find list of all custom target filters.
      */
     @Override
-    Page<TargetFilterQuery> findAll();
+    Page<JpaTargetFilterQuery> findAll();
 
     @Override
     @Modifying
     @Transactional
-    <S extends TargetFilterQuery> S save(S entity);
+    <S extends JpaTargetFilterQuery> S save(S entity);
 
 }

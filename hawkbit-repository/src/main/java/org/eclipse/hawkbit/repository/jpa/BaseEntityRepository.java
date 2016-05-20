@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.Serializable;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -27,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @NoRepositoryBean
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface BaseEntityRepository<T extends TenantAwareBaseEntity, I extends Serializable>
+public interface BaseEntityRepository<T extends JpaTenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I> {
 
     /**

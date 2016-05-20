@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,6 +24,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.persistence.annotations.ExistenceChecking;
 import org.eclipse.persistence.annotations.ExistenceType;
 
@@ -41,16 +44,16 @@ public class RolloutTargetGroup implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @ManyToOne(targetEntity = RolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "rolloutGroup_Id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group") )
+    @ManyToOne(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @JoinColumn(name = "rolloutGroup_Id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group"))
     private RolloutGroup rolloutGroup;
 
     @Id
-    @ManyToOne(targetEntity = Target.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "target_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target") )
-    private Target target;
+    @ManyToOne(targetEntity = JpaTarget.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @JoinColumn(name = "target_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target"))
+    private JpaTarget target;
 
-    @OneToMany(targetEntity = Action.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @OneToMany(targetEntity = JpaAction.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumns(value = { @JoinColumn(name = "rolloutgroup", referencedColumnName = "rolloutGroup_Id"),
             @JoinColumn(name = "target", referencedColumnName = "target_id") })
     private List<Action> actions;
@@ -64,7 +67,7 @@ public class RolloutTargetGroup implements Serializable {
 
     public RolloutTargetGroup(final RolloutGroup rolloutGroup, final Target target) {
         this.rolloutGroup = rolloutGroup;
-        this.target = target;
+        this.target = (JpaTarget) target;
     }
 
     public RolloutTargetGroupId getId() {

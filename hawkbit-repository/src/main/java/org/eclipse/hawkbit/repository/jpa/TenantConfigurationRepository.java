@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface TenantConfigurationRepository extends BaseEntityRepository<TenantConfiguration, Long> {
+public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration, Long> {
 
     /**
      * Finds a specific {@link TenantConfiguration} by the configuration key.
@@ -28,10 +29,10 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<Tena
      *            the configuration key to find the configuration for
      * @return the found tenant configuration object otherwise {@code null}
      */
-    TenantConfiguration findByKey(String configurationKey);
+    JpaTenantConfiguration findByKey(String configurationKey);
 
     @Override
-    List<TenantConfiguration> findAll();
+    List<JpaTenantConfiguration> findAll();
 
     /**
      * Deletes a tenant configuration by tenant and key.

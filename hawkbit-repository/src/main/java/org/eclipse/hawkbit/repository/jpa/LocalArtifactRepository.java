@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface LocalArtifactRepository extends BaseEntityRepository<LocalArtifact, Long> {
+public interface LocalArtifactRepository extends BaseEntityRepository<JpaLocalArtifact, Long> {
 
     /**
      * Counts artifacts size where the related software module is not
@@ -31,7 +32,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<LocalArtif
      *
      * @return sum of artifacts size in bytes
      */
-    @Query("SELECT SUM(la.size) FROM LocalArtifact la WHERE la.softwareModule.deleted = 0")
+    @Query("SELECT SUM(la.size) FROM JpaLocalArtifact la WHERE la.softwareModule.deleted = 0")
     Optional<Long> getSumOfUndeletedArtifactSize();
 
     /**
@@ -60,7 +61,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<LocalArtif
      *            to search
      * @return {@link LocalArtifact} the first in the result list
      */
-    LocalArtifact findFirstByGridFsFileName(String gridFsFileName);
+    JpaLocalArtifact findFirstByGridFsFileName(String gridFsFileName);
 
     /**
      * Searches for a {@link LocalArtifact} based user provided filename at

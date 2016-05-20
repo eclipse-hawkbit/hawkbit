@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface DistributionSetTagRepository
-        extends BaseEntityRepository<DistributionSetTag, Long>, JpaSpecificationExecutor<DistributionSetTag> {
+        extends BaseEntityRepository<JpaDistributionSetTag, Long>, JpaSpecificationExecutor<JpaDistributionSetTag> {
     /**
      * deletes the {@link DistributionSet} with the given name.
      * 
@@ -43,7 +44,7 @@ public interface DistributionSetTagRepository
      *            to filter on
      * @return the {@link DistributionSetTag} if found, otherwise null
      */
-    DistributionSetTag findByNameEquals(final String tagName);
+    JpaDistributionSetTag findByNameEquals(final String tagName);
 
     /**
      * Returns all instances of the type.
@@ -51,8 +52,8 @@ public interface DistributionSetTagRepository
      * @return all entities
      */
     @Override
-    List<DistributionSetTag> findAll();
+    List<JpaDistributionSetTag> findAll();
 
     @Override
-    <S extends DistributionSetTag> List<S> save(Iterable<S> entities);
+    <S extends JpaDistributionSetTag> List<S> save(Iterable<S> entities);
 }

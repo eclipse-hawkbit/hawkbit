@@ -6,75 +6,61 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+
 /**
- * The Software Module meta data composite key which contains the meta data key
- * and the ID of the software module itself.
+ * The DistributionSet Metadata composite key which contains the meta data key
+ * and the ID of the DistributionSet itself.
+ *
  */
-public final class SwMetadataCompositeKey implements Serializable {
+public final class DsMetadataCompositeKey implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String key;
 
-    private Long softwareModule;
+    private Long distributionSet;
 
-    /**
-     * Default constructor for JPA.
-     */
-    public SwMetadataCompositeKey() {
+    public DsMetadataCompositeKey() {
         // Default constructor for JPA.
     }
 
     /**
-     * @param softwareModule
-     *            the software module for this meta data
+     * @param distributionSet
+     *            the distribution set for this meta data
      * @param key
      *            the key of the meta data
      */
-    public SwMetadataCompositeKey(final SoftwareModule softwareModule, final String key) {
-        this.softwareModule = softwareModule.getId();
+    public DsMetadataCompositeKey(final DistributionSet distributionSet, final String key) {
+        this.distributionSet = distributionSet.getId();
         this.key = key;
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
 
-    /**
-     * @return the softwareModule
-     */
-    public Long getSoftwareModule() {
-        return softwareModule;
+    public Long getDistributionSet() {
+        return distributionSet;
     }
 
-    /**
-     * @param softwareModule
-     *            the softwareModule to set
-     */
-    public void setSoftwareModule(final Long softwareModule) {
-        this.softwareModule = softwareModule;
+    public void setDistributionSet(final Long distributionSet) {
+        this.distributionSet = distributionSet;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (distributionSet == null ? 0 : distributionSet.hashCode());
         result = prime * result + (key == null ? 0 : key.hashCode());
-        result = prime * result + (softwareModule == null ? 0 : softwareModule.hashCode());
         return result;
     }
 
@@ -90,19 +76,19 @@ public final class SwMetadataCompositeKey implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SwMetadataCompositeKey other = (SwMetadataCompositeKey) obj;
+        final DsMetadataCompositeKey other = (DsMetadataCompositeKey) obj;
+        if (distributionSet == null) {
+            if (other.distributionSet != null) {
+                return false;
+            }
+        } else if (!distributionSet.equals(other.distributionSet)) {
+            return false;
+        }
         if (key == null) {
             if (other.key != null) {
                 return false;
             }
         } else if (!key.equals(other.key)) {
-            return false;
-        }
-        if (softwareModule == null) {
-            if (other.softwareModule != null) {
-                return false;
-            }
-        } else if (!softwareModule.equals(other.softwareModule)) {
             return false;
         }
         return true;

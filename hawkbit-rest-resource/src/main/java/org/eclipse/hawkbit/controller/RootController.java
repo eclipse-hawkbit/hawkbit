@@ -150,7 +150,7 @@ public class RootController {
 
         return new ResponseEntity<>(
                 DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
-                        controllerManagement.getPollingTime(), tenantAware),
+                        controllerManagement.findPollingTime(), tenantAware),
                 HttpStatus.OK);
     }
 
@@ -222,7 +222,7 @@ public class RootController {
             statusMessage.addMessage(
                     ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
-        controllerManagement.addInformationalActionStatus(statusMessage);
+        controllerManagement.addActionStatusMessage(statusMessage);
         return action;
     }
 
@@ -371,7 +371,8 @@ public class RootController {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action));
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action),
+                action);
 
         return new ResponseEntity<>(HttpStatus.OK);
 
@@ -545,7 +546,7 @@ public class RootController {
         }
 
         controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), action));
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), action), action);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

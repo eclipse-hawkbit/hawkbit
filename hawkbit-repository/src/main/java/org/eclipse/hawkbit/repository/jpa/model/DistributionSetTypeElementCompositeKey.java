@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
 
@@ -40,7 +40,7 @@ public class DistributionSetTypeElementCompositeKey implements Serializable {
      * @param smType
      *            in the key
      */
-    DistributionSetTypeElementCompositeKey(final DistributionSetType dsType, final SoftwareModuleType smType) {
+    DistributionSetTypeElementCompositeKey(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType) {
         super();
         this.dsType = dsType.getId();
         this.smType = smType.getId();

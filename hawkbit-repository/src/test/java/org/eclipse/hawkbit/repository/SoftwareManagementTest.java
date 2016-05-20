@@ -26,16 +26,22 @@ import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.CustomSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
@@ -59,7 +65,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Try to update non updatable fields results in repository doing nothing.")
     public void updateTypeNonUpdateableFieldsFails() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
         created.setName("a new name");
         final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
@@ -73,7 +79,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepositoryForType() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
         final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(created);
 
@@ -86,7 +92,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Calling update for changed fields results in change in the repository.")
     public void updateSoftareModuleTypeFieldsToNewValue() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
         created.setDescription("changed");
         created.setColour("changed");
@@ -103,7 +109,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Try to update non updatable fields results in repository doing nothing.")
     public void updateNonUpdateableFieldsFails() {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
         ah.setName("a new name");
         final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
@@ -117,7 +123,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
     public void updateNothingResultsInUnchangedRepository() {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
         final SoftwareModule updated = softwareManagement.updateSoftwareModule(ah);
 
@@ -130,7 +136,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Calling update for changed fields results in change in the repository.")
     public void updateSoftareModuleFieldsToNewValue() {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
 
         ah.setDescription("changed");
         ah.setVendor("changed");
@@ -146,7 +152,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Create Software Module call fails when called for existing entity.")
     public void createModuleCallFailsForExistingModule() {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
         try {
             softwareManagement.createSoftwareModule(ah);
             fail("Should not have worked as module already exists.");
@@ -159,8 +165,8 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Create Software Modules call fails when called for existing entities.")
     public void createModulesCallFailsForExistingModule() {
         final List<SoftwareModule> modules = softwareManagement.createSoftwareModule(
-                Lists.newArrayList(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"),
-                        new SoftwareModule(appType, "agent-hub", "1.0.2", "test desc", "test vendor")));
+                Lists.newArrayList(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"),
+                        new JpaSoftwareModule(appType, "agent-hub", "1.0.2", "test desc", "test vendor")));
         try {
             softwareManagement.createSoftwareModule(modules);
             fail("Should not have worked as module already exists.");
@@ -173,7 +179,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Create Software Module Type call fails when called for existing entity.")
     public void createModuleTypeCallFailsForExistingType() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test-key", "test-name", "test-desc", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test-key", "test-name", "test-desc", 1));
 
         try {
             softwareManagement.createSoftwareModuleType(created);
@@ -187,8 +193,8 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Create Software Module Types call fails when called for existing entities.")
     public void createModuleTypesCallFailsForExistingTypes() {
         final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
-                Lists.newArrayList(new SoftwareModuleType("test-key-bumlux", "test-name", "test-desc", 1),
-                        new SoftwareModuleType("test-key-bumlux2", "test-name2", "test-desc", 1)));
+                Lists.newArrayList(new JpaSoftwareModuleType("test-key-bumlux", "test-name", "test-desc", 1),
+                        new JpaSoftwareModuleType("test-key-bumlux2", "test-name2", "test-desc", 1)));
 
         try {
             softwareManagement.createSoftwareModuleType(created);
@@ -202,7 +208,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Calling update for changing fields to null results in change in the repository.")
     public void eraseSoftareModuleFields() {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", "test desc", "test vendor"));
 
         ah.setDescription(null);
         ah.setVendor(null);
@@ -218,19 +224,19 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("searched for software modules based on the various filter options, e.g. name,desc,type, version.")
     public void findSoftwareModuleByFilters() {
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
 
         final SoftwareModule ah2 = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.2", null, ""));
-        DistributionSet ds = distributionSetManagement.createDistributionSet(
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.2", null, ""));
+        JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement.createDistributionSet(
                 TestDataUtil.buildDistributionSet("ds-1", "1.0.1", standardDsType, os, jvm, ah2));
 
-        final Target target = targetManagement.createTarget(new Target("test123"));
-        ds = assignSet(target, ds).getDistributionSet();
+        final JpaTarget target = (JpaTarget) targetManagement.createTarget(new JpaTarget("test123"));
+        ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
 
         // standard searches
         assertThat(softwareManagement.findSoftwareModuleByFilters(pageReq, "poky", osType).getContent()).hasSize(1);
@@ -254,7 +260,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
                 .isEqualTo(ah);
     }
 
-    private Action assignSet(final Target target, final DistributionSet ds) {
+    private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         deploymentManagement.assignDistributionSet(ds.getId(), new String[] { target.getControllerId() });
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).getTargetInfo().getUpdateStatus())
@@ -272,10 +278,10 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         final List<Long> modules = new ArrayList<>();
 
-        modules.add(softwareManagement.createSoftwareModule(new SoftwareModule(osType, "poky-una", "3.0.2", null, ""))
-                .getId());
-        modules.add(softwareManagement.createSoftwareModule(new SoftwareModule(osType, "poky-u2na", "3.0.3", null, ""))
-                .getId());
+        modules.add(softwareManagement
+                .createSoftwareModule(new JpaSoftwareModule(osType, "poky-una", "3.0.2", null, "")).getId());
+        modules.add(softwareManagement
+                .createSoftwareModule(new JpaSoftwareModule(osType, "poky-u2na", "3.0.3", null, "")).getId());
         modules.add(624355263L);
 
         assertThat(softwareManagement.findSoftwareModulesById(modules)).hasSize(2);
@@ -286,13 +292,13 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     public void findSoftwareModulesByType() {
         // found in test
         final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "one", "one", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
         final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "two", "two", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "two", "two", null, ""));
         // ignored
         softwareManagement.deleteSoftwareModule(
-                softwareManagement.createSoftwareModule(new SoftwareModule(osType, "deleted", "deleted", null, "")));
-        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "three", "3.0.2", null, ""));
+                softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "three", "3.0.2", null, ""));
 
         assertThat(softwareManagement.findSoftwareModulesByType(pageReq, osType).getContent())
                 .as("Expected to find the following number of modules:").hasSize(2).as("with the following elements")
@@ -303,11 +309,11 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Counts all software modules in the repsitory that are not marked as deleted.")
     public void countSoftwareModulesAll() {
         // found in test
-        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "one", "one", null, ""));
-        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "two", "two", null, ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "two", "two", null, ""));
         // ignored
         softwareManagement.deleteSoftwareModule(
-                softwareManagement.createSoftwareModule(new SoftwareModule(osType, "deleted", "deleted", null, "")));
+                softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")));
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Expected to find the following number of modules:")
                 .isEqualTo(2);
@@ -317,13 +323,13 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Counts for software modules by type.")
     public void countSoftwareModulesByType() {
         // found in test
-        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "one", "one", null, ""));
-        softwareManagement.createSoftwareModule(new SoftwareModule(osType, "two", "two", null, ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "one", "one", null, ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "two", "two", null, ""));
 
         // ignored
         softwareManagement.deleteSoftwareModule(
-                softwareManagement.createSoftwareModule(new SoftwareModule(osType, "deleted", "deleted", null, "")));
-        softwareManagement.createSoftwareModule(new SoftwareModule(appType, "three", "3.0.2", null, ""));
+                softwareManagement.createSoftwareModule(new JpaSoftwareModule(osType, "deleted", "deleted", null, "")));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(appType, "three", "3.0.2", null, ""));
 
         assertThat(softwareManagement.countSoftwareModulesByType(osType))
                 .as("Expected to find the following number of modules:").isEqualTo(2);
@@ -336,7 +342,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
                 appType);
 
         SoftwareModuleType type = softwareManagement.createSoftwareModuleType(
-                new SoftwareModuleType("bundle", "OSGi Bundle", "fancy stuff", Integer.MAX_VALUE));
+                new JpaSoftwareModuleType("bundle", "OSGi Bundle", "fancy stuff", Integer.MAX_VALUE));
 
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(4).contains(osType, runtimeType,
                 appType, type);
@@ -345,23 +351,25 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         softwareManagement.deleteSoftwareModuleType(type);
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
                 appType);
-        assertThat(softwareModuleTypeRepository.findAll()).hasSize(3).contains(osType, runtimeType, appType);
+        assertThat(softwareModuleTypeRepository.findAll()).hasSize(3).contains((JpaSoftwareModuleType) osType,
+                (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType);
 
         type = softwareManagement.createSoftwareModuleType(
-                new SoftwareModuleType("bundle2", "OSGi Bundle2", "fancy stuff", Integer.MAX_VALUE));
+                new JpaSoftwareModuleType("bundle2", "OSGi Bundle2", "fancy stuff", Integer.MAX_VALUE));
 
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(4).contains(osType, runtimeType,
                 appType, type);
 
         softwareManagement
-                .createSoftwareModule(new SoftwareModule(type, "Test SM", "1.0", "cool module", "from meeee"));
+                .createSoftwareModule(new JpaSoftwareModule(type, "Test SM", "1.0", "cool module", "from meeee"));
 
         // delete assigned
         softwareManagement.deleteSoftwareModuleType(type);
         assertThat(softwareManagement.findSoftwareModuleTypesAll(pageReq)).hasSize(3).contains(osType, runtimeType,
                 appType);
 
-        assertThat(softwareModuleTypeRepository.findAll()).hasSize(4).contains(osType, runtimeType, appType,
+        assertThat(softwareModuleTypeRepository.findAll()).hasSize(4).contains((JpaSoftwareModuleType) osType,
+                (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType,
                 softwareModuleTypeRepository.findOne(type.getId()));
     }
 
@@ -397,7 +405,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // Init DistributionSet
         final DistributionSet disSet = distributionSetManagement
-                .createDistributionSet(new DistributionSet("ds1", "v1.0", "test ds", standardDsType, null));
+                .createDistributionSet(new JpaDistributionSet("ds1", "v1.0", "test ds", standardDsType, null));
 
         // [STEP1]: Create SoftwareModuleX with ArtifactX
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
@@ -431,9 +439,9 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     public void softDeleteOfHistoricalAssignedArtifact() {
 
         // Init target and DistributionSet
-        final Target target = targetManagement.createTarget(new Target("test123"));
+        final Target target = targetManagement.createTarget(new JpaTarget("test123"));
         final DistributionSet disSet = distributionSetManagement
-                .createDistributionSet(new DistributionSet("ds1", "v1.0", "test ds", standardDsType, null));
+                .createDistributionSet(new JpaDistributionSet("ds1", "v1.0", "test ds", standardDsType, null));
 
         // [STEP1]: Create SoftwareModuleX and include the new ArtifactX
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
@@ -525,11 +533,11 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // Init artifact binary data, target and DistributionSets
         final byte[] source = RandomUtils.nextBytes(1024);
-        final Target target = targetManagement.createTarget(new Target("test123"));
+        final Target target = targetManagement.createTarget(new JpaTarget("test123"));
         final DistributionSet disSetX = distributionSetManagement
-                .createDistributionSet(new DistributionSet("dsX", "v1.0", "test dsX", standardDsType, null));
+                .createDistributionSet(new JpaDistributionSet("dsX", "v1.0", "test dsX", standardDsType, null));
         final DistributionSet disSetY = distributionSetManagement
-                .createDistributionSet(new DistributionSet("dsY", "v1.0", "test dsY", standardDsType, null));
+                .createDistributionSet(new JpaDistributionSet("dsY", "v1.0", "test dsY", standardDsType, null));
 
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
@@ -587,8 +595,8 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         final long countSoftwareModule = softwareModuleRepository.count();
 
         // create SoftwareModule
-        SoftwareModule softwareModule = softwareManagement
-                .createSoftwareModule(new SoftwareModule(type, name, version, "description of artifact " + name, ""));
+        SoftwareModule softwareModule = softwareManagement.createSoftwareModule(
+                new JpaSoftwareModule(type, name, version, "description of artifact " + name, ""));
 
         for (int i = 0; i < numberArtifacts; i++) {
             artifactManagement.createLocalArtifact(new RandomGeneratedInputStream(5 * 1024), softwareModule.getId(),
@@ -617,7 +625,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
             assertThat(operations.findOne(new Query()
-                    .addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
+                    .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
                             .isNotNull();
         }
     }
@@ -625,7 +633,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     private void assertArtfiactNull(final Artifact... results) {
         for (final Artifact result : results) {
             assertThat(operations.findOne(new Query()
-                    .addCriteria(Criteria.where("filename").is(((LocalArtifact) result).getGridFsFileName()))))
+                    .addCriteria(Criteria.where("filename").is(((JpaLocalArtifact) result).getGridFsFileName()))))
                             .isNull();
         }
     }
@@ -635,28 +643,28 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     public void findSoftwareModuleOrderByDistributionModuleNameAscModuleVersionAsc() {
         // test meta data
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
-                        .addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
+                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
 
         // found in test
         final SoftwareModule unassigned = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "asis", "found", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
         final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "found", "b", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
         final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "found", "c", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "c", null, ""));
         final SoftwareModule differentName = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "differentname", "d", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "differentname", "d", null, ""));
 
         // ignored
         final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
         final SoftwareModule four = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "sdfjhsdj", "e", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "sdfjhsdj", "e", null, ""));
 
-        final DistributionSet set = distributionSetManagement.createDistributionSet(new DistributionSet("set", "1",
+        final DistributionSet set = distributionSetManagement.createDistributionSet(new JpaDistributionSet("set", "1",
                 "desc", testDsType, Lists.newArrayList(one, two, deleted, four, differentName)));
         softwareManagement.deleteSoftwareModule(deleted);
 
@@ -688,26 +696,26 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // test meta data
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
-                        .addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
+                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
 
         // test modules
-        softwareManagement.createSoftwareModule(new SoftwareModule(testType, "asis", "found", null, ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
         final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "found", "b", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
         final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "found", "c", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "c", null, ""));
         final SoftwareModule differentName = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "differentname", "d", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "differentname", "d", null, ""));
         final SoftwareModule four = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "found", "3.0.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "found", "3.0.2", null, ""));
 
         // one soft deleted
         final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
-        distributionSetManagement.createDistributionSet(new DistributionSet("set", "1", "desc", testDsType,
+                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
+        distributionSetManagement.createDistributionSet(new JpaDistributionSet("set", "1", "desc", testDsType,
                 Lists.newArrayList(one, two, deleted, four, differentName)));
         softwareManagement.deleteSoftwareModule(deleted);
 
@@ -724,18 +732,18 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Verfies that all undeleted software modules are found in the repository.")
     public void countSoftwareModuleTypesAll() {
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
-                        .addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
+                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
         final SoftwareModule four = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "found", "3.0.2", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "found", "3.0.2", null, ""));
 
         // one soft deleted
         final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
         distributionSetManagement.createDistributionSet(
-                new DistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(deleted, four)));
+                new JpaDistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(deleted, four)));
         softwareManagement.deleteSoftwareModule(deleted);
 
         assertThat(softwareManagement.countSoftwareModulesAll()).as("Number of undeleted modules").isEqualTo(1);
@@ -746,8 +754,8 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Checks that software module typeis found based on given name.")
     public void findSoftwareModuleTypeByName() {
         final SoftwareModuleType found = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
-        softwareManagement.createSoftwareModuleType(new SoftwareModuleType("thetype2", "anothername", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
+        softwareManagement.createSoftwareModuleType(new JpaSoftwareModuleType("thetype2", "anothername", "desc", 100));
 
         assertThat(softwareManagement.findSoftwareModuleTypeByName("thename")).as("Type with given name")
                 .isEqualTo(found);
@@ -757,7 +765,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Verfies that it is not possible to create a type that alrady exists.")
     public void createSoftwareModuleTypeFailsWithExistingEntity() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         try {
             softwareManagement.createSoftwareModuleType(created);
             fail("should not have worked as module type already exists");
@@ -771,10 +779,10 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Description("Verfies that it is not possible to create a list of types where one already exists.")
     public void createSoftwareModuleTypesFailsWithExistingEntity() {
         final SoftwareModuleType created = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         try {
             softwareManagement.createSoftwareModuleType(
-                    Lists.newArrayList(created, new SoftwareModuleType("anothertype", "anothername", "desc", 100)));
+                    Lists.newArrayList(created, new JpaSoftwareModuleType("anothertype", "anothername", "desc", 100)));
             fail("should not have worked as module type already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -784,9 +792,9 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     @Test
     @Description("Verfies that multiple types are created as requested.")
     public void createMultipleoftwareModuleTypes() {
-        final List<SoftwareModuleType> created = softwareManagement
-                .createSoftwareModuleType(Lists.newArrayList(new SoftwareModuleType("thetype", "thename", "desc", 100),
-                        new SoftwareModuleType("thetype2", "thename2", "desc2", 100)));
+        final List<SoftwareModuleType> created = softwareManagement.createSoftwareModuleType(
+                Lists.newArrayList(new JpaSoftwareModuleType("thetype", "thename", "desc", 100),
+                        new JpaSoftwareModuleType("thetype2", "thename2", "desc2", 100)));
 
         assertThat(created.size()).as("Number of created types").isEqualTo(2);
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).as("Number of types in repository").isEqualTo(5);
@@ -797,23 +805,23 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     public void findSoftwareModuleByAssignedTo() {
         // test meta data
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("thetype", "thename", "desc", 100));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("thetype", "thename", "desc", 100));
         final DistributionSetType testDsType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("key", "name", "desc").addMandatoryModuleType(osType)
-                        .addOptionalModuleType(testType));
+                .createDistributionSetType(new JpaDistributionSetType("key", "name", "desc")
+                        .addMandatoryModuleType(osType).addOptionalModuleType(testType));
 
         // test modules
-        softwareManagement.createSoftwareModule(new SoftwareModule(testType, "asis", "found", null, ""));
+        softwareManagement.createSoftwareModule(new JpaSoftwareModule(testType, "asis", "found", null, ""));
         final SoftwareModule one = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "found", "b", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "b", null, ""));
         final SoftwareModule two = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "found", "c", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "found", "c", null, ""));
 
         // one soft deleted
         final SoftwareModule deleted = softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "deleted", "deleted", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(testType, "deleted", "deleted", null, ""));
         final DistributionSet set = distributionSetManagement.createDistributionSet(
-                new DistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(one, deleted)));
+                new JpaDistributionSet("set", "1", "desc", testDsType, Lists.newArrayList(one, deleted)));
         softwareManagement.deleteSoftwareModule(deleted);
 
         assertThat(softwareManagement.findSoftwareModuleByAssignedTo(pageReq, set).getContent())
@@ -831,13 +839,13 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         final String knownValue2 = "myKnownValue2";
 
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
         assertThat(ah.getOptLockRevision()).isEqualTo(1L);
 
-        final SoftwareModuleMetadata swMetadata1 = new SoftwareModuleMetadata(knownKey1, ah, knownValue1);
+        final SoftwareModuleMetadata swMetadata1 = new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1);
 
-        final SoftwareModuleMetadata swMetadata2 = new SoftwareModuleMetadata(knownKey2, ah, knownValue2);
+        final SoftwareModuleMetadata swMetadata2 = new JpaSoftwareModuleMetadata(knownKey2, ah, knownValue2);
 
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement
                 .createSoftwareModuleMetadata(Lists.newArrayList(swMetadata1, swMetadata2));
@@ -848,7 +856,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         assertThat(softwareModuleMetadata).hasSize(2);
         assertThat(softwareModuleMetadata.get(0)).isNotNull();
         assertThat(softwareModuleMetadata.get(0).getValue()).isEqualTo(knownValue1);
-        assertThat(softwareModuleMetadata.get(0).getId().getKey()).isEqualTo(knownKey1);
+        assertThat(((JpaSoftwareModuleMetadata) softwareModuleMetadata.get(0)).getId().getKey()).isEqualTo(knownKey1);
         assertThat(softwareModuleMetadata.get(0).getSoftwareModule().getId()).isEqualTo(ah.getId());
     }
 
@@ -861,12 +869,12 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         final String knownValue2 = "myKnownValue2";
 
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1));
+        softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         try {
-            softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue2));
+            softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue2));
             fail("should not have worked as module metadata already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -883,13 +891,13 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         // create a base software module
         final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         // initial opt lock revision must be 1
         assertThat(ah.getOptLockRevision()).isEqualTo(1L);
 
         // create an software module meta data entry
         final List<SoftwareModuleMetadata> softwareModuleMetadata = softwareManagement.createSoftwareModuleMetadata(
-                Collections.singleton(new SoftwareModuleMetadata(knownKey, ah, knownValue)));
+                Collections.singleton(new JpaSoftwareModuleMetadata(knownKey, ah, knownValue)));
         assertThat(softwareModuleMetadata).hasSize(1);
         // base software module should have now the opt lock revision one
         // because we are modifying the
@@ -915,7 +923,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         // verify updated meta data contains the updated value
         assertThat(updated).isNotNull();
         assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
-        assertThat(updated.getId().getKey()).isEqualTo(knownKey);
+        assertThat(((JpaSoftwareModuleMetadata) updated).getId().getKey()).isEqualTo(knownKey);
         assertThat(updated.getSoftwareModule().getId()).isEqualTo(ah.getId());
     }
 
@@ -926,14 +934,14 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         final String knownValue1 = "myKnownValue1";
 
         SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        ah = softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1))
+        ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
                 .getSoftwareModule();
 
         assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata())
                 .as("Contains the created metadata element")
-                .containsExactly(new SoftwareModuleMetadata(knownKey1, ah, knownValue1));
+                .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
 
         softwareManagement.deleteSoftwareModuleMetadata(new SwMetadataCompositeKey(ah, knownKey1));
         assertThat(softwareManagement.findSoftwareModuleById(ah.getId()).getMetadata()).as("Metadata elemenets are")
@@ -947,9 +955,9 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
         final String knownValue1 = "myKnownValue1";
 
         SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
-        ah = softwareManagement.createSoftwareModuleMetadata(new SoftwareModuleMetadata(knownKey1, ah, knownValue1))
+        ah = softwareManagement.createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1))
                 .getSoftwareModule();
 
         try {
@@ -965,20 +973,20 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
     public void findAllSoftwareModuleMetadataBySwId() {
 
         SoftwareModule sw1 = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
 
         SoftwareModule sw2 = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "os", "1.0.1", null, ""));
+                .createSoftwareModule(new JpaSoftwareModule(osType, "os", "1.0.1", null, ""));
 
         for (int index = 0; index < 10; index++) {
             sw1 = softwareManagement
-                    .createSoftwareModuleMetadata(new SoftwareModuleMetadata("key" + index, sw1, "value" + index))
+                    .createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata("key" + index, sw1, "value" + index))
                     .getSoftwareModule();
         }
 
         for (int index = 0; index < 20; index++) {
             sw2 = softwareManagement
-                    .createSoftwareModuleMetadata(new SoftwareModuleMetadata("key" + index, sw2, "value" + index))
+                    .createSoftwareModuleMetadata(new JpaSoftwareModuleMetadata("key" + index, sw2, "value" + index))
                     .getSoftwareModule();
         }
 

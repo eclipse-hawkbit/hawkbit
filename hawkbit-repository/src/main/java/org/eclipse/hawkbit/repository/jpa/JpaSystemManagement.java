@@ -20,6 +20,9 @@ import org.eclipse.hawkbit.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -167,7 +170,7 @@ public class JpaSystemManagement implements SystemManagement {
             try {
                 createInitialTenant.set(tenant);
                 cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
-                return tenantMetaDataRepository.save(new TenantMetaData(createStandardSoftwareDataSetup(), tenant));
+                return tenantMetaDataRepository.save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant));
             } finally {
                 createInitialTenant.remove();
             }
@@ -253,27 +256,26 @@ public class JpaSystemManagement implements SystemManagement {
             throw new EntityNotFoundException("Metadata does not exist: " + metaData.getId());
         }
 
-        return tenantMetaDataRepository.save(metaData);
+        return tenantMetaDataRepository.save((JpaTenantMetaData) metaData);
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
-        final SoftwareModuleType eclApp = softwareModuleTypeRepository.save(new SoftwareModuleType("application",
+        final SoftwareModuleType eclApp = softwareModuleTypeRepository.save(new JpaSoftwareModuleType("application",
                 "ECL Application", "Edge Controller Linux base application type", 1));
-        final SoftwareModuleType eclOs = softwareModuleTypeRepository
-                .save(new SoftwareModuleType("os", "ECL OS", "Edge Controller Linux operation system image type", 1));
+        final SoftwareModuleType eclOs = softwareModuleTypeRepository.save(
+                new JpaSoftwareModuleType("os", "ECL OS", "Edge Controller Linux operation system image type", 1));
         final SoftwareModuleType eclJvm = softwareModuleTypeRepository.save(
-                new SoftwareModuleType("runtime", "ECL JVM", "Edge Controller Linux java virtual machine type.", 1));
+                new JpaSoftwareModuleType("runtime", "ECL JVM", "Edge Controller Linux java virtual machine type.", 1));
 
-        distributionSetTypeRepository.save(
-                new DistributionSetType("ecl_os", "OS only", "Standard Edge Controller Linux distribution set type.")
-                        .addMandatoryModuleType(eclOs));
+        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("ecl_os", "OS only",
+                "Standard Edge Controller Linux distribution set type.").addMandatoryModuleType(eclOs));
 
-        distributionSetTypeRepository.save(new DistributionSetType("ecl_os_app", "OS with optional app",
-                "Standard Edge Controller Linux distribution set type. OS only.").addMandatoryModuleType(eclOs)
-                        .addOptionalModuleType(eclApp));
+        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("ecl_os_app",
+                "OS with optional app", "Standard Edge Controller Linux distribution set type. OS only.")
+                        .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp));
 
-        return distributionSetTypeRepository
-                .save(new DistributionSetType("ecl_os_app_jvm", "OS with optional app and jvm",
+        return distributionSetTypeRepository.save(
+                (JpaDistributionSetType) new JpaDistributionSetType("ecl_os_app_jvm", "OS with optional app and jvm",
                         "Standard Edge Controller Linux distribution set type. OS with optional application.")
                                 .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp)
                                 .addOptionalModuleType(eclJvm));

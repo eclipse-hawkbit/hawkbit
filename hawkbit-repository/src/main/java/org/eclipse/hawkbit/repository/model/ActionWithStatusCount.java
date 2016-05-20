@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 
@@ -16,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
  * action's {@link ActionStatus}.
  *
  */
+// TODO: create interface
 public class ActionWithStatusCount {
     private final Long actionStatusCount;
     private final Long actionId;
@@ -28,7 +30,7 @@ public class ActionWithStatusCount {
     private final Long dsId;
     private final String dsName;
     private final String dsVersion;
-    private final Action action;
+    private final JpaAction action;
     private final String rolloutName;
 
     /**
@@ -78,7 +80,7 @@ public class ActionWithStatusCount {
         this.actionStatusCount = actionStatusCount;
         this.rolloutName = rolloutName;
 
-        action = new Action();
+        action = new JpaAction();
         action.setActionType(actionType);
         action.setActive(actionActive);
         action.setForcedTime(actionForceTime);

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetTagRepository
-        extends BaseEntityRepository<TargetTag, Long>, JpaSpecificationExecutor<TargetTag> {
+        extends BaseEntityRepository<JpaTargetTag, Long>, JpaSpecificationExecutor<JpaTargetTag> {
 
     /**
      * deletes the {@link TargetTag}s with the given tag names.
@@ -42,7 +43,7 @@ public interface TargetTagRepository
      *            to filter on
      * @return the {@link TargetTag} if found, otherwise null
      */
-    TargetTag findByNameEquals(final String tagName);
+    JpaTargetTag findByNameEquals(final String tagName);
 
     /**
      * Returns all instances of the type.
@@ -50,8 +51,8 @@ public interface TargetTagRepository
      * @return all entities
      */
     @Override
-    List<TargetTag> findAll();
+    List<JpaTargetTag> findAll();
 
     @Override
-    <S extends TargetTag> List<S> save(Iterable<S> entities);
+    <S extends JpaTargetTag> List<S> save(Iterable<S> entities);
 }

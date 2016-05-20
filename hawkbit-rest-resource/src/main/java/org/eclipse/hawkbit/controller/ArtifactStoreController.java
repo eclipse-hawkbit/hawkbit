@@ -149,7 +149,7 @@ public class ArtifactStoreController {
             actionStatus.addMessage(
                     ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
-        controllerManagement.addInformationalActionStatus(actionStatus);
+        controllerManagement.addActionStatusMessage(actionStatus);
         return action;
     }
 

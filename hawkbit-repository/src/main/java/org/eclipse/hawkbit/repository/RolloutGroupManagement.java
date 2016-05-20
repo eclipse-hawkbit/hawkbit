@@ -84,8 +84,8 @@ public interface RolloutGroupManagement {
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findRolloutGroupsAll(@NotNull Rollout rollout,
-            @NotNull Specification<RolloutGroup> specification, @NotNull Pageable page);
+    Page<RolloutGroup> findRolloutGroupsAll(@NotNull Rollout rollout, @NotNull String rsqlParam,
+            @NotNull Pageable page);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -128,8 +128,8 @@ public interface RolloutGroupManagement {
      * @return Page<Target> list of targets of a rollout group
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup,
-            @NotNull Specification<Target> specification, @NotNull Pageable page);
+    Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull String rsqlParam,
+            @NotNull Pageable page);
 
     /**
      * Get count of targets in different status in rollout group.
@@ -141,4 +141,10 @@ public interface RolloutGroupManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
 
+    /**
+     * Generates an empty {@link RolloutGroup} without persisting it.
+     * 
+     * @return {@link RolloutGroup} object
+     */
+    RolloutGroup generateRolloutGroup();
 }

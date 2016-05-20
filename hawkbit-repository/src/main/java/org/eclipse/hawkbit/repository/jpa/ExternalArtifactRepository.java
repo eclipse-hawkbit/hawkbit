@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface ExternalArtifactRepository extends BaseEntityRepository<ExternalArtifact, Long> {
+public interface ExternalArtifactRepository extends BaseEntityRepository<JpaExternalArtifact, Long> {
 
     /**
      * Searches for external artifact for a base software module.
@@ -31,6 +32,6 @@ public interface ExternalArtifactRepository extends BaseEntityRepository<Externa
      *
      * @return Page<ExternalArtifact>
      */
-    Page<ExternalArtifact> findBySoftwareModuleId(Pageable pageReq, final Long swId);
+    Page<JpaExternalArtifact> findBySoftwareModuleId(Pageable pageReq, final Long swId);
 
 }

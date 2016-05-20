@@ -21,14 +21,14 @@ import org.eclipse.hawkbit.repository.exception.DistributionSetCreationFailedMis
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.jpa.model.DistributionSetTypeElement;
+import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.DistributionSetTypeElement;
-import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -274,18 +273,7 @@ public interface DistributionSetManagement {
      * @return the found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Iterable<DistributionSet> findDistributionSetList(Collection<Long> dist);
-
-    /**
-     * Retrieves {@link DistributionSet} List including details information,
-     * i.e. @link BaseSoftwareModule}s and {@link DistributionSetTag}s.
-     *
-     * @param distributionIdSet
-     *            List of {@link DistributionSet} IDs to be found
-     * @return the found {@link DistributionSet}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetListWithDetails(Collection<Long> distributionIdSet);
+    List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
 
     /**
      * finds all meta data by the given distribution set id.
@@ -315,7 +303,7 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,
-            @NotNull Specification<DistributionSetMetadata> spec, @NotNull Pageable pageable);
+            @NotNull String rsqlParam, @NotNull Pageable pageable);
 
     // TODO discuss: use enum instead of the true,false,null switch ?
     /**
@@ -357,8 +345,8 @@ public interface DistributionSetManagement {
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findDistributionSetsAll(@NotNull Specification<DistributionSet> spec,
-            @NotNull Pageable pageReq, Boolean deleted);
+    Page<DistributionSet> findDistributionSetsAll(@NotNull String rsqlParam, @NotNull Pageable pageReq,
+            Boolean deleted);
 
     /**
      * method retrieves all {@link DistributionSet}s from the repository in the
@@ -442,8 +430,7 @@ public interface DistributionSetManagement {
      * @return the found {@link SoftwareModuleType}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetType> findDistributionSetTypesAll(@NotNull Specification<DistributionSetType> spec,
-            @NotNull Pageable pageable);
+    Page<DistributionSetType> findDistributionSetTypesAll(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * finds a single distribution set meta data by its id.
@@ -580,4 +567,17 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType updateDistributionSetType(@NotNull DistributionSetType dsType);
 
+    /**
+     * Generates an empty {@link DistributionSetType} without persisting it.
+     * 
+     * @return {@link DistributionSetType} object
+     */
+    DistributionSetType generateDistributionSetType();
+
+    /**
+     * Generates an empty {@link DistributionSet} without persisting it.
+     * 
+     * @return {@link DistributionSet} object
+     */
+    DistributionSet generateDistributionSet();
 }

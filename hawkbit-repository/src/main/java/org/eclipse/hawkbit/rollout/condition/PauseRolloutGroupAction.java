@@ -8,13 +8,12 @@
  */
 package org.eclipse.hawkbit.rollout.condition;
 
-import java.util.concurrent.Callable;
-
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.RolloutGroupRepository;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,14 +41,11 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator {
 
     @Override
     public void eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-        systemSecurityContext.runAsSystem(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
-                rolloutGroupRepository.save(rolloutGroup);
-                rolloutManagement.pauseRollout(rollout);
-                return null;
-            }
+        systemSecurityContext.runAsSystem(() -> {
+            rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
+            rolloutGroupRepository.save((JpaRolloutGroup) rolloutGroup);
+            rolloutManagement.pauseRollout(rollout);
+            return null;
         });
     }
 }

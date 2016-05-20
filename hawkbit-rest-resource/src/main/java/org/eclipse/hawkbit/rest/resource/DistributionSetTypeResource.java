@@ -69,7 +69,7 @@ public class DistributionSetTypeResource implements DistributionSetTypeRestApi {
         final Slice<DistributionSetType> findModuleTypessAll;
         Long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(
+            findModuleTypessAll = distributionSetManagement.findDistributionSetTypesByPredicate(
                     RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class), pageable);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
         } else {

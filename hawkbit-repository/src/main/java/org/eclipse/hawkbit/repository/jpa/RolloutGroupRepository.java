@@ -10,9 +10,11 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -26,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface RolloutGroupRepository
-        extends BaseEntityRepository<RolloutGroup, Long>, JpaSpecificationExecutor<RolloutGroup> {
+        extends BaseEntityRepository<JpaRolloutGroup, Long>, JpaSpecificationExecutor<JpaRolloutGroup> {
 
     /**
      * Retrieves all {@link RolloutGroup} referring a specific rollout in the
@@ -36,7 +38,7 @@ public interface RolloutGroupRepository
      *            the rollout the rolloutgroups belong to
      * @return the rollout groups belonging to a rollout ordered by ID ASC.
      */
-    List<RolloutGroup> findByRolloutOrderByIdAsc(final Rollout rollout);
+    List<JpaRolloutGroup> findByRolloutOrderByIdAsc(final JpaRollout rollout);
 
     /**
      * Retrieves all {@link RolloutGroup} referring a specific rollout in a
@@ -48,7 +50,7 @@ public interface RolloutGroupRepository
      *            the status of the rollout groups
      * @return the rollout groups belonging to a rollout in a specific status
      */
-    List<RolloutGroup> findByRolloutAndStatus(final Rollout rollout, final RolloutGroupStatus status);
+    List<JpaRolloutGroup> findByRolloutAndStatus(final Rollout rollout, final RolloutGroupStatus status);
 
     /**
      * Counts all {@link RolloutGroup} referring a specific rollout.
@@ -57,7 +59,7 @@ public interface RolloutGroupRepository
      *            the rollout the rolloutgroup belong to
      * @return the count of the rollout groups for a specific rollout
      */
-    Long countByRollout(final Rollout rollout);
+    Long countByRollout(final JpaRollout rollout);
 
     /**
      * Counts all {@link RolloutGroup} referring a specific rollout in a
@@ -70,7 +72,7 @@ public interface RolloutGroupRepository
      * @return the count of rollout groups belonging to a rollout in a specific
      *         status
      */
-    Long countByRolloutAndStatus(Rollout rollout, RolloutGroupStatus rolloutGroupStatus);
+    Long countByRolloutAndStatus(JpaRollout rollout, RolloutGroupStatus rolloutGroupStatus);
 
     /**
      * Counts all {@link RolloutGroup} referring a specific rollout in specific
@@ -88,8 +90,8 @@ public interface RolloutGroupRepository
      * @return the count of rollout groups belonging to a rollout in specific
      *         status
      */
-    @Query("SELECT COUNT(r.id) FROM RolloutGroup r WHERE r.rollout = :rollout and (r.status = :status1 or r.status = :status2)")
-    Long countByRolloutAndStatusOrStatus(@Param("rollout") Rollout rollout,
+    @Query("SELECT COUNT(r.id) FROM JpaRolloutGroup r WHERE r.rollout = :rollout and (r.status = :status1 or r.status = :status2)")
+    Long countByRolloutAndStatusOrStatus(@Param("rollout") JpaRollout rollout,
             @Param("status1") RolloutGroupStatus rolloutGroupStatus1,
             @Param("status2") RolloutGroupStatus rolloutGroupStatus2);
 
@@ -103,7 +105,7 @@ public interface RolloutGroupRepository
      *            the status of the rolloutgroups
      * @return The child {@link RolloutGroup}s in a specific status
      */
-    List<RolloutGroup> findByParentAndStatus(RolloutGroup rolloutGroup, RolloutGroupStatus status);
+    List<JpaRolloutGroup> findByParentAndStatus(JpaRolloutGroup rolloutGroup, RolloutGroupStatus status);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific rollout and status not
@@ -116,7 +118,7 @@ public interface RolloutGroupRepository
      * @return rolloutgroup referring to a rollout and not having a specific
      *         status ordered by ID DESC.
      */
-    List<RolloutGroup> findByRolloutAndStatusNotOrderByIdDesc(Rollout rollout, RolloutGroupStatus notStatus);
+    List<JpaRolloutGroup> findByRolloutAndStatusNotOrderByIdDesc(JpaRollout rollout, RolloutGroupStatus notStatus);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific rollout.
@@ -127,6 +129,6 @@ public interface RolloutGroupRepository
      *            the page request to sort, limit the result
      * @return a page of found {@link RolloutGroup} or {@code empty}.
      */
-    Page<RolloutGroup> findByRolloutId(final Long rolloutId, Pageable page);
+    Page<JpaRolloutGroup> findByRolloutId(final Long rolloutId, Pageable page);
 
 }

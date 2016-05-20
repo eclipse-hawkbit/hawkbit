@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -30,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface SoftwareModuleRepository
-        extends BaseEntityRepository<SoftwareModule, Long>, JpaSpecificationExecutor<SoftwareModule> {
+        extends BaseEntityRepository<JpaSoftwareModule, Long>, JpaSpecificationExecutor<JpaSoftwareModule> {
 
     /**
      * Counts all {@link SoftwareModule}s based on the given {@link Type}.
@@ -39,7 +42,7 @@ public interface SoftwareModuleRepository
      *            to count for
      * @return number of {@link SoftwareModule}s
      */
-    Long countByType(SoftwareModuleType type);
+    Long countByType(JpaSoftwareModuleType type);
 
     /**
      * Retrieves {@link SoftwareModule} by filtering on name AND version AND
@@ -54,7 +57,7 @@ public interface SoftwareModuleRepository
      * @return the found {@link SoftwareModule} with the given name AND version
      *         AND type
      */
-    SoftwareModule findOneByNameAndVersionAndType(String name, String version, SoftwareModuleType type);
+    JpaSoftwareModule findOneByNameAndVersionAndType(String name, String version, JpaSoftwareModuleType type);
 
     /**
      * deletes the {@link SoftwareModule}s with the given IDs.
@@ -69,7 +72,7 @@ public interface SoftwareModuleRepository
      */
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Query("UPDATE SoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.id IN :ids")
+    @Query("UPDATE JpaSoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.id IN :ids")
     void deleteSoftwareModule(@Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
             @Param("ids") final Long... ids);
 
@@ -81,7 +84,7 @@ public interface SoftwareModuleRepository
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
      */
-    Page<SoftwareModule> findByAssignedTo(Pageable pageable, DistributionSet set);
+    Page<SoftwareModule> findByAssignedTo(Pageable pageable, JpaDistributionSet set);
 
     /**
      * 
@@ -92,7 +95,7 @@ public interface SoftwareModuleRepository
      *         {@link DistributionSet}
      */
     @EntityGraph(value = "SoftwareModule.artifacts", type = EntityGraphType.LOAD)
-    List<SoftwareModule> findByAssignedTo(DistributionSet set);
+    List<JpaSoftwareModule> findByAssignedTo(JpaDistributionSet set);
 
     /**
      * @param pageable
@@ -104,7 +107,7 @@ public interface SoftwareModuleRepository
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet} filtered by {@link SoftwareModuleType}.
      */
-    Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, DistributionSet set, SoftwareModuleType type);
+    Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, JpaDistributionSet set, JpaSoftwareModuleType type);
 
     /**
      * retrieves all software modules with a given {@link SoftwareModuleType}
@@ -117,11 +120,11 @@ public interface SoftwareModuleRepository
      * @return {@link List} of found {@link SoftwareModule}s
      */
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT sm FROM SoftwareModule sm WHERE sm.id IN ?1 and sm.type = ?2")
-    List<SoftwareModule> findByIdInAndType(Iterable<Long> ids, SoftwareModuleType type);
+    @Query("SELECT sm FROM JpaSoftwareModule sm WHERE sm.id IN ?1 and sm.type = ?2")
+    List<SoftwareModule> findByIdInAndType(Iterable<Long> ids, JpaSoftwareModuleType type);
 
     @Override
-    <S extends SoftwareModule> List<S> save(Iterable<S> entities);
+    <S extends JpaSoftwareModule> List<S> save(Iterable<S> entities);
 
     /**
      * retrieves all software modules with a given
@@ -132,6 +135,6 @@ public interface SoftwareModuleRepository
      * @return {@link List} of found {@link SoftwareModule}s
      */
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT sm FROM SoftwareModule sm WHERE sm.id IN ?1")
-    List<SoftwareModule> findByIdIn(Iterable<Long> ids);
+    @Query("SELECT sm FROM JpaSoftwareModule sm WHERE sm.id IN ?1")
+    List<JpaSoftwareModule> findByIdIn(Iterable<Long> ids);
 }

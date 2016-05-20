@@ -33,12 +33,17 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -129,7 +134,7 @@ public final class RepositoryDataGenerator {
 
         public void generateTestTagetGroup(final String group, final int sizeMultiplikator) {
             final DistributionSetTag dsTag = tagManagement
-                    .createDistributionSetTag(new DistributionSetTag("For " + group + "s"));
+                    .createDistributionSetTag(new JpaDistributionSetTag("For " + group + "s"));
 
             auditingHandler.setDateTimeProvider(() -> {
                 final Calendar instance = Calendar.getInstance();
@@ -203,14 +208,14 @@ public final class RepositoryDataGenerator {
                         "Controller retrieved update action and should start now the download.");
 
                 // download
-                final ActionStatus download = new ActionStatus();
+                final ActionStatus download = new JpaActionStatus();
                 download.setAction(action);
                 download.setStatus(Status.DOWNLOAD);
                 download.addMessage("Controller started download.");
                 action = controllerManagement.addUpdateActionStatus(download);
 
                 // warning
-                final ActionStatus warning = new ActionStatus();
+                final ActionStatus warning = new JpaActionStatus();
                 warning.setAction(action);
                 warning.setStatus(Status.WARNING);
                 warning.addMessage("Some warning: " + jlorem.words(new Random().nextInt(50)));
@@ -218,13 +223,13 @@ public final class RepositoryDataGenerator {
 
                 // garbage
                 for (int i = 0; i < new Random().nextInt(10); i++) {
-                    final ActionStatus running = new ActionStatus();
+                    final ActionStatus running = new JpaActionStatus();
                     running.setAction(action);
                     running.setStatus(Status.RUNNING);
                     running.addMessage("Still running: " + jlorem.words(new Random().nextInt(50)));
                     action = controllerManagement.addUpdateActionStatus(running);
                     for (int g = 0; g < new Random().nextInt(5); g++) {
-                        final ActionStatus rand = new ActionStatus();
+                        final ActionStatus rand = new JpaActionStatus();
                         rand.setAction(action);
                         rand.setStatus(Status.RUNNING);
                         rand.addMessage(jlorem.words(new Random().nextInt(50)));
@@ -233,7 +238,7 @@ public final class RepositoryDataGenerator {
                 }
 
                 // close
-                final ActionStatus close = new ActionStatus();
+                final ActionStatus close = new JpaActionStatus();
                 close.setAction(action);
 
                 // with error
@@ -262,7 +267,7 @@ public final class RepositoryDataGenerator {
                         "Controller retrieved update action and should start now the download.");
 
                 // close
-                final ActionStatus close = new ActionStatus();
+                final ActionStatus close = new JpaActionStatus();
                 close.setAction(action);
                 close.setStatus(Status.FINISHED);
                 close.addMessage("Controller reported CLOSED with OK!");
@@ -274,7 +279,7 @@ public final class RepositoryDataGenerator {
         private List<Target> createTargetTestGroup(final String group, final int targets) {
             LOG.debug("createTargetTestGroup: create group {}", group);
 
-            final TargetTag targTag = tagManagement.createTargetTag(new TargetTag(group));
+            final TargetTag targTag = tagManagement.createTargetTag(new JpaTargetTag(group));
 
             final List<Target> targAs = targetManagement.createTargets(buildTargets(targets, group),
                     TargetUpdateStatus.REGISTERED, System.currentTimeMillis() - new Random().nextInt(50_000_000),
@@ -291,7 +296,7 @@ public final class RepositoryDataGenerator {
             final List<Target> result = new ArrayList<Target>(noOfTgts);
 
             for (int i = 0; i < noOfTgts; i++) {
-                final Target target = new Target(UUID.randomUUID().toString());
+                final Target target = new JpaTarget(UUID.randomUUID().toString());
 
                 final StringBuilder builder = new StringBuilder();
                 builder.append(descriptionPrefix);
@@ -331,7 +336,7 @@ public final class RepositoryDataGenerator {
                 final String[] modulesTypes = { "HeadUnit_FW", "EDC17_FW", "OSGi_Bundle" };
 
                 final DistributionSetTag depTag = tagManagement
-                        .createDistributionSetTag(new DistributionSetTag("deprecated"));
+                        .createDistributionSetTag(new JpaDistributionSetTag("deprecated"));
 
                 Arrays.stream(targetTestGroups).forEach(group -> {
                     generateTestTagetGroup(group, sizeMultiplikator);
@@ -346,11 +351,11 @@ public final class RepositoryDataGenerator {
                 LOG.debug("initDemoRepo - start now Extra Software Modules and types");
                 Arrays.stream(modulesTypes).forEach(typeName -> {
                     final SoftwareModuleType smtype = softwareManagement.createSoftwareModuleType(
-                            new SoftwareModuleType(typeName.toLowerCase().replaceAll("\\s+", ""), typeName,
+                            new JpaSoftwareModuleType(typeName.toLowerCase().replaceAll("\\s+", ""), typeName,
                                     jlorem.words(5), Integer.MAX_VALUE));
 
                     for (int i1 = 0; i1 < sizeMultiplikator; i1++) {
-                        softwareManagement.createSoftwareModule(new SoftwareModule(smtype, typeName + i1, "1.0." + i1,
+                        softwareManagement.createSoftwareModule(new JpaSoftwareModule(smtype, typeName + i1, "1.0." + i1,
                                 jlorem.words(5), "the " + typeName + " vendor Inc."));
                     }
 
@@ -371,7 +376,7 @@ public final class RepositoryDataGenerator {
 
                 // pending
                 final DistributionSetTag dsTag = tagManagement
-                        .createDistributionSetTag(new DistributionSetTag("OnlyAssignedTag"));
+                        .createDistributionSetTag(new JpaDistributionSetTag("OnlyAssignedTag"));
                 final DistributionSet ds = TestDataUtil.generateDistributionSet("Pending DS", "v1.0",
                         softwareManagement, distributionSetManagement,
                         Arrays.asList(new DistributionSetTag[] { dsTag }));

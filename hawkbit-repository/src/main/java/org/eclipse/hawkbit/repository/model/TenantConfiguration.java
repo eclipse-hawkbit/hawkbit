@@ -8,64 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.io.Serializable;
+public interface TenantConfiguration extends TenantAwareBaseEntity {
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+    String getKey();
 
-/**
- * A JPA entity which stores the tenant specific configuration.
- *
- */
-@Entity
-@Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
-        "tenant" }, name = "uk_tenant_key"))
-public class TenantConfiguration extends TenantAwareBaseEntity implements Serializable {
-    private static final long serialVersionUID = 1L;
+    void setKey(String key);
 
-    @Column(name = "conf_key", length = 128)
-    private String key;
+    String getValue();
 
-    @Column(name = "conf_value", length = 512)
-    @Basic
-    private String value;
-
-    /**
-     * JPA default constructor.
-     */
-    public TenantConfiguration() {
-        // JPA default constructor.
-    }
-
-    /**
-     * @param key
-     *            the key of this configuration
-     * @param value
-     *            the value of this configuration
-     */
-    public TenantConfiguration(final String key, final String value) {
-        this.key = key;
-        this.value = value;
-
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
-    }
+    void setValue(String value);
 
 }

@@ -11,6 +11,12 @@ package org.eclipse.hawkbit.repository.model;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -25,29 +31,29 @@ public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
     @Description("Verfies that different objects even with identical primary key, version and tenant "
             + "return different hash codes.")
     public void differentEntitiesReturnDifferentHashCodes() {
-        assertThat(new Action().hashCode()).as("action should have different hashcode than action status")
-                .isNotEqualTo(new ActionStatus().hashCode());
-        assertThat(new DistributionSet().hashCode())
+        assertThat(new JpaAction().hashCode()).as("action should have different hashcode than action status")
+                .isNotEqualTo(new JpaActionStatus().hashCode());
+        assertThat(new JpaDistributionSet().hashCode())
                 .as("Distribution set should have different hashcode than software module")
-                .isNotEqualTo(new SoftwareModule().hashCode());
-        assertThat(new DistributionSet().hashCode())
+                .isNotEqualTo(new JpaSoftwareModule().hashCode());
+        assertThat(new JpaDistributionSet().hashCode())
                 .as("Distribution set should have different hashcode than action status")
-                .isNotEqualTo(new ActionStatus().hashCode());
-        assertThat(new DistributionSetType().hashCode())
+                .isNotEqualTo(new JpaActionStatus().hashCode());
+        assertThat(new JpaDistributionSetType().hashCode())
                 .as("Distribution set type should have different hashcode than action status")
-                .isNotEqualTo(new ActionStatus().hashCode());
+                .isNotEqualTo(new JpaActionStatus().hashCode());
     }
 
     @Test
     @Description("Verfies that different object even with identical primary key, version and tenant "
             + "are not equal.")
     public void differentEntitiesAreNotEqual() {
-        assertThat(new Action().equals(new ActionStatus())).as("action equals action status").isFalse();
-        assertThat(new DistributionSet().equals(new SoftwareModule())).as("Distribution set equals software module")
+        assertThat(new JpaAction().equals(new JpaActionStatus())).as("action equals action status").isFalse();
+        assertThat(new JpaDistributionSet().equals(new JpaSoftwareModule()))
+                .as("Distribution set equals software module").isFalse();
+        assertThat(new JpaDistributionSet().equals(new JpaActionStatus())).as("Distribution set equals action status")
                 .isFalse();
-        assertThat(new DistributionSet().equals(new ActionStatus())).as("Distribution set equals action status")
-                .isFalse();
-        assertThat(new DistributionSetType().equals(new ActionStatus()))
+        assertThat(new JpaDistributionSetType().equals(new JpaActionStatus()))
                 .as("Distribution set type equals action status").isFalse();
     }
 
@@ -55,9 +61,9 @@ public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
     @Description("Verfies that updated entities are not equal.")
     public void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test", "test", "test", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test", "test", "test", 1));
         assertThat(type).as("persited entity is not equal to regular object")
-                .isNotEqualTo(new SoftwareModuleType("test", "test", "test", 1));
+                .isNotEqualTo(new JpaSoftwareModuleType("test", "test", "test", 1));
 
         type.setDescription("another");
         final SoftwareModuleType updated = softwareManagement.updateSoftwareModuleType(type);
@@ -68,9 +74,9 @@ public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
     @Description("Verify that no proxy of the entity manager has an influence on the equals or hashcode result.")
     public void managedEntityIsEqualToUnamangedObjectWithSameKey() {
         final SoftwareModuleType type = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test", "test", "test", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test", "test", "test", 1));
 
-        final SoftwareModuleType mock = new SoftwareModuleType("test", "test", "test", 1);
+        final JpaSoftwareModuleType mock = new JpaSoftwareModuleType("test", "test", "test", 1);
         mock.setId(type.getId());
         mock.setOptLockRevision(type.getOptLockRevision());
         mock.setTenant(type.getTenant());
@@ -84,9 +90,9 @@ public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
     @Description("Verfies that updated entities do not have the same hashcode.")
     public void updatedEntitiesHaveDifferentHashcodes() {
         final SoftwareModuleType type = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test", "test", "test", 1));
+                .createSoftwareModuleType(new JpaSoftwareModuleType("test", "test", "test", 1));
         assertThat(type.hashCode()).as("persited entity does not have same hashcode as regular object")
-                .isNotEqualTo(new SoftwareModuleType("test", "test", "test", 1).hashCode());
+                .isNotEqualTo(new JpaSoftwareModuleType("test", "test", "test", 1).hashCode());
 
         final int beforeChange = type.hashCode();
         type.setDescription("another");

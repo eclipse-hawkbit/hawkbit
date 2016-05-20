@@ -108,7 +108,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
         actions.get(0).setStatus(Status.FINISHED);
         controllerManagament.addUpdateActionStatus(
-                new ActionStatus(actions.get(0), Status.FINISHED, System.currentTimeMillis(), "testmessage"));
+                new ActionStatus(actions.get(0), Status.FINISHED, System.currentTimeMillis(), "testmessage"),
+                actions.get(0));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
         final ActionStatus status = deploymentManagement
@@ -1283,8 +1284,8 @@ public class TargetResourceTest extends AbstractIntegrationTest {
         final Pageable pageReq = new PageRequest(0, 100);
         final Action action = actionRepository.findByDistributionSet(pageReq, savedSet).getContent().get(0);
 
-        final ActionStatus actionStatus = new ActionStatus(action, Status.FINISHED, 0L);
-        controllerManagement.addUpdateActionStatus(actionStatus);
+        final ActionStatus actionStatus = new ActionStatus(action, Status.FINISHED, 0l);
+        controllerManagement.addUpdateActionStatus(actionStatus, action);
     }
 
     /**

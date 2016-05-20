@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
-import org.eclipse.hawkbit.repository.model.RolloutTargetGroupId;
+import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
+import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroupId;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Isolation;

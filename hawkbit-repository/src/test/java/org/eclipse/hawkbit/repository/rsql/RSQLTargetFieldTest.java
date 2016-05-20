@@ -16,6 +16,9 @@ import java.util.Arrays;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
@@ -40,27 +43,27 @@ public class RSQLTargetFieldTest extends AbstractIntegrationTest {
         final DistributionSet ds = TestDataUtil.generateDistributionSet("AssignedDs", softwareManagement,
                 distributionSetManagement);
 
-        final Target target = new Target("targetId123");
+        final JpaTarget target = new JpaTarget("targetId123");
         target.setDescription("targetId123");
-        final TargetInfo targetInfo = new TargetInfo(target);
+        final TargetInfo targetInfo = new JpaTargetInfo(target);
         targetInfo.getControllerAttributes().put("revision", "1.1");
         target.setTargetInfo(targetInfo);
-        target.getTargetInfo().setUpdateStatus(TargetUpdateStatus.PENDING);
+        ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
         targetManagement.createTarget(target);
-        final Target target2 = new Target("targetId1234");
+        final JpaTarget target2 = new JpaTarget("targetId1234");
         target2.setDescription("targetId1234");
-        final TargetInfo targetInfo2 = new TargetInfo(target2);
+        final TargetInfo targetInfo2 = new JpaTargetInfo(target2);
         targetInfo2.getControllerAttributes().put("revision", "1.2");
         target2.setTargetInfo(targetInfo2);
         targetManagement.createTarget(target2);
-        targetManagement.createTarget(new Target("targetId1235"));
-        targetManagement.createTarget(new Target("targetId1236"));
+        targetManagement.createTarget(new JpaTarget("targetId1235"));
+        targetManagement.createTarget(new JpaTarget("targetId1236"));
 
-        final TargetTag targetTag = tagManagement.createTargetTag(new TargetTag("Tag1"));
-        tagManagement.createTargetTag(new TargetTag("Tag2"));
-        tagManagement.createTargetTag(new TargetTag("Tag3"));
-        tagManagement.createTargetTag(new TargetTag("Tag4"));
+        final TargetTag targetTag = tagManagement.createTargetTag(new JpaTargetTag("Tag1"));
+        tagManagement.createTargetTag(new JpaTargetTag("Tag2"));
+        tagManagement.createTargetTag(new JpaTargetTag("Tag3"));
+        tagManagement.createTargetTag(new JpaTargetTag("Tag4"));
 
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()), targetTag);
 
@@ -163,8 +166,7 @@ public class RSQLTargetFieldTest extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
-        final Page<Target> findTargetPage = targetManagement
-                .findTargetsAll(RSQLUtility.parse(rsqlParam, TargetFields.class), new PageRequest(0, 100));
+        final Page<Target> findTargetPage = targetManagement.findTargetsAll(rsqlParam, new PageRequest(0, 100));
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);

@@ -31,7 +31,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -179,7 +178,7 @@ public interface DeploymentManagement {
      * @return the count value of found actions associated to the target
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Long countActionsByTarget(@NotNull Specification<Action> spec, @NotNull Target target);
+    Long countActionsByTarget(@NotNull String rsqlParam, @NotNull Target target);
 
     /**
      * counts all actions associated to a specific target.
@@ -281,9 +280,9 @@ public interface DeploymentManagement {
      * @return a slice of actions assigned to the specific target and the
      *         specification
      */
+    // TODO fix this
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByTarget(@NotNull Specification<Action> specifiction, @NotNull Target target,
-            @NotNull Pageable pageable);
+    Slice<Action> findActionsByTarget(@NotNull String rsqlParam, @NotNull Target target, @NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link Action}s of a specific target ordered by action ID.
@@ -440,4 +439,10 @@ public interface DeploymentManagement {
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     Action startScheduledAction(@NotNull Action action);
 
+    /**
+     * Generates an empty {@link Action} without persisting it.
+     * 
+     * @return {@link Action} object
+     */
+    Action generateAction();
 }

@@ -31,8 +31,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for all operations of the DDI API (with access permissions only
@@ -248,7 +246,6 @@ public interface ControllerManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     TargetInfo updateLastTargetQuery(@NotNull TargetInfo target, @NotNull URI address);
 
     /**
@@ -270,5 +267,12 @@ public interface ControllerManagement {
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     TargetInfo updateTargetStatus(@NotNull TargetInfo targetInfo, TargetUpdateStatus status, Long lastTargetQuery,
             URI address);
+
+    /**
+     * Generates an empty {@link ActionStatus} without persisting it.
+     * 
+     * @return {@link ActionStatus} object
+     */
+    ActionStatus generateActionStatus();
 
 }

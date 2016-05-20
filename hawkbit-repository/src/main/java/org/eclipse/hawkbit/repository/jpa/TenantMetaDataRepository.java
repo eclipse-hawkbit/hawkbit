@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Isolation;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface TenantMetaDataRepository extends PagingAndSortingRepository<TenantMetaData, Long> {
+public interface TenantMetaDataRepository extends PagingAndSortingRepository<JpaTenantMetaData, Long> {
 
     /**
      * Search {@link TenantMetaData} by tenant name.
@@ -42,7 +43,7 @@ public interface TenantMetaDataRepository extends PagingAndSortingRepository<Ten
     Long countByTenantIgnoreCase(String tenant);
 
     @Override
-    List<TenantMetaData> findAll();
+    List<JpaTenantMetaData> findAll();
 
     /**
      * @param tenant

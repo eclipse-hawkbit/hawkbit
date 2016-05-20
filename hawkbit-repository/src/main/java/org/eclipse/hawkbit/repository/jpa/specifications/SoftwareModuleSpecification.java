@@ -6,13 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.specifications;
+package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import javax.persistence.criteria.Predicate;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -33,10 +34,10 @@ public final class SoftwareModuleSpecification {
      *            to search for
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<SoftwareModule> byId(final Long moduleId) {
+    public static Specification<JpaSoftwareModule> byId(final Long moduleId) {
         return (targetRoot, query, cb) -> {
-            final Predicate predicate = cb.equal(targetRoot.<Long> get(SoftwareModule_.id), moduleId);
-            targetRoot.fetch(SoftwareModule_.type);
+            final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaSoftwareModule_.id), moduleId);
+            targetRoot.fetch(JpaSoftwareModule_.type);
             return predicate;
         };
     }
@@ -47,8 +48,8 @@ public final class SoftwareModuleSpecification {
      * 
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<SoftwareModule> isDeletedFalse() {
-        return (swRoot, query, cb) -> cb.equal(swRoot.<Boolean> get(SoftwareModule_.deleted), Boolean.FALSE);
+    public static Specification<JpaSoftwareModule> isDeletedFalse() {
+        return (swRoot, query, cb) -> cb.equal(swRoot.<Boolean> get(JpaSoftwareModule_.deleted), Boolean.FALSE);
     }
 
     /**
@@ -59,10 +60,10 @@ public final class SoftwareModuleSpecification {
      *            to be filtered on
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<SoftwareModule> likeNameOrVersion(final String subString) {
+    public static Specification<JpaSoftwareModule> likeNameOrVersion(final String subString) {
         return (targetRoot, query, cb) -> cb.or(
-                cb.like(cb.lower(targetRoot.<String> get(SoftwareModule_.name)), subString.toLowerCase()),
-                cb.like(cb.lower(targetRoot.<String> get(SoftwareModule_.version)), subString.toLowerCase()));
+                cb.like(cb.lower(targetRoot.<String> get(JpaSoftwareModule_.name)), subString.toLowerCase()),
+                cb.like(cb.lower(targetRoot.<String> get(JpaSoftwareModule_.version)), subString.toLowerCase()));
     }
 
     /**
@@ -73,8 +74,9 @@ public final class SoftwareModuleSpecification {
      *            to be filtered on
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<SoftwareModule> equalType(final SoftwareModuleType type) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<SoftwareModuleType> get(SoftwareModule_.type), type);
+    public static Specification<JpaSoftwareModule> equalType(final JpaSoftwareModuleType type) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<JpaSoftwareModuleType> get(JpaSoftwareModule_.type),
+                type);
     }
 
 }

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -25,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface ActionStatusRepository
-        extends BaseEntityRepository<ActionStatus, Long>, JpaSpecificationExecutor<ActionStatus> {
+        extends BaseEntityRepository<JpaActionStatus, Long>, JpaSpecificationExecutor<JpaActionStatus> {
 
     /**
      * Counts {@link ActionStatus} entries of given {@link Action} in
@@ -35,7 +37,7 @@ public interface ActionStatusRepository
      *            to count status entries
      * @return number of actions in repository
      */
-    Long countByAction(Action action);
+    Long countByAction(JpaAction action);
 
     /**
      * Counts {@link ActionStatus} entries of given {@link Action} with given
@@ -47,7 +49,7 @@ public interface ActionStatusRepository
      *            to filter for
      * @return number of actions in repository
      */
-    Long countByActionAndStatus(Action action, Status status);
+    Long countByActionAndStatus(JpaAction action, Status status);
 
     /**
      * Retrieves all {@link ActionStatus} entries from repository of given
@@ -59,7 +61,7 @@ public interface ActionStatusRepository
      *            of the status entries
      * @return pages list of {@link ActionStatus} entries
      */
-    Page<ActionStatus> findByAction(Pageable pageReq, Action action);
+    Page<ActionStatus> findByAction(Pageable pageReq, JpaAction action);
 
     /**
      * Finds all status updates for the defined action and target including
@@ -74,6 +76,6 @@ public interface ActionStatusRepository
      * @return Page with found targets
      */
     @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
-    Page<ActionStatus> getByAction(Pageable pageReq, Action action);
+    Page<ActionStatus> getByAction(Pageable pageReq, JpaAction action);
 
 }

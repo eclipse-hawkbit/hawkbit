@@ -142,5 +142,4 @@ public interface TenantConfigurationManagement {
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     <T> T getGlobalConfigurationValue(TenantConfigurationKey configurationKey, Class<T> propertyType);
-
 }

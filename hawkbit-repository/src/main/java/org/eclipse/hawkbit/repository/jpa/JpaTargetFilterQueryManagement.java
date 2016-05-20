@@ -13,11 +13,13 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.specifications.SpecificationsBuilder;
-import org.eclipse.hawkbit.repository.specifications.TargetFilterQuerySpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
@@ -50,7 +52,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         if (targetFilterQueryRepository.findByName(customTargetFilter.getName()) != null) {
             throw new EntityAlreadyExistsException(customTargetFilter.getName());
         }
-        return targetFilterQueryRepository.save(customTargetFilter);
+        return targetFilterQueryRepository.save((JpaTargetFilterQuery) customTargetFilter);
     }
 
     @Override
@@ -62,25 +64,29 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Page<TargetFilterQuery> findAllTargetFilterQuery(final Pageable pageable) {
-        return targetFilterQueryRepository.findAll(pageable);
+        return convertPage(targetFilterQueryRepository.findAll(pageable));
+    }
+
+    private static Page<TargetFilterQuery> convertPage(final Page<JpaTargetFilterQuery> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
     }
 
     @Override
     public Page<TargetFilterQuery> findTargetFilterQueryByFilters(final Pageable pageable, final String name) {
-        final List<Specification<TargetFilterQuery>> specList = new ArrayList<>();
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>();
         if (!Strings.isNullOrEmpty(name)) {
             specList.add(TargetFilterQuerySpecification.likeName(name));
         }
-        return findTargetFilterQueryByCriteriaAPI(pageable, specList);
+        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList));
     }
 
-    private Page<TargetFilterQuery> findTargetFilterQueryByCriteriaAPI(final Pageable pageable,
-            final List<Specification<TargetFilterQuery>> specList) {
+    private Page<JpaTargetFilterQuery> findTargetFilterQueryByCriteriaAPI(final Pageable pageable,
+            final List<Specification<JpaTargetFilterQuery>> specList) {
         if (specList == null || specList.isEmpty()) {
             return targetFilterQueryRepository.findAll(pageable);
         }
 
-        final Specifications<TargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
+        final Specifications<JpaTargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
         return targetFilterQueryRepository.findAll(specs, pageable);
     }
 
@@ -99,7 +105,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
         Assert.notNull(targetFilterQuery.getId());
-        return targetFilterQueryRepository.save(targetFilterQuery);
+        return targetFilterQueryRepository.save((JpaTargetFilterQuery) targetFilterQuery);
     }
 
 }

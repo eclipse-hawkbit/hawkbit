@@ -12,10 +12,11 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.jpa.RolloutGroupRepository;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
                 final RolloutGroup nextGroup = action.getRolloutGroup();
                 logger.debug("Rolloutgroup {} is now running", nextGroup);
                 nextGroup.setStatus(RolloutGroupStatus.RUNNING);
-                rolloutGroupRepository.save(nextGroup);
+                rolloutGroupRepository.save((JpaRolloutGroup) nextGroup);
             });
         } else {
             logger.info("No actions to start for next rolloutgroup of parent {}", rolloutGroup);
@@ -76,8 +77,8 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
             // e.g. if targets has been deleted after the group has been
             // scheduled. If the group is empty now, we just finish the group if
             // there are not actions available for this group.
-            final List<RolloutGroup> findByRolloutGroupParent = rolloutGroupRepository
-                    .findByParentAndStatus(rolloutGroup, RolloutGroupStatus.SCHEDULED);
+            final List<JpaRolloutGroup> findByRolloutGroupParent = rolloutGroupRepository
+                    .findByParentAndStatus((JpaRolloutGroup) rolloutGroup, RolloutGroupStatus.SCHEDULED);
             findByRolloutGroupParent.forEach(nextGroup -> {
                 logger.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
                 nextGroup.setStatus(RolloutGroupStatus.FINISHED);

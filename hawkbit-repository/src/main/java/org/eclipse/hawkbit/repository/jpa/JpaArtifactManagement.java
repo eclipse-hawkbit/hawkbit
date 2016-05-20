@@ -24,12 +24,16 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.GridFSDBFileNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaExternalArtifactProvider;
+import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.specifications.SoftwareModuleSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +92,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             final String urlSuffix, final Long moduleId) {
 
         final SoftwareModule module = getModuleAndThrowExceptionIfThatFails(moduleId);
-        return externalArtifactRepository.save(new ExternalArtifact(externalRepository, urlSuffix, module));
+        return externalArtifactRepository.save(new JpaExternalArtifact(externalRepository, urlSuffix, module));
     }
 
     @Override
@@ -97,7 +101,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public ExternalArtifactProvider createExternalArtifactProvider(final String name, final String description,
             final String basePath, final String defaultUrlSuffix) {
         return externalArtifactProviderRepository
-                .save(new ExternalArtifactProvider(name, description, basePath, defaultUrlSuffix));
+                .save(new JpaExternalArtifactProvider(name, description, basePath, defaultUrlSuffix));
     }
 
     @Override
@@ -142,7 +146,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
 
         existing.getSoftwareModule().removeArtifact(existing);
-        softwareModuleRepository.save(existing.getSoftwareModule());
+        softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
         externalArtifactRepository.delete(id);
     }
 
@@ -156,7 +160,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         boolean artifactIsOnlyUsedByOneSoftwareModule = true;
         for (final LocalArtifact lArtifact : localArtifactRepository
-                .findByGridFsFileName(existing.getGridFsFileName())) {
+                .findByGridFsFileName(((JpaLocalArtifact) existing).getGridFsFileName())) {
             if (!lArtifact.getSoftwareModule().isDeleted()
                     && Long.compare(lArtifact.getSoftwareModule().getId(), existing.getSoftwareModule().getId()) != 0) {
                 artifactIsOnlyUsedByOneSoftwareModule = false;
@@ -166,8 +170,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         if (artifactIsOnlyUsedByOneSoftwareModule) {
             try {
-                LOG.debug("deleting artifact from repository {}", existing.getGridFsFileName());
-                artifactRepository.deleteBySha1(existing.getGridFsFileName());
+                LOG.debug("deleting artifact from repository {}", ((JpaLocalArtifact) existing).getGridFsFileName());
+                artifactRepository.deleteBySha1(((JpaLocalArtifact) existing).getGridFsFileName());
             } catch (final ArtifactStoreException e) {
                 throw new ArtifactDeleteFailedException(e);
             }
@@ -178,7 +182,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteLocalArtifact(final Long id) {
-        final LocalArtifact existing = localArtifactRepository.findOne(id);
+        final JpaLocalArtifact existing = localArtifactRepository.findOne(id);
 
         if (null == existing) {
             return;
@@ -187,7 +191,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         deleteLocalArtifact(existing);
 
         existing.getSoftwareModule().removeArtifact(existing);
-        softwareModuleRepository.save(existing.getSoftwareModule());
+        softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
         localArtifactRepository.delete(id);
     }
 
@@ -219,7 +223,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Override
     public SoftwareModule findSoftwareModuleById(final Long id) {
 
-        final Specification<SoftwareModule> spec = SoftwareModuleSpecification.byId(id);
+        final Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.byId(id);
 
         return softwareModuleRepository.findOne(spec);
     }
@@ -246,9 +250,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public DbArtifact loadLocalArtifactBinary(final LocalArtifact artifact) {
-        final DbArtifact result = artifactRepository.getArtifactBySha1(artifact.getGridFsFileName());
+        final DbArtifact result = artifactRepository
+                .getArtifactBySha1(((JpaLocalArtifact) artifact).getGridFsFileName());
         if (result == null) {
-            throw new GridFSDBFileNotFoundException(artifact.getGridFsFileName());
+            throw new GridFSDBFileNotFoundException(((JpaLocalArtifact) artifact).getGridFsFileName());
         }
 
         return result;
@@ -256,9 +261,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private LocalArtifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
             final DbArtifact result, final LocalArtifact existing) {
-        LocalArtifact artifact = existing;
+        JpaLocalArtifact artifact = (JpaLocalArtifact) existing;
         if (existing == null) {
-            artifact = new LocalArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);
+            artifact = new JpaLocalArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);
         }
         artifact.setMd5Hash(result.getHashes().getMd5());
         artifact.setSha1Hash(result.getHashes().getSha1());

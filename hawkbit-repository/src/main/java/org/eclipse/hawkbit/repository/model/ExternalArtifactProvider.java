@@ -8,69 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+public interface ExternalArtifactProvider extends NamedEntity {
 
-/**
- * External repositories for artifact storage. The SP server provides URLs for
- * the targets to download from these external resources but does not access
- * them itself.
- *
- */
-@Table(name = "sp_external_provider", indexes = {
-        @Index(name = "sp_idx_external_provider_prim", columnList = "tenant,id") })
-@Entity
-public class ExternalArtifactProvider extends NamedEntity {
-    private static final long serialVersionUID = 1L;
+    String getBasePath();
 
-    @Column(name = "base_url", length = 512, nullable = false)
-    private String basePath;
+    String getDefaultSuffix();
 
-    @Column(name = "default_url_suffix", length = 512, nullable = true)
-    private String defaultSuffix;
+    void setBasePath(String basePath);
 
-    /**
-     * Constructs {@link ExternalArtifactProvider} based on given properties.
-     *
-     * @param name
-     *            of the provided
-     * @param description
-     *            which is optional
-     * @param baseURL
-     *            of all {@link ExternalArtifact}s of the provider
-     * @param defaultUrlSuffix
-     *            that is used if {@link ExternalArtifact#getUrlSuffix()} is
-     *            empty.
-     */
-    public ExternalArtifactProvider(final String name, final String description, final String baseURL,
-            final String defaultUrlSuffix) {
-        super(name, description);
-        basePath = baseURL;
-        defaultSuffix = defaultUrlSuffix;
-    }
-
-    ExternalArtifactProvider() {
-        super();
-        defaultSuffix = "";
-        basePath = "";
-    }
-
-    public String getBasePath() {
-        return basePath;
-    }
-
-    public String getDefaultSuffix() {
-        return defaultSuffix;
-    }
-
-    public void setBasePath(final String basePath) {
-        this.basePath = basePath;
-    }
-
-    public void setDefaultSuffix(final String defaultSuffix) {
-        this.defaultSuffix = defaultSuffix;
-    }
+    void setDefaultSuffix(String defaultSuffix);
 
 }

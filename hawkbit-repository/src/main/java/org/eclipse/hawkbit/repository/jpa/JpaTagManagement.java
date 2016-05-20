@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,20 +22,26 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -86,7 +93,7 @@ public class JpaTagManagement implements TagManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        final TargetTag save = targetTagRepository.save(targetTag);
+        final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
 
         afterCommit
                 .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
@@ -97,13 +104,17 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<TargetTag> createTargetTags(final Iterable<TargetTag> targetTags) {
+    public List<TargetTag> createTargetTags(final Collection<TargetTag> tt) {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Collection<JpaTargetTag> targetTags = (Collection) tt;
+
         targetTags.forEach(tag -> {
             if (tag.getId() != null) {
                 throw new EntityAlreadyExistsException();
             }
         });
-        final List<TargetTag> save = targetTagRepository.save(targetTags);
+
+        final List<TargetTag> save = new ArrayList<>(targetTagRepository.save(targetTags));
         afterCommit
                 .afterCommit(() -> eventBus.post(new TargetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
         return save;
@@ -113,10 +124,10 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteTargetTag(final String targetTagName) {
-        final TargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
+        final JpaTargetTag tag = targetTagRepository.findByNameEquals(targetTagName);
 
-        final List<Target> changed = new LinkedList<>();
-        for (final Target target : targetRepository.findByTag(tag)) {
+        final List<JpaTarget> changed = new LinkedList<>();
+        for (final JpaTarget target : targetRepository.findByTag(tag)) {
             target.getTags().remove(tag);
             changed.add(target);
         }
@@ -133,12 +144,22 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public List<TargetTag> findAllTargetTags() {
-        return targetTagRepository.findAll();
+        return new ArrayList<>(targetTagRepository.findAll());
     }
 
     @Override
-    public Page<TargetTag> findAllTargetTags(final Specification<TargetTag> spec, final Pageable pageable) {
-        return targetTagRepository.findAll(spec, pageable);
+    public Page<TargetTag> findAllTargetTags(final String rsqlParam, final Pageable pageable) {
+
+        final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class);
+        return convertTPage(targetTagRepository.findAll(spec, pageable));
+    }
+
+    private static Page<TargetTag> convertTPage(final Page<JpaTargetTag> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    }
+
+    private static Page<DistributionSetTag> convertDsPage(final Page<JpaDistributionSetTag> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
     }
 
     @Override
@@ -152,7 +173,7 @@ public class JpaTagManagement implements TagManagement {
     public TargetTag updateTargetTag(final TargetTag targetTag) {
         checkNotNull(targetTag.getName());
         checkNotNull(targetTag.getId());
-        final TargetTag save = targetTagRepository.save(targetTag);
+        final TargetTag save = targetTagRepository.save((JpaTargetTag) targetTag);
         afterCommit.afterCommit(() -> eventBus.post(new TargetTagUpdateEvent(save)));
         return save;
     }
@@ -174,7 +195,7 @@ public class JpaTagManagement implements TagManagement {
             throw new EntityAlreadyExistsException();
         }
 
-        final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
+        final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
 
         afterCommit.afterCommit(
                 () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
@@ -184,14 +205,17 @@ public class JpaTagManagement implements TagManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<DistributionSetTag> createDistributionSetTags(
-            final Collection<DistributionSetTag> distributionSetTags) {
+    public List<DistributionSetTag> createDistributionSetTags(final Collection<DistributionSetTag> dst) {
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        final Collection<JpaDistributionSetTag> distributionSetTags = (Collection) dst;
+
         for (final DistributionSetTag dsTag : distributionSetTags) {
             if (dsTag.getId() != null) {
                 throw new EntityAlreadyExistsException();
             }
         }
-        final List<DistributionSetTag> save = distributionSetTagRepository.save(distributionSetTags);
+        final List<DistributionSetTag> save = new ArrayList<>(distributionSetTagRepository.save(distributionSetTags));
         afterCommit.afterCommit(
                 () -> eventBus.post(new DistributionSetTagCreatedBulkEvent(tenantAware.getCurrentTenant(), save)));
 
@@ -202,10 +226,10 @@ public class JpaTagManagement implements TagManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void deleteDistributionSetTag(final String tagName) {
-        final DistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName);
+        final JpaDistributionSetTag tag = distributionSetTagRepository.findByNameEquals(tagName);
 
-        final List<DistributionSet> changed = new LinkedList<>();
-        for (final DistributionSet set : distributionSetRepository.findByTag(tag)) {
+        final List<JpaDistributionSet> changed = new LinkedList<>();
+        for (final JpaDistributionSet set : distributionSetRepository.findByTag(tag)) {
             set.getTags().remove(tag);
             changed.add(set);
         }
@@ -224,7 +248,7 @@ public class JpaTagManagement implements TagManagement {
     public DistributionSetTag updateDistributionSetTag(final DistributionSetTag distributionSetTag) {
         checkNotNull(distributionSetTag.getName());
         checkNotNull(distributionSetTag.getId());
-        final DistributionSetTag save = distributionSetTagRepository.save(distributionSetTag);
+        final DistributionSetTag save = distributionSetTagRepository.save((JpaDistributionSetTag) distributionSetTag);
         afterCommit.afterCommit(() -> eventBus.post(new DistributionSetTagUpdateEvent(save)));
 
         return save;
@@ -232,7 +256,7 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public List<DistributionSetTag> findAllDistributionSetTags() {
-        return distributionSetTagRepository.findAll();
+        return new ArrayList<>(distributionSetTagRepository.findAll());
     }
 
     @Override
@@ -247,18 +271,31 @@ public class JpaTagManagement implements TagManagement {
 
     @Override
     public Page<TargetTag> findAllTargetTags(final Pageable pageReq) {
-        return targetTagRepository.findAll(pageReq);
+        return convertTPage(targetTagRepository.findAll(pageReq));
     }
 
     @Override
     public Page<DistributionSetTag> findAllDistributionSetTags(final Pageable pageReq) {
-        return distributionSetTagRepository.findAll(pageReq);
+        return convertDsPage(distributionSetTagRepository.findAll(pageReq));
     }
 
     @Override
-    public Page<DistributionSetTag> findAllDistributionSetTags(final Specification<DistributionSetTag> spec,
-            final Pageable pageable) {
-        return distributionSetTagRepository.findAll(spec, pageable);
+    public Page<DistributionSetTag> findAllDistributionSetTags(final String rsqlParam, final Pageable pageable) {
+        final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class);
+
+        return convertDsPage(distributionSetTagRepository.findAll(spec, pageable));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public TargetTag generateTargetTag() {
+        return new JpaTargetTag();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetTag generateDistributionSetTag() {
+        return new JpaDistributionSetTag();
     }
 
 }

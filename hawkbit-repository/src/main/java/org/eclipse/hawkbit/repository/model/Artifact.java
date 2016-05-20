@@ -8,49 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+public interface Artifact extends TenantAwareBaseEntity {
 
-/**
- * Tenant specific locally stored artifact representation that is used by
- * {@link SoftwareModule}.
- */
-@MappedSuperclass
-public abstract class Artifact extends TenantAwareBaseEntity {
-    private static final long serialVersionUID = 1L;
+    SoftwareModule getSoftwareModule();
 
-    @Column(name = "sha1_hash", length = 40, nullable = true)
-    private String sha1Hash;
+    void setSoftwareModule(SoftwareModule softwareModule);
 
-    @Column(name = "md5_hash", length = 32, nullable = true)
-    private String md5Hash;
+    String getMd5Hash();
 
-    @Column(name = "file_size")
-    private Long size;
+    String getSha1Hash();
 
-    public abstract SoftwareModule getSoftwareModule();
+    Long getSize();
 
-    public String getMd5Hash() {
-        return md5Hash;
-    }
-
-    public String getSha1Hash() {
-        return sha1Hash;
-    }
-
-    public void setMd5Hash(final String md5Hash) {
-        this.md5Hash = md5Hash;
-    }
-
-    public void setSha1Hash(final String sha1Hash) {
-        this.sha1Hash = sha1Hash;
-    }
-
-    public Long getSize() {
-        return size;
-    }
-
-    public void setSize(final Long size) {
-        this.size = size;
-    }
 }

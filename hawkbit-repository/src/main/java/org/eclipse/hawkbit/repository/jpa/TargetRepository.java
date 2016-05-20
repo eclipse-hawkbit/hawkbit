@@ -11,11 +11,13 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
 import org.springframework.cache.annotation.CacheEvict;
@@ -35,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface TargetRepository extends BaseEntityRepository<Target, Long>, JpaSpecificationExecutor<Target> {
+public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>, JpaSpecificationExecutor<JpaTarget> {
 
     /**
      * Loads {@link Target} including details {@link EntityGraph} by given ID.
@@ -45,7 +47,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      * @return found {@link Target} or <code>null</code> if not found.
      */
     @EntityGraph(value = "Target.detail", type = EntityGraphType.LOAD)
-    Target findByControllerId(String controllerID);
+    JpaTarget findByControllerId(String controllerID);
 
     /**
      * Finds targets by given list of {@link Target#getControllerId()}s.
@@ -65,7 +67,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("DELETE FROM Target t WHERE t.id IN ?1")
+    @Query("DELETE FROM JpaTarget t WHERE t.id IN ?1")
     void deleteByIdIn(final Collection<Long> targetIDs);
 
     /**
@@ -75,8 +77,8 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *            to be found
      * @return list of found targets
      */
-    @Query(value = "SELECT DISTINCT t FROM Target t JOIN t.tags tt WHERE tt = :tag")
-    List<Target> findByTag(@Param("tag") final TargetTag tag);
+    @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt = :tag")
+    List<JpaTarget> findByTag(@Param("tag") final JpaTargetTag tag);
 
     /**
      * Finds all {@link Target}s based on given {@link Target#getControllerId()}
@@ -88,7 +90,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *            to search for
      * @return {@link List} of found {@link Target}s.
      */
-    @Query(value = "SELECT DISTINCT t from Target t JOIN t.tags tt WHERE tt.name = :tagname AND t.controllerId IN :targets")
+    @Query(value = "SELECT DISTINCT t from JpaTarget t JOIN t.tags tt WHERE tt.name = :tagname AND t.controllerId IN :targets")
     List<Target> findByTagNameAndControllerIdIn(@Param("tagname") final String tag,
             @Param("targets") final Collection<String> controllerIds);
 
@@ -114,7 +116,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *
      * @return found targets
      */
-    Page<Target> findByTargetInfoInstalledDistributionSet(final Pageable pageable, final DistributionSet set);
+    Page<Target> findByTargetInfoInstalledDistributionSet(final Pageable pageable, final JpaDistributionSet set);
 
     /**
      * retrieves the {@link Target}s which has the {@link DistributionSet}
@@ -138,7 +140,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *
      * @return found targets
      */
-    Page<Target> findByAssignedDistributionSet(final Pageable pageable, final DistributionSet set);
+    Page<Target> findByAssignedDistributionSet(final Pageable pageable, final JpaDistributionSet set);
 
     /**
      * Saves all given {@link Target}s.
@@ -154,7 +156,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    <S extends Target> List<S> save(Iterable<S> entities);
+    <S extends JpaTarget> List<S> save(Iterable<S> entities);
 
     /**
      * Saves a given entity. Use the returned instance for further operations as
@@ -168,7 +170,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    <S extends Target> S save(S entity);
+    <S extends JpaTarget> S save(S entity);
 
     /**
      * Finds all targets that have defined {@link DistributionSet} assigned.
@@ -199,7 +201,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      * @return number of found {@link Target}s with given
      *         {@link Target#getControllerId()}s
      */
-    @Query("SELECT COUNT(t) FROM Target t WHERE t.controllerId IN ?1")
+    @Query("SELECT COUNT(t) FROM JpaTarget t WHERE t.controllerId IN ?1")
     Long countByControllerIdIn(final Collection<String> ids);
 
     /**
@@ -228,7 +230,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      * @return found targets
      */
     Page<Target> findByAssignedDistributionSetOrTargetInfoInstalledDistributionSet(final Pageable pageable,
-            final DistributionSet assigned, final DistributionSet installed);
+            final JpaDistributionSet assigned, final JpaDistributionSet installed);
 
     /**
      * Finds all targets that have defined {@link DistributionSet} assigned or
@@ -255,12 +257,12 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      * @see org.springframework.data.repository.CrudRepository#findAll()
      */
     @Override
-    List<Target> findAll();
+    List<JpaTarget> findAll();
 
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT t FROM Target t WHERE t.id IN ?1")
-    List<Target> findAll(Iterable<Long> ids);
+    @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
+    List<JpaTarget> findAll(Iterable<Long> ids);
 
     /**
      * Sets {@link Target#getAssignedDistributionSet()}.
@@ -276,11 +278,11 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      */
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Query("UPDATE Target t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
-    void setAssignedDistributionSet(@Param("set") DistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
+    @Query("UPDATE JpaTarget t  SET t.assignedDistributionSet = :set, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy WHERE t.id IN :targets")
+    void setAssignedDistributionSet(@Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
-    List<Target> findByRolloutTargetGroupRolloutGroup(final RolloutGroup rolloutGroup);
+    List<Target> findByRolloutTargetGroupRolloutGroup(final JpaRolloutGroup rolloutGroup);
 
     /**
      * 
@@ -304,7 +306,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *            the page request parameter
      * @return a page of all targets related to a rollout group
      */
-    Page<Target> findByActionsRolloutGroup(RolloutGroup rolloutGroup, Pageable page);
+    Page<Target> findByActionsRolloutGroup(JpaRolloutGroup rolloutGroup, Pageable page);
 
     /**
      * Find all targets with action status for a specific group.
@@ -315,7 +317,7 @@ public interface TargetRepository extends BaseEntityRepository<Target, Long>, Jp
      *            the ID of the rollout group
      * @return targets with action status
      */
-    @Query("select DISTINCT NEW org.eclipse.hawkbit.repository.model.TargetWithActionStatus(a.target,a.status) from Action a inner join fetch a.target t where  a.rolloutGroup.id = :rolloutGroupId")
+    @Query("select DISTINCT NEW org.eclipse.hawkbit.repository.model.TargetWithActionStatus(a.target,a.status) from JpaAction a inner join fetch a.target t where  a.rolloutGroup.id = :rolloutGroupId")
     Page<TargetWithActionStatus> findTargetsWithActionStatusByRolloutGroupId(final Pageable pageable,
             @Param("rolloutGroupId") Long rolloutGroupId);
 }

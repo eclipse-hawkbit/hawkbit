@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.Test;
 
@@ -33,7 +34,7 @@ public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
     public void createTargetFilterQuery() {
         final String filterName = "new target filter";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+                .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery,
                 targetFilterQueryManagement.findTargetFilterQueryByName(filterName));
     }
@@ -43,11 +44,11 @@ public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
     public void createDuplicateTargetFilterQuery() {
         final String filterName = "new target filter duplicate";
         targetFilterQueryManagement
-                .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+                .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
 
         try {
             targetFilterQueryManagement
-                    .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+                    .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
             fail("should not have worked as query already exists");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -59,7 +60,7 @@ public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
     public void deleteTargetFilterQuery() {
         final String filterName = "delete_target_filter_query";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+                .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
         targetFilterQueryManagement.deleteTargetFilterQuery(targetFilterQuery.getId());
         assertEquals("Returns null as the target filter is deleted", null,
                 targetFilterQueryManagement.findTargetFilterQueryById(targetFilterQuery.getId()));
@@ -71,7 +72,7 @@ public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
     public void updateTargetFilterQuery() {
         final String filterName = "target_filter_01";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .createTargetFilterQuery(new TargetFilterQuery(filterName, "name==PendingTargets001"));
+                .createTargetFilterQuery(new JpaTargetFilterQuery(filterName, "name==PendingTargets001"));
 
         final String newQuery = "status==UNKNOWN";
         targetFilterQuery.setQuery(newQuery);

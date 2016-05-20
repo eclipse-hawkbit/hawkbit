@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,24 +20,28 @@ import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
+import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.model.RolloutTargetGroup;
-import org.eclipse.hawkbit.repository.model.Rollout_;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.rollout.condition.RolloutGroupConditionEvaluator;
 import org.slf4j.Logger;
@@ -46,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -132,15 +138,21 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable page) {
-        return rolloutRepository.findAll(page);
+        return convertPage(rolloutRepository.findAll(page));
+    }
+
+    private static Page<Rollout> convertPage(final Slice<JpaRollout> findAll) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
     }
 
     @Override
-    public Page<Rollout> findAllWithDetailedStatusByPredicate(final Specification<Rollout> specification,
-            final Pageable page) {
-        final Page<Rollout> findAll = rolloutRepository.findAll(specification, page);
+    public Page<Rollout> findAllWithDetailedStatusByPredicate(final String rsqlParam, final Pageable page) {
+
+        final Specification<JpaRollout> specification = RSQLUtility.parse(rsqlParam, RolloutFields.class);
+
+        final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, page);
         setRolloutStatusDetails(findAll);
-        return findAll;
+        return convertPage(findAll);
     }
 
     @Override
@@ -153,7 +165,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Modifying
     public Rollout createRollout(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
-        final Rollout savedRollout = createRollout(rollout, amountGroup);
+        final JpaRollout savedRollout = createRollout((JpaRollout) rollout, amountGroup);
         return createRolloutGroups(amountGroup, conditions, savedRollout);
     }
 
@@ -162,7 +174,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Modifying
     public Rollout createRolloutAsync(final Rollout rollout, final int amountGroup,
             final RolloutGroupConditions conditions) {
-        final Rollout savedRollout = createRollout(rollout, amountGroup);
+        final JpaRollout savedRollout = createRollout((JpaRollout) rollout, amountGroup);
         creatingRollouts.add(savedRollout.getName());
         // need to flush the entity manager here to get the ID of the rollout,
         // because entity manager is set to FlushMode#Auto, entitymanager will
@@ -182,7 +194,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         return savedRollout;
     }
 
-    private Rollout createRollout(final Rollout rollout, final int amountGroup) {
+    private JpaRollout createRollout(final JpaRollout rollout, final int amountGroup) {
         verifyRolloutGroupParameter(amountGroup);
         final Long totalTargets = targetManagement.countTargetByTargetFilterQuery(rollout.getTargetFilterQuery());
         rollout.setTotalTargets(totalTargets.longValue());
@@ -198,7 +210,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private Rollout createRolloutGroupsInNewTransaction(final int amountOfGroups,
-            final RolloutGroupConditions conditions, final Rollout savedRollout) {
+            final RolloutGroupConditions conditions, final JpaRollout savedRollout) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName("creatingRollout");
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -221,7 +233,7 @@ public class JpaRolloutManagement implements RolloutManagement {
      * @return the rollout with created groups
      */
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,
-            final Rollout savedRollout) {
+            final JpaRollout savedRollout) {
         int pageIndex = 0;
         int groupIndex = 0;
         final Long totalCount = savedRollout.getTotalTargets();
@@ -237,7 +249,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         while (pageIndex < totalCount) {
             groupIndex++;
             final String nameAndDesc = "group-" + groupIndex;
-            final RolloutGroup group = new RolloutGroup();
+            final JpaRolloutGroup group = new JpaRolloutGroup();
             group.setName(nameAndDesc);
             group.setDescription(nameAndDesc);
             group.setRollout(savedRollout);
@@ -272,7 +284,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public Rollout startRollout(final Rollout rollout) {
-        final Rollout mergedRollout = entityManager.merge(rollout);
+        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
         checkIfRolloutCanStarted(rollout, mergedRollout);
         return doStartRollout(mergedRollout);
     }
@@ -281,10 +293,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public Rollout startRolloutAsync(final Rollout rollout) {
-        final Rollout mergedRollout = entityManager.merge(rollout);
+        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
         checkIfRolloutCanStarted(rollout, mergedRollout);
         mergedRollout.setStatus(RolloutStatus.STARTING);
-        final Rollout updatedRollout = rolloutRepository.save(mergedRollout);
+        final JpaRollout updatedRollout = rolloutRepository.save(mergedRollout);
         startingRollouts.add(updatedRollout.getName());
         executor.execute(() -> {
             try {
@@ -303,13 +315,13 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     }
 
-    private Rollout doStartRollout(final Rollout rollout) {
+    private Rollout doStartRollout(final JpaRollout rollout) {
         final DistributionSet distributionSet = rollout.getDistributionSet();
         final ActionType actionType = rollout.getActionType();
         final long forceTime = rollout.getForcedTime();
-        final List<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout);
+        final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout);
         for (int iGroup = 0; iGroup < rolloutGroups.size(); iGroup++) {
-            final RolloutGroup rolloutGroup = rolloutGroups.get(iGroup);
+            final JpaRolloutGroup rolloutGroup = rolloutGroups.get(iGroup);
             final List<Target> targetGroup = targetRepository.findByRolloutTargetGroupRolloutGroup(rolloutGroup);
             // firstgroup can already be started
             if (iGroup == 0) {
@@ -336,7 +348,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void pauseRollout(final Rollout rollout) {
-        final Rollout mergedRollout = entityManager.merge(rollout);
+        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
         if (mergedRollout.getStatus() != RolloutStatus.RUNNING) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
                     + rollout.getStatus().name().toLowerCase());
@@ -354,7 +366,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Modifying
     public void resumeRollout(final Rollout rollout) {
-        final Rollout mergedRollout = entityManager.merge(rollout);
+        final JpaRollout mergedRollout = entityManager.merge((JpaRollout) rollout);
         if (!(RolloutStatus.PAUSED.equals(mergedRollout.getStatus()))) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
                     + rollout.getStatus().name().toLowerCase());
@@ -379,13 +391,13 @@ public class JpaRolloutManagement implements RolloutManagement {
             return;
         }
 
-        final List<Rollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
+        final List<JpaRollout> rolloutsToCheck = rolloutRepository.findByLastCheckAndStatus(lastCheck,
                 RolloutStatus.RUNNING);
         LOGGER.info("Found {} running rollouts to check", rolloutsToCheck.size());
 
-        for (final Rollout rollout : rolloutsToCheck) {
+        for (final JpaRollout rollout : rolloutsToCheck) {
             LOGGER.debug("Checking rollout {}", rollout);
-            final List<RolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutAndStatus(rollout,
+            final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutAndStatus(rollout,
                     RolloutGroupStatus.RUNNING);
 
             if (rolloutGroups.isEmpty()) {
@@ -415,7 +427,7 @@ public class JpaRolloutManagement implements RolloutManagement {
      * In case this happens, set the rollout to error state.
      */
     private void verifyStuckedRollouts() {
-        final List<Rollout> rolloutsInCreatingState = rolloutRepository.findByStatus(RolloutStatus.CREATING);
+        final List<JpaRollout> rolloutsInCreatingState = rolloutRepository.findByStatus(RolloutStatus.CREATING);
         rolloutsInCreatingState.stream().filter(rollout -> !creatingRollouts.contains(rollout.getName()))
                 .forEach(rollout -> {
                     LOGGER.warn(
@@ -425,7 +437,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                     rolloutRepository.save(rollout);
                 });
 
-        final List<Rollout> rolloutsInStartingState = rolloutRepository.findByStatus(RolloutStatus.STARTING);
+        final List<JpaRollout> rolloutsInStartingState = rolloutRepository.findByStatus(RolloutStatus.STARTING);
         rolloutsInStartingState.stream().filter(rollout -> !startingRollouts.contains(rollout.getName()))
                 .forEach(rollout -> {
                     LOGGER.warn(
@@ -437,8 +449,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     }
 
-    private void executeRolloutGroups(final Rollout rollout, final List<RolloutGroup> rolloutGroups) {
-        for (final RolloutGroup rolloutGroup : rolloutGroups) {
+    private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups) {
+        for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             // error state check, do we need to stop the whole
             // rollout because of error?
             final RolloutGroupErrorCondition errorCondition = rolloutGroup.getErrorCondition();
@@ -459,8 +471,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private void executeLatestRolloutGroup(final Rollout rollout) {
-        final List<RolloutGroup> latestRolloutGroup = rolloutGroupRepository
+    private void executeLatestRolloutGroup(final JpaRollout rollout) {
+        final List<JpaRolloutGroup> latestRolloutGroup = rolloutGroupRepository
                 .findByRolloutAndStatusNotOrderByIdDesc(rollout, RolloutGroupStatus.SCHEDULED);
         if (latestRolloutGroup.isEmpty()) {
             return;
@@ -478,13 +490,13 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private boolean isRolloutComplete(final Rollout rollout) {
+    private boolean isRolloutComplete(final JpaRollout rollout) {
         final Long groupsActiveLeft = rolloutGroupRepository.countByRolloutAndStatusOrStatus(rollout,
                 RolloutGroupStatus.RUNNING, RolloutGroupStatus.SCHEDULED);
         return groupsActiveLeft == 0;
     }
 
-    private boolean isRolloutGroupComplete(final Rollout rollout, final RolloutGroup rolloutGroup) {
+    private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
         final Long actionsLeftForRollout = actionRepository
                 .countByRolloutAndRolloutGroupAndStatusNotAndStatusNotAndStatusNot(rollout, rolloutGroup,
                         Action.Status.ERROR, Action.Status.FINISHED, Action.Status.CANCELED);
@@ -543,22 +555,22 @@ public class JpaRolloutManagement implements RolloutManagement {
         return rolloutRepository.count(likeNameOrDescription(searchText));
     }
 
-    private static Specification<Rollout> likeNameOrDescription(final String searchText) {
+    private static Specification<JpaRollout> likeNameOrDescription(final String searchText) {
         return (rolloutRoot, query, criteriaBuilder) -> {
             final String searchTextToLower = searchText.toLowerCase();
             return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.name)), searchTextToLower),
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(Rollout_.description)),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.description)),
                             searchTextToLower));
         };
     }
 
     @Override
     public Slice<Rollout> findRolloutByFilters(final Pageable pageable, final String searchText) {
-        final Specification<Rollout> specs = likeNameOrDescription(searchText);
-        final Slice<Rollout> findAll = criteriaNoCountDao.findAll(specs, pageable, Rollout.class);
+        final Specification<JpaRollout> specs = likeNameOrDescription(searchText);
+        final Slice<JpaRollout> findAll = criteriaNoCountDao.findAll(specs, pageable, JpaRollout.class);
         setRolloutStatusDetails(findAll);
-        return findAll;
+        return convertPage(findAll);
     }
 
     @Override
@@ -579,7 +591,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Modifying
     public Rollout updateRollout(final Rollout rollout) {
         Assert.notNull(rollout.getId());
-        return rolloutRepository.save(rollout);
+        return rolloutRepository.save((JpaRollout) rollout);
     }
 
     /**
@@ -593,9 +605,9 @@ public class JpaRolloutManagement implements RolloutManagement {
      */
     @Override
     public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable page) {
-        final Page<Rollout> rollouts = findAll(page);
+        final Page<JpaRollout> rollouts = rolloutRepository.findAll(page);
         setRolloutStatusDetails(rollouts);
-        return rollouts;
+        return convertPage(rollouts);
 
     }
 
@@ -615,7 +627,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         return resultList.stream().collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
     }
 
-    private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
+    private void setRolloutStatusDetails(final Slice<JpaRollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
@@ -647,5 +659,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
         // calculate threshold
         return ((float) finished / (float) totalGroup) * 100;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public Rollout generateRollout() {
+        return new JpaRollout();
     }
 }

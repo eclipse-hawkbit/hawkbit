@@ -6,9 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
+
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Combined unique key of the table {@link RolloutTargetGroup}.

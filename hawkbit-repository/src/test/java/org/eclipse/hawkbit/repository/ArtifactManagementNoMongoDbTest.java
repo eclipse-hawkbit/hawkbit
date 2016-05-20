@@ -16,7 +16,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class ArtifactManagementNoMongoDbTest extends AbstractIntegrationTest {
     @Test
     @Description("Checks if the expected ArtifactUploadFailedException is thrown in case of MongoDB down")
     public void createLocalArtifactWithMongoDbDown() throws IOException {
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        JpaSoftwareModule sm = new JpaSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareModuleRepository.save(sm);
 

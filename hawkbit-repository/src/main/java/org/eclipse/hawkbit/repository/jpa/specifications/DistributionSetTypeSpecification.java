@@ -6,11 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.specifications;
+package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.DistributionSetType_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -31,8 +32,9 @@ public final class DistributionSetTypeSpecification {
      *            attribute is ignored
      * @return the {@link DistributionSetType} {@link Specification}
      */
-    public static Specification<DistributionSetType> isDeleted(final Boolean isDeleted) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(DistributionSetType_.deleted), isDeleted);
+    public static Specification<JpaDistributionSetType> isDeleted(final Boolean isDeleted) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSetType_.deleted),
+                isDeleted);
     }
 
     /**
@@ -44,8 +46,8 @@ public final class DistributionSetTypeSpecification {
      *            to search
      * @return the {@link DistributionSet} {@link Specification}
      */
-    public static Specification<DistributionSetType> byId(final Long distid) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Long> get(DistributionSetType_.id), distid);
+    public static Specification<JpaDistributionSetType> byId(final Long distid) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Long> get(JpaDistributionSetType_.id), distid);
     }
 
     /**
@@ -57,8 +59,8 @@ public final class DistributionSetTypeSpecification {
      *            to search
      * @return the {@link DistributionSet} {@link Specification}
      */
-    public static Specification<DistributionSetType> byName(final String name) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(DistributionSetType_.name), name);
+    public static Specification<JpaDistributionSetType> byName(final String name) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(JpaDistributionSetType_.name), name);
     }
 
     /**
@@ -70,8 +72,8 @@ public final class DistributionSetTypeSpecification {
      *            to search
      * @return the {@link DistributionSet} {@link Specification}
      */
-    public static Specification<DistributionSetType> byKey(final String key) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(DistributionSetType_.key), key);
+    public static Specification<JpaDistributionSetType> byKey(final String key) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(JpaDistributionSetType_.key), key);
     }
 
 }

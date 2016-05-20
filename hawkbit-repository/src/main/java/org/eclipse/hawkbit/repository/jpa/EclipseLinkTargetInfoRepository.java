@@ -14,7 +14,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.eclipse.hawkbit.repository.model.TargetInfo;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -40,7 +40,7 @@ public class EclipseLinkTargetInfoRepository implements TargetInfoRepository {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void setTargetUpdateStatus(final TargetUpdateStatus status, final List<Long> targets) {
         final Query query = entityManager.createQuery(
-                "update TargetInfo ti set ti.updateStatus = :status where ti.targetId in :targets and ti.updateStatus != :status");
+                "update JpaTargetInfo ti set ti.updateStatus = :status where ti.targetId in :targets and ti.updateStatus != :status");
         query.setParameter("targets", targets);
         query.setParameter("status", status);
 
@@ -50,7 +50,7 @@ public class EclipseLinkTargetInfoRepository implements TargetInfoRepository {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
-    public <S extends TargetInfo> S save(final S entity) {
+    public <S extends JpaTargetInfo> S save(final S entity) {
 
         if (entity.isNew()) {
             entityManager.persist(entity);
@@ -66,7 +66,7 @@ public class EclipseLinkTargetInfoRepository implements TargetInfoRepository {
     @CacheEvict(value = { "targetStatus", "distributionUsageInstalled", "targetsLastPoll" }, allEntries = true)
     public void deleteByTargetIdIn(final Collection<Long> targetIDs) {
         final javax.persistence.Query query = entityManager
-                .createQuery("DELETE FROM TargetInfo ti where ti.targetId IN :target");
+                .createQuery("DELETE FROM JpaTargetInfo ti where ti.targetId IN :target");
         query.setParameter("target", targetIDs);
 
     }
