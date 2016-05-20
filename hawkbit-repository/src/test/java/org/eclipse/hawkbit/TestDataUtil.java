@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,9 +19,12 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -28,6 +33,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -35,6 +43,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -49,6 +59,56 @@ import net._01001111.text.LoremIpsum;
  */
 public class TestDataUtil {
     private static final LoremIpsum LOREM = new LoremIpsum();
+
+    public static DistributionSet createTestDistributionSet(final SoftwareManagement softwareManagement,
+            final DistributionSetManagement distributionSetManagement) {
+        final Pageable pageReq = new PageRequest(0, 400);
+        DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
+                distributionSetManagement);
+        set.setVersion("anotherVersion");
+        set = distributionSetManagement.updateDistributionSet(set);
+
+        set.getModules().forEach(module -> {
+            module.setDescription("updated description");
+            softwareManagement.updateSoftwareModule(module);
+        });
+
+        // load also lazy stuff
+        set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
+
+        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
+        return set;
+    }
+
+    public static List<Target> sendUpdateActionStatusToTargets(final ControllerManagement controllerManagament,
+            final TargetManagement targetManagement, final ActionRepository actionRepository, final DistributionSet dsA,
+            final Iterable<Target> targs, final Status status, final String... msgs) {
+        final List<Target> result = new ArrayList<>();
+        for (final Target t : targs) {
+            final List<Action> findByTarget = actionRepository.findByTarget((JpaTarget) t);
+            for (final Action action : findByTarget) {
+                result.add(sendUpdateActionStatusToTarget(controllerManagament, targetManagement, status, action, t,
+                        msgs));
+            }
+        }
+        return result;
+    }
+
+    private static Target sendUpdateActionStatusToTarget(final ControllerManagement controllerManagament,
+            final TargetManagement targetManagement, final Status status, final Action updActA, final Target t,
+            final String... msgs) {
+        updActA.setStatus(status);
+
+        final ActionStatus statusMessages = new JpaActionStatus();
+        statusMessages.setAction(updActA);
+        statusMessages.setOccurredAt(System.currentTimeMillis());
+        statusMessages.setStatus(status);
+        for (final String msg : msgs) {
+            statusMessages.addMessage(msg);
+        }
+        controllerManagament.addUpdateActionStatus(statusMessages);
+        return targetManagement.findTargetByControllerID(t.getControllerId());
+    }
 
     public static List<JpaDistributionSet> generateDistributionSets(final String suffix, final int number,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {

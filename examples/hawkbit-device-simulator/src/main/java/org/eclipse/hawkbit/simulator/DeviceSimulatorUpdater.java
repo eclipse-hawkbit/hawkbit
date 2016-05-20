@@ -118,9 +118,6 @@ public class DeviceSimulatorUpdater {
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
-        /**
-         * 
-         */
         private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
 
         private static final Random rndSleep = new SecureRandom();

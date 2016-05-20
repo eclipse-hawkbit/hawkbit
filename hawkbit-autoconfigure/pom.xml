@@ -64,7 +64,13 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-rest-resource</artifactId>
+         <artifactId>hawkbit-ddi-resource</artifactId>
+         <version>${project.version}</version>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-mgmt-resource</artifactId>
          <version>${project.version}</version>
          <optional>true</optional>
       </dependency>

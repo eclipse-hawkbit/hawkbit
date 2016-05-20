@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-example-app</artifactId>
-   <name>hawkBit :: Example App</name>
+   <name>hawkBit-example :: UI Application</name>
 
    <build>
       <plugins>
@@ -64,7 +64,12 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-rest-resource</artifactId>
+         <artifactId>hawkbit-mgmt-resource</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-ddi-resource</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
