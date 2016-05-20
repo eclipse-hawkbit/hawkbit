@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+
 /**
  * 
  * Holds uploaded file status.Used to display the details in upload status
@@ -19,16 +21,23 @@ public class UploadStatusObject {
     private Double progress;
     private String filename;
     private String reason;
+    private SoftwareModule selectedSoftwareModule;
 
-    public UploadStatusObject(String status, Double progress, String fileName, String reason) {
-        this(fileName);
+    public UploadStatusObject(final String status, final Double progress, final String fileName, final String reason,
+            final SoftwareModule selectedSoftwareModule) {
+        this(fileName,selectedSoftwareModule);
         this.status = status;
         this.progress = progress;
         this.reason = reason;
     }
 
-    public UploadStatusObject(String fileName) {
+    public UploadStatusObject(String fileName, SoftwareModule selectedSoftwareModule) {
         this.filename = fileName;
+        this.selectedSoftwareModule = selectedSoftwareModule;
+    }
+
+    public SoftwareModule getSelectedSoftwareModule() {
+        return selectedSoftwareModule;
     }
 
     public String getStatus() {

@@ -222,6 +222,11 @@ public class UploadLayout extends VerticalLayout {
                 setUploadStatusButtonIconToFinished();
             }
         }
+        if (artifactUploadState.isUploadCompleted()) {
+            artifactUploadState.getNumberOfFilesActuallyUpload().set(0);
+            artifactUploadState.getNumberOfFileUploadsExpected().set(0);
+            artifactUploadState.getNumberOfFileUploadsFailed().set(0);
+        }
     }
 
     public DragAndDropWrapper getDropAreaWrapper() {
@@ -692,7 +697,7 @@ public class UploadLayout extends VerticalLayout {
             // failed reason to be updated only if there is error other than
             // duplicate file error
             uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
-                    .getFailureReason());
+                    .getFailureReason(), event.getUploadStatus().getSoftwareModule());
             increaseNumberOfFileUploadsFailed();
         }
         decreaseNumberOfFileUploadsExpected();
@@ -722,13 +727,12 @@ public class UploadLayout extends VerticalLayout {
         }
         updateUploadCounts();
         enableProcessBtn();
-        duplicateFileNamesList.clear();
     }
 
     private boolean isUploadComplete() {
         int uploadedCount = artifactUploadState.getNumberOfFilesActuallyUpload().intValue();
         int expectedUploadsCount = artifactUploadState.getNumberOfFileUploadsExpected().intValue();
-        return uploadedCount  == expectedUploadsCount;
+        return uploadedCount == expectedUploadsCount;
     }
 
     private void onUploadFailure(final UploadStatusEvent event) {
@@ -746,7 +750,7 @@ public class UploadLayout extends VerticalLayout {
             // failed reason to be updated only if there is error other than
             // duplicate file error
             uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
-                    .getFailureReason());
+                    .getFailureReason(), event.getUploadStatus().getSoftwareModule());
             increaseNumberOfFileUploadsFailed();
             decreaseNumberOfFileUploadsExpected();
         }

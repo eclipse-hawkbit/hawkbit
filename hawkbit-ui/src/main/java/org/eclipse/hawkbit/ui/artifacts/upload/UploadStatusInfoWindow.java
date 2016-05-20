@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
@@ -21,8 +22,10 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -100,7 +103,7 @@ public class UploadStatusInfoWindow extends Window {
     private Button resizeButton;
 
     private UI ui;
-    
+
     private ConfirmationDialog confirmDialog;
 
     /**
@@ -126,7 +129,7 @@ public class UploadStatusInfoWindow extends Window {
         setContent(mainLayout);
         eventBus.subscribe(this);
         ui = UI.getCurrent();
-        
+
         createConfirmDialog();
     }
 
@@ -135,22 +138,25 @@ public class UploadStatusInfoWindow extends Window {
         if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_IN_PROGRESS) {
             UI.getCurrent().access(
                     () -> updateProgress(event.getUploadStatus().getFileName(), event.getUploadStatus().getBytesRead(),
-                            event.getUploadStatus().getContentLength()));
+                            event.getUploadStatus().getContentLength(), event.getUploadStatus().getSoftwareModule()));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STARTED) {
             UI.getCurrent().access(() -> onStartOfUpload(event));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FAILED) {
             ui.access(() -> uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
-                    .getFailureReason()));
+                    .getFailureReason(), event.getUploadStatus().getSoftwareModule()));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_SUCCESSFUL) {
-            UI.getCurrent().access(() -> uploadSucceeded(event.getUploadStatus().getFileName()));
+            UI.getCurrent().access(
+                    () -> uploadSucceeded(event.getUploadStatus().getFileName(), event.getUploadStatus()
+                            .getSoftwareModule()));
         } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FINISHED) {
-            ui.access(() -> uploadSucceeded(event.getUploadStatus().getFileName()));
+            ui.access(() -> uploadSucceeded(event.getUploadStatus().getFileName(), event.getUploadStatus()
+                    .getSoftwareModule()));
         }
     }
 
     private void onStartOfUpload(UploadStatusEvent event) {
         uploadSessionStarted();
-        uploadStarted(event.getUploadStatus().getFileName());
+        uploadStarted(event.getUploadStatus().getFileName(), event.getUploadStatus().getSoftwareModule());
     }
 
     @PreDestroy
@@ -167,11 +173,15 @@ public class UploadStatusInfoWindow extends Window {
         if (container.getItemIds().isEmpty()) {
             container.removeAllItems();
             for (UploadStatusObject statusObject : artifactUploadState.getUploadedFileStatusList()) {
-                Item item = container.addItem(statusObject.getFilename());
+                Item item = container.addItem(getItemid(statusObject.getFilename(),
+                        statusObject.getSelectedSoftwareModule()));
                 item.getItemProperty(REASON).setValue(statusObject.getReason() != null ? statusObject.getReason() : "");
                 item.getItemProperty(STATUS).setValue(statusObject.getStatus());
                 item.getItemProperty(PROGRESS).setValue(statusObject.getProgress());
                 item.getItemProperty(FILE_NAME).setValue(statusObject.getFilename());
+                SoftwareModule sw = statusObject.getSelectedSoftwareModule();
+                item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(
+                        HawkbitCommonUtil.getFormattedNameVersion(sw.getName(), sw.getVersion()));
             }
             if (artifactUploadState.isUploadCompleted()) {
                 minimizeButton.setEnabled(false);
@@ -192,9 +202,10 @@ public class UploadStatusInfoWindow extends Window {
     private void setGridColumnProperties() {
         grid.getColumn(STATUS).setRenderer(new StatusRenderer());
         grid.getColumn(PROGRESS).setRenderer(new ProgressBarRenderer());
-        grid.setColumnOrder(STATUS, PROGRESS, FILE_NAME, REASON);
+        grid.setColumnOrder(STATUS, PROGRESS, FILE_NAME, SPUILabelDefinitions.NAME_VERSION, REASON);
         setColumnWidth();
-        grid.setFrozenColumnCount(4);
+        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setHeaderCaption(i18n.get("upload.swModuleTable.header"));
+        grid.setFrozenColumnCount(5);
     }
 
     private Grid createGrid() {
@@ -213,6 +224,7 @@ public class UploadStatusInfoWindow extends Window {
         uploadContainer.addContainerProperty(FILE_NAME, String.class, null);
         uploadContainer.addContainerProperty(PROGRESS, Double.class, 0D);
         uploadContainer.addContainerProperty(REASON, String.class, "");
+        uploadContainer.addContainerProperty(SPUILabelDefinitions.NAME_VERSION, String.class, "");
         return uploadContainer;
     }
 
@@ -234,10 +246,11 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void setColumnWidth() {
-        grid.getColumn(STATUS).setWidth(70);
+        grid.getColumn(STATUS).setWidth(60);
         grid.getColumn(PROGRESS).setWidth(150);
-        grid.getColumn(FILE_NAME).setWidth(280);
-        grid.getColumn(REASON).setWidth(300);
+        grid.getColumn(FILE_NAME).setWidth(200);
+        grid.getColumn(REASON).setWidth(290);
+        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidth(200);
     }
 
     private void resetColumnWidth() {
@@ -245,6 +258,7 @@ public class UploadStatusInfoWindow extends Window {
         grid.getColumn(PROGRESS).setWidthUndefined();
         grid.getColumn(FILE_NAME).setWidthUndefined();
         grid.getColumn(REASON).setWidthUndefined();
+        grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setWidthUndefined();
     }
 
     private static class StatusRenderer extends HtmlRenderer {
@@ -307,29 +321,32 @@ public class UploadStatusInfoWindow extends Window {
         restoreState();
     }
 
-    void uploadStarted(final String filename) {
-        final Item item = uploads.addItem(filename);
+    void uploadStarted(final String filename, final SoftwareModule softwareModule) {
+        final Item item = uploads.addItem(getItemid(filename, softwareModule));
         if (item != null) {
             item.getItemProperty(FILE_NAME).setValue(filename);
+            item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(
+                    HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()));
         }
         grid.scrollToEnd();
-        UploadStatusObject uploadStatus = new UploadStatusObject(filename);
+        UploadStatusObject uploadStatus = new UploadStatusObject(filename, softwareModule);
         uploadStatus.setStatus("Active");
         artifactUploadState.getUploadedFileStatusList().add(uploadStatus);
     }
 
-    void updateProgress(final String filename, final long readBytes, final long contentLength) {
-        final Item item = uploads.getItem(filename);
+    void updateProgress(final String filename, final long readBytes, final long contentLength,
+            final SoftwareModule softwareModule) {
+        final Item item = uploads.getItem(getItemid(filename, softwareModule));
+        double progress = (double) readBytes / (double) contentLength;
         if (item != null) {
-            double progress = (double) readBytes / (double) contentLength;
             item.getItemProperty(PROGRESS).setValue(progress);
-            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
-                    .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
-                    .collect(Collectors.toList());
-            if (!uploadStatusObjectList.isEmpty()) {
-                UploadStatusObject uploadStatusObject = uploadStatusObjectList.get(0);
-                uploadStatusObject.setProgress(progress);
-            }
+        }
+        List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
+                .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
+                .collect(Collectors.toList());
+        if (!uploadStatusObjectList.isEmpty()) {
+            UploadStatusObject uploadStatusObject = uploadStatusObjectList.get(0);
+            uploadStatusObject.setProgress(progress);
         }
     }
 
@@ -338,26 +355,29 @@ public class UploadStatusInfoWindow extends Window {
      * 
      * @param filename
      *            of the uploaded file.
+     * @param softwareModule
+     *            selected software module
      */
-    public void uploadSucceeded(final String filename) {
-        final Item item = uploads.getItem(filename);
+    public void uploadSucceeded(final String filename, SoftwareModule softwareModule) {
+        final Item item = uploads.getItem(getItemid(filename, softwareModule));
+        String status = "Finished";
         if (item != null) {
-            String status = "Finished";
             item.getItemProperty(STATUS).setValue(status);
-            List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
-                    .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
-                    .collect(Collectors.toList());
-            if (!uploadStatusObjectList.isEmpty()) {
-                UploadStatusObject uploadStatusObject = uploadStatusObjectList.get(0);
-                uploadStatusObject.setStatus(status);
-            }
+        }
+        List<UploadStatusObject> uploadStatusObjectList = (List<UploadStatusObject>) artifactUploadState
+                .getUploadedFileStatusList().stream().filter(e -> e.getFilename().equals(filename))
+                .collect(Collectors.toList());
+        if (!uploadStatusObjectList.isEmpty()) {
+            UploadStatusObject uploadStatusObject = uploadStatusObjectList.get(0);
+            uploadStatusObject.setStatus(status);
+            uploadStatusObject.setProgress(1d);
         }
     }
 
-    void uploadFailed(final String filename, final String errorReason) {
+    void uploadFailed(final String filename, final String errorReason, SoftwareModule softwareModule) {
         errorOccured = true;
         String status = "Failed";
-        final Item item = uploads.getItem(filename);
+        final Item item = uploads.getItem(getItemid(filename, softwareModule));
         if (item != null) {
             item.getItemProperty(REASON).setValue(errorReason);
             item.getItemProperty(STATUS).setValue(status);
@@ -385,7 +405,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void setPopupSizeInMinMode() {
-        mainLayout.setWidth(800, Unit.PIXELS);
+        mainLayout.setWidth(900, Unit.PIXELS);
         mainLayout.setHeight(510, Unit.PIXELS);
     }
 
@@ -417,6 +437,7 @@ public class UploadStatusInfoWindow extends Window {
             grid.getColumn(PROGRESS).setExpandRatio(1);
             grid.getColumn(FILE_NAME).setExpandRatio(2);
             grid.getColumn(REASON).setExpandRatio(3);
+            grid.getColumn(SPUILabelDefinitions.NAME_VERSION).setExpandRatio(4);
             mainLayout.setSizeFull();
         } else {
             event.getButton().setIcon(FontAwesome.EXPAND);
@@ -455,7 +476,7 @@ public class UploadStatusInfoWindow extends Window {
     }
 
     private void createConfirmDialog() {
-        confirmDialog = new ConfirmationDialog(i18n.get("caption.cancel.action.confirmbox"),
+        confirmDialog = new ConfirmationDialog(i18n.get("caption.confirm.abort.action"),
                 i18n.get("message.abort.upload"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
                     if (ok) {
                         eventBus.publish(this, UploadStatusEventType.ABORT_UPLOAD);
@@ -463,8 +484,13 @@ public class UploadStatusInfoWindow extends Window {
                         errorOccured = true;
                         minimizeButton.setEnabled(false);
                         closeButton.setEnabled(false);
-            }
-        });
+                    }
+                });
     }
 
+    private String getItemid(final String filename, final SoftwareModule softwareModule) {
+        return new StringBuilder(filename).append(
+                HawkbitCommonUtil.getFormattedNameVersion(softwareModule.getName(), softwareModule.getVersion()))
+                .toString();
+    }
 }

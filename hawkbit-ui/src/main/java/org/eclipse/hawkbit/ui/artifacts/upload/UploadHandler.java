@@ -249,15 +249,15 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         // Update progress is called event after upload interrupted in
         // uploadStarted method
         if (!uploadInterrupted) {
-            if (readBytes > maxSize || contentLength > maxSize) {
-                LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-                failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
-                interruptFileUpload();
-                return;
-            }
             if (aborted) {
                 LOG.error("User aborted file upload");
                 failureReason = i18n.get("message.uploadedfile.aborted");
+                interruptFileUpload();
+                return;
+            }
+            if (readBytes > maxSize || contentLength > maxSize) {
+                LOG.error("User tried to upload more than was allowed ({}).", maxSize);
+                failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
                 interruptFileUpload();
                 return;
             }
@@ -274,15 +274,15 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void onProgress(final StreamingProgressEvent event) {
-        if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
-            LOG.error("User tried to upload more than was allowed ({}).", maxSize);
-            failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
-            interruptFileStreaming();
-            return;
-        }
         if (aborted) {
             LOG.error("User aborted  the upload");
             failureReason = i18n.get("message.uploadedfile.aborted");
+            interruptFileStreaming();
+            return;
+        }
+        if (event.getBytesReceived() > maxSize || event.getContentLength() > maxSize) {
+            LOG.error("User tried to upload more than was allowed ({}).", maxSize);
+            failureReason = i18n.get("message.uploadedfile.size.exceeded", maxSize);
             interruptFileStreaming();
             return;
         }
@@ -380,4 +380,5 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         upload.interruptUpload();
         uploadInterrupted = true;
     }
+
 }
