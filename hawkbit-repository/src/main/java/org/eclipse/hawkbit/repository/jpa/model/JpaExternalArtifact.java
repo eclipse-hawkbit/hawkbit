@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 @Table(name = "sp_external_artifact", indexes = {
         @Index(name = "sp_idx_external_artifact_prim", columnList = "id,tenant") })
 @Entity
-public class JpaExternalArtifact extends JpaArtifact implements ExternalArtifact {
+public class JpaExternalArtifact extends AbstractJpaArtifact implements ExternalArtifact {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
@@ -85,7 +85,6 @@ public class JpaExternalArtifact extends JpaArtifact implements ExternalArtifact
         return softwareModule;
     }
 
-    @Override
     public final void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = (JpaSoftwareModule) softwareModule;
         this.softwareModule.addArtifact(this);
@@ -106,9 +105,8 @@ public class JpaExternalArtifact extends JpaArtifact implements ExternalArtifact
         return urlSuffix;
     }
 
-    @Override
-    public void setExternalArtifactProvider(final ExternalArtifactProvider externalArtifactProvider) {
-        this.externalArtifactProvider = (JpaExternalArtifactProvider) externalArtifactProvider;
+    public void setExternalArtifactProvider(final JpaExternalArtifactProvider externalArtifactProvider) {
+        this.externalArtifactProvider = externalArtifactProvider;
     }
 
     /**

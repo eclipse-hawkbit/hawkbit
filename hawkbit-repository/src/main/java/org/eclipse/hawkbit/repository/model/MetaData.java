@@ -10,14 +10,30 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
 
+/**
+ * Meta data for entities, a (key/value) store.
+ *
+ */
 public interface MetaData extends Serializable {
 
+    /**
+     * @return the key
+     */
     String getKey();
 
+    /**
+     * @param key
+     */
     void setKey(String key);
 
+    /**
+     * @return the value
+     */
     String getValue();
 
+    /**
+     * @param value
+     */
     void setValue(String value);
 
 }

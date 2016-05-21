@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.components;
 import java.net.URI;
 import java.security.SecureRandom;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -25,7 +26,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
  *
  *
  */
-public class ProxyTarget extends Target {
+public class ProxyTarget extends JpaTarget {
     private static final long serialVersionUID = -8891449133620645310L;
     private String controllerId;
     private URI address = null;
@@ -262,7 +263,7 @@ public class ProxyTarget extends Target {
      * @param assignedDistributionSet
      *            the assignedDistributionSet to set
      */
-    public void setAssignedDistributionSet(DistributionSet assignedDistributionSet) {
+    public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
         this.assignedDistributionSet = assignedDistributionSet;
     }
 

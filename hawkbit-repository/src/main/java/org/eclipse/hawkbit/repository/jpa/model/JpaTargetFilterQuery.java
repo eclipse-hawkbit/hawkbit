@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 @Table(name = "sp_target_filter_query", indexes = {
         @Index(name = "sp_idx_target_filter_query_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_tenant_custom_filter_name"))
-public class JpaTargetFilterQuery extends JpaTenantAwareBaseEntity implements TargetFilterQuery {
+public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery {
     private static final long serialVersionUID = 7493966984413479089L;
 
     @Column(name = "name", length = 64)

@@ -20,8 +20,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 // TODO: create interface
 public class ActionWithStatusCount {
     private final Long actionStatusCount;
-    private final Long actionId;
-    private final ActionType actionType;
     private final boolean actionActive;
     private final long actionForceTime;
     private final Status actionStatus;
@@ -67,8 +65,6 @@ public class ActionWithStatusCount {
             final long forcedTime, final Status status, final Long actionCreatedAt, final Long actionLastModifiedAt,
             final Long dsId, final String dsName, final String dsVersion, final Long actionStatusCount,
             final String rolloutName) {
-        this.actionId = actionId;
-        this.actionType = actionType;
         actionActive = active;
         actionForceTime = forcedTime;
         actionStatus = status;
@@ -90,26 +86,6 @@ public class ActionWithStatusCount {
 
     public Action getAction() {
         return action;
-    }
-
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public ActionType getActionType() {
-        return actionType;
-    }
-
-    public boolean isActionActive() {
-        return actionActive;
-    }
-
-    public long getActionForceTime() {
-        return actionForceTime;
-    }
-
-    public Status getActionStatus() {
-        return actionStatus;
     }
 
     public Long getActionCreatedAt() {

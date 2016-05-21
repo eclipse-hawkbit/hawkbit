@@ -8,14 +8,32 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+/**
+ * Entities that have a name and description.
+ *
+ */
 public interface NamedEntity extends TenantAwareBaseEntity {
 
+    /**
+     * @return the description of the entity.
+     */
     String getDescription();
 
+    /**
+     * @return the name of the entity.
+     */
     String getName();
 
+    /**
+     * @param description
+     *            of the entity.
+     */
     void setDescription(String description);
 
+    /**
+     * @param name
+     *            of the entity.
+     */
     void setName(String name);
 
 }

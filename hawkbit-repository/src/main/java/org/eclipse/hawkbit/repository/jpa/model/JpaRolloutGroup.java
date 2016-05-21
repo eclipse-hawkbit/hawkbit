@@ -32,14 +32,12 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 /**
  * JPA entity definition of persisting a group of an rollout.
  *
- * @author Michael Hirsch
- *
  */
 @Entity
 @Table(name = "sp_rolloutgroup", indexes = {
         @Index(name = "sp_idx_rolloutgroup_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
-public class JpaRolloutGroup extends JpaNamedEntity implements RolloutGroup {
+public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup {
 
     private static final long serialVersionUID = 1L;
 
@@ -61,25 +59,25 @@ public class JpaRolloutGroup extends JpaNamedEntity implements RolloutGroup {
     private RolloutGroupSuccessCondition successCondition = RolloutGroupSuccessCondition.THRESHOLD;
 
     @Column(name = "success_condition_exp", length = 512, nullable = false)
-    private String successConditionExp = null;
+    private String successConditionExp;
 
     @Column(name = "success_action", nullable = false)
     private RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
 
     @Column(name = "success_action_exp", length = 512, nullable = false)
-    private String successActionExp = null;
+    private String successActionExp;
 
     @Column(name = "error_condition")
-    private RolloutGroupErrorCondition errorCondition = null;
+    private RolloutGroupErrorCondition errorCondition;
 
     @Column(name = "error_condition_exp", length = 512)
-    private String errorConditionExp = null;
+    private String errorConditionExp;
 
     @Column(name = "error_action")
-    private RolloutGroupErrorAction errorAction = null;
+    private RolloutGroupErrorAction errorAction;
 
     @Column(name = "error_action_exp", length = 512)
-    private String errorActionExp = null;
+    private String errorActionExp;
 
     @Column(name = "total_targets")
     private long totalTargets;
@@ -239,271 +237,4 @@ public class JpaRolloutGroup extends JpaNamedEntity implements RolloutGroup {
                 + ", getId()=" + getId() + "]";
     }
 
-    /**
-     * Rollout goup state machine.
-     *
-     */
-    public enum RolloutGroupStatus {
-
-        /**
-         * Ready to start the group.
-         */
-        READY,
-
-        /**
-         * Group is scheduled and started sometime, e.g. trigger of group
-         * before.
-         */
-        SCHEDULED,
-
-        /**
-         * Group is finished.
-         */
-        FINISHED,
-
-        /**
-         * Group is finished and has errors.
-         */
-        ERROR,
-
-        /**
-         * Group is running.
-         */
-        RUNNING;
-    }
-
-    /**
-     * The condition to evaluate if an group is success state.
-     */
-    public enum RolloutGroupSuccessCondition {
-        THRESHOLD("thresholdRolloutGroupSuccessCondition");
-
-        private final String beanName;
-
-        private RolloutGroupSuccessCondition(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
-    }
-
-    /**
-     * The condition to evaluate if an group is in error state.
-     */
-    public enum RolloutGroupErrorCondition {
-        THRESHOLD("thresholdRolloutGroupErrorCondition");
-
-        private final String beanName;
-
-        private RolloutGroupErrorCondition(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
-    }
-
-    /**
-     * The actions executed when the {@link RolloutGroup#errorCondition} is hit.
-     */
-    public enum RolloutGroupErrorAction {
-        PAUSE("pauseRolloutGroupAction");
-
-        private final String beanName;
-
-        private RolloutGroupErrorAction(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
-    }
-
-    /**
-     * The actions executed when the {@link RolloutGroup#successCondition} is
-     * hit.
-     */
-    public enum RolloutGroupSuccessAction {
-        NEXTGROUP("startNextRolloutGroupAction");
-
-        private final String beanName;
-
-        private RolloutGroupSuccessAction(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
-    }
-
-    /**
-     * Object which holds all {@link RolloutGroup} conditions together which can
-     * easily built.
-     */
-    public static class RolloutGroupConditions {
-        private RolloutGroupSuccessCondition successCondition = null;
-        private String successConditionExp = null;
-        private RolloutGroupSuccessAction successAction = null;
-        private String successActionExp = null;
-        private RolloutGroupErrorCondition errorCondition = null;
-        private String errorConditionExp = null;
-        private RolloutGroupErrorAction errorAction = null;
-        private String errorActionExp = null;
-
-        public RolloutGroupSuccessCondition getSuccessCondition() {
-            return successCondition;
-        }
-
-        public void setSuccessCondition(final RolloutGroupSuccessCondition finishCondition) {
-            successCondition = finishCondition;
-        }
-
-        public String getSuccessConditionExp() {
-            return successConditionExp;
-        }
-
-        public void setSuccessConditionExp(final String finishConditionExp) {
-            successConditionExp = finishConditionExp;
-        }
-
-        public RolloutGroupSuccessAction getSuccessAction() {
-            return successAction;
-        }
-
-        public void setSuccessAction(final RolloutGroupSuccessAction successAction) {
-            this.successAction = successAction;
-        }
-
-        public String getSuccessActionExp() {
-            return successActionExp;
-        }
-
-        public void setSuccessActionExp(final String successActionExp) {
-            this.successActionExp = successActionExp;
-        }
-
-        public RolloutGroupErrorCondition getErrorCondition() {
-            return errorCondition;
-        }
-
-        public void setErrorCondition(final RolloutGroupErrorCondition errorCondition) {
-            this.errorCondition = errorCondition;
-        }
-
-        public String getErrorConditionExp() {
-            return errorConditionExp;
-        }
-
-        public void setErrorConditionExp(final String errorConditionExp) {
-            this.errorConditionExp = errorConditionExp;
-        }
-
-        public RolloutGroupErrorAction getErrorAction() {
-            return errorAction;
-        }
-
-        public void setErrorAction(final RolloutGroupErrorAction errorAction) {
-            this.errorAction = errorAction;
-        }
-
-        public String getErrorActionExp() {
-            return errorActionExp;
-        }
-
-        public void setErrorActionExp(final String errorActionExp) {
-            this.errorActionExp = errorActionExp;
-        }
-    }
-
-    /**
-     * Builder to build easily the {@link RolloutGroupConditions}.
-     *
-     */
-    public static class RolloutGroupConditionBuilder {
-        private final RolloutGroupConditions conditions = new RolloutGroupConditions();
-
-        public RolloutGroupConditions build() {
-            return conditions;
-        }
-
-        /**
-         * Sets the finish condition and expression on the builder.
-         *
-         * @param condition
-         *            the finish condition
-         * @param expression
-         *            the finish expression
-         * @return the builder itself
-         */
-        public RolloutGroupConditionBuilder successCondition(final RolloutGroupSuccessCondition condition,
-                final String expression) {
-            conditions.setSuccessCondition(condition);
-            conditions.setSuccessConditionExp(expression);
-            return this;
-        }
-
-        /**
-         * Sets the success action and expression on the builder.
-         *
-         * @param action
-         *            the success action
-         * @param expression
-         *            the error expression
-         * @return the builder itself
-         */
-        public RolloutGroupConditionBuilder successAction(final RolloutGroupSuccessAction action,
-                final String expression) {
-            conditions.setSuccessAction(action);
-            conditions.setSuccessActionExp(expression);
-            return this;
-        }
-
-        /**
-         * Sets the error condition and expression on the builder.
-         *
-         * @param condition
-         *            the error condition
-         * @param expression
-         *            the error expression
-         * @return the builder itself
-         */
-        public RolloutGroupConditionBuilder errorCondition(final RolloutGroupErrorCondition condition,
-                final String expression) {
-            conditions.setErrorCondition(condition);
-            conditions.setErrorConditionExp(expression);
-            return this;
-        }
-
-        /**
-         * Sets the error action and expression on the builder.
-         *
-         * @param action
-         *            the error action
-         * @param expression
-         *            the error expression
-         * @return the builder itself
-         */
-        public RolloutGroupConditionBuilder errorAction(final RolloutGroupErrorAction action, final String expression) {
-            conditions.setErrorAction(action);
-            conditions.setErrorActionExp(expression);
-            return this;
-        }
-    }
 }

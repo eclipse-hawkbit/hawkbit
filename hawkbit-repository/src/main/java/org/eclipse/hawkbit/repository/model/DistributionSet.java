@@ -11,26 +11,62 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+
+/**
+ * A {@link DistributionSet} defines a meta package that combines a set of
+ * {@link SoftwareModule}s which have to be or are provisioned to a
+ * {@link Target}.
+ * 
+ * <p>
+ * A {@link Target} has exactly one target {@link DistributionSet} assigned.
+ * </p>
+ *
+ */
 public interface DistributionSet extends NamedVersionedEntity {
 
+    /**
+     * @return {@link Set} of assigned {@link DistributionSetTag}s.
+     */
     Set<DistributionSetTag> getTags();
 
+    /**
+     * @return <code>true</code> if the set is deleted and only kept for history
+     *         purposes.
+     */
     boolean isDeleted();
 
     /**
-     * @return immutable list of meta data elements.
+     * @return immutable {@link List} of {@link DistributionSetMetadata}
+     *         elements. See {@link DistributionSetManagement} to alter.
      */
     List<DistributionSetMetadata> getMetadata();
 
-    List<Action> getActions();
-
+    /**
+     * @return <code>true</code> if {@link DistributionSet} contains a mandatory
+     *         migration step, i.e. unfinished {@link Action}s will kept active
+     *         and not automatically canceled if overridden by a newer update.
+     */
     boolean isRequiredMigrationStep();
 
+    /**
+     * @param deleted
+     *            to <code>true</code> if {@link DistributionSet} is no longer
+     *            be usage but kept for history purposes.
+     * @return updated {@link DistributionSet}
+     */
     DistributionSet setDeleted(boolean deleted);
 
+    /**
+     * @param isRequiredMigrationStep
+     *            to <code>true</code> if {@link DistributionSet} contains a
+     *            mandatory migration step, i.e. unfinished {@link Action}s will
+     *            kept active and not automatically canceled if overridden by a
+     *            newer update.
+     * 
+     * @return updated {@link DistributionSet}
+     */
     DistributionSet setRequiredMigrationStep(boolean isRequiredMigrationStep);
-
-    DistributionSet setTags(Set<DistributionSetTag> tags);
 
     /**
      * @return the assignedTargets
@@ -48,6 +84,9 @@ public interface DistributionSet extends NamedVersionedEntity {
      */
     Set<SoftwareModule> getModules();
 
+    /**
+     * @return {@link DistributionSetIdName} view.
+     */
     DistributionSetIdName getDistributionSetIdName();
 
     /**
@@ -77,10 +116,22 @@ public interface DistributionSet extends NamedVersionedEntity {
      */
     SoftwareModule findFirstModuleByType(SoftwareModuleType type);
 
+    /**
+     * @return type of the {@link DistributionSet}.
+     */
     DistributionSetType getType();
 
+    /**
+     * @param type
+     *            of the {@link DistributionSet}.
+     */
     void setType(DistributionSetType type);
 
+    /**
+     * @return <code>true</code> if all defined
+     *         {@link DistributionSetType#getMandatoryModuleTypes()} of
+     *         {@link #getType()} are present in this {@link DistributionSet}.
+     */
     boolean isComplete();
 
 }

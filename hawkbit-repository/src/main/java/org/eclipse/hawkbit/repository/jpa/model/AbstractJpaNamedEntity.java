@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
  * addition to their technical ID.
  */
 @MappedSuperclass
-public abstract class JpaNamedEntity extends JpaTenantAwareBaseEntity implements NamedEntity {
+public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseEntity implements NamedEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", nullable = false, length = 64)
@@ -31,7 +31,7 @@ public abstract class JpaNamedEntity extends JpaTenantAwareBaseEntity implements
     /**
      * Default constructor.
      */
-    public JpaNamedEntity() {
+    public AbstractJpaNamedEntity() {
         super();
     }
 
@@ -43,7 +43,7 @@ public abstract class JpaNamedEntity extends JpaTenantAwareBaseEntity implements
      * @param description
      *            of the {@link NamedEntity}
      */
-    public JpaNamedEntity(final String name, final String description) {
+    public AbstractJpaNamedEntity(final String name, final String description) {
         this.name = name;
         this.description = description;
     }

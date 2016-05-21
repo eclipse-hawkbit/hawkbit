@@ -268,29 +268,29 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final Action action = actionWithStatusCount.getAction();
 
-            final Item item = hierarchicalContainer.addItem(actionWithStatusCount.getActionId());
+            final Item item = hierarchicalContainer.addItem(actionWithStatusCount.getAction().getId());
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
-                    .setValue(actionWithStatusCount.getActionStatus());
+                    .setValue(actionWithStatusCount.getAction().getStatus());
 
             /*
              * add action id.
              */
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID)
-                    .setValue(actionWithStatusCount.getActionId().toString());
+                    .setValue(actionWithStatusCount.getAction().getId().toString());
             /*
              * add active/inactive status to the item which will be used in
              * Column generator to generate respective icon
              */
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue(
-                    actionWithStatusCount.isActionActive() ? SPUIDefinitions.ACTIVE : SPUIDefinitions.IN_ACTIVE);
+                    actionWithStatusCount.getAction().isActive() ? SPUIDefinitions.ACTIVE : SPUIDefinitions.IN_ACTIVE);
 
             /*
              * add action Id to the item which will be used for fetching child
              * items ( previous action status ) during expand
              */
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN)
-                    .setValue(actionWithStatusCount.getActionId());
+                    .setValue(actionWithStatusCount.getAction().getId());
 
             /*
              * add distribution name to the item which will be displayed in the
@@ -301,7 +301,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
-            ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), false);
+            ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), false);
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                     .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null)
@@ -312,7 +312,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                     .setValue(actionWithStatusCount.getRolloutName());
 
             if (actionWithStatusCount.getActionStatusCount() > 0) {
-                ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), true);
+                ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), true);
             }
         }
     }
@@ -422,8 +422,12 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                     .findActionWithDetails(actionId);
             final Pageable pageReq = new PageRequest(0, 1000,
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
-            final Page<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action,
-                    managementUIState.isActionHistoryMaximized());
+            final Page<ActionStatus> actionStatusList;
+                    if (managementUIState.isActionHistoryMaximized()) {
+                        actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, action);
+                    } else {
+                        actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action);
+                    }
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
              * Since the recent action status and messages are already

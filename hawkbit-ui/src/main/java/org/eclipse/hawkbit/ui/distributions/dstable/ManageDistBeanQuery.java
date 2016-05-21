@@ -17,7 +17,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -96,7 +96,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         } else if (Strings.isNullOrEmpty(searchText)) {
             // if no search filters available
             distBeans = getDistributionSetManagement()
-                    .findDistributionSetsAll(new OffsetBasedPageRequest(startIndex, count, sort), false, null);
+                    .findDistributionSetsByDeletedAndOrCompleted(new OffsetBasedPageRequest(startIndex, count, sort), false, null);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
@@ -133,7 +133,7 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
         if (Strings.isNullOrEmpty(searchText) && null == distributionSetType) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
-                    .findDistributionSetsAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, null);
+                    .findDistributionSetsByDeletedAndOrCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, null);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();

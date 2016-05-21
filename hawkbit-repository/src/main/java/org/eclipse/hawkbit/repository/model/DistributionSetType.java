@@ -12,21 +12,33 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.jpa.model.DistributionSetTypeElement;
 
+/**
+ * A {@link DistributionSetType} is an abstract definition for
+ * {@link DistributionSet} that defines what {@link SoftwareModule}s can be
+ * added (optional) to {@link DistributionSet} of that type or have to added
+ * (mandatory) in order to be considered complete. Only complete DS can be
+ * assigned to a {@link Target}.
+ *
+ */
 public interface DistributionSetType extends NamedEntity {
 
     /**
-     * @return the deleted
+     * @return <code>true</code> if the type is deleted and only kept for
+     *         history purposes.
      */
     boolean isDeleted();
 
     /**
-     * @param deleted
-     *            the deleted to set
+     * @return set of {@link SoftwareModuleType}s that need to be in a
+     *         {@link DistributionSet} of this type to be
+     *         {@link DistributionSet#isComplete()}.
      */
-    void setDeleted(boolean deleted);
-
     Set<SoftwareModuleType> getMandatoryModuleTypes();
 
+    /**
+     * @return set of optional {@link SoftwareModuleType}s that can be in a
+     *         {@link DistributionSet} of this type.
+     */
     Set<SoftwareModuleType> getOptionalModuleTypes();
 
     /**
@@ -55,7 +67,7 @@ public interface DistributionSetType extends NamedEntity {
      * {@link DistributionSetType} and defined as
      * {@link DistributionSetTypeElement#isMandatory()}.
      *
-     * @param softwareModuleType
+     * @param softwareModuleTypeId
      *            search for by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
@@ -122,8 +134,15 @@ public interface DistributionSetType extends NamedEntity {
      */
     DistributionSetType removeModuleType(Long smTypeId);
 
+    /**
+     * @return business key of this {@link DistributionSetType}.
+     */
     String getKey();
 
+    /**
+     * @param key
+     *            of this {@link DistributionSetType}.
+     */
     void setKey(String key);
 
     /**
@@ -134,8 +153,15 @@ public interface DistributionSetType extends NamedEntity {
      */
     boolean checkComplete(DistributionSet distributionSet);
 
+    /**
+     * @return get color code to by used in management UI views.
+     */
     String getColour();
 
+    /**
+     * @param colour
+     *            code to by used in management UI views.
+     */
     void setColour(final String colour);
 
 }

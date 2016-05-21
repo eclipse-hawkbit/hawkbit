@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
  *
  */
 @MappedSuperclass
-public abstract class JpaMetaData implements MetaData {
+public abstract class AbstractJpaMetaData implements MetaData {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -31,13 +31,13 @@ public abstract class JpaMetaData implements MetaData {
     @Basic
     private String value;
 
-    public JpaMetaData(final String key, final String value) {
+    public AbstractJpaMetaData(final String key, final String value) {
         super();
         this.key = key;
         this.value = value;
     }
 
-    public JpaMetaData() {
+    public AbstractJpaMetaData() {
         // Default constructor needed for JPA entities
     }
 
@@ -81,7 +81,7 @@ public abstract class JpaMetaData implements MetaData {
         if (!(this.getClass().isInstance(obj))) {
             return false;
         }
-        final JpaMetaData other = (JpaMetaData) obj;
+        final AbstractJpaMetaData other = (AbstractJpaMetaData) obj;
         if (key == null) {
             if (other.key != null) {
                 return false;

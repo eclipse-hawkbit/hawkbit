@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.junit.Test;
 
@@ -27,11 +26,11 @@ public class ActionTest {
     @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
     public void timeforcedHitNewHasCodeIsGenerated() throws InterruptedException {
 
-        final boolean active = true;
+        final boolean active;
         // current time + 1 seconds
         final long sleepTime = 1000;
         final long timeForceTimeAt = System.currentTimeMillis() + sleepTime;
-        final Action timeforcedAction = new JpaAction();
+        final JpaAction timeforcedAction = new JpaAction();
         timeforcedAction.setActionType(ActionType.TIMEFORCED);
         timeforcedAction.setForcedTime(timeForceTimeAt);
         assertThat(timeforcedAction.isForce()).isFalse();

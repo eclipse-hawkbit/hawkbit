@@ -33,12 +33,12 @@ public interface RolloutGroupManagement {
      * 
      * @param rolloutId
      *            the ID of the rollout to filter the {@link RolloutGroup}s
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(@NotNull Long rolloutId, @NotNull Pageable page);
+    Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(@NotNull Long rolloutId, @NotNull Pageable pageable);
 
     // TODO discuss: target read perm missing?
     /**
@@ -79,13 +79,13 @@ public interface RolloutGroupManagement {
      * @param specification
      *            the specification to filter the result set based on attributes
      *            of the {@link RolloutGroup}
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Page<RolloutGroup> findRolloutGroupsAll(@NotNull Rollout rollout, @NotNull String rsqlParam,
-            @NotNull Pageable page);
+            @NotNull Pageable pageable);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
@@ -93,12 +93,12 @@ public interface RolloutGroupManagement {
      * 
      * @param rolloutId
      *            the ID of the rollout to filter the {@link RolloutGroup}s
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findRolloutGroupsByRolloutId(@NotNull Long rolloutId, @NotNull Pageable page);
+    Page<RolloutGroup> findRolloutGroupsByRolloutId(@NotNull Long rolloutId, @NotNull Pageable pageable);
 
     // TODO discuss: target read perm missing?
     /**
@@ -122,14 +122,14 @@ public interface RolloutGroupManagement {
      *            rollout group
      * @param specification
      *            the specification for filtering the targets of a rollout group
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * 
      * @return Page<Target> list of targets of a rollout group
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull String rsqlParam,
-            @NotNull Pageable page);
+            @NotNull Pageable pageable);
 
     /**
      * Get count of targets in different status in rollout group.

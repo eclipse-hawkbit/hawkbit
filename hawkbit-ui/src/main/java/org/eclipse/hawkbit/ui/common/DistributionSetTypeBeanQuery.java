@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -57,8 +57,9 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
 
     @Override
     protected DistributionSetType constructBean() {
-
-        return new DistributionSetType("", "", "", "");
+        final DistributionSetType result = distributionSetManagement.generateDistributionSetType("", "", "");
+        result.setColour("");
+        return result;
     }
 
     @Override

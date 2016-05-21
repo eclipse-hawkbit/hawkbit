@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -286,7 +287,7 @@ public class JpaControllerManagement implements ControllerManagement {
         return actionRepository.save(mergedAction);
     }
 
-    private void handleErrorOnAction(final Action mergedAction, final Target mergedTarget) {
+    private void handleErrorOnAction(final JpaAction mergedAction, final Target mergedTarget) {
         mergedAction.setActive(false);
         mergedAction.setStatus(Status.ERROR);
         mergedTarget.setAssignedDistributionSet(null);
@@ -436,5 +437,29 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(propagation = Propagation.SUPPORTS)
     public ActionStatus generateActionStatus() {
         return new JpaActionStatus();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
+            final String message) {
+        return new JpaActionStatus((JpaAction) action, status, occurredAt, message);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
+            final Collection<String> messages) {
+
+        final ActionStatus result = new JpaActionStatus((JpaAction) action, status, occurredAt, null);
+        messages.forEach(result::addMessage);
+
+        return result;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt) {
+        return new JpaActionStatus(action, status, occurredAt);
     }
 }

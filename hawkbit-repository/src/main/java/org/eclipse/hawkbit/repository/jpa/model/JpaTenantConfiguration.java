@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
         "tenant" }, name = "uk_tenant_key"))
-public class JpaTenantConfiguration extends JpaTenantAwareBaseEntity implements TenantConfiguration {
+public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "conf_key", length = 128)

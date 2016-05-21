@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 
 /**
  * 
  *
  *
  */
-public class ProxyTargetFilter extends TargetFilterQuery {
+public class ProxyTargetFilter extends JpaTargetFilterQuery {
 
     private static final long serialVersionUID = 6622060929679084419L;
 

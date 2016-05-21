@@ -193,7 +193,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
         final String tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != tagNameValue) {
-            TargetTag newTargetTag = new TargetTag(tagNameValue);
+            TargetTag newTargetTag = tagManagement.generateTargetTag(tagNameValue);
             if (null != tagDescValue) {
                 newTargetTag.setDescription(tagDescValue);
             }

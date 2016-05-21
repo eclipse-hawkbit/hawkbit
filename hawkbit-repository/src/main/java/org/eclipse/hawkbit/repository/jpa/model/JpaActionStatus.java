@@ -40,7 +40,7 @@ import com.google.common.base.Splitter;
         @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })
 @Entity
-public class JpaActionStatus extends JpaTenantAwareBaseEntity implements ActionStatus {
+public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "target_occurred_at")
@@ -88,14 +88,11 @@ public class JpaActionStatus extends JpaTenantAwareBaseEntity implements ActionS
      * @param messages
      *            the messages which should be added to this action status
      */
-    public JpaActionStatus(final JpaAction action, final Status status, final Long occurredAt,
-            final String... messages) {
+    public JpaActionStatus(final JpaAction action, final Status status, final Long occurredAt, final String message) {
         this.action = action;
         this.status = status;
         this.occurredAt = occurredAt;
-        for (final String msg : messages) {
-            addMessage(msg);
-        }
+        addMessage(message);
     }
 
     /**
@@ -115,15 +112,11 @@ public class JpaActionStatus extends JpaTenantAwareBaseEntity implements ActionS
         this.occurredAt = occurredAt;
     }
 
-    /**
-     * Adds message including splitting in case it exceeds 512 length.
-     *
-     * @param message
-     *            to add
-     */
     @Override
     public final void addMessage(final String message) {
-        Splitter.fixedLength(512).split(message).forEach(messages::add);
+        if (message != null) {
+            Splitter.fixedLength(512).split(message).forEach(messages::add);
+        }
     }
 
     @Override

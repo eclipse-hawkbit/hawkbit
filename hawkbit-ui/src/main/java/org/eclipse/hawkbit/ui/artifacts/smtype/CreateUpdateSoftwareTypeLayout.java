@@ -625,8 +625,10 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         }
 
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue,
-                    assignNumber, colorPicked);
+            SoftwareModuleType newSWType = swTypeManagementService.generateSoftwareModuleType(typeKeyValue,
+                    typeNameValue, typeDescValue, assignNumber);
+            newSWType.setColour(colorPicked);
+
             if (null != typeDescValue) {
                 newSWType.setDescription(typeDescValue);
             }

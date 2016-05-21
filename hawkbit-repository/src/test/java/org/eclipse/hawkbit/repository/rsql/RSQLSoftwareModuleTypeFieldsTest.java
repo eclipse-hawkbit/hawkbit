@@ -59,7 +59,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
-        final Page<SoftwareModuleType> find = softwareManagement.findSoftwareModuleTypesByPredicate(rsqlParam,
+        final Page<SoftwareModuleType> find = softwareManagement.findSoftwareModuleTypesAll(rsqlParam,
                 new PageRequest(0, 100));
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();

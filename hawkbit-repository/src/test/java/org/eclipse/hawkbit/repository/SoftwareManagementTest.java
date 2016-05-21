@@ -961,7 +961,7 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
                 .getSoftwareModule();
 
         try {
-            softwareManagement.findSoftwareModuleMetadata(new SwMetadataCompositeKey(ah, "doesnotexist"));
+            softwareManagement.findSoftwareModuleMetadata(ah, "doesnotexist");
             fail("should not have worked as module metadata with that key does not exist");
         } catch (final EntityNotFoundException e) {
 

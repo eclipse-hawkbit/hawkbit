@@ -8,15 +8,29 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.net.URL;
+
+/**
+ * External artifact representation with all the necessary information to
+ * generate an artifact {@link URL} at runtime.
+ *
+ */
 public interface ExternalArtifact extends Artifact {
 
+    /**
+     * @return {@link ExternalArtifactProvider} of this {@link Artifact}.
+     */
     ExternalArtifactProvider getExternalArtifactProvider();
 
+    /**
+     * @return generated download {@link URL}.
+     */
     String getUrl();
 
+    /**
+     * @return suffix for {@link URL} generation.
+     */
     String getUrlSuffix();
-
-    void setExternalArtifactProvider(ExternalArtifactProvider externalArtifactProvider);
 
     /**
      * @param urlSuffix

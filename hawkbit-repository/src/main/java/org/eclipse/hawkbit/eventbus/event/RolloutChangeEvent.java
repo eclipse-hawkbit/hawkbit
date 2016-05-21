@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.eventbus.event;
 
-import org.eclipse.hawkbit.eventbus.event.AbstractEvent;
-
 /**
  * Event declaration for the UI to notify the UI that a rollout has been
  * changed.

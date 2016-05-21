@@ -34,14 +34,14 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 
 /**
- * @author Michael Hirsch
+ * JPA implementation of a {@link Rollout}.
  *
  */
 @Entity
 @Table(name = "sp_rollout", indexes = {
         @Index(name = "sp_idx_rollout_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_rollout"))
-public class JpaRollout extends JpaNamedEntity implements Rollout {
+public class JpaRollout extends AbstractJpaNamedEntity implements Rollout {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,7 +60,7 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
     private RolloutStatus status = RolloutStatus.CREATING;
 
     @Column(name = "last_check")
-    private long lastCheck = 0L;
+    private long lastCheck;
 
     @Column(name = "action_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -74,11 +74,11 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
 
     @Transient
     @CacheField(key = CacheKeys.ROLLOUT_GROUP_TOTAL)
-    private int rolloutGroupsTotal = 0;
+    private int rolloutGroupsTotal;
 
     @Transient
     @CacheField(key = CacheKeys.ROLLOUT_GROUP_CREATED)
-    private int rolloutGroupsCreated = 0;
+    private int rolloutGroupsCreated;
 
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
@@ -98,7 +98,6 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
         return rolloutGroups;
     }
 
-    @Override
     public void setRolloutGroups(final List<RolloutGroup> rolloutGroups) {
         this.rolloutGroups = rolloutGroups;
     }
@@ -118,17 +117,14 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
         return status;
     }
 
-    @Override
     public void setStatus(final RolloutStatus status) {
         this.status = status;
     }
 
-    @Override
     public long getLastCheck() {
         return lastCheck;
     }
 
-    @Override
     public void setLastCheck(final long lastCheck) {
         this.lastCheck = lastCheck;
     }
@@ -158,7 +154,6 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
         return totalTargets;
     }
 
-    @Override
     public void setTotalTargets(final long totalTargets) {
         this.totalTargets = totalTargets;
     }
@@ -168,7 +163,6 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
         return rolloutGroupsTotal;
     }
 
-    @Override
     public void setRolloutGroupsTotal(final int rolloutGroupsTotal) {
         this.rolloutGroupsTotal = rolloutGroupsTotal;
     }
@@ -178,7 +172,6 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
         return rolloutGroupsCreated;
     }
 
-    @Override
     public void setRolloutGroupsCreated(final int rolloutGroupsCreated) {
         this.rolloutGroupsCreated = rolloutGroupsCreated;
     }
@@ -191,7 +184,6 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
         return totalTargetCountStatus;
     }
 
-    @Override
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
     }
@@ -203,58 +195,4 @@ public class JpaRollout extends JpaNamedEntity implements Rollout {
                 + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
-    /**
-     *
-     * State machine for rollout.
-     *
-     */
-    public enum RolloutStatus {
-
-        /**
-         * Rollouts is beeing created.
-         */
-        CREATING,
-
-        /**
-         * Rollout is ready to start.
-         */
-        READY,
-
-        /**
-         * Rollout is paused.
-         */
-        PAUSED,
-
-        /**
-         * Rollout is starting.
-         */
-        STARTING,
-
-        /**
-         * Rollout is stopped.
-         */
-        STOPPED,
-
-        /**
-         * Rollout is running.
-         */
-        RUNNING,
-
-        /**
-         * Rollout is finished.
-         */
-        FINISHED,
-
-        /**
-         * Rollout could not created due errors, might be database problem due
-         * asynchronous creating.
-         */
-        ERROR_CREATING,
-
-        /**
-         * Rollout could not started due errors, might be database problem due
-         * asynchronous starting.
-         */
-        ERROR_STARTING;
-    }
 }

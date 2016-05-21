@@ -9,13 +9,30 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
 
+/**
+ * Status information of an {@link Action} which can be provided by the
+ * {@link Target} or is added by the update server itself. This can be the start
+ * of the {@link Action} life cycle, the end and update notifications in
+ * between.
+ *
+ */
 public interface ActionStatus extends TenantAwareBaseEntity {
 
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} when the status was
+     *         reported.
+     */
     Long getOccurredAt();
 
+    /**
+     * @param occurredAt
+     *            time in {@link TimeUnit#MILLISECONDS} when the status was
+     *            reported.
+     */
     void setOccurredAt(Long occurredAt);
 
     /**
@@ -26,14 +43,36 @@ public interface ActionStatus extends TenantAwareBaseEntity {
      */
     void addMessage(String message);
 
+    /**
+     * @return list of message entries that can be added to the
+     *         {@link ActionStatus}.
+     */
     List<String> getMessages();
 
+    /**
+     * @return {@link Action} this {@link ActionStatus} belongs to.
+     */
     Action getAction();
 
+    /**
+     * @param action
+     *            this {@link ActionStatus} belongs to.
+     */
     void setAction(Action action);
 
+    /**
+     * @return the {@link Status} of this {@link ActionStatus}. Caused
+     *         potentially a transition change of the {@link #getAction()} if
+     *         different from the previous {@link ActionStatus#getStatus()}.
+     */
     Status getStatus();
 
+    /**
+     * @param status
+     *            of this {@link ActionStatus}. May cause a transition change of
+     *            the {@link #getAction()} if different from the previous
+     *            {@link ActionStatus#getStatus()}.
+     */
     void setStatus(Status status);
 
 }

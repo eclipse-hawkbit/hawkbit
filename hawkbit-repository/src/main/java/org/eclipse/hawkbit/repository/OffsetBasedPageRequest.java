@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -14,13 +14,9 @@ import org.springframework.data.domain.Sort;
 /**
  * An implementation of the {@link PageRequest} which is offset based by means
  * the offset is given and not the page number as in the original
- * {@link PageRequest} implemntation where the offset is generated. Due that the
- * REST-API is working with {@code offset} and {@code limit} parameter we need
- * an offset based page request for JPA.
- * 
- * @author Michael Hirsch
- * @since 0.2.2
- *
+ * {@link PageRequest} implementation where the offset is generated. Due that
+ * the REST-API is working with {@code offset} and {@code limit} parameter we
+ * need an offset based page request.
  */
 public final class OffsetBasedPageRequest extends PageRequest {
 

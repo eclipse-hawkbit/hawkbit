@@ -297,7 +297,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         if (mandatoryCheck(name, version, distSetTypeName) && duplicateCheck(name, version)) {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-            DistributionSet newDist = new DistributionSet();
+            DistributionSet newDist = distributionSetManagement.generateDistributionSet();
 
             setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
             newDist = distributionSetManagement.createDistributionSet(newDist);

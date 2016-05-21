@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
@@ -20,7 +20,7 @@ import com.vaadin.server.FontAwesome;
  * Proxy rollout with custom properties.
  *
  */
-public class ProxyRollout extends Rollout {
+public class ProxyRollout extends JpaRollout {
 
     private static final long serialVersionUID = 4539849939617681918L;
 
@@ -59,7 +59,7 @@ public class ProxyRollout extends Rollout {
      *            the isRequiredMigrationStep to set
      */
 
-    public void setIsRequiredMigrationStep(Boolean isRequiredMigrationStep) {
+    public void setIsRequiredMigrationStep(final Boolean isRequiredMigrationStep) {
         this.isRequiredMigrationStep = isRequiredMigrationStep;
     }
 
@@ -76,7 +76,7 @@ public class ProxyRollout extends Rollout {
      *            the discription to set
      */
 
-    public void setDiscription(String discription) {
+    public void setDiscription(final String discription) {
         this.discription = discription;
     }
 
@@ -92,7 +92,7 @@ public class ProxyRollout extends Rollout {
      *            the type to set
      */
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
@@ -108,7 +108,7 @@ public class ProxyRollout extends Rollout {
      * @param swModules
      *            Set<SoftwareModule> to set
      */
-    public void setSwModules(Set<SoftwareModule> swModules) {
+    public void setSwModules(final Set<SoftwareModule> swModules) {
         this.swModules = swModules;
     }
 
@@ -116,7 +116,7 @@ public class ProxyRollout extends Rollout {
         return rolloutRendererData;
     }
 
-    public void setRolloutRendererData(RolloutRendererData rendererData) {
+    public void setRolloutRendererData(final RolloutRendererData rendererData) {
         this.rolloutRendererData = rendererData;
     }
 

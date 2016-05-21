@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -76,6 +77,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private SpPermissionChecker permChecker;
 
     @Autowired
+    private TagManagement tagManagement;
+
+    @Autowired
     private transient TargetManagement targetManagement;
 
     TargetTagFilterButtonClick filterButtonClickBehaviour;
@@ -90,7 +94,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     public void init(final TargetTagFilterButtonClick filterButtonClickBehaviour) {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         super.init(filterButtonClickBehaviour);
-        addNewTargetTag(new TargetTag("NO TAG"));
+        addNewTargetTag(tagManagement.generateTargetTag("NO TAG"));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -290,7 +294,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private void refreshContainer() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
-        addNewTargetTag(new TargetTag("NO TAG"));
+        addNewTargetTag(tagManagement.generateTargetTag("NO TAG"));
         addColumn();
     }
 

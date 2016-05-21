@@ -145,7 +145,7 @@ public class JpaTargetManagement implements TargetManagement {
             }
             return cb.conjunction();
         };
-        return convertPage(criteriaNoCountDao.findAll(spec, pageable, JpaTarget.class));
+        return convertPage(criteriaNoCountDao.findAll(spec, pageable, JpaTarget.class), pageable);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
-        return convertPage(targetRepository.findAll(spec, pageable));
+        return convertPage(targetRepository.findAll(spec, pageable), pageable);
     }
 
     @Override
@@ -222,17 +222,21 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class);
 
-        return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
-                TargetSpecifications.hasAssignedDistributionSet(distributionSetID).toPredicate(root, query, cb),
-                spec.toPredicate(root, query, cb)), pageReq));
+        return convertPage(
+                targetRepository
+                        .findAll((Specification<JpaTarget>) (root, query,
+                                cb) -> cb.and(TargetSpecifications.hasAssignedDistributionSet(distributionSetID)
+                                        .toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
+                                pageReq),
+                pageReq);
     }
 
-    private static Page<Target> convertPage(final Page<JpaTarget> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<Target> convertPage(final Page<JpaTarget> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
-    private static Slice<Target> convertPage(final Slice<JpaTarget> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Slice<Target> convertPage(final Slice<JpaTarget> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, 0);
     }
 
     @Override
@@ -246,9 +250,13 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class);
 
-        return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
-                TargetSpecifications.hasInstalledDistributionSet(distributionSetId).toPredicate(root, query, cb),
-                spec.toPredicate(root, query, cb)), pageable));
+        return convertPage(
+                targetRepository
+                        .findAll((Specification<JpaTarget>) (root, query,
+                                cb) -> cb.and(TargetSpecifications.hasInstalledDistributionSet(distributionSetId)
+                                        .toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
+                                pageable),
+                pageable);
     }
 
     @Override
@@ -296,10 +304,11 @@ public class JpaTargetManagement implements TargetManagement {
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
         if (specList == null || specList.isEmpty()) {
-            return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class));
+            return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
         }
         return convertPage(
-                criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, JpaTarget.class));
+                criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, JpaTarget.class),
+                pageable);
     }
 
     private Long countByCriteriaAPI(final List<Specification<JpaTarget>> specList) {

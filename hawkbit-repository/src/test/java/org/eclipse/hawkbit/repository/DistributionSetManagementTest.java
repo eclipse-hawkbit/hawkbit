@@ -404,7 +404,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         // modifying the meta data value
         dsMetadata.setValue(knownUpdateValue);
         dsMetadata.setKey(knownKey);
-        dsMetadata.setDistributionSet(changedLockRevisionDS);
+        ((JpaDistributionSetMetadata) dsMetadata).setDistributionSet(changedLockRevisionDS);
 
         Thread.sleep(100);
 
@@ -728,7 +728,8 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     public void findDistributionSetsWithoutLazy() {
         TestDataUtil.generateDistributionSets(20, softwareManagement, distributionSetManagement);
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(20);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(20);
     }
 
     @Test
@@ -747,8 +748,9 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         distributionSetManagement.deleteDistributionSet(ds1.getId());
         // not assigned so not marked as deleted but fully deleted
         assertThat(distributionSetRepository.findAll()).hasSize(1);
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, Boolean.FALSE, Boolean.TRUE)
-                .getTotalElements()).isEqualTo(1);
+        assertThat(distributionSetManagement
+                .findDistributionSetsByDeletedAndOrCompleted(pageReq, Boolean.FALSE, Boolean.TRUE).getTotalElements())
+                        .isEqualTo(1);
     }
 
     @Test
@@ -816,8 +818,9 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
 
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(3);
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, Boolean.FALSE, Boolean.TRUE)
-                .getTotalElements()).isEqualTo(2);
+        assertThat(distributionSetManagement
+                .findDistributionSetsByDeletedAndOrCompleted(pageReq, Boolean.FALSE, Boolean.TRUE).getTotalElements())
+                        .isEqualTo(2);
     }
 
     private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,

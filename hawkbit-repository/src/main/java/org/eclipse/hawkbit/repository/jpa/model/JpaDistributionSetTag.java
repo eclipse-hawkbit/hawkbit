@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 @Table(name = "sp_distributionset_tag", indexes = {
         @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_ds_tag"))
-public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag {
+public class JpaDistributionSetTag extends AbstractJpaTag implements DistributionSetTag {
     private static final long serialVersionUID = 1L;
 
     @ManyToMany(mappedBy = "tags", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)

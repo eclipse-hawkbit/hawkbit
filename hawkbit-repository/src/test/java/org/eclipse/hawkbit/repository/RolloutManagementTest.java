@@ -18,23 +18,22 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
-import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -876,7 +875,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
                 softwareManagement, distributionSetManagement);
         targetManagement.createTargets(
                 TestDataUtil.buildTargetFixtures(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
-        final RolloutGroupConditions conditions = new JpaRolloutGroup.RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
@@ -963,7 +962,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
-        final RolloutGroupConditions conditions = new JpaRolloutGroup.RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();

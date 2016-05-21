@@ -36,21 +36,11 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
- * <p>
- * Applicable transition changes of the {@link SoftwareModule}s state of a
- * {@link Target}, e.g. install, uninstall, update and preparations for the
- * transition change, i.e. download.
- * </p>
- *
- * <p>
- * Actions are managed by the SP server and applied to the targets by the
- * client.
- * <p>
+ * JPA implementation of {@link Action}.
  */
 @Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
         @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
@@ -59,12 +49,9 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
 @Entity
-public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
+public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * the {@link DistributionSet} which should be installed by this action.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
     private JpaDistributionSet distributionSet;
@@ -106,33 +93,16 @@ public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
     @CacheField(key = CacheKeys.DOWNLOAD_PROGRESS_PERCENT)
     private int downloadProgressPercent;
 
-    /**
-     * @return the distributionSet
-     */
     @Override
     public DistributionSet getDistributionSet() {
         return distributionSet;
     }
 
-    /**
-     * @param distributionSet
-     *            the distributionSet to set
-     */
     @Override
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = (JpaDistributionSet) distributionSet;
     }
 
-    /**
-     * @return true when action is in state {@link Status#CANCELING} or
-     *         {@link Status#CANCELED}, false otherwise
-     */
-    @Override
-    public boolean isCancelingOrCanceled() {
-        return status == Status.CANCELING || status == Status.CANCELED;
-    }
-
-    @Override
     public void setActive(final boolean active) {
         this.active = active;
     }
@@ -152,7 +122,6 @@ public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
         return downloadProgressPercent;
     }
 
-    @Override
     public void setDownloadProgressPercent(final int downloadProgressPercent) {
         this.downloadProgressPercent = downloadProgressPercent;
     }
@@ -162,14 +131,10 @@ public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
         return active;
     }
 
-    @Override
     public void setActionType(final ActionType actionType) {
         this.actionType = actionType;
     }
 
-    /**
-     * @return the actionType
-     */
     @Override
     public ActionType getActionType() {
         return actionType;
@@ -195,7 +160,6 @@ public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
         return forcedTime;
     }
 
-    @Override
     public void setForcedTime(final long forcedTime) {
         this.forcedTime = forcedTime;
     }
@@ -205,7 +169,6 @@ public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
         return rolloutGroup;
     }
 
-    @Override
     public void setRolloutGroup(final RolloutGroup rolloutGroup) {
         this.rolloutGroup = (JpaRolloutGroup) rolloutGroup;
     }
@@ -215,55 +178,8 @@ public class JpaAction extends JpaTenantAwareBaseEntity implements Action {
         return rollout;
     }
 
-    @Override
     public void setRollout(final Rollout rollout) {
         this.rollout = (JpaRollout) rollout;
-    }
-
-    /**
-     * checks if the {@link #forcedTime} is hit by the given
-     * {@code hitTimeMillis}, by means if the given milliseconds are greater
-     * than the forcedTime.
-     *
-     * @param hitTimeMillis
-     *            the milliseconds, mostly the
-     *            {@link System#currentTimeMillis()}
-     * @return {@code true} if this {@link #type} is in
-     *         {@link ActionType#TIMEFORCED} and the given {@code hitTimeMillis}
-     *         is greater than the {@link #forcedTime} otherwise {@code false}
-     */
-    @Override
-    public boolean isHitAutoForceTime(final long hitTimeMillis) {
-        if (actionType == ActionType.TIMEFORCED) {
-            return hitTimeMillis >= forcedTime;
-        }
-        return false;
-    }
-
-    /**
-     * @return {@code true} if either the {@link #type} is
-     *         {@link ActionType#FORCED} or {@link ActionType#TIMEFORCED} but
-     *         then if the {@link #forcedTime} has been exceeded otherwise
-     *         always {@code false}
-     */
-    @Override
-    public boolean isForce() {
-        switch (actionType) {
-        case FORCED:
-            return true;
-        case TIMEFORCED:
-            return isHitAutoForceTime(System.currentTimeMillis());
-        default:
-            return false;
-        }
-    }
-
-    /**
-     * @return true when action is forced, false otherwise
-     */
-    @Override
-    public boolean isForced() {
-        return actionType == ActionType.FORCED;
     }
 
     @Override

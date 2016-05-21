@@ -298,11 +298,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetFilter distributionSetFilter) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
-        return convertDsPage(findByCriteriaAPI(pageable, specList));
+        return convertDsPage(findByCriteriaAPI(pageable, specList), pageable);
     }
 
-    private static Page<DistributionSet> convertDsPage(final Page<JpaDistributionSet> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<DistributionSet> convertDsPage(final Page<JpaDistributionSet> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     /**
@@ -323,8 +324,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findDistributionSetsAll(final Pageable pageReq, final Boolean deleted,
-            final Boolean complete) {
+    public Page<DistributionSet> findDistributionSetsByDeletedAndOrCompleted(final Pageable pageReq,
+            final Boolean deleted, final Boolean complete) {
         final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
 
         if (deleted != null) {
@@ -337,7 +338,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
-        return convertDsPage(findByCriteriaAPI(pageReq, specList));
+        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
     }
 
     @Override
@@ -351,7 +352,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(DistributionSetSpecification.isDeleted(deleted));
         }
         specList.add(spec);
-        return convertDsPage(findByCriteriaAPI(pageReq, specList));
+        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
     }
 
     @Override
@@ -528,7 +529,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return convertMdPage(distributionSetMetadataRepository
                 .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
                         root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
-                        distributionSetId), pageable));
+                        distributionSetId), pageable),
+                pageable);
     }
 
     @Override
@@ -543,11 +545,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                         .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.and(
                                 cb.equal(root.get(JpaDistributionSetMetadata_.distributionSet)
                                         .get(JpaDistributionSet_.id), distributionSetId),
-                                spec.toPredicate(root, query, cb)), pageable));
+                                spec.toPredicate(root, query, cb)), pageable),
+                pageable);
     }
 
-    private static Page<DistributionSetMetadata> convertMdPage(final Page<JpaDistributionSetMetadata> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<DistributionSetMetadata> convertMdPage(final Page<JpaDistributionSetMetadata> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -744,5 +748,37 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional(propagation = Propagation.SUPPORTS)
     public DistributionSet generateDistributionSet() {
         return new JpaDistributionSet();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetMetadata generateDistributionSetMetadata() {
+        return new JpaDistributionSetMetadata();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetMetadata generateDistributionSetMetadata(final DistributionSet distributionSet,
+            final String key, final String value) {
+        return new JpaDistributionSetMetadata(key, distributionSet, value);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetType generateDistributionSetType(final String key, final String name,
+            final String description) {
+        return new JpaDistributionSetType(key, name, description);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSet generateDistributionSet(final String name, final String version, final String description,
+            final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
+        return new JpaDistributionSet(name, version, description, type, moduleList);
+    }
+
+    @Override
+    public Long countDistributionSetsByType(final DistributionSetType type) {
+        return distributionSetRepository.countByType((JpaDistributionSetType) type);
     }
 }

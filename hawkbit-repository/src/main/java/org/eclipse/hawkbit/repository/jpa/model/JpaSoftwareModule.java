@@ -50,7 +50,7 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
                 @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
                 @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
-public class JpaSoftwareModule extends JpaNamedVersionedEntity implements SoftwareModule {
+public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
@@ -61,7 +61,7 @@ public class JpaSoftwareModule extends JpaNamedVersionedEntity implements Softwa
     private final List<DistributionSet> assignedTo = new ArrayList<>();
 
     @Column(name = "deleted")
-    private boolean deleted = false;
+    private boolean deleted;
 
     @Column(name = "vendor", nullable = true, length = 256)
     private String vendor;

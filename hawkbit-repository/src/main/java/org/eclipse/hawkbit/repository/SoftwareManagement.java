@@ -259,7 +259,7 @@ public interface SoftwareManagement {
      *             in case the meta data does not exists for the given key
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    SoftwareModuleMetadata findSoftwareModuleMetadata(@NotNull SwMetadataCompositeKey id);
+    SoftwareModuleMetadata findSoftwareModuleMetadata(@NotNull SoftwareModule softwareModule, @NotEmpty String key);
 
     /**
      * finds all meta data by the given software module id.
@@ -409,7 +409,7 @@ public interface SoftwareManagement {
      * @return the found {@link SoftwareModuleType}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleType> findSoftwareModuleTypesByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<SoftwareModuleType> findSoftwareModuleTypesAll(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Retrieves software module including details (
@@ -478,4 +478,37 @@ public interface SoftwareManagement {
      * @return {@link SoftwareModule} object
      */
     SoftwareModule generateSoftwareModule();
+
+    /**
+     * Generates a {@link SoftwareModule} without persisting it.
+     *
+     * @param type
+     *            of the {@link SoftwareModule}
+     * @param name
+     *            abstract name of the {@link SoftwareModule}
+     * @param version
+     *            of the {@link SoftwareModule}
+     * @param description
+     *            of the {@link SoftwareModule}
+     * @param vendor
+     *            of the {@link SoftwareModule}
+     * 
+     * @return {@link SoftwareModule} object
+     */
+    SoftwareModule generateSoftwareModule(SoftwareModuleType type, String name, String version, String description,
+            String vendor);
+
+    /**
+     * Generates an empty {@link SoftwareModuleMetadata} pair without persisting
+     * it.
+     * 
+     * @return {@link SoftwareModuleMetadata} object
+     */
+    SoftwareModuleMetadata generateSoftwareModuleMetadata();
+
+    SoftwareModuleMetadata generateSoftwareModuleMetadata(SoftwareModule softwareModule, String key, String value);
+
+    SoftwareModuleType generateSoftwareModuleType(final String key, final String name, final String description,
+            final int maxAssignments);
+
 }

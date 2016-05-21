@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  * {@link SoftwareModule}.
  */
 @MappedSuperclass
-public abstract class JpaArtifact extends JpaTenantAwareBaseEntity implements Artifact {
+public abstract class AbstractJpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "sha1_hash", length = 40, nullable = true)

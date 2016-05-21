@@ -8,12 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessCondition;
-
 public interface RolloutGroup extends NamedEntity {
 
     Rollout getRollout();
@@ -75,4 +69,117 @@ public interface RolloutGroup extends NamedEntity {
      */
     void setTotalTargetCountStatus(TotalTargetCountStatus totalTargetCountStatus);
 
+    /**
+     * Rollout goup state machine.
+     *
+     */
+    public enum RolloutGroupStatus {
+
+        /**
+         * Ready to start the group.
+         */
+        READY,
+
+        /**
+         * Group is scheduled and started sometime, e.g. trigger of group
+         * before.
+         */
+        SCHEDULED,
+
+        /**
+         * Group is finished.
+         */
+        FINISHED,
+
+        /**
+         * Group is finished and has errors.
+         */
+        ERROR,
+
+        /**
+         * Group is running.
+         */
+        RUNNING;
+    }
+
+    /**
+     * The condition to evaluate if an group is success state.
+     */
+    public enum RolloutGroupSuccessCondition {
+        THRESHOLD("thresholdRolloutGroupSuccessCondition");
+
+        private final String beanName;
+
+        private RolloutGroupSuccessCondition(final String beanName) {
+            this.beanName = beanName;
+        }
+
+        /**
+         * @return the beanName
+         */
+        public String getBeanName() {
+            return beanName;
+        }
+    }
+
+    /**
+     * The condition to evaluate if an group is in error state.
+     */
+    public enum RolloutGroupErrorCondition {
+        THRESHOLD("thresholdRolloutGroupErrorCondition");
+
+        private final String beanName;
+
+        private RolloutGroupErrorCondition(final String beanName) {
+            this.beanName = beanName;
+        }
+
+        /**
+         * @return the beanName
+         */
+        public String getBeanName() {
+            return beanName;
+        }
+    }
+
+    /**
+     * The actions executed when the {@link RolloutGroup#errorCondition} is hit.
+     */
+    public enum RolloutGroupErrorAction {
+        PAUSE("pauseRolloutGroupAction");
+
+        private final String beanName;
+
+        private RolloutGroupErrorAction(final String beanName) {
+            this.beanName = beanName;
+        }
+
+        /**
+         * @return the beanName
+         */
+        public String getBeanName() {
+            return beanName;
+        }
+    }
+
+    /**
+     * The actions executed when the {@link RolloutGroup#successCondition} is
+     * hit.
+     */
+    public enum RolloutGroupSuccessAction {
+        NEXTGROUP("startNextRolloutGroupAction");
+
+        private final String beanName;
+
+        private RolloutGroupSuccessAction(final String beanName) {
+            this.beanName = beanName;
+        }
+
+        /**
+         * @return the beanName
+         */
+        public String getBeanName() {
+            return beanName;
+        }
+    }
 }

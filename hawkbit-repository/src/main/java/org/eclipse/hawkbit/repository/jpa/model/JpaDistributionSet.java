@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,14 +48,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
- * <p>
- * The {@link DistributionSet} is defined in the SP repository and contains at
- * least an OS and an Agent Hub.
- * </p>
- *
- * <p>
- * A {@link Target} has exactly one target {@link DistributionSet} assigned.
- * </p>
+ * Jpa implementation of {@link DistributionSet}.
  *
  */
 @Entity
@@ -65,11 +59,11 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
                 @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
         @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
-public class JpaDistributionSet extends JpaNamedVersionedEntity implements DistributionSet {
+public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "required_migration_step")
-    private boolean requiredMigrationStep = false;
+    private boolean requiredMigrationStep;
 
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(name = "sp_ds_module", joinColumns = {
@@ -84,7 +78,7 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
     private Set<DistributionSetTag> tags = new HashSet<>();
 
     @Column(name = "deleted")
-    private boolean deleted = false;
+    private boolean deleted;
 
     @OneToMany(mappedBy = "assignedDistributionSet", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
     private List<Target> assignedToTargets;
@@ -106,7 +100,7 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
     private DistributionSetType type;
 
     @Column(name = "complete")
-    private boolean complete = false;
+    private boolean complete;
 
     /**
      * Default constructor.
@@ -130,7 +124,7 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
      *            {@link SoftwareModule}s of the {@link DistributionSet}
      */
     public JpaDistributionSet(final String name, final String version, final String description,
-            final DistributionSetType type, final Iterable<SoftwareModule> moduleList) {
+            final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
         super(name, version, description);
 
         this.type = type;
@@ -152,15 +146,11 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
         return deleted;
     }
 
-    /**
-     * @return immutable list of meta data elements.
-     */
     @Override
     public List<DistributionSetMetadata> getMetadata() {
         return Collections.unmodifiableList(metadata);
     }
 
-    @Override
     public List<Action> getActions() {
         return actions;
     }
@@ -182,23 +172,16 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
         return this;
     }
 
-    @Override
     public DistributionSet setTags(final Set<DistributionSetTag> tags) {
         this.tags = tags;
         return this;
     }
 
-    /**
-     * @return the assignedTargets
-     */
     @Override
     public List<Target> getAssignedTargets() {
         return assignedToTargets;
     }
 
-    /**
-     * @return the installedTargets
-     */
     @Override
     public List<TargetInfo> getInstalledTargets() {
         return installedAtTargets;
@@ -210,10 +193,6 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
                 + ", getId()=" + getId() + "]";
     }
 
-    /**
-     *
-     * @return unmodifiableSet of {@link SoftwareModule}.
-     */
     @Override
     public Set<SoftwareModule> getModules() {
         return Collections.unmodifiableSet(modules);
@@ -224,12 +203,6 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
         return new DistributionSetIdName(getId(), getName(), getVersion());
     }
 
-    /**
-     * @param softwareModule
-     * @return <code>true</code> if the module was added and <code>false</code>
-     *         if it already existed in the set
-     *
-     */
     @Override
     public boolean addModule(final SoftwareModule softwareModule) {
 
@@ -267,13 +240,6 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
         return false;
     }
 
-    /**
-     * Removed given {@link SoftwareModule} from this DS instance.
-     *
-     * @param softwareModule
-     *            to remove
-     * @return <code>true</code> if element was found and removed
-     */
     @Override
     public boolean removeModule(final SoftwareModule softwareModule) {
         final Optional<SoftwareModule> found = modules.stream()
@@ -289,14 +255,6 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
 
     }
 
-    /**
-     * Searches through modules for the given type.
-     *
-     * @param type
-     *            to search for
-     * @return SoftwareModule of given type or <code>null</code> if not in the
-     *         list.
-     */
     @Override
     public SoftwareModule findFirstModuleByType(final SoftwareModuleType type) {
         final Optional<SoftwareModule> result = modules.stream().filter(module -> module.getType().equals(type))
@@ -323,4 +281,5 @@ public class JpaDistributionSet extends JpaNamedVersionedEntity implements Distr
     public boolean isComplete() {
         return complete;
     }
+
 }

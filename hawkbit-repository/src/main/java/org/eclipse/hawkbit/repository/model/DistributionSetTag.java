@@ -10,8 +10,16 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
+/**
+ * {@link Tag} of a {@link DistributionSet}.
+ *
+ */
 public interface DistributionSetTag extends Tag {
 
+    /**
+     * @return {@link List} of {@link DistributionSet}s this {@link Tag} is
+     *         assigned to.
+     */
     List<DistributionSet> getAssignedToDistributionSet();
 
 }

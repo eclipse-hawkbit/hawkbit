@@ -27,7 +27,7 @@ import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
 @MappedSuperclass
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
-public abstract class JpaTenantAwareBaseEntity extends JpaBaseEntity implements TenantAwareBaseEntity {
+public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEntity implements TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
@@ -36,7 +36,7 @@ public abstract class JpaTenantAwareBaseEntity extends JpaBaseEntity implements 
     /**
      * Default constructor needed for JPA entities.
      */
-    public JpaTenantAwareBaseEntity() {
+    public AbstractJpaTenantAwareBaseEntity() {
         // Default constructor needed for JPA entities.
     }
 
@@ -101,7 +101,7 @@ public abstract class JpaTenantAwareBaseEntity extends JpaBaseEntity implements 
         if (!super.equals(obj)) {
             return false;
         }
-        final JpaTenantAwareBaseEntity other = (JpaTenantAwareBaseEntity) obj;
+        final AbstractJpaTenantAwareBaseEntity other = (AbstractJpaTenantAwareBaseEntity) obj;
         if (tenant == null) {
             if (other.tenant != null) {
                 return false;

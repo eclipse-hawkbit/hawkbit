@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
         @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
                 @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
-public class JpaDistributionSetType extends JpaNamedEntity implements DistributionSetType {
+public class JpaDistributionSetType extends AbstractJpaNamedEntity implements DistributionSetType {
     private static final long serialVersionUID = 1L;
 
     @OneToMany(targetEntity = DistributionSetTypeElement.class, cascade = {
@@ -53,7 +53,7 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
     private String colour;
 
     @Column(name = "deleted")
-    private boolean deleted = false;
+    private boolean deleted;
 
     public JpaDistributionSetType() {
         // default public constructor for JPA
@@ -91,19 +91,11 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
         colour = color;
     }
 
-    /**
-     * @return the deleted
-     */
     @Override
     public boolean isDeleted() {
         return deleted;
     }
 
-    /**
-     * @param deleted
-     *            the deleted to set
-     */
-    @Override
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
@@ -120,14 +112,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType}.
-     *
-     * @param softwareModuleType
-     *            search for
-     * @return <code>true</code> if found
-     */
     @Override
     public boolean containsModuleType(final SoftwareModuleType softwareModuleType) {
         for (final DistributionSetTypeElement distributionSetTypeElement : elements) {
@@ -139,15 +123,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
         return false;
     }
 
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
-     *
-     * @param softwareModuleType
-     *            search for
-     * @return <code>true</code> if found
-     */
     @Override
     public boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
         return elements.stream().filter(element -> element.isMandatory())
@@ -155,15 +130,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
 
     }
 
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
-     *
-     * @param softwareModuleType
-     *            search for by {@link SoftwareModuleType#getId()}
-     * @return <code>true</code> if found
-     */
     @Override
     public boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
         return elements.stream().filter(element -> element.isMandatory())
@@ -171,15 +137,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
 
     }
 
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and NOT defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
-     *
-     * @param softwareModuleType
-     *            search for
-     * @return <code>true</code> if found
-     */
     @Override
     public boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
         return elements.stream().filter(element -> !element.isMandatory())
@@ -187,15 +144,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
 
     }
 
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and NOT defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
-     *
-     * @param softwareModuleTypeId
-     *            search by {@link SoftwareModuleType#getId()}
-     * @return <code>true</code> if found
-     */
     @Override
     public boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
         return elements.stream().filter(element -> !element.isMandatory())
@@ -203,27 +151,11 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
 
     }
 
-    /**
-     * Compares the modules of this {@link DistributionSetType} and the given
-     * one.
-     *
-     * @param dsType
-     *            to compare with
-     * @return <code>true</code> if the lists are identical.
-     */
     @Override
     public boolean areModuleEntriesIdentical(final DistributionSetType dsType) {
         return new HashSet<DistributionSetTypeElement>(((JpaDistributionSetType) dsType).elements).equals(elements);
     }
 
-    /**
-     * Adds {@link SoftwareModuleType} that is optional for the
-     * {@link DistributionSet}.
-     *
-     * @param smType
-     *            to add
-     * @return updated instance
-     */
     @Override
     public DistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {
         elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, false));
@@ -231,14 +163,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
         return this;
     }
 
-    /**
-     * Adds {@link SoftwareModuleType} that is mandatory for the
-     * {@link DistributionSet}.
-     *
-     * @param smType
-     *            to add
-     * @return updated instance
-     */
     @Override
     public DistributionSetType addMandatoryModuleType(final SoftwareModuleType smType) {
         elements.add(new DistributionSetTypeElement(this, (JpaSoftwareModuleType) smType, true));
@@ -246,13 +170,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
         return this;
     }
 
-    /**
-     * Removes {@link SoftwareModuleType} from the list.
-     *
-     * @param smTypeId
-     *            to remove
-     * @return updated instance
-     */
     @Override
     public DistributionSetType removeModuleType(final Long smTypeId) {
         // we search by id (standard equals compares also revison)
@@ -276,12 +193,6 @@ public class JpaDistributionSetType extends JpaNamedEntity implements Distributi
         this.key = key;
     }
 
-    /**
-     * @param distributionSet
-     *            to check for completeness
-     * @return <code>true</code> if the all mandatory software module types are
-     *         in the system.
-     */
     @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
         return distributionSet.getModules().stream().map(module -> module.getType()).collect(Collectors.toList())

@@ -503,7 +503,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = new TargetFilterQuery();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.generateTargetFilterQuery();
         targetFilterQuery.setName(nameTextField.getValue());
         targetFilterQuery.setQuery(queryTextField.getValue());
         targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);

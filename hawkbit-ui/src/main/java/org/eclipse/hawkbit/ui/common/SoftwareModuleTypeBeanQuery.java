@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -47,7 +47,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
 
     @Override
     protected SoftwareModuleType constructBean() {
-        return new SoftwareModuleType();
+        return softwareManagement.generateSoftwareModuleType();
     }
 
     @Override

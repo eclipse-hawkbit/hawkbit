@@ -183,15 +183,21 @@ public class JpaSoftwareManagement implements SoftwareManagement {
         spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
 
-        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList));
+        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
     }
 
-    private static Page<SoftwareModule> convertSmPage(final Slice<JpaSoftwareModule> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Slice<SoftwareModule> convertSmPage(final Slice<JpaSoftwareModule> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, 0);
     }
 
-    private static Page<SoftwareModuleMetadata> convertSmMdPage(final Slice<JpaSoftwareModuleMetadata> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<SoftwareModule> convertSmPage(final Page<JpaSoftwareModule> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    private static Page<SoftwareModuleMetadata> convertSmMdPage(final Page<JpaSoftwareModuleMetadata> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -288,7 +294,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
         specList.add(spec);
 
-        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList));
+        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
     }
 
     @Override
@@ -311,20 +317,20 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public Page<SoftwareModule> findSoftwareModulesByPredicate(final String rsqlParam, final Pageable pageable) {
         final Specification<JpaSoftwareModule> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class);
 
-        return convertSmPage(softwareModuleRepository.findAll(spec, pageable));
+        return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
     }
 
     @Override
-    public Page<SoftwareModuleType> findSoftwareModuleTypesByPredicate(final String rsqlParam,
-            final Pageable pageable) {
+    public Page<SoftwareModuleType> findSoftwareModuleTypesAll(final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class);
 
-        return convertSmTPage(softwareModuleTypeRepository.findAll(spec, pageable));
+        return convertSmTPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
     }
 
-    private static Page<SoftwareModuleType> convertSmTPage(final Slice<JpaSoftwareModuleType> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<SoftwareModuleType> convertSmTPage(final Page<JpaSoftwareModuleType> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -361,7 +367,7 @@ public class JpaSoftwareManagement implements SoftwareManagement {
 
         specList.add(spec);
 
-        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList));
+        return convertSmPage(findSwModuleByCriteriaAPI(pageable, specList), pageable);
     }
 
     @Override
@@ -614,11 +620,16 @@ public class JpaSoftwareManagement implements SoftwareManagement {
                                         cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule)
                                                 .get(JpaSoftwareModule_.id), softwareModuleId),
                                         spec.toPredicate(root, query, cb)),
-                                pageable));
+                                pageable),
+                pageable);
     }
 
     @Override
-    public SoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
+    public SoftwareModuleMetadata findSoftwareModuleMetadata(final SoftwareModule softwareModule, final String key) {
+        return findSoftwareModuleMetadata(new SwMetadataCompositeKey(softwareModule, key));
+    }
+
+    private SoftwareModuleMetadata findSoftwareModuleMetadata(final SwMetadataCompositeKey id) {
         final SoftwareModuleMetadata findOne = softwareModuleMetadataRepository.findOne(id);
         if (findOne == null) {
             throw new EntityNotFoundException("Metadata with key '" + id.getKey() + "' does not exist");
@@ -662,6 +673,34 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     @Transactional(propagation = Propagation.SUPPORTS)
     public SoftwareModule generateSoftwareModule() {
         return new JpaSoftwareModule();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public SoftwareModule generateSoftwareModule(final SoftwareModuleType type, final String name, final String version,
+            final String description, final String vendor) {
+
+        return new JpaSoftwareModule(type, name, version, description, vendor);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public SoftwareModuleMetadata generateSoftwareModuleMetadata() {
+        return new JpaSoftwareModuleMetadata();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public SoftwareModuleMetadata generateSoftwareModuleMetadata(final SoftwareModule softwareModule, final String key,
+            final String value) {
+        return new JpaSoftwareModuleMetadata(key, softwareModule, value);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public SoftwareModuleType generateSoftwareModuleType(final String key, final String name, final String description,
+            final int maxAssignments) {
+        return new JpaSoftwareModuleType(key, name, description, maxAssignments);
     }
 
 }

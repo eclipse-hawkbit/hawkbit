@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.security.SecureRandom;
 
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 
 /**
  * 
@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  *
  *
  */
-public class ProxyBaseSoftwareModuleItem extends SoftwareModule {
+public class ProxyBaseSoftwareModuleItem extends JpaSoftwareModule {
 
     private static final long serialVersionUID = -1555306616599140635L;
 

@@ -16,7 +16,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
@@ -111,7 +111,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             distBeans = getDistributionSetManagement()
-                    .findDistributionSetsAll(new OffsetBasedPageRequest(startIndex, count, sort), false, true);
+                    .findDistributionSetsByDeletedAndOrCompleted(new OffsetBasedPageRequest(startIndex, count, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
@@ -153,7 +153,7 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
             firstPageDistributionSets = getDistributionSetManagement()
-                    .findDistributionSetsAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
+                    .findDistributionSetsByDeletedAndOrCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)

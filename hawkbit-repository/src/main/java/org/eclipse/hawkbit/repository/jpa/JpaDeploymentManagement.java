@@ -598,11 +598,11 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         return convertAcPage(actionRepository.findAll((Specification<JpaAction>) (root, query, cb) -> cb
                 .and(specification.toPredicate(root, query, cb), cb.equal(root.get(JpaAction_.target), target)),
-                pageable));
+                pageable), pageable);
     }
 
-    private static Page<Action> convertAcPage(final Page<JpaAction> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<Action> convertAcPage(final Page<JpaAction> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -656,13 +656,13 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Action action,
-            final boolean withMessages) {
-        if (withMessages) {
-            return actionStatusRepository.getByAction(pageReq, (JpaAction) action);
-        } else {
-            return actionStatusRepository.findByAction(pageReq, (JpaAction) action);
-        }
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final Action action) {
+        return actionStatusRepository.findByAction(pageReq, (JpaAction) action);
+    }
+
+    @Override
+    public Page<ActionStatus> findActionStatusByActionWithMessages(final Pageable pageReq, final Action action) {
+        return actionStatusRepository.getByAction(pageReq, (JpaAction) action);
     }
 
     @Override
@@ -681,5 +681,14 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(propagation = Propagation.SUPPORTS)
     public Action generateAction() {
         return new JpaAction();
+    }
+
+    @Override
+    public Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
+        return convertAcSPage(actionStatusRepository.findAll(pageable), pageable);
+    }
+
+    private static Page<ActionStatus> convertAcSPage(final Page<JpaActionStatus> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 }

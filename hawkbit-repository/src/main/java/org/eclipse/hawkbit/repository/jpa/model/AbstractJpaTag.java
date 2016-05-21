@@ -19,13 +19,13 @@ import org.eclipse.hawkbit.repository.model.Tag;
  *
  */
 @MappedSuperclass
-public abstract class JpaTag extends JpaNamedEntity implements Tag {
+public abstract class AbstractJpaTag extends AbstractJpaNamedEntity implements Tag {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "colour", nullable = true, length = 16)
     private String colour;
 
-    protected JpaTag() {
+    protected AbstractJpaTag() {
         super();
     }
 
@@ -39,7 +39,7 @@ public abstract class JpaTag extends JpaNamedEntity implements Tag {
      * @param colour
      *            of tag in UI
      */
-    public JpaTag(final String name, final String description, final String colour) {
+    public AbstractJpaTag(final String name, final String description, final String colour) {
         super(name, description);
         this.colour = colour;
     }

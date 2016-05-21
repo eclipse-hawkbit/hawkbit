@@ -151,15 +151,16 @@ public class JpaTagManagement implements TagManagement {
     public Page<TargetTag> findAllTargetTags(final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class);
-        return convertTPage(targetTagRepository.findAll(spec, pageable));
+        return convertTPage(targetTagRepository.findAll(spec, pageable), pageable);
     }
 
-    private static Page<TargetTag> convertTPage(final Page<JpaTargetTag> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<TargetTag> convertTPage(final Page<JpaTargetTag> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
-    private static Page<DistributionSetTag> convertDsPage(final Page<JpaDistributionSetTag> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<DistributionSetTag> convertDsPage(final Page<JpaDistributionSetTag> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -270,20 +271,20 @@ public class JpaTagManagement implements TagManagement {
     }
 
     @Override
-    public Page<TargetTag> findAllTargetTags(final Pageable pageReq) {
-        return convertTPage(targetTagRepository.findAll(pageReq));
+    public Page<TargetTag> findAllTargetTags(final Pageable pageable) {
+        return convertTPage(targetTagRepository.findAll(pageable), pageable);
     }
 
     @Override
-    public Page<DistributionSetTag> findAllDistributionSetTags(final Pageable pageReq) {
-        return convertDsPage(distributionSetTagRepository.findAll(pageReq));
+    public Page<DistributionSetTag> findAllDistributionSetTags(final Pageable pageable) {
+        return convertDsPage(distributionSetTagRepository.findAll(pageable), pageable);
     }
 
     @Override
     public Page<DistributionSetTag> findAllDistributionSetTags(final String rsqlParam, final Pageable pageable) {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class);
 
-        return convertDsPage(distributionSetTagRepository.findAll(spec, pageable));
+        return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);
     }
 
     @Override
@@ -296,6 +297,31 @@ public class JpaTagManagement implements TagManagement {
     @Transactional(propagation = Propagation.SUPPORTS)
     public DistributionSetTag generateDistributionSetTag() {
         return new JpaDistributionSetTag();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public TargetTag generateTargetTag(final String name, final String description, final String colour) {
+        return new JpaTargetTag(name, description, colour);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetTag generateDistributionSetTag(final String name, final String description,
+            final String colour) {
+        return new JpaDistributionSetTag(name, description, colour);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public TargetTag generateTargetTag(final String name) {
+        return new JpaTargetTag(name);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public DistributionSetTag generateDistributionSetTag(final String name) {
+        return new JpaDistributionSetTag(name);
     }
 
 }

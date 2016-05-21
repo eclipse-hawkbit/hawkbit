@@ -8,10 +8,21 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+/**
+ * Entities that have a name and a description.
+ *
+ */
 public interface NamedVersionedEntity extends NamedEntity {
 
+    /**
+     * @return the version of entity.
+     */
     String getVersion();
 
+    /**
+     * @param version
+     *            of the entity.
+     */
     void setVersion(String version);
 
 }

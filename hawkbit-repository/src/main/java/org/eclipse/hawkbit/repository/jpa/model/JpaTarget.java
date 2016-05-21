@@ -73,7 +73,7 @@ import org.springframework.data.domain.Persistable;
                 "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 @NamedEntityGraph(name = "Target.detail", attributeNodes = { @NamedAttributeNode("tags"),
         @NamedAttributeNode(value = "assignedDistributionSet"), @NamedAttributeNode(value = "targetInfo") })
-public class JpaTarget extends JpaNamedEntity implements Persistable<Long>, Target {
+public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "controller_id", length = 64)
@@ -82,7 +82,7 @@ public class JpaTarget extends JpaNamedEntity implements Persistable<Long>, Targ
     private String controllerId;
 
     @Transient
-    private boolean entityNew = false;
+    private boolean entityNew;
 
     @ManyToMany(targetEntity = JpaTargetTag.class)
     @JoinTable(name = "sp_target_target_tag", joinColumns = {
@@ -103,14 +103,14 @@ public class JpaTarget extends JpaNamedEntity implements Persistable<Long>, Targ
     @CascadeOnDelete
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, targetEntity = JpaTargetInfo.class)
     @PrimaryKeyJoinColumn
-    private JpaTargetInfo targetInfo = null;
+    private JpaTargetInfo targetInfo;
 
     /**
      * the security token of the target which allows if enabled to authenticate
      * with this security token.
      */
     @Column(name = "sec_token", insertable = true, updatable = true, nullable = false, length = 128)
-    private String securityToken = null;
+    private String securityToken;
 
     @CascadeOnDelete
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })

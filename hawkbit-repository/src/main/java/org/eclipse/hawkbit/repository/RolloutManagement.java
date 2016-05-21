@@ -13,11 +13,11 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.eventbus.event.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -149,36 +149,36 @@ public interface RolloutManagement {
     /**
      * Retrieves all rollouts.
      *
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAll(@NotNull Pageable page);
+    Page<Rollout> findAll(@NotNull Pageable pageable);
 
     /**
      * Get count of targets in different status in rollout.
      *
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a list of rollouts with details of targets count for different
      *         statuses
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable page);
+    Page<Rollout> findAllRolloutsWithDetailedStatus(@NotNull Pageable pageable);
 
     /**
      * Retrieves all rollouts found by the given specification.
      *
      * @param specification
      *            the specification to filter rollouts
-     * @param page
+     * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllWithDetailedStatusByPredicate(@NotNull String rsqlParam, @NotNull Pageable page);
+    Page<Rollout> findAllWithDetailedStatusByPredicate(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Finds rollouts by given text in name or description.

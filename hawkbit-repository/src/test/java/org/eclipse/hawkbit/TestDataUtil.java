@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -76,7 +76,7 @@ public class TestDataUtil {
         // load also lazy stuff
         set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true)).hasSize(1);
         return set;
     }
 
@@ -232,12 +232,12 @@ public class TestDataUtil {
         return generateDistributionSet(suffix, "v1.0", softwareManagement, distributionSetManagement, false);
     }
 
-    public static List<JpaArtifact> generateArtifacts(final ArtifactManagement artifactManagement,
+    public static List<AbstractJpaArtifact> generateArtifacts(final ArtifactManagement artifactManagement,
             final Long moduleId) {
-        final List<JpaArtifact> artifacts = new ArrayList<>();
+        final List<AbstractJpaArtifact> artifacts = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             final InputStream stubInputStream = IOUtils.toInputStream("some test data" + i);
-            artifacts.add((JpaArtifact) artifactManagement.createLocalArtifact(stubInputStream, moduleId,
+            artifacts.add((AbstractJpaArtifact) artifactManagement.createLocalArtifact(stubInputStream, moduleId,
                     "filename" + i, false));
 
         }

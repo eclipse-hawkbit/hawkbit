@@ -194,7 +194,7 @@ public class MultiTenancyEntityTest extends AbstractIntegrationTest {
 
     private Page<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
         return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant),
-                () -> distributionSetManagement.findDistributionSetsAll(pageReq, false, false));
+                () -> distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, false));
     }
 
 }

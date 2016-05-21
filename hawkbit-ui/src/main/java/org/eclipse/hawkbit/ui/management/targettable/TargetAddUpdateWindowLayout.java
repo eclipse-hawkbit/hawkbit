@@ -245,7 +245,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             /* create new target entity */
-            Target newTarget = new Target(newControlllerId);
+            Target newTarget = targetManagement.generateTarget(newControlllerId);
             /* set values to the new target entity */
             setTargetValues(newTarget, newName, newDesc);
             /* save new target */

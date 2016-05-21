@@ -148,13 +148,13 @@ public interface TagManagement {
     /**
      * returns all {@link TargetTag}s.
      * 
-     * @param pageReq
+     * @param pageable
      *            page parameter
      *
      * @return all {@link TargetTag}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findAllTargetTags(@NotNull Pageable pageReq);
+    Page<TargetTag> findAllTargetTags(@NotNull Pageable pageable);
 
     /**
      * Retrieves all target tags based on the given specification.
@@ -244,5 +244,13 @@ public interface TagManagement {
      * @return {@link DistributionSetTag} object
      */
     DistributionSetTag generateDistributionSetTag();
+
+    TargetTag generateTargetTag(String name, String description, String colour);
+
+    TargetTag generateTargetTag(String name);
+
+    DistributionSetTag generateDistributionSetTag(String name, String description, String colour);
+
+    DistributionSetTag generateDistributionSetTag(String name);
 
 }

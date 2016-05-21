@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
         @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") }, uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
 @Entity
-public class JpaTenantMetaData extends JpaBaseEntity implements TenantMetaData {
+public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMetaData {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, length = 40)

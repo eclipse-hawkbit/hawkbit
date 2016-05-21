@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -274,5 +275,12 @@ public interface ControllerManagement {
      * @return {@link ActionStatus} object
      */
     ActionStatus generateActionStatus();
+
+    ActionStatus generateActionStatus(Action action, Status status, Long occurredAt, final String message);
+
+    ActionStatus generateActionStatus(Action action, final Status status, Long occurredAt,
+            final Collection<String> messages);
+
+    ActionStatus generateActionStatus(Action action, Status status, Long occurredAt);
 
 }

@@ -98,14 +98,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
 
         if (null != tagNameValue) {
-            DistributionSetTag newDistTag = new DistributionSetTag(tagNameValue);
-            if (null != tagDescValue) {
-                newDistTag.setDescription(tagDescValue);
-            }
-            newDistTag.setColour(new Color(0, 146, 58).getCSS());
+            DistributionSetTag newDistTag = tagManagement.generateDistributionSetTag(tagNameValue, tagDescValue,
+                    new Color(0, 146, 58).getCSS());
+
             if (colorPicked != null) {
                 newDistTag.setColour(colorPicked);
             }
+
             newDistTag = tagManagement.createDistributionSetTag(newDistTag);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistTag.getName() }));
             resetDistTagValues();

@@ -20,24 +20,25 @@ import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupErrorCondition;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -137,22 +138,26 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final Set<String> startingRollouts = ConcurrentHashMap.newKeySet();
 
     @Override
-    public Page<Rollout> findAll(final Pageable page) {
-        return convertPage(rolloutRepository.findAll(page));
+    public Page<Rollout> findAll(final Pageable pageable) {
+        return convertPage(rolloutRepository.findAll(pageable), pageable);
     }
 
-    private static Page<Rollout> convertPage(final Slice<JpaRollout> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<Rollout> convertPage(final Page<JpaRollout> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    private static Slice<Rollout> convertPage(final Slice<JpaRollout> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, 0);
     }
 
     @Override
-    public Page<Rollout> findAllWithDetailedStatusByPredicate(final String rsqlParam, final Pageable page) {
+    public Page<Rollout> findAllWithDetailedStatusByPredicate(final String rsqlParam, final Pageable pageable) {
 
         final Specification<JpaRollout> specification = RSQLUtility.parse(rsqlParam, RolloutFields.class);
 
-        final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, page);
+        final Page<JpaRollout> findAll = rolloutRepository.findAll(specification, pageable);
         setRolloutStatusDetails(findAll);
-        return convertPage(findAll);
+        return convertPage(findAll, pageable);
     }
 
     @Override
@@ -570,7 +575,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final Specification<JpaRollout> specs = likeNameOrDescription(searchText);
         final Slice<JpaRollout> findAll = criteriaNoCountDao.findAll(specs, pageable, JpaRollout.class);
         setRolloutStatusDetails(findAll);
-        return convertPage(findAll);
+        return convertPage(findAll, pageable);
     }
 
     @Override
@@ -604,10 +609,10 @@ public class JpaRolloutManagement implements RolloutManagement {
      *
      */
     @Override
-    public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable page) {
-        final Page<JpaRollout> rollouts = rolloutRepository.findAll(page);
+    public Page<Rollout> findAllRolloutsWithDetailedStatus(final Pageable pageable) {
+        final Page<JpaRollout> rollouts = rolloutRepository.findAll(pageable);
         setRolloutStatusDetails(rollouts);
-        return convertPage(rollouts);
+        return convertPage(rollouts, pageable);
 
     }
 
@@ -618,7 +623,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .getStatusCountByRolloutId(rolloutId);
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
                 rollout.getTotalTargets());
-        rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+        ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
 
@@ -636,7 +641,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         for (final Rollout rollout : rollouts) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                     allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets());
-            rollout.setTotalTargetCountStatus(totalTargetCountStatus);
+            ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
         }
     }
 

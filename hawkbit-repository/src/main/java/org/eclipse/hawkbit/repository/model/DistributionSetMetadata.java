@@ -8,10 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+/**
+ * {@link MetaData} of a {@link DistributionSet}.
+ *
+ */
 public interface DistributionSetMetadata extends MetaData {
 
-    void setDistributionSet(DistributionSet distributionSet);
-
+    /**
+     * @return {@link DistributionSet} of this {@link MetaData} entry.
+     */
     DistributionSet getDistributionSet();
 
 }

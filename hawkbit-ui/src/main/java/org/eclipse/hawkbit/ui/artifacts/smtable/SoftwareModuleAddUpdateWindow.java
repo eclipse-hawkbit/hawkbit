@@ -234,7 +234,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         mainLayout.addComponent(hLayout);
         mainLayout.setComponentAlignment(hLayout, Alignment.MIDDLE_LEFT);
         mainLayout.addComponents(nameTextField, versionTextField, vendorTextField, descTextArea, buttonsLayout);
-        
+
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW);
@@ -277,8 +277,8 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
                 uiNotifcation.displayValidationError(
                         i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
             } else {
-                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(name, version, vendor,
-                        softwareManagement.findSoftwareModuleTypeByName(type), description);
+                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(softwareManagement,
+                        name, version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
                 if (newBaseSoftwareModule != null) {
                     /* display success message */
                     uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
@@ -15,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
  *
  *
  */
-public class ProxyDistribution extends DistributionSet {
+public class ProxyDistribution extends JpaDistributionSet {
 
     private static final long serialVersionUID = -8891449133620645310L;
 

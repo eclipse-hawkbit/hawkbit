@@ -84,6 +84,15 @@ public interface DistributionSetManagement {
     Long countDistributionSetsAll();
 
     /**
+     * Count all {@link DistributionSet}s in the repository that are not marked
+     * as deleted.
+     *
+     * @return number of {@link DistributionSet}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Long countDistributionSetsByType(@NotNull DistributionSetType type);
+
+    /**
      * @return number of {@link DistributionSetType}s in the repository.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -262,20 +271,6 @@ public interface DistributionSetManagement {
     DistributionSet findDistributionSetByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
-     * Retrieves {@link DistributionSet} List for overview purposes (no
-     * {@link SoftwareModule}s and {@link DistributionSetTag}s).
-     *
-     * Please use {@link #findDistributionSetListWithDetails(Iterable)} if
-     * details are required.
-     *
-     * @param dist
-     *            List of {@link DistributionSet} IDs to be found
-     * @return the found {@link DistributionSet}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
-
-    /**
      * finds all meta data by the given distribution set id.
      *
      * @param distributionSetId
@@ -305,6 +300,20 @@ public interface DistributionSetManagement {
     Page<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(@NotNull Long distributionSetId,
             @NotNull String rsqlParam, @NotNull Pageable pageable);
 
+    /**
+     * Retrieves {@link DistributionSet} List for overview purposes (no
+     * {@link SoftwareModule}s and {@link DistributionSetTag}s).
+     *
+     * Please use {@link #findDistributionSetListWithDetails(Iterable)} if
+     * details are required.
+     *
+     * @param dist
+     *            List of {@link DistributionSet} IDs to be found
+     * @return the found {@link DistributionSet}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<DistributionSet> findDistributionSetsAll(Collection<Long> dist);
+
     // TODO discuss: use enum instead of the true,false,null switch ?
     /**
      * finds all {@link DistributionSet}s.
@@ -328,7 +337,8 @@ public interface DistributionSetManagement {
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findDistributionSetsAll(@NotNull Pageable pageReq, Boolean deleted, Boolean complete);
+    Page<DistributionSet> findDistributionSetsByDeletedAndOrCompleted(@NotNull Pageable pageReq, Boolean deleted,
+            Boolean complete);
 
     /**
      * finds all {@link DistributionSet}s.
@@ -444,6 +454,26 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSetMetadata findOne(@NotNull DsMetadataCompositeKey id);
+
+    /**
+     * Generates an empty {@link DistributionSet} without persisting it.
+     * 
+     * @return {@link DistributionSet} object
+     */
+    DistributionSet generateDistributionSet();
+
+    DistributionSetMetadata generateDistributionSetMetadata();
+
+    DistributionSetMetadata generateDistributionSetMetadata(DistributionSet distributionSet, String key, String value);
+
+    /**
+     * Generates an empty {@link DistributionSetType} without persisting it.
+     * 
+     * @return {@link DistributionSetType} object
+     */
+    DistributionSetType generateDistributionSetType();
+
+    DistributionSetType generateDistributionSetType(String key, String name, String description);
 
     /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
@@ -567,17 +597,7 @@ public interface DistributionSetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType updateDistributionSetType(@NotNull DistributionSetType dsType);
 
-    /**
-     * Generates an empty {@link DistributionSetType} without persisting it.
-     * 
-     * @return {@link DistributionSetType} object
-     */
-    DistributionSetType generateDistributionSetType();
+    DistributionSet generateDistributionSet(String name, String version, String description, DistributionSetType type,
+            Collection<SoftwareModule> moduleList);
 
-    /**
-     * Generates an empty {@link DistributionSet} without persisting it.
-     * 
-     * @return {@link DistributionSet} object
-     */
-    DistributionSet generateDistributionSet();
 }

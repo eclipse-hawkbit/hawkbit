@@ -38,6 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -71,7 +72,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     private Long targetId;
 
     @Transient
-    private boolean entityNew = false;
+    private boolean entityNew;
 
     @CascadeOnDelete
     @OneToOne(cascade = { CascadeType.MERGE,
@@ -81,10 +82,10 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
     private JpaTarget target;
 
     @Column(name = "address", length = 512)
-    private String address = null;
+    private String address;
 
     @Column(name = "last_target_query")
-    private Long lastTargetQuery = null;
+    private Long lastTargetQuery;
 
     @Column(name = "install_date")
     private Long installationDate;
@@ -216,6 +217,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
         return controllerAttributes;
     }
 
+    @Override
     public boolean isRequestControllerAttributes() {
         return requestControllerAttributes;
     }
@@ -273,63 +275,6 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
             final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
             return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
         });
-    }
-
-    /**
-     * The poll time object which holds all the necessary information around the
-     * target poll time, e.g. the last poll time, the next poll time and the
-     * overdue poll time.
-     *
-     */
-    public static final class PollStatus {
-        private final LocalDateTime lastPollDate;
-        private final LocalDateTime nextPollDate;
-        private final LocalDateTime overdueDate;
-        private final LocalDateTime currentDate;
-
-        private PollStatus(final LocalDateTime lastPollDate, final LocalDateTime nextPollDate,
-                final LocalDateTime overdueDate, final LocalDateTime currentDate) {
-            this.lastPollDate = lastPollDate;
-            this.nextPollDate = nextPollDate;
-            this.overdueDate = overdueDate;
-            this.currentDate = currentDate;
-        }
-
-        /**
-         * calculates if the target poll time is overdue and the target has not
-         * been polled in the configured poll time interval.
-         *
-         * @return {@code true} if the current time is after the poll time
-         *         overdue date otherwise {@code false}.
-         */
-        public boolean isOverdue() {
-            return currentDate.isAfter(overdueDate);
-        }
-
-        /**
-         * @return the lastPollDate
-         */
-        public LocalDateTime getLastPollDate() {
-            return lastPollDate;
-        }
-
-        public LocalDateTime getNextPollDate() {
-            return nextPollDate;
-        }
-
-        public LocalDateTime getOverdueDate() {
-            return overdueDate;
-        }
-
-        public LocalDateTime getCurrentDate() {
-            return currentDate;
-        }
-
-        @Override
-        public String toString() {
-            return "PollTime [lastPollDate=" + lastPollDate + ", nextPollDate=" + nextPollDate + ", overdueDate="
-                    + overdueDate + ", currentDate=" + currentDate + "]";
-        }
     }
 
     @Override

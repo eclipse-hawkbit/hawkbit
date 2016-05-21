@@ -12,8 +12,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo.PollStatus;
-
 public interface TargetInfo extends Serializable {
 
     Long getId();
@@ -42,5 +40,7 @@ public interface TargetInfo extends Serializable {
      *         before this method returns {@code null}
      */
     PollStatus getPollStatus();
+
+    boolean isRequestControllerAttributes();
 
 }

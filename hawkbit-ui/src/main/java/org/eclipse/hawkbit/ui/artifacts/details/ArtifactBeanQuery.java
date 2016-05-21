@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.jpa.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -72,7 +73,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
 
     @Override
     protected LocalArtifact constructBean() {
-        return new LocalArtifact();
+        return new JpaLocalArtifact();
     }
 
     @Override

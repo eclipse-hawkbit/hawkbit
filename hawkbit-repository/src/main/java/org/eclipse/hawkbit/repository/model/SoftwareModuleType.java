@@ -12,7 +12,11 @@ public interface SoftwareModuleType extends NamedEntity {
 
     String getKey();
 
+    void setKey(String key);
+
     int getMaxAssignments();
+
+    void setMaxAssignments(int maxAssignments);
 
     boolean isDeleted();
 

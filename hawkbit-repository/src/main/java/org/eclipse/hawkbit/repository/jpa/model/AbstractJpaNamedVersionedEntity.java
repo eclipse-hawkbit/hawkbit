@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
  *
  */
 @MappedSuperclass
-public abstract class JpaNamedVersionedEntity extends JpaNamedEntity implements NamedVersionedEntity {
+public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEntity implements NamedVersionedEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "version", nullable = false, length = 64)
@@ -34,12 +34,12 @@ public abstract class JpaNamedVersionedEntity extends JpaNamedEntity implements 
      *            of the entity
      * @param description
      */
-    public JpaNamedVersionedEntity(final String name, final String version, final String description) {
+    public AbstractJpaNamedVersionedEntity(final String name, final String version, final String description) {
         super(name, description);
         this.version = version;
     }
 
-    JpaNamedVersionedEntity() {
+    AbstractJpaNamedVersionedEntity() {
         super();
     }
 

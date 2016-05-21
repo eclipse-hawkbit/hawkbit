@@ -17,15 +17,13 @@ import org.eclipse.hawkbit.repository.model.ExternalArtifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
 
 /**
- * External repositories for artifact storage. The SP server provides URLs for
- * the targets to download from these external resources but does not access
- * them itself.
+ * JPA implementation of {@link ExternalArtifactProvider}.
  *
  */
 @Table(name = "sp_external_provider", indexes = {
         @Index(name = "sp_idx_external_provider_prim", columnList = "tenant,id") })
 @Entity
-public class JpaExternalArtifactProvider extends JpaNamedEntity implements ExternalArtifactProvider {
+public class JpaExternalArtifactProvider extends AbstractJpaNamedEntity implements ExternalArtifactProvider {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "base_url", length = 512, nullable = false)

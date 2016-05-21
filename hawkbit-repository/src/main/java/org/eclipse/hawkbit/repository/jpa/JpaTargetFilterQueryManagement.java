@@ -64,11 +64,12 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Page<TargetFilterQuery> findAllTargetFilterQuery(final Pageable pageable) {
-        return convertPage(targetFilterQueryRepository.findAll(pageable));
+        return convertPage(targetFilterQueryRepository.findAll(pageable), pageable);
     }
 
-    private static Page<TargetFilterQuery> convertPage(final Page<JpaTargetFilterQuery> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<TargetFilterQuery> convertPage(final Page<JpaTargetFilterQuery> findAll,
+            final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
@@ -77,7 +78,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         if (!Strings.isNullOrEmpty(name)) {
             specList.add(TargetFilterQuerySpecification.likeName(name));
         }
-        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList));
+        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
 
     private Page<JpaTargetFilterQuery> findTargetFilterQueryByCriteriaAPI(final Pageable pageable,
@@ -106,6 +107,11 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
         Assert.notNull(targetFilterQuery.getId());
         return targetFilterQueryRepository.save((JpaTargetFilterQuery) targetFilterQuery);
+    }
+
+    @Override
+    public TargetFilterQuery generateTargetFilterQuery() {
+        return new JpaTargetFilterQuery();
     }
 
 }

@@ -511,8 +511,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         final List<Long> deployedTargetIDs = deploymentResult.getDeployedTargetIDs();
         final List<Long> undeployedTargetIDs = deploymentResult.getUndeployedTargetIDs();
-        final List<Target> savedNakedTargets = deploymentResult.getUndeployedTargets();
-        final List<Target> savedDeployedTargets = deploymentResult.getDeployedTargets();
+        final Collection<JpaTarget> savedNakedTargets = (Collection) deploymentResult.getUndeployedTargets();
+        final Collection<JpaTarget> savedDeployedTargets = (Collection) deploymentResult.getDeployedTargets();
 
         // retrieving all Actions created by the assignDistributionSet call
         final Page<JpaAction> page = actionRepository.findAll(pageReq);
@@ -540,11 +540,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // test the content of different lists
         assertThat(allFoundTargets).as("content of founded target is wrong").containsAll(deployedTargetsFromDB)
                 .containsAll(undeployedTargetsFromDB);
-        assertThat(deployedTargetsFromDB).as("content of deployed target is wrong")
-                .containsAll((Iterable<? extends JpaTarget>) savedDeployedTargets)
+        assertThat(deployedTargetsFromDB).as("content of deployed target is wrong").containsAll(savedDeployedTargets)
                 .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, JpaTarget.class));
-        assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong")
-                .containsAll((Iterable<? extends JpaTarget>) savedNakedTargets)
+        assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
                 .doesNotContain(Iterables.toArray(deployedTargetsFromDB, JpaTarget.class));
 
         // For each of the 4 targets 1 distribution sets gets assigned
@@ -675,10 +673,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         }
 
         // verify that deleted attribute is used correctly
-        List<DistributionSet> allFoundDS = distributionSetManagement.findDistributionSetsAll(pageReq, false, true)
-                .getContent();
+        List<DistributionSet> allFoundDS = distributionSetManagement
+                .findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true).getContent();
         assertThat(allFoundDS.size()).as("no ds should be founded").isEqualTo(0);
-        allFoundDS = distributionSetManagement.findDistributionSetsAll(pageRequest, true, true).getContent();
+        allFoundDS = distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageRequest, true, true)
+                .getContent();
         assertThat(allFoundDS).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
@@ -692,9 +691,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         // has been installed
         // successfully and no activeAction is referring to created distribution
         // sets
-        allFoundDS = distributionSetManagement.findDistributionSetsAll(pageRequest, false, true).getContent();
+        allFoundDS = distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageRequest, false, true)
+                .getContent();
         assertThat(allFoundDS.size()).as("no ds should be founded").isEqualTo(0);
-        allFoundDS = distributionSetManagement.findDistributionSetsAll(pageRequest, true, true).getContent();
+        allFoundDS = distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageRequest, true, true)
+                .getContent();
         assertThat(allFoundDS).as("size of founded ds is wrong").hasSize(noOfDistributionSets);
 
     }

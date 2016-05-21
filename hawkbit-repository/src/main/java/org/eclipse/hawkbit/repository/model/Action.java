@@ -9,13 +9,21 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * Operations to be executed by the target. Usually a software update. Other
+ * supported actions are the cancellation of a running update action or a
+ * refresh request for target attributes.
+ *
+ */
 public interface Action extends TenantAwareBaseEntity {
 
     /**
-     * indicating that target action has no force time {@link #hasForcedTime()}.
+     * indicating that target action has no force time which is only needed in
+     * case of {@link ActionType#TIMEFORCED}.
      */
-    public static final long NO_FORCE_TIME = 0L;
+    long NO_FORCE_TIME = 0L;
 
     /**
      * @return the distributionSet
@@ -29,74 +37,117 @@ public interface Action extends TenantAwareBaseEntity {
     void setDistributionSet(DistributionSet distributionSet);
 
     /**
-     * @return true when action is in state {@link Status#CANCELING} or
-     *         {@link Status#CANCELED}, false otherwise
+     * @return <code>true</code> when action is in state
+     *         {@link Status#CANCELING} or {@link Status#CANCELED}, false
+     *         otherwise
      */
-    boolean isCancelingOrCanceled();
-
-    void setActive(boolean active);
-
-    Status getStatus();
-
-    void setStatus(Status status);
-
-    int getDownloadProgressPercent();
-
-    void setDownloadProgressPercent(int downloadProgressPercent);
-
-    boolean isActive();
-
-    void setActionType(ActionType actionType);
+    default boolean isCancelingOrCanceled() {
+        return Status.CANCELING.equals(getStatus()) || Status.CANCELED.equals(getStatus());
+    }
 
     /**
-     * @return the actionType
+     * @return current {@link Status#DOWNLOAD} progress if known by the update
+     *         server.
+     */
+    int getDownloadProgressPercent();
+
+    /**
+     * @return current {@link Status} of the {@link Action}.
+     */
+    Status getStatus();
+
+    /**
+     * @param status
+     *            of the {@link Action}
+     */
+    void setStatus(Status status);
+
+    /**
+     * @return <code>true</code> if {@link Action} is still running.
+     */
+    boolean isActive();
+
+    /**
+     * @return the {@link ActionType}
      */
     ActionType getActionType();
 
+    /**
+     * @return list of {@link ActionStatus} entries.
+     */
     List<ActionStatus> getActionStatus();
 
+    /**
+     * @param target
+     *            of this {@link Action}
+     */
     void setTarget(Target target);
 
+    /**
+     * @return {@link Target} of this {@link Action}.
+     */
     Target getTarget();
 
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} after which
+     *         {@link #isForced()} switches to <code>true</code> in case of
+     *         {@link ActionType#TIMEFORCED}.
+     */
     long getForcedTime();
 
-    void setForcedTime(long forcedTime);
-
+    /**
+     * @return rolloutGroup related to this {@link Action}.
+     */
     RolloutGroup getRolloutGroup();
 
-    void setRolloutGroup(RolloutGroup rolloutGroup);
-
+    /**
+     * @return rollout related to this {@link Action}.
+     */
     Rollout getRollout();
 
-    void setRollout(Rollout rollout);
-
     /**
-     * checks if the {@link #forcedTime} is hit by the given
+     * checks if the {@link #getForcedTime()} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
      *
      * @param hitTimeMillis
      *            the milliseconds, mostly the
      *            {@link System#currentTimeMillis()}
-     * @return {@code true} if this {@link #type} is in
+     * @return {@code true} if this {@link #getActionType()} is in
      *         {@link ActionType#TIMEFORCED} and the given {@code hitTimeMillis}
-     *         is greater than the {@link #forcedTime} otherwise {@code false}
+     *         is greater than the {@link #getForcedTime()} otherwise
+     *         {@code false}
      */
-    boolean isHitAutoForceTime(long hitTimeMillis);
+    default boolean isHitAutoForceTime(final long hitTimeMillis) {
+        if (ActionType.TIMEFORCED.equals(getActionType())) {
+            return hitTimeMillis >= getForcedTime();
+        }
+        return false;
+    }
 
     /**
-     * @return {@code true} if either the {@link #type} is
+     * @return {@code true} if either the {@link #getActionType()} is
      *         {@link ActionType#FORCED} or {@link ActionType#TIMEFORCED} but
-     *         then if the {@link #forcedTime} has been exceeded otherwise
+     *         then if the {@link #getForcedTime()} has been exceeded otherwise
      *         always {@code false}
      */
-    boolean isForce();
+    default boolean isForce() {
+        switch (getActionType()) {
+        case FORCED:
+            return true;
+        case TIMEFORCED:
+            return isHitAutoForceTime(System.currentTimeMillis());
+        default:
+            return false;
+        }
+    }
 
     /**
      * @return true when action is forced, false otherwise
      */
-    boolean isForced();
+    default boolean isForced() {
+        return ActionType.FORCED.equals(getActionType());
+    }
 
     /**
      * Action status as reported by the controller.
@@ -159,7 +210,21 @@ public interface Action extends TenantAwareBaseEntity {
      *
      */
     public enum ActionType {
-        FORCED, SOFT, TIMEFORCED;
-    }
+        /**
+         * Forced action execution. Target is advised to executed immediately.
+         */
+        FORCED,
 
+        /**
+         * Soft action execution. Target is advised to execute when it fits.
+         */
+        SOFT,
+
+        /**
+         * {@link #SOFT} action execution until
+         * {@link Action#isHitAutoForceTime(long)} is reached, {@link #FORCED}
+         * after that.
+         */
+        TIMEFORCED;
+    }
 }

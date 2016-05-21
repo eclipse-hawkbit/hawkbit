@@ -26,18 +26,13 @@ import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSFile;
 
 /**
- * Tenant specific locally stored artifact representation that is used by
- * {@link SoftwareModule} . It contains all information that is provided by the
- * user while all SP server generated information related to the artifact (hash,
- * length) is stored directly with the binary itself.
- *
- *
+ * JPA implementation of {@link LocalArtifact}.
  *
  */
 @Table(name = "sp_artifact", indexes = { @Index(name = "sp_idx_artifact_01", columnList = "tenant,software_module"),
         @Index(name = "sp_idx_artifact_prim", columnList = "tenant,id") })
 @Entity
-public class JpaLocalArtifact extends JpaArtifact implements LocalArtifact {
+public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifact {
     private static final long serialVersionUID = 1L;
 
     @NotNull
@@ -101,7 +96,6 @@ public class JpaLocalArtifact extends JpaArtifact implements LocalArtifact {
         return softwareModule;
     }
 
-    @Override
     public final void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = (JpaSoftwareModule) softwareModule;
         this.softwareModule.addArtifact(this);

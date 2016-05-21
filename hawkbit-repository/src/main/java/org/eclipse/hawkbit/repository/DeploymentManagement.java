@@ -322,8 +322,10 @@ public interface DeploymentManagement {
      * @return the corresponding {@link Page} of {@link ActionStatus}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Action action,
-            boolean withMessages);
+    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Action action);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageReq, @NotNull Action action);
 
     /**
      * Retrieves all {@link Action}s of a specific target ordered by action ID.
@@ -445,4 +447,7 @@ public interface DeploymentManagement {
      * @return {@link Action} object
      */
     Action generateAction();
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<ActionStatus> findActionStatusAll(@NotNull Pageable pageable);
 }

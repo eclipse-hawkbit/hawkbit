@@ -96,4 +96,10 @@ public interface TargetFilterQueryManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateTargetFilterQuery(@NotNull TargetFilterQuery targetFilterQuery);
 
+    /**
+     * Generates an empty {@link TargetFilterQuery} without persisting it.
+     * 
+     * @return {@link TargetFilterQuery} object
+     */
+    TargetFilterQuery generateTargetFilterQuery();
 }

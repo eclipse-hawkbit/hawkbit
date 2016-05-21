@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -35,6 +34,7 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionStatus;
@@ -46,7 +46,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -80,20 +79,21 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<RolloutGroup> findRolloutGroupsByRolloutId(final Long rolloutId, final Pageable page) {
-        return convertPage(rolloutGroupRepository.findByRolloutId(rolloutId, page));
+    public Page<RolloutGroup> findRolloutGroupsByRolloutId(final Long rolloutId, final Pageable pageable) {
+        return convertPage(rolloutGroupRepository.findByRolloutId(rolloutId, pageable), pageable);
     }
 
-    private static Page<RolloutGroup> convertPage(final Slice<JpaRolloutGroup> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<RolloutGroup> convertPage(final Page<JpaRolloutGroup> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
-    private static Page<Target> convertTPage(final Page<JpaTarget> findAll) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()));
+    private static Page<Target> convertTPage(final Page<JpaTarget> findAll, final Pageable pageable) {
+        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
     @Override
-    public Page<RolloutGroup> findRolloutGroupsAll(final Rollout rollout, final String rsqlParam, final Pageable page) {
+    public Page<RolloutGroup> findRolloutGroupsAll(final Rollout rollout, final String rsqlParam,
+            final Pageable pageable) {
 
         final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class);
 
@@ -103,12 +103,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                                 (root, query, criteriaBuilder) -> criteriaBuilder.and(
                                         criteriaBuilder.equal(root.get(JpaRolloutGroup_.rollout), rollout),
                                         specification.toPredicate(root, query, criteriaBuilder)),
-                                page));
+                                pageable),
+                pageable);
     }
 
     @Override
-    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable page) {
-        final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, page);
+    public Page<RolloutGroup> findAllRolloutGroupsWithDetailedStatus(final Long rolloutId, final Pageable pageable) {
+        final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, pageable);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(rollout -> rollout.getId())
                 .collect(Collectors.toList());
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
@@ -120,7 +121,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         }
 
-        return convertPage(rolloutGroups);
+        return convertPage(rolloutGroups, pageable);
     }
 
     @Override
@@ -145,7 +146,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Page<Target> findRolloutGroupTargets(final RolloutGroup rolloutGroup, final String rsqlParam,
-            final Pageable page) {
+            final Pageable pageable) {
 
         final Specification<JpaTarget> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
 
@@ -153,7 +154,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = root.join(JpaTarget_.rolloutTargetGroup);
             return criteriaBuilder.and(rsqlSpecification.toPredicate(root, query, criteriaBuilder),
                     criteriaBuilder.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup), rolloutGroup));
-        }, page));
+        }, pageable), pageable);
     }
 
     @Override

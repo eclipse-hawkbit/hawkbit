@@ -21,11 +21,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -478,12 +479,12 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private Rollout saveRollout() {
-        Rollout rolloutToCreate = new Rollout();
+        Rollout rolloutToCreate = rolloutManagement.generateRollout();
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
         final String targetFilter = getTargetFilterQuery();
         final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);
 
-        final RolloutGroupConditions conditions = new RolloutGroup.RolloutGroupConditionBuilder()
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
                 .successAction(RolloutGroupSuccessAction.NEXTGROUP, null)
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, triggerThreshold.getValue())
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, String.valueOf(errorThresoldPercent))
