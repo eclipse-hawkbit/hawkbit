@@ -14,14 +14,14 @@ package org.eclipse.hawkbit.repository.model;
  * @param <T>
  *            type of the configuration value
  */
-public class TenantConfigurationValue<T> {
+public final class TenantConfigurationValue<T> {
 
     private T value;
     private Long lastModifiedAt;
     private String lastModifiedBy;
     private Long createdAt;
     private String createdBy;
-    private boolean isGlobal = true;
+    private boolean global = true;
 
     private TenantConfigurationValue() {
     }
@@ -41,7 +41,7 @@ public class TenantConfigurationValue<T> {
      * @return true, if is global
      */
     public boolean isGlobal() {
-        return isGlobal;
+        return global;
     }
 
     /**
@@ -126,13 +126,13 @@ public class TenantConfigurationValue<T> {
         /**
          * set the is global attribute.
          *
-         * @param isGlobal
+         * @param global
          *            true when there is no tenant specific value, false
          *            otherwise
          * @return the tenant configuration value builder
          */
-        public TenantConfigurationValueBuilder<T> isGlobal(final boolean isGlobal) {
-            this.configuration.isGlobal = isGlobal;
+        public TenantConfigurationValueBuilder<T> global(final boolean global) {
+            this.configuration.global = global;
             return this;
         }
 

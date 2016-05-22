@@ -73,7 +73,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
     public void invalidRequestsOnArtifactResource() throws Exception {
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
         targets.add(target);
@@ -158,7 +158,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
     public void invalidRequestsOnArtifactResourceByName() throws Exception {
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
         targets.add(target);
@@ -244,7 +244,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(artifactRepository.findAll()).hasSize(0);
 
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<Target>();
         targets.add(target);
@@ -287,7 +287,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.")
     public void downloadMd5sumThroughControllerApi() throws Exception {
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
 
         // create ds
@@ -325,7 +325,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(artifactRepository.findAll()).hasSize(0);
 
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList();
         targets.add(target);
@@ -356,7 +356,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(artifactRepository.findAll()).hasSize(0);
 
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
         targets.add(target);
@@ -389,13 +389,13 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
                 Arrays.equals(result.getResponse().getContentAsByteArray(), random));
 
         // one (update) action
-        assertThat(actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent()).hasSize(1);
-        final Action action = actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent().get(0);
+        assertThat(deploymentManagement.findActionsByTarget(target)).hasSize(1);
+        final Action action = deploymentManagement.findActionsByTarget(target).get(0);
 
         // one status - download
         assertThat(actionStatusRepository.findAll()).hasSize(2);
-        assertThat(actionStatusRepository.findByAction(pageReq, action).getContent()).hasSize(2);
-        assertThat(actionStatusRepository.findByAction(new PageRequest(0, 400, Direction.DESC, "id"), action)
+        assertThat(action.getActionStatus()).hasSize(2);
+        assertThat(deploymentManagement.findActionStatusByAction(new PageRequest(0, 400, Direction.DESC, "id"), action)
                 .getContent().get(0).getStatus()).isEqualTo(Status.DOWNLOAD);
 
         // download complete
@@ -407,7 +407,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Test various HTTP range requests for artifact download, e.g. chunk download or download resume.")
     public void rangeDownloadArtifactByName() throws Exception {
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
         targets.add(target);
@@ -515,7 +515,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         assertThat(artifactRepository.findAll()).hasSize(0);
 
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
         final List<Target> targets = new ArrayList<>();
         targets.add(target);
@@ -538,7 +538,7 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
     @Description("Downloads an MD5SUM file by the related artifacts filename.")
     public void downloadMd5sumFileByName() throws Exception {
         // create target
-        Target target = new Target("4712");
+        Target target = targetManagement.generateTarget("4712");
         target = targetManagement.createTarget(target);
 
         // create ds

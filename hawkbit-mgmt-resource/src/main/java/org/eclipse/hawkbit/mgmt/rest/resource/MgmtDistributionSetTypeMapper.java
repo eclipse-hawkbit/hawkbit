@@ -14,10 +14,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -35,21 +36,22 @@ final class MgmtDistributionSetTypeMapper {
 
     }
 
-    static List<DistributionSetType> smFromRequest(final SoftwareManagement softwareManagement,
+    static List<DistributionSetType> smFromRequest(final DistributionSetManagement distributionSetManagement,
+            final SoftwareManagement softwareManagement,
             final Iterable<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
         final List<DistributionSetType> mappedList = new ArrayList<>();
 
         for (final MgmtDistributionSetTypeRequestBodyPost smRest : smTypesRest) {
-            mappedList.add(fromRequest(softwareManagement, smRest));
+            mappedList.add(fromRequest(distributionSetManagement, softwareManagement, smRest));
         }
         return mappedList;
     }
 
-    static DistributionSetType fromRequest(final SoftwareManagement softwareManagement,
-            final MgmtDistributionSetTypeRequestBodyPost smsRest) {
+    static DistributionSetType fromRequest(final DistributionSetManagement distributionSetManagement,
+            final SoftwareManagement softwareManagement, final MgmtDistributionSetTypeRequestBodyPost smsRest) {
 
-        final DistributionSetType result = new DistributionSetType(smsRest.getKey(), smsRest.getName(),
-                smsRest.getDescription());
+        final DistributionSetType result = distributionSetManagement.generateDistributionSetType(smsRest.getKey(),
+                smsRest.getName(), smsRest.getDescription());
 
         // Add mandatory
         smsRest.getMandatorymodules().stream().map(mand -> {

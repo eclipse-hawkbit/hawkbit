@@ -8,22 +8,53 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+/**
+ * {@link SoftwareModuleType} is an abstract definition used in
+ * {@link DistributionSetType}s and includes additional {@link SoftwareModule}
+ * specific information.
+ *
+ */
 public interface SoftwareModuleType extends NamedEntity {
 
+    /**
+     * @return business key of this {@link SoftwareModuleType}.
+     */
     String getKey();
 
+    /**
+     * @param key
+     *            of this {@link SoftwareModuleType}.
+     */
     void setKey(String key);
 
+    /**
+     * @return maximum assignments of an {@link SoftwareModule} of this type to
+     *         a {@link DistributionSet}.
+     */
     int getMaxAssignments();
 
+    /**
+     * @param maxAssignments
+     *            of an {@link SoftwareModule} of this type to a
+     *            {@link DistributionSet}.
+     */
     void setMaxAssignments(int maxAssignments);
 
+    /**
+     * @return <code>true</code> if the type is deleted and only kept for
+     *         history purposes.
+     */
     boolean isDeleted();
 
-    void setDeleted(boolean deleted);
-
+    /**
+     * @return get color code to by used in management UI views.
+     */
     String getColour();
 
-    void setColour(String colour);
+    /**
+     * @param colour
+     *            code to by used in management UI views.
+     */
+    void setColour(final String colour);
 
 }

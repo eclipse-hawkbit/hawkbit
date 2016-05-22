@@ -80,7 +80,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
-        targetManagement.createTarget(new Target(knownTargetControllerId));
+        targetManagement.createTarget(targetManagement.generateTarget(knownTargetControllerId));
         final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
@@ -226,7 +226,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that the target state machine of a precomissioned target switches from "
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
     public void rootRsPrecommissioned() throws Exception {
-        final Target target = new Target("4711");
+        final Target target = targetManagement.generateTarget("4711");
         targetManagement.createTarget(target);
 
         assertThat(targetRepository.findByControllerId("4711").getTargetInfo().getUpdateStatus())
@@ -265,7 +265,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
 
         // mock
-        final Target target = new Target("911");
+        final Target target = targetManagement.generateTarget("911");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         Target savedTarget = targetManagement.createTarget(target);

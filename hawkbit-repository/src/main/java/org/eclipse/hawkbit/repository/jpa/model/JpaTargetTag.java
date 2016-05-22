@@ -60,7 +60,7 @@ public class JpaTargetTag extends AbstractJpaTag implements TargetTag {
     }
 
     public JpaTargetTag() {
-        super();
+        // Default constructor for JPA.
     }
 
     @Override

@@ -336,7 +336,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
-        final ActionStatus actionStatus = new ActionStatus();
+        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
         actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
 
         actionStatus.setAction(action);

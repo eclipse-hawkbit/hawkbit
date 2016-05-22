@@ -19,8 +19,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.RolloutFields;
-import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -28,18 +26,18 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -80,8 +78,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Rollout> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = this.rolloutManagement
-                    .findAllWithDetailedStatusByPredicate(RSQLUtility.parse(rsqlParam, RolloutFields.class), pageable);
+            findModulesAll = this.rolloutManagement.findAllWithDetailedStatusByPredicate(rsqlParam, pageable);
         } else {
             findModulesAll = this.rolloutManagement.findAll(pageable);
         }
@@ -136,12 +133,12 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             errorActionExpr = rolloutRequestBody.getErrorAction().getExpression();
         }
 
-        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroup.RolloutGroupConditionBuilder()
+        final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder()
                 .successCondition(successCondition, successConditionExpr)
                 .successAction(successAction, successActionExpr).errorCondition(errorCondition, errorConditionExpr)
                 .errorAction(errorAction, errorActionExpr).build();
         final Rollout rollout = this.rolloutManagement.createRollout(
-                MgmtRolloutMapper.fromRequest(rolloutRequestBody, distributionSet,
+                MgmtRolloutMapper.fromRequest(rolloutManagement, rolloutRequestBody, distributionSet,
                         rolloutRequestBody.getTargetFilterQuery()),
                 rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
 
@@ -191,8 +188,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<RolloutGroup> findRolloutGroupsAll;
         if (rsqlParam != null) {
-            findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsByPredicate(rollout,
-                    RSQLUtility.parse(rsqlParam, RolloutGroupFields.class), pageable);
+            findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsAll(rollout, rsqlParam, pageable);
         } else {
             findRolloutGroupsAll = this.rolloutGroupManagement.findRolloutGroupsByRolloutId(rolloutId, pageable);
         }
@@ -228,8 +224,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Page<Target> rolloutGroupTargets;
         if (rsqlParam != null) {
-            final Specification<Target> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class);
-            rolloutGroupTargets = this.rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup, rsqlSpecification,
+            rolloutGroupTargets = this.rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup, rsqlParam,
                     pageable);
         } else {
             final Page<Target> pageTargets = this.rolloutGroupManagement.findRolloutGroupTargets(rolloutGroup,

@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 
 /**
  * Software update operations in large scale IoT scenarios with hundred of
@@ -57,20 +59,46 @@ public interface Rollout extends NamedEntity {
      */
     RolloutStatus getStatus();
 
+    /**
+     * @return {@link ActionType} of the rollout.
+     */
     ActionType getActionType();
 
+    /**
+     * @param actionType
+     *            of the rollout.
+     */
     void setActionType(ActionType actionType);
 
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} after which
+     *         {@link #isForced()} switches to <code>true</code> in case of
+     *         {@link ActionType#TIMEFORCED}.
+     */
     long getForcedTime();
 
+    /**
+     * @param forcedTime
+     *            in {@link TimeUnit#MILLISECONDS} after which
+     *            {@link #isForced()} switches to <code>true</code> in case of
+     *            {@link ActionType#TIMEFORCED}.
+     */
     void setForcedTime(long forcedTime);
 
+    /**
+     * @return number of {@link Target}s in this rollout.
+     */
     long getTotalTargets();
 
-    int getRolloutGroupsTotal();
-
+    /**
+     * @return number of {@link RolloutGroup}s.
+     */
     int getRolloutGroupsCreated();
 
+    /**
+     * @return all states with the respective target count in that
+     *         {@link Status}.
+     */
     TotalTargetCountStatus getTotalTargetCountStatus();
 
     /**

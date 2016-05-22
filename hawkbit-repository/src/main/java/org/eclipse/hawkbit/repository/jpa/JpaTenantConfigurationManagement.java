@@ -81,7 +81,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
             final TenantConfigurationKey configurationKey, final Class<T> propertyType,
             final TenantConfiguration tenantConfiguration) {
         if (tenantConfiguration != null) {
-            return TenantConfigurationValue.<T> builder().isGlobal(false).createdBy(tenantConfiguration.getCreatedBy())
+            return TenantConfigurationValue.<T> builder().global(false).createdBy(tenantConfiguration.getCreatedBy())
                     .createdAt(tenantConfiguration.getCreatedAt())
                     .lastModifiedAt(tenantConfiguration.getLastModifiedAt())
                     .lastModifiedBy(tenantConfiguration.getLastModifiedBy())
@@ -89,7 +89,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
 
         } else if (configurationKey.getDefaultKeyName() != null) {
 
-            return TenantConfigurationValue.<T> builder().isGlobal(true).createdBy(null).createdAt(null)
+            return TenantConfigurationValue.<T> builder().global(true).createdBy(null).createdAt(null)
                     .lastModifiedAt(null).lastModifiedBy(null)
                     .value(getGlobalConfigurationValue(configurationKey, propertyType)).build();
         }
@@ -149,8 +149,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
 
         final Class<T> clazzT = (Class<T>) value.getClass();
 
-        return TenantConfigurationValue.<T> builder().isGlobal(false)
-                .createdBy(updatedTenantConfiguration.getCreatedBy())
+        return TenantConfigurationValue.<T> builder().global(false).createdBy(updatedTenantConfiguration.getCreatedBy())
                 .createdAt(updatedTenantConfiguration.getCreatedAt())
                 .lastModifiedAt(updatedTenantConfiguration.getLastModifiedAt())
                 .lastModifiedBy(updatedTenantConfiguration.getLastModifiedBy())

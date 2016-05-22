@@ -54,8 +54,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests.")
     public void getSoftwareModuleTypes() throws Exception {
-        SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         testType.setDescription("Desc1234");
         testType = softwareManagement.updateSoftwareModuleType(testType);
 
@@ -97,7 +97,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with sorting by MAXASSIGNMENTS field.")
     public void getSoftwareModuleTypesSortedByMaxAssignments() throws Exception {
         SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         testType.setDescription("Desc1234");
         testType = softwareManagement.updateSoftwareModuleType(testType);
 
@@ -138,9 +138,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     public void createSoftwareModuleTypes() throws JSONException, Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
-        types.add(new SoftwareModuleType("test1", "TestName1", "Desc1", 1));
-        types.add(new SoftwareModuleType("test2", "TestName2", "Desc2", 2));
-        types.add(new SoftwareModuleType("test3", "TestName3", "Desc3", 3));
+        types.add(softwareManagement.generateSoftwareModuleType("test1", "TestName1", "Desc1", 1));
+        types.add(softwareManagement.generateSoftwareModuleType("test2", "TestName2", "Desc2", 2));
+        types.add(softwareManagement.generateSoftwareModuleType("test3", "TestName3", "Desc3", 3));
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
@@ -183,7 +183,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} GET requests.")
     public void getSoftwareModuleType() throws Exception {
         SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         testType.setDescription("Desc1234");
         testType = softwareManagement.updateSoftwareModuleType(testType);
 
@@ -204,7 +204,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteSoftwareModuleTypeUnused() throws Exception {
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
 
@@ -219,9 +219,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteSoftwareModuleTypeUsed() throws Exception {
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
-        softwareManagement
-                .createSoftwareModule(new SoftwareModule(testType, "name", "version", "description", "vendor"));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        softwareManagement.createSoftwareModule(
+                softwareManagement.generateSoftwareModule(testType, "name", "version", "description", "vendor"));
 
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
         assertThat(softwareModuleTypeRepository.count()).isEqualTo(4);
@@ -237,7 +237,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} PUT requests.")
     public void updateSoftwareModuleTypeOnlyDescriptionAndNameUntouched() throws Exception {
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
                 .put("name", "nameShouldNotBeChanged").toString();
@@ -293,7 +293,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         final List<SoftwareModuleType> types = new ArrayList<>();
         types.add(testType);
@@ -332,9 +332,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Search erquest of software module types.")
     public void searchSoftwareModuleTypeRsql() throws Exception {
         final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         final SoftwareModuleType testType2 = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test1234", "TestName1234", "Desc123", 5));
+                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test1234", "TestName1234", "Desc123", 5));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
@@ -349,7 +349,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final SoftwareModule softwareModule = new SoftwareModule(osType, str, str, str, str);
+            final SoftwareModule softwareModule = softwareManagement.generateSoftwareModule(osType, str, str, str, str);
 
             softwareManagement.createSoftwareModule(softwareModule);
             character++;

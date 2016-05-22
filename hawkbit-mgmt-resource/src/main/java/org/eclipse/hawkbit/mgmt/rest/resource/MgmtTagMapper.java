@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
+import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -84,8 +85,9 @@ final class MgmtTagMapper {
 
         mapTag(response, distributionSetTag);
 
-        response.add(linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getDistributionSetTag(distributionSetTag.getId()))
-                .withRel("self"));
+        response.add(
+                linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getDistributionSetTag(distributionSetTag.getId()))
+                        .withRel("self"));
 
         response.add(linkTo(
                 methodOn(MgmtDistributionSetTagRestApi.class).getAssignedDistributionSets(distributionSetTag.getId()))
@@ -94,20 +96,22 @@ final class MgmtTagMapper {
         return response;
     }
 
-    static List<TargetTag> mapTargeTagFromRequest(final Iterable<MgmtTagRequestBodyPut> tags) {
+    static List<TargetTag> mapTargeTagFromRequest(final TagManagement tagManagement,
+            final Iterable<MgmtTagRequestBodyPut> tags) {
         final List<TargetTag> mappedList = new ArrayList<>();
         for (final MgmtTagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(
-                    new TargetTag(targetTagRest.getName(), targetTagRest.getDescription(), targetTagRest.getColour()));
+            mappedList.add(tagManagement.generateTargetTag(targetTagRest.getName(), targetTagRest.getDescription(),
+                    targetTagRest.getColour()));
         }
         return mappedList;
     }
 
-    static List<DistributionSetTag> mapDistributionSetTagFromRequest(final Iterable<MgmtTagRequestBodyPut> tags) {
+    static List<DistributionSetTag> mapDistributionSetTagFromRequest(final TagManagement tagManagement,
+            final Iterable<MgmtTagRequestBodyPut> tags) {
         final List<DistributionSetTag> mappedList = new ArrayList<>();
         for (final MgmtTagRequestBodyPut targetTagRest : tags) {
-            mappedList.add(new DistributionSetTag(targetTagRest.getName(), targetTagRest.getDescription(),
-                    targetTagRest.getColour()));
+            mappedList.add(tagManagement.generateDistributionSetTag(targetTagRest.getName(),
+                    targetTagRest.getDescription(), targetTagRest.getColour()));
         }
         return mappedList;
     }

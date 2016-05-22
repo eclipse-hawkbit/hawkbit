@@ -97,7 +97,7 @@ public final class MgmtDistributionSetMapper {
     static DistributionSet fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
             final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
 
-        final DistributionSet result = new DistributionSet();
+        final DistributionSet result = distributionSetManagement.generateDistributionSet();
         result.setDescription(dsRest.getDescription());
         result.setName(dsRest.getName());
         result.setType(findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement));
@@ -135,13 +135,14 @@ public final class MgmtDistributionSetMapper {
      * @return
      */
     static List<DistributionSetMetadata> fromRequestDsMetadata(final DistributionSet ds,
-            final List<MgmtMetadata> metadata) {
+            final List<MgmtMetadata> metadata, final DistributionSetManagement distributionSetManagement) {
         final List<DistributionSetMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final MgmtMetadata metadataRest : metadata) {
             if (metadataRest.getKey() == null) {
                 throw new IllegalArgumentException("the key of the metadata must be present");
             }
-            mappedList.add(new DistributionSetMetadata(metadataRest.getKey(), ds, metadataRest.getValue()));
+            mappedList.add(distributionSetManagement.generateDistributionSetMetadata(ds, metadataRest.getKey(),
+                    metadataRest.getValue()));
         }
         return mappedList;
     }
@@ -170,12 +171,11 @@ public final class MgmtDistributionSetMapper {
 
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
-        response.add(
-                linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getDsId())).withRel("self"));
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getDsId()))
+                .withRel("self"));
 
-        response.add(linkTo(
-                methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(distributionSet.getType().getId()))
-                        .withRel("type"));
+        response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
+                .getDistributionSetType(distributionSet.getType().getId())).withRel("type"));
 
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getDsId(),
                 Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
@@ -206,7 +206,7 @@ public final class MgmtDistributionSetMapper {
 
     static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {
         final MgmtMetadata metadataRest = new MgmtMetadata();
-        metadataRest.setKey(metadata.getId().getKey());
+        metadataRest.setKey(metadata.getKey());
         metadataRest.setValue(metadata.getValue());
         return metadataRest;
     }

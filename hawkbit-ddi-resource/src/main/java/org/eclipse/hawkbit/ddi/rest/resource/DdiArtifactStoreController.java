@@ -138,7 +138,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());
         final String range = request.getHeader("Range");
 
-        final ActionStatus actionStatus = new ActionStatus();
+        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
         actionStatus.setStatus(Status.DOWNLOAD);
@@ -150,7 +150,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
             actionStatus.addMessage(
                     ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
-        controllerManagement.addActionStatusMessage(actionStatus);
+        controllerManagement.addInformationalActionStatus(actionStatus);
         return action;
     }
 

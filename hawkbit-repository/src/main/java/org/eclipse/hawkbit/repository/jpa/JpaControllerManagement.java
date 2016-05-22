@@ -395,7 +395,7 @@ public class JpaControllerManagement implements ControllerManagement {
         // retrieves after the other we don't want to store to protect to
         // overflood action status in
         // case controller retrieves a action multiple times.
-        if (resultList.isEmpty() || resultList.get(0)[1] != Status.RETRIEVED) {
+        if (resultList.isEmpty() || !Status.RETRIEVED.equals(resultList.get(0)[1])) {
             // document that the status has been retrieved
             actionStatusRepository
                     .save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));

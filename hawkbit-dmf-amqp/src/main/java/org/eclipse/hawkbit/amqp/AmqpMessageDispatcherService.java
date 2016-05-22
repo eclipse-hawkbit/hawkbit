@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
@@ -51,6 +52,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     @Autowired
     private AmqpSenderService amqpSenderService;
+
+    @Autowired
+    private SoftwareManagement softwareManagement;
 
     /**
      * Constructor.

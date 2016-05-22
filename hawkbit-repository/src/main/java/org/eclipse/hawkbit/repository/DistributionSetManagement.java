@@ -86,6 +86,9 @@ public interface DistributionSetManagement {
     /**
      * Count all {@link DistributionSet}s in the repository that are not marked
      * as deleted.
+     * 
+     * @param type
+     *            to look for
      *
      * @return number of {@link DistributionSet}s
      */
@@ -289,8 +292,8 @@ public interface DistributionSetManagement {
      *
      * @param distributionSetId
      *            the distribution set id to retrieve the meta data from
-     * @param spec
-     *            the specification to filter the result
+     * @param rsqlParam
+     *            rsql query string
      * @param pageable
      *            the page request to page the result
      * @return a paged result of all meta data entries for a given distribution
@@ -343,8 +346,8 @@ public interface DistributionSetManagement {
     /**
      * finds all {@link DistributionSet}s.
      *
-     * @param spec
-     *            the specification to add for the search query.
+     * @param rsqlParam
+     *            rsql query string
      * @param pageReq
      *            the pagination parameter
      * @param deleted
@@ -432,8 +435,8 @@ public interface DistributionSetManagement {
     /**
      * Generic predicate based query for {@link DistributionSetType}.
      *
-     * @param spec
-     *            of the search
+     * @param rsqlParam
+     *            rsql query string
      * @param pageable
      *            parameter for paging
      *

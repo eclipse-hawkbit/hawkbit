@@ -32,10 +32,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
     @Column(name = "type_key", nullable = false, length = 64)
     private String key;
 
-    public void setMaxAssignments(final int maxAssignments) {
-        this.maxAssignments = maxAssignments;
-    }
-
     @Column(name = "max_ds_assignments", nullable = false)
     private int maxAssignments;
 
@@ -87,10 +83,15 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
     }
 
     /**
-     * Default Constructor.
+     * Default Constructor for JPA.
      */
     public JpaSoftwareModuleType() {
-        super();
+        // Default Constructor for JPA.
+    }
+
+    @Override
+    public void setMaxAssignments(final int maxAssignments) {
+        this.maxAssignments = maxAssignments;
     }
 
     @Override
@@ -108,7 +109,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
         return deleted;
     }
 
-    @Override
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }

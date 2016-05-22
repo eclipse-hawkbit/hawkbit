@@ -27,22 +27,18 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetWithActionType;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.TargetWithActionType;
+import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,10 +92,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<DistributionSet> findDsPage;
         if (rsqlParam != null) {
-            findDsPage = this.distributionSetManagement.findDistributionSetsAll(
-                    RSQLUtility.parse(rsqlParam, DistributionSetFields.class), pageable, false);
+            findDsPage = this.distributionSetManagement.findDistributionSetsAll(rsqlParam, pageable, false);
         } else {
-            findDsPage = this.distributionSetManagement.findDistributionSetsAll(pageable, false, null);
+            findDsPage = this.distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageable, false, null);
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDsPage.getContent());
@@ -181,8 +176,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<Target> targetsAssignedDS;
         if (rsqlParam != null) {
-            targetsAssignedDS = this.targetManagement.findTargetByAssignedDistributionSet(distributionSetId,
-                    RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
+            targetsAssignedDS = this.targetManagement.findTargetByAssignedDistributionSet(distributionSetId, rsqlParam,
+                    pageable);
         } else {
             targetsAssignedDS = this.targetManagement.findTargetByAssignedDistributionSet(distributionSetId, pageable);
         }
@@ -210,7 +205,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Page<Target> targetsInstalledDS;
         if (rsqlParam != null) {
             targetsInstalledDS = this.targetManagement.findTargetByInstalledDistributionSet(distributionSetId,
-                    RSQLUtility.parse(rsqlParam, TargetFields.class), pageable);
+                    rsqlParam, pageable);
         } else {
             targetsInstalledDS = this.targetManagement.findTargetByInstalledDistributionSet(distributionSetId,
                     pageable);
@@ -257,8 +252,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Page<DistributionSetMetadata> metaDataPage;
 
         if (rsqlParam != null) {
-            metaDataPage = this.distributionSetManagement.findDistributionSetMetadataByDistributionSetId(
-                    distributionSetId, RSQLUtility.parse(rsqlParam, DistributionSetMetadataFields.class), pageable);
+            metaDataPage = this.distributionSetManagement
+                    .findDistributionSetMetadataByDistributionSetId(distributionSetId, rsqlParam, pageable);
         } else {
             metaDataPage = this.distributionSetManagement
                     .findDistributionSetMetadataByDistributionSetId(distributionSetId, pageable);
@@ -289,8 +284,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        final DistributionSetMetadata updated = this.distributionSetManagement
-                .updateDistributionSetMetadata(new DistributionSetMetadata(metadataKey, ds, metadata.getValue()));
+        final DistributionSetMetadata updated = this.distributionSetManagement.updateDistributionSetMetadata(
+                distributionSetManagement.generateDistributionSetMetadata(ds, metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(updated));
     }
 
@@ -312,8 +307,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
-        final List<DistributionSetMetadata> created = this.distributionSetManagement
-                .createDistributionSetMetadata(MgmtDistributionSetMapper.fromRequestDsMetadata(ds, metadataRest));
+        final List<DistributionSetMetadata> created = this.distributionSetManagement.createDistributionSetMetadata(
+                MgmtDistributionSetMapper.fromRequestDsMetadata(ds, metadataRest, distributionSetManagement));
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDsMetadata(created), HttpStatus.CREATED);
 
     }

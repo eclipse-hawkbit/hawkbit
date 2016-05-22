@@ -59,10 +59,9 @@ public class DistributionSetAssignmentResult extends AssignmentResult<Target> {
         return actions;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Target> getAssignedEntity() {
-        return (List<Target>) targetManagement.findTargetByControllerID(assignedTargets);
+        return targetManagement.findTargetByControllerID(assignedTargets);
     }
 
 }

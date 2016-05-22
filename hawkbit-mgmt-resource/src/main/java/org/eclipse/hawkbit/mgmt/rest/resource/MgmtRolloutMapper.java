@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction.Succ
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -83,9 +84,9 @@ final class MgmtRolloutMapper {
         return body;
     }
 
-    static Rollout fromRequest(final MgmtRolloutRestRequestBody restRequest, final DistributionSet distributionSet,
-            final String filterQuery) {
-        final Rollout rollout = new Rollout();
+    static Rollout fromRequest(final RolloutManagement rolloutManagement, final MgmtRolloutRestRequestBody restRequest,
+            final DistributionSet distributionSet, final String filterQuery) {
+        final Rollout rollout = rolloutManagement.generateRollout();
         rollout.setName(restRequest.getName());
         rollout.setDescription(restRequest.getDescription());
         rollout.setDistributionSet(distributionSet);

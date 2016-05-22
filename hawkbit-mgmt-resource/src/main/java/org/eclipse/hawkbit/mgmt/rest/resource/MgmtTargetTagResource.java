@@ -20,14 +20,12 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +73,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             countTargetsAll = this.tagManagement.countTargetTags();
 
         } else {
-            final Page<TargetTag> findTargetPage = this.tagManagement
-                    .findAllTargetTags(RSQLUtility.parse(rsqlParam, TagFields.class), pageable);
+            final Page<TargetTag> findTargetPage = this.tagManagement.findAllTargetTags(rsqlParam, pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
 
@@ -96,7 +93,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
-                .createTargetTags(MgmtTagMapper.mapTargeTagFromRequest(tags));
+                .createTargetTags(MgmtTagMapper.mapTargeTagFromRequest(tagManagement, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
     }
 

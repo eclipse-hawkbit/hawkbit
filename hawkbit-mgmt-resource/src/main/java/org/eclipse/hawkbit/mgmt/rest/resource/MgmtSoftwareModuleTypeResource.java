@@ -18,12 +18,10 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,8 +60,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
         final Slice<SoftwareModuleType> findModuleTypessAll;
         Long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = this.softwareManagement.findSoftwareModuleTypesByPredicate(
-                    RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class), pageable);
+            findModuleTypessAll = this.softwareManagement.findSoftwareModuleTypesAll(rsqlParam, pageable);
             countModulesAll = ((Page<SoftwareModuleType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = this.softwareManagement.findSoftwareModuleTypesAll(pageable);
@@ -112,8 +109,8 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
             @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
-        final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement
-                .createSoftwareModuleType(MgmtSoftwareModuleTypeMapper.smFromRequest(softwareModuleTypes));
+        final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement.createSoftwareModuleType(
+                MgmtSoftwareModuleTypeMapper.smFromRequest(softwareManagement, softwareModuleTypes));
 
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules),
                 HttpStatus.CREATED);

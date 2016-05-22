@@ -189,12 +189,12 @@ public interface Action extends TenantAwareBaseEntity {
         CANCELING,
 
         /**
-         * Action has been presented to the target.
+         * Action has been send to the target.
          */
         RETRIEVED,
 
         /**
-         * Action needs download by this target which has now started.
+         * Action requests download by this target which has now started.
          */
         DOWNLOAD,
 

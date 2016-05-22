@@ -12,14 +12,13 @@ import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPut;
-import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -27,7 +26,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,8 +69,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final Slice<DistributionSetType> findModuleTypessAll;
         Long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = distributionSetManagement.findDistributionSetTypesByPredicate(
-                    RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class), pageable);
+            findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(rsqlParam, pageable);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = distributionSetManagement.findDistributionSetTypesAll(pageable);
@@ -124,8 +121,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
-        final List<DistributionSetType> createdSoftwareModules = distributionSetManagement.createDistributionSetTypes(
-                MgmtDistributionSetTypeMapper.smFromRequest(softwareManagement, distributionSetTypes));
+        final List<DistributionSetType> createdSoftwareModules = distributionSetManagement
+                .createDistributionSetTypes(MgmtDistributionSetTypeMapper.smFromRequest(distributionSetManagement,
+                        softwareManagement, distributionSetTypes));
 
         return new ResponseEntity<>(MgmtDistributionSetTypeMapper.toTypesResponse(createdSoftwareModules),
                 HttpStatus.CREATED);

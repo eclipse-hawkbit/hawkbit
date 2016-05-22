@@ -59,8 +59,11 @@ public class JpaDistributionSetTag extends AbstractJpaTag implements Distributio
         super(name, description, colour);
     }
 
+    /**
+     * Default constructor for JPA.
+     */
     public JpaDistributionSetTag() {
-        super();
+        // Default constructor for JPA.
     }
 
     @Override

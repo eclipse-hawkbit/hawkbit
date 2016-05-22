@@ -49,7 +49,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")
     public void rootRsCancelActionButContinueAnyway() throws Exception {
         // prepare test data
-        final Target target = new Target("4712");
+        final Target target = targetManagement.generateTarget("4712");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         final Target savedTarget = targetManagement.createTarget(target);
@@ -106,7 +106,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Test for cancel operation of a update action.")
     public void rootRsCancelAction() throws Exception {
-        final Target target = new Target("4712");
+        final Target target = targetManagement.generateTarget("4712");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
         final Target savedTarget = targetManagement.createTarget(target);
@@ -224,7 +224,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     }
 
     private Action createCancelAction(final String targetid) {
-        final Target target = new Target(targetid);
+        final Target target = targetManagement.generateTarget(targetid);
         final DistributionSet ds = TestDataUtil.generateDistributionSet(targetid, softwareManagement,
                 distributionSetManagement);
         final Target savedTarget = targetManagement.createTarget(target);
@@ -241,7 +241,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Description("Tests the feedback channel of the cancel operation.")
     public void rootRsCancelActionFeedback() throws Exception {
 
-        final Target target = new Target("4712");
+        final Target target = targetManagement.generateTarget("4712");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
 
@@ -334,7 +334,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Tests the feeback chanel of for multiple open cancel operations on the same target.")
     public void multipleCancelActionFeedback() throws Exception {
-        final Target target = new Target("4712");
+        final Target target = targetManagement.generateTarget("4712");
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement, true);
         final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
@@ -453,7 +453,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Tests the feeback channel closing for too many feedbacks, i.e. denial of service prevention.")
     public void tooMuchCancelActionFeedback() throws Exception {
-        final Target target = targetManagement.createTarget(new Target("4712"));
+        final Target target = targetManagement.createTarget(targetManagement.generateTarget("4712"));
         final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
                 distributionSetManagement);
 

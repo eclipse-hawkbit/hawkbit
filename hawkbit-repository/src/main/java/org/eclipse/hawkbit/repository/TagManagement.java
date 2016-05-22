@@ -130,8 +130,8 @@ public interface TagManagement {
     /**
      * Retrieves all DistributionSet tags based on the given specification.
      *
-     * @param spec
-     *            the specification for the query
+     * @param rsqlParam
+     *            rsql query string
      * @param pageable
      *            pagination parameter
      * @return the found {@link DistributionSetTag}s, never {@code null}
@@ -159,8 +159,8 @@ public interface TagManagement {
     /**
      * Retrieves all target tags based on the given specification.
      *
-     * @param spec
-     *            the specification for the query
+     * @param rsqlParam
+     *            rsql query string
      * @param pageable
      *            pagination parameter
      * @return the found {@link Target}s, never {@code null}
@@ -245,12 +245,48 @@ public interface TagManagement {
      */
     DistributionSetTag generateDistributionSetTag();
 
+    /**
+     * Generates a {@link TargetTag} without persisting it.
+     * 
+     * @param name
+     *            of the tag
+     * @param description
+     *            of the tag
+     * @param colour
+     *            of the tag
+     * @return {@link TargetTag} object
+     */
     TargetTag generateTargetTag(String name, String description, String colour);
 
+    /**
+     * Generates a {@link TargetTag} without persisting it.
+     * 
+     * @param name
+     *            of the tag
+     * @return {@link TargetTag} object
+     */
     TargetTag generateTargetTag(String name);
 
+    /**
+     * Generates a {@link DistributionSetTag} without persisting it.
+     * 
+     * @param name
+     *            of the tag
+     * @param description
+     *            of the tag
+     * @param colour
+     *            of the tag
+     * @return {@link DistributionSetTag} object
+     */
     DistributionSetTag generateDistributionSetTag(String name, String description, String colour);
 
+    /**
+     * Generates a {@link DistributionSetTag} without persisting it.
+     * 
+     * @param name
+     *            of the tag
+     * @return {@link DistributionSetTag} object
+     */
     DistributionSetTag generateDistributionSetTag(String name);
 
 }

@@ -54,18 +54,20 @@ public final class MgmtSoftwareModuleMapper {
 
     static SoftwareModule fromRequest(final MgmtSoftwareModuleRequestBodyPost smsRest,
             final SoftwareManagement softwareManagement) {
-        return new SoftwareModule(getSoftwareModuleTypeFromKeyString(smsRest.getType(), softwareManagement),
-                smsRest.getName(), smsRest.getVersion(), smsRest.getDescription(), smsRest.getVendor());
+        return softwareManagement.generateSoftwareModule(
+                getSoftwareModuleTypeFromKeyString(smsRest.getType(), softwareManagement), smsRest.getName(),
+                smsRest.getVersion(), smsRest.getDescription(), smsRest.getVendor());
     }
 
-    static List<SoftwareModuleMetadata> fromRequestSwMetadata(final SoftwareModule sw,
-            final List<MgmtMetadata> metadata) {
+    static List<SoftwareModuleMetadata> fromRequestSwMetadata(final SoftwareManagement softwareManagement,
+            final SoftwareModule sw, final List<MgmtMetadata> metadata) {
         final List<SoftwareModuleMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final MgmtMetadata metadataRest : metadata) {
             if (metadataRest.getKey() == null) {
                 throw new IllegalArgumentException("the key of the metadata must be present");
             }
-            mappedList.add(new SoftwareModuleMetadata(metadataRest.getKey(), sw, metadataRest.getValue()));
+            mappedList.add(softwareManagement.generateSoftwareModuleMetadata(sw, metadataRest.getKey(),
+                    metadataRest.getValue()));
         }
         return mappedList;
     }
@@ -116,7 +118,7 @@ public final class MgmtSoftwareModuleMapper {
 
     static MgmtMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
         final MgmtMetadata metadataRest = new MgmtMetadata();
-        metadataRest.setKey(metadata.getId().getKey());
+        metadataRest.setKey(metadata.getKey());
         metadataRest.setValue(metadata.getValue());
         return metadataRest;
     }

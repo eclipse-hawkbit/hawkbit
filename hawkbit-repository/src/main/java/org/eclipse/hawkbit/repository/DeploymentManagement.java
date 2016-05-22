@@ -171,8 +171,8 @@ public interface DeploymentManagement {
     /**
      * counts all actions associated to a specific target.
      *
-     * @param spec
-     *            the specification to filter the count result
+     * @param rsqlParam
+     *            rsql query string
      * @param target
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
@@ -271,8 +271,8 @@ public interface DeploymentManagement {
      * Retrieves all {@link Action}s assigned to a specific {@link Target} and a
      * given specification.
      *
-     * @param specifiction
-     *            the specification to narrow down the search
+     * @param rsqlParam
+     *            rsql query string
      * @param target
      *            the target which must be assigned to the actions
      * @param pageable
@@ -280,7 +280,6 @@ public interface DeploymentManagement {
      * @return a slice of actions assigned to the specific target and the
      *         specification
      */
-    // TODO fix this
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByTarget(@NotNull String rsqlParam, @NotNull Target target, @NotNull Pageable pageable);
 

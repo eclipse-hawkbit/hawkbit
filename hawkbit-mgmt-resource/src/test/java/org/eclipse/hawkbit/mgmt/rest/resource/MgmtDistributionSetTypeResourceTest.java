@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -58,8 +57,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests.")
     public void getDistributionSetTypes() throws Exception {
 
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
         testType.setDescription("Desc1234");
         testType = distributionSetManagement.updateDistributionSetType(testType);
 
@@ -96,8 +95,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with sorting by KEY.")
     public void getDistributionSetTypesSortedByKey() throws Exception {
 
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("zzzzz", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("zzzzz", "TestName123", "Desc123"));
         testType.setDescription("Desc1234");
         testType = distributionSetManagement.updateDistributionSetType(testType);
 
@@ -136,12 +135,12 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(3);
 
         final List<DistributionSetType> types = new ArrayList<>();
-        types.add(new DistributionSetType("test1", "TestName1", "Desc1").addMandatoryModuleType(osType)
-                .addOptionalModuleType(runtimeType));
-        types.add(new DistributionSetType("test2", "TestName2", "Desc2").addOptionalModuleType(osType)
-                .addOptionalModuleType(runtimeType).addOptionalModuleType(appType));
-        types.add(new DistributionSetType("test3", "TestName3", "Desc3").addMandatoryModuleType(osType)
-                .addMandatoryModuleType(runtimeType));
+        types.add(distributionSetManagement.generateDistributionSetType("test1", "TestName1", "Desc1")
+                .addMandatoryModuleType(osType).addOptionalModuleType(runtimeType));
+        types.add(distributionSetManagement.generateDistributionSetType("test2", "TestName2", "Desc2")
+                .addOptionalModuleType(osType).addOptionalModuleType(runtimeType).addOptionalModuleType(appType));
+        types.add(distributionSetManagement.generateDistributionSetType("test3", "TestName3", "Desc3")
+                .addMandatoryModuleType(osType).addMandatoryModuleType(runtimeType));
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/distributionsettypes/").content(JsonBuilder.distributionSetTypes(types))
@@ -205,8 +204,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.")
     public void addMandatoryModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
@@ -224,8 +223,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
     public void addOptionalModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -244,8 +243,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes GET requests.")
     public void getMandatoryModulesOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123")
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123")
                         .addMandatoryModuleType(osType).addOptionalModuleType(appType));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -263,8 +262,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes GET requests.")
     public void getOptionalModulesOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123")
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123")
                         .addMandatoryModuleType(osType).addOptionalModuleType(appType));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -283,8 +282,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} GET requests.")
     public void getMandatoryModuleOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123")
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123")
                         .addMandatoryModuleType(osType).addOptionalModuleType(appType));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -305,8 +304,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} GET requests.")
     public void getOptionalModuleOfDistributionSetType() throws JSONException, Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123")
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123")
                         .addMandatoryModuleType(osType).addOptionalModuleType(appType));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -327,8 +326,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} DELETE requests.")
     public void removeMandatoryModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123")
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123")
                         .addMandatoryModuleType(osType).addOptionalModuleType(appType));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -349,8 +348,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} DELETE requests.")
     public void removeOptionalModuleToDistributionSetType() throws JSONException, Exception {
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123")
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123")
                         .addMandatoryModuleType(osType).addOptionalModuleType(appType));
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
@@ -372,8 +371,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} GET requests.")
     public void getDistributionSetType() throws Exception {
 
-        DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
         testType.setDescription("Desc1234");
         testType = distributionSetManagement.updateDistributionSetType(testType);
 
@@ -391,8 +390,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteDistributionSetTypeUnused() throws Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
 
         assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(4);
 
@@ -406,10 +405,10 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteDistributionSetTypeUsed() throws Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
-        distributionSetManagement
-                .createDistributionSet(new DistributionSet("sdfsd", "dsfsdf", "sdfsdf", testType, null));
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        distributionSetManagement.createDistributionSet(
+                distributionSetManagement.generateDistributionSet("sdfsd", "dsfsdf", "sdfsdf", testType, null));
 
         assertThat(distributionSetManagement.countDistributionSetTypesAll()).isEqualTo(4);
         assertThat(distributionSetTypeRepository.count()).isEqualTo(4);
@@ -424,8 +423,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.")
     public void updateDistributionSetTypeOnlyDescriptionAndNameUntouched() throws Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
                 .put("name", "nameShouldNotBeChanged").toString();
@@ -479,11 +478,11 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Test
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnDistributionSetTypesResource() throws Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
 
-        final SoftwareModuleType testSmType = softwareManagement
-                .createSoftwareModuleType(new SoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        final SoftwareModuleType testSmType = softwareManagement.createSoftwareModuleType(
+                softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         final List<DistributionSetType> types = new ArrayList<>();
         types.add(testType);
@@ -526,8 +525,10 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
 
         // Modules types at creation time invalid
 
-        final DistributionSetType testNewType = new DistributionSetType("test123", "TestName123", "Desc123");
-        testNewType.addMandatoryModuleType(new SoftwareModuleType("foo", "bar", "test", Integer.MAX_VALUE));
+        final DistributionSetType testNewType = distributionSetManagement.generateDistributionSetType("test123",
+                "TestName123", "Desc123");
+        testNewType.addMandatoryModuleType(
+                softwareManagement.generateSoftwareModuleType("foo", "bar", "test", Integer.MAX_VALUE));
 
         mvc.perform(post("/rest/v1/distributionsettypes")
                 .content(JsonBuilder.distributionSetTypes(Lists.newArrayList(testNewType)))
@@ -560,10 +561,10 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
     @Test
     @Description("Search erquest of software module types.")
     public void searchDistributionSetTypeRsql() throws Exception {
-        final DistributionSetType testType = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test123", "TestName123", "Desc123"));
-        final DistributionSetType testType2 = distributionSetManagement
-                .createDistributionSetType(new DistributionSetType("test1234", "TestName1234", "Desc123"));
+        final DistributionSetType testType = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test123", "TestName123", "Desc123"));
+        final DistributionSetType testType2 = distributionSetManagement.createDistributionSetType(
+                distributionSetManagement.generateDistributionSetType("test1234", "TestName1234", "Desc123"));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
@@ -577,7 +578,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractRestIntegration
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final SoftwareModule softwareModule = new SoftwareModule(osType, str, str, str, str);
+            final SoftwareModule softwareModule = softwareManagement.generateSoftwareModule(osType, str, str, str, str);
 
             softwareManagement.createSoftwareModule(softwareModule);
             character++;

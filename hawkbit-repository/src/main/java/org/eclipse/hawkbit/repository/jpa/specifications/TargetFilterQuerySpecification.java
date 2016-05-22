@@ -18,11 +18,19 @@ import org.springframework.data.jpa.domain.Specification;
  * Spring Data JPQL Specifications.
  *
  */
-public class TargetFilterQuerySpecification {
+public final class TargetFilterQuerySpecification {
     private TargetFilterQuerySpecification() {
         // utility class
     }
 
+    /**
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
+     * on is {@link JpaTargetFilterQuery#getName()}.
+     * 
+     * @param searchText
+     *            of the filter
+     * @return the {@link JpaTargetFilterQuery} {@link Specification}
+     */
     public static Specification<JpaTargetFilterQuery> likeName(final String searchText) {
         return (targetFilterQueryRoot, query, cb) -> {
             final String searchTextToLower = searchText.toLowerCase();

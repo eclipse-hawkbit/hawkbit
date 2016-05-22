@@ -30,8 +30,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -577,7 +577,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = new Rollout();
+        final Rollout rollout = rolloutManagement.generateRollout();
         rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
         rollout.setName(name);
         rollout.setTargetFilterQuery(targetFilterQuery);

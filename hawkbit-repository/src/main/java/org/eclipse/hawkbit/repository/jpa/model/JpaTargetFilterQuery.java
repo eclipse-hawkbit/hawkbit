@@ -37,6 +37,14 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
         // Default constructor for JPA.
     }
 
+    /**
+     * Public constructor.
+     * 
+     * @param name
+     *            of the {@link TargetFilterQuery}.
+     * @param query
+     *            of the {@link TargetFilterQuery}.
+     */
     public JpaTargetFilterQuery(final String name, final String query) {
         this.name = name;
         this.query = query;

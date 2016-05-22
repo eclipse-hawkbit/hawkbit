@@ -60,6 +60,8 @@ public class TargetIdName implements Serializable {
     }
 
     @Override
+    // Exception squid:S864 - generated code
+    @SuppressWarnings("squid:S864")
     public int hashCode() {
         final int prime = 31;
         int result = 1;

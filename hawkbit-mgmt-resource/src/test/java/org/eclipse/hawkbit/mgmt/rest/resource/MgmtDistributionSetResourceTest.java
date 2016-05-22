@@ -30,10 +30,10 @@ import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -76,7 +76,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final DistributionSet disSet = TestDataUtil.generateDistributionSetWithNoSoftwareModules("Eris", "560a",
                 distributionSetManagement);
         final List<Long> smIDs = new ArrayList<Long>();
-        SoftwareModule sm = new SoftwareModule(osType, "Dysnomia ", "15,772", null, null);
+        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "Dysnomia ", "15,772", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         smIDs.add(sm.getId());
         final JSONArray smList = new JSONArray();
@@ -92,7 +92,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(new Target(targetId));
+            targetManagement.createTarget(targetManagement.generateTarget(targetId));
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
         deploymentManagement.assignDistributionSet(disSet.getId(), knownTargetIds[0]);
@@ -120,7 +120,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final DistributionSet disSet = TestDataUtil.generateDistributionSetWithNoSoftwareModules("Mars", "686,980",
                 distributionSetManagement);
         final List<Long> smIDs = new ArrayList<>();
-        SoftwareModule sm = new SoftwareModule(osType, "Phobos", "0,3189", null, null);
+        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "Phobos", "0,3189", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         smIDs.add(sm.getId());
         final JSONArray smList = new JSONArray();
@@ -136,7 +136,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(new Target(targetId));
+            targetManagement.createTarget(targetManagement.generateTarget(targetId));
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
         // assign DisSet to target and test assignment
@@ -150,8 +150,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
         // Create another SM and post assignment
-        final List<Long> smID2s = new ArrayList<Long>();
-        SoftwareModule sm2 = new SoftwareModule(appType, "Deimos", "1,262", null, null);
+        final List<Long> smID2s = new ArrayList<>();
+        SoftwareModule sm2 = softwareManagement.generateSoftwareModule(appType, "Deimos", "1,262", null, null);
         sm2 = softwareManagement.createSoftwareModule(sm2);
         smID2s.add(sm2.getId());
         final JSONArray smList2 = new JSONArray();
@@ -178,13 +178,13 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("$.size", equalTo(disSet.getModules().size())));
         // create Software Modules
         final List<Long> smIDs = new ArrayList<Long>();
-        SoftwareModule sm = new SoftwareModule(osType, "Europa", "3,551", null, null);
+        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "Europa", "3,551", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         smIDs.add(sm.getId());
-        SoftwareModule sm2 = new SoftwareModule(appType, "Ganymed", "7,155", null, null);
+        SoftwareModule sm2 = softwareManagement.generateSoftwareModule(appType, "Ganymed", "7,155", null, null);
         sm2 = softwareManagement.createSoftwareModule(sm2);
         smIDs.add(sm2.getId());
-        SoftwareModule sm3 = new SoftwareModule(runtimeType, "Kallisto", "16,689", null, null);
+        SoftwareModule sm3 = softwareManagement.generateSoftwareModule(runtimeType, "Kallisto", "16,689", null, null);
         sm3 = softwareManagement.createSoftwareModule(sm3);
         smIDs.add(sm3.getId());
         final JSONArray list = new JSONArray();
@@ -234,7 +234,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(new Target(targetId));
+            targetManagement.createTarget(targetManagement.generateTarget(targetId));
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
         // assign already one target to DS
@@ -258,7 +258,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownTargetId = "knownTargetId1";
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
-        targetManagement.createTarget(new Target(knownTargetId));
+        targetManagement.createTarget(targetManagement.generateTarget(knownTargetId));
         deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetId);
 
         mvc.perform(get(
@@ -285,10 +285,10 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownTargetId = "knownTargetId1";
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
-        final Target createTarget = targetManagement.createTarget(new Target(knownTargetId));
+        final Target createTarget = targetManagement.createTarget(targetManagement.generateTarget(knownTargetId));
         // create some dummy targets which are not assigned or installed
-        targetManagement.createTarget(new Target("dummy1"));
-        targetManagement.createTarget(new Target("dummy2"));
+        targetManagement.createTarget(targetManagement.generateTarget("dummy1"));
+        targetManagement.createTarget(targetManagement.generateTarget("dummy2"));
         // assign knownTargetId to distribution set
         deploymentManagement.assignDistributionSet(createdDs.getId(), knownTargetId);
         // make it in install state
@@ -348,7 +348,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     @Description("Ensures that multiple DS requested are listed with expected payload.")
     public void getDistributionSets() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
 
         DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
@@ -361,7 +362,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         // load also lazy stuff
         set = distributionSetManagement.findDistributionSetByIdWithDetails(set.getId());
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(1);
 
         // perform request
         mvc.perform(get("/rest/v1/distributionsets").accept(MediaType.APPLICATION_JSON))
@@ -425,14 +427,15 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws JSONException, Exception {
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new SoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new SoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+        final SoftwareModule ah = softwareManagement.createSoftwareModule(
+                softwareManagement.generateSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+        final SoftwareModule jvm = softwareManagement.createSoftwareModule(
+                softwareManagement.generateSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new SoftwareModule(osType, "poky", "3.0.2", null, ""));
+                .createSoftwareModule(softwareManagement.generateSoftwareModule(osType, "poky", "3.0.2", null, ""));
 
         DistributionSet one = TestDataUtil.buildDistributionSet("one", "one", standardDsType, os, jvm, ah);
         DistributionSet two = TestDataUtil.buildDistributionSet("two", "two", standardDsType, os, jvm, ah);
@@ -527,7 +530,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .isEqualTo(String.valueOf(three.getId()));
 
         // check in database
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(3);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(3);
         assertThat(one.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(two.isRequiredMigrationStep()).isEqualTo(false);
         assertThat(three.isRequiredMigrationStep()).isEqualTo(true);
@@ -541,19 +545,22 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     @Description("Ensures that DS deletion request to API is reflected by the repository.")
     public void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
 
         final DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(1);
 
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).isEmpty();
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .isEmpty();
         assertThat(distributionSetRepository.findAll()).isEmpty();
     }
 
@@ -561,22 +568,26 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     @Description("Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.")
     public void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
 
         final DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
-        targetManagement.createTarget(new Target("test"));
+        targetManagement.createTarget(targetManagement.generateTarget("test"));
         deploymentManagement.assignDistributionSet(set.getId(), "test");
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(1);
 
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, true, true)).hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, true, true))
+                .hasSize(1);
     }
 
     @Test
@@ -584,14 +595,16 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     public void updateDistributionSet() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(0);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(0);
 
         final DistributionSet set = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true)).hasSize(1);
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
+                .hasSize(1);
 
-        final DistributionSet update = new DistributionSet();
+        final DistributionSet update = distributionSetManagement.generateDistributionSet();
         update.setVersion("anotherVersion");
         update.setName(null);
         update.setType(standardDsType);
@@ -600,11 +613,10 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
-        assertThat(distributionSetManagement.findDistributionSetsAll(pageReq, false, true).getContent().get(0)
-                .getVersion()).isEqualTo("anotherVersion");
-        assertThat(
-                distributionSetManagement.findDistributionSetsAll(pageReq, false, true).getContent().get(0).getName())
-                        .isEqualTo(set.getName());
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true)
+                .getContent().get(0).getVersion()).isEqualTo("anotherVersion");
+        assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true)
+                .getContent().get(0).getName()).isEqualTo(set.getName());
     }
 
     @Test
@@ -692,8 +704,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
 
         final DistributionSet testDS = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
-        distributionSetManagement
-                .createDistributionSetMetadata(new DistributionSetMetadata(knownKey, testDS, knownValue));
+        distributionSetManagement.createDistributionSetMetadata(
+                distributionSetManagement.generateDistributionSetMetadata(testDS, knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -718,8 +730,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
 
         final DistributionSet testDS = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
-        distributionSetManagement
-                .createDistributionSetMetadata(new DistributionSetMetadata(knownKey, testDS, knownValue));
+        distributionSetManagement.createDistributionSetMetadata(
+                distributionSetManagement.generateDistributionSetMetadata(testDS, knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -740,8 +752,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String knownValue = "knownValue";
         final DistributionSet testDS = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
-        distributionSetManagement
-                .createDistributionSetMetadata(new DistributionSetMetadata(knownKey, testDS, knownValue));
+        distributionSetManagement.createDistributionSetMetadata(
+                distributionSetManagement.generateDistributionSetMetadata(testDS, knownKey, knownValue));
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -760,8 +772,9 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final DistributionSet testDS = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createDistributionSetMetadata(new DistributionSetMetadata(knownKeyPrefix + index,
-                    distributionSetManagement.findDistributionSetById(testDS.getId()), knownValuePrefix + index));
+            distributionSetManagement.createDistributionSetMetadata(distributionSetManagement
+                    .generateDistributionSetMetadata(distributionSetManagement.findDistributionSetById(testDS.getId()),
+                            knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
@@ -795,8 +808,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     public void filterDistributionSetComplete() throws Exception {
         final int amount = 10;
         TestDataUtil.generateDistributionSets(amount, softwareManagement, distributionSetManagement);
-        distributionSetManagement.createDistributionSet(new DistributionSet("incomplete", "2", "incomplete",
-                distributionSetManagement.findDistributionSetTypeByKey("ecl_os"), null));
+        distributionSetManagement.createDistributionSet(distributionSetManagement.generateDistributionSet("incomplete",
+                "2", "incomplete", distributionSetManagement.findDistributionSetTypeByKey("ecl_os"), null));
 
         final String rsqlFindLikeDs1OrDs2 = "complete==" + Boolean.TRUE;
 
@@ -815,7 +828,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = new JSONArray();
         for (final String targetId : knownTargetIds) {
-            targetManagement.createTarget(new Target(targetId));
+            targetManagement.createTarget(targetManagement.generateTarget(targetId));
             list.put(new JSONObject().put("id", Long.valueOf(targetId)));
         }
 
@@ -840,8 +853,9 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final DistributionSet testDS = TestDataUtil.generateDistributionSet("one", softwareManagement,
                 distributionSetManagement);
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createDistributionSetMetadata(new DistributionSetMetadata(knownKeyPrefix + index,
-                    distributionSetManagement.findDistributionSetById(testDS.getId()), knownValuePrefix + index));
+            distributionSetManagement.createDistributionSetMetadata(distributionSetManagement
+                    .generateDistributionSetMetadata(distributionSetManagement.findDistributionSetById(testDS.getId()),
+                            knownKeyPrefix + index, knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

@@ -158,7 +158,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout {
         this.totalTargets = totalTargets;
     }
 
-    @Override
     public int getRolloutGroupsTotal() {
         return rolloutGroupsTotal;
     }

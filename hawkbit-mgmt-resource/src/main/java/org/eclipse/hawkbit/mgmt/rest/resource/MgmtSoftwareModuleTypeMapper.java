@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
@@ -35,18 +36,25 @@ final class MgmtSoftwareModuleTypeMapper {
 
     }
 
-    static List<SoftwareModuleType> smFromRequest(final Iterable<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
+    static List<SoftwareModuleType> smFromRequest(final SoftwareManagement softwareManagement,
+            final Iterable<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
         final List<SoftwareModuleType> mappedList = new ArrayList<>();
 
         for (final MgmtSoftwareModuleTypeRequestBodyPost smRest : smTypesRest) {
-            mappedList.add(fromRequest(smRest));
+            mappedList.add(fromRequest(softwareManagement, smRest));
         }
         return mappedList;
     }
 
-    static SoftwareModuleType fromRequest(final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
-        return new SoftwareModuleType(smsRest.getKey(), smsRest.getName(), smsRest.getDescription(),
-                smsRest.getMaxAssignments());
+    static SoftwareModuleType fromRequest(final SoftwareManagement softwareManagement,
+            final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
+        final SoftwareModuleType result = softwareManagement.generateSoftwareModuleType();
+        result.setName(smsRest.getName());
+        result.setKey(smsRest.getKey());
+        result.setDescription(smsRest.getDescription());
+        result.setMaxAssignments(smsRest.getMaxAssignments());
+
+        return result;
     }
 
     static List<MgmtSoftwareModuleType> toTypesResponse(final List<SoftwareModuleType> types) {

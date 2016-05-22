@@ -132,7 +132,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         return new ResponseEntity<>(
                 DataConversionHelper.fromTarget(target, controllerManagement.findActionByTargetAndActive(target),
-                        controllerManagement.findPollingTime(), tenantAware),
+                        controllerManagement.getPollingTime(), tenantAware),
                 HttpStatus.OK);
     }
 
@@ -174,7 +174,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module);
         final String range = request.getHeader("Range");
 
-        final ActionStatus statusMessage = new ActionStatus();
+        final ActionStatus statusMessage = controllerManagement.generateActionStatus();
         statusMessage.setAction(action);
         statusMessage.setOccurredAt(System.currentTimeMillis());
         statusMessage.setStatus(Status.DOWNLOAD);
@@ -186,7 +186,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             statusMessage.addMessage(
                     ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
-        controllerManagement.addActionStatusMessage(statusMessage);
+        controllerManagement.addInformationalActionStatus(statusMessage);
         return action;
     }
 
@@ -247,8 +247,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
             LOG.debug("Found an active UpdateAction for target {}. returning deyploment: {}", targetid, base);
 
-            controllerManagement.registerRetrieved(action,
-                    ControllerManagement.SERVER_MESSAGE_PREFIX
+            controllerManagement.registerRetrieved(action, ControllerManagement.SERVER_MESSAGE_PREFIX
                     + "Target retrieved update action and should start now the download.");
 
             return new ResponseEntity<>(base, HttpStatus.OK);
@@ -285,8 +284,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(
-                generateUpdateStatus(feedback, targetid, feedback.getId(), action), action);
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, targetid, feedback.getId(), action));
 
         return new ResponseEntity<>(HttpStatus.OK);
 
@@ -295,7 +293,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String targetid,
             final Long actionid, final Action action) {
 
-        final ActionStatus actionStatus = new ActionStatus();
+        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 
@@ -420,15 +418,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), action), action);
+        controllerManagement.addCancelActionStatus(
+                generateActionCancelStatus(feedback, target, feedback.getId(), action, controllerManagement));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private static ActionStatus generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
-            final Long actionid, final Action action) {
+            final Long actionid, final Action action, final ControllerManagement controllerManagement) {
 
-        final ActionStatus actionStatus = new ActionStatus();
+        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 

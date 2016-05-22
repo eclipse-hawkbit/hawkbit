@@ -49,7 +49,7 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractIntegrationT
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
         assertThat(artifactRepository.findAll()).hasSize(0);
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
+        SoftwareModule sm = softwareManagement.generateSoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
                 "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
         assertThat(artifactRepository.findAll()).hasSize(0);
