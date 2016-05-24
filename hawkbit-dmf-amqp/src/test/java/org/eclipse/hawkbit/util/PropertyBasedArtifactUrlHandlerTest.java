@@ -39,6 +39,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
         AmqpTestConfiguration.class })
 public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTestWithMongoDB {
 
+    private static final String HTTPS_LOCALHOST = "https://localhost:8080/";
+    private static final String HTTP_LOCALHOST = "http://localhost:8080/";
     @Autowired
     private ArtifactUrlHandler urlHandlerProperties;
     @Autowired
@@ -69,9 +71,8 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
         final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.HTTP);
         assertEquals("http is build incorrect",
-                "http://localhost:8080/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                        + "/softwaremodules/" + localArtifact.getSoftwareModule().getId() + "/artifacts/"
-                        + localArtifact.getFilename(),
+                HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId + "/softwaremodules/"
+                        + localArtifact.getSoftwareModule().getId() + "/artifacts/" + localArtifact.getFilename(),
                 url);
     }
 
@@ -81,7 +82,7 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
         final String url = urlHandlerProperties.getUrl(controllerId, softwareModuleId, fileName, sha1Hash,
                 UrlProtocol.HTTPS);
         assertEquals("https is build incorrect",
-                "https://localhost:8080/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                HTTPS_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                         + "/softwaremodules/" + localArtifact.getSoftwareModule().getId() + "/artifacts/"
                         + localArtifact.getFilename(),
                 url);

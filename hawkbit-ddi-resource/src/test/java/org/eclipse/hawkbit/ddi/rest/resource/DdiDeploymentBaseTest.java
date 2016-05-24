@@ -57,6 +57,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Deployment Action Resource")
 public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoDB {
 
+    private static final String HTTP_LOCALHOST = "http://localhost:8080/";
+    private static final String HTTPS_LOCALHOST = "https://localhost:8080/";
+
     @Test()
     @Description("Ensures that artifacts are not found, when softare module does not exists.")
     public void artifactsNotFound() throws Exception {
@@ -171,24 +174,22 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
                                 equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
 
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
 
@@ -201,23 +202,21 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
                                 equalTo(artifactSignature.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
@@ -316,12 +315,12 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0].hashes.sha1",
                                 equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
@@ -334,23 +333,21 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
                                 equalTo(artifactSignature.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==bApp)][0].version",
@@ -446,23 +443,21 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         equalTo(artifact.getSha1Hash())))
 
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.download-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[0]._links.md5sum-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.MD5SUM")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].size", equalTo(5 * 1024)))
@@ -474,24 +469,22 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                         jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1].hashes.sha1",
                                 equalTo(artifactSignature.getSha1Hash())))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum.href",
-                        equalTo("https://localhost:8080/" + tenantAware.getCurrentTenant()
+                        equalTo(HTTPS_LOCALHOST + tenantAware.getCurrentTenant()
                                 + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
 
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.download-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature")))
                 .andExpect(jsonPath("$deployment.chunks[?(@.part==os)][0].artifacts[1]._links.md5sum-http.href",
-                        equalTo("http://localhost:8080/" + tenantAware.getCurrentTenant()
-                                + "/controller/v1/4712/softwaremodules/"
+                        equalTo(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/4712/softwaremodules/"
                                 + findDistributionSetByAction.findFirstModuleByType(osType).getId()
                                 + "/artifacts/test1.signature.MD5SUM")))
 
