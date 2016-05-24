@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.autoconfigure.web;
 
 import org.eclipse.hawkbit.ddi.EnableDdiApi;
-import org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi;
+import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

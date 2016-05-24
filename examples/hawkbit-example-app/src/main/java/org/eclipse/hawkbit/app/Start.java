@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.app;
 import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.eclipse.hawkbit.ddi.EnableDdiApi;
-import org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi;
+import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
