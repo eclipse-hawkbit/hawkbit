@@ -923,6 +923,11 @@ public final class SPUIDefinitions {
     public static final String CUSTOM_FILTER_ASSIGNED_DS = "Assigned DS";
 
     /**
+     * TARGET_FILTER_MANAGEMENT - header caption .
+     */
+    public static final String TARGET_FILTER_LIST_HEADER_CAPTION = "Custom Filters";
+
+    /**
      * CUSTOM_FILTER_STATUS.
      */
     public static final String TARGET_FILTER_STATUS = "Status";
@@ -1000,7 +1005,6 @@ public final class SPUIDefinitions {
      * Rollout group started date column property.
      */
     public static final String ROLLOUT_GROUP_STARTED_DATE = "Started date";
-
 
     /**
      * Rollout group status column property.
