@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
@@ -51,10 +50,10 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -95,8 +94,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     @Autowired
     private transient UiProperties uiProperties;
 
-    // private Button saveDistributionBtn;
-    // private Button discardDistributionBtn;
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private Label madatoryLabel;
@@ -118,6 +115,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private TextChangeListener distVersionTextFieldListener;
     private ValueChangeListener distsetTypeNameComboBoxListener;
 
+    private FormLayout formLayout;
+
     /**
      * Initialize Distribution Add and Edit Window.
      */
@@ -128,17 +127,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void buildLayout() {
-        /* action button layout ( save & discard ) */
-        // final HorizontalLayout buttonsLayout = new HorizontalLayout();
-        // buttonsLayout.setSizeFull();
-        // buttonsLayout.setStyleName("dist-buttons-horz-layout");
-        // buttonsLayout.addComponents(saveDistributionBtn,
-        // discardDistributionBtn);
-        // buttonsLayout.setComponentAlignment(saveDistributionBtn,
-        // Alignment.BOTTOM_LEFT);
-        // buttonsLayout.setComponentAlignment(discardDistributionBtn,
-        // Alignment.BOTTOM_RIGHT);
-        // buttonsLayout.addStyleName("window-style");
 
         /*
          * The main layout of the window contains mandatory info, textboxes
@@ -147,13 +135,18 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         setSpacing(Boolean.TRUE);
         addStyleName("lay-color");
         setSizeUndefined();
-        addComponents(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()), madatoryLabel,
-                distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea, reqMigStepCheckbox);
 
-        // addComponent(buttonsLayout);
-        setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
+        formLayout = new FormLayout();
+        formLayout.addComponent(madatoryLabel);
+        formLayout.addComponent(distsetTypeNameComboBox);
+        formLayout.addComponent(distNameTextField);
+        formLayout.addComponent(distVersionTextField);
+        formLayout.addComponent(descTextArea);
+        formLayout.addComponent(reqMigStepCheckbox);
+
+        addComponents(formLayout);
+
         distNameTextField.focus();
-
     }
 
     /**
@@ -192,20 +185,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponetIdProvider.DIST_ADD_MIGRATION_CHECK);
 
-        // /* save or update button */
-        // saveDistributionBtn =
-        // SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE,
-        // "", "", "", true,
-        // FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        // saveDistributionBtn.addClickListener(event -> saveDistribution());
-        //
-        // /* close button */
-        // discardDistributionBtn =
-        // SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD,
-        // "", "", "",
-        // true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        // discardDistributionBtn.addClickListener(event ->
-        // discardDistribution());
     }
 
     /**
@@ -539,6 +518,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(),
                 event -> discardDistribution());
+        addDistributionWindow.removeStyleName("actionButtonsMargin");
+
         return addDistributionWindow;
     }
 

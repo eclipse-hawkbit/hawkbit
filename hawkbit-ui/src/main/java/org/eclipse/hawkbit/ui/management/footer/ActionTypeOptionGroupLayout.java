@@ -56,6 +56,7 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         createOptionGroup();
         addValueChangeListener();
         setStyleName("dist-window-actiontype-horz-layout");
+        setSizeUndefined();
     }
 
     private void addValueChangeListener() {
@@ -127,8 +128,8 @@ public class ActionTypeOptionGroupLayout extends HorizontalLayout {
         forcedTimeDateField.setStyleName("dist-window-forcedtime");
 
         final TimeZone tz = SPDateTimeUtil.getBrowserTimeZone();
-        forcedTimeDateField.setValue(Date.from(LocalDateTime.now().plusWeeks(2)
-                .atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
+        forcedTimeDateField.setValue(
+                Date.from(LocalDateTime.now().plusWeeks(2).atZone(SPDateTimeUtil.getTimeZoneId(tz)).toInstant()));
         forcedTimeDateField.setImmediate(true);
         forcedTimeDateField.setTimeZone(tz);
         forcedTimeDateField.setLocale(i18n.getLocale());

@@ -50,10 +50,6 @@ public class CommonDialogWindow extends Window {
         this.content = content;
         this.helpLink = helpLink;
 
-        if (null == content) {
-            // TODO
-            // throw Exception
-        }
         init(saveButtonClickListener, cancelButtonClickListener);
     }
 
@@ -75,8 +71,6 @@ public class CommonDialogWindow extends Window {
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.MIDDLE_CENTER);
 
-        setHeight("60%");
-        setWidth("50%");
         setCaption(caption);
         setContent(mainLayout);
         setResizable(true);

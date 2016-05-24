@@ -17,6 +17,7 @@ public class ColorPickerHelper {
      * @return String of color picked value.
      */
     public static String getColorPickedString(final SpColorPickerPreview preview) {
+
         return "rgb(" + preview.getColor().getRed() + "," + preview.getColor().getGreen() + ","
                 + preview.getColor().getBlue() + ")";
     }
@@ -29,6 +30,7 @@ public class ColorPickerHelper {
      * @return Color
      */
     public static Color rgbToColorConverter(final String value) {
+
         if (!value.startsWith("rgb")) {
             return null;
         }
@@ -46,6 +48,7 @@ public class ColorPickerHelper {
     }
 
     public static void setRgbSliderValues(final ColorPickerLayout colorPickerLayout) {
+
         try {
             final double redColorValue = colorPickerLayout.getSelectedColor().getRed();
             colorPickerLayout.getRedSlider().setValue(new Double(redColorValue));

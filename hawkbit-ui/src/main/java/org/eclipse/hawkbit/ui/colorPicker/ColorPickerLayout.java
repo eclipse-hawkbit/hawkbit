@@ -37,7 +37,6 @@ public class ColorPickerLayout extends GridLayout {
 
         setColumns(2);
         setRows(4);
-        setCaption("Choose Color");
 
         init();
 

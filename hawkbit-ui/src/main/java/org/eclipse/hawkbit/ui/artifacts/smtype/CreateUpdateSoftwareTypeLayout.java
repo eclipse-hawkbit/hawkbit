@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
@@ -22,7 +21,6 @@ import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.slf4j.Logger;
@@ -30,13 +28,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
@@ -59,9 +55,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Autowired
     private transient SoftwareManagement swTypeManagementService;
 
-    @Autowired
-    private transient UiProperties uiProperties;
-
     private String singleAssignStr;
     private String multiAssignStr;
     private Label singleAssign;
@@ -71,16 +64,12 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void createRequiredComponents() {
 
-        createTypeStr = i18n.get("label.create.type");
-        updateTypeStr = i18n.get("label.update.type");
+        super.createRequiredComponents();
+
         singleAssignStr = i18n.get("label.singleAssign.type");
         multiAssignStr = i18n.get("label.multiAssign.type");
         singleAssign = SPUIComponentProvider.getLabel(singleAssignStr, null);
         multiAssign = SPUIComponentProvider.getLabel(multiAssignStr, null);
-        comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
-        madatoryLabel = getMandatoryLabel();
-        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
-        colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
         tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
@@ -100,26 +89,14 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
 
-        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
-                "", i18n.get("label.combobox.type"));
-        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
-        tagNameComboBox.setImmediate(true);
-
-        tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
-
-        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
-
         singleMultiOptionGroup();
-        createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
     }
 
     @Override
     protected void buildLayout() {
 
         super.buildLayout();
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
         getFormLayout().addComponent(typeKey, 4);
         getFormLayout().addComponent(assignOptiongroup);
     }
@@ -224,24 +201,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 updateSWModuleType(existingSMTypeByName);
             }
         }
-    }
-
-    @Override
-    protected Boolean mandatoryValuesPresent() {
-        if (Strings.isNullOrEmpty(tagName.getValue()) || Strings.isNullOrEmpty(typeKey.getValue())) {
-            if (optiongroup.getValue().equals(createTypeStr)) {
-                displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
-            }
-            if (optiongroup.getValue().equals(updateTypeStr)) {
-                if (null == tagNameComboBox.getValue()) {
-                    displayValidationError(i18n.get("message.error.missing.tagName"));
-                } else {
-                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
-                }
-            }
-            return Boolean.FALSE;
-        }
-        return Boolean.TRUE;
     }
 
     /**

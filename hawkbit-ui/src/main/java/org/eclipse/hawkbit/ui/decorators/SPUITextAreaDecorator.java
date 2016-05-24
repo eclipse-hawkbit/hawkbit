@@ -50,7 +50,7 @@ public final class SPUITextAreaDecorator {
         final TextArea spUITxtArea = new TextArea();
         // Default settings
         spUITxtArea.setRequired(false);
-        spUITxtArea.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        spUITxtArea.addStyleName(ValoTheme.TEXTAREA_SMALL);
         if (StringUtils.isNotEmpty(caption)) {
             spUITxtArea.setCaption(caption);
         }

@@ -25,7 +25,7 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.VaadinSessionScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 
@@ -34,7 +34,7 @@ import com.vaadin.ui.UI;
  *
  */
 @SpringComponent
-@VaadinSessionScope
+@ViewScope
 public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayout {
 
     private static final long serialVersionUID = 444276149954167545L;
@@ -79,7 +79,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
             final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
             if (optiongroup.getValue().equals(createTagStr)) {
                 if (!checkIsDuplicate(existingDistTag)) {
-                    crateNewTag();
+                    createNewTag();
                 }
             } else {
 
@@ -91,7 +91,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     /**
      * Create new tag.
      */
-    protected void crateNewTag() {
+    @Override
+    protected void createNewTag() {
         super.createNewTag();
         if (isNotEmpty(getTagNameValue())) {
             DistributionSetTag newDistTag = new DistributionSetTag(getTagNameValue());

@@ -5,13 +5,17 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
+import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
@@ -31,43 +35,29 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
-    /**
-     * Value change listeners implementations of sliders.
-     */
-    protected void slidersValueChangeListeners() {
-        getColorPickerLayout().getRedSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = -8336732883300920839L;
+    @Override
+    protected void createRequiredComponents() {
 
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double red = (Double) event.getProperty().getValue();
-                final Color newColor = new Color((int) red, getColorPickerLayout().getSelectedColor().getGreen(),
-                        getColorPickerLayout().getSelectedColor().getBlue());
-                setColorToComponents(newColor);
-            }
-        });
-        getColorPickerLayout().getGreenSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1236358037711775663L;
+        createTypeStr = i18n.get("label.create.type");
+        updateTypeStr = i18n.get("label.update.type");
+        comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
+        madatoryLabel = getMandatoryLabel();
+        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
+        colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double green = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(getColorPickerLayout().getSelectedColor().getRed(), (int) green,
-                        getColorPickerLayout().getSelectedColor().getBlue());
-                setColorToComponents(newColor);
-            }
-        });
-        getColorPickerLayout().getBlueSlider().addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 8466370744686043947L;
+        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
+                "", i18n.get("label.combobox.type"));
+        tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
+        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
+        tagNameComboBox.setImmediate(true);
+        tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);
 
-            @Override
-            public void valueChange(final ValueChangeEvent event) {
-                final double blue = (Double) event.getProperty().getValue();
-                final Color newColor = new Color(getColorPickerLayout().getSelectedColor().getRed(),
-                        getColorPickerLayout().getSelectedColor().getGreen(), (int) blue);
-                setColorToComponents(newColor);
-            }
-        });
+        tagColorPreviewBtn = new Button();
+        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
+        tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
+
+        createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
     }
 
     @Override
@@ -262,6 +252,24 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
             }
         }
         return Boolean.FALSE;
+    }
+
+    @Override
+    protected Boolean mandatoryValuesPresent() {
+        if (Strings.isNullOrEmpty(tagName.getValue()) || Strings.isNullOrEmpty(typeKey.getValue())) {
+            if (optiongroup.getValue().equals(createTypeStr)) {
+                displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
+            }
+            if (optiongroup.getValue().equals(updateTypeStr)) {
+                if (null == tagNameComboBox.getValue()) {
+                    displayValidationError(i18n.get("message.error.missing.tagName"));
+                } else {
+                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
+                }
+            }
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     @Override

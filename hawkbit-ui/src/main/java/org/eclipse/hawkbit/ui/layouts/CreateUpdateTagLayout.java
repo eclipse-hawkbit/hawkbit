@@ -93,13 +93,13 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected TextField tagName;
     protected TextArea tagDesc;
     protected Button tagColorPreviewBtn;
-    protected OptionGroup optiongroup = new OptionGroup();
+    protected OptionGroup optiongroup;
     protected ComboBox tagNameComboBox;
 
-    protected final VerticalLayout comboLayout = new VerticalLayout();
-    protected final ColorPickerLayout colorPickerLayout = new ColorPickerLayout();
-    protected final GridLayout mainLayout = new GridLayout(4, 4);
-    protected final VerticalLayout contentLayout = new VerticalLayout();
+    protected VerticalLayout comboLayout;
+    protected ColorPickerLayout colorPickerLayout;
+    protected GridLayout mainLayout;
+    protected VerticalLayout contentLayout;
 
     protected boolean tagPreviewBtnClicked = false;
 
@@ -141,6 +141,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      */
     public void init() {
 
+        setSizeUndefined();
         createRequiredComponents();
         buildLayout();
         createWindow();
@@ -184,11 +185,16 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
-
-        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
     }
 
     protected void buildLayout() {
+
+        mainLayout = new GridLayout(3, 2);
+        mainLayout.setSpacing(true);
+        comboLayout = new VerticalLayout();
+        colorPickerLayout = new ColorPickerLayout();
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
+        contentLayout = new VerticalLayout();
 
         final HorizontalLayout colorLabelLayout = new HorizontalLayout();
         colorLabelLayout.setMargin(false);

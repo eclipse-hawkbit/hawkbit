@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
@@ -81,9 +79,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     @Autowired
     private transient DistributionSetRepository distributionSetRepository;
 
-    @Autowired
-    private transient UiProperties uiProperties;
-
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
     private Table selectedTable;
@@ -93,10 +88,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
 
     @Override
     protected void createRequiredComponents() {
-        createTypeStr = i18n.get("label.create.type");
-        updateTypeStr = i18n.get("label.update.type");
-        comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
-        madatoryLabel = getMandatoryLabel();
+
+        super.createRequiredComponents();
 
         tagName = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_NAME, true, "",
@@ -115,30 +108,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         tagDesc.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
-
-        tagNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, null, false,
-                "", i18n.get("label.combobox.type"));
-        tagNameComboBox.setId(SPUIDefinitions.NEW_DISTRIBUTION_SET_TYPE_NAME_COMBO);
-        tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
-        tagNameComboBox.setImmediate(true);
-        tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);
-
-        colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.tag.color"), null);
-        colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
-        tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
-        getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-        tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
-
-        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
-
-        createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
     }
 
     @Override
     protected void buildLayout() {
 
         super.buildLayout();
+        ColorPickerHelper.setRgbSliderValues(colorPickerLayout);
         getFormLayout().addComponent(typeKey, 4);
 
         distTypeSelectLayout = createTwinColumnLayout();
@@ -649,24 +625,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event));
-    }
-
-    @Override
-    protected Boolean mandatoryValuesPresent() {
-        if (Strings.isNullOrEmpty(tagName.getValue()) || Strings.isNullOrEmpty(typeKey.getValue())) {
-            if (optiongroup.getValue().equals(createTypeStr)) {
-                displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
-            }
-            if (optiongroup.getValue().equals(updateTypeStr)) {
-                if (null == tagNameComboBox.getValue()) {
-                    displayValidationError(i18n.get("message.error.missing.tagName"));
-                } else {
-                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
-                }
-            }
-            return Boolean.FALSE;
-        }
-        return Boolean.TRUE;
     }
 
     @Override

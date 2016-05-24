@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -32,10 +31,9 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -70,17 +68,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
     @Autowired
     private transient UiProperties uiProperties;
 
-    private Label madatoryLabel;
+    private Label mandatoryLabel;
 
     private TextField nameTextField;
 
     private TextField versionTextField;
 
     private TextField vendorTextField;
-
-    // private Button saveSoftware;
-    //
-    // private Button closeWindow;
 
     private ComboBox typeComboBox;
 
@@ -103,6 +97,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
      *         module.
      */
     public CommonDialogWindow createAddSoftwareModuleWindow() {
+
         editSwModule = Boolean.FALSE;
         createRequiredComponents();
         createWindow();
@@ -118,6 +113,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
      *         module.
      */
     public Window createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
+
         editSwModule = Boolean.TRUE;
         this.baseSwModuleId = baseSwModuleId;
         createRequiredComponents();
@@ -155,9 +151,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         addVendorTextChangeListener();
 
         /* Label for mandatory symbol */
-        madatoryLabel = new Label(i18n.get("label.mandatory.field"));
-        madatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-        madatoryLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        mandatoryLabel = new Label(i18n.get("label.mandatory.field"));
+        mandatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        mandatoryLabel.addStyleName(ValoTheme.LABEL_SMALL);
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, false,
                 null, i18n.get("upload.swmodule.type"));
@@ -167,21 +163,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         typeComboBox.setImmediate(Boolean.TRUE);
 
         populateTypeNameCombo();
-
-        /* save or update button */
-        // saveSoftware =
-        // SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_SAVE,
-        // "", "", "", true,
-        // FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        // saveSoftware.addClickListener(event -> save());
-        //
-        // /* close button */
-        // closeWindow =
-        // SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_DISCARD,
-        // "", "", "", true,
-        // FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        // /* Just close this window when this button is clicked */
-        // closeWindow.addClickListener(event -> closeThisWindow());
 
         resetOldValues();
     }
@@ -207,25 +188,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
      * @return
      */
     private void createWindow() {
-        /* action button layout (save & dicard) */
-        // final HorizontalLayout buttonsLayout = new HorizontalLayout();
-        // buttonsLayout.setSizeFull();
-        // buttonsLayout.addComponents(saveSoftware, closeWindow);
-        // buttonsLayout.setComponentAlignment(saveSoftware,
-        // Alignment.BOTTOM_LEFT);
-        // buttonsLayout.setComponentAlignment(closeWindow,
-        // Alignment.BOTTOM_RIGHT);
-        // buttonsLayout.addStyleName("window-style");
 
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
         madatoryStarLabel.setWidth(null);
-        final HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setSizeFull();
-        hLayout.addComponents(typeComboBox, madatoryStarLabel);
-        hLayout.setComponentAlignment(typeComboBox, Alignment.TOP_LEFT);
-        hLayout.setComponentAlignment(madatoryStarLabel, Alignment.TOP_RIGHT);
-        hLayout.setExpandRatio(typeComboBox, 0.8f);
 
         /*
          * The main layout of the window contains mandatory info, textboxes
@@ -235,22 +201,22 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         mainLayout.setSizeUndefined();
         mainLayout.setSpacing(Boolean.TRUE);
         mainLayout.addStyleName("lay-color");
-        mainLayout.addComponent(new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRoot()));
-        mainLayout.addComponent(madatoryLabel);
-        mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
-        mainLayout.addComponent(hLayout);
-        mainLayout.setComponentAlignment(hLayout, Alignment.MIDDLE_LEFT);
-        // mainLayout.addComponents(nameTextField, versionTextField,
-        // vendorTextField, descTextArea, buttonsLayout);
 
-        // TODO MR WINDOW
-        mainLayout.addComponents(nameTextField, versionTextField, vendorTextField, descTextArea);
+        final FormLayout formLayout = new FormLayout();
+        formLayout.addComponent(typeComboBox);
+        formLayout.addComponent(mandatoryLabel);
+        formLayout.addComponent(nameTextField);
+        formLayout.addComponent(versionTextField);
+        formLayout.addComponent(vendorTextField);
+        formLayout.addComponent(descTextArea);
 
+        mainLayout.addComponents(formLayout);
         setCompositionRoot(mainLayout);
 
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> closeThisWindow());
+        window.removeStyleName("actionButtonsMargin");
         nameTextField.focus();
     }
 
