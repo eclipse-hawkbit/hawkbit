@@ -53,11 +53,13 @@ import com.vaadin.ui.renderers.ProgressBarRenderer;
  *
  */
 @SpringView(name = "")
+// The inheritance comes from Vaadin
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SimulatorView extends VerticalLayout implements View {
 
     private static final String NEXT_POLL_COUNTER_SEC_COL = "nextPollCounterSec";
 
-    private static final String RESPONSE_STATUS_COL = "responseStatus";
+    private static final String RESPONSE_STATUS_COL = "updateStatus";
 
     private static final String PROTOCOL_COL = "protocol";
 
@@ -141,10 +143,9 @@ public class SimulatorView extends VerticalLayout implements View {
         responseComboBox.setItemIcon(ResponseStatus.ERROR, FontAwesome.EXCLAMATION_CIRCLE);
         responseComboBox.setNullSelectionAllowed(false);
         responseComboBox.setValue(ResponseStatus.SUCCESSFUL);
-        responseComboBox.addValueChangeListener(valueChangeEvent -> {
-            beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId)
-                    .getItemProperty(RESPONSE_STATUS_COL).setValue(valueChangeEvent.getProperty().getValue()));
-        });
+        responseComboBox.addValueChangeListener(
+                valueChangeEvent -> beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId)
+                        .getItemProperty(RESPONSE_STATUS_COL).setValue(valueChangeEvent.getProperty().getValue())));
 
         // add all components
         addComponent(caption);

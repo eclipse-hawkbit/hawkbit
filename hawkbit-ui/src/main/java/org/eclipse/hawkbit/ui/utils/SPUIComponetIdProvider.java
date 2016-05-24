@@ -76,6 +76,11 @@ public final class SPUIComponetIdProvider {
     public static final String TARGET_TEXT_FIELD = "target.search.textfield";
 
     /**
+     * ID for add target filter icon
+     */
+    public static final String TARGET_FILTER_ADD_ICON_ID = "target.filter.add.id";
+
+    /**
      * ID-Dist.
      */
     public static final String DIST_TABLE_ID = "dist.tableId";

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.WithUser;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -57,6 +58,36 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Target Management")
 public class TargetManagementTest extends AbstractIntegrationTest {
+
+    @Test
+    @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
+    public void getTargetSecurityTokenOnlyWithCorrectPermission() throws Exception {
+        final Target createdTarget = targetManagement.createTarget(new JpaTarget("targetWithSecurityToken"));
+
+        // retrieve security token only with READ_TARGET_SEC_TOKEN permission
+        final String securityTokenWithReadPermission = securityRule.runAs(WithSpringAuthorityRule
+                .withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN.toString()), () -> {
+                    return createdTarget.getSecurityToken();
+                });
+
+        // retrieve security token as system code execution
+        final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(() -> {
+            return createdTarget.getSecurityToken();
+        });
+
+        // retrieve security token without any permissions
+        final String securityTokenWithoutPermission = securityRule
+                .runAs(WithSpringAuthorityRule.withUser("NoPermission", false), () -> {
+                    return createdTarget.getSecurityToken();
+                });
+
+        assertThat(createdTarget.getSecurityToken()).isNotNull();
+        assertThat(securityTokenWithReadPermission).isNotNull();
+        assertThat(securityTokenAsSystemCode).isNotNull();
+
+        assertThat(securityTokenWithoutPermission).isNull();
+
+    }
 
     @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists.")

@@ -18,8 +18,8 @@ import feign.Contract;
 import feign.Feign;
 
 /**
- * 
- *
+ * Spring annotated java configuration class which defines necessary beans for
+ * configure the feign-client.
  */
 @Configuration
 @ConditionalOnClass(Feign.class)

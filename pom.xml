@@ -105,7 +105,6 @@
       <jlorem.version>1.1</jlorem.version>
       <json-simple.version>1.1.1</json-simple.version>
       <commons-lang3.version>3.4</commons-lang3.version>
-      <commons.lang>2.3</commons.lang>
       <json.version>20141113</json.version>
       <rsql-parser.version>2.0.0</rsql-parser.version>
       <!-- Misc libraries versions - END -->
@@ -449,39 +448,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
             <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-logging</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-            <version>${spring.boot.version}</version>
          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-logging</artifactId>
-               </exclusion>
-            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-logging</artifactId>
-               </exclusion>
-            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -556,11 +532,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${commons.lang}</version>
          </dependency>
          <dependency>
             <groupId>org.springframework.boot</groupId>

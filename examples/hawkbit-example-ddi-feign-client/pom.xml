@@ -55,7 +55,6 @@
       <dependency>
          <groupId>com.netflix.feign</groupId>
          <artifactId>feign-core</artifactId>
-         <!-- need to overwrite for the interface inheritance feature of feign-core -->
       </dependency>
       <dependency>
          <groupId>com.netflix.feign</groupId>

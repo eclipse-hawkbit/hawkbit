@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
 import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -197,6 +198,9 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
 
     @Autowired
     protected RolloutRepository rolloutRepository;
+
+    @Autowired
+    protected SystemSecurityContext systemSecurityContext;
 
     protected MockMvc mvc;
 

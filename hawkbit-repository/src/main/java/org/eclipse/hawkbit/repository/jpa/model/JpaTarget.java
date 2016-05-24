@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.springframework.data.domain.Persistable;
 
@@ -210,11 +211,15 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Lon
     }
 
     /**
-     * @return the securityToken
+     * @return the securityToken if the current security context contains the
+     *         necessary permission {@link SpPermission#READ_TARGET_SEC_TOKEN}
+     *         or the current context is executed as system code, otherwise
+     *         {@code null}.
      */
     @Override
     public String getSecurityToken() {
-        if (SecurityChecker.hasPermission(SpPermission.READ_TARGET_SEC_TOKEN)) {
+        if (SystemSecurityContextHolder.getInstance().getSystemSecurityContext().isCurrentThreadSystemCode()
+                || SecurityChecker.hasPermission(SpPermission.READ_TARGET_SEC_TOKEN)) {
             return securityToken;
         }
         return null;
