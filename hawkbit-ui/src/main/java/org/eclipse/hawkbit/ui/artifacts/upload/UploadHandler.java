@@ -250,7 +250,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         // uploadStarted method
         if (!uploadInterrupted) {
             if (aborted) {
-                LOG.error("User aborted file upload");
+                LOG.info("User aborted file upload for file : {}", fileName);
                 failureReason = i18n.get("message.uploadedfile.aborted");
                 interruptFileUpload();
                 return;
@@ -275,7 +275,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     @Override
     public void onProgress(final StreamingProgressEvent event) {
         if (aborted) {
-            LOG.error("User aborted  the upload");
+            LOG.info("User aborted  the upload for file : {}", event.getFileName());
             failureReason = i18n.get("message.uploadedfile.aborted");
             interruptFileStreaming();
             return;
@@ -300,14 +300,16 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void streamingFailed(final StreamingErrorEvent event) {
-        LOG.info("Streaming failed for file :{}", event.getFileName());
         if (failureReason == null) {
             failureReason = event.getException().getMessage();
         }
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STREAMING_FAILED,
                 new UploadFileStatus(fileName, failureReason, selectedSw)));
 
-        LOG.info("Streaming failed due to  :{}", event.getException());
+        if (!aborted) {
+            LOG.info("Streaming failed for file :{}", event.getFileName());
+            LOG.info("Streaming failed due to  :{}", event.getException());
+        }
     }
 
     /**
@@ -317,13 +319,15 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void uploadFailed(final FailedEvent event) {
-        LOG.info("Upload failed for file :{}", event.getFilename());
         if (failureReason == null) {
             failureReason = event.getReason().getMessage();
         }
         eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
                 fileName, failureReason, selectedSwForUpload)));
-        LOG.info("Upload failed for file :{}", event.getReason());
+        if (!aborted) {
+            LOG.info("Upload failed for file :{}", event.getFilename());
+            LOG.info("Upload failed for file :{}", event.getReason());
+        }
     }
 
     /**
