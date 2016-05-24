@@ -339,7 +339,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (fileName == null ? 0 : fileName.hashCode());
+        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
         return result;
     }
 
@@ -348,12 +348,17 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof UploadHandler)) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final UploadHandler other = (UploadHandler) obj;
-        if (fileName == null && other.fileName != null) {
-            return false;
+        if (fileName == null) {
+            if (other.fileName != null) {
+                return false;
+            }
         } else if (!fileName.equals(other.fileName)) {
             return false;
         }

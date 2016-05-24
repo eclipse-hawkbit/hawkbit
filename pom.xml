@@ -8,8 +8,7 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -25,15 +24,19 @@
    <name>hawkBit :: Parent</name>
 
    <modules>
-      <module>hawkbit-dmf-api</module>
-      <module>hawkbit-rest-api</module>
       <module>hawkbit-core</module>
       <module>hawkbit-security-core</module>
-      <module>hawkbit-repository</module>
+      <module>hawkbit-rest-core</module>
+      <module>hawkbit-mgmt-api</module>
+      <module>hawkbit-mgmt-resource</module>
+      <module>hawkbit-ddi-api</module>
+      <module>hawkbit-ddi-dl-api</module>
+      <module>hawkbit-ddi-resource</module>
+      <module>hawkbit-dmf-api</module>
       <module>hawkbit-dmf-amqp</module>
+      <module>hawkbit-repository</module>
       <module>hawkbit-security-integration</module>
       <module>hawkbit-http-security</module>
-      <module>hawkbit-rest-resource</module>
       <module>hawkbit-ui</module>
       <module>hawkbit-artifact-repository-mongo</module>
       <module>hawkbit-autoconfigure</module>
@@ -244,7 +247,7 @@
                               </goals>
                            </pluginExecutionFilter>
                            <action>
-                              <ignore />
+                              <ignore/>
                            </action>
                         </pluginExecution>
                         <pluginExecution>
@@ -258,7 +261,7 @@
                               </goals>
                            </pluginExecutionFilter>
                            <action>
-                              <ignore />
+                              <ignore/>
                            </action>
                         </pluginExecution>
                      </pluginExecutions>
@@ -525,13 +528,11 @@
                </exclusion>
             </exclusions>
          </dependency>
-         
           <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
          </dependency>
-         
          <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
