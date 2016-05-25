@@ -22,7 +22,7 @@
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository</artifactId>
+         <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>

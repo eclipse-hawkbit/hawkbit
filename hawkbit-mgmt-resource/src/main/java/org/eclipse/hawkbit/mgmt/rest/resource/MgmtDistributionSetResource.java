@@ -32,9 +32,8 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetWithActionType;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.TargetWithActionType;
-import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -94,7 +93,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         if (rsqlParam != null) {
             findDsPage = this.distributionSetManagement.findDistributionSetsAll(rsqlParam, pageable, false);
         } else {
-            findDsPage = this.distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageable, false, null);
+            findDsPage = this.distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageable, false,
+                    null);
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDsPage.getContent());
@@ -273,8 +273,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        final DistributionSetMetadata findOne = this.distributionSetManagement
-                .findOne(new DsMetadataCompositeKey(ds, metadataKey));
+        final DistributionSetMetadata findOne = this.distributionSetManagement.findOne(ds, metadataKey);
         return ResponseEntity.<MgmtMetadata> ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
     }
 
@@ -295,7 +294,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // check if distribution set exists otherwise throw exception
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
-        this.distributionSetManagement.deleteDistributionSetMetadata(new DsMetadataCompositeKey(ds, metadataKey));
+        this.distributionSetManagement.deleteDistributionSetMetadata(ds, metadataKey);
         return ResponseEntity.ok().build();
     }
 

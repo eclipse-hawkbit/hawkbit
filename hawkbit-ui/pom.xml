@@ -151,7 +151,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository</artifactId>
+         <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
       </dependency>
       <!-- Vaadin -->
@@ -253,6 +253,11 @@
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.scala-lang</groupId>
+         <artifactId>scala-library</artifactId>
+         <version>2.10.4</version>
       </dependency>
    </dependencies>
 </project>

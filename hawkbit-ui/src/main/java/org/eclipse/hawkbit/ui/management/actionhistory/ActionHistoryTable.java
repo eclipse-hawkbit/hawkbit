@@ -304,9 +304,9 @@ public class ActionHistoryTable extends TreeTable implements Handler {
             ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), false);
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
-                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null)
-                            ? actionWithStatusCount.getActionLastModifiedAt()
-                            : actionWithStatusCount.getActionCreatedAt()));
+                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getAction().getLastModifiedAt() != null)
+                            ? actionWithStatusCount.getAction().getLastModifiedAt()
+                            : actionWithStatusCount.getAction().getLastModifiedAt()));
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME)
                     .setValue(actionWithStatusCount.getRolloutName());

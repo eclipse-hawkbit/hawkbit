@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -685,10 +684,8 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
-        final DistributionSetMetadata metaKey1 = distributionSetManagement
-                .findOne(new DsMetadataCompositeKey(testDS, knownKey1));
-        final DistributionSetMetadata metaKey2 = distributionSetManagement
-                .findOne(new DsMetadataCompositeKey(testDS, knownKey2));
+        final DistributionSetMetadata metaKey1 = distributionSetManagement.findOne(testDS, knownKey1);
+        final DistributionSetMetadata metaKey2 = distributionSetManagement.findOne(testDS, knownKey2);
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
@@ -715,8 +712,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final DistributionSetMetadata assertDS = distributionSetManagement
-                .findOne(new DsMetadataCompositeKey(testDS, knownKey));
+        final DistributionSetMetadata assertDS = distributionSetManagement.findOne(testDS, knownKey);
         assertThat(assertDS.getValue()).isEqualTo(updateValue);
 
     }
@@ -737,7 +733,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         try {
-            distributionSetManagement.findOne(new DsMetadataCompositeKey(testDS, knownKey));
+            distributionSetManagement.findOne(testDS, knownKey);
             fail("expected EntityNotFoundException but didn't throw");
         } catch (final EntityNotFoundException e) {
             // ok as expected
