@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.PopupWindowHelp;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.tenantconfiguration.ConfigurationItem.ConfigurationItemChangeListener;
@@ -89,11 +88,6 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         rootLayout.setSizeFull();
         rootLayout.setMargin(true);
         rootLayout.setSpacing(true);
-
-        final PopupWindowHelp help = new PopupWindowHelp(uiProperties.getLinks().getDocumentation().getRolloutView());
-        help.setSpacing(true);
-        rootLayout.addComponent(help);
-        rootLayout.setComponentAlignment(help, Alignment.BOTTOM_RIGHT);
 
         configurationViews.forEach(view -> rootLayout.addComponent(view));
 

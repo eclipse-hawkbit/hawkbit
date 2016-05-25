@@ -56,10 +56,8 @@ import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
@@ -204,9 +202,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         addComponent(getLabel("prompt.distribution.set"), 0, 2);
         addComponent(distributionSet, 1, 2);
         addComponent(getLabel("prompt.target.filter"), 0, 3);
-        addComponent(getTargetFilterLayout(), 1, 3);
+        addComponent(targetFilterQueryCombo, 1, 3);
+        addComponent(totalTargetsLabel, 2, 3);
         addComponent(getLabel("prompt.number.of.groups"), 0, 4);
-        addComponent(getGroupDetailsLayout(), 1, 4);
+        addComponent(noOfGroups, 1, 4);
+        addComponent(groupSizeLabel, 2, 4);
         addComponent(getLabel("prompt.tigger.threshold"), 0, 5);
         addComponent(triggerThreshold, 1, 5);
         addComponent(getPercentHintLabel(), 2, 5);
@@ -218,26 +218,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         addComponent(actionTypeOptionGroupLayout, 0, 8, 2, 8);
 
         rolloutName.focus();
-    }
-
-    private HorizontalLayout getTargetFilterLayout() {
-        final HorizontalLayout targetFilterLayout = new HorizontalLayout();
-        targetFilterLayout.setSizeUndefined();
-        targetFilterLayout.addComponents(targetFilterQueryCombo, targetFilterQuery, totalTargetsLabel);
-        targetFilterLayout.setExpandRatio(targetFilterQueryCombo, 0.71F);
-        targetFilterLayout.setExpandRatio(targetFilterQuery, 0.70F);
-        targetFilterLayout.setExpandRatio(totalTargetsLabel, 0.29F);
-        targetFilterLayout.setComponentAlignment(totalTargetsLabel, Alignment.MIDDLE_LEFT);
-        return targetFilterLayout;
-    }
-
-    private HorizontalLayout getGroupDetailsLayout() {
-        final HorizontalLayout groupLayout = new HorizontalLayout();
-        groupLayout.setSizeUndefined();
-        groupLayout.addComponents(noOfGroups, groupSizeLabel);
-        groupLayout.setExpandRatio(noOfGroups, 1.0F);
-        groupLayout.setComponentAlignment(groupSizeLabel, Alignment.MIDDLE_LEFT);
-        return groupLayout;
     }
 
     private Label getLabel(final String key) {

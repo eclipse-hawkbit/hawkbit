@@ -327,8 +327,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         colorPickerLayout.getSelPreview()
                 .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-        // remove the sliders and color picker layout
-        // fieldLayout.removeComponent(colorPickerLayout.getSliders());
         mainLayout.removeComponent(colorPickerLayout);
     }
 

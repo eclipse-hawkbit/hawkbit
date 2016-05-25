@@ -335,7 +335,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
      * Create new DistSet Type tag.
      */
     @SuppressWarnings("unchecked")
-    private void crateNewDistributionSetType() {
+    private void createNewDistributionSetType() {
 
         final String colorPicked = ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview());
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
@@ -611,7 +611,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                     .findDistributionSetTypeByName(tagName.getValue());
             if (optiongroup.getValue().equals(createTypeStr)) {
                 if (!checkIsDuplicateByKey(existingDistTypeByKey) && !checkIsDuplicate(existingDistTypeByName)) {
-                    crateNewDistributionSetType();
+                    createNewDistributionSetType();
                 }
             } else {
                 updateDistributionSetType(existingDistTypeByKey);

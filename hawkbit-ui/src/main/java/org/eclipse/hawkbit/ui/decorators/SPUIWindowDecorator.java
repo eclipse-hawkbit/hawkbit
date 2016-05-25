@@ -44,10 +44,10 @@ public final class SPUIWindowDecorator {
      */
     public static CommonDialogWindow getDeocratedWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
-            final ClickListener CancelButtonClickListener, final String helpLink) {
-        // TODO helpLink
+            final ClickListener cancelButtonClickListener, final String helpLink) {
+
         final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-                CancelButtonClickListener);
+                cancelButtonClickListener);
         if (null != id) {
             window.setId(id);
         }
