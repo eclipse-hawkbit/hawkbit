@@ -145,7 +145,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      */
     public void init() {
 
-        setSizeFull();
+        setSizeUndefined();
         createRequiredComponents();
         buildLayout();
     }
@@ -153,7 +153,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     public CommonDialogWindow getWindow() {
 
         addUpdateRolloutWindow = SPUIComponentProvider.getWindow(i18n.get("caption.configure.rollout"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard(),
+                uiProperties.getLinks().getDocumentation().getRolloutView());
         return addUpdateRolloutWindow;
     }
 

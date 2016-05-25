@@ -215,7 +215,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> closeThisWindow());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> closeThisWindow(), null);
         window.removeStyleName("actionButtonsMargin");
         nameTextField.focus();
     }

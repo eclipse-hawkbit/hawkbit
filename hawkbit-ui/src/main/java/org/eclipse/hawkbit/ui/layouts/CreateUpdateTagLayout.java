@@ -110,7 +110,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected void createWindow() {
         reset();
         setWindow(SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event)));
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event), null));
     }
 
     /**

@@ -133,6 +133,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
          * (controller Id, name & description) and action buttons layout
          */
         setSpacing(Boolean.TRUE);
+        setMargin(Boolean.FALSE);
         addStyleName("lay-color");
         setSizeUndefined();
 
@@ -184,7 +185,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponetIdProvider.DIST_ADD_MIGRATION_CHECK);
-
     }
 
     /**
@@ -516,8 +516,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         populateRequiredComponents();
         resetComponents();
         addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(),
-                event -> discardDistribution());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
+                null);
         addDistributionWindow.removeStyleName("actionButtonsMargin");
 
         return addDistributionWindow;
