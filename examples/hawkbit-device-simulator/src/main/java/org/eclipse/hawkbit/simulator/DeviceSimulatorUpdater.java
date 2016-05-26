@@ -118,9 +118,6 @@ public class DeviceSimulatorUpdater {
     }
 
     private static final class DeviceSimulatorUpdateThread implements Runnable {
-        /**
-         * 
-         */
         private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
 
         private static final Random rndSleep = new SecureRandom();
@@ -152,6 +149,8 @@ public class DeviceSimulatorUpdater {
                     eventbus.post(new ProgressUpdate(device));
                     return;
                 }
+                // download is 80% of the game after all
+                device.setProgress(0.8);
             }
 
             final double newProgress = device.getProgress() + 0.2;
@@ -265,7 +264,7 @@ public class DeviceSimulatorUpdater {
                 }
 
             } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                LOGGER.error("Failed to download {} with {}", url, e.getMessage());
+                LOGGER.error("Failed to download" + url, e);
                 return new UpdateStatus(ResponseStatus.ERROR, "Failed to download " + url + ": " + e.getMessage());
             }
 
@@ -275,6 +274,10 @@ public class DeviceSimulatorUpdater {
         }
 
         private static String hideTokenDetails(final String targetToken) {
+            if (targetToken == null) {
+                return "<NULL!>";
+            }
+
             if (targetToken.isEmpty()) {
                 return "<EMTPTY!>";
             }

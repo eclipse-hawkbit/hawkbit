@@ -100,6 +100,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(targetAssignDistributionSetEvent.getTargetAdress());
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         assertTrue("No softwaremmodule should be contained in the request",
                 downloadAndUpdateRequest.getSoftwareModules().isEmpty());
     }
@@ -116,6 +117,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("Expecting a size of 3 software modules in the reuqest", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             assertTrue("Artifact list for softwaremodule should be empty", softwareModule.getArtifacts().isEmpty());
@@ -155,6 +157,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
         final DownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage);
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
+
         for (final org.eclipse.hawkbit.dmf.json.model.SoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {
