@@ -8,34 +8,26 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
-import org.eclipse.hawkbit.ui.common.table.AbstractTable;
+import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
-import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -45,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -71,18 +62,12 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class SwModuleTable extends AbstractTable {
+public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6785314784507424750L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
     private ManageDistUIState manageDistUIState;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
@@ -97,21 +82,9 @@ public class SwModuleTable extends AbstractTable {
      * Initialize the filter layout.
      */
     @Override
-    @PostConstruct
     protected void init() {
         super.init();
-        eventBus.subscribe(this);
         styleTableOnDistSelection();
-        setNoDataAvailable();
-    }
-
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
     }
 
     /* All event Listeners */
@@ -148,13 +121,7 @@ public class SwModuleTable extends AbstractTable {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent event) {
-        if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.MINIMIZED) {
-            UI.getCurrent().access(() -> applyMinTableSettings());
-        } else if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.MAXIMIZED) {
-            UI.getCurrent().access(() -> applyMaxTableSettings());
-        } else if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.NEW_SOFTWARE_MODULE) {
-            UI.getCurrent().access(() -> addSoftwareModule(event.getSoftwareModule()));
-        }
+        onBaseEntityEvent(event);
     }
 
     @Override
@@ -237,54 +204,41 @@ public class SwModuleTable extends AbstractTable {
         return manageDistUIState.isSwModuleTableMaximized();
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    protected void onValueChange() {
-        eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        @SuppressWarnings("unchecked")
-        final Set<Long> values = (Set) getValue();
-        if (values != null && !values.isEmpty()) {
-            final Iterator<Long> iterator = values.iterator();
-            Long value = null;
-            while (iterator.hasNext()) {
-                value = iterator.next();
-            }
-            if (null != value) {
-                manageDistUIState.setSelectedBaseSwModuleId(value);
-                final SoftwareModule baseSoftwareModule = softwareManagement.findSoftwareModuleById(value);
-                manageDistUIState.setSelectedSoftwareModules(values);
-                eventBus.publish(this,
-                        new SoftwareModuleEvent(SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE, baseSoftwareModule));
-            }
-        } else {
-            manageDistUIState.setSelectedBaseSwModuleId(null);
-            manageDistUIState.setSelectedSoftwareModules(Collections.emptySet());
-            eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.SELECTED_SOFTWARE_MODULE, null));
-        }
+    protected void publishEntityAfterValueChange(final SoftwareModule selectedLastEntity) {
+        eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+    }
+
+    @Override
+    protected void setManagementEntitiyStateValues(final Set<Long> values, final Long lastId) {
+        manageDistUIState.setSelectedBaseSwModuleId(lastId);
+        manageDistUIState.setSelectedSoftwareModules(values);
+    }
+
+    @Override
+    protected SoftwareModule findEntityByTableValue(final Long lastSelectedId) {
+        return softwareManagement.findSoftwareModuleById(lastSelectedId);
+    }
+
+    @Override
+    protected ManagmentEntityState<Long> getManagmentEntityState() {
+        return null;
     }
 
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
-        final List<TableColumn> columnList = new ArrayList<>();
+        final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (isMaximized()) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.2F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1F));
-            columnList
-                    .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1F));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                    0.1F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
+            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
         } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get("header.name"), 0.7F));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get("header.version"), 0.2F));
             columnList.add(new TableColumn(SPUILabelDefinitions.ARTIFACT_ICON, "", 0.1F));
-
         }
         return columnList;
+    }
+
+    @Override
+    protected float getColumnNameMinimizedSize() {
+        return 0.7F;
     }
 
     @Override
@@ -369,30 +323,27 @@ public class SwModuleTable extends AbstractTable {
         return name + "." + version;
     }
 
-    @SuppressWarnings("unchecked")
-    private void addSoftwareModule(final SoftwareModule swModule) {
-        final Object addItem = addItem();
-        final Item item = getItem(addItem);
-        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", swModule.getName(), swModule.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
-        item.getItemProperty("swId").setValue(swModule.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_ID).setValue(swModule.getId());
-        item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(swModule.getDescription());
-        item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(swModule.getVersion());
-        item.getItemProperty(SPUILabelDefinitions.VAR_NAME).setValue(swModule.getName());
-        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(swModule.getVendor());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).setValue(swModule.getCreatedBy());
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).setValue(swModule.getLastModifiedBy());
-        item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(swModule.getCreatedAt()));
-        item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
-                .setValue(SPDateTimeUtil.getFormattedDate(swModule.getLastModifiedAt()));
+    @Override
+    protected Item addEntity(final SoftwareModule baseEntity) {
+        final Item item = super.addEntity(baseEntity);
 
-        item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(swModule.getType().getColour());
         if (!manageDistUIState.getSelectedSoftwareModules().isEmpty()) {
-            manageDistUIState.getSelectedSoftwareModules().stream().forEach(swmNameId -> unselect(swmNameId));
+            manageDistUIState.getSelectedSoftwareModules().stream().forEach(this::unselect);
         }
-        select(swModule.getId());
+        select(baseEntity.getId());
+        return item;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void updateEntity(final SoftwareModule baseEntity, final Item item) {
+        final String swNameVersion = HawkbitCommonUtil.concatStrings(":", baseEntity.getName(),
+                baseEntity.getVersion());
+        item.getItemProperty(SPUILabelDefinitions.NAME_VERSION).setValue(swNameVersion);
+        item.getItemProperty("swId").setValue(baseEntity.getId());
+        item.getItemProperty(SPUILabelDefinitions.VAR_VENDOR).setValue(baseEntity.getVendor());
+        item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).setValue(baseEntity.getType().getColour());
+        super.updateEntity(baseEntity, item);
     }
 
     private void showArtifactDetailsWindow(final Long itemId, final String nameVersionStr) {
@@ -431,13 +382,10 @@ public class SwModuleTable extends AbstractTable {
         UI.getCurrent().addWindow(atrifactDtlsWindow);
     }
 
-    private void setNoDataAvailable() {
-        final int conatinerSize = getContainerDataSource().size();
-        if (conatinerSize == 0) {
-            manageDistUIState.setNoDataAvilableSwModule(true);
-        } else {
-            manageDistUIState.setNoDataAvilableSwModule(false);
-        }
+    @Override
+    protected void setDataAvailable(final boolean available) {
+        manageDistUIState.setNoDataAvilableSwModule(!available);
+
     }
 
 }

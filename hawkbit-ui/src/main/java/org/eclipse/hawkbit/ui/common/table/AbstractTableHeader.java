@@ -8,13 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.common.table;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.server.FontAwesome;
@@ -38,6 +45,15 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
     private static final long serialVersionUID = 4881626370291837175L;
 
+    @Autowired
+    protected I18N i18n;
+
+    @Autowired
+    protected SpPermissionChecker permChecker;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventbus;
+
     private Label headerCaption;
 
     private TextField searchField;
@@ -59,10 +75,17 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     /**
      * Initialze components.
      */
+    @PostConstruct
     protected void init() {
         createComponents();
         buildLayout();
         restoreState();
+        eventbus.subscribe(this);
+    }
+
+    @PreDestroy
+    void destroy() {
+        eventbus.unsubscribe(this);
     }
 
     private void createComponents() {
@@ -147,8 +170,8 @@ public abstract class AbstractTableHeader extends VerticalLayout {
         }
         titleFilterIconsLayout.addComponent(maxMinIcon);
         titleFilterIconsLayout.setComponentAlignment(maxMinIcon, Alignment.TOP_RIGHT);
-        titleFilterIconsLayout.setExpandRatio(headerCaption, 0.4f);
-        titleFilterIconsLayout.setExpandRatio(searchField, 0.6f);
+        titleFilterIconsLayout.setExpandRatio(headerCaption, 0.4F);
+        titleFilterIconsLayout.setExpandRatio(searchField, 0.6F);
 
         addComponent(titleFilterIconsLayout);
 
@@ -168,10 +191,10 @@ public abstract class AbstractTableHeader extends VerticalLayout {
 
             dropHintDropFilterLayout.addComponent(dropFilterLayout);
             dropHintDropFilterLayout.setComponentAlignment(dropFilterLayout, Alignment.TOP_CENTER);
-            dropHintDropFilterLayout.setExpandRatio(dropFilterLayout, 1.0f);
+            dropHintDropFilterLayout.setExpandRatio(dropFilterLayout, 1.0F);
         }
         addComponent(dropHintDropFilterLayout);
-        setComponentAlignment(dropHintDropFilterLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(dropHintDropFilterLayout, Alignment.TOP_CENTER);
         addStyleName("bordered-layout");
         addStyleName("no-border-bottom");
     }

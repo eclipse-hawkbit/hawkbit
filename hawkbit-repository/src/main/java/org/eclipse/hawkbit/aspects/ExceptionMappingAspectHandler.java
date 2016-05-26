@@ -90,6 +90,8 @@ public class ExceptionMappingAspectHandler implements Ordered {
             + " || execution( * org.eclipse.hawkbit.controller.*.*(..)) "
             + " || execution( * org.eclipse.hawkbit.rest.resource.*.*(..)) "
             + " || execution( * org.eclipse.hawkbit.service.*.*(..)) )", throwing = "ex")
+    // Exception squid:S00112 - Is aspectJ proxy
+    @SuppressWarnings({ "squid:S00112" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
         LOG.trace("exception occured", ex);
         Exception translatedAccessException = translateEclipseLinkExceptionIfPossible(ex);
@@ -167,11 +169,6 @@ public class ExceptionMappingAspectHandler implements Ordered {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.core.Ordered#getOrder()
-     */
     @Override
     public int getOrder() {
         return 1;

@@ -37,20 +37,12 @@ import com.vaadin.ui.Upload.SucceededListener;
  * {@link StreamVariable} upload variants.
  *
  * The handler manages the output to the user and at the same time ensures that
- * the upload does not exceed the configued max file size.
- *
- *
- *
- *
- *
+ * the upload does not exceed the configured max file size.
  *
  */
 public class UploadHandler implements StreamVariable, Receiver, SucceededListener, FailedListener, FinishedListener,
         ProgressListener, StartedListener {
 
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(UploadHandler.class);
@@ -108,7 +100,7 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
         this.fileName = fileName;
         this.mimeType = mimeType;
-        //reset has directory flag before upload
+        // reset has directory flag before upload
         view.setHasDirectory(false);
         try {
             if (view.checkIfSoftwareModuleIsSelected()) {
@@ -343,35 +335,30 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (fileName == null ? 0 : fileName.hashCode());
+        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof UploadHandler)) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final UploadHandler other = (UploadHandler) obj;
-        if (fileName == null && other.fileName != null) {
-            return false;
+        if (fileName == null) {
+            if (other.fileName != null) {
+                return false;
+            }
         } else if (!fileName.equals(other.fileName)) {
             return false;
         }

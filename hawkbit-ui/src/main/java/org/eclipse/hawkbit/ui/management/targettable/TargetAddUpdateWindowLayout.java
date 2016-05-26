@@ -14,11 +14,11 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -56,6 +56,8 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringComponent
 @VaadinSessionScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
+    private static final long serialVersionUID = -6659290471705262389L;
+    
     @Autowired
     private I18N i18n;
 
@@ -68,7 +70,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     @Autowired
     private transient UINotification uINotification;
 
-    private static final long serialVersionUID = -6659290471705262389L;
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
@@ -151,7 +152,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             madatoryLabel.setVisible(Boolean.FALSE);
         }
         mainLayout.addComponents(madatoryLabel, controllerIDTextField, nameTextField, descTextArea, buttonsLayout);
-
+        nameTextField.focus();
     }
 
     private void addListeners() {
@@ -218,7 +219,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         /* display success msg */
         uINotification.displaySuccess(i18n.get("message.update.success", new Object[] { latestTarget.getName() }));
         // publishing through event bus
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.EDIT_TARGET, latestTarget));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, latestTarget));
 
         /* close the window */
         closeThisWindow();

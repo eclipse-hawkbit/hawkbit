@@ -9,7 +9,8 @@
 package org.eclipse.hawkbit.ui.management.event;
 
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
  * 
@@ -17,34 +18,18 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentE
  *
  *
  */
-public class TargetAddUpdateWindowEvent {
-
-    private final TargetComponentEvent targetComponentEvent;
-
-    private final Target target;
+public class TargetAddUpdateWindowEvent extends BaseEntityEvent<Target> {
 
     /**
+     * Constructor.
+     * 
      * @param eventType
      *            the event type
-     * @param target
-     *            the target which has been created or modified
+     * @param entity
+     *            the entity
      */
-    public TargetAddUpdateWindowEvent(final TargetComponentEvent eventType, final Target target) {
-        this.targetComponentEvent = eventType;
-        this.target = target;
+    public TargetAddUpdateWindowEvent(final BaseEntityEventType eventType, final Target entity) {
+        super(eventType, entity);
     }
 
-    /**
-     * @return the targetComponentEvent
-     */
-    public TargetComponentEvent getTargetComponentEvent() {
-        return targetComponentEvent;
-    }
-
-    /**
-     * @return the target
-     */
-    public Target getTarget() {
-        return target;
-    }
 }

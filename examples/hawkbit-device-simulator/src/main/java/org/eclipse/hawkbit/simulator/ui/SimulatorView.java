@@ -8,21 +8,19 @@
  */
 package org.eclipse.hawkbit.simulator.ui;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
-import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.ResponseStatus;
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Status;
 import org.eclipse.hawkbit.simulator.DeviceSimulatorRepository;
 import org.eclipse.hawkbit.simulator.SimulatedDeviceFactory;
+import org.eclipse.hawkbit.simulator.UpdateStatus.ResponseStatus;
 import org.eclipse.hawkbit.simulator.amqp.SpSenderService;
 import org.eclipse.hawkbit.simulator.event.InitUpdate;
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
 import org.eclipse.hawkbit.simulator.event.ProgressUpdate;
-import org.eclipse.hawkbit.simulator.ui.GenerateDialog.GenerateDialogCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
@@ -52,12 +50,28 @@ import com.vaadin.ui.renderers.ProgressBarRenderer;
  * Vaadin view which allows to generate devices through the DMF API and show the
  * current simulated devices in a grid with their current status and update
  * progress.
- * 
- * @author Michael Hirsch
  *
  */
 @SpringView(name = "")
+// The inheritance comes from Vaadin
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SimulatorView extends VerticalLayout implements View {
+
+    private static final String NEXT_POLL_COUNTER_SEC_COL = "nextPollCounterSec";
+
+    private static final String RESPONSE_STATUS_COL = "updateStatus";
+
+    private static final String PROTOCOL_COL = "protocol";
+
+    private static final String TENANT_COL = "tenant";
+
+    private static final String PROGRESS_COL = "progress";
+
+    private static final String SWVERSION_COL = "swversion";
+
+    private static final String STATUS_COL = "status";
+
+    private static final String ID_COL = "id";
 
     private static final long serialVersionUID = 1L;
 
@@ -79,6 +93,7 @@ public class SimulatorView extends VerticalLayout implements View {
 
     private BeanContainer<String, AbstractSimulatedDevice> beanContainer;
 
+    @SuppressWarnings("unchecked")
     @Override
     public void enter(final ViewChangeEvent event) {
         eventbus.register(this);
@@ -91,7 +106,7 @@ public class SimulatorView extends VerticalLayout implements View {
         createToolbar();
 
         beanContainer = new BeanContainer<>(AbstractSimulatedDevice.class);
-        beanContainer.setBeanIdProperty("id");
+        beanContainer.setBeanIdProperty(ID_COL);
 
         grid.setSizeFull();
         grid.setCellStyleGenerator(new CellStyleGenerator() {
@@ -100,38 +115,37 @@ public class SimulatorView extends VerticalLayout implements View {
 
             @Override
             public String getStyle(final CellReference cellReference) {
-                return cellReference.getPropertyId().equals("status") ? "centeralign" : null;
+                return cellReference.getPropertyId().equals(STATUS_COL) ? "centeralign" : null;
             }
         });
 
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setContainerDataSource(beanContainer);
-        grid.appendHeaderRow().getCell("responseStatus").setComponent(responseComboBox);
-        grid.setColumnOrder("id", "status", "swversion", "progress", "tenant", "protocol", "responseStatus",
-                "nextPollCounterSec");
+        grid.appendHeaderRow().getCell(RESPONSE_STATUS_COL).setComponent(responseComboBox);
+        grid.setColumnOrder(ID_COL, STATUS_COL, SWVERSION_COL, PROGRESS_COL, TENANT_COL, PROTOCOL_COL,
+                RESPONSE_STATUS_COL, NEXT_POLL_COUNTER_SEC_COL);
         // header widths
-        grid.getColumn("status").setMaximumWidth(80);
-        grid.getColumn("protocol").setMaximumWidth(180);
-        grid.getColumn("responseStatus").setMaximumWidth(240);
-        grid.getColumn("nextPollCounterSec").setMaximumWidth(210);
+        grid.getColumn(STATUS_COL).setMaximumWidth(80);
+        grid.getColumn(PROTOCOL_COL).setMaximumWidth(180);
+        grid.getColumn(RESPONSE_STATUS_COL).setMaximumWidth(240);
+        grid.getColumn(NEXT_POLL_COUNTER_SEC_COL).setMaximumWidth(210);
 
-        grid.getColumn("nextPollCounterSec").setHeaderCaption("Next Poll in (sec)");
-        grid.getColumn("swversion").setHeaderCaption("SW Version");
-        grid.getColumn("responseStatus").setHeaderCaption("Response Update Status");
-        grid.getColumn("progress").setRenderer(new ProgressBarRenderer());
-        grid.getColumn("protocol").setConverter(createProtocolConverter());
-        grid.getColumn("status").setRenderer(new HtmlRenderer(), createStatusConverter());
-        grid.removeColumn("tenant");
+        grid.getColumn(NEXT_POLL_COUNTER_SEC_COL).setHeaderCaption("Next Poll in (sec)");
+        grid.getColumn(SWVERSION_COL).setHeaderCaption("SW Version");
+        grid.getColumn(RESPONSE_STATUS_COL).setHeaderCaption("Response Update Status");
+        grid.getColumn(PROGRESS_COL).setRenderer(new ProgressBarRenderer());
+        grid.getColumn(PROTOCOL_COL).setConverter(createProtocolConverter());
+        grid.getColumn(STATUS_COL).setRenderer(new HtmlRenderer(), createStatusConverter());
+        grid.removeColumn(TENANT_COL);
 
         // grid combobox
         responseComboBox.setItemIcon(ResponseStatus.SUCCESSFUL, FontAwesome.CHECK_CIRCLE);
         responseComboBox.setItemIcon(ResponseStatus.ERROR, FontAwesome.EXCLAMATION_CIRCLE);
         responseComboBox.setNullSelectionAllowed(false);
         responseComboBox.setValue(ResponseStatus.SUCCESSFUL);
-        responseComboBox.addValueChangeListener(valueChangeEvent -> {
-            beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId).getItemProperty("responseStatus")
-                    .setValue(valueChangeEvent.getProperty().getValue()));
-        });
+        responseComboBox.addValueChangeListener(
+                valueChangeEvent -> beanContainer.getItemIds().forEach(itemId -> beanContainer.getItem(itemId)
+                        .getItemProperty(RESPONSE_STATUS_COL).setValue(valueChangeEvent.getProperty().getValue())));
 
         // add all components
         addComponent(caption);
@@ -141,7 +155,7 @@ public class SimulatorView extends VerticalLayout implements View {
         setExpandRatio(grid, 1.0F);
 
         // load beans
-        repository.getAll().forEach(device -> beanContainer.addBean(device));
+        repository.getAll().forEach(beanContainer::addBean);
     }
 
     @Override
@@ -150,20 +164,16 @@ public class SimulatorView extends VerticalLayout implements View {
         eventbus.unregister(this);
     }
 
+    @SuppressWarnings("unchecked")
     @Subscribe
     public void pollCounterUpdate(final NextPollCounterUpdate update) {
         final List<AbstractSimulatedDevice> devices = update.getDevices();
-        this.getUI().access(new Runnable() {
-            @Override
-            public void run() {
-                devices.forEach(device -> {
-                    final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
-                    if (item != null) {
-                        item.getItemProperty("nextPollCounterSec").setValue(device.getNextPollCounterSec());
-                    }
-                });
+        this.getUI().access(() -> devices.forEach(device -> {
+            final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
+            if (item != null) {
+                item.getItemProperty(NEXT_POLL_COUNTER_SEC_COL).setValue(device.getNextPollCounterSec());
             }
-        });
+        }));
     }
 
     /**
@@ -172,20 +182,19 @@ public class SimulatorView extends VerticalLayout implements View {
      * @param update
      *            the update event posted on the event bus
      */
+    @SuppressWarnings("unchecked")
     @Subscribe
     public void initUpdate(final InitUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
-        this.getUI().access(new Runnable() {
-            @Override
-            public void run() {
-                final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
-                if (item != null) {
-                    item.getItemProperty("progress").setValue(device.getProgress());
-                    item.getItemProperty("status").setValue(Status.PEDNING);
-                    item.getItemProperty("swversion").setValue(device.getSwversion());
-                }
-
+        this.getUI().access(() -> {
+            final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
+            if (item == null) {
+                return;
             }
+
+            item.getItemProperty(PROGRESS_COL).setValue(device.getProgress());
+            item.getItemProperty(STATUS_COL).setValue(Status.PEDNING);
+            item.getItemProperty(SWVERSION_COL).setValue(device.getSwversion());
         });
     }
 
@@ -195,33 +204,35 @@ public class SimulatorView extends VerticalLayout implements View {
      * @param update
      *            the update event posted on the event bus
      */
+    @SuppressWarnings("unchecked")
     @Subscribe
     public void progessUpdate(final ProgressUpdate update) {
         final AbstractSimulatedDevice device = update.getDevice();
-        this.getUI().access(new Runnable() {
-            @Override
-            public void run() {
-                final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
-                if (item != null) {
-                    item.getItemProperty("progress").setValue(device.getProgress());
-                    if (device.getProgress() >= 1) {
-                        switch (device.getResponseStatus()) {
-                        case SUCCESSFUL:
-                            item.getItemProperty("status").setValue(Status.FINISH);
-                            break;
-                        case ERROR:
-                            item.getItemProperty("status").setValue(Status.ERROR);
-                            break;
-                        default:
-                            item.getItemProperty("status").setValue(Status.UNKNWON);
-                        }
-                    } else {
-                        item.getItemProperty("status").setValue(Status.PEDNING);
-                    }
-                }
-
+        this.getUI().access(() -> {
+            final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
+            if (item != null) {
+                item.getItemProperty(PROGRESS_COL).setValue(device.getProgress());
+                setStatusColumn(device, item);
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setStatusColumn(final AbstractSimulatedDevice device, final BeanItem<AbstractSimulatedDevice> item) {
+        if (device.getProgress() >= 1) {
+            switch (device.getUpdateStatus().getResponseStatus()) {
+            case SUCCESSFUL:
+                item.getItemProperty(STATUS_COL).setValue(Status.FINISH);
+                break;
+            case ERROR:
+                item.getItemProperty(STATUS_COL).setValue(Status.ERROR);
+                break;
+            default:
+                item.getItemProperty(STATUS_COL).setValue(Status.UNKNWON);
+            }
+        } else {
+            item.getItemProperty(STATUS_COL).setValue(Status.PEDNING);
+        }
     }
 
     private void createToolbar() {
@@ -244,18 +255,15 @@ public class SimulatorView extends VerticalLayout implements View {
     }
 
     private void openGenerateDialog() {
-        UI.getCurrent().addWindow(new GenerateDialog(new GenerateDialogCallback() {
-            @Override
-            public void okButton(final String namePrefix, final String tenant, final int amount, final int pollDelay,
-                    final URL basePollUrl, final String gatewayToken, final Protocol protocol) {
-                for (int index = 0; index < amount; index++) {
-                    final String deviceId = namePrefix + index;
-                    beanContainer.addBean(repository.add(deviceFactory.createSimulatedDevice(deviceId,
-                            tenant.toLowerCase(), protocol, pollDelay, basePollUrl, gatewayToken)));
-                    spSenderService.createOrUpdateThing(tenant, deviceId);
-                }
-            }
-        }));
+        UI.getCurrent().addWindow(
+                new GenerateDialog((namePrefix, tenant, amount, pollDelay, basePollUrl, gatewayToken, protocol) -> {
+                    for (int index = 0; index < amount; index++) {
+                        final String deviceId = namePrefix + index;
+                        beanContainer.addBean(repository.add(deviceFactory.createSimulatedDevice(deviceId,
+                                tenant.toLowerCase(), protocol, pollDelay, basePollUrl, gatewayToken)));
+                        spSenderService.createOrUpdateThing(tenant, deviceId);
+                    }
+                }));
     }
 
     private Converter<String, Protocol> createProtocolConverter() {

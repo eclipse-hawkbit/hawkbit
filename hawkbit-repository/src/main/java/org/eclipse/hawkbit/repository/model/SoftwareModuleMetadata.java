@@ -8,9 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,26 +21,12 @@ import javax.persistence.Table;
 /**
  * Metadata for {@link SoftwareModule}.
  *
- *
- *
- *
  */
 @IdClass(SwMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_sw_metadata")
-public class SoftwareModuleMetadata implements Serializable {
-
-    /**
-    *
-    */
+public class SoftwareModuleMetadata extends MetaData {
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @Column(name = "meta_key", length = 128)
-    private String key;
-
-    @Column(name = "meta_value", length = 4000)
-    private String value;
 
     @Id
     @ManyToOne(targetEntity = SoftwareModule.class, fetch = FetchType.LAZY)
@@ -51,74 +34,47 @@ public class SoftwareModuleMetadata implements Serializable {
     private SoftwareModule softwareModule;
 
     public SoftwareModuleMetadata() {
-
+        // default public constructor for JPA
     }
 
-    /**
-     * Standard constructor.
-     *
-     * @param key
-     *            of the metadata element
-     * @param softwareModule
-     * @param value
-     *            of the metadata element
-     */
     public SoftwareModuleMetadata(final String key, final SoftwareModule softwareModule, final String value) {
-        this.key = key;
+        super(key, value);
         this.softwareModule = softwareModule;
-        this.value = value;
     }
 
-    /**
-     * @return the id
-     */
     public SwMetadataCompositeKey getId() {
-        return new SwMetadataCompositeKey(softwareModule, key);
+        return new SwMetadataCompositeKey(softwareModule, getKey());
     }
 
-    /**
-     * @return the value
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * @param value
-     *            the value to set
-     */
-    public void setValue(final String value) {
-        this.value = value;
-    }
-
-    /**
-     * @return the softwareModule
-     */
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
     }
 
-    /**
-     * @param softwareModule
-     *            the softwareModule to set
-     */
     public void setSoftwareModule(final SoftwareModule softwareModule) {
         this.softwareModule = softwareModule;
     }
 
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((softwareModule == null) ? 0 : softwareModule.hashCode());
+        return result;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
-    public void setKey(final String key) {
-        this.key = key;
+    @Override
+    public boolean equals(final Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final SoftwareModuleMetadata other = (SoftwareModuleMetadata) obj;
+        if (softwareModule == null) {
+            if (other.softwareModule != null) {
+                return false;
+            }
+        } else if (!softwareModule.equals(other.softwareModule)) {
+            return false;
+        }
+        return true;
     }
-
 }

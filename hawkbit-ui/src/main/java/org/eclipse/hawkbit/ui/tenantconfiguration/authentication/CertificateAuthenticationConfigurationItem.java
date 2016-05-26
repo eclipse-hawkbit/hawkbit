@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,20 +25,14 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
- *
+ * This class represents the UI item for the certificate authenticated by an
+ * reverse proxy in the authentication configuration view.
  */
 @SpringComponent
 @ViewScope
 public class CertificateAuthenticationConfigurationItem extends AbstractAuthenticationTenantConfigurationItem {
 
-    /**
-    * 
-    */
     private static final long serialVersionUID = 1L;
-
-    @Autowired
-    private I18N i18n;
 
     private boolean configurationEnabled = false;
     private boolean configurationEnabledChange = false;
@@ -59,11 +52,11 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
     }
 
     /**
-     * init mehotd called by spring.
+     * Init mehotd called by spring.
      */
     @PostConstruct
     public void init() {
-        super.init(i18n.get("label.configuration.auth.header"));
+        super.init("label.configuration.auth.header");
         configurationEnabled = isConfigEnabled();
 
         detailLayout = new VerticalLayout();
@@ -94,12 +87,6 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# configEnable()
-     */
     @Override
     public void configEnable() {
         if (!configurationEnabled) {
@@ -110,12 +97,6 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         setDetailVisible(true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.hawkbit.server.ui.tenantconfiguration.
-     * TenantConfigurationItem# configDisable()
-     */
     @Override
     public void configDisable() {
         if (configurationEnabled) {
@@ -125,11 +106,6 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         setDetailVisible(false);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.tenantconfiguration.TenantConfigurationItem#save()
-     */
     @Override
     public void save() {
         if (configurationEnabledChange) {
@@ -142,11 +118,6 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.ui.tenantconfiguration.TenantConfigurationItem#undo()
-     */
     @Override
     public void undo() {
         configurationEnabledChange = false;

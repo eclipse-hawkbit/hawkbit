@@ -66,10 +66,6 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * <li>name==targetId1,description==plugAndPlay,updateStatus==UNKNOWN</li>
  * <li>name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN</li>
  * </ul>
- * 
- *
- *
- *
  */
 public final class RSQLUtility {
 
@@ -139,14 +135,6 @@ public final class RSQLUtility {
             this.enumType = enumType;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see
-         * org.springframework.data.jpa.domain.Specification#toPredicate(javax.
-         * persistence.criteria .Root, javax.persistence.criteria.CriteriaQuery,
-         * javax.persistence.criteria.CriteriaBuilder)
-         */
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
 
@@ -287,6 +275,9 @@ public final class RSQLUtility {
         }
 
         @Override
+        // Exception squid:S2095 - see
+        // https://jira.sonarsource.com/browse/SONARJAVA-1478
+        @SuppressWarnings({ "squid:S2095" })
         public List<Predicate> visit(final ComparisonNode node, final String param) {
             A fieldName = null;
             try {
@@ -312,6 +303,9 @@ public final class RSQLUtility {
             return mapToPredicate(node, fieldPath, node.getArguments(), transformedValue, fieldName);
         }
 
+        // Exception squid:S2095 - see
+        // https://jira.sonarsource.com/browse/SONARJAVA-1478
+        @SuppressWarnings({ "squid:S2095" })
         private List<String> getExpectedFieldList() {
             final List<String> expectedFieldList = Arrays.stream(enumType.getEnumConstants())
                     .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {
@@ -398,7 +392,9 @@ public final class RSQLUtility {
             }
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
+        // Exception squid:S2095 - see
+        // https://jira.sonarsource.com/browse/SONARJAVA-1478
+        @SuppressWarnings({ "rawtypes", "unchecked", "squid:S2095" })
         private Object transformEnumValue(final ComparisonNode node, final String value,
                 final Class<? extends Object> javaType) {
             final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;

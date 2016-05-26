@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
@@ -79,9 +78,8 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel("Custom Filters",
+        return SPUIComponentProvider.getLabel(SPUIDefinitions.TARGET_FILTER_LIST_HEADER_CAPTION,
                 SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
     }
 
     private void buildLayout() {
@@ -110,10 +108,9 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Button createAddButton() {
-        final Button button = SPUIComponentProvider.getButton("camp.search.add.Id", "Create Filter", "Create Filter",
-                "", false, null, SPUIButtonStyleSmall.class);
+        final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.TARGET_FILTER_ADD_ICON_ID, "", "",
+                null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> addNewFilter());
-        button.addStyleName("on-focus-no-border link");
         return button;
     }
 

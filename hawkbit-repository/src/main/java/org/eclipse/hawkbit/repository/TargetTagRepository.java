@@ -13,15 +13,14 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link TargetTag} repository.
  *
- *
- *
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface TargetTagRepository
         extends BaseEntityRepository<TargetTag, Long>, JpaSpecificationExecutor<TargetTag> {
 
@@ -33,7 +32,7 @@ public interface TargetTagRepository
      * @return 1 if tag was deleted
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     Long deleteByName(final String tagName);
 
     /**

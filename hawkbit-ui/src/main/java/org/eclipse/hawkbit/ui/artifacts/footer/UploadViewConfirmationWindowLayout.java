@@ -14,23 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -39,8 +33,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract layout of confirm actions window.
@@ -63,31 +57,11 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private static final String DISCARD = "Discard";
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
     private transient SoftwareManagement softwareManagement;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
 
-    /**
-     * Initialze the component.
-     */
-    @PostConstruct
-    void init() {
-        super.inittialize();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.hawkbit.server.ui.common.confirmwindow.layout.
-     * AbstractConfirmationWindowLayout# getConfimrationTabs()
-     */
     @Override
     protected Map<String, ConfirmationTab> getConfimrationTabs() {
         final Map<String, ConfirmationTab> tabs = new HashMap<>();
@@ -116,26 +90,13 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
         // Add the discard action column
         tab.getTable().addGeneratedColumn(SW_DISCARD_CHGS, (source, itemId, columnId) -> {
-            final Button deleteswIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    ValoTheme.BUTTON_TINY + " " + "redicon", true, FontAwesome.REPLY,
-                    SPUIButtonStyleSmallNoBorder.class);
-            deleteswIcon.setData(itemId);
-            deleteswIcon.setImmediate(true);
-            deleteswIcon.addClickListener(event -> discardSoftwareDelete(event, itemId, tab));
-            return deleteswIcon;
+            final ClickListener clickListener = event -> discardSoftwareDelete(event, itemId, tab);
+            return createDiscardButton(itemId, clickListener);
         });
 
-        // set the visible columns
-        final List<Object> visibleColumnIds = new ArrayList<>();
-        final List<String> visibleColumnLabels = new ArrayList<>();
-        if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
-            visibleColumnIds.add(SW_MODULE_NAME_MSG);
-            visibleColumnIds.add(SW_DISCARD_CHGS);
-            visibleColumnLabels.add(i18n.get("upload.swModuleTable.header"));
-            visibleColumnLabels.add(i18n.get("header.second.deletetarget.table"));
-        }
-        tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
-        tab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
+        tab.getTable().setVisibleColumns(SW_MODULE_NAME_MSG, SW_DISCARD_CHGS);
+        tab.getTable().setColumnHeaders(i18n.get("upload.swModuleTable.header"),
+                i18n.get("header.second.deletetarget.table"));
 
         tab.getTable().setColumnExpandRatio(SW_MODULE_NAME_MSG, SPUIDefinitions.TARGET_DISTRIBUTION_COLUMN_WIDTH);
         tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -233,30 +194,14 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
 
         // Add the discard action column
         tab.getTable().addGeneratedColumn(DISCARD, (source, itemId, columnId) -> {
-            final StringBuilder style = new StringBuilder(ValoTheme.BUTTON_TINY);
-            style.append(' ');
-            style.append("redicon");
-            final Button deleteIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
-                    style.toString(), true, FontAwesome.REPLY, SPUIButtonStyleSmallNoBorder.class);
-            deleteIcon.setData(itemId);
-            deleteIcon.setImmediate(true);
-            deleteIcon.addClickListener(event -> discardSoftwareTypeDelete(
-                    (String) ((Button) event.getComponent()).getData(), itemId, tab));
-            return deleteIcon;
+            final ClickListener clickListener = event -> discardSoftwareTypeDelete(
+                    (String) ((Button) event.getComponent()).getData(), itemId, tab);
+            return createDiscardButton(itemId, clickListener);
         });
 
-        // set the visible columns
-        final List<Object> visibleColumnIds = new ArrayList<>();
-        final List<String> visibleColumnLabels = new ArrayList<>();
-        if (visibleColumnIds.isEmpty() && visibleColumnLabels.isEmpty()) {
-            visibleColumnIds.add(SW_MODULE_TYPE_NAME);
-            visibleColumnIds.add(DISCARD);
-            visibleColumnLabels.add(i18n.get("header.first.delete.swmodule.type.table"));
-            visibleColumnLabels.add(i18n.get("header.second.delete.swmodule.type.table"));
-
-        }
-        tab.getTable().setVisibleColumns(visibleColumnIds.toArray());
-        tab.getTable().setColumnHeaders(visibleColumnLabels.toArray(new String[0]));
+        tab.getTable().setVisibleColumns(SW_MODULE_TYPE_NAME, DISCARD);
+        tab.getTable().setColumnHeaders(i18n.get("header.first.delete.swmodule.type.table"),
+                i18n.get("header.second.delete.swmodule.type.table"));
 
         tab.getTable().setColumnExpandRatio(SW_MODULE_TYPE_NAME, 2);
         tab.getTable().setColumnExpandRatio(SW_DISCARD_CHGS, SPUIDefinitions.DISCARD_COLUMN_WIDTH);
@@ -264,9 +209,6 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
         return tab;
     }
 
-    /**
-     * @return
-     */
     private Container getSWModuleTypeTableContainer() {
         final IndexedContainer contactContainer = new IndexedContainer();
         contactContainer.addContainerProperty(SW_MODULE_TYPE_NAME, String.class, "");

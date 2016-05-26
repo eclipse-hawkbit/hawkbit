@@ -13,10 +13,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
+import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 import org.vaadin.tokenfield.TokenField;
 import org.vaadin.tokenfield.TokenField.InsertPosition;
 
@@ -28,6 +38,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -37,7 +48,7 @@ import com.vaadin.ui.themes.ValoTheme;
  *
  *
  */
-public abstract class AbstractTagToken implements Serializable {
+public abstract class AbstractTagToken<T extends BaseEntity> implements Serializable {
 
     private static final String COLOR_PROPERTY = "color";
 
@@ -54,11 +65,45 @@ public abstract class AbstractTagToken implements Serializable {
     protected CssLayout tokenLayout = new CssLayout();
 
     @Autowired
+    protected SpPermissionChecker checker;
+
+    @Autowired
+    protected I18N i18n;
+
+    @Autowired
+    protected UINotification uinotification;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
     protected ManagementUIState managementUIState;
 
+    protected T selectedEntity;
+
+    @PostConstruct
     protected void init() {
         createTokenField();
         checkIfTagAssignedIsAllowed();
+        eventBus.subscribe(this);
+    }
+
+    @PreDestroy
+    protected void destroy() {
+        eventBus.unsubscribe(this);
+    }
+
+    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+        if (BaseEntityEventType.SELECTED_ENTITY != baseEntityEvent.getEventType()) {
+            return;
+        }
+        UI.getCurrent().access(() -> {
+            final T entity = baseEntityEvent.getEntity();
+            if (entity != null) {
+                selectedEntity = entity;
+                repopulateToken();
+            }
+        });
     }
 
     private void createTokenField() {
@@ -151,18 +196,25 @@ public abstract class AbstractTagToken implements Serializable {
             }
         }
 
-    }
+        private void updateTokenStyle(final Object tokenId, final Button button) {
+            final String color = getColor(tokenId);
+            button.setCaption("<span style=\"color:" + color + " !important;\">" + FontAwesome.CIRCLE.getHtml()
+                    + "</span>" + " " + getItemNameProperty(tokenId).getValue().toString().concat(" ×"));
+            button.setCaptionAsHtml(true);
+        }
 
-    private void updateTokenStyle(final Object tokenId, final Button button) {
-        final String color = getColor(tokenId);
-        button.setCaption("<span style=\"color:" + color + " !important;\">" + FontAwesome.CIRCLE.getHtml() + "</span>"
-                + " " + getItemNameProperty(tokenId).getValue().toString().concat(" ×"));
-        button.setCaptionAsHtml(true);
-    }
+        private void onTokenSearch(final Object tokenId) {
+            assignTag(getItemNameProperty(tokenId).getValue().toString());
+            removeTagAssignedFromCombo((Long) tokenId);
+        }
 
-    private void onTokenSearch(final Object tokenId) {
-        assignTag(getItemNameProperty(tokenId).getValue().toString());
-        removeTagAssignedFromCombo((Long) tokenId);
+        private void tokenClick(final Object tokenId) {
+            final Item item = tokenField.getContainerDataSource().addItem(tokenId);
+            item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
+            item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
+            unassignTag(tagDetails.get(tokenId).getName());
+        }
+
     }
 
     private Property getItemNameProperty(final Object tokenId) {
@@ -182,13 +234,6 @@ public abstract class AbstractTagToken implements Serializable {
     private String getTagName(final Object tokenId) {
         final Item item = tokenField.getContainerDataSource().getItem(tokenId);
         return (String) item.getItemProperty("name").getValue();
-    }
-
-    private void tokenClick(final Object tokenId) {
-        final Item item = tokenField.getContainerDataSource().addItem(tokenId);
-        item.getItemProperty("name").setValue(tagDetails.get(tokenId).getName());
-        item.getItemProperty(COLOR_PROPERTY).setValue(tagDetails.get(tokenId).getColor());
-        unassignTag(tagDetails.get(tokenId).getName());
     }
 
     protected void removePreviouslyAddedTokens() {

@@ -13,14 +13,10 @@ import javax.persistence.MappedSuperclass;
 
 /**
  * Tenant specific locally stored artifact representation that is used by
- * {@link SoftwareModule} .
- *
- *
- *
- *
+ * {@link SoftwareModule}.
  */
 @MappedSuperclass
-public abstract class Artifact extends BaseEntity {
+public abstract class Artifact extends TenantAwareBaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "sha1_hash", length = 40, nullable = true)
@@ -34,49 +30,27 @@ public abstract class Artifact extends BaseEntity {
 
     public abstract SoftwareModule getSoftwareModule();
 
-    /**
-     * @return the md5Hash
-     */
     public String getMd5Hash() {
         return md5Hash;
     }
 
-    /**
-     * @return the sha1Hash
-     */
     public String getSha1Hash() {
         return sha1Hash;
     }
 
-    /**
-     * @param md5Hash
-     *            the md5Hash to set
-     */
     public void setMd5Hash(final String md5Hash) {
         this.md5Hash = md5Hash;
     }
 
-    /**
-     * @param sha1Hash
-     *            the sha1Hash to set
-     */
     public void setSha1Hash(final String sha1Hash) {
         this.sha1Hash = sha1Hash;
     }
 
-    /**
-     * @return the size
-     */
     public Long getSize() {
         return size;
     }
 
-    /**
-     * @param size
-     *            the size to set
-     */
     public void setSize(final Long size) {
         this.size = size;
     }
-
 }

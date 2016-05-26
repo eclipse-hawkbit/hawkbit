@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -37,7 +39,7 @@ public class ArtifactManagementNoMongoDbTest extends AbstractIntegrationTest {
         System.setProperty("spring.data.mongodb.port", "1020");
     }
 
-    @Test(expected = ArtifactUploadFailedException.class)
+    @Test
     @Description("Checks if the expected ArtifactUploadFailedException is thrown in case of MongoDB down")
     public void createLocalArtifactWithMongoDbDown() throws IOException {
         SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
@@ -46,7 +48,12 @@ public class ArtifactManagementNoMongoDbTest extends AbstractIntegrationTest {
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
-        artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+        try {
+            artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
+            fail("Should not have worked with MongoDb down.");
+        } catch (final ArtifactUploadFailedException e) {
+
+        }
     }
 
 }

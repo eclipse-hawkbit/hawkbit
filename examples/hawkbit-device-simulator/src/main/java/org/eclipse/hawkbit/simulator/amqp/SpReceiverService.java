@@ -25,15 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
+
 /**
- * Handle all incoming Messages from SP.
- *
- *
+ * Handle all incoming Messages from hawkBit update server.
  *
  */
 @Component
 public class SpReceiverService extends ReceiverService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
     public static final String SOFTWARE_MODULE_FIRMWARE = "firmware";
@@ -44,17 +43,6 @@ public class SpReceiverService extends ReceiverService {
 
     /**
      * Constructor.
-     *
-     * @param rabbitTemplate
-     *            the rabbit template
-     * @param amqpProperties
-     *            the amqp properties
-     * @param lwm2mSenderService
-     *            the lwm2mSenderService
-     * @param spSenderService
-     *            the spSenderService
-     * @param deviceUpdater
-     *            the updater service to simulate update process
      */
     @Autowired
     public SpReceiverService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,
@@ -62,12 +50,11 @@ public class SpReceiverService extends ReceiverService {
         super(rabbitTemplate, amqpProperties);
         this.spSenderService = spSenderService;
         this.deviceUpdater = deviceUpdater;
-
     }
 
     /**
      * Handle the incoming Message from Queue with the property
-     * (com.bosch.sp.lwm2m.connector.amqp.receiverConnectorQueueFromSp).
+     * (hawkbit.device.simulator.amqp.receiverConnectorQueueFromSp).
      *
      * @param message
      *            the incoming message
@@ -103,6 +90,8 @@ public class SpReceiverService extends ReceiverService {
         if (eventHeader == null) {
             logAndThrowMessageError(message, "Event Topic is not set");
         }
+        // Exception squid:S2259 - Checked before
+        @SuppressWarnings({ "squid:S2259" })
         final EventTopic eventTopic = EventTopic.valueOf(eventHeader.toString());
         switch (eventTopic) {
         case DOWNLOAD_AND_INSTALL:
@@ -124,7 +113,7 @@ public class SpReceiverService extends ReceiverService {
         final Long actionId = convertMessage(message, Long.class);
 
         final SimulatedUpdate update = new SimulatedUpdate(tenant, thingId, actionId);
-        spSenderService.finishUpdateProcess(update, "Simulation canceled");
+        spSenderService.finishUpdateProcess(update, Lists.newArrayList("Simulation canceled"));
     }
 
     private void handleUpdateProcess(final Message message, final String thingId) {
@@ -135,19 +124,20 @@ public class SpReceiverService extends ReceiverService {
         final DownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
                 DownloadAndUpdateRequest.class);
         final Long actionId = downloadAndUpdateRequest.getActionId();
+        final String targetSecurityToken = downloadAndUpdateRequest.getTargetSecurityToken();
 
-        deviceUpdater.startUpdate(tenant, thingId, actionId,
-                downloadAndUpdateRequest.getSoftwareModules().get(0).getModuleVersion(), (device, actionId1) -> {
-                    switch (device.getResponseStatus()) {
+        deviceUpdater.startUpdate(tenant, thingId, actionId, null, downloadAndUpdateRequest.getSoftwareModules(),
+                targetSecurityToken, (device, actionId1) -> {
+                    switch (device.getUpdateStatus().getResponseStatus()) {
                     case SUCCESSFUL:
                         spSenderService.finishUpdateProcess(
                                 new SimulatedUpdate(device.getTenant(), device.getId(), actionId1),
-                                "Simulation complete!");
+                                device.getUpdateStatus().getStatusMessages());
                         break;
                     case ERROR:
                         spSenderService.finishUpdateProcessWithError(
                                 new SimulatedUpdate(device.getTenant(), device.getId(), actionId1),
-                                "Simulation complete with error!");
+                                device.getUpdateStatus().getStatusMessages());
                         break;
                     default:
                         break;

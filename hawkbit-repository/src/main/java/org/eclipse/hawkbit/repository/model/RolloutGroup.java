@@ -34,13 +34,13 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "sp_rolloutgroup", indexes = {
         @Index(name = "sp_idx_rolloutgroup_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "rollout", "tenant" }, name = "uk_rolloutgroup") )
+                "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
 public class RolloutGroup extends NamedEntity {
 
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout") )
+    @JoinColumn(name = "rollout", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
     private Rollout rollout;
 
     @Column(name = "status")
@@ -210,8 +210,7 @@ public class RolloutGroup extends NamedEntity {
     }
 
     /**
-     *
-     * @author Michael Hirsch
+     * Rollout goup state machine.
      *
      */
     public enum RolloutGroupStatus {
@@ -477,5 +476,4 @@ public class RolloutGroup extends NamedEntity {
             return this;
         }
     }
-
 }

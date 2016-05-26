@@ -15,9 +15,6 @@ import java.io.Serializable;
  *
  */
 public class DistributionSetIdName implements Serializable {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private final Long id;
@@ -39,9 +36,6 @@ public class DistributionSetIdName implements Serializable {
         this.version = version;
     }
 
-    /**
-     * @return the id
-     */
     public Long getId() {
         return id;
     }
@@ -50,40 +44,27 @@ public class DistributionSetIdName implements Serializable {
         return version;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
-    public int hashCode() { // NOSONAR - as this is generated
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (id == null ? 0 : id.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof DistributionSetIdName)) {
             return false;
         }
         final DistributionSetIdName other = (DistributionSetIdName) obj;
@@ -97,11 +78,6 @@ public class DistributionSetIdName implements Serializable {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         // only return the ID because it's used in vaadin for setting the item

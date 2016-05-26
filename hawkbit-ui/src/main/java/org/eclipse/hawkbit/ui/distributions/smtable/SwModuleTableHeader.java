@@ -8,21 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -44,31 +38,10 @@ public class SwModuleTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 242961845006626297L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
-
-    @Autowired
     private ManageDistUIState manageDistUIState;
 
     @Autowired
     private SoftwareModuleAddUpdateWindow softwareModuleAddUpdateWindow;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        eventbus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventbus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionsUIEvent event) {
@@ -149,14 +122,14 @@ public class SwModuleTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         manageDistUIState.setSwModuleTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MAXIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MAXIMIZED, null));
 
     }
 
     @Override
     public void minimizeTable() {
         manageDistUIState.setSwModuleTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.MINIMIZED, null));
+        eventbus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override

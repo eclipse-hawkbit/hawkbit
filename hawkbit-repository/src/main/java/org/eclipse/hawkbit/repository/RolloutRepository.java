@@ -18,12 +18,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The repository interface for the {@link Rollout} model.
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, JpaSpecificationExecutor<Rollout> {
 
     /**
@@ -40,7 +41,7 @@ public interface RolloutRepository extends BaseEntityRepository<Rollout, Long>, 
      * @return the count of the updated rows. Zero if no row has been updated
      */
     @Modifying
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Query("UPDATE Rollout r SET r.lastCheck = :lastCheck WHERE r.lastCheck < (:lastCheck - :delay) AND r.status=:status")
     int updateLastCheck(@Param("lastCheck") final long lastCheck, @Param("delay") final long delay,
             @Param("status") final RolloutStatus status);

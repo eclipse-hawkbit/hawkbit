@@ -11,20 +11,28 @@ package org.eclipse.hawkbit.ui.common.confirmwindow.layout;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
+
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Abstract layout of confirm actions window.
- * 
- *
- *
  * 
  */
 public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
@@ -37,33 +45,25 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
 
     private String consolidatedMessage;
 
-    protected void inittialize() {
-        // Remove all components
+    @Autowired
+    protected I18N i18n;
+
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
+
+    @PostConstruct
+    public void initialize() {
         removeAllComponents();
         consolidatedMessage = "";
-
-        // create components again
         createComponents();
-
-        // Build layout.
         buildLayout();
     }
 
-    /**
-     * Create accordion and add respective tabs.
-     */
     private void createComponents() {
-        // create accordion
         createAccordian();
-
-        // create action message label
         createActionMessgaeLabel();
     }
 
-    /**
-     * Create a message label to show the results of any actions which user does
-     * in the confirmation window.
-     */
     private void createActionMessgaeLabel() {
         actionMessage = SPUIComponentProvider.getLabel("", null);
         actionMessage.addStyleName(SPUIStyleDefinitions.CONFIRM_WINDOW_INFO_BOX);
@@ -137,5 +137,15 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
      */
     public String getConsolidatedMessage() {
         return consolidatedMessage;
+    }
+
+    protected Button createDiscardButton(final Object itemId, final ClickListener clickListener) {
+        final Button deletesDsIcon = SPUIComponentProvider.getButton("", "", SPUILabelDefinitions.DISCARD,
+                ValoTheme.BUTTON_TINY + " " + SPUIStyleDefinitions.REDICON, true, FontAwesome.REPLY,
+                SPUIButtonStyleSmallNoBorder.class);
+        deletesDsIcon.setData(itemId);
+        deletesDsIcon.setImmediate(true);
+        deletesDsIcon.addClickListener(clickListener);
+        return deletesDsIcon;
     }
 }

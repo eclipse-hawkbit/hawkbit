@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -101,8 +102,8 @@ public class BaseSwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSoftwareMo
         proxy.setVersion(bean.getVersion());
         proxy.setVendor(bean.getVendor());
         proxy.setDescription(bean.getDescription());
-        proxy.setCreatedByUser(HawkbitCommonUtil.getIMUser(bean.getCreatedBy()));
-        proxy.setModifiedByUser(HawkbitCommonUtil.getIMUser(bean.getLastModifiedBy()));
+        proxy.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(bean));
+        proxy.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(bean));
         return proxy;
     }
 

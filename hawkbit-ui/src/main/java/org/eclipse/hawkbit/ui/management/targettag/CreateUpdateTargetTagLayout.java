@@ -85,16 +85,22 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
         populateTagNameCombo();
     }
@@ -144,7 +150,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
             if (optiongroup.getValue().equals(createTagNw)) {
                 if (!checkIsDuplicate(existingTag)) {
-                    crateNewTag();
+                    createNewTag();
                 }
             } else {
 
@@ -182,8 +188,8 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     /**
      * Create new tag.
      */
-    private void crateNewTag() {
-        final String colorPicked = getColorPickedSting();
+    private void createNewTag() {
+        final String colorPicked = getColorPickedString();
         final String tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != tagNameValue) {
@@ -214,7 +220,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
         if (null != nameUpdateValue) {
             targetObj.setName(nameUpdateValue);
             targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
-            targetObj.setColour(getColorPickedSting());
+            targetObj.setColour(getColorPickedString());
             tagManagement.updateTargetTag(targetObj);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
             closeWindow();
@@ -244,7 +250,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
      *
      * @return String of color picked value.
      */
-    private String getColorPickedSting() {
+    private String getColorPickedString() {
         return "rgb(" + getSelPreview().getColor().getRed() + "," + getSelPreview().getColor().getGreen() + ","
                 + getSelPreview().getColor().getBlue() + ")";
     }

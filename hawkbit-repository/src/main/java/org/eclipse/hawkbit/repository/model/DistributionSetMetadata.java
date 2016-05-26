@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.io.Serializable;
-
-import javax.persistence.Basic;
-import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,99 +19,62 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- * Metadata for {@link DistributionSet}.
- *
- *
- *
+ * Meta data for {@link DistributionSet}.
  *
  */
 @IdClass(DsMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_ds_metadata")
-public class DistributionSetMetadata implements Serializable {
-
-    /**
-    *
-    */
+public class DistributionSetMetadata extends MetaData {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "meta_key", length = 128)
-    private String key;
-
-    @Column(name = "meta_value", length = 4000)
-    @Basic
-    private String value;
-
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds") )
+    @JoinColumn(name = "ds_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds"))
     private DistributionSet distributionSet;
 
     public DistributionSetMetadata() {
-
+        // default public constructor for JPA
     }
 
-    /**
-     * Parameter constructor.
-     *
-     * @param key
-     * @param distributionSet
-     * @param value
-     */
     public DistributionSetMetadata(final String key, final DistributionSet distributionSet, final String value) {
-        this.key = key;
+        super(key, value);
         this.distributionSet = distributionSet;
-        this.value = value;
     }
 
     public DsMetadataCompositeKey getId() {
-        return new DsMetadataCompositeKey(distributionSet, key);
+        return new DsMetadataCompositeKey(distributionSet, getKey());
     }
 
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key
-     *            the key to set
-     */
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    /**
-     * @param distributionSet
-     *            the distributionSet to set
-     */
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = distributionSet;
     }
 
-    /**
-     * @return the value
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * @param value
-     *            the value to set
-     */
-    public void setValue(final String value) {
-        this.value = value;
-    }
-
-    /**
-     * @return the distributionSet
-     */
     public DistributionSet getDistributionSet() {
         return distributionSet;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((distributionSet == null) ? 0 : distributionSet.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final DistributionSetMetadata other = (DistributionSetMetadata) obj;
+        if (distributionSet == null) {
+            if (other.distributionSet != null) {
+                return false;
+            }
+        } else if (!distributionSet.equals(other.distributionSet)) {
+            return false;
+        }
+        return true;
+    }
 }

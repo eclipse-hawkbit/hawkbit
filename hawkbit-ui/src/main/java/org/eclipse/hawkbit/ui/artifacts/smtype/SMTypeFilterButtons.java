@@ -8,21 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -47,26 +43,6 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
-
-    /**
-     * Initialize component.
-     * 
-     * @param filterButtonClickBehaviour
-     *            the clickable behaviour.
-     */
-    @Override
-    public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
-        super.init(filterButtonClickBehaviour);
-        eventBus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventBus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleTypeEvent event) {
@@ -97,9 +73,9 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
     }
 
     @Override
-    protected boolean isClickedByDefault(final Long buttonId) {
+    protected boolean isClickedByDefault(final String typeName) {
         return artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent() && artifactUploadState
-                .getSoftwareModuleFilters().getSoftwareModuleType().get().getId().equals(buttonId);
+                .getSoftwareModuleFilters().getSoftwareModuleType().get().getName().equals(typeName);
     }
 
     @Override

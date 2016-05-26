@@ -16,12 +16,12 @@ import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -161,7 +161,6 @@ public class SoftwareModuleDetailsTable extends Table {
         if (null != distributionSet) {
             if (isUnassignSoftModAllowed && permissionChecker.hasUpdateDistributionPermission()) {
                 try {
-                    distributionSetManagement.checkDistributionSetAlreadyUse(distributionSet);
                     isTargetAssigned = false;
                 } catch (final EntityLockedException exception) {
                     isTargetAssigned = true;
@@ -215,9 +214,8 @@ public class SoftwareModuleDetailsTable extends Table {
                 .getItem(event.getButton().getId()).getItemProperty(SOFT_MODULE).getValue(), alreadyAssignedSwModules);
         final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
                 unAssignedSw);
-        manageDistUIState.setLastSelectedDistribution(newDistributionSet.getDistributionSetIdName());
-        eventBus.publish(this,
-                new DistributionTableEvent(DistributionComponentEvent.ON_VALUE_CHANGE, newDistributionSet));
+        manageDistUIState.setLastSelectedEntity(newDistributionSet.getDistributionSetIdName());
+        eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
         uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));
     }

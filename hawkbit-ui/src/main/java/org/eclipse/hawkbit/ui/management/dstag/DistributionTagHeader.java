@@ -10,14 +10,12 @@ package org.eclipse.hawkbit.ui.management.dstag;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -37,12 +35,6 @@ public class DistributionTagHeader extends AbstractFilterHeader {
 
     @Autowired
     private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
 
     @Autowired
     private ManagementUIState managementUIState;
@@ -90,7 +82,7 @@ public class DistributionTagHeader extends AbstractFilterHeader {
     @Override
     protected void hideFilterButtonLayout() {
         managementUIState.setDistTagFilterClosed(true);
-        eventbus.publish(this, ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT);
+        eventBus.publish(this, ManagementUIEvent.HIDE_DISTRIBUTION_TAG_LAYOUT);
     }
 
     @Override

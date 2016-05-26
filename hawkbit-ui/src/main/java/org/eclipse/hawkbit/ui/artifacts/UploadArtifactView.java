@@ -15,12 +15,12 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.ArtifactDetailsEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
-import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.footer.SMDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleTableLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadLayout;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -111,9 +111,9 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent event) {
-        if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.MINIMIZED) {
+        if (BaseEntityEventType.MINIMIZED == event.getEventType()) {
             minimizeSwTable();
-        } else if (event.getSoftwareModuleEventType() == SoftwareModuleEventType.MAXIMIZED) {
+        } else if (BaseEntityEventType.MAXIMIZED == event.getEventType()) {
             maximizeSwTable();
         }
     }

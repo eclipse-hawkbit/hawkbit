@@ -25,11 +25,11 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -296,8 +296,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(HawkbitCommonUtil
-                    .getFormattedText(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion()));
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(actionWithStatusCount.getDsName() + ":" +
+                                 actionWithStatusCount.getDsVersion());
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
@@ -442,8 +442,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
-                            .setValue(HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
-                                    + action.getDistributionSet().getVersion()));
+                            .setValue(action.getDistributionSet().getName() + ":"
+                                    + action.getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
@@ -855,11 +855,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     }
 
     private void updateTargetAndDsTable() {
-        /*
-         * Update the target status in the Target table and update the color
-         * settings for DS in DS table.
-         */
-        eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.EDIT_TARGET, target));
+        eventBus.publish(this, new TargetTableEvent(BaseEntityEventType.UPDATED_ENTITY, target));
         updateDistributionTableStyle();
     }
 

@@ -17,13 +17,12 @@ import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.CustomSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.QueryDefinition;
 
@@ -79,9 +78,8 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         final Slice<CustomSoftwareModule> swModuleBeans;
         final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<>();
 
-        swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderByDistribution(
-                new OffsetBasedPageRequest(startIndex, count, new Sort(Direction.ASC, "name", "version")),
-                orderByDistId, searchText, type);
+        swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
+                new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type);
 
         for (final CustomSoftwareModule swModule : swModuleBeans) {
             proxyBeans.add(getProxyBean(swModule));
@@ -102,8 +100,8 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
         proxyItem.setVersion(bean.getVersion());
         proxyItem.setVendor(bean.getVendor());
         proxyItem.setDescription(bean.getDescription());
-        proxyItem.setCreatedByUser(HawkbitCommonUtil.getIMUser(bean.getCreatedBy()));
-        proxyItem.setModifiedByUser(HawkbitCommonUtil.getIMUser(bean.getLastModifiedBy()));
+        proxyItem.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(bean));
+        proxyItem.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(bean));
         proxyItem.setAssigned(customSoftwareModule.isAssigned());
         proxyItem.setColour(bean.getType().getColour());
         proxyItem.setTypeId(bean.getType().getId());

@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -25,7 +27,6 @@ import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
-import org.eclipse.hawkbit.util.ArtifactUrlHandler;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -81,6 +82,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .getSoftwareModules();
         final DownloadAndUpdateRequest downloadAndUpdateRequest = new DownloadAndUpdateRequest();
         downloadAndUpdateRequest.setActionId(targetAssignDistributionSetEvent.getActionId());
+        downloadAndUpdateRequest.setTargetSecurityToken(targetAssignDistributionSetEvent.getTargetToken());
 
         for (final org.eclipse.hawkbit.repository.model.SoftwareModule softwareModule : modules) {
             final SoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(controllerId, softwareModule);
@@ -152,15 +154,27 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private Artifact convertArtifact(final String targetId, final LocalArtifact localArtifact) {
         final Artifact artifact = new Artifact();
-        artifact.getUrls().put(Artifact.UrlProtocol.COAP,
-                artifactUrlHandler.getUrl(targetId, localArtifact, Artifact.UrlProtocol.COAP));
-        artifact.getUrls().put(Artifact.UrlProtocol.HTTP,
-                artifactUrlHandler.getUrl(targetId, localArtifact, Artifact.UrlProtocol.HTTP));
-        artifact.getUrls().put(Artifact.UrlProtocol.HTTPS,
-                artifactUrlHandler.getUrl(targetId, localArtifact, Artifact.UrlProtocol.HTTPS));
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.COAP)) {
+            artifact.getUrls().put(Artifact.UrlProtocol.COAP,
+                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
+                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.COAP));
+        }
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTP)) {
+            artifact.getUrls().put(Artifact.UrlProtocol.HTTP,
+                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
+                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTP));
+        }
+
+        if (artifactUrlHandler.protocolSupported(UrlProtocol.HTTPS)) {
+            artifact.getUrls().put(Artifact.UrlProtocol.HTTPS,
+                    artifactUrlHandler.getUrl(targetId, localArtifact.getSoftwareModule().getId(),
+                            localArtifact.getFilename(), localArtifact.getSha1Hash(), UrlProtocol.HTTPS));
+        }
 
         artifact.setFilename(localArtifact.getFilename());
-        artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), null));
+        artifact.setHashes(new ArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
         return artifact;
     }

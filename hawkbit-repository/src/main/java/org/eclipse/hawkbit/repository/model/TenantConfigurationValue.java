@@ -89,7 +89,7 @@ public class TenantConfigurationValue<T> {
      */
     public static <K> TenantConfigurationValueBuilder<K> builder() {
 
-        return new TenantConfigurationValueBuilder<K>();
+        return new TenantConfigurationValueBuilder<>();
     }
 
     /**

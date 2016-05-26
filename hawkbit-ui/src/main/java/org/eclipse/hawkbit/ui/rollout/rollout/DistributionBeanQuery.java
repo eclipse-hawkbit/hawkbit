@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -62,7 +63,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             sort = new Sort(sortStates[0] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[0]);
             // Add sort
             for (int distId = 1; distId < sortPropertyIds.length; distId++) {
-                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC, (String) sortPropertyIds[distId]));
+                sort.and(new Sort(sortStates[distId] ? Direction.ASC : Direction.DESC,
+                        (String) sortPropertyIds[distId]));
             }
         }
     }
@@ -103,8 +105,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
         final List<ProxyDistribution> proxyDistributions = new ArrayList<>();
         for (final DistributionSet distributionSet : distBeans) {
             final ProxyDistribution proxyDistribution = new ProxyDistribution();
-            proxyDistribution.setName(HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(),
-                    distributionSet.getVersion()));
+            proxyDistribution.setName(
+                    HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
             proxyDistribution.setDescription(distributionSet.getDescription());
             proxyDistribution.setDistId(distributionSet.getId());
             proxyDistribution.setId(distributionSet.getId());
@@ -112,8 +114,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             proxyDistribution.setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
             proxyDistribution.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
             proxyDistribution.setDescription(distributionSet.getDescription());
-            proxyDistribution.setCreatedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getCreatedBy()));
-            proxyDistribution.setModifiedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getLastModifiedBy()));
+            proxyDistribution.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
+            proxyDistribution.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
             proxyDistribution.setIsComplete(distributionSet.isComplete());
             proxyDistributions.add(proxyDistribution);
         }

@@ -14,34 +14,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.AssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
-import org.eclipse.hawkbit.ui.management.dstable.DistributionTable;
-import org.eclipse.hawkbit.ui.management.targettable.TargetTable;
+import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -81,6 +73,11 @@ public final class HawkbitCommonUtil {
      */
     public static final String SPAN_CLOSE = "</span>";
 
+    public static final String HTML_LI_CLOSE_TAG = "</li>";
+    public static final String HTML_LI_OPEN_TAG = "<li>";
+    public static final String HTML_UL_CLOSE_TAG = "</ul>";
+    public static final String HTML_UL_OPEN_TAG = "<ul>";
+
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitCommonUtil.class);
 
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
@@ -95,8 +92,6 @@ public final class HawkbitCommonUtil {
     private static final String COUNT_STYLE = " countStyle = document.createElement('style'); ";
     private static final String COUNT_STYLE_ID = " countStyle.id=\"sp-drag-count\"; ";
     private static final String APPEND_CHILD = " document.head.appendChild(countStyle);";
-    private static final String HEADER_VERSION = "header.version";
-    private static final String HEADER_NAME = "header.name";
     private static final String SM_HIGHLIGHT_CREATE_SCRIPT = "smHighlight = document.createElement('style'); smHighlight.id=\"sm-table-highlight\";  document.head.appendChild(smHighlight); ";
     private static final String SM_HIGHLIGHT_REMOVE_SCRIPT = "var y = document.getElementById('sm-table-highlight'); if(y) { document.head.removeChild(y); } ";
     private static final String SM_HIGHLIGHT_RESET_SCRIPT = SM_HIGHLIGHT_REMOVE_SCRIPT + SM_HIGHLIGHT_CREATE_SCRIPT
@@ -113,6 +108,9 @@ public final class HawkbitCommonUtil {
     private static final String TARGET_TAG_DROP_REMOVE_SCRIPT = "var m = document.getElementById('show-filter-drop-hint'); if(m) { document.head.removeChild(m); } ";
     private static final String DELETE_DROP_CREATE_SCRIPT = "var q = document.getElementById('show-delete-drop-hint'); if(q) { } else { showDeleteDrop = document.createElement('style'); showDeleteDrop.id=\"show-delete-drop-hint\";  document.head.appendChild(showDeleteDrop); }";
     private static final String DELETE_TAG_DROP_REMOVE_SCRIPT = "var o = document.getElementById('show-delete-drop-hint'); if(o) { document.head.removeChild(o); } ";
+
+    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
+    private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     /**
      * Define empty string.
@@ -433,27 +431,7 @@ public final class HawkbitCommonUtil {
         return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
     }
 
-    /**
-     * Format the lengthy text.
-     *
-     * @param orgText
-     *            text to be formatted
-     * @return String formatted text
-     */
-    public static String getFormattedText(final String orgText) {
-        if (orgText == null) {
-            return StringUtils.EMPTY;
-        }
-
-        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
-        if (orgText.length() > txtLengthAllowed) {
-            return new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
-        }
-
-        return orgText;
-    }
-
-    /**
+   /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
      * 
@@ -613,31 +591,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * get formatted name - lastname,firstname.
-     *
-     * @param user
-     *            user name
-     * @return String formatted name
-     */
-    public static String getFormattedName(final UserDetails user) {
-        final StringBuilder formattedName = new StringBuilder();
-        if (user instanceof UserPrincipal) {
-            if (trimAndNullIfEmpty(((UserPrincipal) user).getLastname()) != null) {
-                formattedName.append(((UserPrincipal) user).getLastname());
-            }
-            if (trimAndNullIfEmpty(((UserPrincipal) user).getFirstname()) != null) {
-                if (formattedName.length() > 0) {
-                    formattedName.append(", ");
-                }
-                formattedName.append(((UserPrincipal) user).getFirstname());
-            }
-        } else if (user != null) {
-            formattedName.append(user.getUsername());
-        }
-        return formattedName.toString();
-    }
-
-    /**
      * get the Last sequence of string which is after last dot in String.
      *
      * @param name
@@ -691,30 +644,6 @@ public final class HawkbitCommonUtil {
                     .append(APPEND_CHILD);
         }
         return exeJS.toString();
-    }
-
-    /**
-     * Get IM User for user UUID.
-     * 
-     * @param uuid
-     * @return imReslovedUser user details
-     */
-    public static String getIMUser(final String uuid) {
-        // Get modifed user
-        String imReslovedUser = HawkbitCommonUtil.SP_STRING_SPACE;
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(uuid) != null) {
-            final UserDetailsService idManagement = SpringContextHelper.getBean(UserDetailsService.class);
-            try {
-                imReslovedUser = HawkbitCommonUtil.getFormattedName(idManagement.loadUserByUsername(uuid));
-            } catch (final UsernameNotFoundException e) { // NOSONAR
-                // nope not need to handle
-            }
-            // If Null display the UID
-            if (HawkbitCommonUtil.trimAndNullIfEmpty(imReslovedUser) == null) {
-                imReslovedUser = uuid;
-            }
-        }
-        return imReslovedUser;
     }
 
     /**
@@ -802,13 +731,16 @@ public final class HawkbitCommonUtil {
      *            as string
      * @param version
      *            as string
+     * @param type
+     *            key as string
      * @return boolean as flag
      */
-    public static boolean isDuplicate(final String name, final String version) {
+    public static boolean isDuplicate(final String name, final String version, final String type) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        final List<SoftwareModule> swModulesList = swMgmtService.findSoftwareModuleByNameAndVersion(name, version);
+        final SoftwareModule swModule = swMgmtService.findSoftwareModuleByNameAndVersion(name, version,
+                swMgmtService.findSoftwareModuleTypeByName(type));
         boolean duplicate = false;
-        if (swModulesList != null && !swModulesList.isEmpty()) {
+        if (swModule != null) {
             duplicate = true;
         }
         return duplicate;
@@ -865,7 +797,7 @@ public final class HawkbitCommonUtil {
     /**
      * Display Target Tag action message.
      * 
-     * @param targTagName
+     * @param tagName
      *            as tag name
      * @param result
      *            as TargetTagAssigmentResult
@@ -875,8 +807,8 @@ public final class HawkbitCommonUtil {
      *            I18N
      * @return message
      */
-    public static String getTargetTagAssigmentMsg(final String targTagName, final TargetTagAssigmentResult result,
-            final I18N i18n) {
+    public static String createAssignmentMessage(final String tagName,
+            final AssignmentResult<? extends NamedEntity> result, final I18N i18n) {
         final StringBuilder formMsg = new StringBuilder();
         final int assignedCount = result.getAssigned();
         final int alreadyAssignedCount = result.getAlreadyAssigned();
@@ -884,10 +816,10 @@ public final class HawkbitCommonUtil {
 
         if (assignedCount == 1) {
             formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedTargets().get(0).getName(), targTagName })).append("<br>");
+                    new Object[] { result.getAssignedEntity().get(0).getName(), tagName })).append("<br>");
 
         } else if (assignedCount > 1) {
-            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
+            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, tagName }))
                     .append("<br>");
 
             if (alreadyAssignedCount > 0) {
@@ -899,55 +831,10 @@ public final class HawkbitCommonUtil {
 
         if (unassignedCount == 1) {
             formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedTargets().get(0).getName(), targTagName })).append("<br>");
+                    new Object[] { result.getUnassignedEntity().get(0).getName(), tagName })).append("<br>");
 
         } else if (unassignedCount > 1) {
-            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
-                    .append("<br>");
-        }
-        return formMsg.toString();
-    }
-
-    /**
-     * Get message to be displayed after distribution tag assignment.
-     * 
-     * @param targTagName
-     *            tag name
-     * @param result
-     *            DistributionSetTagAssigmentResult
-     * @param tagsClickedList
-     *            list of clicked tags
-     * @param i18n
-     *            I18N
-     * @return message
-     */
-    public static String getDistributionTagAssignmentMsg(final String targTagName,
-            final DistributionSetTagAssigmentResult result, final I18N i18n) {
-        final StringBuilder formMsg = new StringBuilder();
-        final int assignedCount = result.getAssigned();
-        final int alreadyAssignedCount = result.getAlreadyAssigned();
-        final int unassignedCount = result.getUnassigned();
-
-        if (assignedCount == 1) {
-            formMsg.append(i18n.get("message.target.assigned.one",
-                    new Object[] { result.getAssignedDs().get(0).getName(), targTagName })).append("<br>");
-
-        } else if (assignedCount > 1) {
-            formMsg.append(i18n.get("message.target.assigned.many", new Object[] { assignedCount, targTagName }))
-                    .append("<br>");
-
-            if (alreadyAssignedCount > 0) {
-                final String alreadyAssigned = i18n.get("message.target.alreadyAssigned",
-                        new Object[] { alreadyAssignedCount });
-                formMsg.append(alreadyAssigned).append("<br>");
-            }
-        }
-
-        if (unassignedCount == 1) {
-            formMsg.append(i18n.get("message.target.unassigned.one",
-                    new Object[] { result.getUnassignedDs().get(0).getName(), targTagName })).append("<br>");
-        } else if (unassignedCount > 1) {
-            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, targTagName }))
+            formMsg.append(i18n.get("message.target.unassigned.many", new Object[] { unassignedCount, tagName }))
                     .append("<br>");
         }
         return formMsg.toString();
@@ -999,43 +886,6 @@ public final class HawkbitCommonUtil {
         lqc.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false, true);
         lqc.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, String.class, null, false, true);
         lqc.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null, false, true);
-    }
-
-    /**
-     * Get visible columns in table.
-     * 
-     * @param isMaximized
-     *            true if table is maximized
-     * @param isShowPinColumn
-     *            if true pin column will be displayed.
-     * @param i18n
-     *            I18N
-     * @return List<TableColumn> list of columns to be displayed.
-     */
-    public static List<TableColumn> getTableVisibleColumns(final Boolean isMaximized, final Boolean isShowPinColumn,
-            final I18N i18n) {
-        final List<TableColumn> columnList = new ArrayList<>();
-        if (isMaximized) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.2f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_BY, i18n.get("header.createdBy"), 0.1f));
-            columnList
-                    .add(new TableColumn(SPUILabelDefinitions.VAR_CREATED_DATE, i18n.get("header.createdDate"), 0.1f));
-            columnList.add(
-                    new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"),
-                    0.1f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2f));
-        } else if (isShowPinColumn) {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.7f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.2f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, SP_STRING_EMPTY, 0.1f));
-        } else {
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_NAME, i18n.get(HEADER_NAME), 0.8f));
-            columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VERSION, i18n.get(HEADER_VERSION), 0.2f));
-        }
-        return columnList;
-
     }
 
     /**
@@ -1145,36 +995,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Get the details of selected rows of {@link TargetTable}.
-     * 
-     * @param sourceTable
-     * @return set of {@link TargetIdName}
-     */
-    public static Set<TargetIdName> getSelectedTargetDetails(final Table sourceTable) {
-        Set<TargetIdName> targetSelected = null;
-        if (sourceTable.getValue() != null) {
-            targetSelected = new LinkedHashSet<>((Set) sourceTable.getValue());
-            targetSelected.remove(null);
-        }
-        return targetSelected;
-    }
-
-    /**
-     * Get the details of selected rows of {@link DistributionTable}.
-     * 
-     * @param sourceTable
-     * @return set of {@link DistributionSetIdName}
-     */
-    public static Set<DistributionSetIdName> getSelectedDSDetails(final Table sourceTable) {
-        Set<DistributionSetIdName> distSelected = null;
-        if (sourceTable.getValue() != null) {
-            distSelected = new LinkedHashSet<>((Set) sourceTable.getValue());
-            distSelected.remove(null);
-        }
-        return distSelected;
-    }
-
-    /**
      * 
      * Add target table container properties.
      * 
@@ -1206,6 +1026,10 @@ public final class HawkbitCommonUtil {
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
+
+        targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
+        targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
+
     }
 
     /**
@@ -1359,12 +1183,12 @@ public final class HawkbitCommonUtil {
      *            details of status and count
      * @return String
      */
-    public static String getFormattedString(Map<Status, Long> details) {
-        StringBuilder val = new StringBuilder();
+    public static String getFormattedString(final Map<Status, Long> details) {
+        final StringBuilder val = new StringBuilder();
         if (details == null || details.isEmpty()) {
             return null;
         }
-        for (Entry<Status, Long> entry : details.entrySet()) {
+        for (final Entry<Status, Long> entry : details.entrySet()) {
             val.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
         }
         return val.substring(0, val.length() - 1);
@@ -1382,8 +1206,8 @@ public final class HawkbitCommonUtil {
      *            label id
      * @return
      */
-    public static String getStatusLabelDetailsInString(String value, String style, String id) {
-        StringBuilder val = new StringBuilder();
+    public static String getStatusLabelDetailsInString(final String value, final String style, final String id) {
+        final StringBuilder val = new StringBuilder();
         if (!Strings.isNullOrEmpty(value)) {
             val.append("value:").append(value).append(",");
         }
@@ -1392,6 +1216,21 @@ public final class HawkbitCommonUtil {
         }
         val.append("id:").append(id);
         return val.toString();
+    }
+
+    /**
+     * Receive the code point of a given StatusFontIcon.
+     * 
+     * @param statusFontIcon
+     *            the status font icon
+     * @return the code point of the StatusFontIcon
+     */
+    public static String getCodePoint(final StatusFontIcon statusFontIcon) {
+        if (statusFontIcon == null) {
+            return null;
+        }
+        return statusFontIcon.getFontIcon() != null ? Integer.toString(statusFontIcon.getFontIcon().getCodepoint())
+                : null;
     }
 
 }

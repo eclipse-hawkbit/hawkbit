@@ -8,8 +8,7 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
@@ -19,13 +18,45 @@
    </parent>
 
    <artifactId>hawkbit-examples-parent</artifactId>
-   <name>hawkBit :: Examples Parent</name>
+   <name>hawkBit-example :: Parent</name>
    <packaging>pom</packaging>
 
    <modules>
       <module>hawkbit-device-simulator</module>
       <module>hawkbit-example-app</module>
-      <module>hawkbit-mgmt-api-client</module>
-   </modules>
+      <module>hawkbit-example-core-feign-client</module>
+      <module>hawkbit-example-ddi-feign-client</module>
+      <module>hawkbit-example-mgmt-feign-client</module>
+      <module>hawkbit-example-mgmt-simulator</module>
+  </modules>
+  
+  
+   <properties>
+      <feign.version>8.14.2</feign.version>
+   </properties>
+
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-core</artifactId>
+            <!-- need to overwrite for the interface inheritance feature of feign-core -->
+            <!-- <version>8.16.0</version> -->
+            <version>${feign.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-jackson</artifactId>
+            <!-- need to overwrite for the interface inheritance feature of feign-core -->
+            <!-- <version>8.16.0</version> -->
+            <version>${feign.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+            <version>${feign.version}</version>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
 
 </project>

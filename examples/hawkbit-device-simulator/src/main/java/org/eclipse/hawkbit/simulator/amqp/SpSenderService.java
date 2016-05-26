@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -23,13 +24,9 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 /**
- * Sender service to send message to SP.
- *
- *
- *
+ * Sender service to send messages to update server.
  */
 @Service
 public class SpSenderService extends SenderService {
@@ -59,8 +56,9 @@ public class SpSenderService extends SenderService {
      * @param description
      *            a description according the update process
      */
-    public void finishUpdateProcess(final SimulatedUpdate update, final String description) {
-        final Message updateResultMessage = createUpdateResultMessage(update, ActionStatus.FINISHED, description);
+    public void finishUpdateProcess(final SimulatedUpdate update, final List<String> updateResultMessages) {
+        final Message updateResultMessage = createUpdateResultMessage(update, ActionStatus.FINISHED,
+                updateResultMessages);
         sendMessage(spExchange, updateResultMessage);
     }
 
@@ -72,9 +70,9 @@ public class SpSenderService extends SenderService {
      * @param messageDescription
      *            a description according the update process
      */
-    public void finishUpdateProcessWithError(final SimulatedUpdate update, final String messageDescription) {
-        sendErrorgMessage(update, messageDescription);
-        LOGGER.debug("Update process finished with error \"{}\" reported by thing {}", messageDescription,
+    public void finishUpdateProcessWithError(final SimulatedUpdate update, final List<String> updateResultMessages) {
+        sendErrorgMessage(update, updateResultMessages);
+        LOGGER.debug("Update process finished with error \"{}\" reported by thing {}", updateResultMessages,
                 update.getThingId());
     }
 
@@ -88,8 +86,8 @@ public class SpSenderService extends SenderService {
      * @param actionId
      *            the ID of the action for the error message
      */
-    public void sendErrorMessage(final String tenant, final String messageDescription, final Long actionId) {
-        final Message message = createActionStatusMessage(tenant, ActionStatus.ERROR, messageDescription, actionId);
+    public void sendErrorMessage(final String tenant, final List<String> updateResultMessages, final Long actionId) {
+        final Message message = createActionStatusMessage(tenant, ActionStatus.ERROR, updateResultMessages, actionId);
         sendMessage(spExchange, message);
     }
 
@@ -101,8 +99,8 @@ public class SpSenderService extends SenderService {
      * @param warningMessage
      *            a warning description
      */
-    public void sendWarningMessage(final SimulatedUpdate update, final String warningMessage) {
-        final Message message = createActionStatusMessage(update, warningMessage, ActionStatus.WARNING);
+    public void sendWarningMessage(final SimulatedUpdate update, final List<String> updateResultMessages) {
+        final Message message = createActionStatusMessage(update, updateResultMessages, ActionStatus.WARNING);
         sendMessage(spExchange, message);
     }
 
@@ -119,8 +117,8 @@ public class SpSenderService extends SenderService {
      *            the cached value
      */
     public void sendActionStatusMessage(final String tenant, final ActionStatus actionStatus,
-            final String actionMessage, final Long actionId) {
-        final Message message = createActionStatusMessage(tenant, actionStatus, actionMessage, actionId);
+            final List<String> updateResultMessages, final Long actionId) {
+        final Message message = createActionStatusMessage(tenant, actionStatus, updateResultMessages, actionId);
         sendMessage(message);
 
     }
@@ -162,11 +160,11 @@ public class SpSenderService extends SenderService {
      *
      * @param context
      *            the current context
-     * @param messageDescription
-     *            a description according the update process
+     * @param updateResultMessages
+     *            a list of descriptions according the update process
      */
-    private void sendErrorgMessage(final SimulatedUpdate update, final String messageDescription) {
-        final Message message = createActionStatusMessage(update, messageDescription, ActionStatus.ERROR);
+    private void sendErrorgMessage(final SimulatedUpdate update, final List<String> updateResultMessages) {
+        final Message message = createActionStatusMessage(update, updateResultMessages, ActionStatus.ERROR);
         sendMessage(spExchange, message);
     }
 
@@ -183,7 +181,7 @@ public class SpSenderService extends SenderService {
      *            the cacheValue value
      */
     private Message createActionStatusMessage(final String tenant, final ActionStatus actionStatus,
-            final String actionMessage, final Long actionId) {
+            final List<String> updateResultMessages, final Long actionId) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
         final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
@@ -192,15 +190,14 @@ public class SpSenderService extends SenderService {
         headers.put(MessageHeaderKey.TENANT, tenant);
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         headers.put(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
-        if (!StringUtils.isEmpty(actionMessage)) {
-            actionUpdateStatus.getMessage().add(actionMessage);
-        }
+        actionUpdateStatus.getMessage().addAll(updateResultMessages);
+
         actionUpdateStatus.setActionId(actionId);
         return convertMessage(actionUpdateStatus, messageProperties);
     }
 
     private Message createUpdateResultMessage(final SimulatedUpdate cacheValue, final ActionStatus actionStatus,
-            final String updateResultMessage) {
+            final List<String> updateResultMessages) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
         final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
@@ -209,14 +206,14 @@ public class SpSenderService extends SenderService {
         headers.put(MessageHeaderKey.TENANT, cacheValue.getTenant());
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         headers.put(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
-        actionUpdateStatus.getMessage().add(updateResultMessage);
+        actionUpdateStatus.getMessage().addAll(updateResultMessages);
         actionUpdateStatus.setActionId(cacheValue.getActionId());
         return convertMessage(actionUpdateStatus, messageProperties);
     }
 
-    private Message createActionStatusMessage(final SimulatedUpdate update, final String messageDescription,
+    private Message createActionStatusMessage(final SimulatedUpdate update, final List<String> updateResultMessages,
             final ActionStatus status) {
-        return createActionStatusMessage(update.getTenant(), status, messageDescription, update.getActionId());
+        return createActionStatusMessage(update.getTenant(), status, updateResultMessages, update.getActionId());
     }
 
 }

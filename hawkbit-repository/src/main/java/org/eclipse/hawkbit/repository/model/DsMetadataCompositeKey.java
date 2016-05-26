@@ -13,24 +13,17 @@ import java.io.Serializable;
 /**
  * The DistributionSet Metadata composite key which contains the meta data key
  * and the ID of the DistributionSet itself.
- * 
- *
  *
  */
 public final class DsMetadataCompositeKey implements Serializable {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private String key;
 
     private Long distributionSet;
 
-    /**
-    *
-    */
     public DsMetadataCompositeKey() {
+        // Default constructor for JPA.
     }
 
     /**
@@ -44,55 +37,31 @@ public final class DsMetadataCompositeKey implements Serializable {
         this.key = key;
     }
 
-    /**
-     * @return the key
-     */
     public String getKey() {
         return key;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
     public void setKey(final String key) {
         this.key = key;
     }
 
-    /**
-     * @return the distributionSet
-     */
     public Long getDistributionSet() {
         return distributionSet;
     }
 
-    /**
-     * @param distributionSet
-     *            the distributionSet to set
-     */
     public void setDistributionSet(final Long distributionSet) {
         this.distributionSet = distributionSet;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((distributionSet == null) ? 0 : distributionSet.hashCode());
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + (distributionSet == null ? 0 : distributionSet.hashCode());
+        result = prime * result + (key == null ? 0 : key.hashCode());
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) { // NOSONAR - as this is generated
                                               // code

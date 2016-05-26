@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilte
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
@@ -129,8 +130,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             proxyDistribution.setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
             proxyDistribution.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
             proxyDistribution.setDescription(distributionSet.getDescription());
-            proxyDistribution.setCreatedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getCreatedBy()));
-            proxyDistribution.setModifiedByUser(HawkbitCommonUtil.getIMUser(distributionSet.getLastModifiedBy()));
+            proxyDistribution.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
+            proxyDistribution.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
             proxyDistribution.setNameVersion(
                     HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
             proxyDistributions.add(proxyDistribution);

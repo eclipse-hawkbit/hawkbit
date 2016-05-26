@@ -8,8 +8,7 @@
     http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
@@ -28,8 +27,8 @@
             <configuration>
                <extraJvmArgs>-Xmx1g -Xss1024k</extraJvmArgs>
                <!-- We are doing "inplace" gwt compilation but into subdir VAADIN/widgetsets -->
-               <webappDirectory>${project.build.directory}/classes/VAADIN/widgetsets</webappDirectory>
-               <hostedWebapp>${project.build.directory}/classes/VAADIN/widgetsets</hostedWebapp>
+               <webappDirectory>src/main/resources/VAADIN/widgetsets</webappDirectory>
+               <hostedWebapp>src/main/resources/VAADIN/widgetsets</hostedWebapp>
                <warSourceDirectory>src/main/resources</warSourceDirectory>
                <noServer>true</noServer>
                <!-- Remove draftCompile when project is ready -->
@@ -43,12 +42,12 @@
             </configuration>
             <executions>
                <execution>
+               <phase>process-classes</phase>
                   <configuration>
                      <!-- if you don't specify any modules, the plugin will find them -->
                      <!-- <modules> <module>com.vaadin.demo.mobilemail.gwt.ColorPickerWidgetSet</module> </modules> -->
                   </configuration>
                   <goals>
-                     <goal>clean</goal>
                      <goal>resources</goal>
                      <goal>update-theme</goal>
                      <goal>update-widgetset</goal>
@@ -58,29 +57,47 @@
                </execution>
             </executions>
          </plugin>
-		 <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-jar-plugin</artifactId>
-			<configuration>
-				<archive>
-					<index>true</index>
-					<manifest>
-						<addClasspath>true</addClasspath>
-						<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-					</manifest>
-					<manifestEntries>
-						<Implementation-Title>CustomRenderers</Implementation-Title>
-						<Vaadin-Package-Version>1</Vaadin-Package-Version>
-						<Vaadin-Widgetsets>org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet</Vaadin-Widgetsets>
-					</manifestEntries>
-				</archive>
-			</configuration>
-		</plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+               <execution>
+                  <phase>process-classes</phase>
+                  <configuration>
+                     <target>
+                        <copy todir="${project.build.directory}/classes/VAADIN/widgetsets">
+                           <fileset dir="${basedir}/src/main/resources/VAADIN/widgetsets" includes="**/*" />
+                        </copy>
+                     </target>
+                  </configuration>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+               <archive>
+                  <index>true</index>
+                  <manifest>
+                     <addClasspath>true</addClasspath>
+                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                  </manifest>
+                  <manifestEntries>
+                     <Implementation-Title>CustomRenderers</Implementation-Title>
+                     <Vaadin-Package-Version>1</Vaadin-Package-Version>
+                     <Vaadin-Widgetsets>org.eclipse.hawkbit.ui.customrenderers.CustomRendererWidgetSet</Vaadin-Widgetsets>
+                  </manifestEntries>
+               </archive>
+            </configuration>
+         </plugin>
       </plugins>
       <pluginManagement>
          <plugins>
-            <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven 
-               build itself. -->
+            <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
             <plugin>
                <groupId>org.eclipse.m2e</groupId>
                <artifactId>lifecycle-mapping</artifactId>
@@ -171,11 +188,11 @@
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-server</artifactId>
       </dependency>
-	  <dependency>
-		 <groupId>com.vaadin</groupId>
-		 <artifactId>vaadin-client</artifactId>
-	  </dependency>
-	  <dependency>
+      <dependency>
+         <groupId>com.vaadin</groupId>
+         <artifactId>vaadin-client</artifactId>
+      </dependency>
+      <dependency>
          <groupId>com.vaadin</groupId>
          <artifactId>vaadin-push</artifactId>
       </dependency>

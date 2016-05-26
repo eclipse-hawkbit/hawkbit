@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import java.io.Serializable;
 
 /**
- * represents an configurationItem, which can be modified by the user
+ * Represents an configurationItem, which can be modified by the user
  */
 public interface ConfigurationItem {
 

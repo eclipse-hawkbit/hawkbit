@@ -14,11 +14,6 @@ import javax.persistence.MappedSuperclass;
 /**
  * Extension for {@link NamedEntity} that are versioned.
  *
- *
- *
- *
- *
- *
  */
 @MappedSuperclass
 public abstract class NamedVersionedEntity extends NamedEntity {
@@ -29,7 +24,7 @@ public abstract class NamedVersionedEntity extends NamedEntity {
 
     /**
      * parameterized constructor.
-     * 
+     *
      * @param name
      *            of the entity
      * @param version
@@ -52,5 +47,4 @@ public abstract class NamedVersionedEntity extends NamedEntity {
     public void setVersion(final String version) {
         this.version = version;
     }
-
 }

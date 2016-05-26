@@ -17,7 +17,7 @@
       <version>0.2.0-SNAPSHOT</version>
    </parent>
    <artifactId>hawkbit-example-app</artifactId>
-   <name>hawkBit :: Example App</name>
+   <name>hawkBit-example :: UI Application</name>
 
    <build>
       <plugins>
@@ -39,6 +39,20 @@
             </executions>
          </plugin>
       </plugins>
+      <resources>
+         <resource>
+            <directory>src/main/resources</directory>
+         </resource>
+         <resource>
+            <directory>cf</directory>
+            <filtering>true</filtering>
+            <targetPath>${project.build.directory}</targetPath>
+            <includes>
+               <include>manifest.yml</include>
+               <include>manifest-simple.yml</include>
+            </includes>
+         </resource>
+      </resources>
    </build>
 
    <dependencies>
@@ -50,7 +64,12 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-rest-resource</artifactId>
+         <artifactId>hawkbit-mgmt-resource</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-ddi-resource</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -82,16 +101,26 @@
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.springframework.boot</groupId>
-               <artifactId>spring-boot-starter-logging</artifactId>
-            </exclusion>
-         </exclusions>
       </dependency>
+      <!-- Log4j API and Core implementation required for binding -->
       <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-log4j2</artifactId>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-api</artifactId>
+      </dependency>
+      <!-- Logging binding for java-util-logging e.g. Tomcat -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>jul-to-slf4j</artifactId>
+      </dependency>
+      <!-- Logging binding for Jakarta Commons Logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+      </dependency>
+      <!-- Logging binding for Log4J Logging -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>log4j-over-slf4j</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework.security</groupId>

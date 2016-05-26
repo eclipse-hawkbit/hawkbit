@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,10 +41,7 @@ import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
 /**
- * The file management which looks up all the file in the filestore.
- *
- *
- *
+ * The file management which looks up all the file in the file tore.
  *
  */
 public class ArtifactStore implements ArtifactRepository {
@@ -60,7 +60,7 @@ public class ArtifactStore implements ArtifactRepository {
     private static final String MD5 = "md5";
 
     /**
-     * The mongoDB field which holds the SHA1 hash, stored in the metadata
+     * The mongoDB field which holds the SHA1 hash, stored in the meta data
      * object.
      */
     private static final String SHA1 = "sha1";
@@ -75,11 +75,10 @@ public class ArtifactStore implements ArtifactRepository {
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's SHA1 hash.
      *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
      * @param sha1Hash
      *            the sha1-hash of the file to lookup.
-     * @return The gridfs file object or {@code null} if no file exists.
+     * 
+     * @return The DbArtifact object or {@code null} if no file exists.
      */
     @Override
     public DbArtifact getArtifactBySha1(final String sha1Hash) {
@@ -126,7 +125,11 @@ public class ArtifactStore implements ArtifactRepository {
             LOGGER.debug("storing file {} of content {}", filename, contentType);
             tempFile = File.createTempFile("uploadFile", null);
             try (final FileOutputStream os = new FileOutputStream(tempFile)) {
-                return store(content, contentType, os, tempFile, hash);
+                try (BufferedOutputStream bos = new BufferedOutputStream(os)) {
+                    try (BufferedInputStream bis = new BufferedInputStream(content)) {
+                        return store(content, contentType, bos, tempFile, hash);
+                    }
+                }
             }
         } catch (final IOException | MongoException e1) {
             throw new ArtifactStoreException(e1.getMessage(), e1);
@@ -166,7 +169,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private DbArtifact store(final InputStream content, final String contentType, final FileOutputStream os,
+    private DbArtifact store(final InputStream content, final String contentType, final OutputStream os,
             final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
         try {
@@ -189,7 +192,8 @@ public class ArtifactStore implements ArtifactRepository {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
 
-        if (hash != null && hash.getMd5() != null && !storedArtifact.getHashes().getMd5().equals(hash.getMd5())) {
+        if (hash != null && hash.getMd5() != null
+                && !storedArtifact.getHashes().getMd5().equalsIgnoreCase(hash.getMd5())) {
             throw new HashNotMatchException("The given md5 hash " + hash.getMd5()
                     + " not matching the calculated md5 hash " + storedArtifact.getHashes().getMd5(),
                     HashNotMatchException.MD5);
@@ -199,14 +203,14 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private static String computeSHA1Hash(final InputStream stream, final FileOutputStream os,
-            final String providedSHA1Sum) throws NoSuchAlgorithmException, IOException {
+    private static String computeSHA1Hash(final InputStream stream, final OutputStream os, final String providedSHA1Sum)
+            throws NoSuchAlgorithmException, IOException {
         String sha1Hash;
         // compute digest
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
-        final DigestOutputStream dos = new DigestOutputStream(os, md);
-        ByteStreams.copy(stream, dos);
-        dos.close();
+        try (final DigestOutputStream dos = new DigestOutputStream(os, md)) {
+            ByteStreams.copy(stream, dos);
+        }
         sha1Hash = BaseEncoding.base16().lowerCase().encode(md.digest());
         if (providedSHA1Sum != null && !providedSHA1Sum.equalsIgnoreCase(sha1Hash)) {
             throw new HashNotMatchException(
@@ -226,8 +230,7 @@ public class ArtifactStore implements ArtifactRepository {
      * @return a paged list of artifacts mapped from the given dbFiles
      */
     private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
-        final List<DbArtifact> collect = dbFiles.stream().map(dbFile -> map(dbFile)).collect(Collectors.toList());
-        return collect;
+        return dbFiles.stream().map(dbFile -> map(dbFile)).collect(Collectors.toList());
     }
 
     /**
@@ -238,7 +241,7 @@ public class ArtifactStore implements ArtifactRepository {
      *            the tenant to retrieve the artifacts from, ignore case.
      * @param sha1Hashes
      *            the sha1-hashes of the files to lookup.
-     * @return list of artfiacts
+     * @return list of artifacts
      */
     @Override
     public List<DbArtifact> getArtifactsBySha1(final List<String> sha1Hashes) {

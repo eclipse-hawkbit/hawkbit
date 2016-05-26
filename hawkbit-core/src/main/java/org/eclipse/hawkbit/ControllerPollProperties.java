@@ -31,7 +31,7 @@ public class ControllerPollProperties {
      * Maximum polling time that can be configured by a tenant in HH:MM:SS
      * notation.
      */
-    private String maxPollingTime = "23:59:00";
+    private String maxPollingTime = "23:59:59";
 
     /**
      * Minimum polling time that can be configured by a tenant in HH:MM:SS

@@ -8,21 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
-import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent.DistributionComponentEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -44,31 +38,10 @@ public class DistributionTableHeader extends AbstractTableHeader {
     private static final long serialVersionUID = 7597766804650170127L;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
-    private SpPermissionChecker permChecker;
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventbus;
-
-    @Autowired
     private ManagementUIState managementUIState;
 
     @Autowired
     private DistributionAddUpdateWindowLayout distributionAddUpdateWindowLayout;
-
-    @Override
-    @PostConstruct
-    protected void init() {
-        super.init();
-        eventbus.subscribe(this);
-    }
-
-    @PreDestroy
-    void destroy() {
-        eventbus.unsubscribe(this);
-    }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final ManagementUIEvent event) {
@@ -154,13 +127,13 @@ public class DistributionTableHeader extends AbstractTableHeader {
     @Override
     public void maximizeTable() {
         managementUIState.setDsTableMaximized(Boolean.TRUE);
-        eventbus.publish(this, new DistributionTableEvent(DistributionComponentEvent.MAXIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MAXIMIZED, null));
     }
 
     @Override
     public void minimizeTable() {
         managementUIState.setDsTableMaximized(Boolean.FALSE);
-        eventbus.publish(this, new DistributionTableEvent(DistributionComponentEvent.MINIMIZED, null));
+        eventbus.publish(this, new DistributionTableEvent(BaseEntityEventType.MINIMIZED, null));
     }
 
     @Override

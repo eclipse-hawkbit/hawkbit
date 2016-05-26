@@ -55,7 +55,7 @@ public class SimulationController {
      *            number of delay in milliseconds to delay polling of DDI
      *            devices
      * @param gatewayToken
-     *            the hawkbit-update-server gatwaytoken in case authentication
+     *            the hawkbit-update-server gatewaytoken in case authentication
      *            is enforced in hawkbit
      * @return a response string that devices has been created
      * @throws MalformedURLException
@@ -68,7 +68,7 @@ public class SimulationController {
             @RequestParam(value = "endpoint", defaultValue = "http://localhost:8080") final String endpoint,
             @RequestParam(value = "polldelay", defaultValue = "30") final int pollDelay,
             @RequestParam(value = "gatewaytoken", defaultValue = "") final String gatewayToken)
-                    throws MalformedURLException {
+            throws MalformedURLException {
 
         final Protocol protocol;
         switch (api.toLowerCase()) {
@@ -86,7 +86,10 @@ public class SimulationController {
             final String deviceId = name + i;
             repository.add(deviceFactory.createSimulatedDevice(deviceId, tenant, protocol, pollDelay, new URL(endpoint),
                     gatewayToken));
-            spSenderService.createOrUpdateThing(tenant, deviceId);
+
+            if (protocol == Protocol.DMF_AMQP) {
+                spSenderService.createOrUpdateThing(tenant, deviceId);
+            }
         }
 
         return ResponseEntity.ok("Updated " + amount + " DMF connected targets!");

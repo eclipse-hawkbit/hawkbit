@@ -13,19 +13,12 @@ import java.io.Serializable;
 /**
  * ID class of the {@link Target} which contains the
  * {@link Target#getControllerId()} and the {@link Target#getName()} in one
- * object. Often it's necessary to remeber the IDs of the {@link Target} and the
- * resolve for e.g. the UI the name of the target, this is very costly
+ * object. Often it's necessary to remember the IDs of the {@link Target} and
+ * the resolve for e.g. the UI the name of the target, this is very costly
  * operation, so it's much better if the ID and the name of the {@link Target}
  * is already in memory available.
- *
- *
- *
- *
  */
 public class TargetIdName implements Serializable {
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
     private final long targetId;
@@ -46,61 +39,34 @@ public class TargetIdName implements Serializable {
         this.name = name;
     }
 
-    /**
-     * @return the controller id
-     */
     public String getControllerId() {
         return controllerId;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param id
-     *            the id to set
-     */
     public void setControllerId(final String id) {
-        this.controllerId = id;
+        controllerId = id;
     }
 
-    /**
-     * @param name
-     *            the name to set
-     */
     public void setName(final String name) {
         this.name = name;
     }
 
-    /**
-     * @return the targetId
-     */
     public long getTargetId() {
         return targetId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (targetId ^ (targetId >>> 32));
+        result = prime * result + (int) (targetId ^ targetId >>> 32);
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -119,11 +85,6 @@ public class TargetIdName implements Serializable {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         // only return the ID because it's used in vaadin for setting the item

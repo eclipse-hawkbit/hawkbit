@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +30,9 @@ import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
+import org.eclipse.hawkbit.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.WithUser;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -55,13 +58,44 @@ import ru.yandex.qatools.allure.annotations.Stories;
 public class TargetManagementTest extends AbstractIntegrationTest {
 
     @Test
+    @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
+    public void getTargetSecurityTokenOnlyWithCorrectPermission() throws Exception {
+        final Target createdTarget = targetManagement.createTarget(new Target("targetWithSecurityToken"));
+
+        // retrieve security token only with READ_TARGET_SEC_TOKEN permission
+        final String securityTokenWithReadPermission = securityRule.runAs(WithSpringAuthorityRule
+                .withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN.toString()), () -> {
+                    return createdTarget.getSecurityToken();
+                });
+
+        // retrieve security token as system code execution
+        final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(() -> {
+            return createdTarget.getSecurityToken();
+        });
+
+        // retrieve security token without any permissions
+        final String securityTokenWithoutPermission = securityRule
+                .runAs(WithSpringAuthorityRule.withUser("NoPermission", false), () -> {
+                    return createdTarget.getSecurityToken();
+                });
+
+        assertThat(createdTarget.getSecurityToken()).isNotNull();
+        assertThat(securityTokenWithReadPermission).isNotNull();
+        assertThat(securityTokenAsSystemCode).isNotNull();
+
+        assertThat(securityTokenWithoutPermission).isNull();
+
+    }
+
+    @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists.")
     @WithUser(tenantId = "tenantWhichDoesNotExists", allSpPermissions = true, autoCreateTenant = false)
     public void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
         try {
             targetManagement.createTarget(new Target("targetId123"));
-            fail("tenant not exist");
+            fail("should not be possible as the tenant does not exist");
         } catch (final TenantNotExistException e) {
+            // ok
         }
     }
 
@@ -204,6 +238,12 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         assertThat(target.getTargetInfo().getInstalledDistributionSet().getId()).as("Installed ds is wrong")
                 .isEqualTo(set.getId());
 
+    }
+
+    @Test
+    @Description("Ensures that repositoy returns null if given controller ID does not exist without exception.")
+    public void findTargetByControllerIDWithDetailsReturnsNullForNonexisting() {
+        assertThat(targetManagement.findTargetByControllerIDWithDetails("dsfsdfsdfsd")).as("Expected as").isNull();
     }
 
     @Test
@@ -715,6 +755,22 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         assertThat(50).as("Total targets").isEqualTo(targetManagement.findAllTargetIds().size());
         assertThat(25).as("Targets with no tag").isEqualTo(targetsListWithNoTag.size());
+
+    }
+
+    @Test
+    @Description("Tests the a target can be read with only the read target permission")
+    public void targetCanBeReadWithOnlyReadTargetPermission() throws Exception {
+        final String knownTargetControllerId = "readTarget";
+        controllerManagament.findOrRegisterTargetIfItDoesNotexist(knownTargetControllerId, new URI("http://127.0.0.1"));
+
+        securityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
+            final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
+            assertThat(findTargetByControllerID).isNotNull();
+            assertThat(findTargetByControllerID.getTargetInfo()).isNotNull();
+            assertThat(findTargetByControllerID.getTargetInfo().getPollStatus()).isNotNull();
+            return null;
+        });
 
     }
 }

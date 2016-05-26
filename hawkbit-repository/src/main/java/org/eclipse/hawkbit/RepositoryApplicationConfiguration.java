@@ -13,13 +13,16 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -49,13 +52,23 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
+     * @return the {@link SystemSecurityContext} singleton bean which make it
+     *         accessible in beans which cannot access the service directly,
+     *         e.g. JPA entities.
+     */
+    @Bean
+    public SystemSecurityContextHolder systemSecurityContextHolder() {
+        return SystemSecurityContextHolder.getInstance();
+    }
+
+    /**
      * @return the {@link TenantConfigurationManagement} singleton bean which
      *         make it accessible in beans which cannot access the service
      *         directly, e.g. JPA entities.
      */
     @Bean
-    public TenantConfigurationManagement tenantConfigurationManagement() {
-        return TenantConfigurationManagement.getInstance();
+    public TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
+        return TenantConfigurationManagementHolder.getInstance();
     }
 
     /**
@@ -127,23 +140,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new ExceptionMappingAspectHandler();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#
-     * createJpaVendorAdapter()
-     */
     @Override
     protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
         return new EclipseLinkJpaVendorAdapter();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#
-     * getVendorProperties()
-     */
     @Override
     protected Map<String, Object> getVendorProperties() {
 

@@ -33,9 +33,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Default DistributionSet Panel.
- *
- *
- *
  */
 @SpringComponent
 @ViewScope

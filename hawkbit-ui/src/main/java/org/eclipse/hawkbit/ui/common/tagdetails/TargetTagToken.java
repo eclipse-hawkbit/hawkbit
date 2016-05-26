@@ -19,10 +19,9 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssigmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ import com.vaadin.spring.annotation.ViewScope;
  */
 @SpringComponent
 @ViewScope
-public class TargetTagToken extends AbstractTargetTagToken {
+public class TargetTagToken extends AbstractTargetTagToken<Target> {
 
     private static final long serialVersionUID = 7124887018280196721L;
 
@@ -52,8 +51,6 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     @Autowired
     private transient TargetManagement targetManagement;
-
-    private Target selectedTarget;
 
     @Override
     protected String getTagStyleName() {
@@ -68,7 +65,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
     @Override
     protected void assignTag(final String tagNameSelected) {
         if (tagNameSelected != null) {
-            final TargetTagAssigmentResult result = toggleAssignment(tagNameSelected);
+            final TargetTagAssignmentResult result = toggleAssignment(tagNameSelected);
             if (result.getAssigned() >= 1 && NOTAGS_SELECTED) {
                 eventBus.publish(this, ManagementUIEvent.ASSIGN_TARGET_TAG);
             }
@@ -77,17 +74,17 @@ public class TargetTagToken extends AbstractTargetTagToken {
         }
     }
 
-    private TargetTagAssigmentResult toggleAssignment(final String tagNameSelected) {
+    private TargetTagAssignmentResult toggleAssignment(final String tagNameSelected) {
         final Set<String> targetList = new HashSet<>();
-        targetList.add(selectedTarget.getControllerId());
-        final TargetTagAssigmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
-        uinotification.displaySuccess(HawkbitCommonUtil.getTargetTagAssigmentMsg(tagNameSelected, result, i18n));
+        targetList.add(selectedEntity.getControllerId());
+        final TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(targetList, tagNameSelected);
+        uinotification.displaySuccess(HawkbitCommonUtil.createAssignmentMessage(tagNameSelected, result, i18n));
         return result;
     }
 
     @Override
     protected void unassignTag(final String tagName) {
-        final TargetTagAssigmentResult result = toggleAssignment(tagName);
+        final TargetTagAssignmentResult result = toggleAssignment(tagName);
         if (result.getUnassigned() >= 1 && (isClickedTagListEmpty() || getClickedTagList().contains(tagName))) {
             eventBus.publish(this, ManagementUIEvent.UNASSIGN_TARGET_TAG);
         }
@@ -113,8 +110,8 @@ public class TargetTagToken extends AbstractTargetTagToken {
     @Override
     protected void displayAlreadyAssignedTags() {
         removePreviouslyAddedTokens();
-        if (selectedTarget != null) {
-            for (final TargetTag tag : selectedTarget.getTags()) {
+        if (selectedEntity != null) {
+            for (final TargetTag tag : selectedEntity.getTags()) {
                 addNewToken(tag.getId());
             }
         }
@@ -139,7 +136,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onTargetTagAssigmentResultEvent(final TargetTagAssigmentResultEvent event) {
-        final TargetTagAssigmentResult assignmentResult = event.getAssigmentResult();
+        final TargetTagAssignmentResult assignmentResult = event.getAssigmentResult();
         final TargetTag targetTag = assignmentResult.getTargetTag();
         if (isAssign(assignmentResult)) {
             addNewToken(targetTag.getId());
@@ -149,9 +146,9 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     }
 
-    protected boolean isAssign(final TargetTagAssigmentResult assignmentResult) {
+    protected boolean isAssign(final TargetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getAssigned() > 0) {
-            final List<String> assignedTargetNames = assignmentResult.getAssignedTargets().stream()
+            final List<String> assignedTargetNames = assignmentResult.getAssignedEntity().stream()
                     .map(t -> t.getControllerId()).collect(Collectors.toList());
             if (assignedTargetNames.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
                 return true;
@@ -160,9 +157,9 @@ public class TargetTagToken extends AbstractTargetTagToken {
         return false;
     }
 
-    protected boolean isUnassign(final TargetTagAssigmentResult assignmentResult) {
+    protected boolean isUnassign(final TargetTagAssignmentResult assignmentResult) {
         if (assignmentResult.getUnassigned() > 0) {
-            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedTargets().stream()
+            final List<String> unassignedTargetNamesList = assignmentResult.getUnassignedEntity().stream()
                     .map(t -> t.getControllerId()).collect(Collectors.toList());
             if (unassignedTargetNamesList.contains(managementUIState.getLastSelectedTargetIdName().getControllerId())) {
                 return true;
@@ -173,16 +170,7 @@ public class TargetTagToken extends AbstractTargetTagToken {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent targetTableEvent) {
-        if (targetTableEvent.getTargetComponentEvent() == TargetComponentEvent.SELECTED_TARGET
-                && targetTableEvent.getTarget() != null) {
-            ui.access(() -> {
-                /**
-                 * targetTableEvent.getTarget() is null when table has no data.
-                 */
-                selectedTarget = targetTableEvent.getTarget();
-                repopulateToken();
-            });
-        }
+        onBaseEntityEvent(targetTableEvent);
     }
 
 }

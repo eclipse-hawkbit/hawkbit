@@ -12,7 +12,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.TestDataUtil;
@@ -20,9 +23,11 @@ import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilte
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -159,6 +164,98 @@ public class TagManagementTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Description("Verifies the toogle mechanism by means on assigning tag if at least on DS in the list does not have"
+            + "the tag yet. Unassign if all of them have the tag already.")
+    public void assignAndUnassignDistributionSetTags() {
+        final List<DistributionSet> groupA = TestDataUtil.generateDistributionSets(20, softwareManagement,
+                distributionSetManagement);
+        final List<DistributionSet> groupB = TestDataUtil.generateDistributionSets("unassigned", 20, softwareManagement,
+                distributionSetManagement);
+
+        final DistributionSetTag tag = tagManagement
+                .createDistributionSetTag(new DistributionSetTag("tag1", "tagdesc1", ""));
+
+        // toggle A only -> A is now assigned
+        DistributionSetTagAssignmentResult result = distributionSetManagement.toggleTagAssignment(groupA, tag);
+        assertThat(result.getAlreadyAssigned()).isEqualTo(0);
+        assertThat(result.getAssigned()).isEqualTo(20);
+        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+                groupA.stream().map(set -> set.getId()).collect(Collectors.toList())));
+        assertThat(result.getUnassigned()).isEqualTo(0);
+        assertThat(result.getUnassignedEntity()).isEmpty();
+        assertThat(result.getDistributionSetTag()).isEqualTo(tag);
+
+        // toggle A+B -> A is still assigned and B is assigned as well
+        result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        assertThat(result.getAlreadyAssigned()).isEqualTo(20);
+        assertThat(result.getAssigned()).isEqualTo(20);
+        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+                groupB.stream().map(set -> set.getId()).collect(Collectors.toList())));
+        assertThat(result.getUnassigned()).isEqualTo(0);
+        assertThat(result.getUnassignedEntity()).isEmpty();
+        assertThat(result.getDistributionSetTag()).isEqualTo(tag);
+
+        // toggle A+B -> both unassigned
+        result = distributionSetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        assertThat(result.getAlreadyAssigned()).isEqualTo(0);
+        assertThat(result.getAssigned()).isEqualTo(0);
+        assertThat(result.getAssignedEntity()).isEmpty();
+        assertThat(result.getUnassigned()).isEqualTo(40);
+        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement.findDistributionSetListWithDetails(
+                concat(groupB, groupA).stream().map(set -> set.getId()).collect(Collectors.toList())));
+        assertThat(result.getDistributionSetTag()).isEqualTo(tag);
+
+    }
+
+    @Test
+    @Description("Verifies the toogle mechanism by means on assigning tag if at least on target in the list does not have"
+            + "the tag yet. Unassign if all of them have the tag already.")
+    public void assignAndUnassignTargetTags() {
+        final List<Target> groupA = targetManagement.createTargets(TestDataUtil.generateTargets(20, ""));
+        final List<Target> groupB = targetManagement.createTargets(TestDataUtil.generateTargets(20, "groupb"));
+
+        final TargetTag tag = tagManagement.createTargetTag(new TargetTag("tag1", "tagdesc1", ""));
+
+        // toggle A only -> A is now assigned
+        TargetTagAssignmentResult result = targetManagement.toggleTagAssignment(groupA, tag);
+        assertThat(result.getAlreadyAssigned()).isEqualTo(0);
+        assertThat(result.getAssigned()).isEqualTo(20);
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+                groupA.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
+        assertThat(result.getUnassigned()).isEqualTo(0);
+        assertThat(result.getUnassignedEntity()).isEmpty();
+        assertThat(result.getTargetTag()).isEqualTo(tag);
+
+        // toggle A+B -> A is still assigned and B is assigned as well
+        result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        assertThat(result.getAlreadyAssigned()).isEqualTo(20);
+        assertThat(result.getAssigned()).isEqualTo(20);
+        assertThat(result.getAssignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+                groupB.stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
+        assertThat(result.getUnassigned()).isEqualTo(0);
+        assertThat(result.getUnassignedEntity()).isEmpty();
+        assertThat(result.getTargetTag()).isEqualTo(tag);
+
+        // toggle A+B -> both unassigned
+        result = targetManagement.toggleTagAssignment(concat(groupA, groupB), tag);
+        assertThat(result.getAlreadyAssigned()).isEqualTo(0);
+        assertThat(result.getAssigned()).isEqualTo(0);
+        assertThat(result.getAssignedEntity()).isEmpty();
+        assertThat(result.getUnassigned()).isEqualTo(40);
+        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.findTargetsByControllerIDsWithTags(
+                concat(groupB, groupA).stream().map(target -> target.getControllerId()).collect(Collectors.toList())));
+        assertThat(result.getTargetTag()).isEqualTo(tag);
+
+    }
+
+    @SafeVarargs
+    private final <T> List<T> concat(final List<T>... targets) {
+        final List<T> result = new ArrayList<>();
+        Arrays.asList(targets).forEach(result::addAll);
+        return result;
+    }
+
+    @Test
     @Description("Ensures that all tags are retrieved through repository.")
     public void findAllTargetTags() {
         final List<TargetTag> tags = createTargetsWithTags();
@@ -266,47 +363,58 @@ public class TagManagementTest extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameException() {
         tagManagement.createTargetTag(new TargetTag("A"));
+
         try {
             tagManagement.createTargetTag(new TargetTag("A"));
-            fail("Expected EntityAlreadyExistsException");
+            fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
+
         }
     }
 
+    @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         tagManagement.createTargetTag(new TargetTag("A"));
         final TargetTag tag = tagManagement.createTargetTag(new TargetTag("B"));
         tag.setName("A");
+
         try {
             tagManagement.updateTargetTag(tag);
-            fail("Expected EntityAlreadyExistsException");
+            fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
+
         }
     }
 
+    @Test
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameException() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
         try {
             tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
-            fail("Expected EntityAlreadyExistsException");
+            fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
+
         }
     }
 
+    @Test
     @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
     public void failedDuplicateDsTagNameExceptionAfterUpdate() {
         tagManagement.createDistributionSetTag(new DistributionSetTag("A"));
         final DistributionSetTag tag = tagManagement.createDistributionSetTag(new DistributionSetTag("B"));
         tag.setName("A");
+
         try {
             tagManagement.updateDistributionSetTag(tag);
-            fail("Expected EntityAlreadyExistsException");
+            fail("should not have worked as tag already exists");
         } catch (final EntityAlreadyExistsException e) {
+
         }
     }
 

@@ -10,7 +10,15 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
+import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -19,6 +27,8 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -27,15 +37,27 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- *
+ * Abstract Layout to show the entity details.
  *
  */
-public abstract class AbstractTableDetailsLayout extends VerticalLayout {
+public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends VerticalLayout {
 
     private static final long serialVersionUID = 4862529368471627190L;
+
+    @Autowired
+    private I18N i18n;
+
+    @Autowired
+    private transient EventBus.SessionEventBus eventBus;
+
+    @Autowired
+    private SpPermissionChecker permissionChecker;
+
+    private T selectedBaseEntity;
 
     private Label caption;
 
@@ -54,20 +76,57 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
     /**
      * Initialize components.
      */
+    @PostConstruct
     protected void init() {
         createComponents();
         buildLayout();
-        /**
-         * On load of UI/Refresh details will be loaded based on the row
-         * selected in table.
-         */
         restoreState();
+        eventBus.subscribe(this);
+    }
+
+    @PreDestroy
+    void destroy() {
+        eventBus.unsubscribe(this);
+    }
+
+    protected SpPermissionChecker getPermissionChecker() {
+        return permissionChecker;
+    }
+
+    protected EventBus.SessionEventBus getEventBus() {
+        return eventBus;
+    }
+
+    protected I18N getI18n() {
+        return i18n;
+    }
+
+    protected T getSelectedBaseEntity() {
+        return selectedBaseEntity;
+    }
+
+    public void setSelectedBaseEntity(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+    }
+
+    /**
+     * Default implementation to handle an entity event.
+     * 
+     * @param baseEntityEvent
+     *            the event
+     */
+    protected void onBaseEntityEvent(final BaseEntityEvent<T> baseEntityEvent) {
+        final BaseEntityEventType eventType = baseEntityEvent.getEventType();
+        if (BaseEntityEventType.SELECTED_ENTITY == eventType || BaseEntityEventType.UPDATED_ENTITY == eventType) {
+            UI.getCurrent().access(() -> populateData(baseEntityEvent.getEntity()));
+        } else if (BaseEntityEventType.MINIMIZED == eventType) {
+            UI.getCurrent().access(() -> setVisible(true));
+        } else if (BaseEntityEventType.MAXIMIZED == eventType) {
+            UI.getCurrent().access(() -> setVisible(false));
+        }
     }
 
     private void createComponents() {
-        /**
-         * Default caption is set.Reset on selecting table row.
-         */
         caption = createHeaderCaption();
         caption.setImmediate(true);
         caption.setContentMode(ContentMode.HTML);
@@ -76,7 +135,7 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
         editButton = SPUIComponentProvider.getButton("", "", "", null, false, FontAwesome.PENCIL_SQUARE_O,
                 SPUIButtonStyleSmallNoBorder.class);
         editButton.setId(getEditButtonId());
-        editButton.addClickListener(event -> onEdit(event));
+        editButton.addClickListener(this::onEdit);
 
         editButton.setEnabled(false);
 
@@ -90,22 +149,21 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
     }
 
     private void buildLayout() {
-
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
-        nameEditLayout.setWidth(100.0f, Unit.PERCENTAGE);
+        nameEditLayout.setWidth(100.0F, Unit.PERCENTAGE);
         nameEditLayout.addComponent(caption);
-        nameEditLayout.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
+        nameEditLayout.setComponentAlignment(caption, Alignment.TOP_LEFT);
         if (hasEditPermission()) {
             nameEditLayout.addComponent(editButton);
-            nameEditLayout.setComponentAlignment(editButton, Alignment.MIDDLE_RIGHT);
+            nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
         }
-        nameEditLayout.setExpandRatio(caption, 1.0f);
+        nameEditLayout.setExpandRatio(caption, 1.0F);
         nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
 
         addComponent(nameEditLayout);
-        setComponentAlignment(nameEditLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
         addComponent(detailsTab);
-        setComponentAlignment(nameEditLayout, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(nameEditLayout, Alignment.TOP_CENTER);
 
         setSizeFull();
         setHeightUndefined();
@@ -113,9 +171,7 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel(getDefaultCaption(),
-                SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
+        return SPUIComponentProvider.getLabel(getDefaultCaption(), SPUILabelDefinitions.SP_WIDGET_CAPTION);
     }
 
     protected VerticalLayout getTabLayout() {
@@ -130,62 +186,47 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
 
     private void restoreState() {
         if (onLoadIsTableRowSelected()) {
-            populateData(true);
+            populateData(null);
+            editButton.setEnabled(true);
         }
         if (onLoadIsTableMaximized()) {
-            /**
-             * If table is maximized hide details layout.
-             */
-            hideLayout();
+            setVisible(false);
         }
-    }
-
-    protected void showLayout() {
-        setVisible(true);
-    }
-
-    protected void hideLayout() {
-        setVisible(false);
     }
 
     /**
      * If no data in table (i,e no row selected),then disable the edit button.
      * If row is selected ,enable edit button.
      */
-    protected void populateData(final Boolean isRowSelected) {
-        if (isRowSelected) {
-            populateDetailsWidget();
-            enableEditButton();
+    private void populateData(final T selectedBaseEntity) {
+        this.selectedBaseEntity = selectedBaseEntity;
+        editButton.setEnabled(selectedBaseEntity != null);
+        if (selectedBaseEntity == null) {
+            setName(getDefaultCaption(), StringUtils.EMPTY);
         } else {
-            disableEditButton();
-            clearDetails();
+            setName(getDefaultCaption(), getName());
         }
+        populateLog();
+        populateDescription();
+        populateDetailsWidget();
     }
 
-    protected void enableEditButton() {
-        editButton.setEnabled(true);
-    }
+    protected void populateLog() {
+        logLayout.removeAllComponents();
 
-    protected void disableEditButton() {
-        editButton.setEnabled(false);
-    }
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
+                SPDateTimeUtil.formatCreatedAt(selectedBaseEntity)));
 
-    protected void updateLogLayout(final VerticalLayout changeLogLayout, final Long lastModifiedAt,
-            final String lastModifiedBy, final Long createdAt, final String createdBy, final I18N i18n) {
-        changeLogLayout.removeAllComponents();
-        changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.at"),
-                createdAt == null ? "" : SPDateTimeUtil.getFormattedDate(createdAt)));
+        logLayout.addComponent(SPUIComponentProvider.createCreatedByLabel(i18n, selectedBaseEntity));
 
-        changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.created.by"),
-                createdBy == null ? "" : HawkbitCommonUtil.getIMUser(createdBy)));
-
-        if (null != lastModifiedAt) {
-            changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
-                    SPDateTimeUtil.getFormattedDate(lastModifiedAt)));
-
-            changeLogLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.by"),
-                    lastModifiedBy == null ? "" : HawkbitCommonUtil.getIMUser(lastModifiedBy)));
+        if (selectedBaseEntity == null || selectedBaseEntity.getLastModifiedAt() == null) {
+            return;
         }
+
+        logLayout.addComponent(SPUIComponentProvider.createNameValueLabel(i18n.get("label.modified.date"),
+                SPDateTimeUtil.formatLastModifiedAt(selectedBaseEntity)));
+
+        logLayout.addComponent(SPUIComponentProvider.createLastModifiedByLabel(i18n, selectedBaseEntity));
     }
 
     protected void updateDescriptionLayout(final String descriptionLabel, final String description) {
@@ -271,23 +312,28 @@ public abstract class AbstractTableDetailsLayout extends VerticalLayout {
 
     protected abstract String getTabSheetId();
 
-    /**
-     * Populate details layout.
-     */
-    protected abstract void populateDetailsWidget();
-
-    protected abstract void clearDetails();
-
     protected abstract Boolean hasEditPermission();
 
     public VerticalLayout getDetailsLayout() {
         return detailsLayout;
     }
 
-    public VerticalLayout getLogLayout() {
-        return logLayout;
+    private void populateDescription() {
+        if (selectedBaseEntity != null) {
+            updateDescriptionLayout(i18n.get("label.description"), selectedBaseEntity.getDescription());
+        } else {
+            updateDescriptionLayout(i18n.get("label.description"), null);
+        }
+    }
+
+    protected abstract void populateDetailsWidget();
+
+    protected Long getSelectedBaseEntityId() {
+        return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
     }
 
     protected abstract String getDetailsHeaderCaptionId();
+
+    protected abstract String getName();
 
 }

@@ -24,11 +24,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 /**
- * An spring authentication provider which supportes authentication tokens of
+ * An spring authentication provider which supports authentication tokens of
  * type {@link PreAuthenticatedAuthenticationToken} created by the
  * {@link ControllerPreAuthenticatedSecurityHeaderFilter}.
  * 
- * Addtionally to the authentication token providing the principal and the
+ * Additionally to the authentication token providing the principal and the
  * credentials which must be match, this authentication provider can also check
  * the remote IP address of the request.
  * 
@@ -109,6 +109,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         if (successAuthentication) {
             final Collection<GrantedAuthority> controllerAuthorities = new ArrayList<>();
             controllerAuthorities.add(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
+            controllerAuthorities.add(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE));
             final PreAuthenticatedAuthenticationToken successToken = new PreAuthenticatedAuthenticationToken(principal,
                     credentials, controllerAuthorities);
             successToken.setDetails(tokenDetails);

@@ -34,7 +34,8 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.ActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
-import org.eclipse.hawkbit.dmf.json.model.TenantSecruityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
+import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -263,7 +264,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, "123", "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -282,7 +283,7 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, "123", "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
@@ -306,17 +307,16 @@ public class AmqpMessageHandlerServiceTest {
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
         final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
-        final TenantSecruityToken securityToken = new TenantSecruityToken(TENANT, "123", "12345");
+        final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
         // mock
         final LocalArtifact localArtifactMock = mock(LocalArtifact.class);
-        final Action actionMock = mock(Action.class);
         final DbArtifact dbArtifactMock = mock(DbArtifact.class);
         when(artifactManagementMock.findFirstLocalArtifactsBySHA1(anyString())).thenReturn(localArtifactMock);
-        when(controllerManagementMock.getActionForDownloadByTargetAndSoftwareModule(anyObject(), anyObject()))
-                .thenReturn(actionMock);
+        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), localArtifactMock))
+                .thenReturn(true);
         when(artifactManagementMock.loadLocalArtifactBinary(localArtifactMock)).thenReturn(dbArtifactMock);
         when(dbArtifactMock.getArtifactId()).thenReturn("artifactId");
         when(dbArtifactMock.getSize()).thenReturn(1L);
@@ -333,20 +333,22 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
+        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo("sha1");
+        assertThat(downloadResponse.getArtifact().getHashes().getMd5()).as("Wrong md5 hash").isEqualTo("md5");
         assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
                 .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
     }
 
     @Test
     @Description("Tests TODO")
-    public void lookupNextUpdateActionAfterFinished() throws IllegalArgumentException, IllegalAccessException {
+    public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any(), Matchers.any())).thenReturn(action);
         // for the test the same action can be used
-        final List<Action> actionList = new ArrayList<Action>();
+        final List<Action> actionList = new ArrayList<>();
         actionList.add(action);
         when(controllerManagementMock.findActionByTargetAndActive(Matchers.any())).thenReturn(actionList);
 
@@ -372,6 +374,8 @@ public class AmqpMessageHandlerServiceTest {
 
         assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
                 .isEqualTo("target1");
+        assertThat(targetAssignDistributionSetEvent.getTargetToken()).as("targetoken not filled correctly")
+                .isEqualTo(action.getTarget().getSecurityToken());
         assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
         assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
                 .isEqualTo(softwareModuleList);
@@ -379,7 +383,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status) {
-        return createActionUpdateStatus(status, 2l);
+        return createActionUpdateStatus(status, 2L);
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status, final Long id) {
@@ -404,15 +408,14 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private List<SoftwareModule> createSoftwareModuleList() {
-        final List<SoftwareModule> softwareModuleList = new ArrayList<SoftwareModule>();
+        final List<SoftwareModule> softwareModuleList = new ArrayList<>();
         final SoftwareModule softwareModule = new SoftwareModule();
         softwareModule.setId(777L);
         softwareModuleList.add(softwareModule);
         return softwareModuleList;
     }
 
-    private Action createActionWithTarget(final Long targetId, final Status status)
-            throws IllegalArgumentException, IllegalAccessException {
+    private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
         // is needed for the creation of targets
         initalizeSecurityTokenGenerator();
 
@@ -427,7 +430,7 @@ public class AmqpMessageHandlerServiceTest {
         return action;
     }
 
-    private void initalizeSecurityTokenGenerator() throws IllegalArgumentException, IllegalAccessException {
+    private void initalizeSecurityTokenGenerator() throws IllegalAccessException {
         final SecurityTokenGeneratorHolder instance = SecurityTokenGeneratorHolder.getInstance();
         final Field[] fields = instance.getClass().getDeclaredFields();
         for (final Field field : fields) {

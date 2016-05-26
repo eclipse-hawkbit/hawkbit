@@ -19,26 +19,31 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("hawkbit.device.simulator.amqp")
 public class AmqpProperties {
-
     /**
      * Queue for receiving DMF messages from update server.
      */
-    private String receiverConnectorQueueFromSp;
+    private String receiverConnectorQueueFromSp = "simulator_receiver";
 
     /**
      * Exchange for sending DMF messages to update server.
      */
-    private String senderForSpExchange;
+    private String senderForSpExchange = "simulator.replyTo";
 
     /**
      * Simulator dead letter queue.
      */
-    private String deadLetterQueue;
+    private String deadLetterQueue = "simulator_deadletter";
 
     /**
      * Simulator dead letter exchange.
      */
-    private String deadLetterExchange;
+    private String deadLetterExchange = "simulator.deadletter";
+
+    /**
+     * Message time to live (ttl) for the deadletter queue. Default ttl is 1
+     * hour.
+     */
+    private int deadLetterTtl = 60_000;
 
     public String getReceiverConnectorQueueFromSp() {
         return receiverConnectorQueueFromSp;
@@ -70,5 +75,13 @@ public class AmqpProperties {
 
     public void setSenderForSpExchange(final String senderForSpExchange) {
         this.senderForSpExchange = senderForSpExchange;
+    }
+
+    public int getDeadLetterTtl() {
+        return deadLetterTtl;
+    }
+
+    public void setDeadLetterTtl(final int deadLetterTtl) {
+        this.deadLetterTtl = deadLetterTtl;
     }
 }
