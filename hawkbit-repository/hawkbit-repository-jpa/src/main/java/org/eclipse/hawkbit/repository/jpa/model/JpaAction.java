@@ -29,8 +29,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.cache.CacheField;
-import org.eclipse.hawkbit.cache.CacheKeys;
+import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
+import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;

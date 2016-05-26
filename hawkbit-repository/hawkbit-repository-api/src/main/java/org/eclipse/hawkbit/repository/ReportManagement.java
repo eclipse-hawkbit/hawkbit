@@ -18,11 +18,11 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.report.model.DataReportSeries;
-import org.eclipse.hawkbit.report.model.InnerOuterDataReportSeries;
-import org.eclipse.hawkbit.report.model.ListReportSeries;
-import org.eclipse.hawkbit.report.model.SeriesTime;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.report.model.DataReportSeries;
+import org.eclipse.hawkbit.repository.report.model.InnerOuterDataReportSeries;
+import org.eclipse.hawkbit.repository.report.model.ListReportSeries;
+import org.eclipse.hawkbit.repository.report.model.SeriesTime;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**

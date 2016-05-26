@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.rest;
 
-import org.eclipse.hawkbit.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
 import org.eclipse.hawkbit.rest.configuration.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;

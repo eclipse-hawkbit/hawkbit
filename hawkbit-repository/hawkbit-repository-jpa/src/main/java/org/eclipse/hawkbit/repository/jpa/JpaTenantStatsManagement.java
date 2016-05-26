@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
