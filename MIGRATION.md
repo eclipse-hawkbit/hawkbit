@@ -11,3 +11,10 @@
 ### REST API model changes for clients
 - ENTITYPagedList classes have been removed; generic PagedList used instead (e.g. PagedList<TargetRest> instead of TargetPagedList).
 - ENTITYsrest classes have been removed; List<ENTITYrest> used instead (e.g. List<TargetRest> instead of TargetsRest)
+
+### Renamed api annotations
+- Annotation `org.eclipse.hawkbit.rest.resource.EnableRestResources` have changed to `org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi`
+- Annotation `org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi` have changed to `org.eclipse.hawkbit.ddi.annotation.EnableDdiApi`
+
+### Renamed maven modules
+- Module hawkbit-mgmt-api-client have changed to hawkbit-example-mgmt-simulator

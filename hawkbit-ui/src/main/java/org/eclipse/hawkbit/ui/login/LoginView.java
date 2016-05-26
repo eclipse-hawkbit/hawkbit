@@ -225,7 +225,7 @@ public class LoginView extends VerticalLayout implements View {
         final String linkStyle = "v-link";
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
-            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENATION,
+            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENTATION,
                     i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
             links.addComponent(docuLink);
