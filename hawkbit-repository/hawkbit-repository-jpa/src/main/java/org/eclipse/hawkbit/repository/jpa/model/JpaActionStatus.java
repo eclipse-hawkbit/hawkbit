@@ -40,6 +40,9 @@ import com.google.common.base.Splitter;
         @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })
 @Entity
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
     private static final long serialVersionUID = 1L;
 

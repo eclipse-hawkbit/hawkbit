@@ -85,11 +85,6 @@ public interface DistributionSet extends NamedVersionedEntity {
     Set<SoftwareModule> getModules();
 
     /**
-     * @return {@link DistributionSetIdName} view.
-     */
-    DistributionSetIdName getDistributionSetIdName();
-
-    /**
      * @param softwareModule
      * @return <code>true</code> if the module was added and <code>false</code>
      *         if it already existed in the set

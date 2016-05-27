@@ -41,6 +41,9 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 @Table(name = "sp_rollout", indexes = {
         @Index(name = "sp_idx_rollout_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_rollout"))
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout {
 
     private static final long serialVersionUID = 1L;

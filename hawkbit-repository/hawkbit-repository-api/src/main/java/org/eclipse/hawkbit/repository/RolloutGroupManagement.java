@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -70,16 +72,22 @@ public interface RolloutGroupManagement {
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given
-     * {@link Rollout} and the given {@link Specification}.
+     * {@link Rollout} and the an rsql filter.
      * 
-     * @param rolloutId
-     *            the ID of the rollout to filter the {@link RolloutGroup}s
-     * @param specification
+     * @param rollout
+     *            the rollout to filter the {@link RolloutGroup}s
+     * @param rsqlParam
      *            the specification to filter the result set based on attributes
      *            of the {@link RolloutGroup}
      * @param pageable
      *            the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     Page<RolloutGroup> findRolloutGroupsAll(@NotNull Rollout rollout, @NotNull String rsqlParam,
@@ -116,12 +124,18 @@ public interface RolloutGroupManagement {
      * 
      * @param rolloutGroup
      *            rollout group
-     * @param specification
+     * @param rsqlParam
      *            the specification for filtering the targets of a rollout group
      * @param pageable
      *            the page request to sort and limit the result
      * 
      * @return Page<Target> list of targets of a rollout group
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Page<Target> findRolloutGroupTargets(@NotNull RolloutGroup rolloutGroup, @NotNull String rsqlParam,

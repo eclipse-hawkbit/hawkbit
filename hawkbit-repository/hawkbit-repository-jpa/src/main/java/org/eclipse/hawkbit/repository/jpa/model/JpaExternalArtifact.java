@@ -33,6 +33,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 @Table(name = "sp_external_artifact", indexes = {
         @Index(name = "sp_idx_external_artifact_prim", columnList = "id,tenant") })
 @Entity
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaExternalArtifact extends AbstractJpaArtifact implements ExternalArtifact {
     private static final long serialVersionUID = 1L;
 

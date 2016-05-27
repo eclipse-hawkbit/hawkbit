@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlArtifactStoreControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -144,11 +145,11 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         actionStatus.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
+            actionStatus.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
                     + " of: " + request.getRequestURI());
         } else {
             actionStatus.addMessage(
-                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
+                    Constants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
         controllerManagement.addInformationalActionStatus(actionStatus);
         return action;

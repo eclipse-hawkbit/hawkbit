@@ -24,6 +24,9 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 @Table(name = "sp_target_filter_query", indexes = {
         @Index(name = "sp_idx_target_filter_query_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
                 "name", "tenant" }, name = "uk_tenant_custom_filter_name"))
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery {
     private static final long serialVersionUID = 7493966984413479089L;
 

@@ -19,6 +19,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  * {@link SoftwareModule}.
  */
 @MappedSuperclass
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public abstract class AbstractJpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
     private static final long serialVersionUID = 1L;
 

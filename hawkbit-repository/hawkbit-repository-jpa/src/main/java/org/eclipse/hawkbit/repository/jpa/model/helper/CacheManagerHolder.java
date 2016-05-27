@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
-import org.eclipse.hawkbit.repository.jpa.eventbus.CacheFieldEntityListener;
+import org.eclipse.hawkbit.repository.jpa.model.CacheFieldEntityListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 

@@ -36,6 +36,9 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
         @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") }, uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
 @Entity
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMetaData {
     private static final long serialVersionUID = 1L;
 
@@ -83,25 +86,5 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
 
     public void setTenant(final String tenant) {
         this.tenant = tenant;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + this.getClass().getName().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof TenantMetaData)) {
-            return false;
-        }
-
-        return true;
     }
 }

@@ -6,11 +6,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * A custom view on {@link Target} with {@link ActionType}.
@@ -53,7 +51,7 @@ public class TargetWithActionType {
         if (actionType == ActionType.TIMEFORCED) {
             return forceTime;
         }
-        return Action.NO_FORCE_TIME;
+        return Constants.NO_FORCE_TIME;
     }
 
     /**

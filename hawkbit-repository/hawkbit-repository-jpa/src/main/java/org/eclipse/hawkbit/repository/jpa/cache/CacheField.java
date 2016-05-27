@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.eclipse.hawkbit.repository.jpa.eventbus.CacheFieldEntityListener;
+import org.eclipse.hawkbit.repository.jpa.model.CacheFieldEntityListener;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.annotation.Transient;
 

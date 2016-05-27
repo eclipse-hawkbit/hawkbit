@@ -38,6 +38,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
         @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
                 @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
                 @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaDistributionSetType extends AbstractJpaNamedEntity implements DistributionSetType {
     private static final long serialVersionUID = 1L;
 
@@ -110,45 +113,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
     public Set<SoftwareModuleType> getOptionalModuleTypes() {
         return elements.stream().filter(element -> !element.isMandatory()).map(element -> element.getSmType())
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean containsModuleType(final SoftwareModuleType softwareModuleType) {
-        for (final DistributionSetTypeElement distributionSetTypeElement : elements) {
-            if (distributionSetTypeElement.getSmType().equals(softwareModuleType)) {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    @Override
-    public boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
-        return elements.stream().filter(element -> element.isMandatory())
-                .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
-
-    }
-
-    @Override
-    public boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
-        return elements.stream().filter(element -> element.isMandatory())
-                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
-
-    }
-
-    @Override
-    public boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
-        return elements.stream().filter(element -> !element.isMandatory())
-                .filter(element -> element.getSmType().equals(softwareModuleType)).findFirst().isPresent();
-
-    }
-
-    @Override
-    public boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
-        return elements.stream().filter(element -> !element.isMandatory())
-                .filter(element -> element.getSmType().getId().equals(softwareModuleTypeId)).findFirst().isPresent();
-
     }
 
     @Override

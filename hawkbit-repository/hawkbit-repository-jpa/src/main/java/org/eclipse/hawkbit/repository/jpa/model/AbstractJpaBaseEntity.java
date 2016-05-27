@@ -18,8 +18,6 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
-import org.eclipse.hawkbit.repository.jpa.eventbus.CacheFieldEntityListener;
-import org.eclipse.hawkbit.repository.jpa.eventbus.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -156,8 +154,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) { // NOSONAR - as this is generated
-                                              // code
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

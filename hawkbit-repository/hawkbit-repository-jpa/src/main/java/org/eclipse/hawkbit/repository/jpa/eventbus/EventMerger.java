@@ -36,10 +36,8 @@ import com.google.common.eventbus.Subscribe;
  * interested in all fine grained events, e.g. UI code. The UI code is not
  * interested in handling the flood of events, so collecting the events and
  * merge them to one event together and post them in a fixed interval is easier
- * to consume e.g. for push notifcations on UI.
+ * to consume e.g. for push notifications on UI.
  * 
- * @author Michael Hirsch
- *
  */
 @EventSubscriber
 public class EventMerger {

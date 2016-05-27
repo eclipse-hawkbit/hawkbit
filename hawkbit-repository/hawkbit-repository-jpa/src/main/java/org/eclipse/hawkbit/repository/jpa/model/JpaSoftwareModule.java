@@ -50,6 +50,9 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
                 @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
                 @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule {
     private static final long serialVersionUID = 1L;
 

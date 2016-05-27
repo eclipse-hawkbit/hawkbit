@@ -23,6 +23,9 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
         "tenant" }, name = "uk_tenant_key"))
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration {
     private static final long serialVersionUID = 1L;
 

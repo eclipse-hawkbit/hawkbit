@@ -20,6 +20,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -214,22 +215,26 @@ public class JpaControllerManagement implements ControllerManagement {
             break;
         case CANCELED:
         case FINISHED:
-            // in case of successful cancellation we also report the success at
-            // the canceled action itself.
-            actionStatus.addMessage(
-                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
-            DeploymentHelper.successCancellation(action, actionRepository, targetManagement, targetInfoRepository,
-                    entityManager);
+            handleFinishedCancelation(actionStatus, action);
             break;
         case RETRIEVED:
-            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
+            actionStatus.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
             break;
         default:
+            // do nothing
         }
         actionRepository.save(action);
         actionStatusRepository.save((JpaActionStatus) actionStatus);
 
         return action;
+    }
+
+    private void handleFinishedCancelation(final ActionStatus actionStatus, final JpaAction action) {
+        // in case of successful cancellation we also report the success at
+        // the canceled action itself.
+        actionStatus.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
+        DeploymentHelper.successCancellation(action, actionRepository, targetManagement, targetInfoRepository,
+                entityManager);
     }
 
     @Override

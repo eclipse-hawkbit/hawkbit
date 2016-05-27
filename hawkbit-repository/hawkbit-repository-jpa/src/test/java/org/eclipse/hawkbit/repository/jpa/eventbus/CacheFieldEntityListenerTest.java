@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
+import org.eclipse.hawkbit.repository.jpa.model.CacheFieldEntityListener;
 import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
 import org.junit.Before;
 import org.junit.Test;

@@ -12,6 +12,9 @@ import java.util.List;
 
 /**
  * Generic assignment result bean.
+ * 
+ * @param <T>
+ *            type of the assigned and unassigned {@link BaseEntity}s.
  *
  */
 public class AssignmentResult<T extends BaseEntity> {

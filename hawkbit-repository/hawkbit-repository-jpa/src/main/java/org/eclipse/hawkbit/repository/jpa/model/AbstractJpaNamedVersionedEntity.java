@@ -19,6 +19,9 @@ import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
  *
  */
 @MappedSuperclass
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEntity implements NamedVersionedEntity {
     private static final long serialVersionUID = 1L;
 

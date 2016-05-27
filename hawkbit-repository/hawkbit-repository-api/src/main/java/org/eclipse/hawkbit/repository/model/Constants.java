@@ -8,17 +8,20 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.List;
-
 /**
- * Target tag element.
+ * Repository model constants.
  *
  */
-public interface TargetTag extends Tag {
+public final class Constants {
 
     /**
-     * @return {@link List} of targets assigned to this {@link Tag}.
+     * indicating that target action has no force time which is only needed in
+     * case of {@link Action.ActionType#TIMEFORCED}.
      */
-    List<Target> getAssignedToTargets();
+    public static final Long NO_FORCE_TIME = 0L;
+
+    private Constants() {
+        // Utility class.
+    }
 
 }

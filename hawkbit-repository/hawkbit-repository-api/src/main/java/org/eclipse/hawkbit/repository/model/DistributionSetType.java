@@ -47,51 +47,59 @@ public interface DistributionSetType extends NamedEntity {
      *            search for
      * @return <code>true</code> if found
      */
-    boolean containsModuleType(SoftwareModuleType softwareModuleType);
+    default boolean containsModuleType(final SoftwareModuleType softwareModuleType) {
+        return containsMandatoryModuleType(softwareModuleType) || containsOptionalModuleType(softwareModuleType);
+    }
 
     /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
+     * Checks if the given {@link SoftwareModuleType} is in
+     * {@link #getMandatoryModuleTypes()}.
      *
      * @param softwareModuleType
      *            search for
      * @return <code>true</code> if found
      */
-    boolean containsMandatoryModuleType(SoftwareModuleType softwareModuleType);
+    default boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
+        return containsMandatoryModuleType(softwareModuleType.getId());
+    }
 
     /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
+     * Checks if the given {@link SoftwareModuleType} is in
+     * {@link #getMandatoryModuleTypes()}.
      *
      * @param softwareModuleTypeId
      *            search for by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
-    boolean containsMandatoryModuleType(Long softwareModuleTypeId);
+    default boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
+        return getMandatoryModuleTypes().stream().filter(element -> element.getId().equals(softwareModuleTypeId))
+                .findFirst().isPresent();
+    }
 
     /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and NOT defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
+     * Checks if the given {@link SoftwareModuleType} is in
+     * {@link #getOptionalModuleTypes()}.
      *
      * @param softwareModuleType
      *            search for
      * @return <code>true</code> if found
      */
-    boolean containsOptionalModuleType(SoftwareModuleType softwareModuleType);
+    default boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
+        return containsOptionalModuleType(softwareModuleType.getId());
+    }
 
     /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType} and NOT defined as
-     * {@link DistributionSetTypeElement#isMandatory()}.
+     * Checks if the given {@link SoftwareModuleType} is in
+     * {@link #getOptionalModuleTypes()}.
      *
      * @param softwareModuleTypeId
      *            search by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
-    boolean containsOptionalModuleType(Long softwareModuleTypeId);
+    default boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
+        return getOptionalModuleTypes().stream().filter(element -> element.getId().equals(softwareModuleTypeId))
+                .findFirst().isPresent();
+    }
 
     /**
      * Compares the modules of this {@link DistributionSetType} and the given

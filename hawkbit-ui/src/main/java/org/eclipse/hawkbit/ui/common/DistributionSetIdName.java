@@ -6,9 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.ui.common;
 
 import java.io.Serializable;
+
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  *
@@ -20,6 +22,12 @@ public class DistributionSetIdName implements Serializable {
     private final Long id;
     private final String name;
     private final String version;
+
+    public static DistributionSetIdName generate(final DistributionSet distributionSet) {
+        return new DistributionSetIdName(distributionSet.getId(), distributionSet.getName(),
+                distributionSet.getVersion());
+
+    }
 
     /**
      * @param id

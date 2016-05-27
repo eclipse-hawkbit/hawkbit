@@ -857,8 +857,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final DistributionSet ds = TestDataUtil.generateDistributionSet("a", softwareManagement,
                 distributionSetManagement);
         // assign ds to create an action
-        final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement
-                .assignDistributionSet(ds.getId(), ActionType.SOFT, Action.NO_FORCE_TIME, target.getControllerId());
+        final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
+                ds.getId(), ActionType.SOFT, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME,
+                target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify preparation
         Action findAction = deploymentManagement.findAction(action.getId());
@@ -880,8 +881,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final DistributionSet ds = TestDataUtil.generateDistributionSet("a", softwareManagement,
                 distributionSetManagement);
         // assign ds to create an action
-        final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement
-                .assignDistributionSet(ds.getId(), ActionType.FORCED, Action.NO_FORCE_TIME, target.getControllerId());
+        final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
+                ds.getId(), ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME,
+                target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify perparation
         Action findAction = deploymentManagement.findAction(action.getId());
@@ -1060,8 +1062,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         public List<TargetAssignDistributionSetEvent> getEvents(final long timeout, final TimeUnit unit)
                 throws InterruptedException {
             latch.await(timeout, unit);
-            final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<TargetAssignDistributionSetEvent>(
-                    events);
+            final List<TargetAssignDistributionSetEvent> handledEvents = new LinkedList<>(events);
             assertThat(handledEvents).as("Did not receive the expected amount of events (" + expectedNumberOfEvents
                     + ") within timeout. Received events are " + handledEvents).hasSize(expectedNumberOfEvents);
 

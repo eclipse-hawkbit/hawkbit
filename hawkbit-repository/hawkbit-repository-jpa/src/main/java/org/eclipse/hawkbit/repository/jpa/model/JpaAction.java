@@ -49,6 +49,9 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
         @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
 @Entity
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action {
     private static final long serialVersionUID = 1L;
 

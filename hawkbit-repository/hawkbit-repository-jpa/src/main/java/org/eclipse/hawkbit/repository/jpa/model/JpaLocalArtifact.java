@@ -32,6 +32,9 @@ import com.mongodb.gridfs.GridFSFile;
 @Table(name = "sp_artifact", indexes = { @Index(name = "sp_idx_artifact_01", columnList = "tenant,software_module"),
         @Index(name = "sp_idx_artifact_prim", columnList = "tenant,id") })
 @Entity
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaLocalArtifact extends AbstractJpaArtifact implements LocalArtifact {
     private static final long serialVersionUID = 1L;
 

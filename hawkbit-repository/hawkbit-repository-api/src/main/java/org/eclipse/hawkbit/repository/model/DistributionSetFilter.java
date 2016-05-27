@@ -6,11 +6,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collection;
-
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
  * Holds distribution set filter parameters.

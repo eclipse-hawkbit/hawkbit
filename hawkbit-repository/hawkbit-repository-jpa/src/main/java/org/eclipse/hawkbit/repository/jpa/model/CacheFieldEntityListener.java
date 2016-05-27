@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.eventbus;
+package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;

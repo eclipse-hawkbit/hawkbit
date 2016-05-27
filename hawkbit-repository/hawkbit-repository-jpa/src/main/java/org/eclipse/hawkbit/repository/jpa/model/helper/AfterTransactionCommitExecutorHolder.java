@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
-import org.eclipse.hawkbit.repository.jpa.eventbus.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

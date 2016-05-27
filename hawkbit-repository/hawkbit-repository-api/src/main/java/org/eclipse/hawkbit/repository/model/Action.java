@@ -20,12 +20,6 @@ import java.util.concurrent.TimeUnit;
 public interface Action extends TenantAwareBaseEntity {
 
     /**
-     * indicating that target action has no force time which is only needed in
-     * case of {@link ActionType#TIMEFORCED}.
-     */
-    long NO_FORCE_TIME = 0L;
-
-    /**
      * @return the distributionSet
      */
     DistributionSet getDistributionSet();

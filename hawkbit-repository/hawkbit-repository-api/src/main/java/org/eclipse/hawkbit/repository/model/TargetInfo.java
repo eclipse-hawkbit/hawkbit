@@ -10,27 +10,48 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.text.AttributedCharacterIterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public interface TargetInfo extends Serializable {
-
-    Long getId();
-
     /**
-     * @return the ipAddress
+     * @return the address under whioch the target can be reached
      */
     URI getAddress();
 
+    /**
+     * @return {@link Target} this info element belongs to.
+     */
     Target getTarget();
 
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} GMT when the {@link Target}
+     *         polled the server the last time.
+     */
     Long getLastTargetQuery();
 
+    /**
+     * @return {@link AttributedCharacterIterator} that have been provided by
+     *         the {@link Target} itself, e.g. hardware revision, serial number,
+     *         mac address etc.
+     */
     Map<String, String> getControllerAttributes();
 
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} GMT when
+     *         {@link #getInstalledDistributionSet()} was applied.
+     */
     Long getInstallationDate();
 
+    /**
+     * @return current status of the {@link Target}.
+     */
     TargetUpdateStatus getUpdateStatus();
 
+    /**
+     * @return currently installed {@link DistributionSet}.
+     */
     DistributionSet getInstalledDistributionSet();
 
     /**
@@ -41,6 +62,10 @@ public interface TargetInfo extends Serializable {
      */
     PollStatus getPollStatus();
 
+    /**
+     * @return <code>true</code> if the {@link Target} has not jet provided
+     *         {@link #getControllerAttributes()}.
+     */
     boolean isRequestControllerAttributes();
 
 }

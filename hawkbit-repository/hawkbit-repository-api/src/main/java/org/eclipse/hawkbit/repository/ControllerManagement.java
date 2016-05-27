@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.NotNull;
 
@@ -39,8 +40,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface ControllerManagement {
-
-    String SERVER_MESSAGE_PREFIX = "Update Server: ";
 
     /**
      * Adds an {@link ActionStatus} for a cancel {@link Action} including
@@ -270,17 +269,60 @@ public interface ControllerManagement {
             URI address);
 
     /**
-     * Generates an empty {@link ActionStatus} without persisting it.
+     * Generates an empty {@link ActionStatus} object without persisting it.
      * 
      * @return {@link ActionStatus} object
      */
     ActionStatus generateActionStatus();
 
+    /**
+     * Generates an {@link ActionStatus} object without persisting it.
+     * 
+     * @param action
+     *            the {@link ActionStatus} belongs to.
+     * @param status
+     *            as reflected by this {@link ActionStatus}.
+     * @param occurredAt
+     *            time in {@link TimeUnit#MILLISECONDS} GMT when the status
+     *            change happened.
+     * @param message
+     *            optional comment
+     * 
+     * @return {@link ActionStatus} object
+     */
     ActionStatus generateActionStatus(Action action, Status status, Long occurredAt, final String message);
 
+    /**
+     * Generates an {@link ActionStatus} object without persisting it.
+     * 
+     * @param action
+     *            the {@link ActionStatus} belongs to.
+     * @param status
+     *            as reflected by this {@link ActionStatus}.
+     * @param occurredAt
+     *            time in {@link TimeUnit#MILLISECONDS} GMT when the status
+     *            change happened.
+     * @param messages
+     *            optional comments
+     * 
+     * @return {@link ActionStatus} object
+     */
     ActionStatus generateActionStatus(Action action, final Status status, Long occurredAt,
             final Collection<String> messages);
 
+    /**
+     * Generates an {@link ActionStatus} object without persisting it.
+     * 
+     * @param action
+     *            the {@link ActionStatus} belongs to.
+     * @param status
+     *            as reflected by this {@link ActionStatus}.
+     * @param occurredAt
+     *            time in {@link TimeUnit#MILLISECONDS} GMT when the status
+     *            change happened.
+     * 
+     * @return {@link ActionStatus} object
+     */
     ActionStatus generateActionStatus(Action action, Status status, Long occurredAt);
 
 }

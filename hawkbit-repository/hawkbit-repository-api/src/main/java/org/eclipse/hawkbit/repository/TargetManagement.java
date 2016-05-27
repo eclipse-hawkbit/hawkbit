@@ -16,6 +16,8 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -281,11 +283,17 @@ public interface TargetManagement {
      *
      * @param distributionSetID
      *            the ID of the {@link DistributionSet}
-     * @param spec
+     * @param rsqlParam
      *            the specification to filter the result set
      * @param pageReq
      *            page parameter
      * @return the found {@link Target}s, never {@code null}
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     * 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByAssignedDistributionSet(@NotNull Long distributionSetID, @NotNull String rsqlParam,
@@ -381,11 +389,17 @@ public interface TargetManagement {
      *
      * @param distributionSetId
      *            the ID of the {@link DistributionSet}
-     * @param spec
+     * @param rsqlParam
      *            the specification to filter the result
      * @param pageable
      *            page parameter
      * @return the found {@link Target}s, never {@code null}
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Page<Target> findTargetByInstalledDistributionSet(@NotNull Long distributionSetId, @NotNull String rsqlParam,
@@ -531,7 +545,7 @@ public interface TargetManagement {
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> targetIds, @NotEmpty String tagName);
 
     /**
-     * {@link Entity} based method call for
+     * {@link Target} based method call for
      * {@link #toggleTagAssignment(Collection, String)}.
      *
      * @param targets

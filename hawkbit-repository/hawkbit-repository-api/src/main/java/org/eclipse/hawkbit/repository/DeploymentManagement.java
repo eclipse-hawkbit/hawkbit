@@ -16,8 +16,11 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.ActionWithStatusCount;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -26,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -147,17 +151,17 @@ public interface DeploymentManagement {
 
     /**
      * Cancels given {@link Action} for given {@link Target}. The method will
-     * immediately add a {@link ActionStatus.Status#CANCELED} status to the
-     * action. However, it might be possible that the controller will continue
-     * to work on the cancellation.
+     * immediately add a {@link Status#CANCELED} status to the action. However,
+     * it might be possible that the controller will continue to work on the
+     * cancellation.
      *
      * @param action
      *            to be canceled
      * @param target
      *            for which the action needs cancellation
      *
-     * @return generated {@link CancelAction} or <code>null</code> if not in
-     *         {@link Target#getActiveActions()}.
+     * @return generated {@link Action} or <code>null</code> if not active on
+     *         given {@link Target}.
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active or is already a cancel
      *             action
@@ -173,6 +177,12 @@ public interface DeploymentManagement {
      * @param target
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionsByTarget(@NotNull String rsqlParam, @NotNull Target target);
@@ -276,6 +286,12 @@ public interface DeploymentManagement {
      *            the page request
      * @return a slice of actions assigned to the specific target and the
      *         specification
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByTarget(@NotNull String rsqlParam, @NotNull Target target, @NotNull Pageable pageable);
@@ -404,8 +420,8 @@ public interface DeploymentManagement {
      * @param target
      *            for which the action needs cancellation
      *
-     * @return generated {@link CancelAction} or <code>null</code> if not in
-     *         {@link Target#getActiveActions()}.
+     * @return generated {@link Action} or <code>null</code> if not active on
+     *         {@link Target}.
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active
      */
@@ -413,14 +429,14 @@ public interface DeploymentManagement {
     Action forceQuitAction(@NotNull Action action);
 
     /**
-     * Updates a {@link TargetAction} and forces the {@link TargetAction} if
-     * it's not already forced.
+     * Updates a {@link Action} and forces the {@link Action} if it's not
+     * already forced.
      *
      * @param targetId
      *            the ID of the target
      * @param actionId
      *            the ID of the action
-     * @return the updated or the found {@link TargetAction}
+     * @return the updated or the found {@link Action}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Action forceTargetAction(@NotNull Long actionId);
@@ -444,6 +460,13 @@ public interface DeploymentManagement {
      */
     Action generateAction();
 
+    /**
+     * All {@link ActionStatus} entries in the repository.
+     * 
+     * @param pageable
+     *            the pagination parameter
+     * @return {@link Page} of {@link ActionStatus} entries
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<ActionStatus> findActionStatusAll(@NotNull Pageable pageable);
 }

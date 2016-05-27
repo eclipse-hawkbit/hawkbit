@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
-import org.eclipse.hawkbit.repository.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
@@ -49,6 +47,8 @@ import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpec
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -497,7 +497,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
         metadata.forEach(m -> entityManager.merge((JpaDistributionSet) m.getDistributionSet()).setLastModifiedAt(0L));
 
-        return new ArrayList<DistributionSetMetadata>(
+        return new ArrayList<>(
                 (Collection<? extends DistributionSetMetadata>) distributionSetMetadataRepository.save(metadata));
     }
 

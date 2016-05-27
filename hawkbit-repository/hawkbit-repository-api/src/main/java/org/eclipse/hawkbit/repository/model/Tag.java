@@ -8,10 +8,20 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+/**
+ * {@link Tag} entry.
+ *
+ */
 public interface Tag extends NamedEntity {
 
+    /**
+     * @return colour code of the tag used in Management UI.
+     */
     String getColour();
 
+    /**
+     * @param colour
+     */
     void setColour(String colour);
 
 }

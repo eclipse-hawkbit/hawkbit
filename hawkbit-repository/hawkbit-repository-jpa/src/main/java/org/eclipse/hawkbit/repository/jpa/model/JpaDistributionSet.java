@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedExce
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -59,6 +58,9 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
                 @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
         @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet {
     private static final long serialVersionUID = 1L;
 
@@ -196,11 +198,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public Set<SoftwareModule> getModules() {
         return Collections.unmodifiableSet(modules);
-    }
-
-    @Override
-    public DistributionSetIdName getDistributionSetIdName() {
-        return new DistributionSetIdName(getId(), getName(), getVersion());
     }
 
     @Override

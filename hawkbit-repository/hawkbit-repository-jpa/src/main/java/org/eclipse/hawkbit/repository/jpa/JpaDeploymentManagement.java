@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetWithActionType;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -69,6 +68,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -146,7 +146,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         return assignDistributionSetByTargetId((JpaDistributionSet) pset,
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()),
-                ActionType.FORCED, Action.NO_FORCE_TIME);
+                ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME);
 
     }
 
@@ -155,7 +155,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String... targetIDs) {
-        return assignDistributionSet(dsID, ActionType.FORCED, Action.NO_FORCE_TIME, targetIDs);
+        return assignDistributionSet(dsID, ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME, targetIDs);
     }
 
     @Override

@@ -61,6 +61,9 @@ import org.springframework.data.domain.Persistable;
                 "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 @NamedEntityGraph(name = "Target.detail", attributeNodes = { @NamedAttributeNode("tags"),
         @NamedAttributeNode(value = "assignedDistributionSet"), @NamedAttributeNode(value = "targetInfo") })
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
+// sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaTarget extends AbstractJpaNamedEntity implements Persistable<Long>, Target {
     private static final long serialVersionUID = 1L;
 
