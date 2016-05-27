@@ -18,8 +18,8 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -95,8 +95,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             distBeans = firstPageDistributionSets;
         } else if (Strings.isNullOrEmpty(searchText)) {
             // if no search filters available
-            distBeans = getDistributionSetManagement()
-                    .findDistributionSetsByDeletedAndOrCompleted(new OffsetBasedPageRequest(startIndex, count, sort), false, null);
+            distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
+                    new OffsetBasedPageRequest(startIndex, count, sort), false, null);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();
@@ -113,7 +113,6 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
             proxyDistribution.setVersion(distributionSet.getVersion());
             proxyDistribution.setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
             proxyDistribution.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
-            proxyDistribution.setDescription(distributionSet.getDescription());
             proxyDistribution.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
             proxyDistribution.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
             proxyDistribution.setIsComplete(distributionSet.isComplete());
@@ -132,8 +131,8 @@ public class ManageDistBeanQuery extends AbstractBeanQuery<ProxyDistribution> {
     public int size() {
         if (Strings.isNullOrEmpty(searchText) && null == distributionSetType) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement()
-                    .findDistributionSetsByDeletedAndOrCompleted(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, null);
+            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, null);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setSearchText(searchText).setSelectDSWithNoTag(Boolean.FALSE).setType(distributionSetType).build();

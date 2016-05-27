@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 
 /**
  * Proxy for {@link DistributionSet}.
@@ -39,6 +40,10 @@ public class ProxyDistribution extends JpaDistributionSet {
      */
     public String getNameVersion() {
         return nameVersion;
+    }
+
+    public DistributionSetIdName getDistributionSetIdName() {
+        return DistributionSetIdName.generate(this);
     }
 
     /**

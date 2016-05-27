@@ -113,7 +113,6 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             proxyDistribution.setVersion(distributionSet.getVersion());
             proxyDistribution.setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
             proxyDistribution.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
-            proxyDistribution.setDescription(distributionSet.getDescription());
             proxyDistribution.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
             proxyDistribution.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
             proxyDistribution.setIsComplete(distributionSet.isComplete());
