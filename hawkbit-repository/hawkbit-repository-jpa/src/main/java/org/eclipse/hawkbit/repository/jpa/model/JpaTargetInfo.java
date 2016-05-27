@@ -37,8 +37,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;

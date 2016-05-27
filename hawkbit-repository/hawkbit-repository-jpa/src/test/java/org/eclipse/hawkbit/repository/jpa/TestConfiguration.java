@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.EventBusHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
 import org.eclipse.hawkbit.repository.jpa.utils.RepositoryDataGenerator;
 import org.eclipse.hawkbit.repository.jpa.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;

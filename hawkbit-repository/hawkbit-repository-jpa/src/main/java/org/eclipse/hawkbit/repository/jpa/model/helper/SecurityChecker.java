@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.repository.model.helper;
+package org.eclipse.hawkbit.repository.jpa.model.helper;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

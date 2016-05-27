@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
-import org.eclipse.hawkbit.repository.jpa.repository.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;

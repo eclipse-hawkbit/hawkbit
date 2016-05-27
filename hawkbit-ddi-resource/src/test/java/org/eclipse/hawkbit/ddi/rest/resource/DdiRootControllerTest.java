@@ -22,11 +22,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.TestDataUtil;
-import org.eclipse.hawkbit.WithSpringAuthorityRule;
-import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.jpa.WithUser;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;

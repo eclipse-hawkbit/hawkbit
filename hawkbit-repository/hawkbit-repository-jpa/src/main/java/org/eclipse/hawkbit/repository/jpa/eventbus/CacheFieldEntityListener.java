@@ -17,7 +17,7 @@ import javax.persistence.PostRemove;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheField;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheKeys;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.CacheManagerHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;

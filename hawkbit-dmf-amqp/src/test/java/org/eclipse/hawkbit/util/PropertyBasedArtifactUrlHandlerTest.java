@@ -10,13 +10,13 @@ package org.eclipse.hawkbit.util;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.hawkbit.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.AmqpTestConfiguration;
 import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
-import org.eclipse.hawkbit.TestConfiguration;
-import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.UrlProtocol;
+import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.jpa.TestConfiguration;
+import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;

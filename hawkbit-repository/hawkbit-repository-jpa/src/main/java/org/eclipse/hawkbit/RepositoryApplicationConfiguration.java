@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.configuration;
+package org.eclipse.hawkbit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +14,14 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.AfterTransactionCommitExecutorHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.CacheManagerHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SecurityTokenGeneratorHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SystemManagementHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.TenantAwareHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.CacheManagerHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -157,6 +158,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put("eclipselink.ddl-generation", "none");
 
         properties.put("eclipselink.persistence-context.flush-mode", "auto");
+        properties.put("eclipselink.logging.logger", "JavaLogger");
 
         return properties;
     }

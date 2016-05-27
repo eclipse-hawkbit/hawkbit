@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.repository.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

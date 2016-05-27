@@ -13,8 +13,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;

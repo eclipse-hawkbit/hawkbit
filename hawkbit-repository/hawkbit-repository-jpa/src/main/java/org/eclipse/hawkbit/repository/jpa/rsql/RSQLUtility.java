@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.repository.rsql;
+package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.util.ArrayList;
 import java.util.Arrays;

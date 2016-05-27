@@ -13,8 +13,8 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SystemManagementHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;

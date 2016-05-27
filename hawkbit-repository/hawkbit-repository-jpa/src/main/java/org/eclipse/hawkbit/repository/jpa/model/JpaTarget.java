@@ -36,9 +36,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SecurityChecker;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SecurityTokenGeneratorHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
