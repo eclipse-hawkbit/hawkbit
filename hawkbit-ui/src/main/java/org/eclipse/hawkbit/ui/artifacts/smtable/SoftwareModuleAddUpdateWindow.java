@@ -38,7 +38,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -197,10 +196,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
          */
-        final VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setSizeUndefined();
-        mainLayout.setSpacing(Boolean.TRUE);
-        mainLayout.addStyleName("lay-color");
+        addStyleName("lay-color");
 
         final FormLayout formLayout = new FormLayout();
         formLayout.addComponent(typeComboBox);
@@ -210,13 +206,12 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         formLayout.addComponent(vendorTextField);
         formLayout.addComponent(descTextArea);
 
-        mainLayout.addComponents(formLayout);
-        setCompositionRoot(mainLayout);
+        setCompositionRoot(formLayout);
 
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> closeThisWindow(), null);
-        window.removeStyleName("actionButtonsMargin");
+        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         nameTextField.focus();
     }
 

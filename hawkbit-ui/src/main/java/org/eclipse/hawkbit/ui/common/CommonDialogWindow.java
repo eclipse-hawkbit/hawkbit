@@ -131,4 +131,8 @@ public class CommonDialogWindow extends Window {
         cancelButton.setEnabled(enabled);
     }
 
+    public HorizontalLayout getButtonsLayout() {
+        return buttonsLayout;
+    }
+
 }

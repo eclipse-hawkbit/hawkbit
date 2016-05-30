@@ -70,6 +70,12 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
         distTagNameList.forEach(value -> tagNameComboBox.addItem(value.getName()));
     }
 
+    @Override
+    protected void addListeners() {
+        super.addListeners();
+        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
+    }
+
     /**
      * Update DistributionTag.
      */
@@ -164,4 +170,11 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
         createOptionGroup(permChecker.hasCreateDistributionPermission(), permChecker.hasUpdateDistributionPermission());
     }
 
+    @Override
+    protected void reset() {
+
+        super.reset();
+        setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
+                permChecker.hasUpdateDistributionPermission());
+    }
 }

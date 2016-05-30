@@ -196,7 +196,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setRows(9);
         setColumns(3);
 
-        addComponent(mandatoryLabel, 0, 0, 2, 0);
+        addComponent(mandatoryLabel, 1, 0, 2, 0);
         addComponent(getLabel("textfield.name"), 0, 1);
         addComponent(rolloutName, 1, 1);
         addComponent(getLabel("prompt.distribution.set"), 0, 2);

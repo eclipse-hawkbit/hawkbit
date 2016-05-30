@@ -57,6 +57,12 @@ public class CreateUpdateTargetTagLayoutWindow extends CreateUpdateTagLayout {
         populateTagNameCombo();
     }
 
+    @Override
+    protected void addListeners() {
+        super.addListeners();
+        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
+    }
+
     /**
      * Populate target name combo.
      */
@@ -130,6 +136,13 @@ public class CreateUpdateTargetTagLayoutWindow extends CreateUpdateTagLayout {
     protected void createRequiredComponents() {
         super.createRequiredComponents();
         createOptionGroup(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission());
+    }
+
+    @Override
+    protected void reset() {
+
+        super.reset();
+        setOptionGroupDefaultValue(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission());
     }
 
 }

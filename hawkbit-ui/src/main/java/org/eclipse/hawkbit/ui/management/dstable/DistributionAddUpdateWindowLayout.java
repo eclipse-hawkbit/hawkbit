@@ -53,12 +53,12 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -67,7 +67,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class DistributionAddUpdateWindowLayout extends VerticalLayout {
+public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -5602182034230568435L;
 
@@ -132,8 +132,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
          */
-        setSpacing(Boolean.TRUE);
-        setMargin(Boolean.FALSE);
         addStyleName("lay-color");
         setSizeUndefined();
 
@@ -145,7 +143,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         formLayout.addComponent(descTextArea);
         formLayout.addComponent(reqMigStepCheckbox);
 
-        addComponents(formLayout);
+        setCompositionRoot(formLayout);
 
         distNameTextField.focus();
     }
@@ -518,7 +516,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
                 null);
-        addDistributionWindow.removeStyleName("actionButtonsMargin");
+        addDistributionWindow.getButtonsLayout().removeStyleName("actionButtonsMargin");
 
         return addDistributionWindow;
     }

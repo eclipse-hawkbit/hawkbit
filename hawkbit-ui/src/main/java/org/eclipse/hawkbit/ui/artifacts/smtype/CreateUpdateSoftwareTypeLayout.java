@@ -62,6 +62,12 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     private OptionGroup assignOptiongroup;
 
     @Override
+    protected void addListeners() {
+        super.addListeners();
+        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+    }
+
+    @Override
     protected void createRequiredComponents() {
 
         super.createRequiredComponents();
@@ -119,7 +125,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
         super.createOptionValueChanged(event);
 
-        if ("Update Type".equals(event.getProperty().getValue())) {
+        if (updateTypeStr.equals(event.getProperty().getValue())) {
             assignOptiongroup.setEnabled(false);
         } else {
             assignOptiongroup.setEnabled(true);

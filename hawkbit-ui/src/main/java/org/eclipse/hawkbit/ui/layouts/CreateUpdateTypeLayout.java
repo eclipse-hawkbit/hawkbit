@@ -36,6 +36,12 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
 
     @Override
+    protected void addListeners() {
+        super.addListeners();
+        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+    }
+
+    @Override
     protected void createRequiredComponents() {
 
         createTypeStr = i18n.get("label.create.type");
@@ -107,6 +113,8 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
         super.reset();
         typeKey.clear();
         restoreComponentStyles();
+        setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
+                permChecker.hasUpdateDistributionPermission());
     }
 
     /**
@@ -117,7 +125,7 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
      */
     protected void createOptionValueChanged(final ValueChangeEvent event) {
 
-        if ("Update Type".equals(event.getProperty().getValue())) {
+        if (updateTypeStr.equals(event.getProperty().getValue())) {
             tagName.clear();
             tagDesc.clear();
             typeKey.clear();
@@ -186,13 +194,21 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
 
         if (hasCreatePermission) {
             optiongroup.addItem(createTypeStr);
-            optiongroup.select(createTypeStr);
         }
         if (hasUpdatePermission) {
             optiongroup.addItem(updateTypeStr);
-            if (!hasCreatePermission) {
-                optiongroup.select(updateTypeStr);
-            }
+        }
+        setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
+    }
+
+    @Override
+    protected void setOptionGroupDefaultValue(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
+
+        if (hasCreatePermission) {
+            optiongroup.select(createTypeStr);
+        }
+        if (hasUpdatePermission && !hasCreatePermission) {
+            optiongroup.select(updateTypeStr);
         }
     }
 
