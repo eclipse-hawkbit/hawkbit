@@ -1,11 +1,17 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -22,8 +28,6 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class SoftwareModuleMetadatadetailslayout extends Table {
@@ -33,14 +37,14 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     private static final Logger LOG = LoggerFactory.getLogger(SoftwareModuleMetadatadetailslayout.class);
 
     private static final String METADATA_KEY = "Key";
-    
-    private static final String VIEW ="view";
+
+    private static final String VIEW = "view";
 
     private SpPermissionChecker permissionChecker;
 
     private I18N i18n;
 
-   /**
+    /**
      * Initialize software module table- to be displayed in details layout.
      * 
      * @param i18n
@@ -81,7 +85,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
         container.addContainerProperty(METADATA_KEY, String.class, "");
         setColumnExpandRatio(METADATA_KEY, 0.7f);
         setColumnAlignment(METADATA_KEY, Align.LEFT);
-        
+
         if (permissionChecker.hasUpdateDistributionPermission()) {
             container.addContainerProperty(VIEW, Label.class, "");
             setColumnExpandRatio(VIEW, 0.2F);
@@ -101,35 +105,37 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
      */
     public void populateSMMetadata(final SoftwareModule swModule) {
         removeAllItems();
-        List<SoftwareModuleMetadata> swMetadtaList = new ArrayList<>();
-        for(int i=1;i<=5;i++){
-            SoftwareModuleMetadata swMetadata = new SoftwareModuleMetadata();
-            swMetadata.setKey("ReleaseNote BBB" +i);
-            swMetadata.setValue("ReleaseNote BBB sample data"+i);
+        final List<SoftwareModuleMetadata> swMetadtaList = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            final SoftwareModuleMetadata swMetadata = new SoftwareModuleMetadata();
+            swMetadata.setKey("ReleaseNote BBB" + i);
+            swMetadata.setValue("ReleaseNote BBB sample data" + i);
             swMetadtaList.add(swMetadata);
-       }
-        if (null != swModule) {            
-            /*final List<SoftwareModuleMetadata> swMetadataList = swModule.getMetadata();*/
+        }
+        if (null != swModule) {
+            /*
+             * final List<SoftwareModuleMetadata> swMetadataList =
+             * swModule.getMetadata();
+             */
             final List<SoftwareModuleMetadata> swMetadataList = swMetadtaList;
             if (null != swMetadataList && !swMetadataList.isEmpty()) {
                 swMetadataList.forEach(swMetadata -> setSWMetadataProperties(swMetadata));
             }
-         }
+        }
 
     }
-    
-    private void setSWMetadataProperties(final SoftwareModuleMetadata swMetadata){
+
+    private void setSWMetadataProperties(final SoftwareModuleMetadata swMetadata) {
         final Item item = getContainerDataSource().addItem(swMetadata.getKey());
         item.getItemProperty(METADATA_KEY).setValue(swMetadata.getKey());
         if (permissionChecker.hasUpdateDistributionPermission()) {
             item.getItemProperty(VIEW).setValue(HawkbitCommonUtil.getFormatedLabel("View"));
         }
-        
+
     }
-    
-    protected void addCustomGeneratedColumns() {       
-        addGeneratedColumn(VIEW,
-                (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
+
+    protected void addCustomGeneratedColumns() {
+        addGeneratedColumn(VIEW, (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
 
     private Button customMetadataDetailButton(final String itemId) {
@@ -140,12 +146,11 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
                 "View Software Module Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewIcon.setData(metadataKey);
         viewIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
-        //viewIcon.addClickListener(event -> onClickOfDetailButton(event));
+        // viewIcon.addClickListener(event -> onClickOfDetailButton(event));
         return viewIcon;
     }
-    
+
     private static String getDetailLinkId(final String name) {
-        return new StringBuilder(SPUIComponetIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name)
-                .toString();
+        return new StringBuilder(SPUIComponetIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name).toString();
     }
 }
