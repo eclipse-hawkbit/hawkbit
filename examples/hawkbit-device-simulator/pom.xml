@@ -19,7 +19,7 @@
    </parent>
 
    <artifactId>hawkbit-device-simulator</artifactId>
-   <name>hawkBit :: Device Simulator</name>
+   <name>hawkBit-example :: Device Simulator</name>
    <description>Device Management Federation API based simulator</description>
 
    <build>
@@ -82,16 +82,26 @@
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>org.springframework.boot</groupId>
-               <artifactId>spring-boot-starter-logging</artifactId>
-            </exclusion>
-         </exclusions>
       </dependency>
+      <!-- Log4j API and Core implementation required for binding -->
       <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-log4j2</artifactId>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-api</artifactId>
+      </dependency>
+      <!-- Logging binding for java-util-logging e.g. Tomcat -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>jul-to-slf4j</artifactId>
+      </dependency>
+      <!-- Logging binding for Jakarta Commons Logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+      </dependency>
+      <!-- Logging binding for Log4J Logging -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>log4j-over-slf4j</artifactId>
       </dependency>
       <dependency>
          <groupId>com.vaadin</groupId>
