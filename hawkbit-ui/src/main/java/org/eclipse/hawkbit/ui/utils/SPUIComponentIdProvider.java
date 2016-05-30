@@ -16,7 +16,7 @@ package org.eclipse.hawkbit.ui.utils;
  *
  *
  */
-public final class SPUIComponetIdProvider {
+public final class SPUIComponentIdProvider {
     /**
      * ID-Target.
      */
@@ -891,7 +891,7 @@ public final class SPUIComponetIdProvider {
     /**
      * /* Private Constructor.
      */
-    private SPUIComponetIdProvider() {
+    private SPUIComponentIdProvider() {
 
     }
 }
