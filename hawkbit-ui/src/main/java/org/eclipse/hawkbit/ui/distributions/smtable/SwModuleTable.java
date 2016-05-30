@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -51,6 +53,7 @@ import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
@@ -77,6 +80,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Autowired
     private ArtifactDetailsLayout artifactDetailsLayout;
+    
+    @Autowired
+    private MetadataPopupLayout metadataPopupLayout;
 
     /**
      * Initialize the filter layout.
@@ -180,11 +186,19 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
+                HorizontalLayout iconLayout = new HorizontalLayout();
+                
                 // add artifactory details popup
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button showArtifactDtlsBtn = createShowArtifactDtlsButton(nameVersionStr);
+                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
+
                 showArtifactDtlsBtn.addClickListener(event -> showArtifactDetailsWindow((Long) itemId, nameVersionStr));
-                return showArtifactDtlsBtn;
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId, nameVersionStr));
+
+                iconLayout.addComponent(showArtifactDtlsBtn);
+                iconLayout.addComponent(manageMetaDataBtn);
+                return iconLayout;
             }
         });
     }
@@ -315,6 +329,16 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         showArtifactDtlsBtn.setDescription(i18n.get("tooltip.artifact.icon"));
         return showArtifactDtlsBtn;
     }
+    
+
+    private Button createManageMetadataButton(String nameVersionStr) {
+        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
+                SPUIComponetIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.PLUS_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        return manageMetadataBtn;
+    }
 
     private String getNameAndVerion(final Object itemId) {
         final Item item = getItem(itemId);
@@ -386,6 +410,52 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvilableSwModule(!available);
 
+    }
+
+    private void showMetadataDetails(Long itemId, String nameVersionStr) {
+        final Window metadataWindow = new Window();
+        metadataWindow.setCaption(getMetadataCaption(nameVersionStr));
+        metadataWindow.setCaptionAsHtml(true);
+        metadataWindow.setClosable(true);
+        metadataWindow.setResizable(true);
+        metadataWindow.setImmediate(true);
+        metadataWindow.setWindowMode(WindowMode.NORMAL);
+        metadataWindow.setModal(true);
+        metadataWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+        
+        
+
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
+        if (swmodule.getMetadata().isEmpty()) {
+            List<SoftwareModuleMetadata> metadataList = new ArrayList<>();
+            for (int i = 1; i <= 30; i++) {
+                metadataList.add(new SoftwareModuleMetadata("K-" + i, swmodule, "V--" + i));
+            }
+            softwareManagement.createSoftwareModuleMetadata(metadataList);
+        }
+
+        
+        metadataPopupLayout.setUpDetails(itemId);
+        // metadataPopupLayout.setFullWindowMode(false);
+        // artifactDetailsLayout.populateArtifactDetails(itemId,
+        // nameVersionStr);
+        // /* Now add table to the window */
+        // artifactDetailsLayout.getArtifactDetailsTable().setWidth(700,
+        // Unit.PIXELS);
+        // artifactDetailsLayout.getArtifactDetailsTable().setHeight(500,
+        // Unit.PIXELS);
+        metadataWindow.setContent(metadataPopupLayout);
+
+        /* display the window */
+        UI.getCurrent().addWindow(metadataWindow);
+    }
+
+    private String getMetadataCaption(String nameVersionStr) {
+        final StringBuilder caption = new StringBuilder();
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION + i18n.get("caption.metadata.popup")
+                + " "+ HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
+        caption.append(HawkbitCommonUtil.DIV_CLOSE);
+        return caption.toString();
     }
 
 }

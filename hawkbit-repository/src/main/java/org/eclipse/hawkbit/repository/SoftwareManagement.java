@@ -874,6 +874,21 @@ public class SoftwareManagement {
             @NotNull final Pageable pageable) {
         return softwareModuleMetadataRepository.findBySoftwareModuleId(swId, pageable);
     }
+    
+    
+
+    /**
+     * finds all meta data by the given software module id.
+     *
+     * @param swId
+     *            the software module id to retrieve the meta data from
+     * @return a paged result of all meta data entries for a given software
+     *         module id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    public List<SoftwareModuleMetadata> findSoftwareModuleMetadataBySoftwareModuleId(@NotNull final Long swId) {
+        return softwareModuleMetadataRepository.findBySoftwareModuleId(swId);
+    }
 
     /**
      * finds all meta data by the given software module id.

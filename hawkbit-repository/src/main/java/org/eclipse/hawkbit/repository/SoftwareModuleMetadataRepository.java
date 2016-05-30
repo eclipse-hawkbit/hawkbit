@@ -50,4 +50,14 @@ public interface SoftwareModuleMetadataRepository
      */
     Page<SoftwareModuleMetadata> findBySoftwareModuleId(final Long swId, Pageable pageable);
 
+    
+    /**
+     * finds all software module meta data of the given software module id.
+     * 
+     * @param swId
+     *            the ID of the software module to retrieve the meta data
+     * @return the paged result of all meta data of an given software module id
+     */
+    List<SoftwareModuleMetadata> findBySoftwareModuleId(final Long swId);
+
 }

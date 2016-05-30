@@ -889,6 +889,40 @@ public final class SPUIComponetIdProvider {
     public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
 
     /**
+     * Software module table - Manage metadata id.
+     */
+    public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";
+    
+    
+    /**
+     * Metadata key id.
+     */
+    public static final String METADATA_KEY_FIELD_ID = "metadata.key.id";
+    
+    /**
+     * Metadata value id.
+     */
+    public static final String METADATA_VALUE_ID = "metadata.value.id";
+    /**
+     * Metadata save id.
+     */
+    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
+    
+    /**
+     * Metadata discard id.
+     */
+    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
+    
+    /**
+     * Metadata add icon id.
+     */
+    public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
+    /**
+     * Metadata table id.
+     */
+    public static final String METDATA_TABLE_ID = "metadata.table.id";
+    
+    /**
      * /* Private Constructor.
      */
     private SPUIComponetIdProvider() {
