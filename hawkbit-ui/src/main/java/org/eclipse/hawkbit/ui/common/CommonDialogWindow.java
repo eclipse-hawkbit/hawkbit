@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -20,7 +21,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 @Service
-public class CommonDialogWindow extends Window {
+public class CommonDialogWindow extends Window{
 
     private static final long serialVersionUID = -1321949234316858703L;
 
@@ -71,6 +72,7 @@ public class CommonDialogWindow extends Window {
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
 
         setCaption(caption);
+        setCaptionAsHtml(true);
         setContent(mainLayout);
         setResizable(true);
         center();
@@ -96,8 +98,8 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
         buttonsLayout.setExpandRatio(saveButton, 1.0F);
 
-        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel", "",
-                "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel",
+                "", "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         if (null != cancelButtonClickListener) {
             cancelButton.addClickListener(cancelButtonClickListener);
@@ -130,5 +132,14 @@ public class CommonDialogWindow extends Window {
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
+
+    public void setCancelButtonCaption(final String caption) {
+        cancelButton.setCaption(caption);
+    }
+
+    public void setCancelButtonIcon(final Resource icon) {
+        cancelButton.setIcon(icon);
+    }
+
 
 }

@@ -413,16 +413,16 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(Long itemId, String nameVersionStr) {
-        final Window metadataWindow = new Window();
-        metadataWindow.setCaption(getMetadataCaption(nameVersionStr));
-        metadataWindow.setCaptionAsHtml(true);
-        metadataWindow.setClosable(true);
-        metadataWindow.setResizable(true);
-        metadataWindow.setImmediate(true);
-        metadataWindow.setWindowMode(WindowMode.NORMAL);
-        metadataWindow.setModal(true);
-        metadataWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
-        
+//        final Window metadataWindow = new Window();
+//        metadataWindow.setCaption(getMetadataCaption(nameVersionStr));
+//        metadataWindow.setCaptionAsHtml(true);
+//        metadataWindow.setClosable(true);
+//        metadataWindow.setResizable(true);
+//        metadataWindow.setImmediate(true);
+//        metadataWindow.setWindowMode(WindowMode.NORMAL);
+//        metadataWindow.setModal(true);
+//        metadataWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
+//        
         
 
         SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
@@ -435,27 +435,19 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
         }
 
         
-        metadataPopupLayout.setUpDetails(itemId);
-        // metadataPopupLayout.setFullWindowMode(false);
-        // artifactDetailsLayout.populateArtifactDetails(itemId,
-        // nameVersionStr);
-        // /* Now add table to the window */
-        // artifactDetailsLayout.getArtifactDetailsTable().setWidth(700,
-        // Unit.PIXELS);
-        // artifactDetailsLayout.getArtifactDetailsTable().setHeight(500,
-        // Unit.PIXELS);
-        metadataWindow.setContent(metadataPopupLayout);
+//        metadataPopupLayout.setUpDetails(itemId);
+//         metadataPopupLayout.setFullWindowMode(false);
+//         artifactDetailsLayout.populateArtifactDetails(itemId,
+//         nameVersionStr);
+//         /* Now add table to the window */
+//         artifactDetailsLayout.getArtifactDetailsTable().setWidth(700,
+//         Unit.PIXELS);
+//         artifactDetailsLayout.getArtifactDetailsTable().setHeight(500,
+//         Unit.PIXELS);
+//        metadataWindow.setContent(metadataPopupLayout);
 
         /* display the window */
-        UI.getCurrent().addWindow(metadataWindow);
-    }
-
-    private String getMetadataCaption(String nameVersionStr) {
-        final StringBuilder caption = new StringBuilder();
-        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION + i18n.get("caption.metadata.popup")
-                + " "+ HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
-        caption.append(HawkbitCommonUtil.DIV_CLOSE);
-        return caption.toString();
+        UI.getCurrent().addWindow(metadataPopupLayout.getWindow(itemId,nameVersionStr));
     }
 
 }

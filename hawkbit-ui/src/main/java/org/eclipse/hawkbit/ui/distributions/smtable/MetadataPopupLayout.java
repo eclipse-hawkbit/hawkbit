@@ -1,7 +1,5 @@
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -11,10 +9,13 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SwMetadataCompositeKey;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -27,10 +28,11 @@ import com.vaadin.event.SelectionEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -42,7 +44,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SpringComponent
 @ViewScope
-public class MetadataPopupLayout extends HorizontalLayout {
+public class MetadataPopupLayout extends CustomComponent {
 
     private static final String VALUE = "value";
 
@@ -75,6 +77,8 @@ public class MetadataPopupLayout extends HorizontalLayout {
 
     private transient Long swModuleId;
 
+    private CommonDialogWindow metadataWindow;
+
     @PostConstruct
     private void init() {
         createComponents();
@@ -91,12 +95,36 @@ public class MetadataPopupLayout extends HorizontalLayout {
         }
     }
 
+    public CommonDialogWindow getWindow(final Long swId, final String nameVersionStr) {
+        metadataWindow = SPUIComponentProvider.getWindow(getMetadataCaption(nameVersionStr), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onSave(), event -> onDiscard(), null);
+        metadataWindow.removeStyleName("actionButtonsMargin");
+        // addMetadataWindow.setWidth(900,Unit.PIXELS);
+        // addMetadataWindow.setHeight(500,Unit.PIXELS);
+        // addMetadataWindow.setContent(this);
+        metadataWindow.setSaveButtonEnabled(false);
+        metadataWindow.setCancelButtonEnabled(false);
+        metadataWindow.setCancelButtonCaption(i18n.get("button.discard"));
+        metadataWindow.setCancelButtonIcon(FontAwesome.UNDO);
+//        setMargin(false);
+        setUpDetails(swId);
+        return metadataWindow;
+    }
+
+    private String getMetadataCaption(String nameVersionStr) {
+        final StringBuilder caption = new StringBuilder();
+        caption.append(HawkbitCommonUtil.DIV_DESCRIPTION + i18n.get("caption.metadata.popup") + " "
+                + HawkbitCommonUtil.getBoldHTMLText(nameVersionStr));
+        caption.append(HawkbitCommonUtil.DIV_CLOSE);
+        return caption.toString();
+    }
+
     private void buildLayout() {
         final HorizontalLayout headerLayout = new HorizontalLayout();
         headerLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         headerLayout.setSpacing(false);
         headerLayout.setMargin(false);
-        headerLayout.setSizeFull();
+        headerLayout.setWidth("100%");;
 
         headerLayout.addComponent(headerCaption);
         headerLayout.addComponents(addIcon);
@@ -104,26 +132,31 @@ public class MetadataPopupLayout extends HorizontalLayout {
         headerLayout.setExpandRatio(headerCaption, 1.0F);
 
         final VerticalLayout tableLayout = new VerticalLayout();
+        tableLayout.setSizeFull();
+        tableLayout.setHeight("100%");
         tableLayout.addComponent(headerLayout);
         tableLayout.addComponent(metaDataGrid);
-        tableLayout.setWidth("400px");
-        metaDataGrid.setHeight("420px");
         tableLayout.addStyleName("table-layout");
+        tableLayout.setExpandRatio(metaDataGrid, 1.0F);
 
         VerticalLayout metadataFieldsLayout = new VerticalLayout();
-        HorizontalLayout iconLayout = new HorizontalLayout();
-        iconLayout.addComponent(keyTextField);
-        iconLayout.addComponent(saveButton);
-        iconLayout.addComponent(discardButton);
-        iconLayout.setSizeFull();
-
-        metadataFieldsLayout.addComponent(iconLayout);
+        metadataFieldsLayout.setSizeFull();
+        metadataFieldsLayout.setHeight("100%");
+        metadataFieldsLayout.addComponent(keyTextField);
         metadataFieldsLayout.addComponent(valueTextArea);
         metadataFieldsLayout.setSpacing(true);
-        metadataFieldsLayout.setExpandRatio(valueTextArea, 1.0F);
-        addComponent(tableLayout);
-        addComponent(metadataFieldsLayout);
-        setSpacing(true);
+        metadataFieldsLayout.setExpandRatio(valueTextArea, 1F);
+
+        
+        HorizontalLayout mainLayout = new HorizontalLayout();
+        mainLayout.addComponent(tableLayout);
+        mainLayout.addComponent(metadataFieldsLayout);
+        mainLayout.setExpandRatio(tableLayout, 0.5F);
+        mainLayout.setExpandRatio(metadataFieldsLayout, 0.5F);
+        mainLayout.setHeight(500, Unit.PIXELS);
+        mainLayout.setWidth(800, Unit.PIXELS);
+        mainLayout.setSpacing(true);
+        setCompositionRoot(mainLayout);
     }
 
     private Button createSaveButton() {
@@ -203,45 +236,54 @@ public class MetadataPopupLayout extends HorizontalLayout {
     }
 
     private TextArea createValueTextField() {
-        valueTextArea = SPUIComponentProvider.getTextArea(null, "mandate-value-field", ValoTheme.TEXTAREA_TINY, false,
-                null, i18n.get("textfield.value"), 4000);
+        valueTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.value"), null, ValoTheme.TEXTAREA_TINY,
+                true, null, i18n.get("textfield.value"), 4000);
         valueTextArea.setId(SPUIComponetIdProvider.METADATA_VALUE_ID);
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
-        valueTextArea.setWidth("100%");
+        // valueTextArea.addStyleName("mandate-value-field");
         valueTextArea.addTextChangeListener(event -> onValueChange(event));
         valueTextArea.setTextChangeEventMode(TextChangeEventMode.EAGER);
         return valueTextArea;
     }
 
     private TextField createKeyTextField() {
-        TextField keyField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, true, "",
-                i18n.get("textfield.key"), true, 128);
+        TextField keyField = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
+                ValoTheme.TEXTFIELD_TINY, true, "", i18n.get("textfield.key"), true, 128);
         keyField.setId(SPUIComponetIdProvider.METADATA_KEY_FIELD_ID);
-        keyField.setWidth("350px");
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
+        keyField.setWidth("100%");
+        // keyField.setWidth("100%");
         return keyField;
     }
 
     private void onKeyChange(TextChangeEvent event) {
         if (!valueTextArea.getValue().isEmpty() && !event.getText().isEmpty()) {
-            saveButton.setEnabled(true);
-            discardButton.setEnabled(true);
+            // saveButton.setEnabled(true);
+            // discardButton.setEnabled(true);
+            metadataWindow.setSaveButtonEnabled(true);
+            metadataWindow.setCancelButtonEnabled(true);
         } else {
-            saveButton.setEnabled(false);
-            discardButton.setEnabled(false);
+            // saveButton.setEnabled(false);
+            // discardButton.setEnabled(false);
+            metadataWindow.setSaveButtonEnabled(false);
+            metadataWindow.setCancelButtonEnabled(false);
         }
 
     }
 
     private void onValueChange(TextChangeEvent event) {
         if (!keyTextField.getValue().isEmpty() && !event.getText().isEmpty()) {
-            saveButton.setEnabled(true);
-            discardButton.setEnabled(true);
+            // saveButton.setEnabled(true);
+            // discardButton.setEnabled(true);
+            metadataWindow.setSaveButtonEnabled(true);
+            metadataWindow.setCancelButtonEnabled(true);
         } else {
-            saveButton.setEnabled(false);
-            discardButton.setEnabled(false);
+            // saveButton.setEnabled(false);
+            // discardButton.setEnabled(false);
+            metadataWindow.setSaveButtonEnabled(false);
+            metadataWindow.setCancelButtonEnabled(false);
         }
     }
 
@@ -259,7 +301,8 @@ public class MetadataPopupLayout extends HorizontalLayout {
         final Grid metadataGrid = new Grid();
         metadataGrid.setImmediate(true);
         metadataGrid.setSizeFull();
-
+        metadataGrid.setHeight("100%");
+        metadataGrid.setWidth("100%");
         metadataGrid.setId(SPUIComponetIdProvider.METDATA_TABLE_ID);
         metadataGrid.setSelectionMode(SelectionMode.SINGLE);
         metadataGrid.setColumnReorderingAllowed(true);
@@ -285,8 +328,10 @@ public class MetadataPopupLayout extends HorizontalLayout {
             keyTextField.setEnabled(true);
             addIcon.setEnabled(false);
         }
-        saveButton.setEnabled(false);
-        discardButton.setEnabled(false);
+        // saveButton.setEnabled(false);
+        // discardButton.setEnabled(false);
+        metadataWindow.setSaveButtonEnabled(false);
+        metadataWindow.setCancelButtonEnabled(false);
     }
 
     private void popualateKeyValue(SwMetadataCompositeKey swMetadataCompositeKey) {
@@ -330,12 +375,12 @@ public class MetadataPopupLayout extends HorizontalLayout {
 
     private void addItemToGrid(final SoftwareModuleMetadata softwareModuleMetadata) {
         final IndexedContainer metadataContainer = (IndexedContainer) metaDataGrid.getContainerDataSource();
-        System.out.println("softwareModuleMetadata.getKey()::"+softwareModuleMetadata.getKey());
-        System.out.println("softwareModuleMetadata.getId():::"+softwareModuleMetadata.getId());
+        System.out.println("softwareModuleMetadata.getKey()::" + softwareModuleMetadata.getKey());
+        System.out.println("softwareModuleMetadata.getId():::" + softwareModuleMetadata.getId());
         final Item item = metadataContainer.addItem(softwareModuleMetadata.getId());
-        System.out.println("item::"+item);
+        System.out.println("item::" + item);
         item.getItemProperty(VALUE).setValue(softwareModuleMetadata.getValue());
-        System.out.println("softwareModuleMetadata.getValue():::"+softwareModuleMetadata.getValue());
+        System.out.println("softwareModuleMetadata.getValue():::" + softwareModuleMetadata.getValue());
         item.getItemProperty(KEY).setValue(softwareModuleMetadata.getKey());
     }
 
@@ -350,4 +395,5 @@ public class MetadataPopupLayout extends HorizontalLayout {
         final Label captionLabel = SPUIComponentProvider.getLabel("Metadata", SPUILabelDefinitions.SP_WIDGET_CAPTION);
         return captionLabel;
     }
+    
 }
