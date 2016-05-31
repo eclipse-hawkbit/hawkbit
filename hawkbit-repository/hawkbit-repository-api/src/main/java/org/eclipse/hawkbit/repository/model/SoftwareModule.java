@@ -49,7 +49,16 @@ public interface SoftwareModule extends NamedVersionedEntity {
      */
     List<LocalArtifact> getLocalArtifacts();
 
+    /**
+     * @return the vendor of this software module
+     */
     String getVendor();
+
+    /**
+     * @param vendor
+     *            the vendor of this software module to set
+     */
+    void setVendor(String vendor);
 
     /**
      * @param artifact
@@ -63,14 +72,30 @@ public interface SoftwareModule extends NamedVersionedEntity {
      */
     void removeArtifact(ExternalArtifact artifact);
 
-    void setVendor(String vendor);
-
+    /**
+     * @return the type of the software module
+     */
     SoftwareModuleType getType();
 
+    /**
+     * @return {@code true} if this software module is marked as deleted
+     *         otherwise {@code false}
+     */
     boolean isDeleted();
 
+    /**
+     * Marks or un-marks this software module as deleted.
+     * 
+     * @param deleted
+     *            {@code true} if the software module should be marked as
+     *            deleted otherwise {@code false}
+     */
     void setDeleted(boolean deleted);
 
+    /**
+     * @param type
+     *            the module type for this software module
+     */
     void setType(SoftwareModuleType type);
 
     /**
