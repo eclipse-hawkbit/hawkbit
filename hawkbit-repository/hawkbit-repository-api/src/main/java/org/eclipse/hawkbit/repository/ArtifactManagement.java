@@ -60,9 +60,17 @@ public interface ArtifactManagement {
     ExternalArtifact createExternalArtifact(@NotNull ExternalArtifactProvider externalRepository, String urlSuffix,
             @NotNull Long moduleId);
 
+    /**
+     * @return the total amount of local artifacts stored in the artifact
+     *         management
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countLocalArtifactsAll();
 
+    /**
+     * @return the total amount of external artifacts stored in the artifact
+     *         management
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countExternalArtifactsAll();
 
