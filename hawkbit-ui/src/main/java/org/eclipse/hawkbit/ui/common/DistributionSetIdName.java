@@ -22,10 +22,15 @@ public class DistributionSetIdName implements Serializable {
     private final Long id;
     private final String name;
     private final String version;
-
+    
     public static DistributionSetIdName generate(final DistributionSet distributionSet) {
         return new DistributionSetIdName(distributionSet.getId(), distributionSet.getName(),
                 distributionSet.getVersion());
+
+    }
+
+    public static DistributionSetIdName generate(final Long id, final String name, final String version) {
+        return new DistributionSetIdName(id, name, version);
 
     }
 

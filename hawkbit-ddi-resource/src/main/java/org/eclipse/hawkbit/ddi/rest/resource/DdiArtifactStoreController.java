@@ -17,10 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlArtifactStoreControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -61,9 +60,6 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private CacheWriteNotify cacheWriteNotify;
-
-    @Autowired
     private HawkbitSecurityProperties securityProperties;
 
     @Autowired
@@ -101,7 +97,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
                         requestResponseContextHolder.getHttpServletRequest(), targetid, artifact);
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
-                        requestResponseContextHolder.getHttpServletRequest(), file, cacheWriteNotify, action.getId());
+                        requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
+                        action.getId());
             } else {
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
@@ -149,10 +146,11 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
         actionStatus.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range + " of: "
-                    + request.getRequestURI());
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
+                    + " of: " + request.getRequestURI());
         } else {
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
+            actionStatus.addMessage(
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
         controllerManagement.addInformationalActionStatus(actionStatus);
         return action;

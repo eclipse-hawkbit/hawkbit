@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.jpa.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
@@ -91,9 +90,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
     @Autowired
     private transient SystemManagement systemManagement;
-
-    @Autowired
-    private transient TenantMetaDataRepository tenantMetaDataRepository;
 
     @Autowired
     private transient EntityFactory entityFactory;
@@ -225,8 +221,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
-        final TenantMetaData tenantMetaData = tenantMetaDataRepository
-                .findByTenantIgnoreCase(systemManagement.currentTenant());
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
         return tenantMetaData.getDefaultDsType();
     }
 

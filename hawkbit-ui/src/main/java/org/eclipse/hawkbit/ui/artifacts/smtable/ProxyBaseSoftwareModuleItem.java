@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.security.SecureRandom;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-
 /**
  * 
  * Proxy for software module to display details in Software modules table.
@@ -19,7 +17,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
  *
  *
  */
-public class ProxyBaseSoftwareModuleItem extends JpaSoftwareModule {
+public class ProxyBaseSoftwareModuleItem {
 
     private static final long serialVersionUID = -1555306616599140635L;
 
@@ -39,12 +37,49 @@ public class ProxyBaseSoftwareModuleItem extends JpaSoftwareModule {
 
     private String modifiedByUser;
 
+    private String name;
+    private String version;
+    private String vendor;
+    private String description;
+
     /**
      * Default constructor.
      */
     public ProxyBaseSoftwareModuleItem() {
         super();
         swId = RANDOM_OBJ.nextLong();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(final String version) {
+        this.version = version;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(final String vendor) {
+        this.vendor = vendor;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     public String getCreatedByUser() {

@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 import com.vaadin.server.FontAwesome;
@@ -20,7 +22,7 @@ import com.vaadin.server.FontAwesome;
  * Proxy rollout with custom properties.
  *
  */
-public class ProxyRollout extends JpaRollout {
+public class ProxyRollout {
 
     private static final long serialVersionUID = 4539849939617681918L;
 
@@ -45,6 +47,17 @@ public class ProxyRollout extends JpaRollout {
     private String type;
 
     private Set<SoftwareModule> swModules;
+
+    private Long id;
+    private String name;
+    private String version;
+    private String description;
+    private DistributionSet distributionSet;
+    private String createdBy;
+    private String lastModifiedBy;
+    private long forcedTime;
+    private RolloutStatus status;
+    private TotalTargetCountStatus totalTargetCountStatus;
 
     /**
      * @return the isRequiredMigrationStep
@@ -214,4 +227,83 @@ public class ProxyRollout extends JpaRollout {
         return FontAwesome.CIRCLE_O.getHtml();
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(final String version) {
+        this.version = version;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public DistributionSet getDistributionSet() {
+        return distributionSet;
+    }
+
+    public void setDistributionSet(final DistributionSet distributionSet) {
+        this.distributionSet = distributionSet;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(final String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public long getForcedTime() {
+        return forcedTime;
+    }
+
+    public void setForcedTime(final long forcedTime) {
+        this.forcedTime = forcedTime;
+    }
+
+    public RolloutStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final RolloutStatus status) {
+        this.status = status;
+    }
+
+    public TotalTargetCountStatus getTotalTargetCountStatus() {
+        return totalTargetCountStatus;
+    }
+
+    public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
+        this.totalTargetCountStatus = totalTargetCountStatus;
+    }
 }

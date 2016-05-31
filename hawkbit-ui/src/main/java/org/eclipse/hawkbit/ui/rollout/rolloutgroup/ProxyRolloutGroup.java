@@ -8,14 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 
 /**
  * Proxy rollout group with renderer properties.
  *
  */
-public class ProxyRolloutGroup extends JpaRolloutGroup {
+public class ProxyRolloutGroup {
 
     private static final long serialVersionUID = -2745056813306692356L;
 
@@ -40,6 +45,23 @@ public class ProxyRolloutGroup extends JpaRolloutGroup {
     private Boolean isActionRecieved = Boolean.FALSE;
 
     private String totalTargetsCount;
+
+    private Long id;
+    private String name;
+    private String description;
+    private String createdBy;
+    private String lastModifiedBy;
+    private RolloutGroupStatus status;
+    private TotalTargetCountStatus totalTargetCountStatus;
+
+    private RolloutGroupSuccessCondition successCondition;
+    private String successConditionExp;
+    private RolloutGroupSuccessAction successAction;
+    private String successActionExp;
+    private RolloutGroupErrorCondition errorCondition;
+    private String errorConditionExp;
+    private RolloutGroupErrorAction errorAction;
+    private String errorActionExp;
 
     private RolloutRendererData rolloutRendererData;
 
@@ -214,6 +236,126 @@ public class ProxyRolloutGroup extends JpaRolloutGroup {
      */
     public void setTotalTargetsCount(final String totalTargetsCount) {
         this.totalTargetsCount = totalTargetsCount;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(final String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public RolloutGroupStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final RolloutGroupStatus status) {
+        this.status = status;
+    }
+
+    public TotalTargetCountStatus getTotalTargetCountStatus() {
+        return totalTargetCountStatus;
+    }
+
+    public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
+        this.totalTargetCountStatus = totalTargetCountStatus;
+    }
+
+    public RolloutGroupSuccessCondition getSuccessCondition() {
+        return successCondition;
+    }
+
+    public void setSuccessCondition(final RolloutGroupSuccessCondition successCondition) {
+        this.successCondition = successCondition;
+    }
+
+    public String getSuccessConditionExp() {
+        return successConditionExp;
+    }
+
+    public void setSuccessConditionExp(final String successConditionExp) {
+        this.successConditionExp = successConditionExp;
+    }
+
+    public RolloutGroupSuccessAction getSuccessAction() {
+        return successAction;
+    }
+
+    public void setSuccessAction(final RolloutGroupSuccessAction successAction) {
+        this.successAction = successAction;
+    }
+
+    public String getSuccessActionExp() {
+        return successActionExp;
+    }
+
+    public void setSuccessActionExp(final String successActionExp) {
+        this.successActionExp = successActionExp;
+    }
+
+    public RolloutGroupErrorCondition getErrorCondition() {
+        return errorCondition;
+    }
+
+    public void setErrorCondition(final RolloutGroupErrorCondition errorCondition) {
+        this.errorCondition = errorCondition;
+    }
+
+    public String getErrorConditionExp() {
+        return errorConditionExp;
+    }
+
+    public void setErrorConditionExp(final String errorConditionExp) {
+        this.errorConditionExp = errorConditionExp;
+    }
+
+    public RolloutGroupErrorAction getErrorAction() {
+        return errorAction;
+    }
+
+    public void setErrorAction(final RolloutGroupErrorAction errorAction) {
+        this.errorAction = errorAction;
+    }
+
+    public String getErrorActionExp() {
+        return errorActionExp;
+    }
+
+    public void setErrorActionExp(final String errorActionExp) {
+        this.errorActionExp = errorActionExp;
     }
 
 }

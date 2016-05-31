@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,13 +14,10 @@ import java.security.NoSuchAlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.BaseEncoding;
+
 /**
- * Hash utility calls copied from
- * http://www.codejava.net/coding/how-to-calculate-md5-and-sha-hash-values-in-
- * java.
- *
- *
- *
+ * Hash digest utility.
  */
 public final class HashGeneratorUtils {
 
@@ -68,18 +65,11 @@ public final class HashGeneratorUtils {
         try {
             final MessageDigest digest = MessageDigest.getInstance(algorithm);
             final byte[] hashedBytes = digest.digest(message);
-            return convertByteArrayToHexString(hashedBytes);
+            return BaseEncoding.base16().lowerCase().encode(hashedBytes);
         } catch (final NoSuchAlgorithmException e) {
-            LOG.error("Algorithm could not be find", e);
+            LOG.error("Algorithm could not be found", e);
         }
         return null;
     }
 
-    private static String convertByteArrayToHexString(final byte[] arrayBytes) {
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < arrayBytes.length; i++) {
-            builder.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
-        return builder.toString();
-    }
 }

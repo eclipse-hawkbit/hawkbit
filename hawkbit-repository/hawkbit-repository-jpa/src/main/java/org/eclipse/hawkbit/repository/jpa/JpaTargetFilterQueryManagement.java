@@ -11,9 +11,11 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -107,6 +109,12 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public TargetFilterQuery updateTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
         Assert.notNull(targetFilterQuery.getId());
         return targetFilterQueryRepository.save((JpaTargetFilterQuery) targetFilterQuery);
+    }
+
+    @Override
+    public boolean verifyTargetFilterQuerySyntax(final String query) {
+        RSQLUtility.parse(query, TargetFields.class);
+        return true;
     }
 
 }

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ExternalArtifactProvider;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.util.WithUser;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;

@@ -23,6 +23,11 @@
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-api</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
       </dependency>
@@ -62,13 +67,7 @@
          <groupId>org.easytesting</groupId>
          <artifactId>fest-assert</artifactId>
          <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-jpa</artifactId>
-         <version>${project.version}</version>
-         <classifier>tests</classifier>
-      </dependency>
+      </dependency>      
       <dependency>
          <groupId>ru.yandex.qatools.allure</groupId>
          <artifactId>allure-junit-adaptor</artifactId>

@@ -439,7 +439,14 @@ public interface TargetManagement {
      *            in string notation
      * @param pageable
      *            pagination parameter
+     * 
      * @return the found {@link Target}s, never {@code null}
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findTargetsAll(@NotNull String targetFilterQuery, @NotNull Pageable pageable);
@@ -455,6 +462,12 @@ public interface TargetManagement {
      *            pagination parameter
      * 
      * @return the found {@link Target}s, never {@code null}
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Target> findTargetsAll(@NotNull TargetFilterQuery targetFilterQuery, @NotNull Pageable pageable);

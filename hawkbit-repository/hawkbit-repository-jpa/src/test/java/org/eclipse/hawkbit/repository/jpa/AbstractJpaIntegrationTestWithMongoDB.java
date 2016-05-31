@@ -16,8 +16,7 @@ import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
-@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class,
-        TestConfiguration.class })
+@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
 public abstract class AbstractJpaIntegrationTestWithMongoDB extends AbstractIntegrationTestWithMongoDB {
 
     @PersistenceContext

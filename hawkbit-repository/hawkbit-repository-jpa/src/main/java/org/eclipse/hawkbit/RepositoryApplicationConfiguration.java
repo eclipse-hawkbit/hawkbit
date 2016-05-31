@@ -47,8 +47,8 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
-@ComponentScan
 @Configuration
+@ComponentScan
 @EnableAutoConfiguration
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**

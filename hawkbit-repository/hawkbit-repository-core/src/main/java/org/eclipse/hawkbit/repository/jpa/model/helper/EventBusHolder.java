@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
-import org.eclipse.hawkbit.repository.jpa.model.CacheFieldEntityListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.eventbus.EventBus;
@@ -16,7 +15,7 @@ import com.google.common.eventbus.EventBus;
 /**
  * A singleton bean which holds the {@link EventBus} to have to the cache
  * manager in beans not instantiated by spring e.g. JPA entities or
- * {@link CacheFieldEntityListener} which cannot be autowired.
+ * CacheFieldEntityListener which cannot be autowired.
  *
  */
 public final class EventBusHolder {

@@ -19,13 +19,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ToManyAttributeEntriesException;
 import org.eclipse.hawkbit.repository.exception.ToManyStatusEntriesException;
+import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
@@ -97,6 +98,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
+
+    @Autowired
+    private CacheWriteNotify cacheWriteNotify;
 
     @Override
     public String getPollingTime() {
@@ -230,7 +234,8 @@ public class JpaControllerManagement implements ControllerManagement {
     private void handleFinishedCancelation(final ActionStatus actionStatus, final JpaAction action) {
         // in case of successful cancellation we also report the success at
         // the canceled action itself.
-        actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
+        actionStatus.addMessage(
+                RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
         DeploymentHelper.successCancellation(action, actionRepository, targetManagement, targetInfoRepository,
                 entityManager);
     }
@@ -434,6 +439,11 @@ public class JpaControllerManagement implements ControllerManagement {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public TargetInfo updateLastTargetQuery(final TargetInfo target, final URI address) {
         return updateTargetStatus(target, null, System.currentTimeMillis(), address);
+    }
+
+    @Override
+    public void downloadProgressPercent(final long statusId, final int progressPercent) {
+        cacheWriteNotify.downloadProgressPercent(statusId, progressPercent);
     }
 
 }

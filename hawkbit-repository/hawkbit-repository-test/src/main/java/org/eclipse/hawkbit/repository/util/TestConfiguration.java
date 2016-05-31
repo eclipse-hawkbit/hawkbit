@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.util;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
-import org.eclipse.hawkbit.repository.util.TestRepositoryManagement;
-import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;

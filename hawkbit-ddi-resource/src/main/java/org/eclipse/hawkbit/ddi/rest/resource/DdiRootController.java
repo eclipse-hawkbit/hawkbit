@@ -29,12 +29,11 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -82,9 +81,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Autowired
     private ArtifactManagement artifactManagement;
-
-    @Autowired
-    private CacheWriteNotify cacheWriteNotify;
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
@@ -167,7 +163,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         module);
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
-                        requestResponseContextHolder.getHttpServletRequest(), file, cacheWriteNotify, action.getId());
+                        requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
+                        action.getId());
             }
         }
         return result;
@@ -185,10 +182,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
         statusMessage.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            statusMessage.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range + " of: "
-                    + request.getRequestURI());
+            statusMessage.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
+                    + " of: " + request.getRequestURI());
         } else {
-            statusMessage.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
+            statusMessage.addMessage(
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
         controllerManagement.addInformationalActionStatus(statusMessage);
         return action;
@@ -339,8 +337,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
         LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.", actionid,
                 targetid, feedback.getStatus().getExecution());
         actionStatus.setStatus(Status.RUNNING);
-        actionStatus
-                .addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
+        actionStatus.addMessage(
+                RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
     }
 
     private static void handleClosedUpdateStatus(final DdiActionFeedback feedback, final String targetid,

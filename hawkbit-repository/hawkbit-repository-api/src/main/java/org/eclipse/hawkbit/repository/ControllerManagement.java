@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.eventbus.event.DownloadProgressEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -31,6 +32,8 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * Service layer for all operations of the DDI API (with access permissions only
@@ -53,6 +56,18 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Action addCancelActionStatus(@NotNull ActionStatus actionStatus);
+
+    /**
+     * Sends the download progress in percentage and notifies the
+     * {@link EventBus} with a {@link DownloadProgressEvent}.
+     * 
+     * @param statusId
+     *            the ID of the {@link ActionStatus}
+     * @param progressPercent
+     *            the progress in percentage which must be between 0-100
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    void downloadProgressPercent(long statusId, int progressPercent);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}

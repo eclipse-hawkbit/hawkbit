@@ -33,11 +33,11 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,6 +47,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -56,7 +57,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "test" })
 @Features("Component Tests - Device Management Federation API")
 @Stories("AmqpMessage Dispatcher Service Test")
-public class AmqpMessageDispatcherServiceTest extends AbstractJpaIntegrationTestWithMongoDB {
+@SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
+public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
 
     private static final String TENANT = "default";
 

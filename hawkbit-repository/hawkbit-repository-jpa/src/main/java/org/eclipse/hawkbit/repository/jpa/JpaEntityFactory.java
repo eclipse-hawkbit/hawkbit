@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -32,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -196,6 +198,11 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt) {
         return new JpaActionStatus(action, status, occurredAt);
+    }
+
+    @Override
+    public LocalArtifact generateLocalArtifact() {
+        return new JpaLocalArtifact();
     }
 
 }

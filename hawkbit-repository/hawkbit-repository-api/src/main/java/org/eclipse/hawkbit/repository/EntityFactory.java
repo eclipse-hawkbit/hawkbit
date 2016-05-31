@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -329,5 +330,12 @@ public interface EntityFactory {
      * @return {@link TargetTag} object
      */
     TargetTag generateTargetTag(String name, String description, String colour);
+
+    /**
+     * Generates an empty {@link LocalArtifact} without persisting it.
+     * 
+     * @return {@link LocalArtifact} object
+     */
+    LocalArtifact generateLocalArtifact();
 
 }

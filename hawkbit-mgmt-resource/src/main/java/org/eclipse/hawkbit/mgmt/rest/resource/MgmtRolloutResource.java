@@ -22,9 +22,8 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -65,6 +64,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private DistributionSetManagement distributionSetManagement;
 
     @Autowired
+    private TargetFilterQueryManagement targetFilterQueryManagement;
+
+    @Autowired
     private EntityFactory entityFactory;
 
     @Override
@@ -103,7 +105,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         // first check the given RSQL query if it's well formed, otherwise and
         // exception is thrown
-        RSQLUtility.parse(rolloutRequestBody.getTargetFilterQuery(), TargetFields.class);
+        targetFilterQueryManagement.verifyTargetFilterQuerySyntax(rolloutRequestBody.getTargetFilterQuery());
 
         final DistributionSet distributionSet = findDistributionSetOrThrowException(rolloutRequestBody);
 

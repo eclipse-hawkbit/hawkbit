@@ -26,7 +26,6 @@ import org.springframework.stereotype.Controller;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Configuration
-@ComponentScan
 @Import(RepositoryApplicationConfiguration.class)
 public @interface EnableJpaRepository {
 

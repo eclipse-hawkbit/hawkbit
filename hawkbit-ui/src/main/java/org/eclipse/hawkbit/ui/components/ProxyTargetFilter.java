@@ -8,20 +8,24 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
-
 /**
  * 
  *
  *
  */
-public class ProxyTargetFilter extends JpaTargetFilterQuery {
+public class ProxyTargetFilter {
 
     private static final long serialVersionUID = 6622060929679084419L;
 
     private String createdDate;
 
     private String modifiedDate;
+
+    private String name;
+    private Long id;
+    private String createdBy;
+    private String lastModifiedBy;
+    private String query;
 
     public String getCreatedDate() {
         return createdDate;
@@ -44,6 +48,46 @@ public class ProxyTargetFilter extends JpaTargetFilterQuery {
      */
     public void setModifiedDate(final String modifiedDate) {
         this.modifiedDate = modifiedDate;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(final String query) {
+        this.query = query;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(final String createdBy) {
+        this.createdBy = createdBy;
     }
 
 }

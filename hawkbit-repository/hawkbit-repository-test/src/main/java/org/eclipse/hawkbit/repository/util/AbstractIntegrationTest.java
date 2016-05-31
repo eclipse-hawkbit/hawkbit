@@ -10,11 +10,11 @@ package org.eclipse.hawkbit.repository.util;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.data.auditing.AuditingHandler;
@@ -58,6 +59,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @ActiveProfiles({ "test" })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = "ROLE_CONTROLLER")
+@SpringApplicationConfiguration(classes = { TestConfiguration.class })
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very

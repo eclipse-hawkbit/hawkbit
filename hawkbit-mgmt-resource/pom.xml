@@ -23,9 +23,9 @@
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-jpa</artifactId>
+         <artifactId>hawkbit-repository-api</artifactId>
          <version>${project.version}</version>
-      </dependency>
+      </dependency> 
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-mgmt-api</artifactId>
@@ -50,6 +50,12 @@
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
          <scope>test</scope>
       </dependency>
@@ -94,13 +100,6 @@
       <dependency>
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-config</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-jpa</artifactId>
-         <version>${project.version}</version>
-         <classifier>tests</classifier>
          <scope>test</scope>
       </dependency>
       <dependency>

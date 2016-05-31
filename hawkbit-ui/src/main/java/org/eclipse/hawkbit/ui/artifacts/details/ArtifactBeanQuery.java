@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaLocalArtifact;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -38,6 +38,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
     private static final long serialVersionUID = -333786310371208962L;
     private Sort sort = new Sort(Direction.DESC, "filename");
     private transient ArtifactManagement artifactManagement = null;
+    private transient EntityFactory entityFactory;
     private transient Page<LocalArtifact> firstPagetArtifacts = null;
     private Long baseSwModuleId = null;
 
@@ -73,7 +74,7 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
 
     @Override
     protected LocalArtifact constructBean() {
-        return new JpaLocalArtifact();
+        return entityFactory.generateLocalArtifact();
     }
 
     @Override
@@ -115,5 +116,12 @@ public class ArtifactBeanQuery extends AbstractBeanQuery<LocalArtifact> {
             artifactManagement = SpringContextHelper.getBean(ArtifactManagement.class);
         }
         return artifactManagement;
+    }
+
+    private EntityFactory getEntityFactory() {
+        if (entityFactory == null) {
+            entityFactory = SpringContextHelper.getBean(EntityFactory.class);
+        }
+        return entityFactory;
     }
 }

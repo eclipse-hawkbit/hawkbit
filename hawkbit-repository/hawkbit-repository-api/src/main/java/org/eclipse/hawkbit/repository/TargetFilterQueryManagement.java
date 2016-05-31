@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +41,23 @@ public interface TargetFilterQueryManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void deleteTargetFilterQuery(@NotNull Long targetFilterQueryId);
+
+    /**
+     * Verifies provided filter syntax.
+     * 
+     * @param query
+     *            to verify
+     * 
+     * @return <code>true</code> if syntax is valid
+     * 
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if a field in the RSQL string is used but not provided by the
+     *             given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException
+     *             if the RSQL syntax is wrong
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    boolean verifyTargetFilterQuerySyntax(String query);
 
     /**
      *
