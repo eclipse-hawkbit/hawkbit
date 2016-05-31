@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.junit.Before;
 import org.junit.Test;
@@ -429,14 +430,18 @@ public class AmqpMessageHandlerServiceTest {
         initalizeSecurityTokenGenerator();
 
         // Mock
-        final JpaAction action = new JpaAction();
-        action.setId(targetId);
-        action.setStatus(status);
-        action.setTenant("DEFAULT");
-        final JpaTarget target = new JpaTarget("target1");
-        action.setTarget(target);
-
-        return action;
+        final JpaAction actionMock = mock(JpaAction.class);
+        final JpaTarget targetMock = mock(JpaTarget.class);
+        final TargetInfo targetInfoMock = mock(TargetInfo.class);
+        when(actionMock.getId()).thenReturn(targetId);
+        when(actionMock.getStatus()).thenReturn(status);
+        when(actionMock.getTenant()).thenReturn("DEFAULT");
+        when(actionMock.getTarget()).thenReturn(targetMock);
+        when(targetMock.getControllerId()).thenReturn("target1");
+        when(targetMock.getSecurityToken()).thenReturn("securityToken");
+        when(targetMock.getTargetInfo()).thenReturn(targetInfoMock);
+        when(targetInfoMock.getAddress()).thenReturn(null);
+        return actionMock;
     }
 
     private void initalizeSecurityTokenGenerator() throws IllegalAccessException {
