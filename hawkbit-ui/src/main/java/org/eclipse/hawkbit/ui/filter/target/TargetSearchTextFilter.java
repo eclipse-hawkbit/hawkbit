@@ -56,7 +56,7 @@ public class TargetSearchTextFilter implements FilterExpression {
     }
 
     private boolean ipAddressIgnoreCase() {
-        if (target.getTargetInfo().getAddress() == null) {
+        if (target.getTargetInfo().getAddress() == null || target.getTargetInfo().getAddress().getHost() == null) {
             return false;
         }
         return target.getTargetInfo().getAddress().getHost().toUpperCase().contains(searchTextUpper);
