@@ -16,44 +16,145 @@ package org.eclipse.hawkbit.repository.model;
  */
 public interface RolloutGroup extends NamedEntity {
 
+    /**
+     * @return the corresponding {@link Rollout} of this group
+     */
     Rollout getRollout();
 
+    /**
+     * @param rollout
+     *            sets the {@link Rollout} for this group
+     */
     void setRollout(Rollout rollout);
 
+    /**
+     * @return the current {@link RolloutGroupStatus} for this group
+     */
     RolloutGroupStatus getStatus();
 
+    /**
+     * @param status
+     *            the {@link RolloutGroupStatus} to set for this group
+     */
     void setStatus(RolloutGroupStatus status);
 
+    /**
+     * @return the parent group of this group, in case the group is the root
+     *         group it does not have a parent and so return {@code null}
+     */
     RolloutGroup getParent();
 
+    /**
+     * @return the {@link RolloutGroupSuccessCondition} for this group to
+     *         indicate when a group is successful
+     */
     RolloutGroupSuccessCondition getSuccessCondition();
 
-    void setSuccessCondition(RolloutGroupSuccessCondition finishCondition);
+    /**
+     * @param successCondition
+     *            the {@link RolloutGroupSuccessCondition} to be set for this
+     *            group to indicate when a group is successfully and a next
+     *            group might be started
+     */
+    void setSuccessCondition(RolloutGroupSuccessCondition successCondition);
 
+    /**
+     * @return a String representation of the expression to be evaluated by the
+     *         {@link RolloutGroupSuccessCondition} to indicate if the condition
+     *         is true, might be {@code null} if no expression must be set for
+     *         the {@link RolloutGroupSuccessCondition}
+     */
     String getSuccessConditionExp();
 
-    void setSuccessConditionExp(String finishExp);
+    /**
+     * @param successConditionExp
+     *            sets a String represented expression which is evaluated by the
+     *            {@link RolloutGroupSuccessCondition}, might be {@code null} if
+     *            the set {@link RolloutGroupSuccessCondition} can handle
+     *            {@code null} value
+     */
+    void setSuccessConditionExp(String successConditionExp);
 
+    /**
+     * @return the {@link RolloutGroupErrorCondition} for this group to indicate
+     *         when a group should marked as failed
+     */
     RolloutGroupErrorCondition getErrorCondition();
 
+    /**
+     * 
+     * @param errorCondition
+     *            the {@link RolloutGroupErrorCondition} to be set for this
+     *            group to indicate when a group is marked as failed and the
+     *            corresponding {@link RolloutGroupErrorAction} should be
+     *            executed
+     */
     void setErrorCondition(RolloutGroupErrorCondition errorCondition);
 
+    /**
+     * @return a String representation of the expression to be evaluated by the
+     *         {@link RolloutGroupErrorCondition} to indicate if the condition
+     *         is true, might be {@code null} if no expression must be set for
+     *         the {@link RolloutGroupErrorCondition}
+     */
     String getErrorConditionExp();
 
+    /**
+     * @param errorExp
+     *            sets a String represented expression which is evaluated by the
+     *            {@link RolloutGroupErrorCondition}, might be {@code null} if
+     *            the set {@link RolloutGroupErrorCondition} can handle
+     *            {@code null} value
+     */
     void setErrorConditionExp(String errorExp);
 
+    /**
+     * @return a {@link RolloutGroupErrorAction} which is executed when the
+     *         given {@link RolloutGroupErrorCondition} is met, might be
+     *         {@code null} if no error action is set
+     */
     RolloutGroupErrorAction getErrorAction();
 
+    /**
+     * @param errorAction
+     *            the {@link RolloutGroupErrorAction} to be set which should be
+     *            executed if the {@link RolloutGroupErrorCondition} is met,
+     *            might be {@code null} if no error action should be executed
+     */
     void setErrorAction(RolloutGroupErrorAction errorAction);
 
+    /**
+     * @return a String representation of the expression to be evaluated by the
+     *         {@link RolloutGroupErrorAction} might be {@code null} if no
+     *         expression must be set for the {@link RolloutGroupErrorAction}
+     */
     String getErrorActionExp();
 
+    /**
+     * @param errorActionExp
+     *            sets a String represented expression which is evaluated by the
+     *            {@link RolloutGroupErrorAction}, might be {@code null} if the
+     *            set {@link RolloutGroupErrorAction} can handle {@code null}
+     *            value
+     */
     void setErrorActionExp(String errorActionExp);
 
+    /**
+     * @return the {@link RolloutGroupSuccessAction} which is executed if the
+     *         {@link RolloutGroupSuccessCondition} is met
+     */
     RolloutGroupSuccessAction getSuccessAction();
 
+    /**
+     * @return a String representation of the expression to be evaluated by the
+     *         {@link RolloutGroupSuccessAction} might be {@code null} if no
+     *         expression must be set for the {@link RolloutGroupSuccessAction}
+     */
     String getSuccessActionExp();
 
+    /**
+     * @return the total amount of targets containing in this group
+     */
     long getTotalTargets();
 
     /**
