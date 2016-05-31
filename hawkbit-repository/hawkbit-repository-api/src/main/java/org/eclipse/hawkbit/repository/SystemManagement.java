@@ -18,8 +18,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -66,10 +64,6 @@ public interface SystemManagement {
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
      */
     TenantMetaData getTenantMetadata();
-
-    // TODO figure out why this is necessary and clean this up
-    @Bean
-    KeyGenerator currentTenantKeyGenerator();
 
     /**
      * Returns {@link TenantMetaData} of given and current tenant. Creates for

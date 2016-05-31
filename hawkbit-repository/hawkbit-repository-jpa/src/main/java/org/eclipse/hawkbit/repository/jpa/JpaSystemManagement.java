@@ -49,7 +49,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
 @Service
-public class JpaSystemManagement implements SystemManagement {
+public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
     @Autowired
     private EntityManager entityManager;
 
