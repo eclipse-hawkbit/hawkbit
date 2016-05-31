@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
  * Repository constants.
  *
  */
-public final class Constants {
+public final class RepositoryConstants {
 
     /**
      * Prefix that the server puts in front of
@@ -30,7 +30,7 @@ public final class Constants {
      */
     public static final int DEFAULT_DS_TYPES_IN_TENANT = 2;
 
-    private Constants() {
+    private RepositoryConstants() {
         // Utility class.
     }
 

@@ -19,7 +19,7 @@ public class TargetWithActionStatus {
 
     private Target target;
 
-    private Status status = null;
+    private Status status;
 
     public TargetWithActionStatus(final Target target) {
         this.target = target;

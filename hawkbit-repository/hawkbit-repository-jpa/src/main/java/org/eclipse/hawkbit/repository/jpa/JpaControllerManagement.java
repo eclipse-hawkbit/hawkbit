@@ -19,7 +19,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.Constants;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -216,7 +216,7 @@ public class JpaControllerManagement implements ControllerManagement {
             handleFinishedCancelation(actionStatus, action);
             break;
         case RETRIEVED:
-            actionStatus.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation request retrieved.");
             break;
         default:
             // do nothing
@@ -230,7 +230,7 @@ public class JpaControllerManagement implements ControllerManagement {
     private void handleFinishedCancelation(final ActionStatus actionStatus, final JpaAction action) {
         // in case of successful cancellation we also report the success at
         // the canceled action itself.
-        actionStatus.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
+        actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
         DeploymentHelper.successCancellation(action, actionRepository, targetManagement, targetInfoRepository,
                 entityManager);
     }

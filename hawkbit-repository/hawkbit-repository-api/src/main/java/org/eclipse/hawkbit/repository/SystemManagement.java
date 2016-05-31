@@ -74,7 +74,7 @@ public interface SystemManagement {
     /**
      * Returns {@link TenantMetaData} of given and current tenant. Creates for
      * new tenants also two {@link SoftwareModuleType} (os and app) and
-     * {@link Constants#DEFAULT_DS_TYPES_IN_TENANT} {@link DistributionSetType}s
+     * {@link RepositoryConstants#DEFAULT_DS_TYPES_IN_TENANT} {@link DistributionSetType}s
      * (os and os_app).
      *
      * DISCLAIMER: this variant is used during initial login (where the tenant
