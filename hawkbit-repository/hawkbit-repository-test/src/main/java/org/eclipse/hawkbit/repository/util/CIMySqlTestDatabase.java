@@ -6,10 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -17,17 +18,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * {@link Testdatabase} implementation for MySQL.
  *
  */
 public class CIMySqlTestDatabase implements Testdatabase {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CIMySqlTestDatabase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CIMySqlTestDatabase.class);
     private String schemaName;
     private String uri;
     private final String username;
     private final String password;
 
+    /**
+     * Constructor.
+     */
     public CIMySqlTestDatabase() {
         this.username = System.getProperty("spring.datasource.username");
         this.password = System.getProperty("spring.datasource.password");
@@ -43,7 +47,7 @@ public class CIMySqlTestDatabase implements Testdatabase {
 
     private void createSchemaUri() {
         schemaName = "SP" + RandomStringUtils.randomAlphanumeric(10);
-        this.uri = this.uri.substring(0, uri.lastIndexOf("/") + 1);
+        this.uri = this.uri.substring(0, uri.lastIndexOf('/') + 1);
 
         System.setProperty("spring.datasource.url", uri + schemaName);
     }
@@ -55,10 +59,12 @@ public class CIMySqlTestDatabase implements Testdatabase {
 
     private void createSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
-            connection.prepareStatement("CREATE SCHEMA " + schemaName + ";").execute();
-            LOG.info("Schema {} created on uri {}", schemaName, uri);
+            try (PreparedStatement statement = connection.prepareStatement("CREATE SCHEMA " + schemaName + ";")) {
+                statement.execute();
+                LOG.info("Schema {} created on uri {}", schemaName, uri);
+            }
         } catch (final SQLException e) {
-            e.printStackTrace();
+            LOG.error("Schema creation failed!", e);
         }
 
     }
@@ -70,10 +76,12 @@ public class CIMySqlTestDatabase implements Testdatabase {
 
     private void dropSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
-            connection.prepareStatement("DROP SCHEMA " + schemaName + ";").execute();
-            LOG.info("Schema {} dropped on uri {}", schemaName, uri);
+            try (PreparedStatement statement = connection.prepareStatement("DROP SCHEMA " + schemaName + ";")) {
+                statement.execute();
+                LOG.info("Schema {} dropped on uri {}", schemaName, uri);
+            }
         } catch (final SQLException e) {
-            e.printStackTrace();
+            LOG.error("Schema drop failed!", e);
         }
     }
 

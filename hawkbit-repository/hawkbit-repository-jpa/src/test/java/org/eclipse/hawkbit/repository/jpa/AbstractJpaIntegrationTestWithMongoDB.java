@@ -13,11 +13,8 @@ import javax.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
 
 @SpringApplicationConfiguration(classes = { org.eclipse.hawkbit.RepositoryApplicationConfiguration.class,
         TestConfiguration.class })
@@ -69,9 +66,6 @@ public abstract class AbstractJpaIntegrationTestWithMongoDB extends AbstractInte
     protected TargetInfoRepository targetInfoRepository;
 
     @Autowired
-    protected GridFsOperations operations;
-
-    @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;
 
     @Autowired
@@ -79,26 +73,5 @@ public abstract class AbstractJpaIntegrationTestWithMongoDB extends AbstractInte
 
     @Autowired
     protected TenantAwareCacheManager cacheManager;
-
-    private static CIMySqlTestDatabase tesdatabase;
-
-    @BeforeClass
-    public static void beforeClass() {
-        createTestdatabaseAndStart();
-    }
-
-    private static void createTestdatabaseAndStart() {
-        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
-            tesdatabase = new CIMySqlTestDatabase();
-            tesdatabase.before();
-        }
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        if (tesdatabase != null) {
-            tesdatabase.after();
-        }
-    }
 
 }

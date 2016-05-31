@@ -23,7 +23,7 @@
    <Logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />   
    
    
-   <Logger name="org.eclipse.hawkbit.rest.util.MockMvcResultPrinter" level="DEBUG" />
+<!--    <Logger name="org.eclipse.hawkbit.rest.util.MockMvcResultPrinter" level="DEBUG" /> -->
 
    <!-- Security Log with hints on potential attacks -->
    <logger name="server-security" level="INFO" />

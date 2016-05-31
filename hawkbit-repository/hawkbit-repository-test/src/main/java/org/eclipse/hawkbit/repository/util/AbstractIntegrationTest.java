@@ -29,7 +29,9 @@ import org.eclipse.hawkbit.security.DosFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestWatchman;
@@ -211,4 +213,25 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
             }
         }
     };
+
+    private static CIMySqlTestDatabase tesdatabase;
+
+    @BeforeClass
+    public static void beforeClass() {
+        createTestdatabaseAndStart();
+    }
+
+    private static void createTestdatabaseAndStart() {
+        if ("MYSQL".equals(System.getProperty("spring.jpa.database"))) {
+            tesdatabase = new CIMySqlTestDatabase();
+            tesdatabase.before();
+        }
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        if (tesdatabase != null) {
+            tesdatabase.after();
+        }
+    }
 }

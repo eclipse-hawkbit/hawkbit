@@ -387,7 +387,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that single DS requested by ID is listed with expected payload.")
     public void getDistributionSet() throws Exception {
-        final DistributionSet set = testdataFactory.createTestDistributionSet();
+        final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         // perform request
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()).accept(MediaType.APPLICATION_JSON))

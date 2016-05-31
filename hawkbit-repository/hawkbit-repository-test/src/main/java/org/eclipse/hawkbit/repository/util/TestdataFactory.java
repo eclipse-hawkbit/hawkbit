@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -219,7 +220,7 @@ public class TestdataFactory {
      * @param version
      *            {@link DistributionSet#getVersion()} and
      *            {@link SoftwareModule#getVersion()} extended by a random
-     *            number.
+     *            number.updat
      * @param tags
      *            {@link DistributionSet#getTags()}
      * 
@@ -352,9 +353,14 @@ public class TestdataFactory {
      * iterative number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      * 
+     * In addition it updates the ccreated {@link DistributionSet}s and
+     * {@link SoftwareModule}s to ensure that
+     * {@link BaseEntity#getLastModifiedAt()} and
+     * {@link BaseEntity#getLastModifiedBy()} is filled.
+     * 
      * @return persisted {@link DistributionSet}.
      */
-    public DistributionSet createTestDistributionSet() {
+    public DistributionSet createUpdatedDistributionSet() {
         DistributionSet set = createDistributionSet("");
         set.setVersion(DEFAULT_VERSION);
         set = distributionSetManagement.updateDistributionSet(set);
