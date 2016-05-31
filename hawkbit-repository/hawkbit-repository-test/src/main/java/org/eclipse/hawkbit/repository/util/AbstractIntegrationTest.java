@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.repository.util;
 
 import org.eclipse.hawkbit.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.Constants;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -72,7 +72,7 @@ public abstract class AbstractIntegrationTest implements EnvironmentAware {
      * {@link TestdataFactory#findOrCreateDefaultTestDsType()} and two
      * {@link SystemManagement#getTenantMetadata()};
      */
-    protected static final int DEFAULT_DS_TYPES = Constants.DEFAULT_DS_TYPES_IN_TENANT + 1;
+    protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
 
     @Autowired
     protected EntityFactory entityFactory;

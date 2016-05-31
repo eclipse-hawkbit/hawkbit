@@ -51,7 +51,7 @@ public class TargetWithActionType {
         if (actionType == ActionType.TIMEFORCED) {
             return forceTime;
         }
-        return Constants.NO_FORCE_TIME;
+        return RepositoryModelConstants.NO_FORCE_TIME;
     }
 
     /**

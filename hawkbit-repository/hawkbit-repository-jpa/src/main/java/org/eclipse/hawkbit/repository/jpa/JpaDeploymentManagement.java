@@ -145,7 +145,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
 
         return assignDistributionSetByTargetId((JpaDistributionSet) pset,
                 targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()),
-                ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME);
+                ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME);
 
     }
 
@@ -155,7 +155,7 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String... targetIDs) {
         return assignDistributionSet(dsID, ActionType.FORCED,
-                org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME, targetIDs);
+                org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME, targetIDs);
     }
 
     @Override
