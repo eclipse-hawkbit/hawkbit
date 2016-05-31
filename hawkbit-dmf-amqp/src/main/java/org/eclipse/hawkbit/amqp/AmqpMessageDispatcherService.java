@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.SoftwareModule;
 import org.eclipse.hawkbit.eventbus.EventSubscriber;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -53,14 +52,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @Autowired
     private AmqpSenderService amqpSenderService;
 
-    @Autowired
-    private SoftwareManagement softwareManagement;
-
     /**
      * Constructor.
      * 
-     * @param messageConverter
-     *            message converter
+     * @param rabbitTemplate
+     *            the rabbitTemplate
      */
     @Autowired
     public AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate) {
@@ -118,7 +114,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     }
 
-    private MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId,
+    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId,
             final EventTopic topic) {
         final MessageProperties messageProperties = createMessageProperties();
         messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);

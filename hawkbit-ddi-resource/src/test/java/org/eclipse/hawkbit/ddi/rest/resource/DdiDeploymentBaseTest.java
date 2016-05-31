@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.Constants;
+import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -113,7 +113,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.FORCED,
-                Constants.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
+                RepositoryModelConstants.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
@@ -250,7 +250,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.SOFT,
-                Constants.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
+                RepositoryModelConstants.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);

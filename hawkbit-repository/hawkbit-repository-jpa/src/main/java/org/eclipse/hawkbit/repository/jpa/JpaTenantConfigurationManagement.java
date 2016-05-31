@@ -97,7 +97,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
     }
 
     @Override
-    public TenantConfigurationValue<?> getConfigurationValue(final TenantConfigurationKey configurationKey) {
+    public <T> TenantConfigurationValue<T> getConfigurationValue(final TenantConfigurationKey configurationKey) {
         return getConfigurationValue(configurationKey, configurationKey.getDataType());
     }
 
@@ -147,6 +147,7 @@ public class JpaTenantConfigurationManagement implements EnvironmentAware, Tenan
         final JpaTenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository
                 .save(tenantConfiguration);
 
+        @SuppressWarnings("unchecked")
         final Class<T> clazzT = (Class<T>) value.getClass();
 
         return TenantConfigurationValue.<T> builder().global(false).createdBy(updatedTenantConfiguration.getCreatedBy())

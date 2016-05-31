@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.cache;
 import org.eclipse.hawkbit.repository.jpa.model.CacheFieldEntityListener;
 
 /**
- * Constants for cache keys used in multiple classes.
+ * RepositoryConstants for cache keys used in multiple classes.
  *
  *
  *

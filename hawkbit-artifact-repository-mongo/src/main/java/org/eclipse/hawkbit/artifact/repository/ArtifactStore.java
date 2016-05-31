@@ -124,11 +124,9 @@ public class ArtifactStore implements ArtifactRepository {
         try {
             LOGGER.debug("storing file {} of content {}", filename, contentType);
             tempFile = File.createTempFile("uploadFile", null);
-            try (final FileOutputStream os = new FileOutputStream(tempFile)) {
-                try (BufferedOutputStream bos = new BufferedOutputStream(os)) {
-                    try (BufferedInputStream bis = new BufferedInputStream(content)) {
-                        return store(content, contentType, bos, tempFile, hash);
-                    }
+            try (final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile))) {
+                try (BufferedInputStream bis = new BufferedInputStream(content)) {
+                    return store(bis, contentType, bos, tempFile, hash);
                 }
             }
         } catch (final IOException | MongoException e1) {

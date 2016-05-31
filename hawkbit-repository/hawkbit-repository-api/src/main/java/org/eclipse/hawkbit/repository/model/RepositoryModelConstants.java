@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.model;
  * Repository model constants.
  *
  */
-public final class Constants {
+public final class RepositoryModelConstants {
 
     /**
      * indicating that target action has no force time which is only needed in
@@ -20,7 +20,7 @@ public final class Constants {
      */
     public static final Long NO_FORCE_TIME = 0L;
 
-    private Constants() {
+    private RepositoryModelConstants() {
         // Utility class.
     }
 

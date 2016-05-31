@@ -842,7 +842,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.SOFT, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME,
+                ds.getId(), ActionType.SOFT, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify preparation
@@ -865,7 +865,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
-                ds.getId(), ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME,
+                ds.getId(), ActionType.FORCED, org.eclipse.hawkbit.repository.model.RepositoryModelConstants.NO_FORCE_TIME,
                 target.getControllerId());
         final Action action = deploymentManagement.findActionWithDetails(assignDistributionSet.getActions().get(0));
         // verify perparation

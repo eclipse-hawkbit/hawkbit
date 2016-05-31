@@ -187,9 +187,15 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionsByTarget(@NotNull String rsqlParam, @NotNull Target target);
 
+    /**
+     * @return the total amount of stored action status
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionStatusAll();
 
+    /**
+     * @return the total amount of stored actions
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionsAll();
 
@@ -280,8 +286,20 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByTarget(@NotNull Pageable pageable, @NotNull Target target);
 
+    /**
+     * Retrieves all {@link Action} which assigned to a specific
+     * {@link DistributionSet}.
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param distributionSet
+     *            the distribution set which should be assigned to the actions
+     *            in the result
+     * @return a list of {@link Action} which are assigned to a specific
+     *         {@link DistributionSet}
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull DistributionSet ds);
+    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull DistributionSet distributionSet);
 
     /**
      * Retrieves all {@link Action}s assigned to a specific {@link Target} and a
@@ -345,8 +363,18 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, @NotNull Action action);
 
+    /**
+     * Retrieves all {@link ActionStatus} inclusive their messages by a specific
+     * {@link Action}.
+     * 
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param action
+     *            the {@link Action} to retrieve the {@link ActionStatus} from
+     * @return a page of {@link ActionStatus} by a speciifc {@link Action}
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageReq, @NotNull Action action);
+    Page<ActionStatus> findActionStatusByActionWithMessages(@NotNull Pageable pageable, @NotNull Action action);
 
     /**
      * Retrieves all {@link Action}s of a specific target ordered by action ID.
