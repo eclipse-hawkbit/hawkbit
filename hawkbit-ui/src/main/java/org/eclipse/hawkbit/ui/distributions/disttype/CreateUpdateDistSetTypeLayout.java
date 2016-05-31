@@ -486,7 +486,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
 
         super.createOptionValueChanged(event);
 
-        if ("Update Type".equals(event.getProperty().getValue())) {
+        if (updateTypeStr.equals(event.getProperty().getValue())) {
             selectedTable.getContainerDataSource().removeAllItems();
             getSourceTableData();
             distTypeSelectLayout.setEnabled(false);

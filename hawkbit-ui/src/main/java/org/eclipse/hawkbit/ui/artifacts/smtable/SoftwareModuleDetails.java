@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -44,7 +45,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
-
+    
     @Override
     protected String getEditButtonId() {
         return SPUIComponetIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
@@ -55,8 +56,9 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
         detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
+        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
     }
-
+    
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow
@@ -81,6 +83,8 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
             updateSoftwareModuleDetailsLayout(HawkbitCommonUtil.SP_STRING_EMPTY, HawkbitCommonUtil.SP_STRING_EMPTY,
                     maxAssign);
         }
+        
+        populateMetadataDetails();
     }
 
     private void updateSoftwareModuleDetailsLayout(final String type, final String vendor, final String maxAssign) {
@@ -141,4 +145,8 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponetIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
+    
+    private void populateMetadataDetails(){
+        swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
+   }
 }

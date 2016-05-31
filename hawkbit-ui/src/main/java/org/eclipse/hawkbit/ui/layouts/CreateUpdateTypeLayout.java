@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.layouts;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -34,6 +42,12 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
+
+    @Override
+    protected void addListeners() {
+        super.addListeners();
+        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+    }
 
     @Override
     protected void createRequiredComponents() {
@@ -107,6 +121,8 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
         super.reset();
         typeKey.clear();
         restoreComponentStyles();
+        setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
+                permChecker.hasUpdateDistributionPermission());
     }
 
     /**
@@ -117,7 +133,7 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
      */
     protected void createOptionValueChanged(final ValueChangeEvent event) {
 
-        if ("Update Type".equals(event.getProperty().getValue())) {
+        if (updateTypeStr.equals(event.getProperty().getValue())) {
             tagName.clear();
             tagDesc.clear();
             typeKey.clear();
@@ -186,13 +202,21 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
 
         if (hasCreatePermission) {
             optiongroup.addItem(createTypeStr);
-            optiongroup.select(createTypeStr);
         }
         if (hasUpdatePermission) {
             optiongroup.addItem(updateTypeStr);
-            if (!hasCreatePermission) {
-                optiongroup.select(updateTypeStr);
-            }
+        }
+        setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
+    }
+
+    @Override
+    protected void setOptionGroupDefaultValue(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
+
+        if (hasCreatePermission) {
+            optiongroup.select(createTypeStr);
+        }
+        if (hasUpdatePermission && !hasCreatePermission) {
+            optiongroup.select(updateTypeStr);
         }
     }
 
