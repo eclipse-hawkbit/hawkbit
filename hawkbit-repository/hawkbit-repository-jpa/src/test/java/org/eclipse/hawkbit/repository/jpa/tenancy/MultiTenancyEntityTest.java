@@ -10,14 +10,14 @@ package org.eclipse.hawkbit.repository.jpa.tenancy;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.WithSpringAuthorityRule;
-import org.eclipse.hawkbit.repository.jpa.WithUser;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
@@ -34,7 +34,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Multi Tenancy")
-public class MultiTenancyEntityTest extends AbstractIntegrationTest {
+public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description(value = "Ensures that multiple targets with same controller-ID can be created for different tenants.")

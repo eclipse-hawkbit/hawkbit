@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.jpa.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.CoordinatesToColor;
@@ -114,7 +114,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
     private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
-    private transient DistributionSetRepository distributionSetRepository;
+    private transient EntityFactory entityFactory;
 
     /**
      * Instance of ColorPickerPreview.
@@ -654,8 +654,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
-            DistributionSetType newDistType = distributionSetManagement.generateDistributionSetType(typeKeyValue,
-                    typeNameValue, typeDescValue);
+            DistributionSetType newDistType = entityFactory.generateDistributionSetType(typeKeyValue, typeNameValue,
+                    typeDescValue);
             for (final Long id : itemIds) {
                 final Item item = selectedTable.getItem(id);
                 final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();

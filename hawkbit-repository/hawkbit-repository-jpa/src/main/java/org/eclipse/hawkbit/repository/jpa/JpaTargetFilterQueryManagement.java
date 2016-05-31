@@ -109,9 +109,4 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return targetFilterQueryRepository.save((JpaTargetFilterQuery) targetFilterQuery);
     }
 
-    @Override
-    public TargetFilterQuery generateTargetFilterQuery() {
-        return new JpaTargetFilterQuery();
-    }
-
 }

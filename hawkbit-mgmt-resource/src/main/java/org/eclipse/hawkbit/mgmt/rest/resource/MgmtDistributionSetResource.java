@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -75,6 +76,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private TenantAware currentTenant;
 
     @Autowired
+    private EntityFactory entityFactory;
+
+    @Autowired
     private DistributionSetManagement distributionSetManagement;
 
     @Override
@@ -118,8 +122,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(this.systemManagement
                 .getTenantMetadata(this.currentTenant.getCurrentTenant()).getDefaultDsType().getKey()));
 
-        final Iterable<DistributionSet> createdDSets = this.distributionSetManagement.createDistributionSets(
-                MgmtDistributionSetMapper.dsFromRequest(sets, this.softwareManagement, this.distributionSetManagement));
+        final Iterable<DistributionSet> createdDSets = this.distributionSetManagement
+                .createDistributionSets(MgmtDistributionSetMapper.dsFromRequest(sets, this.softwareManagement,
+                        this.distributionSetManagement, entityFactory));
 
         LOG.debug("{} distribution sets created, return status {}", sets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(createdDSets),
@@ -284,7 +289,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         // immediately
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
         final DistributionSetMetadata updated = this.distributionSetManagement.updateDistributionSetMetadata(
-                distributionSetManagement.generateDistributionSetMetadata(ds, metadataKey, metadata.getValue()));
+                entityFactory.generateDistributionSetMetadata(ds, metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(updated));
     }
 
@@ -307,7 +312,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final DistributionSet ds = findDistributionSetWithExceptionIfNotFound(distributionSetId);
 
         final List<DistributionSetMetadata> created = this.distributionSetManagement.createDistributionSetMetadata(
-                MgmtDistributionSetMapper.fromRequestDsMetadata(ds, metadataRest, distributionSetManagement));
+                MgmtDistributionSetMapper.fromRequestDsMetadata(ds, metadataRest, entityFactory));
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDsMetadata(created), HttpStatus.CREATED);
 
     }

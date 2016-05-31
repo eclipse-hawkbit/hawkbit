@@ -12,8 +12,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- *
+ * Verifies {@link RolloutGroup#getErrorConditionExp()}.
  */
+@FunctionalInterface
 public interface RolloutGroupConditionEvaluator {
 
     default boolean verifyExpression(final String expression) {

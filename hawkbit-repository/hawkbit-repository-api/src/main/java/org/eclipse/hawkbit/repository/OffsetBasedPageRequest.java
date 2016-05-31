@@ -62,4 +62,31 @@ public final class OffsetBasedPageRequest extends PageRequest {
         return "OffsetBasedPageRequest [offset=" + offset + ", getPageSize()=" + getPageSize() + ", getPageNumber()="
                 + getPageNumber() + "]";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + offset;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof OffsetBasedPageRequest)) {
+            return false;
+        }
+        final OffsetBasedPageRequest other = (OffsetBasedPageRequest) obj;
+        if (offset != other.offset) {
+            return false;
+        }
+        return true;
+    }
+
 }

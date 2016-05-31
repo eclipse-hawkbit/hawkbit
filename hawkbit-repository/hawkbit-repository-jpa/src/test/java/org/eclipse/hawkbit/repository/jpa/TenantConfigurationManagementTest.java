@@ -29,7 +29,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Tenant Configuration Management")
-public class TenantConfigurationManagementTest extends AbstractIntegrationTestWithMongoDB {
+public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
 
     @Test
     @Description("Tests that tenant specific configuration can be persisted and in case the tenant does not have specific configuration the default from environment is used instead.")

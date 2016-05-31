@@ -14,12 +14,11 @@ import org.eclipse.hawkbit.AmqpTestConfiguration;
 import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.UrlProtocol;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.repository.jpa.TestConfiguration;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,11 +52,9 @@ public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTest
 
     @Before
     public void setup() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final SoftwareModule module = dsA.getModules().iterator().next();
-        localArtifact = (LocalArtifact) TestDataUtil.generateArtifacts(artifactManagement, module.getId()).stream()
-                .findAny().get();
+        localArtifact = testdataFactory.createLocalArtifacts(module.getId()).stream().findAny().get();
         softwareModuleId = localArtifact.getSoftwareModule().getId();
         fileName = localArtifact.getFilename();
         sha1Hash = localArtifact.getSha1Hash();

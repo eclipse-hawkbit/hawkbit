@@ -601,14 +601,4 @@ public interface TargetManagement {
             + SpringEvalExpressions.IS_CONTROLLER)
     List<Target> updateTargets(@NotNull Collection<Target> targets);
 
-    /**
-     * Generates an empty {@link Target} without persisting it.
-     * 
-     * @param controllerID
-     *            of the {@link Target}
-     * 
-     * @return {@link Target} object
-     */
-    Target generateTarget(@NotEmpty String controllerID);
-
 }

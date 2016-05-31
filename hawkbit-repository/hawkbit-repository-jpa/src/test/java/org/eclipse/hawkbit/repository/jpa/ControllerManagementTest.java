@@ -33,14 +33,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Controller Management")
-public class ControllerManagementTest extends AbstractIntegrationTest {
+public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Controller adds a new action status.")
     public void controllerAddsActionStatus() {
         final Target target = new JpaTarget("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = targetManagement.createTarget(target);
 
         final List<Target> toAssign = new ArrayList<>();
@@ -99,8 +98,7 @@ public class ControllerManagementTest extends AbstractIntegrationTest {
 
         // mock
         final Target target = new JpaTarget("Rabbit");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = targetManagement.createTarget(target);
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);

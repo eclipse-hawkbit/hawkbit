@@ -41,7 +41,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -285,43 +284,6 @@ public class JpaTagManagement implements TagManagement {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class);
 
         return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public TargetTag generateTargetTag() {
-        return new JpaTargetTag();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetTag generateDistributionSetTag() {
-        return new JpaDistributionSetTag();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public TargetTag generateTargetTag(final String name, final String description, final String colour) {
-        return new JpaTargetTag(name, description, colour);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetTag generateDistributionSetTag(final String name, final String description,
-            final String colour) {
-        return new JpaDistributionSetTag(name, description, colour);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public TargetTag generateTargetTag(final String name) {
-        return new JpaTargetTag(name);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetTag generateDistributionSetTag(final String name) {
-        return new JpaDistributionSetTag(name);
     }
 
 }

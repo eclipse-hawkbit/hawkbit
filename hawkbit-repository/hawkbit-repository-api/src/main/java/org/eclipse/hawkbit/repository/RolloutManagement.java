@@ -341,11 +341,4 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE)
     Rollout updateRollout(@NotNull Rollout rollout);
 
-    /**
-     * Generates an empty {@link Rollout} without persisting it.
-     * 
-     * @return {@link Rollout} object
-     */
-    Rollout generateRollout();
-
 }

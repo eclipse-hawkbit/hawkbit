@@ -21,8 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.Test;
@@ -40,13 +40,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "im", "test" })
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Config Data Resource")
-public class DdiConfigDataTest extends AbstractIntegrationTest {
+public class DdiConfigDataTest extends AbstractRestIntegrationTest {
 
     @Test
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "are requested only once from the device.")
     public void requestConfigDataIfEmpty() throws Exception {
-        final Target target = targetManagement.generateTarget("4712");
+        final Target target = entityFactory.generateTarget("4712");
         final Target savedTarget = targetManagement.createTarget(target);
 
         final long current = System.currentTimeMillis();
@@ -84,7 +84,7 @@ public class DdiConfigDataTest extends AbstractIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "can be uploaded correctly by the controller.")
     public void putConfigData() throws Exception {
-        targetManagement.createTarget(targetManagement.generateTarget("4717"));
+        targetManagement.createTarget(entityFactory.generateTarget("4717"));
 
         // initial
         final Map<String, String> attributes = new HashMap<>();
@@ -127,7 +127,7 @@ public class DdiConfigDataTest extends AbstractIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "upload limitation is inplace which is meant to protect the server from malicious attempts.")
     public void putToMuchConfigData() throws Exception {
-        targetManagement.createTarget(targetManagement.generateTarget("4717"));
+        targetManagement.createTarget(entityFactory.generateTarget("4717"));
 
         // initial
         Map<String, String> attributes = new HashMap<>();
@@ -150,7 +150,7 @@ public class DdiConfigDataTest extends AbstractIntegrationTest {
     @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
             + "resource behaves as exptected in cae of invalid request attempts.")
     public void badConfigData() throws Exception {
-        final Target target = targetManagement.generateTarget("4712");
+        final Target target = entityFactory.generateTarget("4712");
         final Target savedTarget = targetManagement.createTarget(target);
 
         // not allowed methods

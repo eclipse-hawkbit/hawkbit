@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -27,7 +27,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter software module")
-public class RSQLSoftwareModuleFieldTest extends AbstractIntegrationTest {
+public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void setupBeforeTest() {

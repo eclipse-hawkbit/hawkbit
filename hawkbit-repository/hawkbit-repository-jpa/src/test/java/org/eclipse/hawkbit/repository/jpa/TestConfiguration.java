@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EventBusHolder;
-import org.eclipse.hawkbit.repository.jpa.utils.RepositoryDataGenerator;
-import org.eclipse.hawkbit.repository.jpa.utils.RepositoryDataGenerator.DatabaseCleanupUtil;
+import org.eclipse.hawkbit.repository.util.TestRepositoryManagement;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
@@ -52,14 +52,14 @@ import com.mongodb.MongoClientOptions;
 @Profile("test")
 public class TestConfiguration implements AsyncConfigurer {
 
-    /**
-     * DB cleanup utility bean is created.
-     *
-     * @return the {@link DatabaseCleanupUtil} bean
-     */
     @Bean
-    public DatabaseCleanupUtil createDatabaseCleanupUtil() {
-        return new RepositoryDataGenerator.DatabaseCleanupUtil();
+    public TestRepositoryManagement testRepositoryManagement() {
+        return new JpaTestRepositoryManagement();
+    }
+
+    @Bean
+    public TestdataFactory testdataFactory() {
+        return new TestdataFactory();
     }
 
     @Bean

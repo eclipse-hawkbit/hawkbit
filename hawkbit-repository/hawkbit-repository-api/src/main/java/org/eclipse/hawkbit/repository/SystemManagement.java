@@ -13,6 +13,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -39,7 +41,8 @@ public interface SystemManagement {
      * @param tenant
      *            to delete
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_SYSTEM_CODE)
     void deleteTenant(@NotNull String tenant);
 
     /**
@@ -69,7 +72,10 @@ public interface SystemManagement {
     KeyGenerator currentTenantKeyGenerator();
 
     /**
-     * Returns {@link TenantMetaData} of given and current tenant.
+     * Returns {@link TenantMetaData} of given and current tenant. Creates for
+     * new tenants also two {@link SoftwareModuleType} (os and app) and
+     * {@link Constants#DEFAULT_DS_TYPES_IN_TENANT} {@link DistributionSetType}s
+     * (os and os_app).
      *
      * DISCLAIMER: this variant is used during initial login (where the tenant
      * is not yet in the session). Please user {@link #getTenantMetadata()} for

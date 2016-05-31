@@ -84,7 +84,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -155,7 +154,8 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = { "distributionUsageAssigned" }, allEntries = true)
     public DistributionSetAssignmentResult assignDistributionSet(final Long dsID, final String... targetIDs) {
-        return assignDistributionSet(dsID, ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME, targetIDs);
+        return assignDistributionSet(dsID, ActionType.FORCED,
+                org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME, targetIDs);
     }
 
     @Override
@@ -684,17 +684,26 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public Action generateAction() {
-        return new JpaAction();
-    }
-
-    @Override
     public Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
         return convertAcSPage(actionStatusRepository.findAll(pageable), pageable);
     }
 
     private static Page<ActionStatus> convertAcSPage(final Page<JpaActionStatus> findAll, final Pageable pageable) {
         return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+    }
+
+    @Override
+    public Long countActionStatusAll() {
+        return actionStatusRepository.count();
+    }
+
+    @Override
+    public Long countActionsAll() {
+        return actionRepository.count();
+    }
+
+    @Override
+    public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final DistributionSet ds) {
+        return actionRepository.findByDistributionSet(pageable, (JpaDistributionSet) ds);
     }
 }

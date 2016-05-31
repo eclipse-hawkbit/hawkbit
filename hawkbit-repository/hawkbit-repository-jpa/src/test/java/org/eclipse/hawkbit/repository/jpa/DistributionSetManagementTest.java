@@ -31,14 +31,15 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -56,7 +57,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("DistributionSet Management")
-public class DistributionSetManagementTest extends AbstractIntegrationTest {
+public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the successfull module update of unused distribution set type which is in fact allowed.")
@@ -178,10 +179,10 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).")
     public void createDuplicateDistributionSetsFailsWithException() {
-        TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+        testdataFactory.createDistributionSet("a");
 
         try {
-            TestDataUtil.generateDistributionSet("a", softwareManagement, distributionSetManagement);
+            testdataFactory.createDistributionSet("a");
             fail("Should not have worked as DS with same UK already exists.");
         } catch (final EntityAlreadyExistsException e) {
 
@@ -239,8 +240,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         final String knownKey = "dsMetaKnownKey";
         final String knownValue = "dsMetaKnownValue";
 
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("testDs", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("testDs");
 
         final DistributionSetMetadata metadata = new JpaDistributionSetMetadata(knownKey, ds, knownValue);
         final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) distributionSetManagement
@@ -262,8 +262,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         SoftwareModule ah2 = new JpaSoftwareModule(appType, "agent-hub2", "1.0.5", null, "");
         SoftwareModule os2 = new JpaSoftwareModule(osType, "poky2", "3.0.3", null, "");
 
-        DistributionSet ds = TestDataUtil.generateDistributionSet("ds-1", softwareManagement,
-                distributionSetManagement);
+        DistributionSet ds = testdataFactory.createDistributionSet("ds-1");
 
         ah2 = softwareManagement.createSoftwareModule(ah2);
         os2 = softwareManagement.createSoftwareModule(os2);
@@ -348,7 +347,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         SoftwareModule os2 = new JpaSoftwareModule(osType, "poky2", "3.0.3", null, "");
         final SoftwareModule app2 = new JpaSoftwareModule(appType, "app2", "3.0.3", null, "");
 
-        DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement, distributionSetManagement);
+        DistributionSet ds = testdataFactory.createDistributionSet("");
 
         os2 = softwareManagement.createSoftwareModule(os2);
 
@@ -387,8 +386,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         final String knownUpdateValue = "myNewUpdatedValue";
 
         // create a DS
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("testDs", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("testDs");
         // initial opt lock revision must be zero
         assertThat(ds.getOptLockRevision()).isEqualTo(1L);
 
@@ -427,13 +425,12 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     @Description("Tests that a DS queue is possible where the result is ordered by the target assignment, i.e. assigned first in the list.")
     public void findDistributionSetsAllOrderedByLinkTarget() {
 
-        final List<JpaDistributionSet> buildDistributionSets = TestDataUtil.generateDistributionSets("dsOrder", 10,
-                softwareManagement, distributionSetManagement);
+        final List<DistributionSet> buildDistributionSets = testdataFactory.createDistributionSets("dsOrder", 10);
 
         final List<Target> buildTargetFixtures = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(5, "tOrder", "someDesc"));
+                .createTargets(testdataFactory.generateTargets(5, "tOrder", "someDesc"));
 
-        final Iterator<JpaDistributionSet> dsIterator = buildDistributionSets.iterator();
+        final Iterator<DistributionSet> dsIterator = buildDistributionSets.iterator();
         final Iterator<Target> tIterator = buildTargetFixtures.iterator();
         final DistributionSet dsFirst = dsIterator.next();
         final DistributionSet dsSecond = dsIterator.next();
@@ -482,12 +479,9 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         final DistributionSetTag dsTagD = tagManagement
                 .createDistributionSetTag(new JpaDistributionSetTag("DistributionSetTag-D"));
 
-        Collection<DistributionSet> ds100Group1 = (Collection) TestDataUtil.generateDistributionSets("", 100,
-                softwareManagement, distributionSetManagement);
-        Collection<DistributionSet> ds100Group2 = (Collection) TestDataUtil.generateDistributionSets("test2", 100,
-                softwareManagement, distributionSetManagement);
-        DistributionSet dsDeleted = TestDataUtil.generateDistributionSet("deleted", softwareManagement,
-                distributionSetManagement);
+        Collection<DistributionSet> ds100Group1 = testdataFactory.createDistributionSets("", 100);
+        Collection<DistributionSet> ds100Group2 = testdataFactory.createDistributionSets("test2", 100);
+        DistributionSet dsDeleted = testdataFactory.createDistributionSet("deleted");
         final DistributionSet dsInComplete = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("notcomplete", "1", "", standardDsType, null));
 
@@ -498,8 +492,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
         final DistributionSet dsNewType = distributionSetManagement
                 .createDistributionSet(new JpaDistributionSet("newtype", "1", "", newType, dsDeleted.getModules()));
 
-        deploymentManagement.assignDistributionSet(dsDeleted,
-                targetManagement.createTargets(Lists.newArrayList(TestDataUtil.generateTargets(5))));
+        deploymentManagement.assignDistributionSet(dsDeleted, Lists.newArrayList(testdataFactory.createTargets(5)));
         distributionSetManagement.deleteDistributionSet(dsDeleted);
         dsDeleted = distributionSetManagement.findDistributionSetById(dsDeleted.getId());
 
@@ -724,7 +717,7 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Simple DS load without the related data that should be loaded lazy.")
     public void findDistributionSetsWithoutLazy() {
-        TestDataUtil.generateDistributionSets(20, softwareManagement, distributionSetManagement);
+        testdataFactory.createDistributionSets(20);
 
         assertThat(distributionSetManagement.findDistributionSetsByDeletedAndOrCompleted(pageReq, false, true))
                 .hasSize(20);
@@ -733,10 +726,8 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Deltes a DS that is no in use. Expected behaviour is a hard delete on the database.")
     public void deleteUnassignedDistributionSet() {
-        DistributionSet ds1 = TestDataUtil.generateDistributionSet("ds-1", softwareManagement,
-                distributionSetManagement);
-        DistributionSet ds2 = TestDataUtil.generateDistributionSet("ds-2", softwareManagement,
-                distributionSetManagement);
+        DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
+        DistributionSet ds2 = testdataFactory.createDistributionSet("ds-2");
 
         ds1 = distributionSetManagement.findDistributionSetByNameAndVersion(ds1.getName(), ds1.getVersion());
         ds2 = distributionSetManagement.findDistributionSetByNameAndVersion(ds2.getName(), ds2.getVersion());
@@ -755,10 +746,8 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     @Description("Queries and loads the metadata related to a given software module.")
     public void findAllDistributionSetMetadataByDsId() {
         // create a DS
-        DistributionSet ds1 = TestDataUtil.generateDistributionSet("testDs1", softwareManagement,
-                distributionSetManagement);
-        DistributionSet ds2 = TestDataUtil.generateDistributionSet("testDs2", softwareManagement,
-                distributionSetManagement);
+        DistributionSet ds1 = testdataFactory.createDistributionSet("testDs1");
+        DistributionSet ds2 = testdataFactory.createDistributionSet("testDs2");
 
         for (int index = 0; index < 10; index++) {
 
@@ -791,12 +780,9 @@ public class DistributionSetManagementTest extends AbstractIntegrationTest {
     @Description("Deltes a DS that is no in use. Expected behaviour is a soft delete on the database, i.e. only marked as "
             + "deleted, kept eas refernce and unavailable for future use..")
     public void deleteAssignedDistributionSet() {
-        DistributionSet ds1 = TestDataUtil.generateDistributionSet("ds-1", softwareManagement,
-                distributionSetManagement);
-        DistributionSet ds2 = TestDataUtil.generateDistributionSet("ds-2", softwareManagement,
-                distributionSetManagement);
-        DistributionSet dsAssigned = TestDataUtil.generateDistributionSet("ds-3", softwareManagement,
-                distributionSetManagement);
+        DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
+        DistributionSet ds2 = testdataFactory.createDistributionSet("ds-2");
+        DistributionSet dsAssigned = testdataFactory.createDistributionSet("ds-3");
 
         ds1 = distributionSetManagement.findDistributionSetByNameAndVersion(ds1.getName(), ds1.getVersion());
         ds2 = distributionSetManagement.findDistributionSetByNameAndVersion(ds2.getName(), ds2.getVersion());

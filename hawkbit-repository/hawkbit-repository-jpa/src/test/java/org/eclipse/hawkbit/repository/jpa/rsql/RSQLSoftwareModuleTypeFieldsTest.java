@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter software module test type")
-public class RSQLSoftwareModuleTypeFieldsTest extends AbstractIntegrationTest {
+public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter software module test type by id")
@@ -34,7 +34,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractIntegrationTest {
     @Test
     @Description("Test filter software module test type by name")
     public void testFilterByParameterName() {
-        assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==ECL*", 3);
+        assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==Firmware", 1);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractIntegrationTest {
     @Test
     @Description("Test filter software module test type by max")
     public void testFilterByMaxAssignment() {
-        assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "==1", 3);
+        assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "==1", 2);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {

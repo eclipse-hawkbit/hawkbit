@@ -259,28 +259,6 @@ public class JpaSystemManagement implements SystemManagement {
         return tenantMetaDataRepository.save((JpaTenantMetaData) metaData);
     }
 
-    private DistributionSetType createStandardSoftwareDataSetup() {
-        final SoftwareModuleType eclApp = softwareModuleTypeRepository.save(new JpaSoftwareModuleType("application",
-                "ECL Application", "Edge Controller Linux base application type", 1));
-        final SoftwareModuleType eclOs = softwareModuleTypeRepository.save(
-                new JpaSoftwareModuleType("os", "ECL OS", "Edge Controller Linux operation system image type", 1));
-        final SoftwareModuleType eclJvm = softwareModuleTypeRepository.save(
-                new JpaSoftwareModuleType("runtime", "ECL JVM", "Edge Controller Linux java virtual machine type.", 1));
-
-        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("ecl_os", "OS only",
-                "Standard Edge Controller Linux distribution set type.").addMandatoryModuleType(eclOs));
-
-        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("ecl_os_app",
-                "OS with optional app", "Standard Edge Controller Linux distribution set type. OS only.")
-                        .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp));
-
-        return distributionSetTypeRepository.save(
-                (JpaDistributionSetType) new JpaDistributionSetType("ecl_os_app_jvm", "OS with optional app and jvm",
-                        "Standard Edge Controller Linux distribution set type. OS with optional application.")
-                                .addMandatoryModuleType(eclOs).addOptionalModuleType(eclApp)
-                                .addOptionalModuleType(eclJvm));
-    }
-
     /**
      * A implementation of the {@link KeyGenerator} to generate a key based on
      * either the {@code createInitialTenant} thread local and the
@@ -302,5 +280,19 @@ public class JpaSystemManagement implements SystemManagement {
             return SimpleKeyGenerator.generateKey(initialTenantCreation.toUpperCase(),
                     initialTenantCreation.toUpperCase());
         }
+    }
+
+    private DistributionSetType createStandardSoftwareDataSetup() {
+        final SoftwareModuleType app = softwareModuleTypeRepository
+                .save(new JpaSoftwareModuleType("application", "Application", "Application Addons", Integer.MAX_VALUE));
+        final SoftwareModuleType os = softwareModuleTypeRepository
+                .save(new JpaSoftwareModuleType("os", "Firmware", "Core firmware or operationg system", 1));
+
+        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os_app", "With app(s)",
+                "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
+                        .addOptionalModuleType(app));
+
+        return distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os", "OS only",
+                "Default type with Firmware/OS only.").addMandatoryModuleType(os));
     }
 }

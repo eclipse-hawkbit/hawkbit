@@ -8,13 +8,11 @@
  */
 package org.eclipse.hawkbit.app;
 
-import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.eclipse.hawkbit.ddi.EnableDdiApi;
 import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
 
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
@@ -22,7 +20,6 @@ import org.springframework.context.annotation.Import;
  *
  */
 @SpringBootApplication
-@Import({ RepositoryApplicationConfiguration.class })
 @EnableHawkbitManagedSecurityConfiguration
 @EnableMgmtApi
 @EnableDdiApi

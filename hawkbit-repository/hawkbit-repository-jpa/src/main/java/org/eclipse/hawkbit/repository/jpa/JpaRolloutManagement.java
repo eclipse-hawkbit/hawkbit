@@ -667,9 +667,4 @@ public class JpaRolloutManagement implements RolloutManagement {
         return ((float) finished / (float) totalGroup) * 100;
     }
 
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public Rollout generateRollout() {
-        return new JpaRollout();
-    }
 }

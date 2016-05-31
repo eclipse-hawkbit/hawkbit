@@ -67,7 +67,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Deployment Management")
-public class DeploymentManagementTest extends AbstractIntegrationTest {
+public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private EventBus eventBus;
@@ -75,9 +75,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
     public void findActionWithLazyDetails() {
-        final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
-                distributionSetManagement, new ArrayList<DistributionSetTag>());
-        final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
+        final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
+                new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
         final Long actionId = deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0);
         final Action action = deploymentManagement.findActionWithDetails(actionId);
@@ -91,9 +91,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Test verifies that the custom query to find all actions include the count of action status is working correctly")
     public void findActionsWithStatusCountByTarget() {
-        final DistributionSet testDs = TestDataUtil.generateDistributionSet("TestDs", "1.0", softwareManagement,
-                distributionSetManagement, new ArrayList<DistributionSetTag>());
-        final List<Target> testTarget = targetManagement.createTargets(TestDataUtil.generateTargets(1));
+        final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
+                new ArrayList<DistributionSetTag>());
+        final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
         final Action action = deploymentManagement.findActionWithDetails(
                 deploymentManagement.assignDistributionSet(testDs, testTarget).getActions().get(0));
@@ -114,8 +114,8 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     public void assignAndUnassignDistributionSetToTag() {
         final List<Long> assignDS = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            assignDS.add(TestDataUtil.generateDistributionSet("DS" + i, "1.0", softwareManagement,
-                    distributionSetManagement, new ArrayList<DistributionSetTag>()).getId());
+            assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", new ArrayList<DistributionSetTag>())
+                    .getId());
         }
         // not exists
         assignDS.add(Long.valueOf(100));
@@ -154,14 +154,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
     public void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
 
-        final DistributionSet cancelDs = TestDataUtil.generateDistributionSet("Canceled DS", "1.0", softwareManagement,
-                distributionSetManagement, new ArrayList<DistributionSetTag>());
+        final DistributionSet cancelDs = testdataFactory.createDistributionSet("Canceled DS", "1.0",
+                new ArrayList<DistributionSetTag>());
 
-        final DistributionSet cancelDs2 = TestDataUtil.generateDistributionSet("Canceled DS", "1.2", softwareManagement,
-                distributionSetManagement, new ArrayList<DistributionSetTag>());
+        final DistributionSet cancelDs2 = testdataFactory.createDistributionSet("Canceled DS", "1.2",
+                new ArrayList<DistributionSetTag>());
 
-        List<Target> targets = targetManagement
-                .createTargets(TestDataUtil.generateTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10));
+        List<Target> targets = testdataFactory.createTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10);
 
         targets = deploymentManagement.assignDistributionSet(cancelDs, targets).getAssignedEntity();
         targets = deploymentManagement.assignDistributionSet(cancelDs2, targets).getAssignedEntity();
@@ -179,15 +178,12 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
             + "also the target goes back to IN_SYNC as no open action is left.")
     public void manualCancelWithMultipleAssignmentsCancelLastOneFirst() {
         JpaTarget target = new JpaTarget("4712");
-        final JpaDistributionSet dsFirst = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet dsFirst = testdataFactory.createDistributionSet("", true);
         dsFirst.setRequiredMigrationStep(true);
-        final JpaDistributionSet dsSecond = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
-        final JpaDistributionSet dsInstalled = TestDataUtil.generateDistributionSet("installed", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet dsSecond = testdataFactory.createDistributionSet("2", true);
+        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
 
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet(dsInstalled);
+        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
         target = (JpaTarget) targetManagement.createTarget(target);
 
         // check initial status
@@ -236,15 +232,12 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
             + "also the target goes back to IN_SYNC as no open action is left.")
     public void manualCancelWithMultipleAssignmentsCancelMiddleOneFirst() {
         JpaTarget target = new JpaTarget("4712");
-        final JpaDistributionSet dsFirst = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet dsFirst = testdataFactory.createDistributionSet("", true);
         dsFirst.setRequiredMigrationStep(true);
-        final JpaDistributionSet dsSecond = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
-        final JpaDistributionSet dsInstalled = TestDataUtil.generateDistributionSet("installed", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet dsSecond = testdataFactory.createDistributionSet("2", true);
+        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
 
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet(dsInstalled);
+        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
         target = (JpaTarget) targetManagement.createTarget(target);
 
         // check initial status
@@ -295,13 +288,11 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     public void forceQuitSetActionToInactive() throws InterruptedException {
 
         JpaTarget target = new JpaTarget("4712");
-        final JpaDistributionSet dsInstalled = TestDataUtil.generateDistributionSet("installed", softwareManagement,
-                distributionSetManagement, true);
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet(dsInstalled);
+        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
+        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
         target = (JpaTarget) targetManagement.createTarget(target);
 
-        final JpaDistributionSet ds = TestDataUtil.generateDistributionSet("newDS", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
         ds.setRequiredMigrationStep(true);
 
         // verify initial status
@@ -336,14 +327,12 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Description("Force Quit an not canceled Assignment. Expected behaviour is that the action can not be force quit and there is thrown an exception.")
     public void forceQuitNotAllowedThrowsException() {
 
-        JpaTarget target = new JpaTarget("4712");
-        final JpaDistributionSet dsInstalled = TestDataUtil.generateDistributionSet("installed", softwareManagement,
-                distributionSetManagement, true);
-        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet(dsInstalled);
-        target = (JpaTarget) targetManagement.createTarget(target);
+        Target target = new JpaTarget("4712");
+        final DistributionSet dsInstalled = testdataFactory.createDistributionSet("installed", true);
+        ((JpaTargetInfo) target.getTargetInfo()).setInstalledDistributionSet((JpaDistributionSet) dsInstalled);
+        target = targetManagement.createTarget(target);
 
-        final JpaDistributionSet ds = TestDataUtil.generateDistributionSet("newDS", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
         ds.setRequiredMigrationStep(true);
 
         // verify initial status
@@ -364,14 +353,16 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         }
     }
 
-    private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
+    private Action assignSet(final Target target, final DistributionSet ds) {
         deploymentManagement.assignDistributionSet(ds.getId(), new String[] { target.getControllerId() });
         assertThat(
                 targetManagement.findTargetByControllerID(target.getControllerId()).getTargetInfo().getUpdateStatus())
                         .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(targetManagement.findTargetByControllerID(target.getControllerId()).getAssignedDistributionSet())
                 .as("wrong assigned ds").isEqualTo(ds);
-        final Action action = actionRepository.findByTargetAndDistributionSet(pageReq, target, ds).getContent().get(0);
+        final Action action = actionRepository
+                .findByTargetAndDistributionSet(pageReq, (JpaTarget) target, (JpaDistributionSet) ds).getContent()
+                .get(0);
         assertThat(action).as("action should not be null").isNotNull();
         return action;
     }
@@ -392,14 +383,13 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
 
         final String myCtrlIDPref = "myCtrlID";
         final Iterable<Target> savedNakedTargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(10, myCtrlIDPref, "first description"));
+                .createTargets(testdataFactory.generateTargets(10, myCtrlIDPref, "first description"));
 
         final String myDeployedCtrlIDPref = "myDeployedCtrlID";
         List<Target> savedDeployedTargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(20, myDeployedCtrlIDPref, "first description"));
+                .createTargets(testdataFactory.generateTargets(20, myDeployedCtrlIDPref, "first description"));
 
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         deploymentManagement.assignDistributionSet(ds, savedDeployedTargets);
 
@@ -446,7 +436,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final EventHandlerMock eventHandlerMock = new EventHandlerMock(0);
         eventBus.register(eventHandlerMock);
 
-        final List<Target> targets = targetManagement.createTargets(TestDataUtil.generateTargets(10));
+        final List<Target> targets = testdataFactory.createTargets(10);
 
         final SoftwareModule ah = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
@@ -657,7 +647,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
 
-        DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement, distributionSetManagement);
+        DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         distributionSetManagement.deleteDistributionSet(dsA.getId());
         dsA = distributionSetManagement.findDistributionSetById(dsA.getId());
@@ -761,12 +751,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Description("Testing if changing target and the status without refreshing the entities from the DB (e.g. concurrent changes from UI and from controller) works")
     public void alternatingAssignmentAndAddUpdateActionStatus() {
 
-        final JpaDistributionSet dsA = TestDataUtil.generateDistributionSet("a", softwareManagement,
-                distributionSetManagement);
-        final JpaDistributionSet dsB = TestDataUtil.generateDistributionSet("b", softwareManagement,
-                distributionSetManagement);
-        Target targ = targetManagement
-                .createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("a");
+        final DistributionSet dsB = testdataFactory.createDistributionSet("b");
+        Target targ = targetManagement.createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
 
         List<Target> targs = new ArrayList<>();
         targs.add(targ);
@@ -793,7 +780,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
         assertThat(deploymentManagement.findActiveActionsByTarget(targ).get(0).getDistributionSet())
                 .as("Installed distribution set of action should be null").isNotNull();
 
-        final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, dsA);
+        final Page<Action> updAct = actionRepository.findByDistributionSet(pageReq, (JpaDistributionSet) dsA);
         final Action action = updAct.getContent().get(0);
         action.setStatus(Status.FINISHED);
         final ActionStatus statusMessage = new JpaActionStatus((JpaAction) action, Status.FINISHED,
@@ -831,11 +818,9 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     @Description("The test verfies that the DS itself is not changed because of an target assignment"
             + " which is a relationship but not a changed on the entity itself..")
     public void checkThatDsRevisionsIsNotChangedWithTargetAssignment() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("a", softwareManagement,
-                distributionSetManagement);
-        TestDataUtil.generateDistributionSet("b", softwareManagement, distributionSetManagement);
-        Target targ = targetManagement
-                .createTarget(TestDataUtil.buildTargetFixture("target-id-A", "first description"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("a");
+        testdataFactory.createDistributionSet("b");
+        Target targ = targetManagement.createTarget(testdataFactory.generateTarget("target-id-A", "first description"));
 
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong").isEqualTo(
                 distributionSetManagement.findDistributionSetByIdWithDetails(dsA.getId()).getOptLockRevision());
@@ -854,8 +839,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     public void forceSoftAction() {
         // prepare
         final Target target = targetManagement.createTarget(new JpaTarget("knownControllerId"));
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("a", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
                 ds.getId(), ActionType.SOFT, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME,
@@ -878,8 +862,7 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
     public void forceAlreadyForcedActionNothingChanges() {
         // prepare
         final Target target = targetManagement.createTarget(new JpaTarget("knownControllerId"));
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("a", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("a");
         // assign ds to create an action
         final DistributionSetAssignmentResult assignDistributionSet = deploymentManagement.assignDistributionSet(
                 ds.getId(), ActionType.FORCED, org.eclipse.hawkbit.repository.model.Constants.NO_FORCE_TIME,
@@ -926,14 +909,14 @@ public class DeploymentManagementTest extends AbstractIntegrationTest {
             final String deployedTargetPrefix, final int noOfDeployedTargets, final int noOfDistributionSets,
             final String distributionSetPrefix) {
         final Iterable<Target> nakedTargets = targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(noOfUndeployedTargets, undeployedTargetPrefix, "first description"));
+                testdataFactory.generateTargets(noOfUndeployedTargets, undeployedTargetPrefix, "first description"));
 
         List<Target> deployedTargets = targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(noOfDeployedTargets, deployedTargetPrefix, "first description"));
+                testdataFactory.generateTargets(noOfDeployedTargets, deployedTargetPrefix, "first description"));
 
         // creating 10 DistributionSets
-        final Collection<DistributionSet> dsList = (Collection) TestDataUtil.generateDistributionSets(
-                distributionSetPrefix, noOfDistributionSets, softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsList = testdataFactory.createDistributionSets(distributionSetPrefix,
+                noOfDistributionSets);
         String time = String.valueOf(System.currentTimeMillis());
         time = time.substring(time.length() - 5);
 

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +54,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -438,33 +436,4 @@ public class JpaControllerManagement implements ControllerManagement {
         return updateTargetStatus(target, null, System.currentTimeMillis(), address);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public ActionStatus generateActionStatus() {
-        return new JpaActionStatus();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
-            final String message) {
-        return new JpaActionStatus((JpaAction) action, status, occurredAt, message);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt,
-            final Collection<String> messages) {
-
-        final ActionStatus result = new JpaActionStatus((JpaAction) action, status, occurredAt, null);
-        messages.forEach(result::addMessage);
-
-        return result;
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public ActionStatus generateActionStatus(final Action action, final Status status, final Long occurredAt) {
-        return new JpaActionStatus(action, status, occurredAt);
-    }
 }

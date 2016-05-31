@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.utils.MultipleInvokeHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.SuccessCondition;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -41,6 +40,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -48,6 +48,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+
+import com.google.common.collect.Lists;
 
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -60,7 +62,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Rollout Management")
-public class RolloutManagementTest extends AbstractIntegrationTest {
+public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private RolloutManagement rolloutManagement;
@@ -455,8 +457,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         targetToCancel.add(targetList.get(0));
         targetToCancel.add(targetList.get(1));
         targetToCancel.add(targetList.get(2));
-        final DistributionSet dsForCancelTest = TestDataUtil.generateDistributionSet("dsForTest", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsForCancelTest = testdataFactory.createDistributionSet("dsForTest");
         deploymentManagement.assignDistributionSet(dsForCancelTest, targetToCancel);
         // 5 targets are canceling but still have the status running and 5 are
         // still in SCHEDULED
@@ -480,8 +481,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         rolloutManagement.startRollout(rolloutOne);
         rolloutOne = rolloutManagement.findRolloutById(rolloutOne.getId());
 
-        final DistributionSet dsForRolloutTwo = TestDataUtil.generateDistributionSet("dsForRolloutTwo",
-                softwareManagement, distributionSetManagement);
+        final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsForRolloutTwo");
 
         final Rollout rolloutTwo = createRolloutByVariables("rolloutTwo", "This is the description for rollout two", 1,
                 "controllerId==rollout-*", dsForRolloutTwo, "50", "80");
@@ -834,7 +834,7 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         Rollout myRollout = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups,
                 successCondition, errorCondition, rolloutName, rolloutName);
 
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountOtherTargets, "others-", "rollout"));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountOtherTargets, "others-", "rollout"));
 
         final String rsqlParam = "controllerId==*MyRoll*";
 
@@ -872,10 +872,9 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
         final String errorCondition = "80";
         final String rolloutName = "rolloutTest";
         final String targetPrefixName = rolloutName;
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("dsFor" + rolloutName,
-                softwareManagement, distributionSetManagement);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
         targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
+                testdataFactory.generateTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
@@ -933,17 +932,14 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int amountOtherTargets, final int groupSize, final String successCondition,
             final String errorCondition) {
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
-        final DistributionSet rolloutDS = distributionSetManagement.createDistributionSet(
-                TestDataUtil.buildDistributionSet("rolloutDS", "0.0.0", standardDsType, os, jvm, ah));
-        targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(amountTargetsForRollout, "rollout-", "rollout"));
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountOtherTargets, "others-", "rollout"));
+        final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
+        final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
+        final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
+
+        final DistributionSet rolloutDS = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("rolloutDS", "0.0.0", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsForRollout, "rollout-", "rollout"));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountOtherTargets, "others-", "rollout"));
         final String filterQuery = "controllerId==rollout-*";
         return createRolloutByVariables("test-rollout-name-1", "test-rollout-description-1", groupSize, filterQuery,
                 rolloutDS, successCondition, errorCondition);
@@ -952,10 +948,9 @@ public class RolloutManagementTest extends AbstractIntegrationTest {
     private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
             final String targetPrefixName) {
-        final DistributionSet dsForRolloutTwo = TestDataUtil.generateDistributionSet("dsFor" + rolloutName,
-                softwareManagement, distributionSetManagement);
+        final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsFor" + rolloutName);
         targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
+                testdataFactory.generateTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName));
         return createRolloutByVariables(rolloutName, rolloutName + "description", groupSize,
                 "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition);
     }

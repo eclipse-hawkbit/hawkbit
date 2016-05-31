@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -62,6 +63,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Autowired
     private DeploymentManagement deploymentManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
@@ -105,7 +109,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets) {
         LOG.debug("creating {} targets", targets.size());
         final Iterable<Target> createdTargets = this.targetManagement
-                .createTargets(MgmtTargetMapper.fromRequest(targetManagement, targets));
+                .createTargets(MgmtTargetMapper.fromRequest(entityFactory, targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets), HttpStatus.CREATED);
     }

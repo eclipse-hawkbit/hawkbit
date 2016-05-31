@@ -27,7 +27,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Target Filter Query Management")
-public class TargetFilterQueryManagenmentTest extends AbstractIntegrationTest {
+public class TargetFilterQueryManagenmentTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test creation of target filter query.")

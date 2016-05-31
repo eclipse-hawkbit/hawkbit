@@ -60,6 +60,12 @@ public interface ArtifactManagement {
     ExternalArtifact createExternalArtifact(@NotNull ExternalArtifactProvider externalRepository, String urlSuffix,
             @NotNull Long moduleId);
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Long countLocalArtifactsAll();
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Long countExternalArtifactsAll();
+
     /**
      * Persists {@link ExternalArtifactProvider} based on given properties.
      *

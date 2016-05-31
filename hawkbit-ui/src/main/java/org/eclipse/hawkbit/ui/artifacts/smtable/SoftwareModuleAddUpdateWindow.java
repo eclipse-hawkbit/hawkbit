@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -65,6 +66,9 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private Label madatoryLabel;
 
@@ -277,8 +281,8 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
                 uiNotifcation.displayValidationError(
                         i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
             } else {
-                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(softwareManagement,
-                        name, version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
+                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
+                        version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
                 if (newBaseSoftwareModule != null) {
                     /* display success message */
                     uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {

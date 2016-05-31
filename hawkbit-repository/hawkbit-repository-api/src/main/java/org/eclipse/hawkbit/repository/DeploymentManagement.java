@@ -187,6 +187,12 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Long countActionsByTarget(@NotNull String rsqlParam, @NotNull Target target);
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Long countActionStatusAll();
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Long countActionsAll();
+
     /**
      * counts all actions associated to a specific target.
      *
@@ -273,6 +279,9 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByTarget(@NotNull Pageable pageable, @NotNull Target target);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, @NotNull DistributionSet ds);
 
     /**
      * Retrieves all {@link Action}s assigned to a specific {@link Target} and a
@@ -452,13 +461,6 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_SYSTEM_CODE)
     Action startScheduledAction(@NotNull Action action);
-
-    /**
-     * Generates an empty {@link Action} without persisting it.
-     * 
-     * @return {@link Action} object
-     */
-    Action generateAction();
 
     /**
      * All {@link ActionStatus} entries in the repository.

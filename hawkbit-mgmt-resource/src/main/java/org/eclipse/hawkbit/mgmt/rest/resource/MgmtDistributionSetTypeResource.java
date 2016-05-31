@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -52,6 +53,9 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
@@ -121,9 +125,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
 
-        final List<DistributionSetType> createdSoftwareModules = distributionSetManagement
-                .createDistributionSetTypes(MgmtDistributionSetTypeMapper.smFromRequest(distributionSetManagement,
-                        softwareManagement, distributionSetTypes));
+        final List<DistributionSetType> createdSoftwareModules = distributionSetManagement.createDistributionSetTypes(
+                MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, softwareManagement, distributionSetTypes));
 
         return new ResponseEntity<>(MgmtDistributionSetTypeMapper.toTypesResponse(createdSoftwareModules),
                 HttpStatus.CREATED);

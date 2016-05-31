@@ -44,6 +44,12 @@
       </dependency>
 
       <!-- Test -->
+       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
       <dependency>
          <groupId>org.easytesting</groupId>
          <artifactId>fest-assert</artifactId>

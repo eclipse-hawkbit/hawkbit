@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
@@ -53,15 +53,15 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private DistributionTagDropEvent spDistTagDropEvent;
 
     @Autowired
-    private TagManagement tagManagement;
+    private ManagementUIState managementUIState;
 
     @Autowired
-    private ManagementUIState managementUIState;
+    private transient EntityFactory entityFactory;
 
     @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
-        addNewTag(tagManagement.generateDistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -143,7 +143,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private void refreshTagTable() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        addNewTag(tagManagement.generateDistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
         addColumn();
     }
 

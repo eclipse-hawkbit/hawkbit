@@ -15,12 +15,12 @@ import java.util.Arrays;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -32,19 +32,18 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter distribution set")
-public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
+public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void seuptBeforeTest() {
 
-        DistributionSet ds = TestDataUtil.generateDistributionSet("DS", softwareManagement, distributionSetManagement);
+        DistributionSet ds = testdataFactory.createDistributionSet("DS");
         ds.setDescription("DS");
         ds = distributionSetManagement.updateDistributionSet(ds);
         distributionSetManagement
                 .createDistributionSetMetadata(new JpaDistributionSetMetadata("metaKey", ds, "metaValue"));
 
-        DistributionSet ds2 = TestDataUtil
-                .generateDistributionSets("NewDS", 3, softwareManagement, distributionSetManagement).get(0);
+        DistributionSet ds2 = testdataFactory.createDistributionSets("NewDS", 3).get(0);
 
         ds2.setDescription("DS%");
         ds2 = distributionSetManagement.updateDistributionSet(ds2);
@@ -89,10 +88,12 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     @Test
     @Description("Test filter distribution set by version")
     public void testFilterByParameterVersion() {
-        assertRSQLQuery(DistributionSetFields.VERSION.name() + "==v1.0", 2);
-        assertRSQLQuery(DistributionSetFields.VERSION.name() + "!=v1.0", 2);
-        assertRSQLQuery(DistributionSetFields.VERSION.name() + "=in=(v1.0,v1.1)", 3);
-        assertRSQLQuery(DistributionSetFields.VERSION.name() + "=out=(v1.0,error)", 2);
+        assertRSQLQuery(DistributionSetFields.VERSION.name() + "==" + TestdataFactory.DEFAULT_VERSION, 1);
+        assertRSQLQuery(DistributionSetFields.VERSION.name() + "!=" + TestdataFactory.DEFAULT_VERSION, 3);
+        assertRSQLQuery(
+                DistributionSetFields.VERSION.name() + "=in=(" + TestdataFactory.DEFAULT_VERSION + ",1.0.0,1.0.1)", 3);
+        assertRSQLQuery(DistributionSetFields.VERSION.name() + "=out=(" + TestdataFactory.DEFAULT_VERSION + ",error)",
+                3);
     }
 
     @Test
@@ -121,10 +122,10 @@ public class RSQLDistributionSetFieldTest extends AbstractIntegrationTest {
     @Test
     @Description("Test filter distribution set by type")
     public void testFilterByType() {
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "==ecl_os_app_jvm", 4);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + "==" + TestdataFactory.DS_TYPE_DEFAULT, 4);
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==noExist*", 0);
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=in=(ecl_os_app_jvm,ecl)", 4);
-        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=out=(ecl_os_app_jvm)", 0);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=in=(" + TestdataFactory.DS_TYPE_DEFAULT + ",ecl)", 4);
+        assertRSQLQuery(DistributionSetFields.TYPE.name() + "=out=(" + TestdataFactory.DS_TYPE_DEFAULT + ")", 0);
     }
 
     @Test

@@ -15,8 +15,7 @@ import java.util.Arrays;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
@@ -25,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -36,19 +36,17 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter target")
-public class RSQLTargetFieldTest extends AbstractIntegrationTest {
+public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void seuptBeforeTest() {
 
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("AssignedDs", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
-        final JpaTarget target = new JpaTarget("targetId123");
+        final Target target = entityFactory.generateTarget("targetId123");
         target.setDescription("targetId123");
-        final TargetInfo targetInfo = new JpaTargetInfo(target);
+        final TargetInfo targetInfo = target.getTargetInfo();
         targetInfo.getControllerAttributes().put("revision", "1.1");
-        target.setTargetInfo(targetInfo);
         ((JpaTargetInfo) target.getTargetInfo()).setUpdateStatus(TargetUpdateStatus.PENDING);
 
         targetManagement.createTarget(target);
@@ -149,11 +147,13 @@ public class RSQLTargetFieldTest extends AbstractIntegrationTest {
     @Test
     @Description("Test filter target by assigned ds version")
     public void testFilterByAssignedDsVersion() {
-        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==v1.0", 1);
+        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==" + TestdataFactory.DEFAULT_VERSION, 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==*1*", 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==noExist*", 0);
-        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version=in=(v1.0,notexist)", 1);
-        assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version=out=(v1.0,notexist)", 0);
+        assertRSQLQuery(
+                TargetFields.ASSIGNEDDS.name() + ".version=in=(" + TestdataFactory.DEFAULT_VERSION + ",notexist)", 1);
+        assertRSQLQuery(
+                TargetFields.ASSIGNEDDS.name() + ".version=out=(" + TestdataFactory.DEFAULT_VERSION + ",notexist)", 0);
     }
 
     @Test

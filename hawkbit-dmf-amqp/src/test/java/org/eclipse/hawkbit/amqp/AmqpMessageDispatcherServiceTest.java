@@ -33,8 +33,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DownloadAndUpdateRequest;
 import org.eclipse.hawkbit.eventbus.event.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTestWithMongoDB;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
@@ -57,7 +56,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @ActiveProfiles({ "test" })
 @Features("Component Tests - Device Management Federation API")
 @Stories("AmqpMessage Dispatcher Service Test")
-public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWithMongoDB {
+public class AmqpMessageDispatcherServiceTest extends AbstractJpaIntegrationTestWithMongoDB {
 
     private static final String TENANT = "default";
 
@@ -108,8 +107,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Test
     @Description("Verfies that download and install event with 3 software moduls and no artifacts works")
     public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 1L, TENANT, CONTROLLER_ID, 1L, dsA.getModules(), AMQP_URI, TEST_TOKEN);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
@@ -139,11 +137,10 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTestWit
     @Test
     @Description("Verfies that download and install event with software moduls and artifacts works")
     public void testSendDownloadRequest() {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final SoftwareModule module = dsA.getModules().iterator().next();
         final List<DbArtifact> receivedList = new ArrayList<>();
-        for (final Artifact artifact : TestDataUtil.generateArtifacts(artifactManagement, module.getId())) {
+        for (final Artifact artifact : testdataFactory.createLocalArtifacts(module.getId())) {
             module.addArtifact((LocalArtifact) artifact);
             receivedList.add(new DbArtifact());
         }

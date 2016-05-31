@@ -24,13 +24,12 @@ import java.util.concurrent.Callable;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
-import org.eclipse.hawkbit.repository.jpa.WithUser;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -73,8 +72,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Description("Testing that creating rollout with insufficient permission returns forbidden")
     @WithUser(allSpPermissions = true, removeFromAllPermission = "ROLLOUT_MANAGEMENT")
     public void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -92,8 +90,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Testing that creating rollout with not valid formed target filter query returns bad request")
     public void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name=test", null))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -107,8 +104,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
         final String targetFilterQuery = null;
 
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
                 .content(JsonBuilder.rollout("rollout1", "desc", 10, dsA.getId(), targetFilterQuery, null))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -121,8 +117,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Testing that rollout can be created")
     public void createRollout() throws Exception {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 10, dsA.getId(), "name==target1");
     }
 
@@ -137,8 +132,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Testing that rollout paged list contains rollouts")
     public void rolloutPagedListContainsAllRollouts() throws Exception {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         // setup - create 2 rollouts
         postRollout("rollout1", 10, dsA.getId(), "name==target1");
         postRollout("rollout2", 5, dsA.getId(), "name==target2");
@@ -159,8 +153,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Testing that rollout paged list is limited by the query param limit")
     public void rolloutPagedListIsLimitedToQueryParam() throws Exception {
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         // setup - create 2 rollouts
         postRollout("rollout1", 10, dsA.getId(), "name==target1");
         postRollout("rollout2", 5, dsA.getId(), "name==target2");
@@ -175,9 +168,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveRolloutGroupsForSpecificRollout() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -198,9 +190,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -221,9 +212,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void pausingRolloutSwitchesIntoPausedState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -248,9 +238,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void resumingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -279,9 +268,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -301,9 +289,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -319,9 +306,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
@@ -345,9 +331,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveSingleRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -369,9 +354,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
@@ -393,9 +377,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         // setup
         final int amountTargets = 10;
         final List<Target> targets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+                .createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
@@ -418,9 +401,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
         // setup
         final int amountTargets = 10;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
@@ -443,9 +425,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
 
         final int amountTargets = 1000;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -468,12 +449,14 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
         final int amountTargetsRollout2 = 25;
         final int amountTargetsRollout3 = 25;
         final int amountTargetsOther = 25;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsRollout1, "rollout1", "rollout1"));
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsRollout2, "rollout2", "rollout2"));
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsRollout3, "rollout3", "rollout3"));
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargetsOther, "other1", "other1"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement
+                .createTargets(testdataFactory.generateTargets(amountTargetsRollout1, "rollout1", "rollout1"));
+        targetManagement
+                .createTargets(testdataFactory.generateTargets(amountTargetsRollout2, "rollout2", "rollout2"));
+        targetManagement
+                .createTargets(testdataFactory.generateTargets(amountTargetsRollout3, "rollout3", "rollout3"));
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargetsOther, "other1", "other1"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         createRollout("rollout1", 5, dsA.getId(), "controllerId==rollout1*");
         final Rollout rollout2 = createRollout("rollout2", 5, dsA.getId(), "controllerId==rollout2*");
@@ -503,9 +486,8 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
     public void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
         // setup
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
@@ -577,7 +559,7 @@ public class MgmtRolloutResourceTest extends AbstractRestIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = rolloutManagement.generateRollout();
+        final Rollout rollout = entityFactory.generateRollout();
         rollout.setDistributionSet(distributionSetManagement.findDistributionSetById(distributionSetId));
         rollout.setName(name);
         rollout.setTargetFilterQuery(targetFilterQuery);

@@ -23,13 +23,13 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Tag Management")
-public class TagManagementTest extends AbstractIntegrationTest {
+public class TagManagementTest extends AbstractJpaIntegrationTest {
     public TagManagementTest() {
         LOG = LoggerFactory.getLogger(TagManagementTest.class);
     }
@@ -59,20 +59,13 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Full DS tag lifecycle tested. Create tags, assign them to sets and delete the tags.")
     public void createAndAssignAndDeleteDistributionSetTags() {
-        final Collection<DistributionSet> dsAs = (Collection) TestDataUtil.generateDistributionSets("DS-A", 20,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> dsBs = (Collection) TestDataUtil.generateDistributionSets("DS-B", 10,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> dsCs = (Collection) TestDataUtil.generateDistributionSets("DS-C", 25,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> dsABs = (Collection) TestDataUtil.generateDistributionSets("DS-AB", 5,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> dsACs = (Collection) TestDataUtil.generateDistributionSets("DS-AC", 11,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> dsBCs = (Collection) TestDataUtil.generateDistributionSets("DS-BC", 13,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> dsABCs = (Collection) TestDataUtil.generateDistributionSets("DS-ABC", 9,
-                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> dsAs = testdataFactory.createDistributionSets("DS-A", 20);
+        final Collection<DistributionSet> dsBs = testdataFactory.createDistributionSets("DS-B", 10);
+        final Collection<DistributionSet> dsCs = testdataFactory.createDistributionSets("DS-C", 25);
+        final Collection<DistributionSet> dsABs = testdataFactory.createDistributionSets("DS-AB", 5);
+        final Collection<DistributionSet> dsACs = testdataFactory.createDistributionSets("DS-AC", 11);
+        final Collection<DistributionSet> dsBCs = testdataFactory.createDistributionSets("DS-BC", 13);
+        final Collection<DistributionSet> dsABCs = testdataFactory.createDistributionSets("DS-ABC", 9);
 
         final DistributionSetTag tagA = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("A"));
         final DistributionSetTag tagB = tagManagement.createDistributionSetTag(new JpaDistributionSetTag("B"));
@@ -169,10 +162,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Description("Verifies the toogle mechanism by means on assigning tag if at least on DS in the list does not have"
             + "the tag yet. Unassign if all of them have the tag already.")
     public void assignAndUnassignDistributionSetTags() {
-        final Collection<DistributionSet> groupA = (Collection) TestDataUtil.generateDistributionSets(20,
-                softwareManagement, distributionSetManagement);
-        final Collection<DistributionSet> groupB = (Collection) TestDataUtil.generateDistributionSets("unassigned", 20,
-                softwareManagement, distributionSetManagement);
+        final Collection<DistributionSet> groupA = testdataFactory.createDistributionSets(20);
+        final Collection<DistributionSet> groupB = testdataFactory.createDistributionSets("unassigned", 20);
 
         final DistributionSetTag tag = tagManagement
                 .createDistributionSetTag(new JpaDistributionSetTag("tag1", "tagdesc1", ""));
@@ -213,8 +204,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
     @Description("Verifies the toogle mechanism by means on assigning tag if at least on target in the list does not have"
             + "the tag yet. Unassign if all of them have the tag already.")
     public void assignAndUnassignTargetTags() {
-        final List<Target> groupA = targetManagement.createTargets(TestDataUtil.generateTargets(20, ""));
-        final List<Target> groupB = targetManagement.createTargets(TestDataUtil.generateTargets(20, "groupb"));
+        final List<Target> groupA = targetManagement.createTargets(testdataFactory.generateTargets(20, ""));
+        final List<Target> groupB = targetManagement.createTargets(testdataFactory.generateTargets(20, "groupb"));
 
         final TargetTag tag = tagManagement.createTargetTag(new JpaTargetTag("tag1", "tagdesc1", ""));
 
@@ -451,8 +442,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
     }
 
     private List<JpaTargetTag> createTargetsWithTags() {
-        final List<Target> targets = targetManagement.createTargets(TestDataUtil.generateTargets(20));
-        final Iterable<TargetTag> tags = tagManagement.createTargetTags(TestDataUtil.generateTargetTags(20));
+        final List<Target> targets = testdataFactory.createTargets(20);
+        final Iterable<TargetTag> tags = tagManagement.createTargetTags(testdataFactory.generateTargetTags(20));
 
         tags.forEach(tag -> targetManagement.toggleTagAssignment(targets, tag));
 
@@ -461,10 +452,8 @@ public class TagManagementTest extends AbstractIntegrationTest {
 
     private List<DistributionSetTag> createDsSetsWithTags() {
 
-        final Collection<DistributionSet> sets = (Collection) TestDataUtil.generateDistributionSets(20,
-                softwareManagement, distributionSetManagement);
-        final Iterable<DistributionSetTag> tags = tagManagement
-                .createDistributionSetTags(TestDataUtil.generateDistributionSetTags(20));
+        final Collection<DistributionSet> sets = testdataFactory.createDistributionSets(20);
+        final Iterable<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(20);
 
         tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(sets, tag));
 

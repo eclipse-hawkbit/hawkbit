@@ -49,7 +49,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -201,9 +200,4 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         return new PageImpl<>(targetWithActionStatus, pageRequest, totalCount);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public RolloutGroup generateRolloutGroup() {
-        return new JpaRolloutGroup();
-    }
 }
