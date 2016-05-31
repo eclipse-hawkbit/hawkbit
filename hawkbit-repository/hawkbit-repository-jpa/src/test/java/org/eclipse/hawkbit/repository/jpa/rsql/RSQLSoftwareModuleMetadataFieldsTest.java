@@ -14,12 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -31,15 +30,14 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter software module metadata")
-public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractIntegrationTest {
+public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private Long softwareModuleId;
 
     @Before
     public void setupBeforeTest() {
-        final SoftwareModule softwareModule = softwareManagement.createSoftwareModule(
-                new JpaSoftwareModule(TestDataUtil.findOrCreateSoftwareModuleType(softwareManagement, "application"),
-                        "application", "1.0.0", "Desc", "vendor Limited, California"));
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
+
         softwareModuleId = softwareModule.getId();
 
         final List<SoftwareModuleMetadata> metadata = new ArrayList<>();

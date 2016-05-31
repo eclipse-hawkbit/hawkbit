@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -96,6 +97,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     @Autowired
     private HostnameResolver hostnameResolver;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     /**
      * Constructor.
@@ -336,7 +340,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
-        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
         actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
 
         actionStatus.setAction(action);
@@ -447,6 +451,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     void setEventBus(final EventBus eventBus) {
         this.eventBus = eventBus;
+    }
+
+    void setEntityFactory(final EntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
     }
 
 }

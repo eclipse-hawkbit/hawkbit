@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -36,21 +36,21 @@ final class MgmtDistributionSetTypeMapper {
 
     }
 
-    static List<DistributionSetType> smFromRequest(final DistributionSetManagement distributionSetManagement,
+    static List<DistributionSetType> smFromRequest(final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement,
             final Iterable<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
         final List<DistributionSetType> mappedList = new ArrayList<>();
 
         for (final MgmtDistributionSetTypeRequestBodyPost smRest : smTypesRest) {
-            mappedList.add(fromRequest(distributionSetManagement, softwareManagement, smRest));
+            mappedList.add(fromRequest(entityFactory, softwareManagement, smRest));
         }
         return mappedList;
     }
 
-    static DistributionSetType fromRequest(final DistributionSetManagement distributionSetManagement,
+    static DistributionSetType fromRequest(final EntityFactory entityFactory,
             final SoftwareManagement softwareManagement, final MgmtDistributionSetTypeRequestBodyPost smsRest) {
 
-        final DistributionSetType result = distributionSetManagement.generateDistributionSetType(smsRest.getKey(),
+        final DistributionSetType result = entityFactory.generateDistributionSetType(smsRest.getKey(),
                 smsRest.getName(), smsRest.getDescription());
 
         // Add mandatory

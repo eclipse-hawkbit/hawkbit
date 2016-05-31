@@ -44,7 +44,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Target Management Searches")
-public class TargetManagementSearchTest extends AbstractIntegrationTest {
+public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests different parameter combinations for target search operations. "
@@ -56,32 +56,30 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
         final TargetTag targTagZ = tagManagement.createTargetTag(new JpaTargetTag("TargTag-Z"));
         final TargetTag targTagW = tagManagement.createTargetTag(new JpaTargetTag("TargTag-W"));
 
-        final DistributionSet setA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet setA = testdataFactory.createDistributionSet("");
 
-        final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
 
         final String targetDsAIdPref = "targ-A";
         List<Target> targAs = targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(100, targetDsAIdPref, targetDsAIdPref.concat(" description")));
+                testdataFactory.generateTargets(100, targetDsAIdPref, targetDsAIdPref.concat(" description")));
         targAs = targetManagement.toggleTagAssignment(targAs, targTagX).getAssignedEntity();
 
         final String targetDsBIdPref = "targ-B";
         List<Target> targBs = targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(100, targetDsBIdPref, targetDsBIdPref.concat(" description")));
+                testdataFactory.generateTargets(100, targetDsBIdPref, targetDsBIdPref.concat(" description")));
         targBs = targetManagement.toggleTagAssignment(targBs, targTagY).getAssignedEntity();
         targBs = targetManagement.toggleTagAssignment(targBs, targTagW).getAssignedEntity();
 
         final String targetDsCIdPref = "targ-C";
         List<Target> targCs = targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(100, targetDsCIdPref, targetDsCIdPref.concat(" description")));
+                testdataFactory.generateTargets(100, targetDsCIdPref, targetDsCIdPref.concat(" description")));
         targCs = targetManagement.toggleTagAssignment(targCs, targTagZ).getAssignedEntity();
         targCs = targetManagement.toggleTagAssignment(targCs, targTagW).getAssignedEntity();
 
         final String targetDsDIdPref = "targ-D";
         final List<Target> targDs = targetManagement.createTargets(
-                TestDataUtil.buildTargetFixtures(100, targetDsDIdPref, targetDsDIdPref.concat(" description")));
+                testdataFactory.generateTargets(100, targetDsDIdPref, targetDsDIdPref.concat(" description")));
 
         final String assignedC = targCs.iterator().next().getControllerId();
         deploymentManagement.assignDistributionSet(setA.getId(), assignedC);
@@ -680,14 +678,13 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
     public void targetSearchWithVariousFilterCombinationsAndOrderByDistributionSet() {
 
         final List<Target> notAssigned = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(3, "not", "first description"));
+                .createTargets(testdataFactory.generateTargets(3, "not", "first description"));
         List<Target> targAssigned = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(3, "assigned", "first description"));
+                .createTargets(testdataFactory.generateTargets(3, "assigned", "first description"));
         List<Target> targInstalled = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(3, "installed", "first description"));
+                .createTargets(testdataFactory.generateTargets(3, "installed", "first description"));
 
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("a", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds = testdataFactory.createDistributionSet("a");
 
         targAssigned = deploymentManagement.assignDistributionSet(ds, targAssigned).getAssignedEntity();
         targInstalled = deploymentManagement.assignDistributionSet(ds, targInstalled).getAssignedEntity();
@@ -714,10 +711,9 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
     @Test
     @Description("Verfies that targets with given assigned DS are returned from repository.")
     public void findTargetByAssignedDistributionSet() {
-        final DistributionSet assignedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        List<Target> assignedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
+        final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
+        targetManagement.createTargets(testdataFactory.generateTargets(10, "unassigned"));
+        List<Target> assignedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
 
         deploymentManagement.assignDistributionSet(assignedSet, assignedtargets);
 
@@ -734,12 +730,10 @@ public class TargetManagementSearchTest extends AbstractIntegrationTest {
     @Test
     @Description("Verfies that targets with given installed DS are returned from repository.")
     public void findTargetByInstalledDistributionSet() {
-        final DistributionSet assignedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        final DistributionSet installedSet = TestDataUtil.generateDistributionSet("another", softwareManagement,
-                distributionSetManagement);
-        targetManagement.createTargets(TestDataUtil.generateTargets(10, "unassigned"));
-        List<Target> installedtargets = targetManagement.createTargets(TestDataUtil.generateTargets(10, "assigned"));
+        final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
+        final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
+        targetManagement.createTargets(testdataFactory.generateTargets(10, "unassigned"));
+        List<Target> installedtargets = targetManagement.createTargets(testdataFactory.generateTargets(10, "assigned"));
 
         // set on installed and assign another one
         deploymentManagement.assignDistributionSet(installedSet, installedtargets).getActions().forEach(actionId -> {

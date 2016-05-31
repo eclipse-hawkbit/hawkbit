@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -62,6 +63,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
@@ -138,7 +142,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                 .successAction(successAction, successActionExpr).errorCondition(errorCondition, errorConditionExpr)
                 .errorAction(errorAction, errorActionExpr).build();
         final Rollout rollout = this.rolloutManagement.createRollout(
-                MgmtRolloutMapper.fromRequest(rolloutManagement, rolloutRequestBody, distributionSet,
+                MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet,
                         rolloutRequestBody.getTargetFilterQuery()),
                 rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
 

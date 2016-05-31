@@ -29,7 +29,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Repository")
 @Stories("Artifact Management")
-public class ArtifactManagementNoMongoDbTest extends AbstractIntegrationTest {
+public class ArtifactManagementNoMongoDbTest extends AbstractJpaIntegrationTest {
 
     @BeforeClass
     public static void initialize() {

@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
+import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;
@@ -26,7 +27,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("System Management")
-public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
+public class SystemManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
 
     @Test
     @Description("Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in")
@@ -108,8 +109,8 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
                     final List<Target> createdTargets = createTestTargets(targets);
                     if (updates > 0) {
                         for (int x = 0; x < updates; x++) {
-                            final DistributionSet ds = TestDataUtil.generateDistributionSet("to be deployed" + x,
-                                    softwareManagement, distributionSetManagement, true);
+                            final DistributionSet ds = testdataFactory.createDistributionSet("to be deployed" + x,
+                                    true);
 
                             deploymentManagement.assignDistributionSet(ds, createdTargets);
                         }
@@ -125,7 +126,7 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
 
     private List<Target> createTestTargets(final int targets) {
         return targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(targets, "testTargetOfTenant", "testTargetOfTenant"));
+                .createTargets(testdataFactory.generateTargets(targets, "testTargetOfTenant", "testTargetOfTenant"));
     }
 
     private void createTestArtifact(final byte[] random) {
@@ -137,8 +138,7 @@ public class SystemManagementTest extends AbstractIntegrationTestWithMongoDB {
     }
 
     private void createDeletedTestArtifact(final byte[] random) {
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("deleted garbage", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet ds = testdataFactory.createDistributionSet("deleted garbage", true);
         ds.getModules().stream().forEach(module -> {
             artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), module.getId(), "file1", false);
             softwareManagement.deleteSoftwareModule(module);

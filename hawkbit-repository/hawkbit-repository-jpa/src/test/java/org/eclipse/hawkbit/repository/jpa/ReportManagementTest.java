@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.ReportManagement.DateTypes;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -38,6 +37,9 @@ import org.eclipse.hawkbit.repository.report.model.DataReportSeries;
 import org.eclipse.hawkbit.repository.report.model.DataReportSeriesItem;
 import org.eclipse.hawkbit.repository.report.model.InnerOuterDataReportSeries;
 import org.eclipse.hawkbit.repository.report.model.SeriesTime;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
+import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Report Management")
-public class ReportManagementTest extends AbstractIntegrationTest {
+public class ReportManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private ReportManagement reportManagement;
@@ -128,8 +130,7 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         final LocalDateTime to = LocalDateTime.now();
         final LocalDateTime from = to.minusMonths(maxMonthBackAmountReportTargets);
 
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("ds", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds");
 
         final DynamicDateTimeProvider dynamicDateTimeProvider = new DynamicDateTimeProvider();
         auditingHandler.setDateTimeProvider(dynamicDateTimeProvider);
@@ -181,21 +182,18 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         final Target knownTarget4 = targetManagement.createTarget(new JpaTarget("t4"));
         final Target knownTarget5 = targetManagement.createTarget(new JpaTarget("t5"));
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
+        final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
+        final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
-        final DistributionSet distributionSet1 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds1", "0.0.0", standardDsType, os, jvm, ah));
-        final DistributionSet distributionSet11 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds1", "0.0.1", standardDsType, os, jvm, ah));
-        final DistributionSet distributionSet2 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds2", "0.0.2", standardDsType, os, jvm, ah));
-        final DistributionSet distributionSet3 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds3", "0.0.3", standardDsType, os, jvm, ah));
+        final DistributionSet distributionSet1 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds1", "0.0.0", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet11 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds1", "0.0.1", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet2 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds2", "0.0.2", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet3 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds3", "0.0.3", standardDsType, Lists.newArrayList(os, jvm, ah)));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
         deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());
@@ -355,21 +353,18 @@ public class ReportManagementTest extends AbstractIntegrationTest {
         final Target knownTarget3 = targetManagement.createTarget(new JpaTarget("t3"));
         final Target knownTarget4 = targetManagement.createTarget(new JpaTarget("t4"));
 
-        final SoftwareModule ah = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
-        final SoftwareModule jvm = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
-        final SoftwareModule os = softwareManagement
-                .createSoftwareModule(new JpaSoftwareModule(osType, "poky", "3.0.2", null, ""));
+        final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
+        final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
+        final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
 
-        final DistributionSet distributionSet1 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds1", "0.0.0", standardDsType, os, jvm, ah));
-        final DistributionSet distributionSet11 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds1", "0.0.1", standardDsType, os, jvm, ah));
-        final DistributionSet distributionSet2 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds2", "0.0.2", standardDsType, os, jvm, ah));
-        final DistributionSet distributionSet3 = distributionSetManagement
-                .createDistributionSet(TestDataUtil.buildDistributionSet("ds3", "0.0.3", standardDsType, os, jvm, ah));
+        final DistributionSet distributionSet1 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds1", "0.0.0", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet11 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds1", "0.0.1", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet2 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds2", "0.0.2", standardDsType, Lists.newArrayList(os, jvm, ah)));
+        final DistributionSet distributionSet3 = distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds3", "0.0.3", standardDsType, Lists.newArrayList(os, jvm, ah)));
 
         // ds1(0.0.0)=[target1,target2], ds1(0.0.1)=[target3]
         deploymentManagement.assignDistributionSet(distributionSet1.getId(), knownTarget1.getControllerId());

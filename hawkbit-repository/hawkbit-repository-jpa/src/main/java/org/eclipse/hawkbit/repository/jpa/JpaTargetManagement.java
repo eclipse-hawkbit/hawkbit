@@ -61,7 +61,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -403,7 +402,6 @@ public class JpaTargetManagement implements TargetManagement {
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public Target unAssignTag(final String controllerID, final TargetTag targetTag) {
-        // TODO : optimize this, findone?
         final List<Target> allTargets = new ArrayList<>(targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithStatusAndTagsInJoin(Arrays.asList(controllerID))));
         final List<Target> unAssignTag = unAssignTag(allTargets, targetTag);
@@ -673,9 +671,4 @@ public class JpaTargetManagement implements TargetManagement {
         return resultList;
     }
 
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public Target generateTarget(final String controllerId) {
-        return new JpaTarget(controllerId);
-    }
 }

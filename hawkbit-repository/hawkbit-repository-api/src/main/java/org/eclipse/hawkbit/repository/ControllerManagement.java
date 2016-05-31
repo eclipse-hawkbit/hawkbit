@@ -9,10 +9,8 @@
 package org.eclipse.hawkbit.repository;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.NotNull;
 
@@ -267,62 +265,5 @@ public interface ControllerManagement {
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     TargetInfo updateTargetStatus(@NotNull TargetInfo targetInfo, TargetUpdateStatus status, Long lastTargetQuery,
             URI address);
-
-    /**
-     * Generates an empty {@link ActionStatus} object without persisting it.
-     * 
-     * @return {@link ActionStatus} object
-     */
-    ActionStatus generateActionStatus();
-
-    /**
-     * Generates an {@link ActionStatus} object without persisting it.
-     * 
-     * @param action
-     *            the {@link ActionStatus} belongs to.
-     * @param status
-     *            as reflected by this {@link ActionStatus}.
-     * @param occurredAt
-     *            time in {@link TimeUnit#MILLISECONDS} GMT when the status
-     *            change happened.
-     * @param message
-     *            optional comment
-     * 
-     * @return {@link ActionStatus} object
-     */
-    ActionStatus generateActionStatus(Action action, Status status, Long occurredAt, final String message);
-
-    /**
-     * Generates an {@link ActionStatus} object without persisting it.
-     * 
-     * @param action
-     *            the {@link ActionStatus} belongs to.
-     * @param status
-     *            as reflected by this {@link ActionStatus}.
-     * @param occurredAt
-     *            time in {@link TimeUnit#MILLISECONDS} GMT when the status
-     *            change happened.
-     * @param messages
-     *            optional comments
-     * 
-     * @return {@link ActionStatus} object
-     */
-    ActionStatus generateActionStatus(Action action, final Status status, Long occurredAt,
-            final Collection<String> messages);
-
-    /**
-     * Generates an {@link ActionStatus} object without persisting it.
-     * 
-     * @param action
-     *            the {@link ActionStatus} belongs to.
-     * @param status
-     *            as reflected by this {@link ActionStatus}.
-     * @param occurredAt
-     *            time in {@link TimeUnit#MILLISECONDS} GMT when the status
-     *            change happened.
-     * 
-     * @return {@link ActionStatus} object
-     */
-    ActionStatus generateActionStatus(Action action, Status status, Long occurredAt);
 
 }

@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -86,6 +87,9 @@ public class AmqpMessageHandlerServiceTest {
     private ControllerManagement controllerManagementMock;
 
     @Mock
+    private EntityFactory entityFactoryMock;
+
+    @Mock
     private ArtifactManagement artifactManagementMock;
 
     @Mock
@@ -117,6 +121,7 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.setCache(cacheMock);
         amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
         amqpMessageHandlerService.setEventBus(eventBus);
+        amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
 
     }
 
@@ -350,7 +355,7 @@ public class AmqpMessageHandlerServiceTest {
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
         when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
-        when(controllerManagementMock.generateActionStatus()).thenReturn(new JpaActionStatus());
+        when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
         final List<Action> actionList = new ArrayList<>();
         actionList.add(action);

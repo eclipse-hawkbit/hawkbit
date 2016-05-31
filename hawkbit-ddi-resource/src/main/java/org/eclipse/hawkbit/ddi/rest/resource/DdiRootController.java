@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.cache.CacheWriteNotify;
@@ -96,6 +97,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Autowired
     private RequestResponseContextHolder requestResponseContextHolder;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<List<org.eclipse.hawkbit.ddi.json.model.DdiArtifact>> getSoftwareModulesArtifacts(
@@ -175,17 +179,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module);
         final String range = request.getHeader("Range");
 
-        final ActionStatus statusMessage = controllerManagement.generateActionStatus();
+        final ActionStatus statusMessage = entityFactory.generateActionStatus();
         statusMessage.setAction(action);
         statusMessage.setOccurredAt(System.currentTimeMillis());
         statusMessage.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            statusMessage.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
-                    + " of: " + request.getRequestURI());
+            statusMessage.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range + " of: "
+                    + request.getRequestURI());
         } else {
-            statusMessage.addMessage(
-                    Constants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
+            statusMessage.addMessage(Constants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI());
         }
         controllerManagement.addInformationalActionStatus(statusMessage);
         return action;
@@ -294,7 +297,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ActionStatus generateUpdateStatus(final DdiActionFeedback feedback, final String targetid,
             final Long actionid, final Action action) {
 
-        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 
@@ -336,8 +339,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
         LOG.debug("Controller reported intermediate status (actionid: {}, targetid: {}) as we got {} report.", actionid,
                 targetid, feedback.getStatus().getExecution());
         actionStatus.setStatus(Status.RUNNING);
-        actionStatus.addMessage(
-                Constants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
+        actionStatus
+                .addMessage(Constants.SERVER_MESSAGE_PREFIX + "Target reported " + feedback.getStatus().getExecution());
     }
 
     private static void handleClosedUpdateStatus(final DdiActionFeedback feedback, final String targetid,
@@ -420,14 +423,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         controllerManagement.addCancelActionStatus(
-                generateActionCancelStatus(feedback, target, feedback.getId(), action, controllerManagement));
+                generateActionCancelStatus(feedback, target, feedback.getId(), action, entityFactory));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private static ActionStatus generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
-            final Long actionid, final Action action, final ControllerManagement controllerManagement) {
+            final Long actionid, final Action action, final EntityFactory entityFactory) {
 
-        final ActionStatus actionStatus = controllerManagement.generateActionStatus();
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 

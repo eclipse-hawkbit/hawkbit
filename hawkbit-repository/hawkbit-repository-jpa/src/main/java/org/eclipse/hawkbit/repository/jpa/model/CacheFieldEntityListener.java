@@ -53,16 +53,11 @@ public class CacheFieldEntityListener {
             @SuppressWarnings("rawtypes")
             final String id = ((Identifiable) target).getId().toString();
             final Class<? extends Object> type = target.getClass();
-            findCacheFields(type, id, new CacheFieldCallback() {
-                @Override
-                public void fromCache(final Field field, final String cacheKey, final Serializable id)
-                        throws IllegalAccessException {
-                    final Cache cache = cacheManager.getCache(type.getName());
-                    final ValueWrapper valueWrapper = cache
-                            .get(CacheKeys.entitySpecificCacheKey(id.toString(), cacheKey));
-                    if (valueWrapper != null && valueWrapper.get() != null) {
-                        FieldUtils.writeField(field, target, valueWrapper.get(), true);
-                    }
+            findCacheFields(type, id, (field, cacheKey, id1) -> {
+                final Cache cache = cacheManager.getCache(type.getName());
+                final ValueWrapper valueWrapper = cache.get(CacheKeys.entitySpecificCacheKey(id1.toString(), cacheKey));
+                if (valueWrapper != null && valueWrapper.get() != null) {
+                    FieldUtils.writeField(field, target, valueWrapper.get(), true);
                 }
             });
         }
@@ -82,13 +77,9 @@ public class CacheFieldEntityListener {
             @SuppressWarnings("rawtypes")
             final String id = ((Identifiable) target).getId().toString();
             final Class<? extends Object> type = target.getClass();
-            findCacheFields(type, id, new CacheFieldCallback() {
-                @Override
-                public void fromCache(final Field field, final String cacheKey, final Serializable id)
-                        throws IllegalAccessException {
-                    final Cache cache = cacheManager.getCache(type.getName());
-                    cache.evict(CacheKeys.entitySpecificCacheKey(id.toString(), cacheKey));
-                }
+            findCacheFields(type, id, (field, cacheKey, id1) -> {
+                final Cache cache = cacheManager.getCache(type.getName());
+                cache.evict(CacheKeys.entitySpecificCacheKey(id1.toString(), cacheKey));
             });
         }
     }
@@ -109,6 +100,7 @@ public class CacheFieldEntityListener {
         }
     }
 
+    @FunctionalInterface
     private interface CacheFieldCallback {
         /**
          * callback methods which is called by the

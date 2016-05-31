@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -53,6 +54,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
@@ -97,7 +101,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
-                .createDistributionSetTags(MgmtTagMapper.mapDistributionSetTagFromRequest(tagManagement, tags));
+                .createDistributionSetTags(MgmtTagMapper.mapDistributionSetTagFromRequest(entityFactory, tags));
 
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }

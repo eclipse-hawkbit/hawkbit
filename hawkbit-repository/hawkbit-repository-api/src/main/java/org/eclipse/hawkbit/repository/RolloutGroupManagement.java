@@ -150,11 +150,4 @@ public interface RolloutGroupManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     RolloutGroup findRolloutGroupWithDetailedStatus(@NotNull Long rolloutGroupId);
-
-    /**
-     * Generates an empty {@link RolloutGroup} without persisting it.
-     * 
-     * @return {@link RolloutGroup} object
-     */
-    RolloutGroup generateRolloutGroup();
 }

@@ -43,6 +43,8 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 
@@ -54,7 +56,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Target Management")
-public class TargetManagementTest extends AbstractIntegrationTest {
+public class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
@@ -193,10 +195,8 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Finds a target by given ID and checks if all data is in the reponse (including the data defined as lazy).")
     public void findTargetByControllerIDWithDetails() {
-        final DistributionSet set = TestDataUtil.generateDistributionSet("test", softwareManagement,
-                distributionSetManagement);
-        final DistributionSet set2 = TestDataUtil.generateDistributionSet("test2", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet set = testdataFactory.createDistributionSet("test");
+        final DistributionSet set2 = testdataFactory.createDistributionSet("test2");
 
         assertThat(targetManagement.countTargetByAssignedDistributionSet(set.getId())).as("Target count is wrong")
                 .isEqualTo(0);
@@ -248,7 +248,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if the targets with the same controller ID are created twice.")
     public void createMultipleTargetsDuplicate() {
-        final List<Target> targets = TestDataUtil.buildTargetFixtures(5, "mySimpleTargs", "my simple targets");
+        final List<Target> targets = testdataFactory.generateTargets(5, "mySimpleTargs", "my simple targets");
         targetManagement.createTargets(targets);
         try {
             targetManagement.createTargets(targets);
@@ -323,7 +323,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     public void singleTargetIsInsertedIntoRepo() throws Exception {
 
         final String myCtrlID = "myCtrlID";
-        final Target target = TestDataUtil.buildTargetFixture(myCtrlID, "the description!");
+        final Target target = testdataFactory.generateTarget(myCtrlID, "the description!");
 
         Target savedTarget = targetManagement.createTarget(target);
         assertNotNull("The target should not be null", savedTarget);
@@ -360,9 +360,9 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Create multiple tragets as bulk operation and delete them in bulk.")
     public void bulkTargetCreationAndDelete() throws Exception {
         final String myCtrlID = "myCtrlID";
-        final List<Target> firstList = TestDataUtil.buildTargetFixtures(100, myCtrlID, "first description");
+        final List<Target> firstList = testdataFactory.generateTargets(100, myCtrlID, "first description");
 
-        final Target extra = TestDataUtil.buildTargetFixture("myCtrlID-00081XX", "first description");
+        final Target extra = testdataFactory.generateTarget("myCtrlID-00081XX", "first description");
 
         List<Target> firstSaved = targetManagement.createTargets(firstList);
 
@@ -432,7 +432,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Stores target attributes and verfies existence in the repository.")
     public void savingTargetControllerAttributes() {
         Iterable<Target> ts = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(100, "myCtrlID", "first description"));
+                .createTargets(testdataFactory.generateTargets(100, "myCtrlID", "first description"));
 
         final Map<String, String> attribs = new HashMap<>();
         attribs.put("a.b.c", "abc");
@@ -541,17 +541,17 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Test
     @Description("Tests the assigment of tags to the a single target.")
     public void targetTagAssignment() {
-        Target t1 = TestDataUtil.buildTargetFixture("id-1", "blablub");
+        Target t1 = testdataFactory.generateTarget("id-1", "blablub");
         final int noT2Tags = 4;
         final int noT1Tags = 3;
         final List<TargetTag> t1Tags = tagManagement
-                .createTargetTags(TestDataUtil.buildTargetTagFixtures(noT1Tags, "tag1"));
+                .createTargetTags(testdataFactory.generateTargetTags(noT1Tags, "tag1"));
         t1.getTags().addAll(t1Tags);
         t1 = targetManagement.createTarget(t1);
 
-        Target t2 = TestDataUtil.buildTargetFixture("id-2", "blablub");
+        Target t2 = testdataFactory.generateTarget("id-2", "blablub");
         final List<TargetTag> t2Tags = tagManagement
-                .createTargetTags(TestDataUtil.buildTargetTagFixtures(noT2Tags, "tag2"));
+                .createTargetTags(testdataFactory.generateTargetTags(noT2Tags, "tag2"));
         t2.getTags().addAll(t2Tags);
         t2 = targetManagement.createTarget(t2);
 
@@ -570,17 +570,17 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Tests the assigment of tags to multiple targets.")
     public void targetTagBulkAssignments() {
         final List<Target> tagATargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagATargets", "first description"));
+                .createTargets(testdataFactory.generateTargets(10, "tagATargets", "first description"));
         final List<Target> tagBTargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagBTargets", "first description"));
+                .createTargets(testdataFactory.generateTargets(10, "tagBTargets", "first description"));
         final List<Target> tagCTargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagCTargets", "first description"));
+                .createTargets(testdataFactory.generateTargets(10, "tagCTargets", "first description"));
 
         final List<Target> tagABTargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagABTargets", "first description"));
+                .createTargets(testdataFactory.generateTargets(10, "tagABTargets", "first description"));
 
         final List<Target> tagABCTargets = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(10, "tagABCTargets", "first description"));
+                .createTargets(testdataFactory.generateTargets(10, "tagABCTargets", "first description"));
 
         final TargetTag tagA = tagManagement.createTargetTag(new JpaTargetTag("A"));
         final TargetTag tagB = tagManagement.createTargetTag(new JpaTargetTag("B"));
@@ -645,20 +645,20 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final TargetTag targTagC = tagManagement.createTargetTag(new JpaTargetTag("Targ-C-Tag"));
 
         final List<Target> targAs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
+                .createTargets(testdataFactory.generateTargets(25, "target-id-A", "first description"));
         final List<Target> targBs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(20, "target-id-B", "first description"));
+                .createTargets(testdataFactory.generateTargets(20, "target-id-B", "first description"));
         final List<Target> targCs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(15, "target-id-C", "first description"));
+                .createTargets(testdataFactory.generateTargets(15, "target-id-C", "first description"));
 
         final List<Target> targABs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(12, "target-id-AB", "first description"));
+                .createTargets(testdataFactory.generateTargets(12, "target-id-AB", "first description"));
         final List<Target> targACs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(13, "target-id-AC", "first description"));
+                .createTargets(testdataFactory.generateTargets(13, "target-id-AC", "first description"));
         final List<Target> targBCs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(7, "target-id-BC", "first description"));
+                .createTargets(testdataFactory.generateTargets(7, "target-id-BC", "first description"));
         final List<Target> targABCs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(17, "target-id-ABC", "first description"));
+                .createTargets(testdataFactory.generateTargets(17, "target-id-ABC", "first description"));
 
         targetManagement.toggleTagAssignment(targAs, targTagA);
         targetManagement.toggleTagAssignment(targABs, targTagA);
@@ -706,7 +706,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
         final TargetTag targTagA = tagManagement.createTargetTag(new JpaTargetTag("Targ-A-Tag"));
 
         final List<Target> targAs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
+                .createTargets(testdataFactory.generateTargets(25, "target-id-A", "first description"));
 
         targetManagement.toggleTagAssignment(targAs, targTagA);
 
@@ -726,7 +726,7 @@ public class TargetManagementTest extends AbstractIntegrationTest {
     @Description("Test the optimized quere for retrieving all ID/name pairs of targets.")
     public void findAllTargetIdNamePaiss() {
         final List<Target> targAs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
+                .createTargets(testdataFactory.generateTargets(25, "target-id-A", "first description"));
         final String[] createdTargetIds = targAs.stream().map(t -> t.getControllerId())
                 .toArray(size -> new String[size]);
 
@@ -743,10 +743,10 @@ public class TargetManagementTest extends AbstractIntegrationTest {
 
         final TargetTag targTagA = tagManagement.createTargetTag(new JpaTargetTag("Targ-A-Tag"));
         final List<Target> targAs = targetManagement
-                .createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-A", "first description"));
+                .createTargets(testdataFactory.generateTargets(25, "target-id-A", "first description"));
         targetManagement.toggleTagAssignment(targAs, targTagA);
 
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(25, "target-id-B", "first description"));
+        targetManagement.createTargets(testdataFactory.generateTargets(25, "target-id-B", "first description"));
 
         final String[] tagNames = null;
         final List<Target> targetsListWithNoTag = targetManagement

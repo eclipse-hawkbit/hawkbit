@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.jpa.WithUser;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -55,7 +55,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests.")
     public void getSoftwareModuleTypes() throws Exception {
         SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
-                softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         testType.setDescription("Desc1234");
         testType = softwareManagement.updateSoftwareModuleType(testType);
 
@@ -77,7 +77,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
                         jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].name", equalTo(appType.getName())))
                 .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].description",
                         equalTo(appType.getDescription())))
-                .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].maxAssignments", equalTo(1)))
+                .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].maxAssignments",
+                        equalTo(Integer.MAX_VALUE)))
                 .andExpect(jsonPath("$content.[?(@.key==" + appType.getKey() + ")][0].key", equalTo("application")))
                 .andExpect(jsonPath("$content.[?(@.key==test123)][0].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$content.[?(@.key==test123)][0].name", equalTo("TestName123")))
@@ -96,8 +97,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with sorting by MAXASSIGNMENTS field.")
     public void getSoftwareModuleTypesSortedByMaxAssignments() throws Exception {
-        SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         testType.setDescription("Desc1234");
         testType = softwareManagement.updateSoftwareModuleType(testType);
 
@@ -106,30 +107,30 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:DESC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[0].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[0].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[0].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[0].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[0].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[0].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[0].maxAssignments", equalTo(5)))
-                .andExpect(jsonPath("$content.[0].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$content.[1].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$content.[1].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$content.[1].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$content.[1].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[1].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$content.[1].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[1].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$content.[1].maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$content.[1].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
 
         // ascending
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:ASC"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$content.[3].id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$content.[3].name", equalTo("TestName123")))
-                .andExpect(jsonPath("$content.[3].description", equalTo("Desc1234")))
-                .andExpect(jsonPath("$content.[3].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[3].createdAt", equalTo(testType.getCreatedAt())))
-                .andExpect(jsonPath("$content.[3].lastModifiedBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("$content.[3].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$content.[3].maxAssignments", equalTo(5)))
-                .andExpect(jsonPath("$content.[3].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
+                .andExpect(jsonPath("$content.[2].id", equalTo(testType.getId().intValue())))
+                .andExpect(jsonPath("$content.[2].name", equalTo("TestName123")))
+                .andExpect(jsonPath("$content.[2].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$content.[2].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[2].createdAt", equalTo(testType.getCreatedAt())))
+                .andExpect(jsonPath("$content.[2].lastModifiedBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("$content.[2].lastModifiedAt", equalTo(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$content.[2].maxAssignments", equalTo(5)))
+                .andExpect(jsonPath("$content.[2].key", equalTo("test123"))).andExpect(jsonPath("$total", equalTo(4)));
     }
 
     @Test
@@ -138,9 +139,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     public void createSoftwareModuleTypes() throws JSONException, Exception {
 
         final List<SoftwareModuleType> types = new ArrayList<>();
-        types.add(softwareManagement.generateSoftwareModuleType("test1", "TestName1", "Desc1", 1));
-        types.add(softwareManagement.generateSoftwareModuleType("test2", "TestName2", "Desc2", 2));
-        types.add(softwareManagement.generateSoftwareModuleType("test3", "TestName3", "Desc3", 3));
+        types.add(entityFactory.generateSoftwareModuleType("test1", "TestName1", "Desc1", 1));
+        types.add(entityFactory.generateSoftwareModuleType("test2", "TestName2", "Desc2", 2));
+        types.add(entityFactory.generateSoftwareModuleType("test3", "TestName3", "Desc3", 3));
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
@@ -182,8 +183,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} GET requests.")
     public void getSoftwareModuleType() throws Exception {
-        SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         testType.setDescription("Desc1234");
         testType = softwareManagement.updateSoftwareModuleType(testType);
 
@@ -203,8 +204,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteSoftwareModuleTypeUnused() throws Exception {
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
 
@@ -218,26 +219,24 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (soft delete scenario).")
     public void deleteSoftwareModuleTypeUsed() throws Exception {
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
         softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(testType, "name", "version", "description", "vendor"));
+                entityFactory.generateSoftwareModule(testType, "name", "version", "description", "vendor"));
 
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(4);
-        assertThat(softwareModuleTypeRepository.count()).isEqualTo(4);
 
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareModuleTypeRepository.count()).isEqualTo(4);
         assertThat(softwareManagement.countSoftwareModuleTypesAll()).isEqualTo(3);
     }
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} PUT requests.")
     public void updateSoftwareModuleTypeOnlyDescriptionAndNameUntouched() throws Exception {
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
                 .put("name", "nameShouldNotBeChanged").toString();
@@ -292,8 +291,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Test
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
 
         final List<SoftwareModuleType> types = new ArrayList<>();
         types.add(testType);
@@ -331,10 +330,10 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
     @Test
     @Description("Search erquest of software module types.")
     public void searchSoftwareModuleTypeRsql() throws Exception {
-        final SoftwareModuleType testType = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
-        final SoftwareModuleType testType2 = softwareManagement
-                .createSoftwareModuleType(softwareManagement.generateSoftwareModuleType("test1234", "TestName1234", "Desc123", 5));
+        final SoftwareModuleType testType = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test123", "TestName123", "Desc123", 5));
+        final SoftwareModuleType testType2 = softwareManagement.createSoftwareModuleType(
+                entityFactory.generateSoftwareModuleType("test1234", "TestName1234", "Desc123", 5));
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
@@ -349,7 +348,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractRestIntegrationT
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final SoftwareModule softwareModule = softwareManagement.generateSoftwareModule(osType, str, str, str, str);
+            final SoftwareModule softwareModule = entityFactory.generateSoftwareModule(osType, str, str, str, str);
 
             softwareManagement.createSoftwareModule(softwareModule);
             character++;

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.cache.CacheConstants;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -46,11 +45,9 @@ public class MgmtDownloadResourceTest extends AbstractRestIntegrationTestWithMon
     @Before
     public void setupCache() {
 
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("Test", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("Test");
         final SoftwareModule softwareModule = distributionSet.getModules().stream().findFirst().get();
-        final Artifact artifact = TestDataUtil.generateArtifacts(artifactManagement, softwareModule.getId()).stream()
-                .findFirst().get();
+        final Artifact artifact = testdataFactory.createLocalArtifacts(softwareModule.getId()).stream().findFirst().get();
 
         downloadIdCache.put(downloadIdSha1, new DownloadArtifactCache(DownloadType.BY_SHA1, artifact.getSha1Hash()));
     }

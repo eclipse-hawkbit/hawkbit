@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.TagFields;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -27,7 +27,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter target and distribution set tags")
-public class RSQLTagFieldsTest extends AbstractIntegrationTest {
+public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
 
     @Before
     public void seuptBeforeTest() {

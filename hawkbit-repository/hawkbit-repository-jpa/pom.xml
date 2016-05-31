@@ -54,16 +54,17 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-artifact-repository-mongo</artifactId>
          <version>${project.version}</version>
-      </dependency>       
+      </dependency> 
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>net._01001111</groupId>
-         <artifactId>jlorem</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework.boot</groupId>
@@ -97,6 +98,12 @@
 
       <!-- Test -->
       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>com.h2database</groupId>
          <artifactId>h2</artifactId>
          <scope>test</scope>
@@ -121,21 +128,11 @@
          <artifactId>allure-junit-adaptor</artifactId>
          <scope>test</scope>
       </dependency>
-<!--       <dependency> -->
-<!--          <groupId>org.springframework.data</groupId> -->
-<!--          <artifactId>spring-data-rest-webmvc</artifactId> -->
-<!--          <scope>test</scope> -->
-<!--       </dependency> -->
       <dependency>
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-aspects</artifactId>
          <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
+      </dependency>      
       <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-test</artifactId>
@@ -150,12 +147,7 @@
          <groupId>org.easytesting</groupId>
          <artifactId>fest-assert</artifactId>
          <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>de.flapdoodle.embed</groupId>
-         <artifactId>de.flapdoodle.embed.mongo</artifactId>
-         <scope>test</scope>
-      </dependency>
+      </dependency>      
       <dependency>
          <groupId>org.springframework.security</groupId>
          <artifactId>spring-security-config</artifactId>
@@ -170,7 +162,6 @@
          <groupId>cz.jirutka.rsql</groupId>
          <artifactId>rsql-parser</artifactId>
       </dependency>
-
    </dependencies>
 
    <build>

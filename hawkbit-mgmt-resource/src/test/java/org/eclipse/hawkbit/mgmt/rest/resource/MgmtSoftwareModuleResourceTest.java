@@ -37,13 +37,12 @@ import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.HashGeneratorUtils;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
-import org.eclipse.hawkbit.repository.jpa.WithUser;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -76,7 +75,6 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     public void assertPreparationOfRepo() {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("no softwaremodule should be founded")
                 .hasSize(0);
-        assertThat(artifactRepository.findAll()).as("no artifacts should be founded").hasSize(0);
     }
 
     @Test
@@ -92,13 +90,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String updateDescription = "newDescription1";
 
         softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
+                entityFactory.generateSoftwareModule(appType, "agent-hub", "1.0.1", null, ""));
         softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
+                entityFactory.generateSoftwareModule(runtimeType, "oracle-jre", "1.7.2", null, ""));
         softwareManagement
-                .createSoftwareModule(softwareManagement.generateSoftwareModule(osType, "poky", "3.0.2", null, ""));
+                .createSoftwareModule(entityFactory.generateSoftwareModule(osType, "poky", "3.0.2", null, ""));
 
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, knownSWName, knownSWVersion,
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, knownSWName, knownSWVersion,
                 knownSWDescription, knownSWVendor);
         sm = softwareManagement.createSoftwareModule(sm);
 
@@ -125,9 +123,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Tests the uppload of an artifact binary. The upload is executed and the content checked in the repository for completenes.")
     public void uploadArtifact() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
-        assertThat(artifactRepository.findAll()).hasSize(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -166,7 +163,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
         // check result in db...
         // repo
-        assertThat(artifactRepository.findAll()).as("Wrong artifact size").hasSize(1);
+        assertThat(artifactManagement.countLocalArtifactsAll()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
         assertTrue("Wrong artifact content",
@@ -192,9 +189,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Description("Verfies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
     public void emptyUploadArtifact() throws Exception {
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, new byte[0]);
@@ -207,7 +204,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verfies that the system does not accept identical artifacts uploads for the same software module. Expected response: CONFLICT")
     public void duplicateUploadArtifact() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -229,9 +226,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
     public void uploadArtifactWithCustomName() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
-        assertThat(artifactRepository.findAll()).hasSize(0);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -246,7 +243,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
 
         // check result in db...
         // repo
-        assertThat(artifactRepository.findAll()).as("Artifact size is wring").hasSize(1);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(1);
 
         // hashes
         assertThat(artifactManagement.findLocalArtifactByFilename("customFilename")).as("Local artifact is wrong")
@@ -256,9 +253,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
     public void uploadArtifactWithHashCheck() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
-        assertThat(artifactRepository.findAll()).hasSize(0);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -300,7 +297,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
     public void downloadArtifact() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -328,14 +325,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 Arrays.equals(result2.getResponse().getContentAsByteArray(), random));
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremodule size is wrong").hasSize(1);
-        assertThat(artifactRepository.findAll()).as("Wrong artifact repostiory").hasSize(2);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(2);
     }
 
     @Test
     @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and download links.")
     public void getArtifact() throws Exception {
         // prepare data for test
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -361,7 +358,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
     public void getArtifacts() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -404,7 +401,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         // no artifact available
@@ -437,7 +434,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
     public void invalidRequestsOnSoftwaremodulesResource() throws Exception {
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final List<SoftwareModule> modules = new ArrayList<>();
@@ -519,15 +516,15 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Test retrieval of all software modules the user has access to.")
     public void getSoftwareModules() throws Exception {
-        SoftwareModule os = softwareManagement.generateSoftwareModule(osType, "name1", "version1", "description1",
+        SoftwareModule os = entityFactory.generateSoftwareModule(osType, "name1", "version1", "description1",
                 "vendor1");
         os = softwareManagement.createSoftwareModule(os);
 
-        SoftwareModule jvm = softwareManagement.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
+        SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
                 "vendor1");
         jvm = softwareManagement.createSoftwareModule(jvm);
 
-        SoftwareModule ah = softwareManagement.generateSoftwareModule(appType, "name1", "version1", "description1",
+        SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name1", "version1", "description1",
                 "vendor1");
         ah = softwareManagement.createSoftwareModule(ah);
 
@@ -590,27 +587,27 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Test
     @Description("Test the various filter parameters, e.g. filter by name or type of the module.")
     public void getSoftwareModulesWithFilterParameters() throws Exception {
-        SoftwareModule os1 = softwareManagement.generateSoftwareModule(osType, "osName1", "1.0.0", "description1",
+        SoftwareModule os1 = entityFactory.generateSoftwareModule(osType, "osName1", "1.0.0", "description1",
                 "vendor1");
         os1 = softwareManagement.createSoftwareModule(os1);
 
-        SoftwareModule jvm1 = softwareManagement.generateSoftwareModule(runtimeType, "runtimeName1", "2.0.0",
+        SoftwareModule jvm1 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName1", "2.0.0",
                 "description1", "vendor1");
         jvm1 = softwareManagement.createSoftwareModule(jvm1);
 
-        SoftwareModule ah1 = softwareManagement.generateSoftwareModule(appType, "appName1", "3.0.0", "description1",
+        SoftwareModule ah1 = entityFactory.generateSoftwareModule(appType, "appName1", "3.0.0", "description1",
                 "vendor1");
         ah1 = softwareManagement.createSoftwareModule(ah1);
 
-        SoftwareModule os2 = softwareManagement.generateSoftwareModule(osType, "osName2", "1.0.1", "description2",
+        SoftwareModule os2 = entityFactory.generateSoftwareModule(osType, "osName2", "1.0.1", "description2",
                 "vendor2");
         os2 = softwareManagement.createSoftwareModule(os2);
 
-        SoftwareModule jvm2 = softwareManagement.generateSoftwareModule(runtimeType, "runtimeName2", "2.0.1",
+        SoftwareModule jvm2 = entityFactory.generateSoftwareModule(runtimeType, "runtimeName2", "2.0.1",
                 "description2", "vendor2");
         jvm2 = softwareManagement.createSoftwareModule(jvm2);
 
-        SoftwareModule ah2 = softwareManagement.generateSoftwareModule(appType, "appName2", "3.0.1", "description2",
+        SoftwareModule ah2 = entityFactory.generateSoftwareModule(appType, "appName2", "3.0.1", "description2",
                 "vendor2");
         ah2 = softwareManagement.createSoftwareModule(ah2);
 
@@ -688,7 +685,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Tests GET request on /rest/v1/softwaremodules/{smId}.")
     public void getSoftareModule() throws Exception {
-        SoftwareModule os = softwareManagement.generateSoftwareModule(osType, "name1", "version1", "description1",
+        SoftwareModule os = entityFactory.generateSoftwareModule(osType, "name1", "version1", "description1",
                 "vendor1");
         os = softwareManagement.createSoftwareModule(os);
 
@@ -708,7 +705,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andExpect(jsonPath("$_links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + os.getId() + "/artifacts")));
 
-        SoftwareModule jvm = softwareManagement.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
+        SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name1", "version1", "description1",
                 "vendor1");
         jvm = softwareManagement.createSoftwareModule(jvm);
 
@@ -728,7 +725,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 .andExpect(jsonPath("$_links.artifacts.href",
                         equalTo("http://localhost/rest/v1/softwaremodules/" + jvm.getId() + "/artifacts")));
 
-        SoftwareModule ah = softwareManagement.generateSoftwareModule(appType, "name1", "version1", "description1",
+        SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name1", "version1", "description1",
                 "vendor1");
         ah = softwareManagement.createSoftwareModule(ah);
 
@@ -755,11 +752,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
     public void createSoftwareModules() throws JSONException, Exception {
-        final SoftwareModule os = softwareManagement.generateSoftwareModule(osType, "name1", "version1", "description1",
+        final SoftwareModule os = entityFactory.generateSoftwareModule(osType, "name1", "version1", "description1",
                 "vendor1");
-        final SoftwareModule jvm = softwareManagement.generateSoftwareModule(runtimeType, "name2", "version1",
+        final SoftwareModule jvm = entityFactory.generateSoftwareModule(runtimeType, "name2", "version1",
                 "description1", "vendor1");
-        final SoftwareModule ah = softwareManagement.generateSoftwareModule(appType, "name3", "version1",
+        final SoftwareModule ah = entityFactory.generateSoftwareModule(appType, "name3", "version1",
                 "description1", "vendor1");
 
         final List<SoftwareModule> modules = new ArrayList<>();
@@ -841,7 +838,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
     @Description("Verifies successfull deletion of software modules that are not in use, i.e. assigned to a DS.")
     public void deleteUnassignedSoftwareModule() throws Exception {
 
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -849,24 +846,20 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         artifactManagement.createLocalArtifact(new ByteArrayInputStream(random), sm.getId(), "file1", false);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("Softwaremoudle size is wrong").hasSize(1);
-        assertThat(artifactRepository.findAll()).as("artifact site is wrong").hasSize(1);
-        assertThat(softwareModuleRepository.findAll()).as("Softwaremoudle size is wrong").hasSize(1);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq))
                 .as("After delete no softwarmodule should be available").isEmpty();
-        assertThat(softwareModuleRepository.findAll()).as("After delete no softwarmodule should be available")
-                .isEmpty();
-        assertThat(artifactRepository.findAll()).as("After delete no artifact should be available").isEmpty();
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
     }
 
     @Test
     @Description("Verifies successfull deletion of software modules that are in use, i.e. assigned to a DS which should result in movinf the module to the archive.")
     public void deleteAssignedSoftwareModule() throws Exception {
-        final DistributionSet ds1 = TestDataUtil.generateDistributionSet("a", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("a");
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
 
@@ -874,8 +867,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
                 ds1.findFirstModuleByType(appType).getId(), "file1", false);
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(3);
-        assertThat(artifactRepository.findAll()).hasSize(1);
-        assertThat(softwareModuleRepository.findAll()).hasSize(3);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(1);
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", ds1.findFirstModuleByType(appType).getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -887,17 +879,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         // all 3 are now marked as deleted
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq).getNumber())
                 .as("After delete no softwarmodule should be available").isEqualTo(0);
-        assertThat(softwareModuleRepository.findAll()).as("After delete no softwarmodule should marked as deleted")
-                .hasSize(3);
-        assertThat(artifactRepository.findAll()).as("After delete artifact should available for marked as deleted sm's")
-                .hasSize(1);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(1);
     }
 
     @Test
     @Description("Tests the deletion of an artifact including verfication that the artifact is actually erased in the repository and removed from the software module.")
     public void deleteArtifact() throws Exception {
         // Create 1 SM
-        SoftwareModule sm = softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
 
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -911,7 +900,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(1);
 
         assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts()).hasSize(2);
-        assertThat(artifactRepository.findAll()).hasSize(2);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(2);
 
         // delete
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()))
@@ -920,8 +909,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         // check that only one artifact is still alive and still assigned
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).as("After the sm should be marked as deleted")
                 .hasSize(1);
-        assertThat(artifactRepository.findAll()).as("After delete artifact should available for marked as deleted sm's")
-                .hasSize(1);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(1);
         assertThat(softwareManagement.findSoftwareModuleWithDetails(sm.getId()).getArtifacts())
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
 
@@ -937,7 +925,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownValue2 = "knownValue1";
 
         final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
 
         final JSONArray jsonArray = new JSONArray();
         jsonArray.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
@@ -966,9 +954,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String updateValue = "valueForUpdate";
 
         final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
         softwareManagement.createSoftwareModuleMetadata(
-                softwareManagement.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
+                entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
@@ -990,9 +978,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownValue = "knownValue";
 
         final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
         softwareManagement.createSoftwareModuleMetadata(
-                softwareManagement.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
+                entityFactory.generateSoftwareModuleMetadata(sm, knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -1012,10 +1000,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
         final SoftwareModule sm = softwareManagement.createSoftwareModule(
-                softwareManagement.generateSoftwareModule(osType, "name 1", "version 1", null, null));
+                entityFactory.generateSoftwareModule(osType, "name 1", "version 1", null, null));
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareManagement.createSoftwareModuleMetadata(softwareManagement.generateSoftwareModuleMetadata(
+            softwareManagement.createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(
                     softwareManagement.findSoftwareModuleById(sm.getId()), knownKeyPrefix + index,
                     knownValuePrefix + index));
         }
@@ -1032,7 +1020,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractRestIntegrationTestW
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            final SoftwareModule softwareModule = softwareManagement.generateSoftwareModule(osType, str, str, str, str);
+            final SoftwareModule softwareModule = entityFactory.generateSoftwareModule(osType, str, str, str, str);
 
             softwareManagement.createSoftwareModule(softwareModule);
             character++;

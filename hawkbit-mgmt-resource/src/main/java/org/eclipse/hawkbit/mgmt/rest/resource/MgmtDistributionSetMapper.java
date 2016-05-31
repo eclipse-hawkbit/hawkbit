@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -75,11 +76,12 @@ public final class MgmtDistributionSetMapper {
      * @return converted list of {@link DistributionSet}s
      */
     static List<DistributionSet> dsFromRequest(final Iterable<MgmtDistributionSetRequestBodyPost> sets,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final EntityFactory entityFactory) {
 
         final List<DistributionSet> mappedList = new ArrayList<>();
         for (final MgmtDistributionSetRequestBodyPost dsRest : sets) {
-            mappedList.add(fromRequest(dsRest, softwareManagement, distributionSetManagement));
+            mappedList.add(fromRequest(dsRest, softwareManagement, distributionSetManagement, entityFactory));
         }
         return mappedList;
 
@@ -95,9 +97,10 @@ public final class MgmtDistributionSetMapper {
      * @return converted {@link DistributionSet}
      */
     static DistributionSet fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
-            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement) {
+            final SoftwareManagement softwareManagement, final DistributionSetManagement distributionSetManagement,
+            final EntityFactory entityFactory) {
 
-        final DistributionSet result = distributionSetManagement.generateDistributionSet();
+        final DistributionSet result = entityFactory.generateDistributionSet();
         result.setDescription(dsRest.getDescription());
         result.setName(dsRest.getName());
         result.setType(findDistributionSetTypeWithExceptionIfNotFound(dsRest.getType(), distributionSetManagement));
@@ -135,14 +138,14 @@ public final class MgmtDistributionSetMapper {
      * @return
      */
     static List<DistributionSetMetadata> fromRequestDsMetadata(final DistributionSet ds,
-            final List<MgmtMetadata> metadata, final DistributionSetManagement distributionSetManagement) {
+            final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
         final List<DistributionSetMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final MgmtMetadata metadataRest : metadata) {
             if (metadataRest.getKey() == null) {
                 throw new IllegalArgumentException("the key of the metadata must be present");
             }
-            mappedList.add(distributionSetManagement.generateDistributionSetMetadata(ds, metadataRest.getKey(),
-                    metadataRest.getValue()));
+            mappedList.add(
+                    entityFactory.generateDistributionSetMetadata(ds, metadataRest.getKey(), metadataRest.getValue()));
         }
         return mappedList;
     }

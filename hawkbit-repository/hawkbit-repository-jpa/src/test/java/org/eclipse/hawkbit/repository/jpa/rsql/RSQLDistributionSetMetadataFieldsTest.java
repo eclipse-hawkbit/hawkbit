@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -30,14 +29,13 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter distribution set metadata")
-public class RSQLDistributionSetMetadataFieldsTest extends AbstractIntegrationTest {
+public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private Long distributionSetId;
 
     @Before
     public void setupBeforeTest() {
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("DS", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("DS");
         distributionSetId = distributionSet.getId();
 
         final List<DistributionSetMetadata> metadata = new ArrayList<>();

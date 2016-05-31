@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTargetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -53,6 +54,9 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Autowired
     private TargetManagement targetManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getTargetTags(
@@ -93,7 +97,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags) {
         LOG.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
-                .createTargetTags(MgmtTagMapper.mapTargeTagFromRequest(tagManagement, tags));
+                .createTargetTags(MgmtTagMapper.mapTargeTagFromRequest(entityFactory, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
     }
 

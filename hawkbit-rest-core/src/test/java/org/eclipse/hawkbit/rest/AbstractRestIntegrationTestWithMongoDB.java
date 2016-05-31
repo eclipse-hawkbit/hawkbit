@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.rest;
 
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.configuration.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +19,14 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
  * Abstract Test for Rest tests.
  */
 @SpringApplicationConfiguration(classes = { RestConfiguration.class })
-public abstract class AbstractRestIntegrationTestWithMongoDB extends AbstractIntegrationTestWithMongoDB {
+public abstract class AbstractRestIntegrationTestWithMongoDB extends AbstractJpaIntegrationTestWithMongoDB {
 
     @Autowired
     private FilterHttpResponse filterHttpResponse;
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext() {
-        DefaultMockMvcBuilder createMvcWebAppContext = super.createMvcWebAppContext();
+        final DefaultMockMvcBuilder createMvcWebAppContext = super.createMvcWebAppContext();
         return createMvcWebAppContext.addFilter(filterHttpResponse);
     }
 }

@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -107,6 +108,9 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
 
     @Autowired
     private transient UiProperties uiProperties;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     @Autowired
     private I18N i18n;
@@ -479,7 +483,7 @@ public class AddUpdateRolloutWindowLayout extends CustomComponent {
     }
 
     private Rollout saveRollout() {
-        Rollout rolloutToCreate = rolloutManagement.generateRollout();
+        Rollout rolloutToCreate = entityFactory.generateRollout();
         final int amountGroup = Integer.parseInt(noOfGroups.getValue());
         final String targetFilter = getTargetFilterQuery();
         final int errorThresoldPercent = getErrorThresoldPercentage(amountGroup);

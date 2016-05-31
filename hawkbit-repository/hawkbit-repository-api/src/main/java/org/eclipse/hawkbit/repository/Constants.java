@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
@@ -23,6 +24,12 @@ public final class Constants {
      * and not be thy {@link Target}.
      */
     public static final String SERVER_MESSAGE_PREFIX = "Update Server: ";
+
+    /**
+     * Number of {@link DistributionSetType}s that are generated as part of
+     * default tenant setup.
+     */
+    public static final int DEFAULT_DS_TYPES_IN_TENANT = 2;
 
     private Constants() {
         // Utility class.

@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -43,6 +44,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRestApi {
     @Autowired
     private SoftwareManagement softwareManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
@@ -110,7 +114,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
 
         final List<SoftwareModuleType> createdSoftwareModules = this.softwareManagement.createSoftwareModuleType(
-                MgmtSoftwareModuleTypeMapper.smFromRequest(softwareManagement, softwareModuleTypes));
+                MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
 
         return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules),
                 HttpStatus.CREATED);

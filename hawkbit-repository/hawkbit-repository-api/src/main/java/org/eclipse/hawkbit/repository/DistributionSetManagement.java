@@ -474,26 +474,6 @@ public interface DistributionSetManagement {
     DistributionSetMetadata findOne(@NotNull DistributionSet distributionSet, @NotNull String key);
 
     /**
-     * Generates an empty {@link DistributionSet} without persisting it.
-     * 
-     * @return {@link DistributionSet} object
-     */
-    DistributionSet generateDistributionSet();
-
-    DistributionSetMetadata generateDistributionSetMetadata();
-
-    DistributionSetMetadata generateDistributionSetMetadata(DistributionSet distributionSet, String key, String value);
-
-    /**
-     * Generates an empty {@link DistributionSetType} without persisting it.
-     * 
-     * @return {@link DistributionSetType} object
-     */
-    DistributionSetType generateDistributionSetType();
-
-    DistributionSetType generateDistributionSetType(String key, String name, String description);
-
-    /**
      * Checks if a {@link DistributionSet} is currently in use by a target in
      * the repository.
      *
@@ -614,8 +594,5 @@ public interface DistributionSetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType updateDistributionSetType(@NotNull DistributionSetType dsType);
-
-    DistributionSet generateDistributionSet(String name, String version, String description, DistributionSetType type,
-            Collection<SoftwareModule> moduleList);
 
 }

@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequ
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -56,6 +57,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Autowired
     private SoftwareManagement softwareManagement;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -158,8 +162,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
         LOG.debug("creating {} softwareModules", softwareModules.size());
-        final Iterable<SoftwareModule> createdSoftwareModules = softwareManagement
-                .createSoftwareModule(MgmtSoftwareModuleMapper.smFromRequest(softwareModules, softwareManagement));
+        final Iterable<SoftwareModule> createdSoftwareModules = softwareManagement.createSoftwareModule(
+                MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules, softwareManagement));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
 
         return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponseSoftwareModules(createdSoftwareModules),
@@ -237,7 +241,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadata metadata) {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         final SoftwareModuleMetadata updated = softwareManagement.updateSoftwareModuleMetadata(
-                softwareManagement.generateSoftwareModuleMetadata(sw, metadataKey, metadata.getValue()));
+                entityFactory.generateSoftwareModuleMetadata(sw, metadataKey, metadata.getValue()));
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(updated));
     }
 
@@ -256,7 +260,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final SoftwareModule sw = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         final List<SoftwareModuleMetadata> created = softwareManagement.createSoftwareModuleMetadata(
-                MgmtSoftwareModuleMapper.fromRequestSwMetadata(softwareManagement, sw, metadataRest));
+                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, sw, metadataRest));
 
         return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponseSwMetadata(created), HttpStatus.CREATED);
 

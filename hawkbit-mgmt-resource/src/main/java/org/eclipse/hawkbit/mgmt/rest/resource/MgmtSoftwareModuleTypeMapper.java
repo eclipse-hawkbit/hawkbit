@@ -18,7 +18,7 @@ import java.util.List;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
-import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
@@ -36,19 +36,19 @@ final class MgmtSoftwareModuleTypeMapper {
 
     }
 
-    static List<SoftwareModuleType> smFromRequest(final SoftwareManagement softwareManagement,
+    static List<SoftwareModuleType> smFromRequest(final EntityFactory entityFactory,
             final Iterable<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
         final List<SoftwareModuleType> mappedList = new ArrayList<>();
 
         for (final MgmtSoftwareModuleTypeRequestBodyPost smRest : smTypesRest) {
-            mappedList.add(fromRequest(softwareManagement, smRest));
+            mappedList.add(fromRequest(entityFactory, smRest));
         }
         return mappedList;
     }
 
-    static SoftwareModuleType fromRequest(final SoftwareManagement softwareManagement,
+    static SoftwareModuleType fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
-        final SoftwareModuleType result = softwareManagement.generateSoftwareModuleType();
+        final SoftwareModuleType result = entityFactory.generateSoftwareModuleType();
         result.setName(smsRest.getName());
         result.setKey(smsRest.getKey());
         result.setDescription(smsRest.getDescription());

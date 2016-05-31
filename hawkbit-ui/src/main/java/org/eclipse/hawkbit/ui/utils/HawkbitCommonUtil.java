@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -430,7 +431,7 @@ public final class HawkbitCommonUtil {
         return trimAndNullIfEmpty(orgText) == null ? SPUIDefinitions.SPACE : orgText;
     }
 
-   /**
+    /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
      * 
@@ -760,10 +761,10 @@ public final class HawkbitCommonUtil {
      *            base software module description
      * @return BaseSoftwareModule new base software module
      */
-    public static SoftwareModule addNewBaseSoftware(final SoftwareManagement softwareManagement, final String bsname,
+    public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,
             final String bsversion, final String bsvendor, final SoftwareModuleType bstype, final String description) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        SoftwareModule newSWModule = softwareManagement.generateSoftwareModule();
+        SoftwareModule newSWModule = entityFactory.generateSoftwareModule();
         newSWModule.setType(bstype);
         newSWModule.setName(bsname);
         newSWModule.setVersion(bsversion);

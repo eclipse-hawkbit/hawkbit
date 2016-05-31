@@ -11,8 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -30,7 +29,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter rollout group")
-public class RSQLRolloutGroupFields extends AbstractIntegrationTest {
+public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
 
     private Long rolloutGroupId;
     private Rollout rollout;
@@ -38,9 +37,8 @@ public class RSQLRolloutGroupFields extends AbstractIntegrationTest {
     @Before
     public void seuptBeforeTest() {
         final int amountTargets = 20;
-        targetManagement.createTargets(TestDataUtil.buildTargetFixtures(amountTargets, "rollout", "rollout"));
-        final DistributionSet dsA = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        targetManagement.createTargets(testdataFactory.generateTargets(amountTargets, "rollout", "rollout"));
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
         rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
         rollout = rolloutManagement.findRolloutById(rollout.getId());
         this.rolloutGroupId = rollout.getRolloutGroups().get(0).getId();

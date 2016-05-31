@@ -62,7 +62,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -737,45 +736,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
             final DistributionSetTag tag) {
         return toggleTagAssignment(sets.stream().map(ds -> ds.getId()).collect(Collectors.toList()), tag.getName());
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetType generateDistributionSetType() {
-        return new JpaDistributionSetType();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSet generateDistributionSet() {
-        return new JpaDistributionSet();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetMetadata generateDistributionSetMetadata() {
-        return new JpaDistributionSetMetadata();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetMetadata generateDistributionSetMetadata(final DistributionSet distributionSet,
-            final String key, final String value) {
-        return new JpaDistributionSetMetadata(key, distributionSet, value);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSetType generateDistributionSetType(final String key, final String name,
-            final String description) {
-        return new JpaDistributionSetType(key, name, description);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public DistributionSet generateDistributionSet(final String name, final String version, final String description,
-            final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
-        return new JpaDistributionSet(name, version, description, type, moduleList);
     }
 
     @Override

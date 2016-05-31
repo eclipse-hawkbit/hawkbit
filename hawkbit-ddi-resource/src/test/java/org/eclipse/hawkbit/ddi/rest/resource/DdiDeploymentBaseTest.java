@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.eclipse.hawkbit.repository.jpa.TestDataUtil;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -63,7 +61,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test()
     @Description("Ensures that artifacts are not found, when softare module does not exists.")
     public void artifactsNotFound() throws Exception {
-        final Target target = TestDataUtil.createTarget(targetManagement);
+        final Target target = testdataFactory.createTarget();
         final Long softwareModuleIdNotExist = 1l;
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleIdNotExist))
@@ -73,9 +71,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test()
     @Description("Ensures that artifacts are found, when software module exists.")
     public void artifactsExists() throws Exception {
-        final Target target = TestDataUtil.createTarget(targetManagement);
-        final DistributionSet distributionSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
         deploymentManagement.assignDistributionSet(distributionSet.getId(), new String[] { target.getName() });
 
@@ -84,7 +81,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
-        TestDataUtil.generateArtifacts(artifactManagement, softwareModuleId);
+        testdataFactory.createLocalArtifacts(softwareModuleId);
 
         mvc.perform(get("/{tenant}/controller/v1/{targetNotExist}/softwaremodules/{softwareModuleId}/artifacts",
                 tenantAware.getCurrentTenant(), target.getName(), softwareModuleId)).andDo(MockMvcResultPrinter.print())
@@ -99,11 +96,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Forced deployment to a controller. Checks if the resource reponse payload for a given deployment is as expected.")
     public void deplomentForceAction() throws Exception {
         // Prepare test data
-        final Target target = targetManagement.generateTarget("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("", true);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
         final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
@@ -114,18 +109,18 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final Target savedTarget = targetManagement.createTarget(target);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).isEmpty();
-        assertThat(actionRepository.findAll()).isEmpty();
-        assertThat(actionStatusRepository.findAll()).isEmpty();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.FORCED,
                 Constants.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
-        assertThat(actionRepository.findAll()).hasSize(1);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
-        assertThat(actionRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
         final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
@@ -143,7 +138,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(actionStatusRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         current = System.currentTimeMillis();
 
@@ -238,11 +233,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Attempt/soft deployment to a controller. Checks if the resource reponse payload  for a given deployment is as expected.")
     public void deplomentAttemptAction() throws Exception {
         // Prepare test data
-        final Target target = targetManagement.generateTarget("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("", true);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
         final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
@@ -253,19 +246,18 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final Target savedTarget = targetManagement.createTarget(target);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).isEmpty();
-        assertThat(actionRepository.findAll()).isEmpty();
-        assertThat(actionStatusRepository.findAll()).isEmpty();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
-        List<Target> saved = deploymentManagement
-                .assignDistributionSet(ds.getId(), ActionType.SOFT, Constants.NO_FORCE_TIME, savedTarget.getControllerId())
-                .getAssignedEntity();
+        List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.SOFT,
+                Constants.NO_FORCE_TIME, savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
-        assertThat(actionRepository.findAll()).hasSize(1);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
-        assertThat(actionRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
         final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
@@ -284,7 +276,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(actionStatusRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         current = System.currentTimeMillis();
 
@@ -369,11 +361,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource reponse payload  for a given deployment is as expected.")
     public void deplomentAutoForceAction() throws Exception {
         // Prepare test data
-        final Target target = targetManagement.generateTarget("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("", true);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final byte random[] = RandomUtils.nextBytes(5 * 1024);
         final LocalArtifact artifact = artifactManagement.createLocalArtifact(new ByteArrayInputStream(random),
@@ -384,18 +374,18 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         final Target savedTarget = targetManagement.createTarget(target);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).isEmpty();
-        assertThat(actionRepository.findAll()).isEmpty();
-        assertThat(actionStatusRepository.findAll()).isEmpty();
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(0);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(0);
 
         List<Target> saved = deploymentManagement.assignDistributionSet(ds.getId(), ActionType.TIMEFORCED,
                 System.currentTimeMillis(), savedTarget.getControllerId()).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
-        assertThat(actionRepository.findAll()).hasSize(1);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         saved = deploymentManagement.assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
-        assertThat(actionRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
@@ -414,7 +404,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(actionStatusRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         current = System.currentTimeMillis();
 
@@ -506,7 +496,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Test various invalid access attempts to the deployment resource und the expected behaviour of the server.")
     public void badDeploymentAction() throws Exception {
-        final Target target = targetManagement.createTarget(targetManagement.generateTarget("4712"));
+        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
 
         // not allowed methods
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/1", tenantAware.getCurrentTenant()))
@@ -529,8 +519,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         // wrong media type
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(target);
-        final DistributionSet savedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
         final Action action1 = deploymentManagement.findActionWithDetails(
                 deploymentManagement.assignDistributionSet(savedSet, toAssign).getActions().get(0));
@@ -547,9 +536,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Description("The server protects itself against to many feedback upload attempts. The test verfies that "
             + "it is not possible to exceed the configured maximum number of feedback uplods.")
     public void toMuchDeplomentActionFeedback() throws Exception {
-        final Target target = targetManagement.createTarget(targetManagement.generateTarget("4712"));
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(target);
@@ -575,19 +563,16 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Multiple uploads of deployment status feedback to the server.")
     public void multipleDeplomentActionFeedback() throws Exception {
-        final Target target1 = targetManagement.generateTarget("4712");
-        final Target target2 = targetManagement.generateTarget("4713");
-        final Target target3 = targetManagement.generateTarget("4714");
+        final Target target1 = entityFactory.generateTarget("4712");
+        final Target target2 = entityFactory.generateTarget("4713");
+        final Target target3 = entityFactory.generateTarget("4714");
         final Target savedTarget1 = targetManagement.createTarget(target1);
         targetManagement.createTarget(target2);
         targetManagement.createTarget(target3);
 
-        final DistributionSet ds1 = TestDataUtil.generateDistributionSet("1", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds3 = TestDataUtil.generateDistributionSet("3", softwareManagement,
-                distributionSetManagement, true);
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("3", true);
 
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget1);
@@ -680,8 +665,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Verfies that an update action is correctly set to error if the controller provides error feedback.")
     public void rootRsSingleDeplomentActionWithErrorFeedback() throws Exception {
-        final Target target = targetManagement.generateTarget("4712");
-        DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement, distributionSetManagement);
+        final Target target = entityFactory.generateTarget("4712");
+        DistributionSet ds = testdataFactory.createDistributionSet("");
 
         final Target savedTarget = targetManagement.createTarget(target);
 
@@ -691,8 +676,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
         deploymentManagement.assignDistributionSet(ds, toAssign);
-        final Action action = actionRepository.findByDistributionSet(pageReq, (JpaDistributionSet) ds).getContent()
-                .get(0);
+        final Action action = deploymentManagement.findActionsByDistributionSet(pageReq, ds).getContent().get(0);
 
         long current = System.currentTimeMillis();
         long lastModified = targetManagement.findTargetByControllerID("4712").getLastModifiedAt();
@@ -747,7 +731,7 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
                 .hasSize(1);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT)).hasSize(0);
         assertThat(deploymentManagement.findInActiveActionsByTarget(myT)).hasSize(2);
-        assertThat(actionStatusRepository.findAll()).hasSize(4);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(4);
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action).getContent()).haveAtLeast(1,
                 new ActionStatusCondition(Status.ERROR));
         assertThat(deploymentManagement.findActionStatusByAction(pageReq, action2).getContent()).haveAtLeast(1,
@@ -758,9 +742,8 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
     @Test
     @Description("Verfies that the controller can provided as much feedback entries as necessry as long as it is in the configured limites.")
     public void rootRsSingleDeplomentActionFeedback() throws Exception {
-        final Target target = targetManagement.generateTarget("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         final Target savedTarget = targetManagement.createTarget(target);
 
@@ -770,17 +753,12 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         Target myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
         deploymentManagement.assignDistributionSet(ds, toAssign);
-        final Action action = actionRepository.findByDistributionSet(pageReq, (JpaDistributionSet) ds).getContent()
-                .get(0);
+        final Action action = deploymentManagement.findActionsByDistributionSet(pageReq, ds).getContent().get(0);
 
         myT = targetManagement.findTargetByControllerID("4712");
         assertThat(myT.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(targetRepository.findByTargetInfoInstalledDistributionSet(new PageRequest(0, 10),
-                (JpaDistributionSet) ds)).hasSize(0);
-        assertThat(targetRepository.findByAssignedDistributionSet(new PageRequest(0, 10), (JpaDistributionSet) ds))
-                .hasSize(1);
-        assertThat(targetRepository.findByAssignedDistributionSetOrTargetInfoInstalledDistributionSet(
-                new PageRequest(0, 10), (JpaDistributionSet) ds, (JpaDistributionSet) ds)).hasSize(1);
+        assertThat(targetManagement.findTargetByInstalledDistributionSet(ds.getId(), pageReq)).hasSize(0);
+        assertThat(targetManagement.findTargetByAssignedDistributionSet(ds.getId(), pageReq)).hasSize(1);
 
         // Now valid Feedback
 
@@ -804,8 +782,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC))
                 .hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT)).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(5);
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(5, new ActionStatusCondition(Status.RUNNING));
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(5);
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(5,
+                new ActionStatusCondition(Status.RUNNING));
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
@@ -823,8 +802,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC))
                 .hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT)).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(6);
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(5, new ActionStatusCondition(Status.RUNNING));
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(5,
+                new ActionStatusCondition(Status.RUNNING));
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
@@ -842,8 +822,9 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC))
                 .hasSize(0);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT)).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(7);
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(6, new ActionStatusCondition(Status.RUNNING));
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(6,
+                new ActionStatusCondition(Status.RUNNING));
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
@@ -862,9 +843,11 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC))
                 .hasSize(0);
 
-        assertThat(actionStatusRepository.findAll()).hasSize(8);
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(7, new ActionStatusCondition(Status.RUNNING));
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(1, new ActionStatusCondition(Status.CANCELED));
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(7,
+                new ActionStatusCondition(Status.RUNNING));
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
+                new ActionStatusCondition(Status.CANCELED));
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
@@ -876,10 +859,13 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(myT.getTargetInfo().getLastTargetQuery()).isGreaterThanOrEqualTo(current);
         assertThat(myT.getTargetInfo().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.findActiveActionsByTarget(myT)).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(9);
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(6, new ActionStatusCondition(Status.RUNNING));
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(1, new ActionStatusCondition(Status.WARNING));
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(1, new ActionStatusCondition(Status.CANCELED));
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(9);
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(6,
+                new ActionStatusCondition(Status.RUNNING));
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
+                new ActionStatusCondition(Status.WARNING));
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
+                new ActionStatusCondition(Status.CANCELED));
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/" + action.getId() + "/feedback",
@@ -896,29 +882,27 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByUpdateStatus(new PageRequest(0, 10), TargetUpdateStatus.IN_SYNC))
                 .hasSize(1);
 
-        assertThat(actionStatusRepository.findAll()).hasSize(10);
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(7, new ActionStatusCondition(Status.RUNNING));
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(1, new ActionStatusCondition(Status.WARNING));
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(1, new ActionStatusCondition(Status.CANCELED));
-        assertThat(actionStatusRepository.findAll()).haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(10);
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(7,
+                new ActionStatusCondition(Status.RUNNING));
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
+                new ActionStatusCondition(Status.WARNING));
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
+                new ActionStatusCondition(Status.CANCELED));
+        assertThat(deploymentManagement.findActionStatusAll(pageReq).getContent()).haveAtLeast(1,
+                new ActionStatusCondition(Status.FINISHED));
 
-        assertThat(targetRepository.findByTargetInfoInstalledDistributionSet(new PageRequest(0, 10),
-                (JpaDistributionSet) ds)).hasSize(1);
-        assertThat(targetRepository.findByAssignedDistributionSet(new PageRequest(0, 10), (JpaDistributionSet) ds))
-                .hasSize(1);
-        assertThat(targetRepository.findByAssignedDistributionSetOrTargetInfoInstalledDistributionSet(
-                new PageRequest(0, 10), (JpaDistributionSet) ds, (JpaDistributionSet) ds)).hasSize(1);
+        assertThat(targetManagement.findTargetByInstalledDistributionSet(ds.getId(), pageReq)).hasSize(1);
+        assertThat(targetManagement.findTargetByAssignedDistributionSet(ds.getId(), pageReq)).hasSize(1);
     }
 
     @Test
     @Description("Various forbidden request appempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.")
     public void badDeplomentActionFeedback() throws Exception {
-        final Target target = targetManagement.generateTarget("4712");
-        final Target target2 = targetManagement.generateTarget("4713");
-        final DistributionSet savedSet = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
-        final DistributionSet savedSet2 = TestDataUtil.generateDistributionSet("1", softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget("4712");
+        final Target target2 = entityFactory.generateTarget("4713");
+        final DistributionSet savedSet = testdataFactory.createDistributionSet("");
+        final DistributionSet savedSet2 = testdataFactory.createDistributionSet("1");
 
         // target does not exist
         mvc.perform(post("/{tenant}/controller/v1/4712/deploymentBase/1234/feedback", tenantAware.getCurrentTenant())

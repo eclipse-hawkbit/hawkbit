@@ -26,6 +26,7 @@ import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -97,6 +98,8 @@ public class BulkUploadHandler extends CustomComponent
 
     final TargetBulkUpdateWindowLayout targetBulkUpdateWindowLayout;
 
+    private final EntityFactory entityFactory;
+
     /**
      *
      * @param targetBulkUpdateWindowLayout
@@ -124,6 +127,7 @@ public class BulkUploadHandler extends CustomComponent
         this.eventBus = targetBulkUpdateWindowLayout.getEventBus();
         distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
         tagManagement = SpringContextHelper.getBean(TagManagement.class);
+        entityFactory = SpringContextHelper.getBean(EntityFactory.class);
     }
 
     /**
@@ -380,7 +384,7 @@ public class BulkUploadHandler extends CustomComponent
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             /* create new target entity */
-            final Target newTarget = targetManagement.generateTarget(newControllerId);
+            final Target newTarget = entityFactory.generateTarget(newControllerId);
             setTargetValues(newTarget, newName, newDesc);
             targetManagement.createTarget(newTarget);
             managementUIState.getTargetTableFilters().getBulkUpload().getTargetsCreated().add(newControllerId);

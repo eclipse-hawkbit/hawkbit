@@ -13,7 +13,7 @@ import static org.junit.Assert.fail;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -30,7 +30,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("RSQL filter actions")
-public class RSQLActionFieldsTest extends AbstractIntegrationTest {
+public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
 
     private Target target;
     private JpaAction action;

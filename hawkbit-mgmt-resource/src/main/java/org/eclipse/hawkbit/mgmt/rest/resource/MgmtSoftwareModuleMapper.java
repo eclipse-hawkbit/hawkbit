@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequ
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -52,31 +53,31 @@ public final class MgmtSoftwareModuleMapper {
         return smType;
     }
 
-    static SoftwareModule fromRequest(final MgmtSoftwareModuleRequestBodyPost smsRest,
-            final SoftwareManagement softwareManagement) {
-        return softwareManagement.generateSoftwareModule(
+    static SoftwareModule fromRequest(final EntityFactory entityFactory,
+            final MgmtSoftwareModuleRequestBodyPost smsRest, final SoftwareManagement softwareManagement) {
+        return entityFactory.generateSoftwareModule(
                 getSoftwareModuleTypeFromKeyString(smsRest.getType(), softwareManagement), smsRest.getName(),
                 smsRest.getVersion(), smsRest.getDescription(), smsRest.getVendor());
     }
 
-    static List<SoftwareModuleMetadata> fromRequestSwMetadata(final SoftwareManagement softwareManagement,
+    static List<SoftwareModuleMetadata> fromRequestSwMetadata(final EntityFactory entityFactory,
             final SoftwareModule sw, final List<MgmtMetadata> metadata) {
         final List<SoftwareModuleMetadata> mappedList = new ArrayList<>(metadata.size());
         for (final MgmtMetadata metadataRest : metadata) {
             if (metadataRest.getKey() == null) {
                 throw new IllegalArgumentException("the key of the metadata must be present");
             }
-            mappedList.add(softwareManagement.generateSoftwareModuleMetadata(sw, metadataRest.getKey(),
-                    metadataRest.getValue()));
+            mappedList.add(
+                    entityFactory.generateSoftwareModuleMetadata(sw, metadataRest.getKey(), metadataRest.getValue()));
         }
         return mappedList;
     }
 
-    static List<SoftwareModule> smFromRequest(final Iterable<MgmtSoftwareModuleRequestBodyPost> smsRest,
-            final SoftwareManagement softwareManagement) {
+    static List<SoftwareModule> smFromRequest(final EntityFactory entityFactory,
+            final Iterable<MgmtSoftwareModuleRequestBodyPost> smsRest, final SoftwareManagement softwareManagement) {
         final List<SoftwareModule> mappedList = new ArrayList<>();
         for (final MgmtSoftwareModuleRequestBodyPost smRest : smsRest) {
-            mappedList.add(fromRequest(smRest, softwareManagement));
+            mappedList.add(fromRequest(entityFactory, smRest, softwareManagement));
         }
         return mappedList;
     }

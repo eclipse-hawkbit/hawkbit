@@ -47,11 +47,10 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
-@Configuration
 @ComponentScan
+@Configuration
 @EnableAutoConfiguration
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
-
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
      *         accessible in beans which cannot access the service directly,

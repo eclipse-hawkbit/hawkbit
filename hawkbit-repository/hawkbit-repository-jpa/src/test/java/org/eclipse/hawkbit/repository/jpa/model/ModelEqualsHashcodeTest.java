@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import org.eclipse.hawkbit.repository.jpa.AbstractIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.Test;
 
@@ -20,7 +20,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Unit Tests - Repository")
 @Stories("Repository Model")
-public class ModelEqualsHashcodeTest extends AbstractIntegrationTest {
+public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verfies that different objects even with identical primary key, version and tenant "

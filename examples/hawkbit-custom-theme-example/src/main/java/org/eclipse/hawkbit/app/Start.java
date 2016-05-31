@@ -8,11 +8,9 @@ package org.eclipse.hawkbit.app;
  * http://www.eclipse.org/legal/epl-v10.html
  */
 
-import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
 
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
@@ -20,7 +18,6 @@ import org.springframework.context.annotation.Import;
  *
  */
 @SpringBootApplication
-@Import({ RepositoryApplicationConfiguration.class })
 @EnableHawkbitManagedSecurityConfiguration
 // Exception squid:S1118 - Spring boot standard behavior
 @SuppressWarnings({ "squid:S1118" })

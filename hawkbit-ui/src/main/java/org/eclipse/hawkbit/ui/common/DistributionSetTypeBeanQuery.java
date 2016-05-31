@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -41,6 +42,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<DistributionSetType> firstPageDistSetType = null;
     private transient DistributionSetManagement distributionSetManagement;
+    private transient EntityFactory entityFactory;
 
     /**
      * Parametric constructor.
@@ -57,7 +59,7 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
 
     @Override
     protected DistributionSetType constructBean() {
-        final DistributionSetType result = distributionSetManagement.generateDistributionSetType("", "", "");
+        final DistributionSetType result = getEntityFactory().generateDistributionSetType("", "", "");
         result.setColour("");
         return result;
     }
@@ -79,6 +81,13 @@ public class DistributionSetTypeBeanQuery extends AbstractBeanQuery<Distribution
             distributionSetManagement = SpringContextHelper.getBean(DistributionSetManagement.class);
         }
         return distributionSetManagement;
+    }
+
+    private EntityFactory getEntityFactory() {
+        if (entityFactory == null) {
+            entityFactory = SpringContextHelper.getBean(EntityFactory.class);
+        }
+        return entityFactory;
     }
 
     @Override

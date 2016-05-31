@@ -62,7 +62,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -661,46 +660,6 @@ public class JpaSoftwareManagement implements SoftwareManagement {
     public List<SoftwareModuleType> createSoftwareModuleType(final Collection<SoftwareModuleType> types) {
 
         return types.stream().map(this::createSoftwareModuleType).collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public SoftwareModuleType generateSoftwareModuleType() {
-        return new JpaSoftwareModuleType();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public SoftwareModule generateSoftwareModule() {
-        return new JpaSoftwareModule();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public SoftwareModule generateSoftwareModule(final SoftwareModuleType type, final String name, final String version,
-            final String description, final String vendor) {
-
-        return new JpaSoftwareModule(type, name, version, description, vendor);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public SoftwareModuleMetadata generateSoftwareModuleMetadata() {
-        return new JpaSoftwareModuleMetadata();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public SoftwareModuleMetadata generateSoftwareModuleMetadata(final SoftwareModule softwareModule, final String key,
-            final String value) {
-        return new JpaSoftwareModuleMetadata(key, softwareModule, value);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public SoftwareModuleType generateSoftwareModuleType(final String key, final String name, final String description,
-            final int maxAssignments) {
-        return new JpaSoftwareModuleType(key, name, description, maxAssignments);
     }
 
 }

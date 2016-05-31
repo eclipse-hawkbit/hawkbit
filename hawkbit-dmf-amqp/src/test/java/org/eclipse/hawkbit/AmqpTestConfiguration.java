@@ -10,6 +10,8 @@ package org.eclipse.hawkbit;
 
 import org.eclipse.hawkbit.amqp.AmqpSenderService;
 import org.eclipse.hawkbit.amqp.DefaultAmqpSenderService;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -22,6 +24,15 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class AmqpTestConfiguration {
+    /**
+     * @return the {@link SystemSecurityContext} singleton bean which make it
+     *         accessible in beans which cannot access the service directly,
+     *         e.g. JPA entities.
+     */
+    @Bean
+    public SystemSecurityContextHolder systemSecurityContextHolder() {
+        return SystemSecurityContextHolder.getInstance();
+    }
 
     /**
      * Method to set the Jackson2JsonMessageConverter.

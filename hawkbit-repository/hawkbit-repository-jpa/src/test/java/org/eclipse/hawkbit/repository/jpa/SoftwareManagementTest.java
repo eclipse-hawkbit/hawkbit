@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,7 +55,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features("Component Tests - Repository")
 @Stories("Software Management")
-public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
+public class SoftwareManagementTest extends AbstractJpaIntegrationTestWithMongoDB {
 
     @Test
     @Description("Try to update non updatable fields results in repository doing nothing.")
@@ -227,8 +228,8 @@ public class SoftwareManagementTest extends AbstractIntegrationTestWithMongoDB {
 
         final SoftwareModule ah2 = softwareManagement
                 .createSoftwareModule(new JpaSoftwareModule(appType, "agent-hub", "1.0.2", null, ""));
-        JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement.createDistributionSet(
-                TestDataUtil.buildDistributionSet("ds-1", "1.0.1", standardDsType, os, jvm, ah2));
+        JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement.createDistributionSet(testdataFactory
+                .generateDistributionSet("ds-1", "1.0.1", standardDsType, Lists.newArrayList(os, jvm, ah2)));
 
         final JpaTarget target = (JpaTarget) targetManagement.createTarget(new JpaTarget("test123"));
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();

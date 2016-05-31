@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.ActionFields;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -169,17 +169,17 @@ public final class MgmtTargetMapper {
         return targetRest;
     }
 
-    static List<Target> fromRequest(final TargetManagement targetManagement,
+    static List<Target> fromRequest(final EntityFactory entityFactory,
             final Iterable<MgmtTargetRequestBody> targetsRest) {
         final List<Target> mappedList = new ArrayList<>();
         for (final MgmtTargetRequestBody targetRest : targetsRest) {
-            mappedList.add(fromRequest(targetManagement, targetRest));
+            mappedList.add(fromRequest(entityFactory, targetRest));
         }
         return mappedList;
     }
 
-    static Target fromRequest(final TargetManagement targetManagement, final MgmtTargetRequestBody targetRest) {
-        final Target target = targetManagement.generateTarget(targetRest.getControllerId());
+    static Target fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
+        final Target target = entityFactory.generateTarget(targetRest.getControllerId());
         target.setDescription(targetRest.getDescription());
         target.setName(targetRest.getName());
         return target;

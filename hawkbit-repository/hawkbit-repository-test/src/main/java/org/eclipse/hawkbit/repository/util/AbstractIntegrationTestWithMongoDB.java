@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.util;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -15,7 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
 
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -38,9 +40,13 @@ import de.flapdoodle.embed.process.runtime.Network;
  *
  */
 public abstract class AbstractIntegrationTestWithMongoDB extends AbstractIntegrationTest {
+
     protected static volatile MongodExecutable mongodExecutable = null;
     private static final AtomicInteger mongoLease = new AtomicInteger(0);
     private static volatile Integer port;
+
+    @Autowired
+    protected GridFsOperations operations;
 
     @BeforeClass
     public static void setupMongo() throws UnknownHostException, IOException {
@@ -67,8 +73,8 @@ public abstract class AbstractIntegrationTestWithMongoDB extends AbstractIntegra
                                 new ArtifactStoreBuilder().defaults(command)
                                         .download(new DownloadConfigBuilder().defaultsForCommand(command)
                                                 .proxyFactory(new HttpProxyFactory(
-                                                        System.getProperty("http.proxyHost").trim(),
-                                                        Integer.valueOf(System.getProperty("http.proxyPort"))))));
+                                                        System.getProperty("http.proxyHost").trim(), Integer
+                                                                .valueOf(System.getProperty("http.proxyPort"))))));
             }
 
             final IMongodConfig mongodConfig = new MongodConfigBuilder().version(version)
@@ -86,7 +92,7 @@ public abstract class AbstractIntegrationTestWithMongoDB extends AbstractIntegra
         operations.delete(new Query());
     }
 
-    public void internalShutDownMongo() {
+    public static void internalShutDownMongo() {
         if (mongodExecutable != null && mongoLease.decrementAndGet() <= 0) {
             mongodExecutable.stop();
             mongodExecutable = null;
