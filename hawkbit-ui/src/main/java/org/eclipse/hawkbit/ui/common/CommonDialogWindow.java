@@ -92,8 +92,8 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setSizeFull();
         buttonsLayout.setSpacing(true);
 
-        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "save", "", "",
-                true, FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
+        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SAVE_BUTTON, "save", "", "", true,
+                FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
         saveButton.setSizeUndefined();
         if (null != saveButtonClickListener) {
             saveButton.addClickListener(saveButtonClickListener);
@@ -104,8 +104,8 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
         buttonsLayout.setExpandRatio(saveButton, 1.0F);
 
-        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel", "",
-                "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.CANCEL_BUTTON, "cancel", "", "", true,
+                FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         if (null != cancelButtonClickListener) {
             cancelButton.addClickListener(cancelButtonClickListener);
