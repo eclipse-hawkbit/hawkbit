@@ -52,13 +52,13 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
 
     @Override
     public void postUpdate(final DescriptorEvent event) {
-        if (event.getObject().getClass().equals(Action.class)) {
+        if (event.getObject().getClass().equals(JpaAction.class)) {
             getAfterTransactionCommmitExecutor().afterCommit(() -> getEventBus().post(
                     new ActionPropertyChangeEvent((Action) event.getObject(), getChangeSet(Action.class, event))));
-        } else if (event.getObject().getClass().equals(Rollout.class)) {
+        } else if (event.getObject().getClass().equals(JpaRollout.class)) {
             getAfterTransactionCommmitExecutor().afterCommit(() -> getEventBus().post(
                     new RolloutPropertyChangeEvent((Rollout) event.getObject(), getChangeSet(Rollout.class, event))));
-        } else if (event.getObject().getClass().equals(RolloutGroup.class)) {
+        } else if (event.getObject().getClass().equals(JpaRolloutGroup.class)) {
             getAfterTransactionCommmitExecutor().afterCommit(
                     () -> getEventBus().post(new RolloutGroupPropertyChangeEvent((RolloutGroup) event.getObject(),
                             getChangeSet(RolloutGroup.class, event))));
