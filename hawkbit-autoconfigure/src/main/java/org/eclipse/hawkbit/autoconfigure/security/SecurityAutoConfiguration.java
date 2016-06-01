@@ -8,23 +8,17 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.PermissionUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,7 +33,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -98,8 +91,6 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean(value = { UserAuthenticationFilter.class })
     public static class InMemoryUserManagementConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryUserManagementConfiguration.class);
-
         @Autowired
         private AuthenticationConfiguration configuration;
 
@@ -127,7 +118,7 @@ public class SecurityAutoConfiguration {
             final InMemoryUserDetailsManager inMemoryUserDetailsManager = new InMemoryUserDetailsManager(
                     new ArrayList<>());
             inMemoryUserDetailsManager.setAuthenticationManager(null);
-            inMemoryUserDetailsManager.createUser(new User("admin", "admin", getAllAuthorities()));
+            inMemoryUserDetailsManager.createUser(new User("admin", "admin", PermissionUtils.createAllAuthorityList()));
             return inMemoryUserDetailsManager;
         }
 
@@ -136,29 +127,7 @@ public class SecurityAutoConfiguration {
          */
         @Bean
         public MultitenancyIndicator multiTenancyIndicator() {
-            return new MultitenancyIndicator() {
-                @Override
-                public boolean isMultiTenancySupported() {
-                    return false;
-                }
-            };
-        }
-
-        private Collection<SimpleGrantedAuthority> getAllAuthorities() {
-            final List<SimpleGrantedAuthority> allPermissions = new ArrayList<>();
-            final Field[] declaredFields = SpPermission.class.getDeclaredFields();
-            for (final Field field : declaredFields) {
-                if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
-                    field.setAccessible(true);
-                    try {
-                        final String permissionName = (String) field.get(null);
-                        allPermissions.add(new SimpleGrantedAuthority(permissionName));
-                    } catch (final IllegalAccessException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                }
-            }
-            return allPermissions;
+            return () -> false;
         }
 
         private static class TenantDaoAuthenticationProvider extends DaoAuthenticationProvider {
