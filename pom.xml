@@ -167,6 +167,7 @@
                   <exclude>**/*.sql</exclude>
                   <exclude>eclipse_codeformatter.xml</exclude>
                   <exclude>**/addons.scss</exclude>
+                  <exclude>**/VAADIN/widgetsets/**</exclude>
                </excludes>
                <mapping>
                   <scss>JAVADOC_STYLE</scss>
