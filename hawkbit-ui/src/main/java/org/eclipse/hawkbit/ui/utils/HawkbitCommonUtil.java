@@ -82,9 +82,9 @@ public final class HawkbitCommonUtil {
 
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
 
-    public static final String DIV_DESCRIPTION = "<div id=\"desc-length\"><p id=\"desciption-p\">";
+    private static final String DIV_DESCRIPTION = "<div id=\"desc-length\"><p id=\"desciption-p\">";
 
-    public static final String DIV_CLOSE = "</p></div>";
+    private static final String DIV_CLOSE = "</p></div>";
 
     private static final String DRAG_COUNT_ELEMENT = "var x = document.getElementById('sp-drag-count'); ";
     private static final String CLOSE_BRACE = "\"; }';";

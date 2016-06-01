@@ -502,6 +502,16 @@ public final class SPUIComponetIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
+     * ID for save button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String SAVE_BUTTON = "common.dialog.window.save";
+
+    /**
+     * ID for cancel button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
+
+    /**
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
@@ -681,16 +691,6 @@ public final class SPUIComponetIdProvider {
      * custom filter - update button id.
      */
     public static final String CUSTOM_FILTER_DETAIL_LINK = "custom.filter.detail.link";
-    
-    /**
-     * DistributionSet - Metadata button id.
-     */
-    public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
-    
-    /**
-     * Software Module - Metadata button id.
-     */
-    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
 
     /**
      * custom filter - save button id.
@@ -932,6 +932,7 @@ public final class SPUIComponetIdProvider {
      */
     public static final String METDATA_TABLE_ID = "metadata.table.id";
     
+
     /**
      * /* Private Constructor.
      */

@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.common;
 
 import org.apache.commons.lang3.StringUtils;
@@ -132,6 +140,10 @@ public class CommonDialogWindow extends Window{
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
+    
+     public HorizontalLayout getButtonsLayout() {
+        return buttonsLayout;
+    }
 
     public void setCancelButtonCaption(final String caption) {
         cancelButton.setCaption(caption);
@@ -141,5 +153,9 @@ public class CommonDialogWindow extends Window{
         cancelButton.setIcon(icon);
     }
 
+
+    public HorizontalLayout getButtonsLayout() {
+        return buttonsLayout;
+    }
 
 }
