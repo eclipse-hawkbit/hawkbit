@@ -706,4 +706,9 @@ public class JpaDeploymentManagement implements DeploymentManagement {
     public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final DistributionSet ds) {
         return actionRepository.findByDistributionSet(pageable, (JpaDistributionSet) ds);
     }
+
+    @Override
+    public Slice<Action> findActionsAll(final Pageable pageable) {
+        return convertAcPage(actionRepository.findAll(pageable), pageable);
+    }
 }

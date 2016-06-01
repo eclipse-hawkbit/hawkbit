@@ -287,6 +287,16 @@ public interface DeploymentManagement {
     Slice<Action> findActionsByTarget(@NotNull Pageable pageable, @NotNull Target target);
 
     /**
+     * Retrieves all {@link Action}s from repository.
+     *
+     * @param pageable
+     *            pagination parameter
+     * @return a paged list of {@link Action}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Slice<Action> findActionsAll(@NotNull Pageable pageable);
+
+    /**
      * Retrieves all {@link Action} which assigned to a specific
      * {@link DistributionSet}.
      * 
