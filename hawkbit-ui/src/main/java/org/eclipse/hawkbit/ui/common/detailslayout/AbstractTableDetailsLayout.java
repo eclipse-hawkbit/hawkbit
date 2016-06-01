@@ -72,12 +72,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private VerticalLayout logLayout;
 
     private VerticalLayout attributesLayout;
-    
-    private VerticalLayout metadataLayout;
-    
-    protected SoftwareModuleMetadatadetailslayout swmMetadataTable;
-    
-   /**
+
+    /**
      * Initialize components.
      */
     @PostConstruct
@@ -149,10 +145,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         detailsTab.setHeight(90, Unit.PERCENTAGE);
         detailsTab.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         detailsTab.setId(getTabSheetId());
-        swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
-        swmMetadataTable.init(getI18n(), getPermissionChecker());
         addTabs(detailsTab);
-     }
+    }
 
     private void buildLayout() {
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
@@ -215,9 +209,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
-      
     }
-       
+
     protected void populateLog() {
         logLayout.removeAllComponents();
 
@@ -288,15 +281,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descriptionLayout = getTabLayout();
         return descriptionLayout;
     }
-    
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.addComponent(swmMetadataTable);
-        return metadataLayout;
-    }
-    
-    
+
     /**
      * Default caption of header to be displayed when no data row selected in
      * table.
@@ -332,7 +317,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     public VerticalLayout getDetailsLayout() {
         return detailsLayout;
     }
-    
+
     private void populateDescription() {
         if (selectedBaseEntity != null) {
             updateDescriptionLayout(i18n.get("label.description"), selectedBaseEntity.getDescription());
