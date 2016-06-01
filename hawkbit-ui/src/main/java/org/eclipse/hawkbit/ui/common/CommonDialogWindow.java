@@ -14,8 +14,8 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
@@ -27,7 +27,6 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-@Service
 public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = -1321949234316858703L;
@@ -47,6 +46,8 @@ public class CommonDialogWindow extends Window {
     private Button cancelButton;
 
     private HorizontalLayout buttonsLayout;
+
+    protected ValueChangeListener buttonEnableListener;
 
     public CommonDialogWindow() {
 
@@ -95,6 +96,7 @@ public class CommonDialogWindow extends Window {
         saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SAVE_BUTTON, "save", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
         saveButton.setSizeUndefined();
+        saveButton.addStyleName("default-color");
         if (null != saveButtonClickListener) {
             saveButton.addClickListener(saveButtonClickListener);
         } else {
@@ -107,6 +109,7 @@ public class CommonDialogWindow extends Window {
         cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.CANCEL_BUTTON, "cancel", "", "", true,
                 FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
+        cancelButton.addStyleName("default-color");
         if (null != cancelButtonClickListener) {
             cancelButton.addClickListener(cancelButtonClickListener);
         } else {
