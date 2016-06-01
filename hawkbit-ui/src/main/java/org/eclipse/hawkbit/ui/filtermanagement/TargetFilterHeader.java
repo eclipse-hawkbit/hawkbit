@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -108,7 +108,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private Button createAddButton() {
-        final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.TARGET_FILTER_ADD_ICON_ID, "", "",
+        final Button button = SPUIComponentProvider.getButton(SPUIComponentIdProvider.TARGET_FILTER_ADD_ICON_ID, "", "",
                 null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         button.addClickListener(event -> addNewFilter());
         return button;
@@ -176,7 +176,7 @@ public class TargetFilterHeader extends VerticalLayout {
     }
 
     private String getSearchRestIconId() {
-        return SPUIComponetIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID;
+        return SPUIComponentIdProvider.TARGET_FILTER_TBL_SEARCH_RESET_ID;
     }
 
     protected void resetSearchText() {

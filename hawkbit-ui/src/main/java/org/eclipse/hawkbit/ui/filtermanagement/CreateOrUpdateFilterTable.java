@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
@@ -90,7 +90,7 @@ public class CreateOrUpdateFilterTable extends Table {
         addCustomGeneratedColumns();
         restoreOnLoad();
         populateTableData();
-        setId(SPUIComponetIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
+        setId(SPUIComponentIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
         setSelectable(false);
         eventBus.subscribe(this);
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
