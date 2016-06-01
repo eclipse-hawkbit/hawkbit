@@ -681,16 +681,6 @@ public final class SPUIComponetIdProvider {
      * custom filter - update button id.
      */
     public static final String CUSTOM_FILTER_DETAIL_LINK = "custom.filter.detail.link";
-    
-    /**
-     * DistributionSet - Metadata button id.
-     */
-    public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
-    
-    /**
-     * Software Module - Metadata button id.
-     */
-    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
 
     /**
      * custom filter - save button id.
