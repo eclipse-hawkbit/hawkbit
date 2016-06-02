@@ -82,7 +82,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private ArtifactDetailsLayout artifactDetailsLayout;
     
     @Autowired
-    private MetadataPopupLayout metadataPopupLayout;
+    private SwMetadataPopupLayout swMetadataPopupLayout;
 
     /**
      * Initialize the filter layout.
@@ -413,18 +413,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(Long itemId, String nameVersionStr) {
-//        final Window metadataWindow = new Window();
-//        metadataWindow.setCaption(getMetadataCaption(nameVersionStr));
-//        metadataWindow.setCaptionAsHtml(true);
-//        metadataWindow.setClosable(true);
-//        metadataWindow.setResizable(true);
-//        metadataWindow.setImmediate(true);
-//        metadataWindow.setWindowMode(WindowMode.NORMAL);
-//        metadataWindow.setModal(true);
-//        metadataWindow.addStyleName(SPUIStyleDefinitions.CONFIRMATION_WINDOW_CAPTION);
-//        
-        
-
         SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
         if (swmodule.getMetadata().isEmpty()) {
             List<SoftwareModuleMetadata> metadataList = new ArrayList<>();
@@ -434,20 +422,9 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
             softwareManagement.createSoftwareModuleMetadata(metadataList);
         }
 
-        
-//        metadataPopupLayout.setUpDetails(itemId);
-//         metadataPopupLayout.setFullWindowMode(false);
-//         artifactDetailsLayout.populateArtifactDetails(itemId,
-//         nameVersionStr);
-//         /* Now add table to the window */
-//         artifactDetailsLayout.getArtifactDetailsTable().setWidth(700,
-//         Unit.PIXELS);
-//         artifactDetailsLayout.getArtifactDetailsTable().setHeight(500,
-//         Unit.PIXELS);
-//        metadataWindow.setContent(metadataPopupLayout);
 
         /* display the window */
-        UI.getCurrent().addWindow(metadataPopupLayout.getWindow(itemId,nameVersionStr));
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule));
     }
 
 }

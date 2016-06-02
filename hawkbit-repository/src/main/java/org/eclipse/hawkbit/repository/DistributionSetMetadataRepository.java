@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -22,8 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-public interface DistributionSetMetadataRepository
-        extends PagingAndSortingRepository<DistributionSetMetadata, DsMetadataCompositeKey>,
+public interface DistributionSetMetadataRepository extends
+        PagingAndSortingRepository<DistributionSetMetadata, DsMetadataCompositeKey>,
         JpaSpecificationExecutor<DistributionSetMetadata> {
+
+    /**
+     * Find list of metadata by distribution set id.
+     * 
+     * @param id
+     *            id of distribution set
+     * @return list of {DistributionSetMetadata}
+     */
+    List<DistributionSetMetadata> findByDistributionSetId(Long id);
 
 }
