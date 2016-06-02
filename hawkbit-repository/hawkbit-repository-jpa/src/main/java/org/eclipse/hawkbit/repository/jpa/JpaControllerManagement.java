@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +103,9 @@ public class JpaControllerManagement implements ControllerManagement {
     @Autowired
     private CacheWriteNotify cacheWriteNotify;
 
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
+
     @Override
     public String getPollingTime() {
         final TenantConfigurationKey configurationKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
@@ -109,8 +113,9 @@ public class JpaControllerManagement implements ControllerManagement {
         JpaTenantConfigurationManagement.validateTenantConfigurationDataType(configurationKey, propertyType);
         final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
                 .findByKey(configurationKey.getKeyName());
-        return tenantConfigurationManagement
-                .buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration).getValue();
+
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration).getValue());
     }
 
     @Override
