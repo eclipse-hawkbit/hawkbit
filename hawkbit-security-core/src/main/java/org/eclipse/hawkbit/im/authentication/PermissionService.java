@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- *
+ * Service to check permissions.
  *
  */
 public class PermissionService {
