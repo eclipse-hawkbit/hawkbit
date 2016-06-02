@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +115,7 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     @Override
     protected String getDeleteAreaId() {
 
-        return SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID;
+        return SPUIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID;
     }
 
     @Override
@@ -262,11 +262,11 @@ public class DSDeleteActionsLayout extends AbstractDeleteActionsLayout {
     }
 
     private boolean isDistributionTable(final Component source) {
-        return SPUIComponetIdProvider.DIST_TABLE_ID.equals(source.getId());
+        return SPUIComponentIdProvider.DIST_TABLE_ID.equals(source.getId());
     }
 
     private boolean isSoftwareModuleTable(final Component source) {
-        return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE.equals(source.getId());
+        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE.equals(source.getId());
     }
 
     @Override

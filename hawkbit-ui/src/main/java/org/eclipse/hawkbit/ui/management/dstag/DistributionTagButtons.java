@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -96,7 +96,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonsTableId() {
-        return SPUIComponetIdProvider.DISTRIBUTION_TAG_TABLE_ID;
+        return SPUIComponentIdProvider.DISTRIBUTION_TAG_TABLE_ID;
     }
 
     @Override

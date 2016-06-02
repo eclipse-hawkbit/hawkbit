@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -119,7 +119,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.DIST_TABLE_ID;
+        return SPUIComponentIdProvider.DIST_TABLE_ID;
     }
 
     @Override
@@ -391,7 +391,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             final Component compsource = dragEvent.getTransferable().getSourceComponent();
             final Table source = (Table) compsource;
             if (compsource instanceof Table) {
-                if (!source.getId().equals(SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE)) {
+                if (!source.getId().equals(SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE)) {
                     notification.displayValidationError(i18n.get("message.action.not.allowed"));
                     return false;
                 }

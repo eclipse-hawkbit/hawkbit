@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.login;
 
 import java.net.URI;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -18,13 +19,14 @@ import org.eclipse.hawkbit.im.authentication.TenantUserPasswordAuthenticationTok
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.util.AntPathMatcher;
 import org.vaadin.spring.security.VaadinSecurity;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -56,6 +58,12 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringView(name = "")
 @UIScope
 public class LoginView extends VerticalLayout implements View {
+    private static final String TENANT_PATTERN_PLACEHOLDER = "tenant";
+    private static final String USER_PATTERN_PLACEHOLDER = "user";
+    private static final String LOGIN_TENANT_USER_URL_PATTERN = "**/#/{" + TENANT_PATTERN_PLACEHOLDER + "}/{"
+            + USER_PATTERN_PLACEHOLDER + "}";
+    private static final String LOGIN_USER_URL_PATTERN = "**/#/{" + USER_PATTERN_PLACEHOLDER + "}";
+
     private static final String LOGIN_TEXTFIELD = "login-textfield";
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginView.class);
@@ -74,6 +82,9 @@ public class LoginView extends VerticalLayout implements View {
 
     @Autowired
     private transient MultitenancyIndicator multiTenancyIndicator;
+
+    private final transient AntPathMatcher matcher = new AntPathMatcher();
+    private boolean useCookie = true;
 
     private TextField username;
     private TextField tenant;
@@ -106,17 +117,45 @@ public class LoginView extends VerticalLayout implements View {
      */
     @PostConstruct
     public void render() {
-
         final URI spURI = Page.getCurrent().getLocation();
-        final String lookForDemoFragment = spURI.toString();
-        if (lookForDemoFragment.contains("?demo")) {
+        final String uriPath = spURI.toString();
+        if (uriPath.contains("?demo")) {
             login(uiProperties.getDemo().getTenant(), uiProperties.getDemo().getUser(),
                     uiProperties.getDemo().getPassword(), false);
         }
-
         final Component loginForm = buildLoginForm();
         addComponent(loginForm);
         setComponentAlignment(loginForm, Alignment.MIDDLE_CENTER);
+
+        readCredentialsFromUriPath(uriPath);
+    }
+
+    private void readCredentialsFromUriPath(final String uriPath) {
+        String urlTenant = null;
+        String urlUser = null;
+        if (matcher.match(LOGIN_USER_URL_PATTERN, uriPath)) {
+            urlUser = matcher.extractUriTemplateVariables(LOGIN_USER_URL_PATTERN, uriPath)
+                    .get(USER_PATTERN_PLACEHOLDER);
+        } else if (matcher.match(LOGIN_TENANT_USER_URL_PATTERN, uriPath)) {
+            final Map<String, String> extractUriTemplateVariables = matcher
+                    .extractUriTemplateVariables(LOGIN_TENANT_USER_URL_PATTERN, uriPath);
+            urlTenant = extractUriTemplateVariables.get(TENANT_PATTERN_PLACEHOLDER);
+            urlUser = extractUriTemplateVariables.get(USER_PATTERN_PLACEHOLDER);
+        }
+
+        if (urlUser != null) {
+            useCookie = false;
+            filloutUsernameTenantFields(urlTenant, urlUser);
+        }
+    }
+
+    private void filloutUsernameTenantFields(final String tenantValue, final String userValue) {
+        if (tenant != null && tenantValue != null) {
+            tenant.setValue(tenantValue);
+        }
+        if (userValue != null) {
+            username.setValue(userValue);
+        }
     }
 
     private Component buildLoginForm() {
@@ -225,7 +264,7 @@ public class LoginView extends VerticalLayout implements View {
         final String linkStyle = "v-link";
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
-            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENTATION,
+            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
             links.addComponent(docuLink);
@@ -233,14 +272,14 @@ public class LoginView extends VerticalLayout implements View {
         }
 
         if (!uiProperties.getDemo().getUser().isEmpty()) {
-            final Link demoLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DEMO,
+            final Link demoLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DEMO,
                     i18n.get("link.demo.name"), "?demo", FontAwesome.DESKTOP, "_top", linkStyle, true);
             links.addComponent(demoLink);
             demoLink.addStyleName(ValoTheme.LINK_SMALL);
         }
 
         if (!uiProperties.getLinks().getRequestAccount().isEmpty()) {
-            final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_REQUESTACCOUNT,
+            final Link requestAccountLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_REQUESTACCOUNT,
                     i18n.get("link.requestaccount.name"), uiProperties.getLinks().getRequestAccount(),
                     FontAwesome.SHOPPING_CART, "", linkStyle, true);
             links.addComponent(requestAccountLink);
@@ -248,7 +287,7 @@ public class LoginView extends VerticalLayout implements View {
         }
 
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
-            final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_USERMANAGEMENT,
+            final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
                     FontAwesome.USERS, "_blank", linkStyle, true);
             links.addComponent(userManagementLink);
@@ -281,6 +320,9 @@ public class LoginView extends VerticalLayout implements View {
      */
     @Override
     public void enter(final ViewChangeEvent event) {
+        if (!useCookie) {
+            return;
+        }
 
         final Cookie usernameCookie = getCookieByName(SP_LOGIN_USER);
 
@@ -348,7 +390,7 @@ public class LoginView extends VerticalLayout implements View {
                 vaadinSecurity.login(new UsernamePasswordAuthenticationToken(user, password));
             }
             /* set success login cookies */
-            if (setCookies) {
+            if (setCookies && useCookie) {
                 setCookies();
             }
 

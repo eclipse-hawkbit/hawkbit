@@ -55,7 +55,7 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -230,7 +230,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.TARGET_TABLE_ID;
+        return SPUIComponentIdProvider.TARGET_TABLE_ID;
     }
 
     @Override
@@ -454,7 +454,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         pinBtn.setStyleName(pinBtnStyle.toString());
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
-        pinBtn.setId(SPUIComponetIdProvider.TARGET_PIN_ICON + "." + itemId);
+        pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
         pinBtn.addClickListener(event -> addPinClickListener(event));
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
@@ -620,7 +620,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     private Boolean validateTable(final Component compsource, final TableTransferable transferable) {
         final Table source = (Table) compsource;
-        if (!(source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)
+        if (!(source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)
                 || source.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS))) {
             notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
             return false;

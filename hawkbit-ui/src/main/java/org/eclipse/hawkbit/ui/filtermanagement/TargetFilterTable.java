@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
@@ -94,7 +94,7 @@ public class TargetFilterTable extends Table {
         populateTableData();
         setColumnCollapsingAllowed(true);
         setColumnProperties();
-        setId(SPUIComponetIdProvider.TAEGET_FILTER_TABLE_ID);
+        setId(SPUIComponentIdProvider.TAEGET_FILTER_TABLE_ID);
         eventBus.subscribe(this);
     }
 
@@ -172,7 +172,7 @@ public class TargetFilterTable extends Table {
     }
 
     private String getDeleteIconId(final String targetFilterName) {
-        return new StringBuilder(SPUIComponetIdProvider.CUSTOM_FILTER_DELETE_ICON).append('.').append(targetFilterName)
+        return new StringBuilder(SPUIComponentIdProvider.CUSTOM_FILTER_DELETE_ICON).append('.').append(targetFilterName)
                 .toString();
     }
 
@@ -241,7 +241,7 @@ public class TargetFilterTable extends Table {
     }
 
     private static String getDetailLinkId(final String filterName) {
-        return new StringBuilder(SPUIComponetIdProvider.CUSTOM_FILTER_DETAIL_LINK).append('.').append(filterName)
+        return new StringBuilder(SPUIComponentIdProvider.CUSTOM_FILTER_DETAIL_LINK).append('.').append(filterName)
                 .toString();
     }
 

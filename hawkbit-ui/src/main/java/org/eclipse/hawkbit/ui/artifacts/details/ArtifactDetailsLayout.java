@@ -31,7 +31,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
@@ -260,7 +260,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
                 final String fileName = (String) table.getContainerDataSource().getItem(itemId)
                         .getItemProperty(PROVIDED_FILE_NAME).getValue();
                 final Button deleteIcon = SPUIComponentProvider.getButton(
-                        fileName + "-" + SPUIComponetIdProvider.UPLOAD_FILE_DELETE_ICON, "",
+                        fileName + "-" + SPUIComponentIdProvider.UPLOAD_FILE_DELETE_ICON, "",
                         SPUILabelDefinitions.DISCARD, ValoTheme.BUTTON_TINY + " " + "redicon", true,
                         FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
                 deleteIcon.setData(itemId);
@@ -344,7 +344,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
         detailsTable.setImmediate(true);
         detailsTable.setSizeFull();
 
-        detailsTable.setId(SPUIComponetIdProvider.UPLOAD_ARTIFACT_DETAILS_TABLE);
+        detailsTable.setId(SPUIComponentIdProvider.UPLOAD_ARTIFACT_DETAILS_TABLE);
         detailsTable.addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         detailsTable.addStyleName(ValoTheme.TABLE_SMALL);
         return detailsTable;
@@ -385,7 +385,7 @@ public class ArtifactDetailsLayout extends VerticalLayout {
      */
     public void createMaxArtifactDetailsTable() {
         maxArtifactDetailsTable = createArtifactDetailsTable();
-        maxArtifactDetailsTable.setId(SPUIComponetIdProvider.UPLOAD_ARTIFACT_DETAILS_TABLE_MAX);
+        maxArtifactDetailsTable.setId(SPUIComponentIdProvider.UPLOAD_ARTIFACT_DETAILS_TABLE_MAX);
         maxArtifactDetailsTable.setContainerDataSource(artifactDetailsTable.getContainerDataSource());
         addGeneratedColumn(maxArtifactDetailsTable);
         if (!readOnly) {

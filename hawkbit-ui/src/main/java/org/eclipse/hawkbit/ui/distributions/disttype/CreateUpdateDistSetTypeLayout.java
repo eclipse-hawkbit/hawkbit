@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.Distr
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -205,7 +205,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
         tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName("tag-color-preview");
 

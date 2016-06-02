@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -176,7 +176,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.DIST_TABLE_ID;
+        return SPUIComponentIdProvider.DIST_TABLE_ID;
     }
 
     @Override
@@ -393,7 +393,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
             notification.displayValidationError(i18n.get("message.permission.insufficient"));
             return false;
         } else {
-            if (compsource instanceof Table && !compsource.getId().equals(SPUIComponetIdProvider.TARGET_TABLE_ID)) {
+            if (compsource instanceof Table && !compsource.getId().equals(SPUIComponentIdProvider.TARGET_TABLE_ID)) {
                 notification.displayValidationError(notAllowedMsg);
                 return false;
             }
@@ -607,7 +607,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     }
 
     private String getPinButtonId(final String distName, final String distVersion) {
-        final StringBuilder pinBtnId = new StringBuilder(SPUIComponetIdProvider.DIST_PIN_BUTTON);
+        final StringBuilder pinBtnId = new StringBuilder(SPUIComponentIdProvider.DIST_PIN_BUTTON);
         pinBtnId.append('.');
         pinBtnId.append(distName);
         pinBtnId.append('.');
