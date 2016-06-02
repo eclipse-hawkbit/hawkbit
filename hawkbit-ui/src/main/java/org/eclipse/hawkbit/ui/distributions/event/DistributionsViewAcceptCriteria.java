@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -69,14 +69,14 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
         final Map<String, List<String>> config = new HashMap<>();
 
         // Delete drop area droppable components
-        config.put(SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID,
-                Arrays.asList(SPUIDefinitions.DISTRIBUTION_TYPE_ID_PREFIXS, SPUIComponetIdProvider.DIST_TABLE_ID,
-                        SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE,
+        config.put(SPUIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID,
+                Arrays.asList(SPUIDefinitions.DISTRIBUTION_TYPE_ID_PREFIXS, SPUIComponentIdProvider.DIST_TABLE_ID,
+                        SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE,
                         SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS));
 
         // Distribution table drop components
-        config.put(SPUIComponetIdProvider.DIST_TABLE_ID,
-                Arrays.asList(SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE));
+        config.put(SPUIComponentIdProvider.DIST_TABLE_ID,
+                Arrays.asList(SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE));
 
         return config;
     }
@@ -84,8 +84,8 @@ public class DistributionsViewAcceptCriteria extends AbstractAcceptCriteria {
     private static Map<String, Object> createDropHintConfigurations() {
         final Map<String, Object> config = new HashMap<>();
         config.put(SPUIDefinitions.DISTRIBUTION_TYPE_ID_PREFIXS, DragEvent.DISTRIBUTION_TYPE_DRAG);
-        config.put(SPUIComponetIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);
-        config.put(SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, DragEvent.SOFTWAREMODULE_DRAG);
+        config.put(SPUIComponentIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);
+        config.put(SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE, DragEvent.SOFTWAREMODULE_DRAG);
         config.put(SPUIDefinitions.SOFTWARE_MODULE_TAG_ID_PREFIXS, DragEvent.SOFTWAREMODULE_TYPE_DRAG);
         return config;
     }

@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteri
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -50,7 +50,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     @Override
     protected String getButtonsTableId() {
 
-        return SPUIComponetIdProvider.DISTRIBUTION_SET_TYPE_TABLE_ID;
+        return SPUIComponentIdProvider.DISTRIBUTION_SET_TYPE_TABLE_ID;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class DSTypeFilterButtons extends AbstractFilterButtons {
     @Override
     protected String createButtonId(final String name) {
 
-        return SPUIComponetIdProvider.DS_TYPE_FILTER_BTN_ID + name;
+        return SPUIComponentIdProvider.DS_TYPE_FILTER_BTN_ID + name;
     }
 
     @Override

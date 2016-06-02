@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
-import org.eclipse.hawkbit.controller.EnableDirectDeviceApi;
-import org.eclipse.hawkbit.rest.resource.EnableRestResources;
+import org.eclipse.hawkbit.ddi.EnableDdiApi;
+import org.eclipse.hawkbit.mgmt.EnableMgmtApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -24,8 +24,8 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @Import({ RepositoryApplicationConfiguration.class })
 @EnableHawkbitManagedSecurityConfiguration
-@EnableRestResources
-@EnableDirectDeviceApi
+@EnableMgmtApi
+@EnableDdiApi
 // Exception squid:S1118 - Spring boot standard behavior
 @SuppressWarnings({ "squid:S1118" })
 public class Start {

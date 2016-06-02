@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -151,10 +151,10 @@ public class UploadConfirmationwindow implements Button.ClickListener {
     }
 
     private void createRequiredComponents() {
-        uploadBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.UPLOAD_BUTTON, SPUILabelDefinitions.SUBMIT,
+        uploadBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_BUTTON, SPUILabelDefinitions.SUBMIT,
                 SPUILabelDefinitions.SUBMIT, ValoTheme.BUTTON_PRIMARY, false, null, SPUIButtonStyleTiny.class);
         uploadBtn.addClickListener(this);
-        cancelBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON,
+        cancelBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON,
                 SPUILabelDefinitions.DISCARD, SPUILabelDefinitions.DISCARD, null, false, null,
                 SPUIButtonStyleTiny.class);
         cancelBtn.addClickListener(this);
@@ -162,7 +162,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
         uploadDetailsTable = new Table();
         uploadDetailsTable.addStyleName("artifact-table");
         uploadDetailsTable.setSizeFull();
-        uploadDetailsTable.setId(SPUIComponetIdProvider.UPLOAD_ARTIFACT_DETAILS_TABLE);
+        uploadDetailsTable.setId(SPUIComponentIdProvider.UPLOAD_ARTIFACT_DETAILS_TABLE);
         uploadDetailsTable.addStyleName(ValoTheme.TABLE_BORDERLESS);
         uploadDetailsTable.addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
         uploadDetailsTable.addStyleName(ValoTheme.TABLE_SMALL);
@@ -238,7 +238,7 @@ public class UploadConfirmationwindow implements Button.ClickListener {
             newItem.getItemProperty(SW_MODULE_NAME).setValue(HawkbitCommonUtil.getFormatedLabel(swNameVersion));
             newItem.getItemProperty(SIZE).setValue(customFile.getFileSize());
             final Button deleteIcon = SPUIComponentProvider.getButton(
-                    SPUIComponetIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
+                    SPUIComponentIdProvider.UPLOAD_DELETE_ICON + "-" + itemId, "", SPUILabelDefinitions.DISCARD,
                     ValoTheme.BUTTON_TINY + " " + "redicon", true, FontAwesome.TRASH_O,
                     SPUIButtonStyleSmallNoBorder.class);
             deleteIcon.addClickListener(this);
@@ -541,16 +541,16 @@ public class UploadConfirmationwindow implements Button.ClickListener {
 
     @Override
     public void buttonClick(final ClickEvent event) {
-        if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_ARTIFACT_DETAILS_CLOSE)) {
+        if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_ARTIFACT_DETAILS_CLOSE)) {
             uploadConfrimationWindow.close();
-        } else if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON)) {
+        } else if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_DISCARD_DETAILS_BUTTON)) {
             uploadLayout.clearUploadedFileDetails();
             uploadConfrimationWindow.close();
-        } else if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_BUTTON)) {
+        } else if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_BUTTON)) {
             processArtifactUpload();
         }
 
-        else if (event.getComponent().getId().startsWith(SPUIComponetIdProvider.UPLOAD_DELETE_ICON)) {
+        else if (event.getComponent().getId().startsWith(SPUIComponentIdProvider.UPLOAD_DELETE_ICON)) {
             final String itemId = ((Button) event.getComponent()).getData().toString();
             final Item item = uploadDetailsTable.getItem(((Button) event.getComponent()).getData());
             final Long swId = (Long) item.getItemProperty(BASE_SOFTWARE_ID).getValue();

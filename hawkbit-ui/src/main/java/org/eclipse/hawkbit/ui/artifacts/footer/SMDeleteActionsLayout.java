@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -114,7 +114,7 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected String getDeleteAreaId() {
-        return SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID;
+        return SPUIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID;
     }
 
     @Override
@@ -130,10 +130,10 @@ public class SMDeleteActionsLayout extends AbstractDeleteActionsLayout {
             addToDeleteList(sourceTable, (TableTransferable) event.getTransferable());
             updateSWActionCount();
         }
-        if (sourceComponent.getId().startsWith(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX)) {
+        if (sourceComponent.getId().startsWith(SPUIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX)) {
 
             final String swModuleTypeName = sourceComponent.getId()
-                    .replace(SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
+                    .replace(SPUIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX, "");
             if (artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().isPresent()
                     && artifactUploadState.getSoftwareModuleFilters().getSoftwareModuleType().get().getName()
                             .equalsIgnoreCase(swModuleTypeName)) {

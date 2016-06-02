@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -63,7 +63,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonsTableId() {
-        return SPUIComponetIdProvider.SW_MODULE_TYPE_TABLE_ID;
+        return SPUIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String createButtonId(final String name) {
-        return SPUIComponetIdProvider.SM_TYPE_FILTER_BTN_ID + name;
+        return SPUIComponentIdProvider.SM_TYPE_FILTER_BTN_ID + name;
     }
 
     @Override
@@ -102,7 +102,7 @@ public class SMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButttonWrapperIdPrefix() {
-        return SPUIComponetIdProvider.UPLOAD_TYPE_BUTTON_PREFIX;
+        return SPUIComponentIdProvider.UPLOAD_TYPE_BUTTON_PREFIX;
     }
 
     @Override

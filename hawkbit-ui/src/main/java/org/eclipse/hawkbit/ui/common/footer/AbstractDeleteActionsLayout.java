@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -154,7 +154,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private Button createActionsButton() {
-        final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.PENDING_ACTION_BUTTON,
+        final Button button = SPUIComponentProvider.getButton(SPUIComponentIdProvider.PENDING_ACTION_BUTTON,
                 getNoActionsButtonLabel(), "", "", false, FontAwesome.BELL, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName("del-action-button");
@@ -165,7 +165,7 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
     }
 
     private Button createBulkUploadStatusButton() {
-        final Button button = SPUIComponentProvider.getButton(SPUIComponetIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
+        final Button button = SPUIComponentProvider.getButton(SPUIComponentIdProvider.BULK_UPLOAD_STATUS_BUTTON, "", "",
                 "", false, null, SPUIButtonStyleSmall.class);
         button.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         button.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
@@ -216,10 +216,10 @@ public abstract class AbstractDeleteActionsLayout extends VerticalLayout impleme
             return;
         }
         unsavedActionsWindow = SPUIComponentProvider.getWindow(getUnsavedActionsWindowCaption(),
-                SPUIComponetIdProvider.SAVE_ACTIONS_POPUP, SPUIDefinitions.CONFIRMATION_WINDOW);
+                SPUIComponentIdProvider.SAVE_ACTIONS_POPUP, SPUIDefinitions.CONFIRMATION_WINDOW);
         unsavedActionsWindow.addCloseListener(event -> unsavedActionsWindowClosed());
         unsavedActionsWindow.setContent(getUnsavedActionsWindowContent());
-        unsavedActionsWindow.setId(SPUIComponetIdProvider.CONFIRMATION_POPUP_ID);
+        unsavedActionsWindow.setId(SPUIComponentIdProvider.CONFIRMATION_POPUP_ID);
         UI.getCurrent().addWindow(unsavedActionsWindow);
     }
 

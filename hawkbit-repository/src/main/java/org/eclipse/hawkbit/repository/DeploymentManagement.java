@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.specifications.TargetSpecifications;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +118,9 @@ public class DeploymentManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
 
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s.
@@ -422,11 +426,14 @@ public class DeploymentManagement {
     private void assignDistributionSetEvent(final Target target, final Long actionId,
             final List<SoftwareModule> softwareModules) {
         target.getTargetInfo().setUpdateStatus(TargetUpdateStatus.PENDING);
+        final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> {
+            return target.getSecurityToken();
+        });
         afterCommit.afterCommit(() -> {
             eventBus.post(new TargetInfoUpdateEvent(target.getTargetInfo()));
             eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
                     target.getControllerId(), actionId, softwareModules, target.getTargetInfo().getAddress(),
-                    target.getSecurityToken()));
+                    targetSecurityToken));
         });
     }
 

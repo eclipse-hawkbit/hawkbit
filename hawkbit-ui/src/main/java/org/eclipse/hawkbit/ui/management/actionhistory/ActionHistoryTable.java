@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -158,7 +158,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void initializeTableSettings() {
 
-        setId(SPUIComponetIdProvider.ACTION_HISTORY_TABLE_ID);
+        setId(SPUIComponentIdProvider.ACTION_HISTORY_TABLE_ID);
         setSelectable(false);
         setMultiSelect(false);
         setSortEnabled(true);
@@ -296,8 +296,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(HawkbitCommonUtil
-                    .getFormattedText(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion()));
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(actionWithStatusCount.getDsName() + ":" +
+                                 actionWithStatusCount.getDsVersion());
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
@@ -442,8 +442,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
-                            .setValue(HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
-                                    + action.getDistributionSet().getVersion()));
+                            .setValue(action.getDistributionSet().getName() + ":"
+                                    + action.getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
