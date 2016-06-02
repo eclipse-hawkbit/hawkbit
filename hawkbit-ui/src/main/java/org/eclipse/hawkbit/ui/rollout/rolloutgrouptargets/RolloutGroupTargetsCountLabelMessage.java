@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +85,7 @@ public class RolloutGroupTargetsCountLabelMessage extends Label {
         /* Create label for Targets count message displaying below the table */
         addStyleName(SPUILabelDefinitions.SP_LABEL_MESSAGE_STYLE);
         setContentMode(ContentMode.HTML);
-        setId(SPUIComponetIdProvider.COUNT_LABEL);
+        setId(SPUIComponentIdProvider.COUNT_LABEL);
     }
 
     private void displayRolloutGroupTargetMessage() {

@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -158,7 +158,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void initializeTableSettings() {
 
-        setId(SPUIComponetIdProvider.ACTION_HISTORY_TABLE_ID);
+        setId(SPUIComponentIdProvider.ACTION_HISTORY_TABLE_ID);
         setSelectable(false);
         setMultiSelect(false);
         setSortEnabled(true);

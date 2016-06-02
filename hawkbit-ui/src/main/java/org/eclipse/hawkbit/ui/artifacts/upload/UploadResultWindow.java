@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -80,7 +80,7 @@ public class UploadResultWindow implements Button.ClickListener {
     }
 
     private void createComponents() {
-        closeBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE,
+        closeBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE,
                 SPUILabelDefinitions.CLOSE, SPUILabelDefinitions.CLOSE, ValoTheme.BUTTON_PRIMARY, false, null,
                 SPUIButtonStyleTiny.class);
         closeBtn.addClickListener(this);
@@ -89,7 +89,7 @@ public class UploadResultWindow implements Button.ClickListener {
         uploadResultTable.addStyleName("artifact-table");
         uploadResultTable.setSizeFull();
         uploadResultTable.setImmediate(true);
-        uploadResultTable.setId(SPUIComponetIdProvider.UPLOAD_RESULT_TABLE);
+        uploadResultTable.setId(SPUIComponentIdProvider.UPLOAD_RESULT_TABLE);
         uploadResultTable.addStyleName(ValoTheme.TABLE_BORDERLESS);
         uploadResultTable.addStyleName(ValoTheme.TABLE_SMALL);
         uploadResultTable.addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
@@ -121,7 +121,7 @@ public class UploadResultWindow implements Button.ClickListener {
 
             reasonLabel = HawkbitCommonUtil.getFormatedLabel(uploadResult.getReason());
             reasonLabel.setDescription(uploadResult.getReason());
-            final String idStr = SPUIComponetIdProvider.UPLOAD_ERROR_REASON + uploadResult.getBaseSwModuleName() + "/"
+            final String idStr = SPUIComponentIdProvider.UPLOAD_ERROR_REASON + uploadResult.getBaseSwModuleName() + "/"
                     + uploadResult.getFileName();
             reasonLabel.setId(idStr);
             newItem.getItemProperty(REASON).setValue(reasonLabel);
@@ -180,8 +180,8 @@ public class UploadResultWindow implements Button.ClickListener {
 
     @Override
     public void buttonClick(final ClickEvent event) {
-        if (event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE)
-                || event.getComponent().getId().equals(SPUIComponetIdProvider.UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE)) {
+        if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE)
+                || event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE)) {
             uploadResultsWindow.close();
         }
 

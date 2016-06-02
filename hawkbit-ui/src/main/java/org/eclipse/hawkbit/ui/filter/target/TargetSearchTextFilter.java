@@ -3,6 +3,8 @@
  */
 package org.eclipse.hawkbit.ui.filter.target;
 
+import java.net.URI;
+
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
 
@@ -56,9 +58,10 @@ public class TargetSearchTextFilter implements FilterExpression {
     }
 
     private boolean ipAddressIgnoreCase() {
-        if (target.getTargetInfo().getAddress() == null) {
+        final URI targetAddress = target.getTargetInfo().getAddress();
+        if (targetAddress == null || targetAddress.getHost() == null) {
             return false;
         }
-        return target.getTargetInfo().getAddress().getHost().toUpperCase().contains(searchTextUpper);
+        return targetAddress.getHost().toUpperCase().contains(searchTextUpper);
     }
 }

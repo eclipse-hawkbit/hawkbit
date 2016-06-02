@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -47,7 +47,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected String getEditButtonId() {
-        return SPUIComponetIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
+        return SPUIComponentIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
     }
 
     @Override
@@ -90,19 +90,19 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
         final Label vendorLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.vendor"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(vendor) == null ? "" : vendor);
-        vendorLabel.setId(SPUIComponetIdProvider.DETAILS_VENDOR_LABEL_ID);
+        vendorLabel.setId(SPUIComponentIdProvider.DETAILS_VENDOR_LABEL_ID);
         detailsTabLayout.addComponent(vendorLabel);
 
         if (type != null) {
             final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
-            typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
+            typeLabel.setId(SPUIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
         final Label assignLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.assigned.type"),
                 HawkbitCommonUtil.trimAndNullIfEmpty(maxAssign) == null ? "" : maxAssign);
-        assignLabel.setId(SPUIComponetIdProvider.SWM_DTLS_MAX_ASSIGN);
+        assignLabel.setId(SPUIComponentIdProvider.SWM_DTLS_MAX_ASSIGN);
         detailsTabLayout.addComponent(assignLabel);
 
     }
@@ -139,6 +139,6 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return SPUIComponetIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
+        return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
 }
