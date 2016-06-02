@@ -288,11 +288,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final SoftwareModuleType os = softwareModuleTypeRepository
                 .save(new JpaSoftwareModuleType("os", "Firmware", "Core firmware or operationg system", 1));
 
-        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os_app", "With app(s)",
-                "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
-                        .addOptionalModuleType(app));
-
-        return distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os", "OS only",
+        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os", "OS only",
                 "Default type with Firmware/OS only.").addMandatoryModuleType(os));
+
+        return distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os_app",
+                "OS with app(s)", "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
+                        .addOptionalModuleType(app));
     }
 }

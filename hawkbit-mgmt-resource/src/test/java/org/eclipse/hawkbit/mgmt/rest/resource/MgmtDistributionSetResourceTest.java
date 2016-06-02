@@ -789,7 +789,7 @@ public class MgmtDistributionSetResourceTest extends AbstractRestIntegrationTest
         final int amount = 10;
         testdataFactory.createDistributionSets(amount);
         distributionSetManagement.createDistributionSet(entityFactory.generateDistributionSet("incomplete", "2",
-                "incomplete", distributionSetManagement.findDistributionSetTypeByKey("ecl_os"), null));
+                "incomplete", distributionSetManagement.findDistributionSetTypeByKey("os"), null));
 
         final String rsqlFindLikeDs1OrDs2 = "complete==" + Boolean.TRUE;
 
