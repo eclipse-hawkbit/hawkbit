@@ -45,6 +45,8 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
     }
 
     @Override
+    // Exception squid:S1217 - we want to run this synchronous
+    @SuppressWarnings("squid:S1217")
     public void afterCommit(final Runnable runnable) {
         LOGGER.debug("Submitting new runnable {} to run after transaction commit", runnable);
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -58,6 +60,7 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
             return;
         }
         LOGGER.info("Transaction synchronization is NOT ACTIVE/ INACTIVE. Executing right now runnable {}", runnable);
+
         runnable.run();
     }
 

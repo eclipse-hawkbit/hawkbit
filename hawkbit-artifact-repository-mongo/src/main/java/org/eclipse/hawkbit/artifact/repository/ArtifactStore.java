@@ -205,6 +205,9 @@ public class ArtifactStore implements ArtifactRepository {
             throws NoSuchAlgorithmException, IOException {
         String sha1Hash;
         // compute digest
+        // Exception squid:S2070 - not used for hashing sensitive
+        // data
+        @SuppressWarnings("squid:S2070")
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
         try (final DigestOutputStream dos = new DigestOutputStream(os, md)) {
             ByteStreams.copy(stream, dos);

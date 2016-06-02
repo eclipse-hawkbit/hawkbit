@@ -68,6 +68,8 @@ public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements So
     }
 
     @Override
+    // exception squid:S2259 - obj is checked for null in super
+    @SuppressWarnings("squid:S2259")
     public boolean equals(final Object obj) {
         if (!super.equals(obj)) {
             return false;
