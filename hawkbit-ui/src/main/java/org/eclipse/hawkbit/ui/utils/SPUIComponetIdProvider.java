@@ -936,6 +936,11 @@ public final class SPUIComponetIdProvider {
      * Distribution set table - Manage metadata id.
      */
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
+    
+    /**
+     * Metadata popup id.
+     */
+    public static final String METADATA_POPUP_ID = "metadata.popup.id";
 
     /**
      * /* Private Constructor.
