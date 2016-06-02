@@ -8,10 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,13 +17,11 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
-import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -42,18 +38,13 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -73,10 +64,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private static final String SOFT_MODULE = "softwareModule";
 
     private static final String UNASSIGN_SOFT_MODULE = "unassignSoftModule";
-    
-    private static final String DS_METADA_KEY = "Key";
-    
-    private static final String VIEW ="view";
 
     @Autowired
     private ManageDistUIState manageDistUIState;
@@ -94,12 +81,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private transient DistributionSetManagement distributionSetManagement;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
-    
-    private DistributionSetMetadatadetailslayout dsMetadataTable;
 
     private VerticalLayout tagsLayout;
-    
-    private VerticalLayout metadataLayout;
 
     Map<String, StringBuilder> assignedSWModule = new HashMap<>();
 
@@ -111,8 +94,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         softwareModuleTable = new SoftwareModuleDetailsTable();
         softwareModuleTable.init(getI18n(), true, getPermissionChecker(), distributionSetManagement, getEventBus(),
                 manageDistUIState);
-        dsMetadataTable = new DistributionSetMetadatadetailslayout();
-        dsMetadataTable.init(getI18n(), getPermissionChecker());
         super.init();
     }
 
@@ -126,14 +107,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         populateDetails();
         populateModule();
         populateTags();
-        populateMetadataDetails();
-    }
-    
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.addComponent(dsMetadataTable);
-        return metadataLayout;
     }
 
     private void populateModule() {
@@ -265,11 +238,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
             updateDistributionSetDetailsLayout(null, null);
         }
     }
-    
-    private void populateMetadataDetails(){
-        dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
-   }
-    
+
     private void updateDistributionSetDetailsLayout(final String type, final Boolean isMigrationRequired) {
         final VerticalLayout detailsTabLayout = getDetailsLayout();
         detailsTabLayout.removeAllComponents();
@@ -325,7 +294,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
     }
 
     @Override

@@ -153,9 +153,4 @@ public class CommonDialogWindow extends Window{
         cancelButton.setIcon(icon);
     }
 
-
-    public HorizontalLayout getButtonsLayout() {
-        return buttonsLayout;
-    }
-
 }
