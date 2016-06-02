@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -84,10 +85,10 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter software module by type")
     public void testFilterByType() {
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==application", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(application)", 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(application)", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
     }
 
     @Test

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
+import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -283,16 +284,19 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
-        final SoftwareModuleType app = softwareModuleTypeRepository
-                .save(new JpaSoftwareModuleType("application", "Application", "Application Addons", Integer.MAX_VALUE));
-        final SoftwareModuleType os = softwareModuleTypeRepository
-                .save(new JpaSoftwareModuleType("os", "Firmware", "Core firmware or operationg system", 1));
+        final SoftwareModuleType app = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
+                Constants.SMT_DEFAULT_APP_KEY, "Application", "Application Addons", Integer.MAX_VALUE));
+        final SoftwareModuleType os = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
+                Constants.SMT_DEFAULT_OS_KEY, "Firmware", "Core firmware or operationg system", 1));
 
-        distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os", "OS only",
-                "Default type with Firmware/OS only.").addMandatoryModuleType(os));
+        distributionSetTypeRepository
+                .save((JpaDistributionSetType) new JpaDistributionSetType(Constants.DST_DEFAULT_OS_ONLY_KEY,
+                        Constants.DST_DEFAULT_OS_ONLY_NAME, "Default type with Firmware/OS only.")
+                                .addMandatoryModuleType(os));
 
-        return distributionSetTypeRepository.save((JpaDistributionSetType) new JpaDistributionSetType("os_app",
-                "OS with app(s)", "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
-                        .addOptionalModuleType(app));
+        return distributionSetTypeRepository
+                .save((JpaDistributionSetType) new JpaDistributionSetType(Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
+                        Constants.DST_DEFAULT_OS_WITH_APPS_NAME, "Default type with Firmware/OS and optional app(s).")
+                                .addMandatoryModuleType(os).addOptionalModuleType(app));
     }
 }
