@@ -793,7 +793,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     private void createUploadStatusButton() {
-        uploadStatusButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
+        uploadStatusButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
                 false, null, SPUIButtonStyleSmall.class);
         uploadStatusButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
