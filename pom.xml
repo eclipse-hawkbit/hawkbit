@@ -168,6 +168,8 @@
                   <exclude>eclipse_codeformatter.xml</exclude>
                   <exclude>**/addons.scss</exclude>
                   <exclude>**/VAADIN/widgetsets/**</exclude>
+                  <exclude>.sonar</exclude>
+                  <exclude>**/.sonar/**</exclude>
                </excludes>
                <mapping>
                   <scss>JAVADOC_STYLE</scss>
