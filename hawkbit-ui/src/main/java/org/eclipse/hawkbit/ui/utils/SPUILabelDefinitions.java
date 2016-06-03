@@ -560,6 +560,11 @@ public final class SPUILabelDefinitions {
      * Rollout group installed percentage column property.
      */
     public static final String ROLLOUT_GROUP_INSTALLED_PERCENTAGE = "finishedPercentage";
+    
+    /**
+     * Add metadata icon.
+     */
+    public static final String METADATA_ICON = "metadataDls";
 
     /**
      * Constructor.

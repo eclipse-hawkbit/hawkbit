@@ -848,6 +848,17 @@ public class DistributionSetManagement {
                 pageable);
 
     }
+    
+    /**
+     * finds all meta data by given distribution set id.
+     * 
+     * @param id
+     *            id of distribution set
+     * @return list of {DistributionSetMetadata}
+     */
+    public List<DistributionSetMetadata> findDistributionSetMetadataByDistributionSetId(final Long id) {
+        return distributionSetMetadataRepository.findByDistributionSetId(id);
+    }
 
     /**
      * finds all meta data by the given distribution set id.
@@ -1109,4 +1120,5 @@ public class DistributionSetManagement {
         distributionSets.forEach(ds -> ds.getTags().remove(tag));
         return distributionSetRepository.save(distributionSets);
     }
+
 }

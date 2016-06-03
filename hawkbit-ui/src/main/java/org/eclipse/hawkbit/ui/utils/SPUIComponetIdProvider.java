@@ -502,6 +502,16 @@ public final class SPUIComponetIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
+     * ID for save button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String SAVE_BUTTON = "common.dialog.window.save";
+
+    /**
+     * ID for cancel button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
+
+    /**
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
@@ -932,6 +942,16 @@ public final class SPUIComponetIdProvider {
      */
     public static final String METDATA_TABLE_ID = "metadata.table.id";
     
+    /**
+     * Distribution set table - Manage metadata id.
+     */
+    public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
+    
+    /**
+     * Metadata popup id.
+     */
+    public static final String METADATA_POPUP_ID = "metadata.popup.id";
+
     /**
      * /* Private Constructor.
      */

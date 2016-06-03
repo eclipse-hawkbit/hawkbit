@@ -221,11 +221,10 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         tagName.focus();
     }
 
-    private void addListeners() {
+    protected void addListeners() {
         colorPickerLayout.getColorSelect().addColorChangeListener(this);
         colorPickerLayout.getSelPreview().addColorChangeListener(this);
         tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
-        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
         tagNameComboBox.addValueChangeListener(event -> tagNameChosen(event));
         slidersValueChangeListeners();
     }
@@ -302,9 +301,9 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
      * @param event
      *            ValueChangeEvent
      */
-    private void optionValueChanged(final ValueChangeEvent event) {
+    protected void optionValueChanged(final ValueChangeEvent event) {
 
-        if ("Update Tag".equals(event.getProperty().getValue())) {
+        if (updateTagStr.equals(event.getProperty().getValue())) {
             tagName.clear();
             tagDesc.clear();
             tagName.setEnabled(false);
@@ -343,8 +342,6 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         comboLayout.removeComponent(comboLabel);
         comboLayout.removeComponent(tagNameComboBox);
         mainLayout.removeComponent(colorPickerLayout);
-
-        optiongroup.select(createTagStr);
 
         // Default green color
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
@@ -456,13 +453,21 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
         if (hasCreatePermission) {
             optiongroup.addItem(createTagStr);
-            optiongroup.select(createTagStr);
         }
         if (hasUpdatePermission) {
             optiongroup.addItem(updateTagStr);
-            if (!hasCreatePermission) {
-                optiongroup.select(updateTagStr);
-            }
+        }
+
+        setOptionGroupDefaultValue(hasCreatePermission, hasUpdatePermission);
+    }
+
+    protected void setOptionGroupDefaultValue(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
+
+        if (hasCreatePermission) {
+            optiongroup.select(createTagStr);
+        }
+        if (hasUpdatePermission && !hasCreatePermission) {
+            optiongroup.select(updateTagStr);
         }
     }
 
