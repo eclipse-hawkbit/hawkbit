@@ -43,8 +43,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Generates window for Software module add or update.
- * 
- *
  */
 @SpringComponent
 @ViewScope
