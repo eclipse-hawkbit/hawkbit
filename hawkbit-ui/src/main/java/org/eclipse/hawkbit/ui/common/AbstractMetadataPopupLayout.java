@@ -112,7 +112,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
             populateGrid();
-            metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+            if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
+                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+            }
             metaDataGrid.scrollToStart();
         }
     }
@@ -181,7 +183,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         mainLayout.setHeight(550, Unit.PIXELS);
         mainLayout.setWidth(800, Unit.PIXELS);
         mainLayout.setSpacing(true);
-        mainLayout.setMargin(true);
         setCompositionRoot(mainLayout);
     }
 
@@ -232,9 +233,15 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         String key = (String) item.getItemProperty(KEY).getValue();
         deleteMetadata(key);
         uiNotification.displaySuccess(i18n.get("metadata.deleted.successfully", key));
+        Object selectedRow = metaDataGrid.getSelectedRow();
         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
-        if (metaDataGrid.getSelectedRows().isEmpty()) {
-            metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+        metaDataGrid.getSelectionModel().reset();
+        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
+            if (selectedRow.equals(event.getItemId())) {
+                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+            } else {
+                metaDataGrid.select(selectedRow);
+            }
         }
     }
 

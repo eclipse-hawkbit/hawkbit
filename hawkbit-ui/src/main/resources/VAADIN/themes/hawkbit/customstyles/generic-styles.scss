@@ -48,6 +48,9 @@ $generic-text-font-size: $generic-text-font-scale * $v-font-size;
     box-shadow: none !important;
   }
 
+   .v-grid-row-selected > .v-grid-cell > .icon-only{
+ 	color : $hawkbit-primary-color;
+   }
   //Buttons with no border
   .button-no-border:focus:after {
     border-color: none !important;
