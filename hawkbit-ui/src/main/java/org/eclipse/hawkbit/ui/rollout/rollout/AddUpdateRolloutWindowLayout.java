@@ -41,6 +41,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -75,6 +77,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private static final long serialVersionUID = 2999293468801479916L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AddUpdateRolloutWindowLayout.class);
 
     private static final String MESSAGE_ROLLOUT_FIELD_VALUE_RANGE = "message.rollout.field.value.range";
 
@@ -642,11 +646,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
                             .validate(Integer.valueOf(value.toString()));
                 }
-            } catch (final InvalidValueException ex) {
-                throw ex;
+            }
+            // suppress the need of preserve original exception, will blow
+            // up the
+            // log and not necessary here
+            catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+                LOG.error(ex.getMessage());
             }
         }
-
     }
 
     private int getGroupSize() {
@@ -662,8 +669,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
                 new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
                         .validate(Integer.valueOf(value.toString()));
-            } catch (final InvalidValueException ex) {
-                throw ex;
+            }
+            // suppress the need of preserve original exception, will blow
+            // up the
+            // log and not necessary here
+            catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+                LOG.error(ex.getMessage());
             }
         }
     }
@@ -677,8 +688,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
                 new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
                         .validate(Integer.valueOf(value.toString()));
-            } catch (final InvalidValueException ex) {
-                throw ex;
+            }
+            // suppress the need of preserve original exception, will blow
+            // up the
+            // log and not necessary here
+            catch (@SuppressWarnings("squid:S1166") final InvalidValueException ex) {
+                LOG.error(ex.getMessage());
             }
         }
     }

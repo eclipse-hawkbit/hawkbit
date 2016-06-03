@@ -68,7 +68,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private static final long serialVersionUID = 7474232427119031474L;
 
-    private static final String breadcrumbCustomFilters = "breadcrumb.target.filter.custom.filters";
+    private static final String BREADCRUMB_CUSTOM_FILTERS = "breadcrumb.target.filter.custom.filters";
 
     @Autowired
     private I18N i18n;
@@ -238,8 +238,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final Button createFilterViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         createFilterViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
-        createFilterViewLink.setDescription(i18n.get(breadcrumbCustomFilters));
-        createFilterViewLink.setCaption(i18n.get(breadcrumbCustomFilters));
+        createFilterViewLink.setDescription(i18n.get(BREADCRUMB_CUSTOM_FILTERS));
+        createFilterViewLink.setCaption(i18n.get(BREADCRUMB_CUSTOM_FILTERS));
         createFilterViewLink.addClickListener(value -> showCustomFiltersView());
 
         return createFilterViewLink;
@@ -487,15 +487,11 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     public void buttonClick(final ClickEvent event) {
         if (SPUIComponetIdProvider.CUSTOM_FILTER_SAVE_ICON.equals(event.getComponent().getId())
                 && manadatoryFieldsPresent()) {
-            if (filterManagementUIState.isCreateFilterViewDisplayed()) {
-                if (!doesAlreadyExists()) {
-                    createTargetFilterQuery();
-                }
+            if (filterManagementUIState.isCreateFilterViewDisplayed() && !doesAlreadyExists()) {
+                createTargetFilterQuery();
             } else {
-                if (!nameTextField.getValue().equals(oldFilterName)) {
-                    if (!doesAlreadyExists()) {
-                        updateCustomFilter();
-                    }
+                if (!nameTextField.getValue().equals(oldFilterName) && !doesAlreadyExists()) {
+                    updateCustomFilter();
                 } else {
                     updateCustomFilter();
                 }

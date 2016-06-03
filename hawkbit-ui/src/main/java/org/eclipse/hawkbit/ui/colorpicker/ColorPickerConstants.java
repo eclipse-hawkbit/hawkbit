@@ -6,12 +6,20 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.colorPicker;
+package org.eclipse.hawkbit.ui.colorpicker;
 
 import com.vaadin.shared.ui.colorpicker.Color;
 
+/**
+ * Provides color constants for the ColorPickerLayout
+ *
+ */
 public class ColorPickerConstants {
 
     public static final String DEFAULT_COLOR = "rgb(44,151,32)";
     public static final Color START_COLOR = new Color(0, 146, 58);
+
+    private ColorPickerConstants() {
+
+    }
 }

@@ -9,11 +9,13 @@
 package org.eclipse.hawkbit.ui.common;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -27,6 +29,12 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
+/**
+ * 
+ * Superclass for pop-up-windows including a minimize and close icon in the
+ * upper right corner and a save and cancel button at the bottom.
+ *
+ */
 public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = -1321949234316858703L;
@@ -48,6 +56,9 @@ public class CommonDialogWindow extends Window {
     private HorizontalLayout buttonsLayout;
 
     protected ValueChangeListener buttonEnableListener;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     public CommonDialogWindow() {
 
@@ -84,6 +95,7 @@ public class CommonDialogWindow extends Window {
         setResizable(true);
         center();
         setModal(true);
+        addStyleName("fontsize");
     }
 
     private HorizontalLayout createActionButtonsLayout(final ClickListener saveButtonClickListener,
@@ -100,7 +112,7 @@ public class CommonDialogWindow extends Window {
         if (null != saveButtonClickListener) {
             saveButton.addClickListener(saveButtonClickListener);
         } else {
-            LOG.warn("No ClickListener for saveButton specified");
+            throw new IllegalArgumentException("no ClickListener for save button specified");
         }
         buttonsLayout.addComponent(saveButton);
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
@@ -113,7 +125,7 @@ public class CommonDialogWindow extends Window {
         if (null != cancelButtonClickListener) {
             cancelButton.addClickListener(cancelButtonClickListener);
         } else {
-            LOG.warn("No ClickListener for cancelButton specified");
+            throw new IllegalArgumentException("no ClickListener for cancel button specified");
         }
         buttonsLayout.addComponent(cancelButton);
         buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);

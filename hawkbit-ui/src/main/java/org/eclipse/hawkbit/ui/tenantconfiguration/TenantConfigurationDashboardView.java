@@ -32,6 +32,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -118,9 +119,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         undoConfigurationBtn.addClickListener(event -> undoConfiguration());
         hlayout.addComponent(undoConfigurationBtn);
 
-        // final Link linkToSystemConfigHelp = SPUIComponentProvider
-        // .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
-        // hlayout.addComponent(linkToSystemConfigHelp);
+        final Link linkToSystemConfigHelp = SPUIComponentProvider
+                .getHelpLink(uiProperties.getLinks().getDocumentation().getSystemConfigurationView());
+        hlayout.addComponent(linkToSystemConfigHelp);
 
         return hlayout;
     }
@@ -142,9 +143,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     }
 
     private void undoConfiguration() {
-        configurationViews.forEach(confView -> {
-            confView.undo();
-        });
+        configurationViews.forEach(confView -> confView.undo());
         // More methods
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);

@@ -14,6 +14,8 @@ import com.vaadin.ui.themes.ValoTheme;
 
 public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
 
+    Button button;
+
     /**
      * Style for button: Primary.
      */
@@ -21,7 +23,19 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
     @Override
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
 
-        // Set Style
+        this.button = button;
+
+        setButtonStyle(style, setStyle);
+        setButtonIcon(icon);
+
+        button.addStyleName(ValoTheme.LABEL_SMALL);
+        button.setSizeFull();
+
+        return button;
+    }
+
+    private void setButtonStyle(final String style, final boolean setStyle) {
+
         if (null != style) {
             if (setStyle) {
                 button.setStyleName(style);
@@ -29,14 +43,12 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
                 button.addStyleName(style);
             }
         }
-        button.addStyleName(ValoTheme.LABEL_SMALL);
-        button.setSizeFull();
+    }
 
-        // Set icon
+    private void setButtonIcon(final Resource icon) {
+
         if (null != icon) {
             button.setIcon(icon);
         }
-        return button;
     }
-
 }

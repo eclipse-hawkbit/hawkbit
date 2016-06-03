@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -90,9 +89,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient TenantMetaDataRepository tenantMetaDataRepository;
-
-    @Autowired
-    private transient UiProperties uiProperties;
 
     private TextField distNameTextField;
     private TextField distVersionTextField;
@@ -537,4 +533,5 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     public void setOriginalDistSetTYpe(final String originalDistSetType) {
         this.originalDistSetType = originalDistSetType;
     }
+
 }

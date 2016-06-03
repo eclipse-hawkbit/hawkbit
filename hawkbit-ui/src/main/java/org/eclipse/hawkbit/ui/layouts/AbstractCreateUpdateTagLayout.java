@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerLayout;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -27,8 +27,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
@@ -58,9 +56,9 @@ import com.vaadin.ui.themes.ValoTheme;
 /**
  * Abstract class for create/update target tag layout.
  */
-public abstract class CreateUpdateTagLayout extends CustomComponent implements ColorChangeListener, ColorSelector {
+public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
+        implements ColorChangeListener, ColorSelector {
     private static final long serialVersionUID = 4229177824620576456L;
-    private static final Logger LOG = LoggerFactory.getLogger(CreateUpdateTagLayout.class);
     private static final String TAG_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TAG_DESC_DYNAMIC_STYLE = "new-tag-desc";
     protected static final String TAG_DYNAMIC_STYLE = "tag-color-preview";
@@ -236,6 +234,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
     protected void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             setColor();
+            mainLayout.getComponent(1, 0);
             mainLayout.addComponent(colorPickerLayout, 1, 0);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
         }

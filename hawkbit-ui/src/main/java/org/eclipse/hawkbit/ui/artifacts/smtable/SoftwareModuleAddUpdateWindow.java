@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
@@ -29,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.ComboBox;
@@ -63,9 +63,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
-
-    @Autowired
-    private transient UiProperties uiProperties;
 
     private Label mandatoryLabel;
 
@@ -182,9 +179,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
     }
 
     /**
-     * Keep UI components on Layout.
+     * Build the window content and get an instance of customDialogWindow
      * 
-     * @return
      */
     private void createWindow() {
 
@@ -215,22 +211,28 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         nameTextField.focus();
     }
 
+    /**
+     * add a TextChangeListener to the description TextField
+     */
     private void addDescriptionTextChangeListener() {
         descTextArea.addTextChangeListener(event -> {
             if (event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue)) {
-                window.setSaveButtonEnabled(false);
+                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
             } else {
-                window.setSaveButtonEnabled(true);
+                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
             }
         });
     }
 
+    /**
+     * add a TextChangeListener to the vendor TextField
+     */
     private void addVendorTextChangeListener() {
         vendorTextField.addTextChangeListener(event -> {
             if (event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue)) {
-                window.setSaveButtonEnabled(false);
+                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
             } else {
-                window.setSaveButtonEnabled(true);
+                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
             }
         });
     }
@@ -264,6 +266,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         }
     }
 
+    /**
+     * updates a softwareModule
+     */
     private void updateSwModule() {
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String newVendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
@@ -280,6 +285,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         closeThisWindow();
     }
 
+    /**
+     * fill the data of a softwareModule in the content of the window
+     */
     private void populateValuesOfSwModule() {
         final SoftwareModule swModle = softwareManagement.findSoftwareModuleById(baseSwModuleId);
         nameTextField.setValue(swModle.getName());
@@ -333,6 +341,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         return isValid;
     }
 
+    /**
+     * saves or updates a softwareModule depending on the information if it is a
+     * new softwareModule or an existing one
+     */
     private void save() {
         if (editSwModule) {
             updateSwModule();
@@ -341,4 +353,17 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
             addNewBaseSoftware();
         }
     }
+
+    /**
+     * Checks if the description and vendor have changed and set the button
+     * enabled/disabled
+     * 
+     * @param event
+     *            TextChangeEvent
+     * @return Boolean
+     */
+    private boolean hasDescriptionOrVendorChanged(final TextChangeEvent event) {
+        return !(event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue));
+    }
+
 }

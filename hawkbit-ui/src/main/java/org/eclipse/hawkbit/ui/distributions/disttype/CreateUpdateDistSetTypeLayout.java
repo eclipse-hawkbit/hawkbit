@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -350,12 +350,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                 final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
                 final Boolean isMandatory = mandatoryCheckBox.getValue();
                 final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
-                if (isMandatory) {
-                    newDistType.addMandatoryModuleType(swModuleType);
-
-                } else {
-                    newDistType.addOptionalModuleType(swModuleType);
-                }
+                checkMandatoryAndAddMandatoryModuleType(newDistType, isMandatory, swModuleType);
             }
             if (null != typeDescValue) {
                 newDistType.setDescription(typeDescValue);
@@ -400,12 +395,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                     final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
                     final SoftwareModuleType swModuleType = softwareManagement
                             .findSoftwareModuleTypeByName(distTypeName);
-                    if (isMandatory) {
-                        updateDistSetType.addMandatoryModuleType(swModuleType);
-
-                    } else {
-                        updateDistSetType.addOptionalModuleType(swModuleType);
-                    }
+                    checkMandatoryAndAddMandatoryModuleType(updateDistSetType, isMandatory, swModuleType);
                 }
             }
             updateDistSetType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
@@ -420,6 +410,16 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
 
+    }
+
+    private void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType updateDistSetType,
+            final Boolean isMandatory, final SoftwareModuleType swModuleType) {
+        if (isMandatory) {
+            updateDistSetType.addMandatoryModuleType(swModuleType);
+
+        } else {
+            updateDistSetType.addOptionalModuleType(swModuleType);
+        }
     }
 
     private DistributionSetType removeSWModuleTypesFromDistSetType(final String selectedDistSetType) {
@@ -588,17 +588,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
             saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
         }
-    }
-
-    /**
-     * reset the tag name and tag description component border color.
-     */
-    @Override
-    protected void restoreComponentStyles() {
-
-        super.restoreComponentStyles();
-        typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        typeKey.addStyleName(SPUIDefinitions.DIST_SET_TYPE_KEY);
     }
 
     @Override

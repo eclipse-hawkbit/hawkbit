@@ -170,4 +170,5 @@ public class MultipleTargetFilter extends Accordion implements SelectedTabChange
         UI.getCurrent().addWindow(addUpdateWindow);
         addUpdateWindow.setVisible(true);
     }
+
 }

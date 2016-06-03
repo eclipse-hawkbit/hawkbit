@@ -6,8 +6,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.colorPicker;
+package org.eclipse.hawkbit.ui.colorpicker;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,19 +16,27 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
 
+/**
+ * Contains helper methods for the ColorPickerLayout to handle the ColorPicker
+ *
+ */
 public class ColorPickerHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(ColorPickerHelper.class);
 
+    private ColorPickerHelper() {
+
+    }
+
     /**
-     * Get color picked value in string.
+     * Get color picked value as string.
      *
      * @return String of color picked value.
      */
     public static String getColorPickedString(final SpColorPickerPreview preview) {
 
-        return "rgb(" + preview.getColor().getRed() + "," + preview.getColor().getGreen() + ","
-                + preview.getColor().getBlue() + ")";
+        final Color color = preview.getColor();
+        return "rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")";
     }
 
     /**
@@ -39,9 +48,11 @@ public class ColorPickerHelper {
      */
     public static Color rgbToColorConverter(final String value) {
 
-        if (!value.startsWith("rgb")) {
-            return null;
+        if (StringUtils.isEmpty(value) || (StringUtils.isNotEmpty(value) && !value.startsWith("rgb"))) {
+            throw new IllegalArgumentException(
+                    "String to convert is empty or of invalid format - value: '" + value + "'");
         }
+
         // RGB color format rgb/rgba(255,255,255,0.1)
         final String[] colors = value.substring(value.indexOf('(') + 1, value.length() - 1).split(",");
         final int red = Integer.parseInt(colors[0]);
@@ -50,20 +61,27 @@ public class ColorPickerHelper {
         if (colors.length > 3) {
             final int alpha = (int) (Double.parseDouble(colors[3]) * 255d);
             return new Color(red, green, blue, alpha);
-        } else {
-            return new Color(red, green, blue);
         }
+        return new Color(red, green, blue);
     }
 
+    /**
+     * 
+     * Gets the selectedColor in the ColorPickerLayout and sets the slider
+     * values
+     * 
+     * @param colorPickerLayout
+     *            colorPickerLayout
+     */
     public static void setRgbSliderValues(final ColorPickerLayout colorPickerLayout) {
 
         try {
             final double redColorValue = colorPickerLayout.getSelectedColor().getRed();
-            colorPickerLayout.getRedSlider().setValue(new Double(redColorValue));
+            colorPickerLayout.getRedSlider().setValue(Double.valueOf(redColorValue));
             final double blueColorValue = colorPickerLayout.getSelectedColor().getBlue();
-            colorPickerLayout.getBlueSlider().setValue(new Double(blueColorValue));
+            colorPickerLayout.getBlueSlider().setValue(Double.valueOf(blueColorValue));
             final double greenColorValue = colorPickerLayout.getSelectedColor().getGreen();
-            colorPickerLayout.getGreenSlider().setValue(new Double(greenColorValue));
+            colorPickerLayout.getGreenSlider().setValue(Double.valueOf(greenColorValue));
         } catch (final ValueOutOfBoundsException e) {
             LOG.error("Unable to set RGB color value to " + colorPickerLayout.getSelectedColor().getRed() + ","
                     + colorPickerLayout.getSelectedColor().getGreen() + ","

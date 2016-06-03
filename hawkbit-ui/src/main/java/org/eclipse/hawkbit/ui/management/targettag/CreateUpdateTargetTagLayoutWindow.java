@@ -16,9 +16,9 @@ import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.layouts.CreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -28,11 +28,11 @@ import com.vaadin.ui.Button.ClickEvent;
 
 /**
  *
- *
+ * Class for Create / Update Tag Layout of target
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateTargetTagLayoutWindow extends CreateUpdateTagLayout {
+public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 2446682350481560235L;
 

@@ -632,15 +632,13 @@ public class RolloutListGrid extends AbstractGrid {
 
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
-                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale) {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
-                final Class<? extends String> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Class<? extends String> targetType, final Locale locale) {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 
@@ -664,14 +662,13 @@ public class RolloutListGrid extends AbstractGrid {
         private static final long serialVersionUID = 6589305227035220369L;
 
         @Override
-        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale) {
             return null;
         }
 
         @Override
         public String convertToPresentation(final Long value, final Class<? extends String> targetType,
-                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Locale locale) {
             if (value == 0) {
                 return "";
             }

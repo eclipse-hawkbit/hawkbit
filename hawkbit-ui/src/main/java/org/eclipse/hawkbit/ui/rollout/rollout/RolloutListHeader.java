@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -48,9 +47,6 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
-
-    @Autowired
-    private I18N i18n;
 
     @Autowired
     private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;

@@ -16,9 +16,9 @@ import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.layouts.CreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.vaadin.spring.events.EventScope;
@@ -31,11 +31,12 @@ import com.vaadin.ui.UI;
 
 /**
  *
- *
+ * Class for Create/Update Tag Layout of distribution set
+ * 
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayout {
+public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 444276149954167545L;
 

@@ -41,10 +41,6 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
     private VerticalLayout detailLayout;
     private TextField caRootAuthorityTextField;
 
-    /**
-     * @param systemManagement
-     *            the system management to retrie the configuration
-     */
     @Autowired
     public CertificateAuthenticationConfigurationItem(
             final TenantConfigurationManagement tenantConfigurationManagement) {
@@ -147,4 +143,5 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         configurationCaRootAuthorityChanged = true;
         notifyConfigurationChanged();
     }
+
 }

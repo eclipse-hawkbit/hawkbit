@@ -11,12 +11,13 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
@@ -279,9 +280,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     protected void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             final String selectedOption = (String) optiongroup.getValue();
-            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTypeStr)) {
+            if (StringUtils.isNotEmpty(selectedOption) && selectedOption.equalsIgnoreCase(updateTypeStr)) {
                 if (null != tagNameComboBox.getValue()) {
-
                     final SoftwareModuleType typeSelected = swTypeManagementService
                             .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
                     if (null != typeSelected) {

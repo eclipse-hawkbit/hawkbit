@@ -354,7 +354,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     /**
-     * @return
+     * create and return window
+     * 
+     * @return Window window
      */
     public Window getWindow() {
         managementUIState.setBulkUploadWindowMinimised(false);

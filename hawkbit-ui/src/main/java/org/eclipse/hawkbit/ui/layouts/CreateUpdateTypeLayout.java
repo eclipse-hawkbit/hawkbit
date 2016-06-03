@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.layouts;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -32,7 +32,13 @@ import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
+/**
+ * 
+ * Superclass defining common properties and methods for creating/updating
+ * types.
+ *
+ */
+public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
@@ -187,6 +193,7 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
     protected void restoreComponentStyles() {
         super.restoreComponentStyles();
         typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
+        typeKey.addStyleName(SPUIDefinitions.TYPE_KEY);
     }
 
     /**
@@ -298,20 +305,17 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
 
     @Override
     protected void save(final ClickEvent event) {
-        // TODO Auto-generated method stub
-
+        // is implemented in the inherited class
     }
 
     @Override
     protected void populateTagNameCombo() {
-        // TODO Auto-generated method stub
-
+        // is implemented in the inherited class
     }
 
     @Override
     protected void setTagDetails(final String tagSelected) {
-        // TODO Auto-generated method stub
-
+        // is implemented in the inherited class
     }
 
 }

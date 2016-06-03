@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.colorPicker;
+package org.eclipse.hawkbit.ui.colorpicker;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,13 +21,15 @@ import com.vaadin.ui.Slider;
 import com.vaadin.ui.components.colorpicker.ColorPickerGradient;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 
+/**
+ * 
+ * Defines the Layout for the ColorPicker
+ *
+ */
 public class ColorPickerLayout extends GridLayout {
 
     private static final long serialVersionUID = -7025970080613796692L;
 
-    /**
-     * Local Instance of ColorPickerPreview.
-     */
     private SpColorPickerPreview selPreview;
 
     private ColorPickerGradient colorSelect;
