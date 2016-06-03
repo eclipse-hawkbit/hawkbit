@@ -284,10 +284,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
-        final SoftwareModuleType app = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
-                Constants.SMT_DEFAULT_APP_KEY, "Application", "Application Addons", Integer.MAX_VALUE));
+        final SoftwareModuleType app = softwareModuleTypeRepository
+                .save(new JpaSoftwareModuleType(Constants.SMT_DEFAULT_APP_KEY, Constants.SMT_DEFAULT_APP_NAME,
+                        "Application Addons", Integer.MAX_VALUE));
         final SoftwareModuleType os = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
-                Constants.SMT_DEFAULT_OS_KEY, "Firmware", "Core firmware or operationg system", 1));
+                Constants.SMT_DEFAULT_OS_KEY, Constants.SMT_DEFAULT_OS_NAME, "Core firmware or operationg system", 1));
 
         distributionSetTypeRepository
                 .save((JpaDistributionSetType) new JpaDistributionSetType(Constants.DST_DEFAULT_OS_ONLY_KEY,
