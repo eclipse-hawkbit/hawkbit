@@ -79,6 +79,11 @@
          <artifactId>hawkbit-http-security</artifactId>
          <version>${project.version}</version>
       </dependency>
+       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-jpa</artifactId>
+         <version>${project.version}</version>
+      </dependency>
 
       <!-- Spring -->
       <dependency>

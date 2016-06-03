@@ -22,15 +22,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.TestDataUtil;
-import org.eclipse.hawkbit.WithSpringAuthorityRule;
-import org.eclipse.hawkbit.WithUser;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -80,7 +79,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
-        targetManagement.createTarget(new Target(knownTargetControllerId));
+        targetManagement.createTarget(entityFactory.generateTarget(knownTargetControllerId));
         final Target findTargetByControllerID = targetManagement.findTargetByControllerID(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
@@ -121,7 +120,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        assertThat(targetRepository.findByControllerId("4711").getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.REGISTERED);
 
         // not allowed methods
@@ -169,9 +168,8 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()).header("If-None-Match", etag))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
-        final Target target = targetRepository.findByControllerId("4711");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = targetManagement.findTargetByControllerID("4711");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         deploymentManagement.assignDistributionSet(ds.getId(), new String[] { "4711" });
 
@@ -204,8 +202,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
         // Now another deployment
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
 
         deploymentManagement.assignDistributionSet(ds2.getId(), new String[] { "4711" });
 
@@ -226,10 +223,10 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     @Description("Ensures that the target state machine of a precomissioned target switches from "
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
     public void rootRsPrecommissioned() throws Exception {
-        final Target target = new Target("4711");
+        final Target target = entityFactory.generateTarget("4711");
         targetManagement.createTarget(target);
 
-        assertThat(targetRepository.findByControllerId("4711").getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
 
         final long current = System.currentTimeMillis();
@@ -242,7 +239,7 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        assertThat(targetRepository.findByControllerId("4711").getTargetInfo().getUpdateStatus())
+        assertThat(targetManagement.findTargetByControllerID("4711").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.REGISTERED);
     }
 
@@ -265,11 +262,10 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
     public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
 
         // mock
-        final Target target = new Target("911");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget("911");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = targetManagement.createTarget(target);
-        final List<Target> toAssign = new ArrayList<Target>();
+        final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
         savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);

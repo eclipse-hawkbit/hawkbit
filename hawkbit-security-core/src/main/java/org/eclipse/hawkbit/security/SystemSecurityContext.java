@@ -64,6 +64,8 @@ public class SystemSecurityContext {
      *            the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
      */
+    // Exception squid:S2221 - Callable declares Exception
+    @SuppressWarnings("squid:S2221")
     public <T> T runAsSystem(final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
