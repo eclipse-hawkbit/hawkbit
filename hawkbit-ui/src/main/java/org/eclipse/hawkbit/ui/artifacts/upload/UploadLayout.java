@@ -16,7 +16,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,6 +25,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.UploadStatusEvent.UploadStatusEventType;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -97,10 +98,6 @@ public class UploadLayout extends VerticalLayout {
     @Autowired
     private transient SPInfo spInfo;
 
-    private final AtomicInteger numberOfFileUploadsExpected = new AtomicInteger();
-
-    private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
-
     private final List<String> duplicateFileNamesList = new ArrayList<>();
 
     private Button processBtn;
@@ -119,6 +116,8 @@ public class UploadLayout extends VerticalLayout {
 
     private Boolean hasDirectory = Boolean.FALSE;
 
+    private Button uploadStatusButton;
+
     /**
      * Initialize the upload layout.
      */
@@ -126,13 +125,52 @@ public class UploadLayout extends VerticalLayout {
     void init() {
         createComponents();
         buildLayout();
-        updateActionCount();
+        restoreState();
         eventBus.subscribe(this);
         ui = UI.getCurrent();
     }
 
-    private void createComponents() {
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final UploadArtifactUIEvent event) {
+        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
+            ui.access(() -> updateActionCount());
+        } else if (event == UploadArtifactUIEvent.MINIMIZED_STATUS_POPUP) {
+            ui.access(() -> showUploadStatusButton());
+        } else if (event == UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP) {
+            ui.access(() -> maximizeStatusPopup());
+        } else if (event == UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED) {
+            ui.access(() -> closeUploadStatusPopup());
+        }
+    }
 
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final UploadStatusEvent event) {
+        if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STARTED) {
+            ui.access(() -> onStartOfUpload());
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_FAILED) {
+            ui.access(() -> onUploadFailure(event));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_FINISHED) {
+            ui.access(() -> onUploadCompletion());
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_SUCCESSFUL) {
+            ui.access(() -> onUploadSuccess(event));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FAILED) {
+            ui.access(() -> onUploadStreamingFailure(event));
+        } else if (event.getUploadProgressEventType() == UploadStatusEventType.UPLOAD_STREAMING_FINISHED) {
+            ui.access(() -> onUploadStreamingSuccess());
+        }
+    }
+
+    @PreDestroy
+    void destroy() {
+        /*
+         * It's good manners to do this, even though vaadin-spring will
+         * automatically unsubscribe when this UI is garbage collected.
+         */
+        eventBus.unsubscribe(this);
+    }
+
+    private void createComponents() {
+        createUploadStatusButton();
         createProcessButton();
         createDiscardBtn();
     }
@@ -140,8 +178,8 @@ public class UploadLayout extends VerticalLayout {
     private void buildLayout() {
 
         final Upload upload = new Upload();
-        final UploadHandler uploadHandler = new UploadHandler(null, 0, this, uploadInfoWindow,
-                spInfo.getMaxArtifactFileSize(), upload, null);
+        final UploadHandler uploadHandler = new UploadHandler(null, 0, this, spInfo.getMaxArtifactFileSize(), upload,
+                null, null);
         upload.setButtonCaption(i18n.get("upload.file"));
         upload.setImmediate(true);
         upload.setReceiver(uploadHandler);
@@ -154,12 +192,15 @@ public class UploadLayout extends VerticalLayout {
 
         fileUploadLayout = new HorizontalLayout();
         fileUploadLayout.setSpacing(true);
+        fileUploadLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         fileUploadLayout.addComponent(upload);
         fileUploadLayout.setComponentAlignment(upload, Alignment.MIDDLE_LEFT);
         fileUploadLayout.addComponent(processBtn);
         fileUploadLayout.setComponentAlignment(processBtn, Alignment.MIDDLE_RIGHT);
         fileUploadLayout.addComponent(discardBtn);
         fileUploadLayout.setComponentAlignment(discardBtn, Alignment.MIDDLE_RIGHT);
+        fileUploadLayout.addComponent(uploadStatusButton);
+        fileUploadLayout.setComponentAlignment(uploadStatusButton, Alignment.MIDDLE_RIGHT);
         setMargin(false);
 
         /* create drag-drop wrapper for drop area */
@@ -167,7 +208,25 @@ public class UploadLayout extends VerticalLayout {
         dropAreaWrapper.setDropHandler(new DropAreahandler());
         setSizeFull();
         setSpacing(true);
+    }
 
+    private void restoreState() {
+        updateActionCount();
+
+        if (!artifactUploadState.getFileSelected().isEmpty() && artifactUploadState.isUploadCompleted()) {
+            processBtn.setEnabled(true);
+        }
+        if (artifactUploadState.isStatusPopupMinimized()) {
+            showUploadStatusButton();
+            if (artifactUploadState.isUploadCompleted()) {
+                setUploadStatusButtonIconToFinished();
+            }
+        }
+        if (artifactUploadState.isUploadCompleted()) {
+            artifactUploadState.getNumberOfFilesActuallyUpload().set(0);
+            artifactUploadState.getNumberOfFileUploadsExpected().set(0);
+            artifactUploadState.getNumberOfFileUploadsFailed().set(0);
+        }
     }
 
     public DragAndDropWrapper getDropAreaWrapper() {
@@ -187,15 +246,16 @@ public class UploadLayout extends VerticalLayout {
         public void drop(final DragAndDropEvent event) {
             if (validate(event)) {
                 final Html5File[] files = ((WrapperTransferable) event.getTransferable()).getFiles();
+                // selected software module at the time of file drop is
+                // considered for upload
+                SoftwareModule selectedSw = artifactUploadState.getSelectedBaseSoftwareModule().get();
                 // reset the flag
                 hasDirectory = Boolean.FALSE;
                 for (final Html5File file : files) {
-                    processFile(file);
+                    processFile(file, selectedSw);
                 }
-                if (numberOfFileUploadsExpected.get() > 0) {
+                if (artifactUploadState.getNumberOfFileUploadsExpected().get() > 0) {
                     processBtn.setEnabled(false);
-                    // reset before we start
-                    uploadInfoWindow.uploadSessionStarted();
                 } else {
                     // If the upload is not started, it signifies all
                     // dropped files as either duplicate or directory.So
@@ -205,20 +265,20 @@ public class UploadLayout extends VerticalLayout {
             }
         }
 
-        private void processFile(final Html5File file) {
+        private void processFile(final Html5File file, SoftwareModule selectedSw) {
             if (!isDirectory(file)) {
-                if (!checkForDuplicate(file.getFileName())) {
-                    numberOfFileUploadsExpected.incrementAndGet();
-                    file.setStreamVariable(createStreamVariable(file));
+                if (!checkForDuplicate(file.getFileName(), selectedSw)) {
+                    artifactUploadState.getNumberOfFileUploadsExpected().incrementAndGet();
+                    file.setStreamVariable(createStreamVariable(file, selectedSw));
                 }
             } else {
                 hasDirectory = Boolean.TRUE;
             }
         }
 
-        private StreamVariable createStreamVariable(final Html5File file) {
-            return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this, uploadInfoWindow,
-                    spInfo.getMaxArtifactFileSize(), null, file.getType());
+        private StreamVariable createStreamVariable(final Html5File file, SoftwareModule selectedSw) {
+            return new UploadHandler(file.getFileName(), file.getFileSize(), UploadLayout.this,
+                    spInfo.getMaxArtifactFileSize(), null, file.getType(), selectedSw);
         }
 
         private boolean isDirectory(final Html5File file) {
@@ -270,9 +330,7 @@ public class UploadLayout extends VerticalLayout {
         processBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
         processBtn.addClickListener(this::displayConfirmWindow);
         processBtn.setHtmlContentAllowed(true);
-        if (artifactUploadState.getFileSelected().isEmpty()) {
-            processBtn.setEnabled(false);
-        }
+        processBtn.setEnabled(false);
     }
 
     private void createDiscardBtn() {
@@ -284,21 +342,12 @@ public class UploadLayout extends VerticalLayout {
         discardBtn.addClickListener(this::discardUploadData);
     }
 
-    boolean checkForDuplicate(final String filename) {
-        final Boolean isDuplicate = checkIfFileIsDuplicate(filename);
+    boolean checkForDuplicate(final String filename, final SoftwareModule selectedSw) {
+        final Boolean isDuplicate = checkIfFileIsDuplicate(filename, selectedSw);
         if (isDuplicate) {
             getDuplicateFileNamesList().add(filename);
         }
         return isDuplicate;
-    }
-
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void toggleProcessButton(final UploadArtifactUIEvent event) {
-        if (event == UploadArtifactUIEvent.ENABLE_PROCESS_BUTTON) {
-            processBtn.setEnabled(true);
-        } else if (event == UploadArtifactUIEvent.DISABLE_PROCESS_BUTTON) {
-            processBtn.setEnabled(false);
-        }
     }
 
     /**
@@ -312,29 +361,29 @@ public class UploadLayout extends VerticalLayout {
      *            file size
      * @param mimeType
      *            the mimeType of the file
+     * @param selectedSw
      * @throws IOException
      *             in case of upload errors
      */
-    OutputStream saveUploadedFileDetails(final String name, final long size, final String mimeType) {
+    OutputStream saveUploadedFileDetails(final String name, final long size, final String mimeType,
+            SoftwareModule selectedSw) {
         File tempFile = null;
         try {
             tempFile = File.createTempFile("spUiArtifactUpload", null);
 
             final OutputStream out = new FileOutputStream(tempFile);
 
-            final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
+            final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(selectedSw.getName(),
+                    selectedSw.getVersion());
 
-            final String currentBaseSoftwareModuleKey = HawkbitCommonUtil
-                    .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
-
-            final CustomFile customFile = new CustomFile(name, size, tempFile.getAbsolutePath(),
-                    selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion(), mimeType);
+            final CustomFile customFile = new CustomFile(name, size, tempFile.getAbsolutePath(), selectedSw.getName(),
+                    selectedSw.getVersion(), mimeType);
 
             artifactUploadState.getFileSelected().add(customFile);
             processBtn.setEnabled(false);
 
             if (!artifactUploadState.getBaseSwModuleList().keySet().contains(currentBaseSoftwareModuleKey)) {
-                artifactUploadState.getBaseSwModuleList().put(currentBaseSoftwareModuleKey, selectedSoftwareModule);
+                artifactUploadState.getBaseSwModuleList().put(currentBaseSoftwareModuleKey, selectedSw);
             }
             return out;
         } catch (final FileNotFoundException e) {
@@ -344,6 +393,7 @@ public class UploadLayout extends VerticalLayout {
             LOG.error("Upload failed {}", e);
             throw new ArtifactUploadFailedException(i18n.get("message.upload.failed"));
         }
+
     }
 
     Boolean validate(final DragAndDropEvent event) {
@@ -378,13 +428,6 @@ public class UploadLayout extends VerticalLayout {
         return true;
     }
 
-    SoftwareModule getSoftwareModuleSelected() {
-        if (artifactUploadState.getSelectedBaseSoftwareModule().isPresent()) {
-            return artifactUploadState.getSelectedBaseSoftwareModule().get();
-        }
-        return null;
-    }
-
     Boolean isSoftwareModuleSelected() {
         if (!artifactUploadState.getSelectedBaseSwModuleId().isPresent()) {
             return false;
@@ -400,11 +443,10 @@ public class UploadLayout extends VerticalLayout {
      *            file name
      * @return Boolean
      */
-    public Boolean checkIfFileIsDuplicate(final String name) {
+    public Boolean checkIfFileIsDuplicate(final String name, final SoftwareModule selectedSoftwareModule) {
         Boolean isDuplicate = false;
-        final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil
-                .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
+        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
+                selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
         for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
             final String fileSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
@@ -418,7 +460,7 @@ public class UploadLayout extends VerticalLayout {
     }
 
     void decreaseNumberOfFileUploadsExpected() {
-        numberOfFileUploadsExpected.decrementAndGet();
+        artifactUploadState.getNumberOfFileUploadsExpected().decrementAndGet();
     }
 
     List<String> getDuplicateFileNamesList() {
@@ -439,8 +481,10 @@ public class UploadLayout extends VerticalLayout {
 
     void displayDuplicateValidationMessage() {
         // check if streaming of all dropped files are completed
-        if (numberOfFilesActuallyUpload.intValue() == numberOfFileUploadsExpected.intValue()) {
+        if (artifactUploadState.getNumberOfFilesActuallyUpload().intValue() == artifactUploadState
+                .getNumberOfFileUploadsExpected().intValue()) {
             displayCompositeMessage();
+            duplicateFileNamesList.clear();
         }
     }
 
@@ -454,7 +498,6 @@ public class UploadLayout extends VerticalLayout {
             } else if (duplicateFileNamesList.size() > 1) {
                 message.append(i18n.get("message.no.duplicateFiles"));
             }
-            duplicateFileNamesList.clear();
         }
         return message.toString();
     }
@@ -464,13 +507,12 @@ public class UploadLayout extends VerticalLayout {
     }
 
     void increaseNumberOfFileUploadsExpected() {
-        numberOfFileUploadsExpected.incrementAndGet();
+        artifactUploadState.getNumberOfFileUploadsExpected().incrementAndGet();
     }
 
-    void updateFileSize(final String name, final long size) {
-        final SoftwareModule selectedSoftwareModule = artifactUploadState.getSelectedBaseSoftwareModule().get();
-        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil
-                .getFormattedNameVersion(selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
+    void updateFileSize(final String name, final long size, SoftwareModule selectedSoftwareModule) {
+        final String currentBaseSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
+                selectedSoftwareModule.getName(), selectedSoftwareModule.getVersion());
 
         for (final CustomFile customFile : artifactUploadState.getFileSelected()) {
             final String fileSoftwareModuleKey = HawkbitCommonUtil.getFormattedNameVersion(
@@ -483,17 +525,22 @@ public class UploadLayout extends VerticalLayout {
     }
 
     void increaseNumberOfFilesActuallyUpload() {
-        numberOfFilesActuallyUpload.incrementAndGet();
+        artifactUploadState.getNumberOfFilesActuallyUpload().incrementAndGet();
+    }
+
+    void increaseNumberOfFileUploadsFailed() {
+        artifactUploadState.getNumberOfFileUploadsFailed().incrementAndGet();
     }
 
     /**
      * Enable process button once upload is completed.
      */
     boolean enableProcessBtn() {
-        if (numberOfFilesActuallyUpload.intValue() >= numberOfFileUploadsExpected.intValue()) {
+        if (artifactUploadState.getNumberOfFilesActuallyUpload().intValue() >= artifactUploadState
+                .getNumberOfFileUploadsExpected().intValue() && !getFileSelected().isEmpty()) {
             processBtn.setEnabled(true);
-            numberOfFileUploadsExpected.set(0);
-            numberOfFilesActuallyUpload.set(0);
+            artifactUploadState.getNumberOfFilesActuallyUpload().set(0);
+            artifactUploadState.getNumberOfFileUploadsExpected().set(0);
             return true;
         }
         return false;
@@ -507,11 +554,21 @@ public class UploadLayout extends VerticalLayout {
         if (event.getButton().equals(discardBtn)) {
             if (artifactUploadState.getFileSelected().isEmpty()) {
                 uiNotification.displayValidationError(i18n.get("message.error.noFileSelected"));
-
             } else {
-                clearFileList();
+                clearUploadedFileDetails();
             }
         }
+    }
+
+    protected void clearUploadedFileDetails() {
+        clearFileList();
+        closeUploadStatusPopup();
+    }
+
+    private void closeUploadStatusPopup() {
+        uploadInfoWindow.clearWindow();
+        hideUploadStatusButton();
+        artifactUploadState.setStatusPopupMinimized(false);
     }
 
     /**
@@ -529,19 +586,20 @@ public class UploadLayout extends VerticalLayout {
         processBtn.setCaption(SPUILabelDefinitions.PROCESS);
         /* disable when there is no files to upload. */
         processBtn.setEnabled(false);
-        numberOfFileUploadsExpected.set(0);
-        numberOfFilesActuallyUpload.set(0);
+        artifactUploadState.getNumberOfFilesActuallyUpload().set(0);
+        artifactUploadState.getNumberOfFileUploadsExpected().set(0);
+        artifactUploadState.getNumberOfFileUploadsFailed().set(0);
         duplicateFileNamesList.clear();
     }
 
     private void setConfirmationPopupHeightWidth(final float newWidth, final float newHeight) {
         if (currentUploadConfirmationwindow != null) {
-            currentUploadConfirmationwindow.getUploadArtifactDetails().setWidth(HawkbitCommonUtil
-                    .getArtifactUploadPopupWidth(newWidth, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH),
-                    Unit.PIXELS);
-            currentUploadConfirmationwindow.getUploadDetailsTable().setHeight(HawkbitCommonUtil
-                    .getArtifactUploadPopupHeight(newHeight, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT),
-                    Unit.PIXELS);
+            currentUploadConfirmationwindow.getUploadArtifactDetails().setWidth(
+                    HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
+            currentUploadConfirmationwindow.getUploadDetailsTable().setHeight(
+                    HawkbitCommonUtil.getArtifactUploadPopupHeight(newHeight,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
         }
     }
 
@@ -558,10 +616,12 @@ public class UploadLayout extends VerticalLayout {
                 && currentUploadConfirmationwindow.getCurrentUploadResultWindow() != null) {
             final UploadResultWindow uploadResultWindow = currentUploadConfirmationwindow
                     .getCurrentUploadResultWindow();
-            uploadResultWindow.getUploadResultsWindow().setWidth(HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
-                    SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
-            uploadResultWindow.getUploadResultTable().setHeight(HawkbitCommonUtil.getArtifactUploadPopupHeight(
-                    newHeight, SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
+            uploadResultWindow.getUploadResultsWindow().setWidth(
+                    HawkbitCommonUtil.getArtifactUploadPopupWidth(newWidth,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_WIDTH), Unit.PIXELS);
+            uploadResultWindow.getUploadResultTable().setHeight(
+                    HawkbitCommonUtil.getArtifactUploadPopupHeight(newHeight,
+                            SPUIDefinitions.MIN_UPLOAD_CONFIRMATION_POPUP_HEIGHT), Unit.PIXELS);
         }
     }
 
@@ -572,8 +632,8 @@ public class UploadLayout extends VerticalLayout {
             } else {
                 currentUploadConfirmationwindow = new UploadConfirmationwindow(this, artifactUploadState);
                 UI.getCurrent().addWindow(currentUploadConfirmationwindow.getUploadConfrimationWindow());
-                setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(),
-                        Page.getCurrent().getBrowserWindowHeight());
+                setConfirmationPopupHeightWidth(Page.getCurrent().getBrowserWindowWidth(), Page.getCurrent()
+                        .getBrowserWindowHeight());
             }
         }
     }
@@ -599,25 +659,101 @@ public class UploadLayout extends VerticalLayout {
     /**
      * @return
      */
-
     VerticalLayout getDropAreaLayout() {
         return dropAreaLayout;
     }
 
-    @EventBusListenerMethod(scope = EventScope.SESSION)
-    void onEvent(final UploadArtifactUIEvent event) {
-        if (event == UploadArtifactUIEvent.DELETED_ALL_SOFWARE) {
-            ui.access(() -> updateActionCount());
+    private void onStartOfUpload() {
+        setUploadStatusButtonIconToInProgress();
+        if (artifactUploadState.isStatusPopupMinimized()) {
+            updateStatusButtonCount();
         }
     }
 
-    @PreDestroy
-    void destroy() {
-        /*
-         * It's good manners to do this, even though vaadin-spring will
-         * automatically unsubscribe when this UI is garbage collected.
-         */
-        eventBus.unsubscribe(this);
+    private void onUploadStreamingSuccess() {
+        increaseNumberOfFilesActuallyUpload();
+        updateUploadCounts();
+        enableProcessBtn();
+        if (isUploadComplete()) {
+            uploadInfoWindow.uploadSessionFinished();
+            setUploadStatusButtonIconToFinished();
+        }
+        // display the duplicate message after streaming all files
+        displayDuplicateValidationMessage();
+    }
+
+    private void onUploadStreamingFailure(UploadStatusEvent event) {
+        /**
+         * If upload interrupted because of duplicate file,do not remove the
+         * file already in upload list
+         **/
+        if (getDuplicateFileNamesList().isEmpty()
+                || !getDuplicateFileNamesList().contains(event.getUploadStatus().getFileName())) {
+            final SoftwareModule sw = event.getUploadStatus().getSoftwareModule();
+            if (sw != null) {
+                getFileSelected().remove(
+                        new CustomFile(event.getUploadStatus().getFileName(), sw.getName(), sw.getVersion()));
+            }
+            // failed reason to be updated only if there is error other than
+            // duplicate file error
+            uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
+                    .getFailureReason(), event.getUploadStatus().getSoftwareModule());
+            increaseNumberOfFileUploadsFailed();
+        }
+        decreaseNumberOfFileUploadsExpected();
+        updateUploadCounts();
+        enableProcessBtn();
+        // check if we are finished
+        if (isUploadComplete()) {
+            uploadInfoWindow.uploadSessionFinished();
+            setUploadStatusButtonIconToFinished();
+        }
+        displayDuplicateValidationMessage();
+    }
+
+    private void onUploadSuccess(UploadStatusEvent event) {
+        updateFileSize(event.getUploadStatus().getFileName(), event.getUploadStatus().getContentLength(), event
+                .getUploadStatus().getSoftwareModule());
+        // recorded that we now one more uploaded
+        increaseNumberOfFilesActuallyUpload();
+    }
+
+    private void onUploadCompletion() {
+        // check if we are finished
+        if (isUploadComplete()) {
+            uploadInfoWindow.uploadSessionFinished();
+            setUploadStatusButtonIconToFinished();
+            displayDuplicateValidationMessage();
+        }
+        updateUploadCounts();
+        enableProcessBtn();
+    }
+
+    private boolean isUploadComplete() {
+        int uploadedCount = artifactUploadState.getNumberOfFilesActuallyUpload().intValue();
+        int expectedUploadsCount = artifactUploadState.getNumberOfFileUploadsExpected().intValue();
+        return uploadedCount == expectedUploadsCount;
+    }
+
+    private void onUploadFailure(final UploadStatusEvent event) {
+        /**
+         * If upload interrupted because of duplicate file,do not remove the
+         * file already in upload list
+         **/
+        if (getDuplicateFileNamesList().isEmpty()
+                || !getDuplicateFileNamesList().contains(event.getUploadStatus().getFileName())) {
+            final SoftwareModule sw = event.getUploadStatus().getSoftwareModule();
+            if (sw != null) {
+                getFileSelected().remove(
+                        new CustomFile(event.getUploadStatus().getFileName(), sw.getName(), sw.getVersion()));
+            }
+            // failed reason to be updated only if there is error other than
+            // duplicate file error
+            uploadInfoWindow.uploadFailed(event.getUploadStatus().getFileName(), event.getUploadStatus()
+                    .getFailureReason(), event.getUploadStatus().getSoftwareModule());
+            increaseNumberOfFileUploadsFailed();
+            decreaseNumberOfFileUploadsExpected();
+        }
     }
 
     /**
@@ -637,8 +773,8 @@ public class UploadLayout extends VerticalLayout {
      * @param selectedBaseSoftwareModule
      */
     public void refreshArtifactDetailsLayout(final SoftwareModule selectedBaseSoftwareModule) {
-        eventBus.publish(this,
-                new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED, selectedBaseSoftwareModule));
+        eventBus.publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.ARTIFACTS_CHANGED,
+                selectedBaseSoftwareModule));
     }
 
     /**
@@ -654,5 +790,80 @@ public class UploadLayout extends VerticalLayout {
 
     public void setHasDirectory(final Boolean hasDirectory) {
         this.hasDirectory = hasDirectory;
+    }
+
+    private void createUploadStatusButton() {
+        uploadStatusButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UPLOAD_STATUS_BUTTON, "", "", "",
+                false, null, SPUIButtonStyleSmall.class);
+        uploadStatusButton.setStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
+        uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadStatusButton.setWidth("100px");
+        uploadStatusButton.setHtmlContentAllowed(true);
+        uploadStatusButton.addClickListener(event -> onClickOfUploadStatusButton());
+        uploadStatusButton.setVisible(false);
+    }
+
+    void updateStatusButtonCount() {
+        int uploadsPending = artifactUploadState.getNumberOfFileUploadsExpected().get()
+                - artifactUploadState.getNumberOfFilesActuallyUpload().get();
+        int uploadsFailed = artifactUploadState.getNumberOfFileUploadsFailed().get();
+        StringBuilder builder = new StringBuilder("");
+        if (uploadsFailed != 0) {
+            if (uploadsPending != 0) {
+                builder.append("<div class='error-count error-count-color'>" + uploadsFailed + "</div>");
+            } else {
+                builder.append("<div class='unread error-count-color'>" + uploadsFailed + "</div>");
+            }
+        }
+        if (uploadsPending != 0) {
+            builder.append("<div class='unread'>" + uploadsPending + "</div>");
+        }
+        uploadStatusButton.setCaption(builder.toString());
+    }
+
+    private void onClickOfUploadStatusButton() {
+        artifactUploadState.setStatusPopupMinimized(false);
+        eventBus.publish(this, UploadArtifactUIEvent.MAXIMIZED_STATUS_POPUP);
+    }
+
+    private void showUploadStatusButton() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.setVisible(true);
+        updateStatusButtonCount();
+    }
+
+    protected void hideUploadStatusButton() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.setVisible(false);
+    }
+
+    private void maximizeStatusPopup() {
+        hideUploadStatusButton();
+        uploadInfoWindow.maximizeStatusPopup();
+    }
+
+    private void setUploadStatusButtonIconToFinished() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.removeStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadStatusButton.setIcon(FontAwesome.UPLOAD);
+    }
+
+    private void setUploadStatusButtonIconToInProgress() {
+        if (uploadStatusButton == null) {
+            return;
+        }
+        uploadStatusButton.addStyleName(SPUIStyleDefinitions.UPLOAD_PROGRESS_INDICATOR_STYLE);
+        uploadStatusButton.setIcon(null);
+    }
+
+    protected void updateUploadCounts() {
+        updateActionCount();
+        updateStatusButtonCount();
     }
 }
