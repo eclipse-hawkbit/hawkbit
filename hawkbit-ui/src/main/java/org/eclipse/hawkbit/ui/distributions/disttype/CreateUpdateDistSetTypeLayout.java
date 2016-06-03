@@ -640,4 +640,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
+    @Override
+    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
+
+        super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
+        optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
+    }
+
 }
