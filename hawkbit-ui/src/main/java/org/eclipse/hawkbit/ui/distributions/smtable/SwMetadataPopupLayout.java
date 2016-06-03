@@ -64,4 +64,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         return metaData.getId();
     }
 
+    @Override
+    protected void deleteMetadata(String key) {
+        softwareManagement.deleteSoftwareModuleMetadata(new SwMetadataCompositeKey(getSelectedEntity(), key));
+    }
+
 }

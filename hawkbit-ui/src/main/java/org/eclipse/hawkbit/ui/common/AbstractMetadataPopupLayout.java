@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
@@ -44,6 +45,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -58,6 +60,8 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity, M extends MetaData> extends
         CustomComponent {
+
+    private static final String DELETE_BUTTON = "DELETE_BUTTON";
 
     private static final long serialVersionUID = -1491218218453167613L;
 
@@ -130,6 +134,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     protected abstract List<M> getMetadataList();
 
     protected abstract Object getMetaDataCompositeKey(M metaData);
+
+    protected abstract  void deleteMetadata(String key) ;
     
     private void createComponents() {
         keyTextField = createKeyTextField();
@@ -145,8 +151,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         headerLayout.setSpacing(false);
         headerLayout.setMargin(false);
         headerLayout.setWidth("100%");
-        ;
-
+        headerLayout.setHeight("30px");
         headerLayout.addComponent(headerCaption);
         headerLayout.addComponents(addIcon);
         headerLayout.setComponentAlignment(addIcon, Alignment.MIDDLE_RIGHT);
@@ -173,9 +178,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         mainLayout.addComponent(metadataFieldsLayout);
         mainLayout.setExpandRatio(tableLayout, 0.5F);
         mainLayout.setExpandRatio(metadataFieldsLayout, 0.5F);
-        mainLayout.setHeight(500, Unit.PIXELS);
+        mainLayout.setHeight(550, Unit.PIXELS);
         mainLayout.setWidth(800, Unit.PIXELS);
         mainLayout.setSpacing(true);
+        mainLayout.setMargin(true);
         setCompositionRoot(mainLayout);
     }
 
@@ -214,7 +220,22 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataGrid.getColumn(VALUE).setHeaderCaption(i18n.get("header.value"));
         metadataGrid.getColumn(VALUE).setHidden(true);
         metadataGrid.addSelectionListener(event -> onRowClick(event));
+        metadataGrid.getColumn(DELETE_BUTTON).setHeaderCaption("");
+        metadataGrid.getColumn(DELETE_BUTTON).setRenderer(new HtmlButtonRenderer(event -> onDelete(event)));
+        metadataGrid.getColumn(DELETE_BUTTON).setWidth(50);
+        metadataGrid.getColumn(KEY).setExpandRatio(1);
         return metadataGrid;
+    }
+
+    private void onDelete(RendererClickEvent event) {
+        Item item = metaDataGrid.getContainerDataSource().getItem(event.getItemId());
+        String key = (String) item.getItemProperty(KEY).getValue();
+        deleteMetadata(key);
+        uiNotification.displaySuccess(i18n.get("metadata.deleted.successfully", key));
+        metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
+        if (metaDataGrid.getSelectedRows().isEmpty()) {
+            metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+        }
     }
 
     private Button createAddIcon() {
@@ -234,6 +255,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty(KEY, String.class, "");
         swcontactContainer.addContainerProperty(VALUE, String.class, "");
+        swcontactContainer.addContainerProperty(DELETE_BUTTON, String.class, FontAwesome.TRASH.getHtml());
         return swcontactContainer;
     }
 

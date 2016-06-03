@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 
 /**
  * Pop up layout to display distribution metadata.
@@ -61,5 +62,10 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected Object getMetaDataCompositeKey(DistributionSetMetadata metaData) {
         return metaData.getId();
+    }
+
+    @Override
+    protected void deleteMetadata(String key) {
+        distributionSetManagement.deleteDistributionSetMetadata(new DsMetadataCompositeKey(getSelectedEntity(), key));
     }
 }
