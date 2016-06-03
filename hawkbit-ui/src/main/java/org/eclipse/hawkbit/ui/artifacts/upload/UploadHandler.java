@@ -133,7 +133,6 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
-        uploadInterrupted = false;
         aborted = false;
         failureReason = null;
         this.fileName = fileName;
@@ -214,17 +213,23 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void uploadStarted(final StartedEvent event) {
-        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().get();
+        uploadInterrupted = false;
+        selectedSwForUpload = artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ? artifactUploadState
+                .getSelectedBaseSoftwareModule().get() : null;
 
-        // single file session
-        if (view.isSoftwareModuleSelected() && !view.checkIfFileIsDuplicate(event.getFilename(), selectedSwForUpload)) {
-            LOG.debug("Upload started for file :{}", event.getFilename());
-            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED, new UploadFileStatus(
-                    event.getFilename(), 0, 0, selectedSwForUpload)));
-        } else {
+        if (view.isSoftwareModuleSelected()) {
+            // single file session
+            if (!view.checkIfFileIsDuplicate(event.getFilename(), selectedSwForUpload)) {
+                LOG.debug("Upload started for file :{}", event.getFilename());
+                eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_STARTED,
+                        new UploadFileStatus(event.getFilename(), 0, 0, selectedSwForUpload)));
+            } 
+        }
+        else {
             failureReason = i18n.get("message.upload.failed");
             upload.interruptUpload();
-            // actual interrupt will happen a bit late so setting the below flag
+            // actual interrupt will happen a bit late so setting the below
+            // flag
             uploadInterrupted = true;
         }
     }
@@ -319,14 +324,20 @@ public class UploadHandler implements StreamVariable, Receiver, SucceededListene
      */
     @Override
     public void uploadFailed(final FailedEvent event) {
-        if (failureReason == null) {
-            failureReason = event.getReason().getMessage();
-        }
-        eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
-                fileName, failureReason, selectedSwForUpload)));
-        if (!aborted) {
-            LOG.info("Upload failed for file :{}", event.getFilename());
-            LOG.info("Upload failed for file :{}", event.getReason());
+        /**
+         * If upload failed due to no selected software UPLOAD_FAILED event need
+         * not be published.
+         */
+        if (selectedSwForUpload != null) {
+            if (failureReason == null) {
+                failureReason = event.getReason().getMessage();
+            }
+            eventBus.publish(this, new UploadStatusEvent(UploadStatusEventType.UPLOAD_FAILED, new UploadFileStatus(
+                    fileName, failureReason, selectedSwForUpload)));
+            if (!aborted) {
+                LOG.info("Upload failed for file :{}", event.getFilename());
+                LOG.info("Upload failed for file :{}", event.getReason());
+            }
         }
     }
 
