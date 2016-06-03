@@ -51,7 +51,6 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -65,7 +64,6 @@ import com.google.common.collect.Sets;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-@Service
 public class SoftwareManagement {
 
     @Autowired

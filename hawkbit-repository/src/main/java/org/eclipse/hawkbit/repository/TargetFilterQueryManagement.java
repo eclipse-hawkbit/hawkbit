@@ -25,7 +25,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -39,7 +38,6 @@ import com.google.common.base.Strings;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-@Service
 public class TargetFilterQueryManagement {
 
     @Autowired

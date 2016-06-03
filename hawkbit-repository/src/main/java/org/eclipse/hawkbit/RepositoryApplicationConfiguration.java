@@ -12,8 +12,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.aspects.ExceptionMappingAspectHandler;
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.ReportManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.helper.CacheManagerHolder;
 import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
@@ -25,6 +37,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -172,4 +185,89 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     public PlatformTransactionManager transactionManager() {
         return new MultiTenantJpaTransactionManager();
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SystemManagement systemManagement() {
+        return new SystemManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ReportManagement reportManagement() {
+        return new ReportManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DistributionSetManagement distributionSetManagement() {
+        return new DistributionSetManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantStatsManagement tenantStatsManagement() {
+        return new TenantStatsManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantConfigurationManagement tenantConfigurationManagement() {
+        return new TenantConfigurationManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TargetManagement targetManagement() {
+        return new TargetManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TargetFilterQueryManagement targetFilterQueryManagement() {
+        return new TargetFilterQueryManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TagManagement tagManagement() {
+        return new TagManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SoftwareManagement softwareManagement() {
+        return new SoftwareManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RolloutManagement rolloutManagement() {
+        return new RolloutManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RolloutGroupManagement rolloutGroupManagement() {
+        return new RolloutGroupManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DeploymentManagement deploymentManagement() {
+        return new DeploymentManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ControllerManagement controllerManagement() {
+        return new ControllerManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ArtifactManagement artifactManagement() {
+        return new ArtifactManagement();
+    }
+
 }

@@ -42,7 +42,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -52,7 +51,6 @@ import org.springframework.validation.annotation.Validated;
  * the functionality based on the {@link PreAuthorize} annotation on methods.
  */
 @Validated
-@Service
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class RolloutGroupManagement {
 

@@ -24,7 +24,6 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +33,6 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-@Service
 public class TenantConfigurationManagement implements EnvironmentAware {
 
     @Autowired

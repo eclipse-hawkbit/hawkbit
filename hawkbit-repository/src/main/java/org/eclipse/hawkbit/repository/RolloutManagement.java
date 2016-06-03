@@ -55,7 +55,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -72,7 +71,6 @@ import org.springframework.validation.annotation.Validated;
  * {@link PreAuthorize} annotation on methods.
  */
 @Validated
-@Service
 @EnableScheduling
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class RolloutManagement {
