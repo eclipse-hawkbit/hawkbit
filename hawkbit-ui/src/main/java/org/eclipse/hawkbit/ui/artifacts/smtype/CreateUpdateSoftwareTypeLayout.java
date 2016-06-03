@@ -65,7 +65,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+        optiongroup.addValueChangeListener(this::createOptionValueChanged);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     public void createWindow() {
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event), null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null);
     }
 
     /**

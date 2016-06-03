@@ -268,7 +268,7 @@ public class UploadLayout extends VerticalLayout {
                 SPUIButtonStyleSmall.class);
         processBtn.setIcon(FontAwesome.BELL);
         processBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        processBtn.addClickListener(event -> displayConfirmWindow(event));
+        processBtn.addClickListener(this::displayConfirmWindow);
         processBtn.setHtmlContentAllowed(true);
         if (artifactUploadState.getFileSelected().isEmpty()) {
             processBtn.setEnabled(false);
@@ -281,7 +281,7 @@ public class UploadLayout extends VerticalLayout {
                 SPUIButtonStyleSmall.class);
         discardBtn.setIcon(FontAwesome.TRASH_O);
         discardBtn.addStyleName(SPUIStyleDefinitions.ACTION_BUTTON);
-        discardBtn.addClickListener(event -> discardUploadData(event));
+        discardBtn.addClickListener(this::discardUploadData);
     }
 
     boolean checkForDuplicate(final String filename) {

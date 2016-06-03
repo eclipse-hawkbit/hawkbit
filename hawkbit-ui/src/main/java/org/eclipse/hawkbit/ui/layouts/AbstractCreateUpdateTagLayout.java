@@ -108,7 +108,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected void createWindow() {
         reset();
         setWindow(SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event), null));
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null));
     }
 
     /**
@@ -223,7 +223,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         colorPickerLayout.getColorSelect().addColorChangeListener(this);
         colorPickerLayout.getSelPreview().addColorChangeListener(this);
         tagColorPreviewBtn.addClickListener(event -> previewButtonClicked());
-        tagNameComboBox.addValueChangeListener(event -> tagNameChosen(event));
+        tagNameComboBox.addValueChangeListener(this::tagNameChosen);
         slidersValueChangeListeners();
     }
 

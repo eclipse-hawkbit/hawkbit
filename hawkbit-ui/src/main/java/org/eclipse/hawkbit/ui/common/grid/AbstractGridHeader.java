@@ -123,14 +123,14 @@ public abstract class AbstractGridHeader extends VerticalLayout {
     private Button createAddButton() {
         final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
                 SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> addNewItem(event));
+        button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createCloseButton() {
         final Button button = SPUIComponentProvider.getButton(getCloseButtonId(), "", "", null, false,
                 FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> onClose(event));
+        button.addClickListener(this::onClose);
         return button;
     }
 

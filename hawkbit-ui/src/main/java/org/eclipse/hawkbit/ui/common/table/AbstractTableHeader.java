@@ -235,14 +235,14 @@ public abstract class AbstractTableHeader extends VerticalLayout {
     private Button createAddIcon() {
         final Button button = SPUIComponentProvider.getButton(getAddIconId(), "", "", null, false, FontAwesome.PLUS,
                 SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> addNewItem(event));
+        button.addClickListener(this::addNewItem);
         return button;
     }
 
     private Button createBulkUploadIcon() {
         final Button button = SPUIComponentProvider.getButton(getBulkUploadIconId(), "", "", null, false,
                 FontAwesome.UPLOAD, SPUIButtonStyleSmallNoBorder.class);
-        button.addClickListener(event -> bulkUpload(event));
+        button.addClickListener(this::bulkUpload);
         return button;
     }
 

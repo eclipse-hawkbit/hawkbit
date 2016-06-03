@@ -167,7 +167,7 @@ public class TargetFilterTable extends Table {
                 SPUILabelDefinitions.DELETE_CUSTOM_FILTER, ValoTheme.BUTTON_TINY + " " + "redicon", true,
                 FontAwesome.TRASH_O, SPUIButtonStyleSmallNoBorder.class);
         deleteIcon.setData(itemId);
-        deleteIcon.addClickListener(event -> onDelete(event));
+        deleteIcon.addClickListener(this::onDelete);
         return deleteIcon;
     }
 
@@ -217,7 +217,7 @@ public class TargetFilterTable extends Table {
                 SPUILabelDefinitions.UPDATE_CUSTOM_FILTER, null, false, null, SPUIButtonStyleSmallNoBorder.class);
         updateIcon.setData(tfName);
         updateIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
-        updateIcon.addClickListener(event -> onClickOfDetailButton(event));
+        updateIcon.addClickListener(this::onClickOfDetailButton);
         return updateIcon;
     }
 

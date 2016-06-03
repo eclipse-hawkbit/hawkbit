@@ -251,7 +251,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameField.setId(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME);
         nameField.setPropertyDataSource(nameLabel);
-        nameField.addTextChangeListener(event -> onFilterNameChange(event));
+        nameField.addTextChangeListener(this::onFilterNameChange);
         return nameField;
     }
 

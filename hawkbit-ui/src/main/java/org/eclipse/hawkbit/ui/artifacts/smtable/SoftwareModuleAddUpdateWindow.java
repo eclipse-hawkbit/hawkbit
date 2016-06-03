@@ -149,7 +149,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         mandatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         mandatoryLabel.addStyleName(ValoTheme.LABEL_SMALL);
 
-        typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, false,
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, true,
                 null, i18n.get("upload.swmodule.type"));
         typeComboBox.setId(SPUIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
@@ -193,8 +193,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         addStyleName("lay-color");
 
         final FormLayout formLayout = new FormLayout();
-        formLayout.addComponent(typeComboBox);
         formLayout.addComponent(mandatoryLabel);
+        formLayout.addComponent(typeComboBox);
         formLayout.addComponent(nameTextField);
         formLayout.addComponent(versionTextField);
         formLayout.addComponent(vendorTextField);

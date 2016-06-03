@@ -74,7 +74,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     /**

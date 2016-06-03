@@ -52,7 +52,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+        optiongroup.addValueChangeListener(this::createOptionValueChanged);
     }
 
     @Override

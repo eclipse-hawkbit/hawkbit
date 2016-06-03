@@ -481,8 +481,7 @@ public class ManangementConfirmationWindowLayout extends AbstractConfirmationWin
         /*
          * On delete of pinned target ,unpin refresh both target table and DS
          */
-        managementUIState.getDistributionTableFilters().getPinnedTargetId()
-                .ifPresent(targetId -> unPinDeletedTarget(targetId));
+        managementUIState.getDistributionTableFilters().getPinnedTargetId().ifPresent(this::unPinDeletedTarget);
         eventBus.publish(this, SaveActionWindowEvent.DELETED_TARGETS);
         managementUIState.getDeletedTargetList().clear();
 

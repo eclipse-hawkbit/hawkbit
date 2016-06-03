@@ -297,7 +297,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
+        return this::getDescription;
     }
 
     @Override
@@ -310,10 +310,10 @@ public class RolloutListGrid extends AbstractGrid {
         createRolloutStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
 
-        getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(event -> onClickOfActionBtn(event)));
+        getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(this::onClickOfActionBtn));
 
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
-        customObjectRenderer.addClickListener(event -> onClickOfRolloutName(event));
+        customObjectRenderer.addClickListener(this::onClickOfRolloutName);
         getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
 
     }
@@ -370,7 +370,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     private ContextMenu createContextMenu(final Long rolloutId) {
         final ContextMenu context = new ContextMenu();
-        context.addItemClickListener(event -> menuItemClicked(event));
+        context.addItemClickListener(this::menuItemClicked);
         final Item row = getContainerDataSource().getItem(rolloutId);
         final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();

@@ -502,6 +502,16 @@ public final class SPUIComponentIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
+     * ID for save button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String SAVE_BUTTON = "common.dialog.window.save";
+
+    /**
+     * ID for cancel button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
+
+    /**
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";

@@ -105,8 +105,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
         final HorizontalLayout hlayout = new HorizontalLayout();
         hlayout.setSpacing(true);
-        saveConfigurationBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "", "",
-                "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
+        saveConfigurationBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "",
+                "", "", true, FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
         saveConfigurationBtn.setEnabled(false);
         saveConfigurationBtn.setDescription(i18n.get("configuration.savebutton.tooltip"));
         saveConfigurationBtn.addClickListener(event -> saveConfiguration());

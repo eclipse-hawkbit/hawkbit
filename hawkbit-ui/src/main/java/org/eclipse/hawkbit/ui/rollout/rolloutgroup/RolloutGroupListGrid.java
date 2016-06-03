@@ -238,8 +238,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
         if (permissionChecker.hasRolloutTargetsReadPermission()) {
-            getColumn(ROLLOUT_RENDERER_DATA)
-                    .setRenderer(new RolloutRenderer(event -> onClickOfRolloutGroupName(event)));
+            getColumn(ROLLOUT_RENDERER_DATA).setRenderer(new RolloutRenderer(this::onClickOfRolloutGroupName));
         }
     }
 
@@ -259,7 +258,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
+        return this::getDescription;
     }
 
     private void onClickOfRolloutGroupName(final RendererClickEvent event) {
@@ -324,14 +323,14 @@ public class RolloutGroupListGrid extends AbstractGrid {
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
                 final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                        throws com.vaadin.data.util.converter.Converter.ConversionException {
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
                 final Class<? extends String> targetType, final Locale locale)
-                        throws com.vaadin.data.util.converter.Converter.ConversionException {
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 

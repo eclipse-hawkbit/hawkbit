@@ -60,7 +60,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     /**

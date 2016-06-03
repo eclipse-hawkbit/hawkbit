@@ -301,7 +301,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         errorThresoldOptions.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
         errorThresoldOptions.addStyleName(SPUIStyleDefinitions.ROLLOUT_OPTION_GROUP);
         errorThresoldOptions.setSizeUndefined();
-        errorThresoldOptions.addValueChangeListener(event -> onErrorThresoldOptionChange(event));
+        errorThresoldOptions.addValueChangeListener(this::onErrorThresoldOptionChange);
         return errorThresoldOptions;
     }
 
