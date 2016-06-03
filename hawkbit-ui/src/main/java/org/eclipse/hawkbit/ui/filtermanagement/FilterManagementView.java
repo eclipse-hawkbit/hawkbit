@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.footer.TargetFilterCountMessageLabel;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -152,7 +153,7 @@ public class FilterManagementView extends VerticalLayout implements View {
     private HorizontalLayout addTargetFilterMessageLabel() {
         final HorizontalLayout messageLabelLayout = new HorizontalLayout();
         messageLabelLayout.addComponent(targetFilterCountMessageLabel);
-        messageLabelLayout.addStyleName("footer-layout");
+        messageLabelLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         return messageLabelLayout;
     }
 

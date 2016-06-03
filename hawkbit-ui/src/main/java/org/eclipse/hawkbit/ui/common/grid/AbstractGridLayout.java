@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.grid;
 
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
@@ -72,7 +73,7 @@ public abstract class AbstractGridLayout extends VerticalLayout {
         final Label countMessageLabel = getCountMessageLabel();
         countMessageLabel.setId(SPUIComponentIdProvider.ROLLOUT_GROUP_TARGET_LABEL);
         rolloutGroupTargetsCountLayout.addComponent(getCountMessageLabel());
-        rolloutGroupTargetsCountLayout.setStyleName("footer-layout");
+        rolloutGroupTargetsCountLayout.setStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         rolloutGroupTargetsCountLayout.setWidth("100%");
         return rolloutGroupTargetsCountLayout;
 

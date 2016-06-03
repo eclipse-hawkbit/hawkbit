@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.upload;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -19,6 +20,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -63,6 +66,9 @@ public class UploadResultWindow implements Button.ClickListener {
     private static final String UPLOAD_RESULT = "uploadResult";
 
     private static final String REASON = "reason";
+    
+    private transient EventBus.SessionEventBus eventBus;
+
 
     /**
      * Initialize upload status popup.
@@ -75,6 +81,7 @@ public class UploadResultWindow implements Button.ClickListener {
     public UploadResultWindow(final List<UploadStatus> uploadResultList, final I18N i18n) {
         this.uploadResultList = uploadResultList;
         this.i18n = i18n;
+        eventBus = SpringContextHelper.getBean( EventBus.SessionEventBus.class);
         createComponents();
         createLayout();
     }
@@ -183,6 +190,8 @@ public class UploadResultWindow implements Button.ClickListener {
         if (event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_CLOSE)
                 || event.getComponent().getId().equals(SPUIComponentIdProvider.UPLOAD_ARTIFACT_RESULT_POPUP_CLOSE)) {
             uploadResultsWindow.close();
+            //close upload status popup if open
+            eventBus.publish(this, UploadArtifactUIEvent.ARTIFACT_RESULT_POPUP_CLOSED);
         }
 
     }
