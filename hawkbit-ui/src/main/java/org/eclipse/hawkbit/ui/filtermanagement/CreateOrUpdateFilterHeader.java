@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -201,7 +201,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         statusIcon.setContentMode(ContentMode.HTML);
         statusIcon.setSizeFull();
         setInitialStatusIconStyle(statusIcon);
-        statusIcon.setId(SPUIComponetIdProvider.VALIDATION_STATUS_ICON_ID);
+        statusIcon.setId(SPUIComponentIdProvider.VALIDATION_STATUS_ICON_ID);
         return statusIcon;
     }
 
@@ -218,7 +218,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
                 SPUILabelDefinitions.SP_WIDGET_CAPTION);
 
         nameLabel = SPUIComponentProvider.getLabel("", SPUILabelDefinitions.SP_LABEL_SIMPLE);
-        nameLabel.setId(SPUIComponetIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);
+        nameLabel.setId(SPUIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LABEL_ID);
 
         nameTextField = createNameTextField();
         nameTextField.setWidth(380, Unit.PIXELS);
@@ -249,7 +249,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final TextField nameField = SPUIComponentProvider.getTextField(i18n.get("textfield.customfiltername"), "",
                 ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.customfiltername"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameField.setId(SPUIComponetIdProvider.CUSTOM_FILTER_ADD_NAME);
+        nameField.setId(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME);
         nameField.setPropertyDataSource(nameLabel);
         nameField.addTextChangeListener(event -> onFilterNameChange(event));
         return nameField;
@@ -295,7 +295,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     private void buildLayout() {
         captionLayout = new HorizontalLayout();
         captionLayout.setDescription(i18n.get("tooltip.click.to.edit"));
-        captionLayout.setId(SPUIComponetIdProvider.TARGET_FILTER_QUERY_NAME_LAYOUT_ID);
+        captionLayout.setId(SPUIComponentIdProvider.TARGET_FILTER_QUERY_NAME_LAYOUT_ID);
 
         titleFilterIconsLayout = new HorizontalLayout();
         titleFilterIconsLayout.addComponents(headerCaption, captionLayout);
@@ -469,8 +469,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private Button createSaveButton() {
-        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.CUSTOM_FILTER_SAVE_ICON,
-                SPUIComponetIdProvider.CUSTOM_FILTER_SAVE_ICON, "Save", null, false, FontAwesome.SAVE,
+        saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON,
+                SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON, "Save", null, false, FontAwesome.SAVE,
                 SPUIButtonStyleSmallNoBorder.class);
         saveButton.addClickListener(this);
         saveButton.setEnabled(false);
@@ -485,7 +485,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
      */
     @Override
     public void buttonClick(final ClickEvent event) {
-        if (SPUIComponetIdProvider.CUSTOM_FILTER_SAVE_ICON.equals(event.getComponent().getId())
+        if (SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON.equals(event.getComponent().getId())
                 && manadatoryFieldsPresent()) {
             if (filterManagementUIState.isCreateFilterViewDisplayed() && !doesAlreadyExists()) {
                 createTargetFilterQuery();

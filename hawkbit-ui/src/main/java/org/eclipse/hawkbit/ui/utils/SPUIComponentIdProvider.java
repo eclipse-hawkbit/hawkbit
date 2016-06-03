@@ -11,8 +11,12 @@ package org.eclipse.hawkbit.ui.utils;
 /**
  * Interface to provide the unchanged constants.
  *
+ *
+ *
+ *
+ *
  */
-public final class SPUIComponetIdProvider {
+public final class SPUIComponentIdProvider {
     /**
      * ID-Target.
      */
@@ -498,16 +502,6 @@ public final class SPUIComponetIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
-     * ID for save button in pop-up-windows instance of commonDialogWindow
-     */
-    public static final String SAVE_BUTTON = "common.dialog.window.save";
-
-    /**
-     * ID for cancel button in pop-up-windows instance of commonDialogWindow
-     */
-    public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
-
-    /**
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
@@ -897,7 +891,7 @@ public final class SPUIComponetIdProvider {
     /**
      * /* Private Constructor.
      */
-    private SPUIComponetIdProvider() {
+    private SPUIComponentIdProvider() {
 
     }
 }

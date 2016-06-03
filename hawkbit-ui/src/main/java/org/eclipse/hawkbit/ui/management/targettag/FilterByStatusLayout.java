@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetFilterEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIButtonDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -135,19 +135,19 @@ public class FilterByStatusLayout extends VerticalLayout implements Button.Click
      * Get - status of FILTER.
      */
     private void getTargetFilterStatuses() {
-        unknown = SPUIComponentProvider.getButton(SPUIComponetIdProvider.UNKNOWN_STATUS_ICON,
+        unknown = SPUIComponentProvider.getButton(SPUIComponentIdProvider.UNKNOWN_STATUS_ICON,
                 TargetUpdateStatus.UNKNOWN.toString(), i18n.get("tooltip.status.unknown"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
-        inSync = SPUIComponentProvider.getButton(SPUIComponetIdProvider.INSYNCH_STATUS_ICON,
+        inSync = SPUIComponentProvider.getButton(SPUIComponentIdProvider.INSYNCH_STATUS_ICON,
                 TargetUpdateStatus.IN_SYNC.toString(), i18n.get("tooltip.status.insync"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
-        pending = SPUIComponentProvider.getButton(SPUIComponetIdProvider.PENDING_STATUS_ICON,
+        pending = SPUIComponentProvider.getButton(SPUIComponentIdProvider.PENDING_STATUS_ICON,
                 TargetUpdateStatus.PENDING.toString(), i18n.get("tooltip.status.pending"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
-        error = SPUIComponentProvider.getButton(SPUIComponetIdProvider.ERROR_STATUS_ICON,
+        error = SPUIComponentProvider.getButton(SPUIComponentIdProvider.ERROR_STATUS_ICON,
                 TargetUpdateStatus.ERROR.toString(), i18n.get("tooltip.status.error"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
-        registered = SPUIComponentProvider.getButton(SPUIComponetIdProvider.REGISTERED_STATUS_ICON,
+        registered = SPUIComponentProvider.getButton(SPUIComponentIdProvider.REGISTERED_STATUS_ICON,
                 TargetUpdateStatus.REGISTERED.toString(), i18n.get("tooltip.status.registered"),
                 SPUIButtonDefinitions.SP_BUTTON_STATUS_STYLE, false, FontAwesome.SQUARE, SPUIButtonStyleSmall.class);
         applyStatusBtnStyle();

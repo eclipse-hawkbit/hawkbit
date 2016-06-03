@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,7 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setSizeFull();
         buttonsLayout.setSpacing(true);
 
-        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "save", "", "",
+        saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_SAVE, "save", "", "",
                 true, FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
@@ -118,8 +118,8 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
         buttonsLayout.setExpandRatio(saveButton, 1.0F);
 
-        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel", "",
-                "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+        cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel",
+                "", "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
         cancelButton.addStyleName("default-color");
         if (null != cancelButtonClickListener) {

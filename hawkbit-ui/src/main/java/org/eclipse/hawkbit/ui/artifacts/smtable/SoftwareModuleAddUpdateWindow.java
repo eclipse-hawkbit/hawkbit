@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -124,23 +124,23 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         /* name textfield */
         nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_NAME);
+        nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
 
         /* version text field */
         versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        versionTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_VERSION);
+        versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
 
         /* Vendor text field */
         vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
                 false, null, i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        vendorTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_VENDOR);
+        vendorTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
 
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
                 ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponetIdProvider.ADD_SW_MODULE_DESCRIPTION);
+        descTextArea.setId(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION);
         addDescriptionTextChangeListener();
         addVendorTextChangeListener();
 
@@ -151,7 +151,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, false,
                 null, i18n.get("upload.swmodule.type"));
-        typeComboBox.setId(SPUIComponetIdProvider.SW_MODULE_TYPE);
+        typeComboBox.setId(SPUIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
