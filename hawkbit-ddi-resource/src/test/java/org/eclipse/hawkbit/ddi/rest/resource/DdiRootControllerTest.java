@@ -33,9 +33,11 @@ import org.eclipse.hawkbit.repository.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
@@ -49,6 +51,9 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Direct Device Integration API")
 @Stories("Root Poll Resource")
 public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoDB {
+
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
 
     @Test
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
@@ -255,6 +260,23 @@ public class DdiRootControllerTest extends AbstractRestIntegrationTestWithMongoD
         final Target target = targetManagement.findTargetByControllerID(knownControllerId1);
         assertThat(target.getTargetInfo().getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1"));
 
+    }
+
+    @Test
+    @Description("Ensures that the source IP address of the polling target is not stored in repository if disabled")
+    public void rootRsIpAddressNotStoredIfDisabled() throws Exception {
+        securityProperties.getClients().setTrackRemoteIp(false);
+
+        // test
+        final String knownControllerId1 = "0815";
+        mvc.perform(get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), knownControllerId1))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        // verify
+        final Target target = targetManagement.findTargetByControllerID(knownControllerId1);
+        assertThat(target.getTargetInfo().getAddress()).isEqualTo(IpUtil.createHttpUri("***"));
+
+        securityProperties.getClients().setTrackRemoteIp(true);
     }
 
     @Test
