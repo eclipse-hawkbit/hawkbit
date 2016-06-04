@@ -6,20 +6,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.util;
+package org.eclipse.hawkbit.repository.test.util;
 
 /**
- *
+ * Repository support for tests.
  *
  */
-public interface Testdatabase {
-
-    void before();
-
-    void after();
-
-    public String getUri();
-
-    String getDriverClassName();
+@FunctionalInterface
+public interface TestRepositoryManagement {
+    /**
+     * Empty the test repository.
+     */
+    void clearTestRepository();
 
 }
