@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.event;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 
 /**
  * Event fired on discard of software module assignment.

@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -54,10 +55,13 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @Autowired
     private ManagementUIState managementUIState;
 
+    @Autowired
+    private transient EntityFactory entityFactory;
+
     @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
-        addNewTag(new DistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -139,7 +143,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private void refreshTagTable() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        addNewTag(new DistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
         addColumn();
     }
 

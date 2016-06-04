@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
@@ -48,6 +49,9 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     @Autowired
     private transient UINotification uiNotification;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private Window targetTagWindow;
 
@@ -193,7 +197,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
         final String tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != tagNameValue) {
-            TargetTag newTargetTag = new TargetTag(tagNameValue);
+            TargetTag newTargetTag = entityFactory.generateTargetTag(tagNameValue);
             if (null != tagDescValue) {
                 newTargetTag.setDescription(tagDescValue);
             }

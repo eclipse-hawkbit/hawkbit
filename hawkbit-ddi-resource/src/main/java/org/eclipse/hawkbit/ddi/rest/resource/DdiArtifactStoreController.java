@@ -15,10 +15,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.cache.CacheWriteNotify;
 import org.eclipse.hawkbit.ddi.dl.rest.api.DdiDlArtifactStoreControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -59,13 +60,13 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     private ControllerManagement controllerManagement;
 
     @Autowired
-    private CacheWriteNotify cacheWriteNotify;
-
-    @Autowired
     private HawkbitSecurityProperties securityProperties;
 
     @Autowired
     private RequestResponseContextHolder requestResponseContextHolder;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     public ResponseEntity<InputStream> downloadArtifactByFilename(@PathVariable("fileName") final String fileName,
@@ -96,7 +97,8 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
                         requestResponseContextHolder.getHttpServletRequest(), targetid, artifact);
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
-                        requestResponseContextHolder.getHttpServletRequest(), file, cacheWriteNotify, action.getId());
+                        requestResponseContextHolder.getHttpServletRequest(), file, controllerManagement,
+                        action.getId());
             } else {
                 result = RestResourceConversionHelper.writeFileResponse(artifact,
                         requestResponseContextHolder.getHttpServletResponse(),
@@ -138,19 +140,19 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());
         final String range = request.getHeader("Range");
 
-        final ActionStatus actionStatus = new ActionStatus();
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
         actionStatus.setStatus(Status.DOWNLOAD);
 
         if (range != null) {
-            actionStatus.addMessage(ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range
                     + " of: " + request.getRequestURI());
         } else {
             actionStatus.addMessage(
-                    ControllerManagement.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads: " + request.getRequestURI());
         }
-        controllerManagement.addActionStatusMessage(actionStatus);
+        controllerManagement.addInformationalActionStatus(actionStatus);
         return action;
     }
 

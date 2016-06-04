@@ -13,11 +13,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.ProxyDistribution;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -42,11 +42,11 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
 
     private static final long serialVersionUID = 5862679853949173536L;
     private Sort sort = new Sort(Direction.ASC, "name", "version");
-    private Collection<String> distributionTags = null;
-    private String searchText = null;
-    private String pinnedControllerId = null;
+    private Collection<String> distributionTags;
+    private String searchText;
+    private String pinnedControllerId;
     private transient DistributionSetManagement distributionSetManagement;
-    private transient Page<DistributionSet> firstPageDistributionSets = null;
+    private transient Page<DistributionSet> firstPageDistributionSets;
     private Boolean noTagClicked = Boolean.FALSE;
 
     /**
@@ -110,8 +110,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     pinnedControllerId);
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            distBeans = getDistributionSetManagement()
-                    .findDistributionSetsAll(new OffsetBasedPageRequest(startIndex, count, sort), false, true);
+            distBeans = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
+                    new OffsetBasedPageRequest(startIndex, count, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)
@@ -129,7 +129,6 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
             proxyDistribution.setVersion(distributionSet.getVersion());
             proxyDistribution.setCreatedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getCreatedAt()));
             proxyDistribution.setLastModifiedDate(SPDateTimeUtil.getFormattedDate(distributionSet.getLastModifiedAt()));
-            proxyDistribution.setDescription(distributionSet.getDescription());
             proxyDistribution.setCreatedByUser(UserDetailsFormatter.loadAndFormatCreatedBy(distributionSet));
             proxyDistribution.setModifiedByUser(UserDetailsFormatter.loadAndFormatLastModifiedBy(distributionSet));
             proxyDistribution.setNameVersion(
@@ -152,8 +151,8 @@ public class DistributionBeanQuery extends AbstractBeanQuery<ProxyDistribution> 
                     pinnedControllerId);
         } else if (distributionTags.isEmpty() && Strings.isNullOrEmpty(searchText) && !noTagClicked) {
             // if no search filters available
-            firstPageDistributionSets = getDistributionSetManagement()
-                    .findDistributionSetsAll(new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
+            firstPageDistributionSets = getDistributionSetManagement().findDistributionSetsByDeletedAndOrCompleted(
+                    new PageRequest(0, SPUIDefinitions.PAGE_SIZE, sort), false, true);
         } else {
             final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
                     .setIsComplete(true).setSearchText(searchText).setSelectDSWithNoTag(noTagClicked)

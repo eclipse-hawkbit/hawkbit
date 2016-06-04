@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -92,6 +93,9 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
     @Autowired
     private transient SoftwareManagement swTypeManagementService;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
@@ -625,8 +629,10 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         }
 
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue,
-                    assignNumber, colorPicked);
+            SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
+                    typeDescValue, assignNumber);
+            newSWType.setColour(colorPicked);
+
             if (null != typeDescValue) {
                 newSWType.setDescription(typeDescValue);
             }

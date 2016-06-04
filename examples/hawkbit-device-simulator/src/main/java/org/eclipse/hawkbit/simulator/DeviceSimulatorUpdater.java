@@ -236,6 +236,10 @@ public class DeviceSimulatorUpdater {
                     }
 
                     final File tempFile = File.createTempFile("uploadFile", null);
+
+                    // Exception squid:S2070 - not used for hashing sensitive
+                    // data
+                    @SuppressWarnings("squid:S2070")
                     final MessageDigest md = MessageDigest.getInstance("SHA-1");
 
                     try (final DigestOutputStream dos = new DigestOutputStream(new FileOutputStream(tempFile), md)) {

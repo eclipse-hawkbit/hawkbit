@@ -16,8 +16,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -92,7 +92,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private transient SystemManagement systemManagement;
 
     @Autowired
-    private transient TenantMetaDataRepository tenantMetaDataRepository;
+    private transient EntityFactory entityFactory;
 
     private Button saveDistributionBtn;
     private Button discardDistributionBtn;
@@ -145,12 +145,12 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         setSizeUndefined();
         addComponents(madatoryLabel, distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea,
                 reqMigStepCheckbox);
-        
+
         addComponent(buttonsLayout);
         setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
         distNameTextField.focus();
-        
-     }
+
+    }
 
     /**
      * Create required UI components.
@@ -221,8 +221,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
-        final TenantMetaData tenantMetaData = tenantMetaDataRepository
-                .findByTenantIgnoreCase(systemManagement.currentTenant());
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
         return tenantMetaData.getDefaultDsType();
     }
 
@@ -297,7 +296,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         if (mandatoryCheck(name, version, distSetTypeName) && duplicateCheck(name, version)) {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-            DistributionSet newDist = new DistributionSet();
+            DistributionSet newDist = entityFactory.generateDistributionSet();
 
             setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
             newDist = distributionSetManagement.createDistributionSet(newDist);

@@ -38,7 +38,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository</artifactId>
+         <artifactId>hawkbit-repository-api</artifactId>
          <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -48,6 +48,18 @@
      
       
        <!-- Test -->
+       <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-jpa</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-rest-core</artifactId>
@@ -93,7 +105,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository</artifactId>
+         <artifactId>hawkbit-repository-jpa</artifactId>
          <version>${project.version}</version>
          <classifier>tests</classifier>
          <scope>test</scope>
