@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
