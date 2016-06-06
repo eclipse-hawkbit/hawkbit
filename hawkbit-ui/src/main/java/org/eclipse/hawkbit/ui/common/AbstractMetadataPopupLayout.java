@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
@@ -25,6 +26,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -44,6 +46,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.themes.ValoTheme;
@@ -137,8 +140,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     protected abstract Object getMetaDataCompositeKey(M metaData);
 
-    protected abstract  void deleteMetadata(String key) ;
-    
+    protected abstract void deleteMetadata(String key);
+
     private void createComponents() {
         keyTextField = createKeyTextField();
         valueTextArea = createValueTextField();
@@ -209,8 +212,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private Grid createMetadataGrid() {
         final Grid metadataGrid = new Grid();
+        metadataGrid.addStyleName(SPUIStyleDefinitions.SP_GRID);
         metadataGrid.setImmediate(true);
-        metadataGrid.setSizeFull();
         metadataGrid.setHeight("100%");
         metadataGrid.setWidth("100%");
         metadataGrid.setId(SPUIComponetIdProvider.METDATA_TABLE_ID);
@@ -231,18 +234,27 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void onDelete(RendererClickEvent event) {
         Item item = metaDataGrid.getContainerDataSource().getItem(event.getItemId());
         String key = (String) item.getItemProperty(KEY).getValue();
-        deleteMetadata(key);
-        uiNotification.displaySuccess(i18n.get("metadata.deleted.successfully", key));
-        Object selectedRow = metaDataGrid.getSelectedRow();
-        metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
-        metaDataGrid.getSelectionModel().reset();
-        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
-            if (selectedRow.equals(event.getItemId())) {
-                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
-            } else {
-                metaDataGrid.select(selectedRow);
-            }
-        }
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(
+                i18n.get("caption.metadata.delete.action.confirmbox"),
+                i18n.get("message.confirm.delete.metadata", key), i18n.get("button.ok"), i18n.get("button.cancel"),
+                ok -> {
+                    if (ok) {
+                        deleteMetadata(key);
+                        uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
+                        Object selectedRow = metaDataGrid.getSelectedRow();
+                        metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
+                        metaDataGrid.getSelectionModel().reset();
+                        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty() && selectedRow != null) {
+                            if (selectedRow.equals(event.getItemId())) {
+                                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+                            } else {
+                                metaDataGrid.select(selectedRow);
+                            }
+                        }
+                    }
+                });
+        UI.getCurrent().addWindow(confirmDialog.getWindow());
+        confirmDialog.getWindow().bringToFront();
     }
 
     private Button createAddIcon() {
@@ -413,7 +425,5 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             metadataWindow.setCancelButtonEnabled(false);
         }
     }
-
-    
 
 }

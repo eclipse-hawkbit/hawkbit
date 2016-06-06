@@ -181,4 +181,32 @@
     visibility: hidden;
     float: right;
   }
+  
+  
+  .sp-grid {
+  	tr {
+  		.icon-only {
+         visibility: hidden;
+        }
+    }
+  
+  	tr.v-grid-row-selected{
+  		.icon-only .v-icon {
+  		 color : $widget-bg;
+  	    }
+  	}
+  	
+  	tr.v-grid-row-selected:hover {
+  	 .icon-only {
+        visibility: visible;
+        color: $widget-bg !important;
+      }
+  	 }
+  	 
+  	 tr:hover {
+      .icon-only {
+        visibility: visible;
+      }
+    }
+  }
 }

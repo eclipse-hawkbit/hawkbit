@@ -293,6 +293,11 @@ public final class SPUIStyleDefinitions {
      * Status pending icon.
      */
     public static final String STATUS_ICON_PENDING = "statusIconPending";
+    
+    /**
+     * Grid style.
+     */
+    public static final String SP_GRID = "sp-grid";
 
     /**
      * Constructor.
