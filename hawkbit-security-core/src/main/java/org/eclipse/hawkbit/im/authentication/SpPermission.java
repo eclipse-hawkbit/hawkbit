@@ -375,6 +375,15 @@ public final class SpPermission {
         /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
+         * {@link SpPermission#READ_TARGET}
+         */
+        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ = HAS_AUTH_PREFIX
+                + ROLLOUT_MANAGEMENT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET
+                + HAS_AUTH_SUFFIX;;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#ROLLOUT_MANAGEMENT} and
          * {@link SpPermission#UPDATE_TARGET}.
          */
         public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_WRITE = HAS_AUTH_PREFIX + ROLLOUT_MANAGEMENT

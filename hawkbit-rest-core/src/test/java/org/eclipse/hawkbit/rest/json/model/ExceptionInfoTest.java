@@ -13,7 +13,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;

@@ -13,9 +13,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.eclipse.hawkbit.AbstractIntegrationTest;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.BeforeClass;
@@ -34,7 +34,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
  */
 @Features("Component Tests - Management API")
 @Stories("Download Resource")
-public class SMRessourceMisingMongoDbConnectionTest extends AbstractIntegrationTest {
+public class SMRessourceMisingMongoDbConnectionTest extends AbstractRestIntegrationTest {
 
     @BeforeClass
     public static void initialize() {
@@ -48,11 +48,11 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractIntegrationT
     public void missingMongoDbConnectionResultsInErrorAtUpload() throws Exception {
 
         assertThat(softwareManagement.findSoftwareModulesAll(pageReq)).hasSize(0);
-        assertThat(artifactRepository.findAll()).hasSize(0);
-        SoftwareModule sm = new SoftwareModule(softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1",
-                "version 1", null, null);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
+        SoftwareModule sm = entityFactory.generateSoftwareModule(
+                softwareManagement.findSoftwareModuleTypeByKey("os"), "name 1", "version 1", null, null);
         sm = softwareManagement.createSoftwareModule(sm);
-        assertThat(artifactRepository.findAll()).hasSize(0);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
         // create test file
         final byte random[] = RandomStringUtils.random(5 * 1024).getBytes();
@@ -70,7 +70,7 @@ public class SMRessourceMisingMongoDbConnectionTest extends AbstractIntegrationT
         assertThat(exceptionInfo.getMessage()).isEqualTo(SpServerError.SP_ARTIFACT_UPLOAD_FAILED.getMessage());
 
         // ensure that the JPA transaction was rolled back
-        assertThat(artifactRepository.findAll()).hasSize(0);
+        assertThat(artifactManagement.countLocalArtifactsAll()).isEqualTo(0);
 
     }
 

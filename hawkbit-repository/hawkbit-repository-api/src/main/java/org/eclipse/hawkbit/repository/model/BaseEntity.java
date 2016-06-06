@@ -1,0 +1,49 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.eclipse.hawkbit.repository.model;
+
+import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.hateoas.Identifiable;
+
+/**
+ * Core information of all entities.
+ *
+ */
+public interface BaseEntity extends Serializable, Identifiable<Long> {
+
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
+     *         was created.
+     */
+    Long getCreatedAt();
+
+    /**
+     * @return user that created the {@link BaseEntity}.
+     */
+    String getCreatedBy();
+
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
+     *         was last time changed.
+     */
+    Long getLastModifiedAt();
+
+    /**
+     * @return user that updated the {@link BaseEntity} last.
+     */
+    String getLastModifiedBy();
+
+    /**
+     * @return version of the {@link BaseEntity}.
+     */
+    long getOptLockRevision();
+
+}

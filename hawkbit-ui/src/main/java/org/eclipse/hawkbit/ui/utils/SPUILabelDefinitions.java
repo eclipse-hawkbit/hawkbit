@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.utils;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Constants required for Label.
+ * RepositoryConstants required for Label.
  * 
  *
  * 
