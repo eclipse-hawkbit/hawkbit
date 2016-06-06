@@ -174,8 +174,10 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setDefaultSaveStartGroupOption();
         totalTargetsLabel.setVisible(false);
         groupSizeLabel.setVisible(false);
-        targetFilterQuery.setVisible(false);
-        targetFilterQueryCombo.setVisible(true);
+        removeComponent(targetFilterQuery);
+        if (getComponent(1, 3) == null) {
+            addComponent(targetFilterQueryCombo, 1, 3);
+        }
         actionTypeOptionGroupLayout.selectDefaultOption();
         totalTargetsCount = 0L;
         rolloutForEdit = null;
@@ -277,7 +279,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                 SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
         filterField.setId(SPUIComponentIdProvider.ROLLOUT_TARGET_FILTER_QUERY_FIELD);
         filterField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
-        filterField.setVisible(false);
         filterField.setEnabled(false);
         filterField.setSizeUndefined();
         return filterField;
@@ -721,8 +722,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         noOfGroups.setEnabled(false);
         targetFilterQuery.setValue(rolloutForEdit.getTargetFilterQuery());
-        targetFilterQuery.setVisible(true);
-        targetFilterQueryCombo.setVisible(false);
+        removeComponent(targetFilterQueryCombo);
+        addComponent(targetFilterQuery, 1, 3);
 
         totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rolloutForEdit.getTargetFilterQuery());
         totalTargetsLabel.setValue(getTotalTargetMessage());

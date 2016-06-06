@@ -96,8 +96,8 @@ public class RolloutListGrid extends AbstractGrid {
     @Autowired
     private transient RolloutManagement rolloutManagement;
 
-    // @Autowired
-    private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout();
+    @Autowired
+    private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     @Autowired
     private UINotification uiNotification;
