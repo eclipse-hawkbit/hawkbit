@@ -11,8 +11,34 @@ package org.eclipse.hawkbit;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.ReportManagement;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaDistributionSetManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaReportManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaRolloutGroupManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaRolloutManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaSoftwareManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaSystemManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTagManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTargetManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
@@ -26,6 +52,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -172,5 +199,89 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public PlatformTransactionManager transactionManager() {
         return new MultiTenantJpaTransactionManager();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SystemManagement systemManagement() {
+        return new JpaSystemManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ReportManagement reportManagement() {
+        return new JpaReportManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DistributionSetManagement distributionSetManagement() {
+        return new JpaDistributionSetManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantStatsManagement tenantStatsManagement() {
+        return new JpaTenantStatsManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantConfigurationManagement tenantConfigurationManagement() {
+        return new JpaTenantConfigurationManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TargetManagement targetManagement() {
+        return new JpaTargetManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TargetFilterQueryManagement targetFilterQueryManagement() {
+        return new JpaTargetFilterQueryManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TagManagement tagManagement() {
+        return new JpaTagManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SoftwareManagement softwareManagement() {
+        return new JpaSoftwareManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RolloutManagement rolloutManagement() {
+        return new JpaRolloutManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RolloutGroupManagement rolloutGroupManagement() {
+        return new JpaRolloutGroupManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DeploymentManagement deploymentManagement() {
+        return new JpaDeploymentManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ControllerManagement controllerManagement() {
+        return new JpaControllerManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ArtifactManagement artifactManagement() {
+        return new JpaArtifactManagement();
     }
 }
