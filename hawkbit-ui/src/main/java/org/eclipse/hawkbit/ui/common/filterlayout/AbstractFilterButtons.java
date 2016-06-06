@@ -120,7 +120,6 @@ public abstract class AbstractFilterButtons extends Table {
                         ? item.getItemProperty(SPUILabelDefinitions.VAR_COLOR).getValue().toString() : DEFAULT_GREEN;
         final Button typeButton = createFilterButton(id, name, desc, color, itemId);
         typeButton.addClickListener(event -> filterButtonClickBehaviour.processFilterButtonClick(event));
-        typeButton.addStyleName("generatedColumnPadding");
         if (typeButton.getData().equals(SPUIDefinitions.NO_TAG_BUTTON_ID) && isNoTagSateSelected()) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         } else if (id != null && isClickedByDefault(name)) {
@@ -181,6 +180,8 @@ public abstract class AbstractFilterButtons extends Table {
             button.setDescription(name);
         }
         button.setData(id == null ? SPUIDefinitions.NO_TAG_BUTTON_ID : itemId);
+
+        button.addStyleName("generatedColumnPadding");
         return button;
     }
 
