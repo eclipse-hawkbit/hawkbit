@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaDistributionSetManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaEntityFactory;
 import org.eclipse.hawkbit.repository.jpa.JpaReportManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaRolloutGroupManagement;
 import org.eclipse.hawkbit.repository.jpa.JpaRolloutManagement;
@@ -283,5 +285,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     public ArtifactManagement artifactManagement() {
         return new JpaArtifactManagement();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EntityFactory entityFactory() {
+        return new JpaEntityFactory();
     }
 }
