@@ -182,8 +182,12 @@
     float: right;
   }
   
-  .v-button-generatedColumnPadding .v-button-tiny-generatedColumnPadding {
-  	padding: 0px 0px !important;
+  .v-button-generatedColumnPadding {
+  	height: 28px;
+	padding: 0 0px !important;
+	font-size: 12px;
+	border-radius: 4px;
   }
+  
   
 }

@@ -30,8 +30,9 @@ public class SPUITagButtonStyle implements SPUIButtonDecorator {
             button.setCaption(buttonCaption.substring(0, SPUIButtonDefinitions.BUTTON_CAPTION_LENGTH) + "...");
         }
         button.setImmediate(true);
-        button.addStyleName("button-no-border" + " " + ValoTheme.BUTTON_BORDERLESS + " " + ValoTheme.BUTTON_TINY + " "
+        button.addStyleName("generatedColumnPadding button-no-border" + " " + ValoTheme.BUTTON_BORDERLESS + " "
                 + "button-tag-no-border");
+
         // Set Style
         if (null != style) {
             if (setStyle) {
