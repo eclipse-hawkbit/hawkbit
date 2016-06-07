@@ -21,7 +21,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -39,9 +42,10 @@ public class ExecutorAutoConfiguration {
     private AsyncConfigurerThreadpoolProperties asyncConfigurerProperties;
 
     /**
-     * @return ExecutorService for general purpose multi threaded operations
+     * @return ExecutorService for general purpose multi threaded operations.
+     *         Tries an orderly shutdown when destroyed.
      */
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
     public Executor asyncExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
@@ -53,20 +57,38 @@ public class ExecutorAutoConfiguration {
         threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> LOGGER.warn(
                 "Reject runnable for centralExecutorService, reached limit of queue size {}",
                 executor.getQueue().size()));
-        return new DelegatingSecurityContextExecutor(threadPoolExecutor);
+        return new CloseableDelegatingSecurityContextExecutor(threadPoolExecutor);
     }
 
     /**
-     * @return the executor for UI background processes.
+     * @return the executor for UI background processes. Run immediate shutdown
+     *         when destroyed.
      */
-    @Bean(name = "uiExecutor")
+    @Bean(name = "uiExecutor", destroyMethod = "shutdownNow")
     @ConditionalOnMissingBean(name = "uiExecutor")
     public Executor uiExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(20);
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 20, 10000, TimeUnit.MILLISECONDS,
                 blockingQueue, new ThreadFactoryBuilder().setNameFormat("ui-executor-pool-%d").build());
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        return new DelegatingSecurityContextExecutor(threadPoolExecutor);
+        return new CloseableDelegatingSecurityContextExecutor(threadPoolExecutor);
     }
 
+    /**
+     * @return {@link TaskExecutor} for task execution
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskExecutor taskExecutor() {
+        return new ConcurrentTaskExecutor(asyncExecutor());
+    }
+
+    /**
+     * @return {@link TaskScheduler} for scheduled tasks
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TaskScheduler taskScheduler() {
+        return new ThreadPoolTaskScheduler();
+    }
 }
