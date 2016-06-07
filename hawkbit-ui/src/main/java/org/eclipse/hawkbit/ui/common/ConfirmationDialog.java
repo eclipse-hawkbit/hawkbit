@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.server.Resource;
@@ -82,7 +82,7 @@ public class ConfirmationDialog implements Button.ClickListener {
             window.setIcon(icon);
         }
 
-        okButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.OK_BUTTON, okLabel, "",
+        okButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.OK_BUTTON, okLabel, "",
                 ValoTheme.BUTTON_PRIMARY, false, null, SPUIButtonStyleTiny.class);
         okButton.addClickListener(this);
 

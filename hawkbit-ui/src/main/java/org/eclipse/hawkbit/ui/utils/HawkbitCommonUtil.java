@@ -19,24 +19,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.AssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.TargetInfo.PollStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.addons.lazyquerycontainer.AbstractBeanQuery;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
@@ -76,6 +73,11 @@ public final class HawkbitCommonUtil {
      */
     public static final String SPAN_CLOSE = "</span>";
 
+    public static final String HTML_LI_CLOSE_TAG = "</li>";
+    public static final String HTML_LI_OPEN_TAG = "<li>";
+    public static final String HTML_UL_CLOSE_TAG = "</ul>";
+    public static final String HTML_UL_OPEN_TAG = "<ul>";
+
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitCommonUtil.class);
 
     private static final String JS_DRAG_COUNT_REM_CHILD = " if(x) { document.head.removeChild(x); } ";
@@ -106,6 +108,9 @@ public final class HawkbitCommonUtil {
     private static final String TARGET_TAG_DROP_REMOVE_SCRIPT = "var m = document.getElementById('show-filter-drop-hint'); if(m) { document.head.removeChild(m); } ";
     private static final String DELETE_DROP_CREATE_SCRIPT = "var q = document.getElementById('show-delete-drop-hint'); if(q) { } else { showDeleteDrop = document.createElement('style'); showDeleteDrop.id=\"show-delete-drop-hint\";  document.head.appendChild(showDeleteDrop); }";
     private static final String DELETE_TAG_DROP_REMOVE_SCRIPT = "var o = document.getElementById('show-delete-drop-hint'); if(o) { document.head.removeChild(o); } ";
+
+    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
+    private static final String INSTALL_DIST_SET = "installedDistributionSet";
 
     /**
      * Define empty string.
@@ -427,26 +432,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * Format the lengthy text.
-     *
-     * @param orgText
-     *            text to be formatted
-     * @return String formatted text
-     */
-    public static String getFormattedText(final String orgText) {
-        if (orgText == null) {
-            return StringUtils.EMPTY;
-        }
-
-        final int txtLengthAllowed = SPUIDefinitions.NAME_DESCRIPTION_LENGTH;
-        if (orgText.length() > txtLengthAllowed) {
-            return new StringBuilder(orgText.substring(0, txtLengthAllowed)).append("...").toString();
-        }
-
-        return orgText;
-    }
-
-    /**
      * Find extra height required to increase by all the components to utilize
      * the full height of browser for the responsive UI.
      * 
@@ -606,31 +591,6 @@ public final class HawkbitCommonUtil {
     }
 
     /**
-     * get formatted name - lastname,firstname.
-     *
-     * @param user
-     *            user name
-     * @return String formatted name
-     */
-    public static String getFormattedName(final UserDetails user) {
-        final StringBuilder formattedName = new StringBuilder();
-        if (user instanceof UserPrincipal) {
-            if (trimAndNullIfEmpty(((UserPrincipal) user).getLastname()) != null) {
-                formattedName.append(((UserPrincipal) user).getLastname());
-            }
-            if (trimAndNullIfEmpty(((UserPrincipal) user).getFirstname()) != null) {
-                if (formattedName.length() > 0) {
-                    formattedName.append(", ");
-                }
-                formattedName.append(((UserPrincipal) user).getFirstname());
-            }
-        } else if (user != null) {
-            formattedName.append(user.getUsername());
-        }
-        return formattedName.toString();
-    }
-
-    /**
      * get the Last sequence of string which is after last dot in String.
      *
      * @param name
@@ -684,30 +644,6 @@ public final class HawkbitCommonUtil {
                     .append(APPEND_CHILD);
         }
         return exeJS.toString();
-    }
-
-    /**
-     * Get IM User for user UUID.
-     * 
-     * @param uuid
-     * @return imReslovedUser user details
-     */
-    public static String getIMUser(final String uuid) {
-        // Get modifed user
-        String imReslovedUser = HawkbitCommonUtil.SP_STRING_SPACE;
-        if (HawkbitCommonUtil.trimAndNullIfEmpty(uuid) != null) {
-            final UserDetailsService idManagement = SpringContextHelper.getBean(UserDetailsService.class);
-            try {
-                imReslovedUser = HawkbitCommonUtil.getFormattedName(idManagement.loadUserByUsername(uuid));
-            } catch (final UsernameNotFoundException e) { // NOSONAR
-                // nope not need to handle
-            }
-            // If Null display the UID
-            if (HawkbitCommonUtil.trimAndNullIfEmpty(imReslovedUser) == null) {
-                imReslovedUser = uuid;
-            }
-        }
-        return imReslovedUser;
     }
 
     /**
@@ -825,10 +761,10 @@ public final class HawkbitCommonUtil {
      *            base software module description
      * @return BaseSoftwareModule new base software module
      */
-    public static SoftwareModule addNewBaseSoftware(final String bsname, final String bsversion, final String bsvendor,
-            final SoftwareModuleType bstype, final String description) {
+    public static SoftwareModule addNewBaseSoftware(final EntityFactory entityFactory, final String bsname,
+            final String bsversion, final String bsvendor, final SoftwareModuleType bstype, final String description) {
         final SoftwareManagement swMgmtService = SpringContextHelper.getBean(SoftwareManagement.class);
-        SoftwareModule newSWModule = new SoftwareModule();
+        SoftwareModule newSWModule = entityFactory.generateSoftwareModule();
         newSWModule.setType(bstype);
         newSWModule.setName(bsname);
         newSWModule.setVersion(bsversion);
@@ -1090,6 +1026,10 @@ public final class HawkbitCommonUtil {
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_POLL_STATUS_TOOL_TIP, String.class, null,
                 false, true);
         targetTableContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
+
+        targetTableContainer.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
+        targetTableContainer.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
+
     }
 
     /**

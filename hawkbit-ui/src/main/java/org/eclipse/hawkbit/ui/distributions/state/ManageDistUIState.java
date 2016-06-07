@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.springframework.beans.factory.annotation.Autowired;
 

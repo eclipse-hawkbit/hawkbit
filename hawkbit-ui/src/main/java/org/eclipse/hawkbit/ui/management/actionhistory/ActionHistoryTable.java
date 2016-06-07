@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -69,14 +69,15 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
+ * Table for {@link Target#getActions()} history.
  *
  */
-
 @SpringComponent
 @ViewScope
 public class ActionHistoryTable extends TreeTable implements Handler {
 
+    private static final String BUTTON_CANCEL = "button.cancel";
+    private static final String BUTTON_OK = "button.ok";
     private static final long serialVersionUID = -1631514704696786653L;
     @Autowired
     private I18N i18n;
@@ -158,7 +159,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void initializeTableSettings() {
 
-        setId(SPUIComponetIdProvider.ACTION_HISTORY_TABLE_ID);
+        setId(SPUIComponentIdProvider.ACTION_HISTORY_TABLE_ID);
         setSelectable(false);
         setMultiSelect(false);
         setSortEnabled(true);
@@ -241,11 +242,14 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
     private void getcontainerData() {
         hierarchicalContainer.removeAllItems();
-        /* service method to create action history for target */
-        final List<ActionWithStatusCount> actionHistory = deploymentManagement
+        
+        if (target != null) {
+            /* service method to create action history for target */
+            final List<ActionWithStatusCount> actionHistory = deploymentManagement
                 .findActionsWithStatusCountByTargetOrderByIdDesc(target);
-
-        addDetailsToContainer(actionHistory);
+            
+            addDetailsToContainer(actionHistory);
+        }
     }
 
     /**
@@ -268,51 +272,51 @@ public class ActionHistoryTable extends TreeTable implements Handler {
 
             final Action action = actionWithStatusCount.getAction();
 
-            final Item item = hierarchicalContainer.addItem(actionWithStatusCount.getActionId());
+            final Item item = hierarchicalContainer.addItem(actionWithStatusCount.getAction().getId());
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_STATUS_HIDDEN)
-                    .setValue(actionWithStatusCount.getActionStatus());
+                    .setValue(actionWithStatusCount.getAction().getStatus());
 
             /*
              * add action id.
              */
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID)
-                    .setValue(actionWithStatusCount.getActionId().toString());
+                    .setValue(actionWithStatusCount.getAction().getId().toString());
             /*
              * add active/inactive status to the item which will be used in
              * Column generator to generate respective icon
              */
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue(
-                    actionWithStatusCount.isActionActive() ? SPUIDefinitions.ACTIVE : SPUIDefinitions.IN_ACTIVE);
+                    actionWithStatusCount.getAction().isActive() ? SPUIDefinitions.ACTIVE : SPUIDefinitions.IN_ACTIVE);
 
             /*
              * add action Id to the item which will be used for fetching child
              * items ( previous action status ) during expand
              */
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTION_ID_HIDDEN)
-                    .setValue(actionWithStatusCount.getActionId());
+                    .setValue(actionWithStatusCount.getAction().getId());
 
             /*
              * add distribution name to the item which will be displayed in the
              * table. The name should not exceed certain limit.
              */
-            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(HawkbitCommonUtil
-                    .getFormattedText(actionWithStatusCount.getDsName() + ":" + actionWithStatusCount.getDsVersion()));
+            item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST).setValue(actionWithStatusCount.getDsName() + ":" +
+                                 actionWithStatusCount.getDsVersion());
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_FORCED).setValue(action);
 
             /* Default no child */
-            ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), false);
+            ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), false);
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
-                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getActionLastModifiedAt() != null)
-                            ? actionWithStatusCount.getActionLastModifiedAt()
-                            : actionWithStatusCount.getActionCreatedAt()));
+                    .setValue(SPDateTimeUtil.getFormattedDate((actionWithStatusCount.getAction().getLastModifiedAt() != null)
+                            ? actionWithStatusCount.getAction().getLastModifiedAt()
+                            : actionWithStatusCount.getAction().getLastModifiedAt()));
 
             item.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ROLLOUT_NAME)
                     .setValue(actionWithStatusCount.getRolloutName());
 
             if (actionWithStatusCount.getActionStatusCount() > 0) {
-                ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getActionId(), true);
+                ((Hierarchical) hierarchicalContainer).setChildrenAllowed(actionWithStatusCount.getAction().getId(), true);
             }
         }
     }
@@ -422,8 +426,12 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                     .findActionWithDetails(actionId);
             final Pageable pageReq = new PageRequest(0, 1000,
                     new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName()));
-            final Page<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action,
-                    managementUIState.isActionHistoryMaximized());
+            final Page<ActionStatus> actionStatusList;
+                    if (managementUIState.isActionHistoryMaximized()) {
+                        actionStatusList = deploymentManagement.findActionStatusByActionWithMessages(pageReq, action);
+                    } else {
+                        actionStatusList = deploymentManagement.findActionStatusByAction(pageReq, action);
+                    }
             final List<ActionStatus> content = actionStatusList.getContent();
             /*
              * Since the recent action status and messages are already
@@ -442,8 +450,8 @@ public class ActionHistoryTable extends TreeTable implements Handler {
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_ACTIVE_HIDDEN).setValue("");
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DIST)
-                            .setValue(HawkbitCommonUtil.getFormattedText(action.getDistributionSet().getName() + ":"
-                                    + action.getDistributionSet().getVersion()));
+                            .setValue(action.getDistributionSet().getName() + ":"
+                                    + action.getDistributionSet().getVersion());
 
                     childItem.getItemProperty(SPUIDefinitions.ACTION_HIS_TBL_DATETIME)
                             .setValue(SPDateTimeUtil.getFormattedDate(actionStatus.getCreatedAt()));
@@ -747,7 +755,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     private void confirmAndForceAction(final Long actionId) {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.force.action.confirmbox"),
-                i18n.get("message.force.action.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                i18n.get("message.force.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
                     if (ok) {
                         /* cancel the action */
                         deploymentManagement.forceTargetAction(actionId);
@@ -769,7 +777,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
     private void confirmAndForceQuitAction(final Long actionId) {
         /* Display the confirmation */
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.forcequit.action.confirmbox"),
-                i18n.get("message.forcequit.action.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                i18n.get("message.forcequit.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
                     if (ok) {
                         final boolean cancelResult = forceQuitActiveAction(actionId);
                         if (cancelResult) {
@@ -797,7 +805,7 @@ public class ActionHistoryTable extends TreeTable implements Handler {
      */
     private void confirmAndCancelAction(final Long actionId) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n.get("caption.cancel.action.confirmbox"),
-                i18n.get("message.cancel.action.confirm"), i18n.get("button.ok"), i18n.get("button.cancel"), ok -> {
+                i18n.get("message.cancel.action.confirm"), i18n.get(BUTTON_OK), i18n.get(BUTTON_CANCEL), ok -> {
                     if (ok) {
                         final boolean cancelResult = cancelActiveAction(actionId);
                         if (cancelResult) {

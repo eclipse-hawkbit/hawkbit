@@ -143,9 +143,15 @@
   .valo-menu-title {
     line-height: 1.2;
   }
+  
   .v-menubar-user-menu:after {
     display: none;
   }
+  
+  .v-menubar-menuitem-user-menuitem {
+    width: 100%;
+  }
+  
   .v-menubar-user-menu > .v-menubar-menuitem {
     white-space: normal !important;
     .v-icon {

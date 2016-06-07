@@ -13,10 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON representation of artifact hash.
- * 
- *
- *
- *
  */
 public class ArtifactHash {
 

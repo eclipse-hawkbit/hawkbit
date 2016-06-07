@@ -17,6 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
     private static final String DEFAULT_IP_LOCALHOST = "127.0.0.1";
+    private static final String DEFAULT_PORT = "8080";
     private static final String LOCALHOST = "localhost";
 
     private final Http http = new Http();
@@ -78,6 +79,12 @@ public class ArtifactUrlHandlerProperties {
          * @return the pattern to build the URL.
          */
         String getPattern();
+
+        /**
+         * @return <code>true</code> if the {@link ProtocolProperties} is
+         *         enabled.
+         */
+        boolean isEnabled();
     }
 
     /**
@@ -86,12 +93,26 @@ public class ArtifactUrlHandlerProperties {
     public static class Http implements ProtocolProperties {
         private String hostname = LOCALHOST;
         private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = "";
+        private String port = DEFAULT_PORT;
         /**
          * An ant-URL pattern with placeholder to build the URL on. The URL can
          * have specific artifact placeholder.
          */
         private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
+
+        /**
+         * Enables HTTP URI generation in DDI and DMF.
+         */
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
 
         @Override
         public String getHostname() {
@@ -136,12 +157,26 @@ public class ArtifactUrlHandlerProperties {
     public static class Https implements ProtocolProperties {
         private String hostname = LOCALHOST;
         private String ip = DEFAULT_IP_LOCALHOST;
-        private String port = "";
+        private String port = DEFAULT_PORT;
         /**
          * An ant-URL pattern with placeholder to build the URL on. The URL can
          * have specific artifact placeholder.
          */
         private String pattern = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{targetId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
+
+        /**
+         * Enables HTTPS URI generation in DDI and DMF.
+         */
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
 
         @Override
         public String getHostname() {
@@ -192,6 +227,20 @@ public class ArtifactUrlHandlerProperties {
          * have specific artifact placeholder.
          */
         private String pattern = "{protocol}://{ip}:{port}/fw/{tenant}/{targetId}/sha1/{artifactSHA1}";
+
+        /**
+         * Enables CoAP URI generation in DMF.
+         */
+        private boolean enabled = true;
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
 
         @Override
         public String getHostname() {

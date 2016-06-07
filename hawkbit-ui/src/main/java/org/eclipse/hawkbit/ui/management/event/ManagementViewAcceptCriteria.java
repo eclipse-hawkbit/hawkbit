@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.AbstractAcceptCriteria;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -70,34 +70,34 @@ public class ManagementViewAcceptCriteria extends AbstractAcceptCriteria {
         final Map<String, List<String>> config = new HashMap<>();
 
         // Delete drop area acceptable components
-        config.put(SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID,
-                Arrays.asList(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, SPUIComponetIdProvider.TARGET_TABLE_ID,
-                        SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS, SPUIComponetIdProvider.DIST_TABLE_ID));
+        config.put(SPUIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID,
+                Arrays.asList(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, SPUIComponentIdProvider.TARGET_TABLE_ID,
+                        SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS, SPUIComponentIdProvider.DIST_TABLE_ID));
 
         // Target Tag acceptable components
-        config.put(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, Arrays.asList(SPUIComponetIdProvider.TARGET_TABLE_ID));
+        config.put(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, Arrays.asList(SPUIComponentIdProvider.TARGET_TABLE_ID));
 
         // Target table acceptable components
-        config.put(SPUIComponetIdProvider.TARGET_TABLE_ID,
-                Arrays.asList(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, SPUIComponetIdProvider.DIST_TABLE_ID));
+        config.put(SPUIComponentIdProvider.TARGET_TABLE_ID,
+                Arrays.asList(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, SPUIComponentIdProvider.DIST_TABLE_ID));
 
         // Target table header acceptable components
-        config.put(SPUIComponetIdProvider.TARGET_DROP_FILTER_ICON, Arrays.asList(SPUIComponetIdProvider.DIST_TABLE_ID));
+        config.put(SPUIComponentIdProvider.TARGET_DROP_FILTER_ICON, Arrays.asList(SPUIComponentIdProvider.DIST_TABLE_ID));
 
         // Distribution table acceptable components
-        config.put(SPUIComponetIdProvider.DIST_TABLE_ID, Arrays.asList(SPUIDefinitions.TARGET_TAG_ID_PREFIXS,
-                SPUIComponetIdProvider.TARGET_TABLE_ID, SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS));
+        config.put(SPUIComponentIdProvider.DIST_TABLE_ID, Arrays.asList(SPUIDefinitions.TARGET_TAG_ID_PREFIXS,
+                SPUIComponentIdProvider.TARGET_TABLE_ID, SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS));
 
         // Distribution tag acceptable components.
-        config.put(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS, Arrays.asList(SPUIComponetIdProvider.DIST_TABLE_ID));
+        config.put(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS, Arrays.asList(SPUIComponentIdProvider.DIST_TABLE_ID));
         return config;
     }
 
     private static Map<String, Object> createDropHintConfigurations() {
         final Map<String, Object> config = new HashMap<>();
         config.put(SPUIDefinitions.TARGET_TAG_ID_PREFIXS, DragEvent.TARGET_TAG_DRAG);
-        config.put(SPUIComponetIdProvider.TARGET_TABLE_ID, DragEvent.TARGET_DRAG);
-        config.put(SPUIComponetIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);
+        config.put(SPUIComponentIdProvider.TARGET_TABLE_ID, DragEvent.TARGET_DRAG);
+        config.put(SPUIComponentIdProvider.DIST_TABLE_ID, DragEvent.DISTRIBUTION_DRAG);
         config.put(SPUIDefinitions.DISTRIBUTION_TAG_ID_PREFIXS, DragEvent.DISTRIBUTION_TAG_DRAG);
         return config;
     }

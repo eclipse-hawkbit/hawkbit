@@ -18,19 +18,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.filter.FilterExpression;
@@ -50,9 +51,10 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
+import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -134,6 +136,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         addActionHandler(this);
         actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
         actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
+        setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
     /**
@@ -225,7 +228,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.TARGET_TABLE_ID;
+        return SPUIComponentIdProvider.TARGET_TABLE_ID;
     }
 
     @Override
@@ -450,7 +453,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         pinBtn.setStyleName(pinBtnStyle.toString());
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
-        pinBtn.setId(SPUIComponetIdProvider.TARGET_PIN_ICON + "." + itemId);
+        pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
         pinBtn.addClickListener(event -> addPinClickListener(event));
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
@@ -616,7 +619,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     private Boolean validateTable(final Component compsource, final TableTransferable transferable) {
         final Table source = (Table) compsource;
-        if (!(source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)
+        if (!(source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)
                 || source.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS))) {
             notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
             return false;
@@ -738,7 +741,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
                     .setValue(updatedTarget.getTargetInfo().getLastTargetQuery());
 
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                    .setValue(HawkbitCommonUtil.getIMUser(updatedTarget.getLastModifiedBy()));
+                    .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(updatedTarget));
             item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
                     .setValue(SPDateTimeUtil.getFormattedDate(updatedTarget.getLastModifiedAt()));
             item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(updatedTarget.getDescription());
@@ -927,6 +930,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
      * Select all rows in the table.
      */
     public void selectAll() {
+
         // final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(),
         // new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER,
         // "createdAt"));

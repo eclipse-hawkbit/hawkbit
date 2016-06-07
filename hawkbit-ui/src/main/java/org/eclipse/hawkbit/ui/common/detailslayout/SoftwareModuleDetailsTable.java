@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.exception.EntityLockedException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -214,7 +215,7 @@ public class SoftwareModuleDetailsTable extends Table {
                 .getItem(event.getButton().getId()).getItemProperty(SOFT_MODULE).getValue(), alreadyAssignedSwModules);
         final DistributionSet newDistributionSet = distributionSetManagement.unassignSoftwareModule(distributionSet,
                 unAssignedSw);
-        manageDistUIState.setLastSelectedEntity(newDistributionSet.getDistributionSetIdName());
+        manageDistUIState.setLastSelectedEntity(DistributionSetIdName.generate(newDistributionSet));
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, newDistributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
         uiNotification.displaySuccess(i18n.get("message.sw.unassigned", unAssignedSw.getName()));

@@ -36,16 +36,21 @@ import org.eclipse.hawkbit.dmf.json.model.ActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
-import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.helper.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +88,9 @@ public class AmqpMessageHandlerServiceTest {
     private ControllerManagement controllerManagementMock;
 
     @Mock
+    private EntityFactory entityFactoryMock;
+
+    @Mock
     private ArtifactManagement artifactManagementMock;
 
     @Mock
@@ -114,6 +122,7 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.setCache(cacheMock);
         amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
         amqpMessageHandlerService.setEventBus(eventBus);
+        amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
 
     }
 
@@ -333,20 +342,23 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
                 .isEqualTo(HttpStatus.OK.value());
         assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
+        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo("sha1");
+        assertThat(downloadResponse.getArtifact().getHashes().getMd5()).as("Wrong md5 hash").isEqualTo("md5");
         assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
                 .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
     }
 
     @Test
     @Description("Tests TODO")
-    public void lookupNextUpdateActionAfterFinished() throws IllegalArgumentException, IllegalAccessException {
+    public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
         final Action action = createActionWithTarget(22L, Status.FINISHED);
         when(controllerManagementMock.findActionWithDetails(Matchers.any())).thenReturn(action);
-        when(controllerManagementMock.addUpdateActionStatus(Matchers.any(), Matchers.any())).thenReturn(action);
+        when(controllerManagementMock.addUpdateActionStatus(Matchers.any())).thenReturn(action);
+        when(entityFactoryMock.generateActionStatus()).thenReturn(new JpaActionStatus());
         // for the test the same action can be used
-        final List<Action> actionList = new ArrayList<Action>();
+        final List<Action> actionList = new ArrayList<>();
         actionList.add(action);
         when(controllerManagementMock.findActionByTargetAndActive(Matchers.any())).thenReturn(actionList);
 
@@ -372,6 +384,8 @@ public class AmqpMessageHandlerServiceTest {
 
         assertThat(targetAssignDistributionSetEvent.getControllerId()).as("event has wrong controller id")
                 .isEqualTo("target1");
+        assertThat(targetAssignDistributionSetEvent.getTargetToken()).as("targetoken not filled correctly")
+                .isEqualTo(action.getTarget().getSecurityToken());
         assertThat(targetAssignDistributionSetEvent.getActionId()).as("event has wrong action id").isEqualTo(22L);
         assertThat(targetAssignDistributionSetEvent.getSoftwareModules()).as("event has wrong sofware modules")
                 .isEqualTo(softwareModuleList);
@@ -379,7 +393,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status) {
-        return createActionUpdateStatus(status, 2l);
+        return createActionUpdateStatus(status, 2L);
     }
 
     private ActionUpdateStatus createActionUpdateStatus(final ActionStatus status, final Long id) {
@@ -404,30 +418,33 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private List<SoftwareModule> createSoftwareModuleList() {
-        final List<SoftwareModule> softwareModuleList = new ArrayList<SoftwareModule>();
-        final SoftwareModule softwareModule = new SoftwareModule();
+        final List<SoftwareModule> softwareModuleList = new ArrayList<>();
+        final JpaSoftwareModule softwareModule = new JpaSoftwareModule();
         softwareModule.setId(777L);
         softwareModuleList.add(softwareModule);
         return softwareModuleList;
     }
 
-    private Action createActionWithTarget(final Long targetId, final Status status)
-            throws IllegalArgumentException, IllegalAccessException {
+    private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
         // is needed for the creation of targets
         initalizeSecurityTokenGenerator();
 
         // Mock
-        final Action action = new Action();
-        action.setId(targetId);
-        action.setStatus(status);
-        action.setTenant("DEFAULT");
-        final Target target = new Target("target1");
-        action.setTarget(target);
-
-        return action;
+        final JpaAction actionMock = mock(JpaAction.class);
+        final JpaTarget targetMock = mock(JpaTarget.class);
+        final TargetInfo targetInfoMock = mock(TargetInfo.class);
+        when(actionMock.getId()).thenReturn(targetId);
+        when(actionMock.getStatus()).thenReturn(status);
+        when(actionMock.getTenant()).thenReturn("DEFAULT");
+        when(actionMock.getTarget()).thenReturn(targetMock);
+        when(targetMock.getControllerId()).thenReturn("target1");
+        when(targetMock.getSecurityToken()).thenReturn("securityToken");
+        when(targetMock.getTargetInfo()).thenReturn(targetInfoMock);
+        when(targetInfoMock.getAddress()).thenReturn(null);
+        return actionMock;
     }
 
-    private void initalizeSecurityTokenGenerator() throws IllegalArgumentException, IllegalAccessException {
+    private void initalizeSecurityTokenGenerator() throws IllegalAccessException {
         final SecurityTokenGeneratorHolder instance = SecurityTokenGeneratorHolder.getInstance();
         final Field[] fields = instance.getClass().getDeclaredFields();
         for (final Field field : fields) {

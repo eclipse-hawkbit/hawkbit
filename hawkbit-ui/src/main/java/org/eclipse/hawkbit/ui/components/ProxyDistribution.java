@@ -9,13 +9,14 @@
 package org.eclipse.hawkbit.ui.components;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 
 /**
  * Proxy for {@link DistributionSet}.
  *
  *
  */
-public class ProxyDistribution extends DistributionSet {
+public class ProxyDistribution {
 
     private static final long serialVersionUID = -8891449133620645310L;
 
@@ -33,11 +34,20 @@ public class ProxyDistribution extends DistributionSet {
 
     private String nameVersion;
 
+    private Long id;
+    private String name;
+    private String version;
+    private String description;
+
     /**
      * @return the nameVersion
      */
     public String getNameVersion() {
         return nameVersion;
+    }
+
+    public DistributionSetIdName getDistributionSetIdName() {
+        return DistributionSetIdName.generate(id, name, version);
     }
 
     /**
@@ -94,6 +104,38 @@ public class ProxyDistribution extends DistributionSet {
 
     public void setModifiedByUser(final String modifiedByUser) {
         this.modifiedByUser = modifiedByUser;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(final String version) {
+        this.version = version;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
 }

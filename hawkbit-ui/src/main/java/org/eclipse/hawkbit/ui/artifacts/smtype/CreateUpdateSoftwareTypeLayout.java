@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -25,7 +26,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -92,6 +93,9 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
     @Autowired
     private transient SoftwareManagement swTypeManagementService;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;
@@ -189,7 +193,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
         tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
@@ -257,6 +261,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         mainLayout = new HorizontalLayout();
         mainLayout.addComponent(fieldButtonLayout);
         setCompositionRoot(mainLayout);
+        typeName.focus();
     }
 
     private void addListeners() {
@@ -553,7 +558,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
                     .findSoftwareModuleTypeByName(typeName.getValue());
             if (createOptiongroup.getValue().equals(createTypeStr)) {
                 if (!checkIsKeyDuplicate(typeKey.getValue()) && !checkIsDuplicate(existingType)) {
-                    crateNewSWModuleType();
+                    createNewSWModuleType();
                 }
             } else {
 
@@ -610,9 +615,9 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
     /**
      * Create new tag.
      */
-    private void crateNewSWModuleType() {
+    private void createNewSWModuleType() {
         int assignNumber = 0;
-        final String colorPicked = getColorPickedSting();
+        final String colorPicked = getColorPickedString();
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeName.getValue());
         final String typeKeyValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeKey.getValue());
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
@@ -624,8 +629,10 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
         }
 
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue,
-                    assignNumber, colorPicked);
+            SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
+                    typeDescValue, assignNumber);
+            newSWType.setColour(colorPicked);
+
             if (null != typeDescValue) {
                 newSWType.setDescription(typeDescValue);
             }
@@ -649,7 +656,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
      *
      * @return String of color picked value.
      */
-    private String getColorPickedSting() {
+    private String getColorPickedString() {
         return "rgb(" + getSelPreview().getColor().getRed() + "," + getSelPreview().getColor().getGreen() + ","
                 + getSelPreview().getColor().getBlue() + ")";
     }
@@ -675,7 +682,7 @@ public class CreateUpdateSoftwareTypeLayout extends CustomComponent implements C
 
             existingType.setDescription(null != typeDescValue ? typeDescValue : null);
 
-            existingType.setColour(getColorPickedSting());
+            existingType.setColour(getColorPickedString());
             swTypeManagementService.updateSoftwareModuleType(existingType);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { existingType.getName() }));
             closeWindow();

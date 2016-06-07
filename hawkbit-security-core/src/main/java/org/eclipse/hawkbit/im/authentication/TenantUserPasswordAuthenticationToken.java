@@ -19,12 +19,10 @@ import org.springframework.security.core.GrantedAuthority;
  *
  */
 public class TenantUserPasswordAuthenticationToken extends UsernamePasswordAuthenticationToken {
-
-    /**
-    *
-    */
     private static final long serialVersionUID = 1L;
 
+    // Exception squid:S1948 - no need to be Serializable
+    @SuppressWarnings({ "squid:S1948" })
     final Object tenant;
 
     /**

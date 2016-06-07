@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public abstract class AbstractConfirmationWindowLayout extends VerticalLayout {
     private void createActionMessgaeLabel() {
         actionMessage = SPUIComponentProvider.getLabel("", null);
         actionMessage.addStyleName(SPUIStyleDefinitions.CONFIRM_WINDOW_INFO_BOX);
-        actionMessage.setId(SPUIComponetIdProvider.ACTION_LABEL);
+        actionMessage.setId(SPUIComponentIdProvider.ACTION_LABEL);
         actionMessage.setVisible(false);
     }
 

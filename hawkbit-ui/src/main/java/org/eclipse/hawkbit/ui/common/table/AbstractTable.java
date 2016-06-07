@@ -20,7 +20,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -213,9 +213,9 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         item.getItemProperty(SPUILabelDefinitions.VAR_ID).setValue(baseEntity.getId());
         item.getItemProperty(SPUILabelDefinitions.VAR_DESC).setValue(baseEntity.getDescription());
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getCreatedBy()));
+                .setValue(UserDetailsFormatter.loadAndFormatCreatedBy(baseEntity));
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY)
-                .setValue(HawkbitCommonUtil.getIMUser(baseEntity.getLastModifiedBy()));
+                .setValue(UserDetailsFormatter.loadAndFormatLastModifiedBy(baseEntity));
         item.getItemProperty(SPUILabelDefinitions.VAR_CREATED_DATE)
                 .setValue(SPDateTimeUtil.getFormattedDate(baseEntity.getCreatedAt()));
         item.getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE)
@@ -330,6 +330,17 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         columnList.add(
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.2F));
+        setItemDescriptionGenerator((source, itemId, propertyId) -> {
+
+            if (SPUILabelDefinitions.VAR_CREATED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_CREATED_BY).getValue().toString();
+            }
+            if (SPUILabelDefinitions.VAR_LAST_MODIFIED_BY.equals(propertyId)) {
+                return getItem(itemId).getItemProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY).getValue().toString();
+            }
+            return null;
+        });
+
         return columnList;
     }
 

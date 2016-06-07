@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.HawkbitUI;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.footer.TargetFilterCountMessageLabel;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -96,7 +97,8 @@ public class FilterManagementView extends VerticalLayout implements View {
         } else if (custFilterUIEvent == CustomFilterUIEvent.CREATE_NEW_FILTER_CLICK
                 || custFilterUIEvent == CustomFilterUIEvent.FILTER_TARGET_BY_QUERY) {
             this.getUI().access(() -> viewCreateTargetFilterLayout());
-        } else if (custFilterUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW) {
+        } else if (custFilterUIEvent == CustomFilterUIEvent.EXIT_CREATE_OR_UPDATE_FILTRER_VIEW
+                || custFilterUIEvent == CustomFilterUIEvent.SHOW_FILTER_MANAGEMENT) {
             UI.getCurrent().access(() -> viewListView());
         }
     }
@@ -121,11 +123,11 @@ public class FilterManagementView extends VerticalLayout implements View {
         tableHeaderLayout.setComponentAlignment(createNewFilterHeader, Alignment.TOP_CENTER);
         tableHeaderLayout.addComponent(createNewFilterTable);
         tableHeaderLayout.setComponentAlignment(createNewFilterTable, Alignment.TOP_CENTER);
-        tableHeaderLayout.setExpandRatio(createNewFilterTable, 1.0f);
+        tableHeaderLayout.setExpandRatio(createNewFilterTable, 1.0F);
 
         addComponent(tableHeaderLayout);
         setComponentAlignment(tableHeaderLayout, Alignment.TOP_CENTER);
-        setExpandRatio(tableHeaderLayout, 1.0f);
+        setExpandRatio(tableHeaderLayout, 1.0F);
 
         final HorizontalLayout targetsCountmessageLabelLayout = addTargetFilterMessageLabel();
         addComponent(targetsCountmessageLabelLayout);
@@ -135,23 +137,23 @@ public class FilterManagementView extends VerticalLayout implements View {
 
     private void viewListView() {
         removeAllComponents();
-        final VerticalLayout tableHeaderLayout = new VerticalLayout();
-        tableHeaderLayout.setSizeFull();
-        tableHeaderLayout.setSpacing(false);
-        tableHeaderLayout.setMargin(false);
-        tableHeaderLayout.setStyleName("table-layout");
-        tableHeaderLayout.addComponent(targetFilterHeader);
-        tableHeaderLayout.setComponentAlignment(targetFilterHeader, Alignment.TOP_CENTER);
-        tableHeaderLayout.addComponent(targetFilterTable);
-        tableHeaderLayout.setComponentAlignment(targetFilterTable, Alignment.TOP_CENTER);
-        tableHeaderLayout.setExpandRatio(targetFilterTable, 1.0f);
-        addComponent(tableHeaderLayout);
+        final VerticalLayout tableListViewLayout = new VerticalLayout();
+        tableListViewLayout.setSizeFull();
+        tableListViewLayout.setSpacing(false);
+        tableListViewLayout.setMargin(false);
+        tableListViewLayout.setStyleName("table-layout");
+        tableListViewLayout.addComponent(targetFilterHeader);
+        tableListViewLayout.setComponentAlignment(targetFilterHeader, Alignment.TOP_CENTER);
+        tableListViewLayout.addComponent(targetFilterTable);
+        tableListViewLayout.setComponentAlignment(targetFilterTable, Alignment.TOP_CENTER);
+        tableListViewLayout.setExpandRatio(targetFilterTable, 1.0F);
+        addComponent(tableListViewLayout);
     }
 
     private HorizontalLayout addTargetFilterMessageLabel() {
         final HorizontalLayout messageLabelLayout = new HorizontalLayout();
         messageLabelLayout.addComponent(targetFilterCountMessageLabel);
-        messageLabelLayout.addStyleName("footer-layout");
+        messageLabelLayout.addStyleName(SPUIStyleDefinitions.FOOTER_LAYOUT);
         return messageLabelLayout;
     }
 

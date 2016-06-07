@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
@@ -48,6 +49,9 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
 
     @Autowired
     private transient UINotification uiNotification;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private Window targetTagWindow;
 
@@ -85,16 +89,22 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagUpdateEvent(final TargetTagUpdateEvent event) {
         populateTagNameCombo();
     }
@@ -144,7 +154,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
             final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
             if (optiongroup.getValue().equals(createTagNw)) {
                 if (!checkIsDuplicate(existingTag)) {
-                    crateNewTag();
+                    createNewTag();
                 }
             } else {
 
@@ -182,12 +192,12 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
     /**
      * Create new tag.
      */
-    private void crateNewTag() {
-        final String colorPicked = getColorPickedSting();
+    private void createNewTag() {
+        final String colorPicked = getColorPickedString();
         final String tagNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         if (null != tagNameValue) {
-            TargetTag newTargetTag = new TargetTag(tagNameValue);
+            TargetTag newTargetTag = entityFactory.generateTargetTag(tagNameValue);
             if (null != tagDescValue) {
                 newTargetTag.setDescription(tagDescValue);
             }
@@ -214,7 +224,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
         if (null != nameUpdateValue) {
             targetObj.setName(nameUpdateValue);
             targetObj.setDescription(null != descUpdateValue ? descUpdateValue : null);
-            targetObj.setColour(getColorPickedSting());
+            targetObj.setColour(getColorPickedString());
             tagManagement.updateTargetTag(targetObj);
             uiNotification.displaySuccess(i18n.get("message.update.success", new Object[] { targetObj.getName() }));
             closeWindow();
@@ -244,7 +254,7 @@ public class CreateUpdateTargetTagLayout extends CreateUpdateTagLayout {
      *
      * @return String of color picked value.
      */
-    private String getColorPickedSting() {
+    private String getColorPickedString() {
         return "rgb(" + getSelPreview().getColor().getRed() + "," + getSelPreview().getColor().getGreen() + ","
                 + getSelPreview().getColor().getBlue() + ")";
     }

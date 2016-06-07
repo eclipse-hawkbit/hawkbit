@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetRepository;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.Distr
 import org.eclipse.hawkbit.ui.management.tag.SpColorPickerPreview;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -114,7 +114,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
     private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
-    private transient DistributionSetRepository distributionSetRepository;
+    private transient EntityFactory entityFactory;
 
     /**
      * Instance of ColorPickerPreview.
@@ -205,7 +205,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
         tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName("tag-color-preview");
 
@@ -299,6 +299,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         mainWindowLayout.addComponent(colorLayout);
         mainWindowLayout.addComponent(buttonLayout);
         setCompositionRoot(mainWindowLayout);
+        typeName.focus();
     }
 
     private HorizontalLayout createTwinColumnLayout() {
@@ -653,7 +654,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(typeDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
-            DistributionSetType newDistType = new DistributionSetType(typeKeyValue, typeNameValue, typeDescValue);
+            DistributionSetType newDistType = entityFactory.generateDistributionSetType(typeKeyValue, typeNameValue,
+                    typeDescValue);
             for (final Long id : itemIds) {
                 final Item item = selectedTable.getItem(id);
                 final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
@@ -703,7 +705,8 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             updateDistSetType.setKey(typeKeyValue);
             updateDistSetType.setDescription(null != typeDescValue ? typeDescValue : null);
 
-            if (distributionSetRepository.countByType(existingType) <= 0 && null != itemIds && !itemIds.isEmpty()) {
+            if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
+                    && !itemIds.isEmpty()) {
                 for (final Long id : itemIds) {
                     final Item item = selectedTable.getItem(id);
                     final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
@@ -1039,7 +1042,7 @@ public class CreateUpdateDistSetTypeLayout extends CustomComponent implements Co
             typeDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
 
-            if (distributionSetRepository.countByType(selectedTypeTag) <= 0) {
+            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag) <= 0) {
                 distTypeSelectLayout.setEnabled(true);
                 selectedTable.setEnabled(true);
                 saveDistSetType.setEnabled(true);

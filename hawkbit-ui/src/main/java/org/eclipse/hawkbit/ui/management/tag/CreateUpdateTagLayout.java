@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -171,7 +171,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         tagName = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME,
                 true, "", i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
-
+        
         tagDesc = SPUIComponentProvider.getTextArea("", ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC,
                 false, "", i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
 
@@ -193,7 +193,7 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         discardTag.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
         tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
@@ -237,7 +237,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
         fieldLayout.addComponent(madatoryLabel);
         fieldLayout.addComponent(tagName);
         fieldLayout.addComponent(tagDesc);
-
+        
+        
         final HorizontalLayout colorLabelLayout = new HorizontalLayout();
         colorLabelLayout.addComponents(colorLabel, tagColorPreviewBtn);
         fieldLayout.addComponent(colorLabelLayout);
@@ -257,8 +258,8 @@ public abstract class CreateUpdateTagLayout extends CustomComponent implements C
 
         mainLayout = new HorizontalLayout();
         mainLayout.addComponent(fieldButtonLayout);
-
         setCompositionRoot(mainLayout);
+        tagName.focus();
 
     }
 

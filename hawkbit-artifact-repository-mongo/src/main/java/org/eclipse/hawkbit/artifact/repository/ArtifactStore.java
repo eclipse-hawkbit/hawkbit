@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -121,8 +124,10 @@ public class ArtifactStore implements ArtifactRepository {
         try {
             LOGGER.debug("storing file {} of content {}", filename, contentType);
             tempFile = File.createTempFile("uploadFile", null);
-            try (final FileOutputStream os = new FileOutputStream(tempFile)) {
-                return store(content, contentType, os, tempFile, hash);
+            try (final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile))) {
+                try (BufferedInputStream bis = new BufferedInputStream(content)) {
+                    return store(bis, contentType, bos, tempFile, hash);
+                }
             }
         } catch (final IOException | MongoException e1) {
             throw new ArtifactStoreException(e1.getMessage(), e1);
@@ -162,7 +167,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private DbArtifact store(final InputStream content, final String contentType, final FileOutputStream os,
+    private DbArtifact store(final InputStream content, final String contentType, final OutputStream os,
             final File tempFile, final DbArtifactHash hash) {
         final GridFsArtifact storedArtifact;
         try {
@@ -185,7 +190,8 @@ public class ArtifactStore implements ArtifactRepository {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
 
-        if (hash != null && hash.getMd5() != null && !storedArtifact.getHashes().getMd5().equals(hash.getMd5())) {
+        if (hash != null && hash.getMd5() != null
+                && !storedArtifact.getHashes().getMd5().equalsIgnoreCase(hash.getMd5())) {
             throw new HashNotMatchException("The given md5 hash " + hash.getMd5()
                     + " not matching the calculated md5 hash " + storedArtifact.getHashes().getMd5(),
                     HashNotMatchException.MD5);
@@ -195,14 +201,17 @@ public class ArtifactStore implements ArtifactRepository {
 
     }
 
-    private static String computeSHA1Hash(final InputStream stream, final FileOutputStream os,
-            final String providedSHA1Sum) throws NoSuchAlgorithmException, IOException {
+    private static String computeSHA1Hash(final InputStream stream, final OutputStream os, final String providedSHA1Sum)
+            throws NoSuchAlgorithmException, IOException {
         String sha1Hash;
         // compute digest
+        // Exception squid:S2070 - not used for hashing sensitive
+        // data
+        @SuppressWarnings("squid:S2070")
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
-        final DigestOutputStream dos = new DigestOutputStream(os, md);
-        ByteStreams.copy(stream, dos);
-        dos.close();
+        try (final DigestOutputStream dos = new DigestOutputStream(os, md)) {
+            ByteStreams.copy(stream, dos);
+        }
         sha1Hash = BaseEncoding.base16().lowerCase().encode(md.digest());
         if (providedSHA1Sum != null && !providedSHA1Sum.equalsIgnoreCase(sha1Hash)) {
             throw new HashNotMatchException(

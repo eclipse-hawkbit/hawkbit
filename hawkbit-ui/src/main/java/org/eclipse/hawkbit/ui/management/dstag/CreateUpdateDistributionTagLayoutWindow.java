@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.tag.CreateUpdateTagLayout;
@@ -43,14 +44,13 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringComponent
 @VaadinSessionScope
 public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayout {
-
-    /**
-    * 
-    */
     private static final long serialVersionUID = 444276149954167545L;
 
     @Autowired
     private transient UINotification uiNotification;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private static final String MISSING_TAG_NAME = "message.error.missing.tagname";
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
@@ -102,14 +102,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
         final String tagDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
 
         if (null != tagNameValue) {
-            DistributionSetTag newDistTag = new DistributionSetTag(tagNameValue);
-            if (null != tagDescValue) {
-                newDistTag.setDescription(tagDescValue);
-            }
-            newDistTag.setColour(new Color(0, 146, 58).getCSS());
+            DistributionSetTag newDistTag = entityFactory.generateDistributionSetTag(tagNameValue, tagDescValue,
+                    new Color(0, 146, 58).getCSS());
+
             if (colorPicked != null) {
                 newDistTag.setColour(colorPicked);
             }
+
             newDistTag = tagManagement.createDistributionSetTag(newDistTag);
             uiNotification.displaySuccess(i18n.get("message.save.success", new Object[] { newDistTag.getName() }));
             resetDistTagValues();
@@ -288,16 +287,22 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagCreatedBulkEvent(final DistributionSetTagCreatedBulkEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagDeletedEvent(final DistributionSetTagDeletedEvent event) {
         populateTagNameCombo();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onDistributionSetTagUpdateEvent(final DistributionSetTagUpdateEvent event) {
         populateTagNameCombo();
     }

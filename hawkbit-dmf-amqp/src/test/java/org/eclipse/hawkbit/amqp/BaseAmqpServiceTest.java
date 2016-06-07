@@ -52,6 +52,8 @@ public class BaseAmqpServiceTest {
         final ActionUpdateStatus actionUpdateStatus = new ActionUpdateStatus();
         actionUpdateStatus.setActionId(1L);
         actionUpdateStatus.setSoftwareModuleId(2L);
+        actionUpdateStatus.getMessage().add("Message 1");
+        actionUpdateStatus.getMessage().add("Message 2");
 
         final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatus,
                 new MessageProperties());

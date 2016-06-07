@@ -71,6 +71,8 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
     @Override
     @Bean
     @ConditionalOnMissingBean
+    // Closed by pre-destroy
+    @SuppressWarnings({ "squid:S2095" })
     public Mongo mongo() throws UnknownHostException {
         final MongoClientURI uri = new MongoClientURI(properties.getUri(), createBuilderOutOfOptions(options));
 

@@ -17,12 +17,14 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.filtermanagement.event.CustomFilterUIEvent;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
+import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
@@ -69,6 +71,10 @@ public class CreateOrUpdateFilterTable extends Table {
 
     private static final int PROPERTY_DEPT = 3;
 
+    private static final String ASSIGN_DIST_SET = "assignedDistributionSet";
+
+    private static final String INSTALL_DIST_SET = "installedDistributionSet";
+
     /**
      * Initialize the Action History Table.
      */
@@ -84,9 +90,10 @@ public class CreateOrUpdateFilterTable extends Table {
         addCustomGeneratedColumns();
         restoreOnLoad();
         populateTableData();
-        setId(SPUIComponetIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
+        setId(SPUIComponentIdProvider.CUSTOM_FILTER_TARGET_TABLE_ID);
         setSelectable(false);
         eventBus.subscribe(this);
+        setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
     @PreDestroy
@@ -160,6 +167,9 @@ public class CreateOrUpdateFilterTable extends Table {
     private void setCollapsibleColumns() {
         setColumnCollapsed(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, true);
         setColumnCollapsed(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, true);
+
+        setColumnCollapsed(ASSIGN_DIST_SET, true);
+        setColumnCollapsed(INSTALL_DIST_SET, true);
     }
 
     /**
@@ -172,10 +182,13 @@ public class CreateOrUpdateFilterTable extends Table {
         container.addContainerProperty(SPUILabelDefinitions.VAR_CREATED_DATE, Date.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, String.class, null, false, true);
         container.addContainerProperty(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, String.class, null, false, true);
-        container.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "");
-        container.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_TARGET_STATUS, TargetUpdateStatus.class, null);
         container.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, "", false, true);
+
+        container.addContainerProperty(ASSIGN_DIST_SET, DistributionSet.class, null, false, true);
+        container.addContainerProperty(INSTALL_DIST_SET, DistributionSet.class, null, false, true);
+        container.addContainerProperty(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER, String.class, "");
+        container.addContainerProperty(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER, String.class, null);
     }
 
     private List<TableColumn> getVisbleColumns() {
@@ -186,12 +199,9 @@ public class CreateOrUpdateFilterTable extends Table {
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_BY, i18n.get("header.modifiedBy"), 0.1F));
         columnList.add(
                 new TableColumn(SPUILabelDefinitions.VAR_LAST_MODIFIED_DATE, i18n.get("header.modifiedDate"), 0.1F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.ASSIGNED_DISTRIBUTION_NAME_VER,
-                i18n.get("header.assigned.ds"), 0.125F));
-        columnList.add(new TableColumn(SPUILabelDefinitions.INSTALLED_DISTRIBUTION_NAME_VER,
-                i18n.get("header.installed.ds"), 0.125F));
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_DESC, i18n.get("header.description"), 0.1F));
         columnList.add(new TableColumn(SPUILabelDefinitions.STATUS_ICON, i18n.get("header.status"), 0.1F));
+
         return columnList;
     }
 
@@ -244,4 +254,5 @@ public class CreateOrUpdateFilterTable extends Table {
         populateTableData();
         eventBus.publish(this, CustomFilterUIEvent.UPDATE_TARGET_FILTER_SEARCH_ICON);
     }
+
 }

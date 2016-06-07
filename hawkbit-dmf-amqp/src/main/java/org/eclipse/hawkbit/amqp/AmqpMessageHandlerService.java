@@ -30,11 +30,12 @@ import org.eclipse.hawkbit.dmf.json.model.ArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken;
 import org.eclipse.hawkbit.dmf.json.model.TenantSecurityToken.FileResource;
-import org.eclipse.hawkbit.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -96,6 +97,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     @Autowired
     private HostnameResolver hostnameResolver;
+
+    @Autowired
+    private EntityFactory entityFactory;
 
     /**
      * Constructor.
@@ -305,7 +309,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
         eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
-                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress()));
+                target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress(),
+                target.getSecurityToken()));
 
     }
 
@@ -335,10 +340,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
-        final ActionStatus actionStatus = new ActionStatus();
-        final List<String> messageText = actionUpdateStatus.getMessage();
-        final String messageString = String.join(", ", messageText);
-        actionStatus.addMessage(messageString);
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
+        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
+
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
 
@@ -371,18 +375,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             logAndThrowMessageError(message, "Status for action does not exisit.");
         }
 
-        final Action addUpdateActionStatus = getUpdateActionStatus(action, actionStatus);
+        final Action addUpdateActionStatus = getUpdateActionStatus(actionStatus);
 
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
     }
 
-    private Action getUpdateActionStatus(final Action action, final ActionStatus actionStatus) {
+    private Action getUpdateActionStatus(final ActionStatus actionStatus) {
         if (actionStatus.getStatus().equals(Status.CANCELED)) {
-            return controllerManagement.addCancelActionStatus(actionStatus, action);
+            return controllerManagement.addCancelActionStatus(actionStatus);
         }
-        return controllerManagement.addUpdateActionStatus(actionStatus, action);
+        return controllerManagement.addUpdateActionStatus(actionStatus);
     }
 
     private Action checkActionExist(final Message message, final ActionUpdateStatus actionUpdateStatus) {
@@ -447,6 +451,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     void setEventBus(final EventBus eventBus) {
         this.eventBus = eventBus;
+    }
+
+    void setEntityFactory(final EntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
     }
 
 }

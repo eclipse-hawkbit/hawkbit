@@ -8,29 +8,37 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rollout;
 
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_LI_OPEN_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
+import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlLabelRenderer;
-import org.eclipse.hawkbit.ui.customrenderers.renderers.LinkRenderer;
+import org.eclipse.hawkbit.ui.customrenderers.renderers.RolloutRenderer;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -77,6 +85,13 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String START_OPTION = "Start";
 
+    private static final String DS_TYPE = "type";
+
+    private static final String SW_MODULES = "swModules";
+
+    private static final String IS_REQUIRED_MIGRATION_STEP = "isRequiredMigrationStep";
+
+    private static final String ROLLOUT_RENDERER_DATA = "rolloutRendererData";
 
     @Autowired
     private transient RolloutManagement rolloutManagement;
@@ -95,7 +110,10 @@ public class RolloutListGrid extends AbstractGrid {
 
     private transient Map<RolloutStatus, StatusFontIcon> statusIconMap = new EnumMap<>(RolloutStatus.class);
 
-
+    /**
+     * Handles the RolloutEvent to refresh Grid.
+     *
+     */
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final RolloutEvent event) {
         switch (event) {
@@ -132,10 +150,16 @@ public class RolloutListGrid extends AbstractGrid {
         item.getItemProperty(SPUILabelDefinitions.VAR_STATUS).setValue(rollout.getStatus());
         item.getItemProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setValue(totalTargetCountStatus);
         final Long groupCount = (Long) item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).getValue();
-        if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
+        final int groupsCreated = rollout.getRolloutGroupsCreated();
+        if (groupsCreated != 0) {
+            item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setValue(Long.valueOf(groupsCreated));
+        } else if (rollout.getRolloutGroups() != null && groupCount != rollout.getRolloutGroups().size()) {
             item.getItemProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS)
                     .setValue(Long.valueOf(rollout.getRolloutGroups().size()));
         }
+        item.getItemProperty(ROLLOUT_RENDERER_DATA)
+                .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
+
     }
 
     @Override
@@ -149,7 +173,11 @@ public class RolloutListGrid extends AbstractGrid {
     protected void addContainerProperties() {
         final LazyQueryContainer rolloutGridContainer = (LazyQueryContainer) getContainerDataSource();
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NAME, String.class, "", false, false);
+        rolloutGridContainer.addContainerProperty(DS_TYPE, String.class, null, false, false);
+        rolloutGridContainer.addContainerProperty(SW_MODULES, Set.class, null, false, false);
+        rolloutGridContainer.addContainerProperty(ROLLOUT_RENDERER_DATA, RolloutRendererData.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DESC, String.class, null, false, false);
+        rolloutGridContainer.addContainerProperty(IS_REQUIRED_MIGRATION_STEP, boolean.class, null, false, false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_STATUS, RolloutStatus.class, null, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_DIST_NAME_VERSION, String.class, null, false,
@@ -163,7 +191,7 @@ public class RolloutListGrid extends AbstractGrid {
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_MODIFIED_BY, String.class, null, false,
                 false);
-        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, Integer.class, 0, false,
+        rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS, Long.class, 0, false,
                 false);
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS, String.class, "0", false,
                 false);
@@ -177,8 +205,9 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnExpandRatio() {
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMinimumWidth(40);
-        getColumn(SPUILabelDefinitions.VAR_NAME).setMaximumWidth(150);
+
+        getColumn(ROLLOUT_RENDERER_DATA).setMinimumWidth(40);
+        getColumn(ROLLOUT_RENDERER_DATA).setMaximumWidth(150);
 
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setMaximumWidth(150);
@@ -202,7 +231,10 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void setColumnHeaderNames() {
-        getColumn(SPUILabelDefinitions.VAR_NAME).setHeaderCaption(i18n.get("header.name"));
+        getColumn(ROLLOUT_RENDERER_DATA).setHeaderCaption(i18n.get("header.name"));
+        getColumn(DS_TYPE).setHeaderCaption("Type");
+        getColumn(SW_MODULES).setHeaderCaption("swModules");
+        getColumn(IS_REQUIRED_MIGRATION_STEP).setHeaderCaption("IsRequiredMigrationStep");
         getColumn(SPUILabelDefinitions.VAR_DIST_NAME_VERSION).setHeaderCaption(i18n.get("header.distributionset"));
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setHeaderCaption(i18n.get("header.numberofgroups"));
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS).setHeaderCaption(i18n.get("header.total.targets"));
@@ -219,14 +251,17 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected String getGridId() {
-        return SPUIComponetIdProvider.ROLLOUT_LIST_GRID_ID;
+        return SPUIComponentIdProvider.ROLLOUT_LIST_GRID_ID;
     }
 
     @Override
     protected void setColumnProperties() {
         final List<Object> columnList = new ArrayList<>();
-        columnList.add(SPUILabelDefinitions.VAR_NAME);
+        columnList.add(ROLLOUT_RENDERER_DATA);
         columnList.add(SPUILabelDefinitions.VAR_DIST_NAME_VERSION);
+        columnList.add(DS_TYPE);
+        columnList.add(SW_MODULES);
+        columnList.add(IS_REQUIRED_MIGRATION_STEP);
         columnList.add(SPUILabelDefinitions.VAR_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS);
         columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
@@ -245,11 +280,15 @@ public class RolloutListGrid extends AbstractGrid {
     @Override
     protected void setHiddenColumns() {
         final List<Object> columnsToBeHidden = new ArrayList<>();
+        columnsToBeHidden.add(SPUILabelDefinitions.VAR_NAME);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_CREATED_USER);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_DATE);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_MODIFIED_BY);
         columnsToBeHidden.add(SPUILabelDefinitions.VAR_DESC);
+        columnsToBeHidden.add(IS_REQUIRED_MIGRATION_STEP);
+        columnsToBeHidden.add(DS_TYPE);
+        columnsToBeHidden.add(SW_MODULES);
         for (final Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
@@ -263,6 +302,8 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected void addColumnRenderes() {
+        getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setRenderer(new HtmlRenderer(),
+                new TotalTargetGroupsConverter());
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
 
@@ -270,7 +311,11 @@ public class RolloutListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
 
         getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(event -> onClickOfActionBtn(event)));
-        getColumn(SPUILabelDefinitions.VAR_NAME).setRenderer(new LinkRenderer(event -> onClickOfRolloutName(event)));
+
+        final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
+        customObjectRenderer.addClickListener(event -> onClickOfRolloutName(event));
+        getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
+
     }
 
     private void createRolloutStatusToFontMap() {
@@ -403,6 +448,9 @@ public class RolloutListGrid extends AbstractGrid {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
     }
 
+    /**
+     * Generator to generate fontIcon by String.
+     */
     public final class FontIconGenerator extends PropertyValueGenerator<String> {
 
         private static final long serialVersionUID = 2544026030795375748L;
@@ -428,13 +476,52 @@ public class RolloutListGrid extends AbstractGrid {
             return cell.getProperty().getValue().toString().toLowerCase();
         } else if (SPUILabelDefinitions.ACTION.equals(cell.getPropertyId())) {
             return SPUILabelDefinitions.ACTION.toLowerCase();
-        } else if (SPUILabelDefinitions.VAR_NAME.equals(cell.getPropertyId())) {
-            return cell.getProperty().getValue().toString();
+        } else if (ROLLOUT_RENDERER_DATA.equals(cell.getPropertyId())) {
+            return ((RolloutRendererData) cell.getProperty().getValue()).getName();
         } else if (SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS.equals(cell.getPropertyId())) {
             return DistributionBarHelper
                     .getTooltip(((TotalTargetCountStatus) cell.getValue()).getStatusTotalCountMap());
+        } else if (SPUILabelDefinitions.VAR_DIST_NAME_VERSION.equals(cell.getPropertyId())) {
+            return getDSDetails(cell.getItem());
         }
         return null;
+    }
+
+    private String getDSDetails(final Item rolloutItem) {
+        final StringBuilder swModuleNames = new StringBuilder();
+        final StringBuilder swModuleVendors = new StringBuilder();
+        final Set<SoftwareModule> swModules = (Set<SoftwareModule>) rolloutItem.getItemProperty(SW_MODULES).getValue();
+        swModules.forEach(swModule -> {
+            swModuleNames.append(swModule.getName());
+            swModuleNames.append(" , ");
+            swModuleVendors.append(swModule.getVendor());
+            swModuleVendors.append(" , ");
+        });
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(HTML_UL_OPEN_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append(" DistributionSet Description : ")
+                .append((String) rolloutItem.getItemProperty(SPUILabelDefinitions.VAR_DESC).getValue());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append(" DistributionSet Type : ")
+                .append((String) rolloutItem.getItemProperty(DS_TYPE).getValue());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append("Required Migration step : ")
+                .append((boolean) rolloutItem.getItemProperty(IS_REQUIRED_MIGRATION_STEP).getValue() ? "Yes" : "No");
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append("SoftWare Modules : ").append(swModuleNames.toString());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+
+        stringBuilder.append(HTML_LI_OPEN_TAG);
+        stringBuilder.append("Vendor(s) : ").append(swModuleVendors.toString());
+        stringBuilder.append(HTML_LI_CLOSE_TAG);
+
+        stringBuilder.append(HTML_UL_CLOSE_TAG);
+        return stringBuilder.toString();
     }
 
     enum ACTION {
@@ -530,7 +617,7 @@ public class RolloutListGrid extends AbstractGrid {
             final StatusFontIcon statusFontIcon = statusIconMap.get(value);
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+                    SPUIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
         }
     }
 
@@ -566,6 +653,41 @@ public class RolloutListGrid extends AbstractGrid {
         public Class<String> getPresentationType() {
             return String.class;
         }
+    }
+
+    /**
+     * Converter to convert 0 to empty, if total target groups is zero.
+     *
+     */
+    class TotalTargetGroupsConverter implements Converter<String, Long> {
+
+        private static final long serialVersionUID = 6589305227035220369L;
+
+        @Override
+        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
+            return null;
+        }
+
+        @Override
+        public String convertToPresentation(final Long value, final Class<? extends String> targetType,
+                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+            if (value == 0) {
+                return "";
+            }
+            return value.toString();
+        }
+
+        @Override
+        public Class<Long> getModelType() {
+            return Long.class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
+
     }
 
 }

@@ -16,11 +16,11 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -246,7 +246,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         if (type != null) {
             final Label typeLabel = SPUIComponentProvider.createNameValueLabel(getI18n().get("label.dist.details.type"),
                     type);
-            typeLabel.setId(SPUIComponetIdProvider.DETAILS_TYPE_LABEL_ID);
+            typeLabel.setId(SPUIComponentIdProvider.DETAILS_TYPE_LABEL_ID);
             detailsTabLayout.addComponent(typeLabel);
         }
 
@@ -268,7 +268,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getEditButtonId() {
-        return SPUIComponetIdProvider.DS_EDIT_BUTTON;
+        return SPUIComponentIdProvider.DS_EDIT_BUTTON;
     }
 
     @Override
@@ -358,7 +358,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getDetailsHeaderCaptionId() {
-        return SPUIComponetIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
+        return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
 
 }

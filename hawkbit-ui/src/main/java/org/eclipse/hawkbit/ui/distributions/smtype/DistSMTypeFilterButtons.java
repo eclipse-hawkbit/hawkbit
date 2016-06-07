@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonsTableId() {
-        return SPUIComponetIdProvider.SW_MODULE_TYPE_TABLE_ID;
+        return SPUIComponentIdProvider.SW_MODULE_TYPE_TABLE_ID;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class DistSMTypeFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String createButtonId(final String name) {
-        return SPUIComponetIdProvider.SM_TYPE_FILTER_BTN_ID + name;
+        return SPUIComponentIdProvider.SM_TYPE_FILTER_BTN_ID + name;
     }
 
     @Override

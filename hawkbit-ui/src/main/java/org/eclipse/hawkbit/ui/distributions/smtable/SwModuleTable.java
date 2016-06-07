@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleTableEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleTableEvent.SoftwareModuleComponentEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -130,7 +130,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
+        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
     @Override
@@ -313,7 +313,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private Button createShowArtifactDtlsButton(final String nameVersionStr) {
         final Button showArtifactDtlsBtn = SPUIComponentProvider.getButton(
-                SPUIComponetIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
+                SPUIComponentIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         showArtifactDtlsBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         showArtifactDtlsBtn.setDescription(i18n.get("tooltip.artifact.icon"));

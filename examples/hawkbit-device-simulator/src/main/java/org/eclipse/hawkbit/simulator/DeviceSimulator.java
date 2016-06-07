@@ -21,8 +21,6 @@ import com.vaadin.spring.annotation.EnableVaadin;
 /**
  * The main-method to start the Spring-Boot application.
  *
- *
- *
  */
 @SpringBootApplication
 @EnableVaadin
@@ -46,6 +44,8 @@ public class DeviceSimulator {
      * @param args
      *            the args
      */
+    // Exception squid:S2095 - Spring boot standard behavior
+    @SuppressWarnings({ "squid:S2095" })
     public static void main(final String[] args) {
         SpringApplication.run(DeviceSimulator.class, args);
     }

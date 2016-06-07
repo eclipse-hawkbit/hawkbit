@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -19,7 +20,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -65,6 +66,9 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private Label madatoryLabel;
 
@@ -130,21 +134,21 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         /* name textfield */
         nameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
                 i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_NAME);
+        nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
 
         /* version text field */
         versionTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
                 i18n.get("textfield.version"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        versionTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_VERSION);
+        versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
 
         /* Vendor text field */
         vendorTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        vendorTextField.setId(SPUIComponetIdProvider.SOFT_MODULE_VENDOR);
+        vendorTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
 
         descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTAREA_TINY, false, null,
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponetIdProvider.ADD_SW_MODULE_DESCRIPTION);
+        descTextArea.setId(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION);
         addDescriptionTextChangeListener();
         addVendorTextChangeListener();
 
@@ -155,7 +159,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
         typeComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, null,
                 i18n.get("upload.swmodule.type"));
-        typeComboBox.setId(SPUIComponetIdProvider.SW_MODULE_TYPE);
+        typeComboBox.setId(SPUIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
@@ -163,7 +167,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         populateTypeNameCombo();
 
         /* save or update button */
-        saveSoftware = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_SAVE, "", "", "", true,
+        saveSoftware = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SOFT_MODULE_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
         saveSoftware.addClickListener(event -> {
             if (editSwModule) {
@@ -175,7 +179,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         });
 
         /* close button */
-        closeWindow = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SOFT_MODULE_DISCARD, "", "", "", true,
+        closeWindow = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SOFT_MODULE_DISCARD, "", "", "", true,
                 FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         /* Just close this window when this button is clicked */
         closeWindow.addClickListener(event -> closeThisWindow());
@@ -240,6 +244,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
                 SPUIDefinitions.CREATE_UPDATE_WINDOW);
         window.setContent(mainLayout);
         window.setModal(true);
+        nameTextField.focus();
     }
 
     private void addDescriptionTextChangeListener() {
@@ -276,8 +281,8 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
                 uiNotifcation.displayValidationError(
                         i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
             } else {
-                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(name, version, vendor,
-                        softwareManagement.findSoftwareModuleTypeByName(type), description);
+                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
+                        version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
                 if (newBaseSoftwareModule != null) {
                     /* display success message */
                     uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {

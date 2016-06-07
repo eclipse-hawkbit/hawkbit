@@ -41,9 +41,9 @@ $ java -jar ./examples/hawkbit-example-app/target/hawkbit-example-app-#version#.
 $ java -jar ./examples/hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 #### Generate Getting Started data
-[Example Management API Client](examples/hawkbit-mgmt-api-client)
+[Example Management API Client](examples/hawkbit-example-mgmt-simulator)
 ```
-$ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#version#.jar
+$ java -jar ./examples/hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
 ```
 
 # Releases and Roadmap
@@ -52,21 +52,27 @@ $ java -jar ./examples/hawkbit-mgmt-api-client/target/hawkbit-mgmt-api-client-#v
 * The master branch contains future development towards 0.2. We are currently focusing on:
   * Rollout Management for large scale rollouts.
   * Clustering capabilities for the update server.
-  * Upgrade of Spring Boot and Vaadin depedencies.
+  * Upgrade of Spring Boot and Vaadin dependencies.
   * And of course tons of usability improvements and bug fixes.
 
 
 # Modules
-`hawkbit-core` : core elements.  
-`hawkbit-security-core` : core security elements.  
-`hawkbit-security-integration` : security integration elements to integrate security into hawkbit.  
-`hawkbit-artifact-repository-mongo` : artifact repository implementation to mongoDB.    
-`hawkbit-autoconfigure` : spring-boot auto-configuration.  
-`hawkbit-dmf-api` : API for the Device Management Integration.  
-`hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API.  
-`hawkbit-repository` : repository implemenation based on SQL for all meta-data.    
-`hawkbit-http-security` : implementation for security filters for HTTP.    
-`hawkbit-rest-api` : API classes for the REST Management API.  
-`hawkbit-rest-resource` : HTTP REST endpoints for the Management and the Direct Device API.  
-`hawkbit-ui` : Vaadin UI.  
-`hawkbit-cache-redis` : spring cache manager configuration and implementation with redis, distributed cache and distributed events.
+* `examples` : hawkBit examples 
+* `hawkbit-artifact-repository-mongo` : Artifact repository implementation to mongoDB. 
+* `hawkbit-autoconfigure` : Spring-boot auto-configuration. 
+* `hawkbit-cache-redis` : Spring cache manager configuration and implementation with redis, distributed cache and distributed events.
+* `hawkbit-core` : Core elements for internal interfaces and utility classes.
+* `hawkbit-ddi-api` : The hawkBit DDI API.
+* `hawkbit-ddi-dl-api` : The hawkBit DDI Download API.
+* `hawkbit-ddi-resource` : Implementation of the hawkBit DDI API
+* `hawkbit-dmf-amqp` : AMQP endpoint implementation for the DMF API. 
+* `hawkbit-dmf-api` : API for the Device Management Integration.  
+* `hawkbit-http-security` : Implementation for security filters for HTTP.  
+* `hawkbit-mgmt-api` : The hawkBit Management API
+* `hawkbit-mgmt-resource` : Implementation of the hawkBit Management API
+* `hawkbit-repository` : Repository implementation based on SQL for all meta-data.   
+* `hawkbit-rest-core` : Core elements for the rest modules.
+* `hawkbit-security-core` : Core security elements.  
+* `hawkbit-security-integration` : Security integration elements to integrate security into hawkBit.  
+* `hawkbit-test-report` : Test reports
+* `hawkbit-ui` : Vaadin UI.  

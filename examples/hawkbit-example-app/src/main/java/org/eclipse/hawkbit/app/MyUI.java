@@ -29,6 +29,9 @@ import com.vaadin.spring.annotation.SpringUI;
  */
 @SpringUI
 @Push(value = PushMode.AUTOMATIC, transport = Transport.WEBSOCKET)
+// Exception squid:MaximumInheritanceDepth - Most of the inheritance comes from
+// Vaadin.
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
 public class MyUI extends HawkbitUI {
 
     private static final long serialVersionUID = 1L;

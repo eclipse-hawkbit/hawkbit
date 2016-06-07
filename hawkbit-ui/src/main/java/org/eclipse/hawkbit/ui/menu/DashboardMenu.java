@@ -18,23 +18,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -115,9 +112,9 @@ public final class DashboardMenu extends CustomComponent {
         final VerticalLayout links = buildLinksAndVersion();
         menus.addComponent(links);
         menus.setComponentAlignment(links, Alignment.BOTTOM_CENTER);
-        menus.setExpandRatio(links, 1.0f);
+        menus.setExpandRatio(links, 1.0F);
         menuContent.addComponent(menus);
-        menuContent.setExpandRatio(menus, 1.0f);
+        menuContent.setExpandRatio(menus, 1.0F);
 
         dashboardMenuLayout.addComponent(menuContent);
         return dashboardMenuLayout;
@@ -139,7 +136,7 @@ public final class DashboardMenu extends CustomComponent {
         final Label logo = new Label("<strong>" + i18n.get("menu.title") + "</strong>", ContentMode.HTML);
         logo.setSizeUndefined();
         final HorizontalLayout logoWrapper = new HorizontalLayout(logo);
-        logoWrapper.setComponentAlignment(logo, Alignment.MIDDLE_CENTER);
+        logoWrapper.setComponentAlignment(logo, Alignment.TOP_CENTER);
         logoWrapper.addStyleName("valo-menu-title");
         return logoWrapper;
     }
@@ -151,7 +148,7 @@ public final class DashboardMenu extends CustomComponent {
         final String linkStyle = "v-link";
 
         if (!uiProperties.getLinks().getDocumentation().getRoot().isEmpty()) {
-            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_DOCUMENATION,
+            final Link docuLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_DOCUMENTATION,
                     i18n.get("link.documentation.name"), uiProperties.getLinks().getDocumentation().getRoot(),
                     FontAwesome.QUESTION_CIRCLE, "_blank", linkStyle, true);
             docuLink.setDescription(i18n.get("link.documentation.name"));
@@ -161,7 +158,7 @@ public final class DashboardMenu extends CustomComponent {
         }
 
         if (!uiProperties.getLinks().getUserManagement().isEmpty()) {
-            final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_USERMANAGEMENT,
+            final Link userManagementLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_USERMANAGEMENT,
                     i18n.get("link.usermanagement.name"), uiProperties.getLinks().getUserManagement(),
                     FontAwesome.USERS, "_blank", linkStyle, true);
             userManagementLink.setDescription(i18n.get("link.usermanagement.name"));
@@ -171,7 +168,7 @@ public final class DashboardMenu extends CustomComponent {
         }
 
         if (!uiProperties.getLinks().getSupport().isEmpty()) {
-            final Link supportLink = SPUIComponentProvider.getLink(SPUIComponetIdProvider.LINK_SUPPORT,
+            final Link supportLink = SPUIComponentProvider.getLink(SPUIComponentIdProvider.LINK_SUPPORT,
                     i18n.get("link.support.name"), uiProperties.getLinks().getSupport(), FontAwesome.ENVELOPE_O, "",
                     linkStyle, true);
             supportLink.setDescription(i18n.get("link.support.name"));
@@ -189,61 +186,25 @@ public final class DashboardMenu extends CustomComponent {
         return links;
     }
 
-    private UserDetails getCurrentUser() {
-        final SecurityContext context = (SecurityContext) VaadinService.getCurrentRequest().getWrappedSession()
-                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        return (UserDetails) context.getAuthentication().getPrincipal();
-    }
-
     private Component buildUserMenu() {
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
-        final UserDetails user = getCurrentUser();
+        settings.setHtmlContentAllowed(true);
         final MenuItem settingsItem = settings.addItem("", new ThemeResource("images/profile-pic-57px.jpg"), null);
-        if (user instanceof UserPrincipal
-                && (((UserPrincipal) user).getFirstname() != null || ((UserPrincipal) user).getLastname() != null)) {
-            settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
-                    + concateFNameLName(((UserPrincipal) user).getFirstname(), ((UserPrincipal) user).getLastname()));
-            settingsItem.setDescription(
-                    ((UserPrincipal) user).getFirstname() + " / " + ((UserPrincipal) user).getLastname());
-        } else if (user instanceof UserPrincipal) {
-            if (((UserPrincipal) user).getLoginname().length() > 10) {
-                settingsItem.setText(trimTanent(((UserPrincipal) user).getTenant()) + "\n"
-                        + ((UserPrincipal) user).getLoginname().substring(0, 10) + "..");
-            } else {
-                settingsItem.setText(
-                        trimTanent(((UserPrincipal) user).getTenant()) + "\n" + ((UserPrincipal) user).getLoginname());
-            }
-            settingsItem.setDescription(((UserPrincipal) user).getLoginname());
-        } else if (user != null) {
-            settingsItem.setText(user.getUsername());
-            settingsItem.setDescription(user.getUsername());
+
+        final String formattedTenant = UserDetailsFormatter.formatCurrentTenant();
+        final String formattedUsername = UserDetailsFormatter.formatCurrentUsername();
+        String tenantAndUsernameHtml = "";
+        if (!StringUtils.isEmpty(formattedTenant)) {
+            tenantAndUsernameHtml += formattedTenant + "<br>";
         }
+        tenantAndUsernameHtml += formattedUsername;
+        settingsItem.setText(tenantAndUsernameHtml);
+        settingsItem.setDescription(formattedUsername);
+        settingsItem.setStyleName("user-menuitem");
 
         settingsItem.addItem("Sign Out", selectedItem -> Page.getCurrent().setLocation("/UI/logout"));
         return settings;
-    }
-
-    private String concateFNameLName(final String fName, final String lName) {
-        final StringBuilder userName = new StringBuilder();
-        if (fName != null && fName.length() > 6) {
-            userName.append(fName.substring(0, 6) + ".." + ", ");
-        } else {
-            userName.append(fName).append(", ");
-        }
-        if (lName != null && lName.length() > 6) {
-            userName.append(lName.substring(0, 6) + "..");
-        } else {
-            userName.append(lName);
-        }
-        return userName.toString();
-    }
-
-    private String trimTanent(final String tanent) {
-        if (tanent != null && tanent.length() > 8) {
-            return tanent.substring(0, 8) + "..";
-        }
-        return tanent;
     }
 
     private Component buildToggleButton() {
@@ -264,7 +225,7 @@ public final class DashboardMenu extends CustomComponent {
     private VerticalLayout buildMenuItems() {
         final VerticalLayout menuItemsLayout = new VerticalLayout();
         menuItemsLayout.addStyleName("valo-menuitems");
-        menuItemsLayout.setHeight(100.0f, Unit.PERCENTAGE);
+        menuItemsLayout.setHeight(100.0F, Unit.PERCENTAGE);
 
         final List<DashboardMenuItem> accessibleViews = getAccessibleViews();
         if (accessibleViews.isEmpty()) {

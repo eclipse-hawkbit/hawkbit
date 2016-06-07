@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -29,7 +30,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -76,6 +77,9 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private SpPermissionChecker permChecker;
 
     @Autowired
+    private transient EntityFactory entityFactory;
+
+    @Autowired
     private transient TargetManagement targetManagement;
 
     TargetTagFilterButtonClick filterButtonClickBehaviour;
@@ -90,7 +94,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     public void init(final TargetTagFilterButtonClick filterButtonClickBehaviour) {
         this.filterButtonClickBehaviour = filterButtonClickBehaviour;
         super.init(filterButtonClickBehaviour);
-        addNewTargetTag(new TargetTag("NO TAG"));
+        addNewTargetTag(entityFactory.generateTargetTag("NO TAG"));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -110,7 +114,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonsTableId() {
-        return SPUIComponetIdProvider.TARGET_TAG_TABLE_ID;
+        return SPUIComponentIdProvider.TARGET_TAG_TABLE_ID;
     }
 
     @Override
@@ -153,7 +157,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
                 if (validate(event) && isNoTagAssigned(event)) {
                     final TableTransferable tbl = (TableTransferable) event.getTransferable();
                     final Table source = tbl.getSourceComponent();
-                    if (source.getId().equals(SPUIComponetIdProvider.TARGET_TABLE_ID)) {
+                    if (source.getId().equals(SPUIComponentIdProvider.TARGET_TABLE_ID)) {
                         processTargetDrop(event);
                     }
                 }
@@ -253,7 +257,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     private boolean validateIfSourceisTargetTable(final Table source) {
-        if (!source.getId().equals(SPUIComponetIdProvider.TARGET_TABLE_ID)) {
+        if (!source.getId().equals(SPUIComponentIdProvider.TARGET_TABLE_ID)) {
             notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
             return false;
         }
@@ -267,16 +271,22 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEvent(final TargetTagUpdateEvent event) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetTagCreated(final TargetTagCreatedBulkEvent event) {
         refreshContainer();
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
+    // Exception squid:S1172 - event not needed
+    @SuppressWarnings({ "squid:S1172" })
     void onEventTargetDeletedEvent(final TargetTagDeletedEvent event) {
         refreshContainer();
     }
@@ -284,7 +294,7 @@ public class TargetTagFilterButtons extends AbstractFilterButtons {
     private void refreshContainer() {
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
         ((LazyQueryContainer) getContainerDataSource()).refresh();
-        addNewTargetTag(new TargetTag("NO TAG"));
+        addNewTargetTag(entityFactory.generateTargetTag("NO TAG"));
         addColumn();
     }
 

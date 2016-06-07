@@ -16,8 +16,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -92,7 +92,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private transient SystemManagement systemManagement;
 
     @Autowired
-    private transient TenantMetaDataRepository tenantMetaDataRepository;
+    private transient EntityFactory entityFactory;
 
     private Button saveDistributionBtn;
     private Button discardDistributionBtn;
@@ -148,6 +148,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
 
         addComponent(buttonsLayout);
         setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
+        distNameTextField.focus();
 
     }
 
@@ -157,23 +158,23 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private void createRequiredComponents() {
         distNameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
                 i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        distNameTextField.setId(SPUIComponetIdProvider.DIST_ADD_NAME);
+        distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
         distNameTextField.setNullRepresentation("");
 
         distVersionTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
                 i18n.get("textfield.version"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        distVersionTextField.setId(SPUIComponetIdProvider.DIST_ADD_VERSION);
+        distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
         distVersionTextField.setNullRepresentation("");
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox("", "", null, "", false, "",
                 i18n.get("label.combobox.type"));
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
-        distsetTypeNameComboBox.setId(SPUIComponetIdProvider.DIST_ADD_DISTSETTYPE);
+        distsetTypeNameComboBox.setId(SPUIComponentIdProvider.DIST_ADD_DISTSETTYPE);
 
         descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTAREA_TINY, false, null,
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponetIdProvider.DIST_ADD_DESC);
+        descTextArea.setId(SPUIComponentIdProvider.DIST_ADD_DESC);
         descTextArea.setNullRepresentation("");
 
         /* Label for mandatory symbol */
@@ -183,15 +184,15 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
-        reqMigStepCheckbox.setId(SPUIComponetIdProvider.DIST_ADD_MIGRATION_CHECK);
+        reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
 
         /* save or update button */
-        saveDistributionBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_SAVE, "", "", "", true,
+        saveDistributionBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.DIST_ADD_SAVE, "", "", "", true,
                 FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
         saveDistributionBtn.addClickListener(event -> saveDistribution());
 
         /* close button */
-        discardDistributionBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.DIST_ADD_DISCARD, "", "", "",
+        discardDistributionBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.DIST_ADD_DISCARD, "", "", "",
                 true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         discardDistributionBtn.addClickListener(event -> discardDistribution());
     }
@@ -220,8 +221,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
-        final TenantMetaData tenantMetaData = tenantMetaDataRepository
-                .findByTenantIgnoreCase(systemManagement.currentTenant());
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
         return tenantMetaData.getDefaultDsType();
     }
 
@@ -296,7 +296,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         if (mandatoryCheck(name, version, distSetTypeName) && duplicateCheck(name, version)) {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-            DistributionSet newDist = new DistributionSet();
+            DistributionSet newDist = entityFactory.generateDistributionSet();
 
             setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
             newDist = distributionSetManagement.createDistributionSet(newDist);

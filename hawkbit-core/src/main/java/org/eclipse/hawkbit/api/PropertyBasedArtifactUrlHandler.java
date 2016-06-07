@@ -61,7 +61,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         for (final Entry<String, String> entry : entrySet) {
             if (entry.getKey().equals(PORT_PLACEHOLDER)) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
-                        Strings.isNullOrEmpty(entry.getValue()) ? "" : ":" + entry.getValue());
+                        Strings.isNullOrEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
             } else {
                 urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
             }
@@ -82,6 +82,17 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(TARGET_ID_PLACEHOLDER, targetId);
         replaceMap.put(SOFTWARE_MODULE_ID_PLACDEHOLDER, String.valueOf(softwareModuleId));
         return replaceMap;
+    }
+
+    @Override
+    public boolean protocolSupported(final UrlProtocol protocol) {
+        final String protocolString = protocol.name().toLowerCase();
+        final ProtocolProperties properties = urlHandlerProperties.getProperties(protocolString);
+        if (properties == null || properties.getPattern() == null) {
+            return false;
+        }
+
+        return properties.isEnabled();
     }
 
 }

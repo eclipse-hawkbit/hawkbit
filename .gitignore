@@ -53,3 +53,5 @@ local.properties
 # Maven
 maven.properties
 /*/maven.properties
+
+hawkbit-repository/hawkbit-repository-jpa/.springBeans

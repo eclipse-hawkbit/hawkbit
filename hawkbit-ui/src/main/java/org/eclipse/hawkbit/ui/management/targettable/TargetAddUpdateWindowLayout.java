@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -21,7 +22,7 @@ import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -69,6 +70,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient UINotification uINotification;
+    
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private TextField controllerIDTextField;
     private TextField nameTextField;
@@ -102,17 +106,17 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         /* Textfield for controller Id */
         controllerIDTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
                 i18n.get("prompt.target.id"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        controllerIDTextField.setId(SPUIComponetIdProvider.TARGET_ADD_CONTROLLER_ID);
+        controllerIDTextField.setId(SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
 
         /* Textfield for target name */
         nameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
-        nameTextField.setId(SPUIComponetIdProvider.TARGET_ADD_NAME);
+        nameTextField.setId(SPUIComponentIdProvider.TARGET_ADD_NAME);
 
         /* Textarea for target description */
         descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTFIELD_TINY, false, null,
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        descTextArea.setId(SPUIComponetIdProvider.TARGET_ADD_DESC);
+        descTextArea.setId(SPUIComponentIdProvider.TARGET_ADD_DESC);
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
 
         /* Label for mandatory symbol */
@@ -152,7 +156,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             madatoryLabel.setVisible(Boolean.FALSE);
         }
         mainLayout.addComponents(madatoryLabel, controllerIDTextField, nameTextField, descTextArea, buttonsLayout);
-
+        nameTextField.focus();
     }
 
     private void addListeners() {
@@ -245,7 +249,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             /* create new target entity */
-            Target newTarget = new Target(newControlllerId);
+            Target newTarget = entityFactory.generateTarget(newControlllerId);
             /* set values to the new target entity */
             setTargetValues(newTarget, newName, newDesc);
             /* save new target */
