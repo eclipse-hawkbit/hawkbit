@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
-import org.eclipse.hawkbit.ui.utils.SPUIButtonDefinitions;
-
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
@@ -22,13 +20,6 @@ public class SPUITagButtonStyle implements SPUIButtonDecorator {
     @Override
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
 
-        /**
-         * Add ... for long name
-         */
-        final String buttonCaption = button.getCaption();
-        if (buttonCaption != null && buttonCaption.length() > SPUIButtonDefinitions.BUTTON_CAPTION_LENGTH) {
-            button.setCaption(buttonCaption.substring(0, SPUIButtonDefinitions.BUTTON_CAPTION_LENGTH) + "...");
-        }
         button.setImmediate(true);
         button.addStyleName("generatedColumnPadding button-no-border" + " " + ValoTheme.BUTTON_BORDERLESS + " "
                 + "button-tag-no-border");
