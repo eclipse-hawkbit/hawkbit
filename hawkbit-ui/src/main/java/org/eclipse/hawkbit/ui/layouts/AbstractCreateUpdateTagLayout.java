@@ -102,8 +102,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected boolean tagPreviewBtnClicked = false;
 
     private String colorPicked;
-    private String tagNameValue;
-    private String tagDescValue;
+    protected String tagNameValue;
+    protected String tagDescValue;
 
     protected void createWindow() {
         reset();

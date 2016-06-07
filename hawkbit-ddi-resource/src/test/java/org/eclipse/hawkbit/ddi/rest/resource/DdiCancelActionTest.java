@@ -22,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.hawkbit.TestDataUtil;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -49,9 +48,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Description("Test of the controller can continue a started update even after a cancel command if it so desires.")
     public void rootRsCancelActionButContinueAnyway() throws Exception {
         // prepare test data
-        final Target target = new Target("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = targetManagement.createTarget(target);
 
         final List<Target> toAssign = new ArrayList<Target>();
@@ -106,9 +104,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Test for cancel operation of a update action.")
     public void rootRsCancelAction() throws Exception {
-        final Target target = new Target("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = targetManagement.createTarget(target);
 
         final List<Target> toAssign = new ArrayList<Target>();
@@ -224,9 +221,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     }
 
     private Action createCancelAction(final String targetid) {
-        final Target target = new Target(targetid);
-        final DistributionSet ds = TestDataUtil.generateDistributionSet(targetid, softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget(targetid);
+        final DistributionSet ds = testdataFactory.createDistributionSet(targetid);
         final Target savedTarget = targetManagement.createTarget(target);
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(savedTarget);
@@ -241,9 +237,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Description("Tests the feedback channel of the cancel operation.")
     public void rootRsCancelActionFeedback() throws Exception {
 
-        final Target target = new Target("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         final Target savedTarget = targetManagement.createTarget(target);
 
@@ -253,7 +248,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         // cancel action manually
         final Action cancelAction = deploymentManagement.cancelAction(updateAction,
                 targetManagement.findTargetByControllerID(savedTarget.getControllerId()));
-        assertThat(actionStatusRepository.findAll()).hasSize(2);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
         long current = System.currentTimeMillis();
@@ -266,7 +261,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .isGreaterThanOrEqualTo(current);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(3);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/cancelAction/" + cancelAction.getId() + "/feedback",
@@ -277,7 +272,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
-        assertThat(actionStatusRepository.findAll()).hasSize(4);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(4);
 
         current = System.currentTimeMillis();
         mvc.perform(post("/{tenant}/controller/v1/4712/cancelAction/" + cancelAction.getId() + "/feedback",
@@ -287,7 +282,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(actionStatusRepository.findAll()).hasSize(5);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(5);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         // cancelation canceled -> should remove the action from active
@@ -300,7 +295,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(actionStatusRepository.findAll()).hasSize(6);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         // cancelation rejected -> action still active until controller close it
@@ -315,7 +310,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(actionStatusRepository.findAll()).hasSize(7);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
         // cancelaction closed -> should remove the action from active
@@ -327,20 +322,17 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.findTargetByControllerID("4712").getTargetInfo().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(actionStatusRepository.findAll()).hasSize(8);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(0);
     }
 
     @Test
     @Description("Tests the feeback chanel of for multiple open cancel operations on the same target.")
     public void multipleCancelActionFeedback() throws Exception {
-        final Target target = new Target("4712");
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds2 = TestDataUtil.generateDistributionSet("2", softwareManagement,
-                distributionSetManagement, true);
-        final DistributionSet ds3 = TestDataUtil.generateDistributionSet("3", softwareManagement,
-                distributionSetManagement, true);
+        final Target target = entityFactory.generateTarget("4712");
+        final DistributionSet ds = testdataFactory.createDistributionSet("", true);
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
+        final DistributionSet ds3 = testdataFactory.createDistributionSet("3", true);
 
         final Target savedTarget = targetManagement.createTarget(target);
 
@@ -351,7 +343,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
         final Action updateAction3 = deploymentManagement.findActionWithDetails(
                 deploymentManagement.assignDistributionSet(ds3.getId(), new String[] { "4712" }).getActions().get(0));
 
-        assertThat(actionStatusRepository.findAll()).hasSize(3);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(3);
 
         // 3 update actions, 0 cancel actions
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(3);
@@ -370,7 +362,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction.getId()))))
                 .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction.getId()))));
-        assertThat(actionStatusRepository.findAll()).hasSize(6);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(6);
 
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -386,7 +378,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                         .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(actionStatusRepository.findAll()).hasSize(7);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(7);
 
         // 1 update actions, 1 cancel actions
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(2);
@@ -396,7 +388,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction2.getId()))))
                 .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction2.getId()))));
-        assertThat(actionStatusRepository.findAll()).hasSize(8);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(8);
 
         mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -412,17 +404,18 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                         .content(JsonBuilder.cancelActionFeedback(cancelAction2.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(actionStatusRepository.findAll()).hasSize(9);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(9);
 
         assertThat(targetManagement.findTargetByControllerID("4712").getAssignedDistributionSet()).isEqualTo(ds3);
         mvc.perform(get("/{tenant}/controller/v1/4712/deploymentBase/" + updateAction3.getId(),
                 tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(actionStatusRepository.findAll()).hasSize(10);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(10);
 
         // 1 update actions, 0 cancel actions
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(1);
 
-        final Action cancelAction3 = deploymentManagement.cancelAction(actionRepository.findOne(updateAction3.getId()),
+        final Action cancelAction3 = deploymentManagement.cancelAction(
+                deploymentManagement.findAction(updateAction3.getId()),
                 targetManagement.findTargetByControllerID(savedTarget.getControllerId()));
 
         // action is in cancelling state
@@ -435,7 +428,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$id", equalTo(String.valueOf(cancelAction3.getId()))))
                 .andExpect(jsonPath("$cancelAction.stopId", equalTo(String.valueOf(updateAction3.getId()))));
-        assertThat(actionStatusRepository.findAll()).hasSize(12);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(12);
 
         // now lets return feedback for the third cancelation
         mvc.perform(post("/{tenant}/controller/v1/4712/cancelAction/" + cancelAction3.getId() + "/feedback",
@@ -443,7 +436,7 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
                         .content(JsonBuilder.cancelActionFeedback(cancelAction3.getId().toString(), "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-        assertThat(actionStatusRepository.findAll()).hasSize(13);
+        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(13);
 
         // final status
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget)).hasSize(0);
@@ -453,9 +446,8 @@ public class DdiCancelActionTest extends AbstractRestIntegrationTest {
     @Test
     @Description("Tests the feeback channel closing for too many feedbacks, i.e. denial of service prevention.")
     public void tooMuchCancelActionFeedback() throws Exception {
-        final Target target = targetManagement.createTarget(new Target("4712"));
-        final DistributionSet ds = TestDataUtil.generateDistributionSet("", softwareManagement,
-                distributionSetManagement);
+        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         final List<Target> toAssign = new ArrayList<Target>();
         toAssign.add(target);

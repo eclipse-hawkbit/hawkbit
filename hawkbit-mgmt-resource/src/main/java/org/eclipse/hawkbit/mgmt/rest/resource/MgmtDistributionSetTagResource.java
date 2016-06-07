@@ -20,14 +20,13 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TagManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
-import org.eclipse.hawkbit.repository.rsql.RSQLUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +55,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
+    @Autowired
+    private EntityFactory entityFactory;
+
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -75,8 +77,8 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             countTargetsAll = this.tagManagement.countTargetTags();
 
         } else {
-            final Page<DistributionSetTag> findTargetPage = this.tagManagement
-                    .findAllDistributionSetTags(RSQLUtility.parse(rsqlParam, TagFields.class), pageable);
+            final Page<DistributionSetTag> findTargetPage = this.tagManagement.findAllDistributionSetTags(rsqlParam,
+                    pageable);
             countTargetsAll = findTargetPage.getTotalElements();
             findTargetsAll = findTargetPage;
 
@@ -99,7 +101,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         LOG.debug("creating {} ds tags", tags.size());
 
         final List<DistributionSetTag> createdTags = this.tagManagement
-                .createDistributionSetTags(MgmtTagMapper.mapDistributionSetTagFromRequest(tags));
+                .createDistributionSetTags(MgmtTagMapper.mapDistributionSetTagFromRequest(entityFactory, tags));
 
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }

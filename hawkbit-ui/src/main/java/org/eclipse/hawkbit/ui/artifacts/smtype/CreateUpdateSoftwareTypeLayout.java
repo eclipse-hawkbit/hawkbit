@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
@@ -55,6 +56,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
     @Autowired
     private transient SoftwareManagement swTypeManagementService;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private String singleAssignStr;
     private String multiAssignStr;
@@ -227,8 +231,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         }
 
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue,
-                    assignNumber, colorPicked);
+            SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
+                    typeDescValue, assignNumber);
+            newSWType.setColour(colorPicked);
+
             if (null != typeDescValue) {
                 newSWType.setDescription(typeDescValue);
             }

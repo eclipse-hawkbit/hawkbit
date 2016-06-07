@@ -12,13 +12,15 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.eventbus.event.TargetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -35,6 +37,9 @@ import com.vaadin.ui.Button.ClickEvent;
 public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 2446682350481560235L;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     // Exception squid:S1172 - event not needed
@@ -116,7 +121,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     protected void createNewTag() {
         super.createNewTag();
         if (isNotEmpty(getTagNameValue())) {
-            TargetTag newTargetTag = new TargetTag(getTagNameValue());
+            TargetTag newTargetTag = entityFactory.generateTargetTag(getTagNameValue());
             if (isNotEmpty(getTagDescValue())) {
                 newTargetTag.setDescription(getTagDescValue());
             }

@@ -21,7 +21,7 @@
 
 
    <dependencies>
-   <dependency>
+      <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-core</artifactId>
          <version>${project.version}</version>

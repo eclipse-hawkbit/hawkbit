@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
@@ -65,6 +66,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient UINotification uINotification;
+    
+    @Autowired
+    private transient EntityFactory entityFactory;
     
     private TextField controllerIDTextField;
     private TextField nameTextField;
@@ -220,7 +224,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
             final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
 
             /* create new target entity */
-            Target newTarget = new Target(newControlllerId);
+            Target newTarget = entityFactory.generateTarget(newControlllerId);
             /* set values to the new target entity */
             setTargetValues(newTarget, newName, newDesc);
             /* save new target */

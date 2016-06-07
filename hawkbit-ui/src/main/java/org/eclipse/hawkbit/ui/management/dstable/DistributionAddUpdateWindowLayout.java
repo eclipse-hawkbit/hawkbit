@@ -16,8 +16,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -88,7 +88,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private transient SystemManagement systemManagement;
 
     @Autowired
-    private transient TenantMetaDataRepository tenantMetaDataRepository;
+    private transient EntityFactory entityFactory;
 
     private TextField distNameTextField;
     private TextField distVersionTextField;
@@ -205,8 +205,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
-        final TenantMetaData tenantMetaData = tenantMetaDataRepository
-                .findByTenantIgnoreCase(systemManagement.currentTenant());
+        final TenantMetaData tenantMetaData = systemManagement.getTenantMetadata();
         return tenantMetaData.getDefaultDsType();
     }
 
@@ -281,7 +280,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         if (mandatoryCheck(name, version, distSetTypeName) && duplicateCheck(name, version)) {
             final String desc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
             final boolean isMigStepReq = reqMigStepCheckbox.getValue();
-            DistributionSet newDist = new DistributionSet();
+            DistributionSet newDist = entityFactory.generateDistributionSet();
 
             setDistributionValues(newDist, name, version, distSetTypeName, desc, isMigStepReq);
             newDist = distributionSetManagement.createDistributionSet(newDist);

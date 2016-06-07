@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -94,6 +95,9 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     @Autowired
     @Qualifier("uiExecutor")
     private transient Executor executor;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private HorizontalLayout breadcrumbLayout;
 
@@ -500,7 +504,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private void createTargetFilterQuery() {
-        final TargetFilterQuery targetFilterQuery = new TargetFilterQuery();
+        final TargetFilterQuery targetFilterQuery = entityFactory.generateTargetFilterQuery();
         targetFilterQuery.setName(nameTextField.getValue());
         targetFilterQuery.setQuery(queryTextField.getValue());
         targetFilterQueryManagement.createTargetFilterQuery(targetFilterQuery);
