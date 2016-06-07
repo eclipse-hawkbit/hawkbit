@@ -182,7 +182,6 @@ public abstract class AbstractFilterButtons extends Table {
         }
         button.setData(id == null ? SPUIDefinitions.NO_TAG_BUTTON_ID : itemId);
 
-        button.addStyleName("generatedColumnPadding");
         return button;
     }
 
