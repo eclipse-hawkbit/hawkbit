@@ -12,13 +12,13 @@ import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * Button with icon decorator.
+ *
+ */
 public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
 
-    Button button;
-
-    /**
-     * Style for button: Primary.
-     */
+    private Button button;
 
     @Override
     public Button decorate(final Button button, final String style, final boolean setStyle, final Resource icon) {
@@ -36,19 +36,22 @@ public class SPUIButtonStyleBorderWithIcon implements SPUIButtonDecorator {
 
     private void setButtonStyle(final String style, final boolean setStyle) {
 
-        if (null != style) {
-            if (setStyle) {
-                button.setStyleName(style);
-            } else {
-                button.addStyleName(style);
-            }
+        if (style == null) {
+            return;
+        }
+
+        if (setStyle) {
+            button.setStyleName(style);
+        } else {
+            button.addStyleName(style);
         }
     }
 
     private void setButtonIcon(final Resource icon) {
 
-        if (null != icon) {
-            button.setIcon(icon);
+        if (icon == null) {
+            return;
         }
+        button.setIcon(icon);
     }
 }
