@@ -241,10 +241,11 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         }
     }
 
+    // TODO MR requiredFields
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), event -> discardTargetListner(), null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), event -> discardTargetListner(), null, null);
         return window;
     }
 

@@ -105,10 +105,11 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected String tagNameValue;
     protected String tagDescValue;
 
+    // TODO MR requiredFields
     protected void createWindow() {
         reset();
         setWindow(SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null));
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, null));
     }
 
     /**

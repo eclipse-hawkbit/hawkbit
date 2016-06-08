@@ -504,13 +504,14 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         }
     }
 
+    // TODO MR requiredFields
     public CommonDialogWindow getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         populateRequiredComponents();
         resetComponents();
         addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null);
+                null, null);
         addDistributionWindow.getButtonsLayout().removeStyleName("actionButtonsMargin");
 
         return addDistributionWindow;

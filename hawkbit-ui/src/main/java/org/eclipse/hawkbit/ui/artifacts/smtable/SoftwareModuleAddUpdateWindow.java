@@ -9,7 +9,11 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -29,10 +33,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
@@ -129,12 +136,14 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
+        nameTextField.addTextChangeListener(this::nameTextFieldChanged);
 
         /* version text field */
         versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
+        versionTextField.addTextChangeListener(this::versionTextFieldChanged);
 
         /* Vendor text field */
         vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
@@ -159,15 +168,40 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
+        typeComboBox.addValueChangeListener(this::typeComboBoxChanged);
 
         populateTypeNameCombo();
 
         resetOldValues();
     }
 
-    /**
-    * 
-    */
+    private void nameTextFieldChanged(final TextChangeEvent event) {
+        if (StringUtils.isNotBlank(event.getText())) {
+            window.getRequiredFields().put(nameTextField.getCaption(), Boolean.TRUE);
+        } else {
+            window.getRequiredFields().put(nameTextField.getCaption(), Boolean.FALSE);
+        }
+        window.checkMandatoryFields();
+    }
+
+    private void versionTextFieldChanged(final TextChangeEvent event) {
+        if (StringUtils.isNotBlank(event.getText())) {
+            window.getRequiredFields().put(versionTextField.getCaption(), Boolean.TRUE);
+        } else {
+            window.getRequiredFields().put(versionTextField.getCaption(), Boolean.FALSE);
+        }
+        window.checkMandatoryFields();
+    }
+
+    private void typeComboBoxChanged(final ValueChangeEvent event) {
+        if (event.getProperty().getValue() != null) {
+            window.getRequiredFields().put(typeComboBox.getCaption(), Boolean.TRUE);
+        } else {
+            window.getRequiredFields().put(typeComboBox.getCaption(), Boolean.FALSE);
+        }
+        window.checkMandatoryFields();
+    }
+
     private void populateTypeNameCombo() {
         typeComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
@@ -180,10 +214,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         oldVendorValue = null;
     }
 
-    /**
-     * Build the window content and get an instance of customDialogWindow
-     * 
-     */
     private void createWindow() {
 
         final Label madatoryStarLabel = new Label("*");
@@ -197,7 +227,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         addStyleName("lay-color");
 
         final FormLayout formLayout = new FormLayout();
-        formLayout.addComponent(mandatoryLabel);
+        // formLayout.addComponent(mandatoryLabel);
         formLayout.addComponent(typeComboBox);
         formLayout.addComponent(nameTextField);
         formLayout.addComponent(versionTextField);
@@ -208,9 +238,29 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
+                getMandatoryFields(formLayout));
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         nameTextField.focus();
+    }
+
+    private Map<String, Boolean> getMandatoryFields(final FormLayout formLayout) {
+        final Map<String, Boolean> requiredFields = new HashMap<>();
+        final Iterator<Component> iterate = formLayout.iterator();
+        while (iterate.hasNext()) {
+            final Component c = iterate.next();
+            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
+                requiredFields.put(c.getCaption(), null);
+            }
+            // else if (c instanceof TextField && ((TextField) c).isRequired())
+            // {
+            // requiredFields.put(c.getCaption(), null);
+            // } else if (c instanceof TextArea && ((TextArea) c).isRequired())
+            // {
+            // requiredFields.put(c.getCaption(), null);
+            // }
+        }
+        return requiredFields;
     }
 
     private void addDescriptionTextChangeListener() {
