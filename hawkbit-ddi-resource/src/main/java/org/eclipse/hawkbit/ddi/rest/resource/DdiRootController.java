@@ -119,16 +119,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("targetid") final String targetid) {
         LOG.debug("getControllerBase({})", targetid);
 
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotexist(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         if (target.getTargetInfo().getUpdateStatus() == TargetUpdateStatus.UNKNOWN) {
             LOG.debug("target with {} extsisted but was in status UNKNOWN -> REGISTERED)", targetid);
             controllerManagement.updateTargetStatus(target.getTargetInfo(), TargetUpdateStatus.REGISTERED,
-                    System.currentTimeMillis(),
-                    IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                            securityProperties.getClients().getRemoteIpHeader()));
+                    System.currentTimeMillis(), IpUtil.getClientIpFromRequest(
+                            requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         }
 
         return new ResponseEntity<>(
@@ -143,9 +141,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName) {
         ResponseEntity<InputStream> result;
 
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
 
         if (checkModule(fileName, module)) {
@@ -200,9 +197,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<Void> downloadArtifactMd5(@PathVariable("targetid") final String targetid,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         final SoftwareModule module = softwareManagement.findSoftwareModuleById(softwareModuleId);
 
@@ -228,9 +224,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource) {
         LOG.debug("getControllerBasedeploymentAction({},{})", targetid, resource);
 
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -263,9 +258,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("targetid") final String targetid, @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", targetid, actionId, feedback);
 
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         if (!actionId.equals(feedback.getId())) {
             LOG.warn(
@@ -357,9 +351,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<Void> putConfigData(@Valid @RequestBody final DdiConfigData configData,
             @PathVariable("targetid") final String targetid) {
-        controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         controllerManagement.updateControllerAttributes(targetid, configData.getData());
 
@@ -372,9 +365,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("getControllerCancelAction({})", targetid);
 
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
@@ -403,9 +395,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", targetid, feedback);
 
-        final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(),
-                        securityProperties.getClients().getRemoteIpHeader()));
+        final Target target = controllerManagement.updateLastTargetQuery(targetid, IpUtil
+                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
 
         if (!actionId.equals(feedback.getId())) {
             LOG.warn(

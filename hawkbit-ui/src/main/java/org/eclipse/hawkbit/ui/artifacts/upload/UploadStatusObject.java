@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
+import java.io.Serializable;
+
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
@@ -16,22 +18,24 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  * popup.
  *
  */
-public class UploadStatusObject {
+public class UploadStatusObject implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String status;
     private Double progress;
     private String filename;
     private String reason;
-    private SoftwareModule selectedSoftwareModule;
+    private final SoftwareModule selectedSoftwareModule;
 
     public UploadStatusObject(final String status, final Double progress, final String fileName, final String reason,
             final SoftwareModule selectedSoftwareModule) {
-        this(fileName,selectedSoftwareModule);
+        this(fileName, selectedSoftwareModule);
         this.status = status;
         this.progress = progress;
         this.reason = reason;
     }
 
-    public UploadStatusObject(String fileName, SoftwareModule selectedSoftwareModule) {
+    public UploadStatusObject(final String fileName, final SoftwareModule selectedSoftwareModule) {
         this.filename = fileName;
         this.selectedSoftwareModule = selectedSoftwareModule;
     }
@@ -44,7 +48,7 @@ public class UploadStatusObject {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(final String status) {
         this.status = status;
     }
 
@@ -52,7 +56,7 @@ public class UploadStatusObject {
         return progress;
     }
 
-    public void setProgress(Double progress) {
+    public void setProgress(final Double progress) {
         this.progress = progress;
     }
 
@@ -60,7 +64,7 @@ public class UploadStatusObject {
         return filename;
     }
 
-    public void setFilename(String filename) {
+    public void setFilename(final String filename) {
         this.filename = filename;
     }
 
@@ -68,19 +72,38 @@ public class UploadStatusObject {
         return reason;
     }
 
-    public void setReason(String reason) {
+    public void setReason(final String reason) {
         this.reason = reason;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == null || obj == null) {
-            return false;
-        }
-        if (obj instanceof UploadStatusObject && this.getFilename() == ((UploadStatusObject) obj).getFilename()) {
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((filename == null) ? 0 : filename.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        return false;
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof UploadStatusObject)) {
+            return false;
+        }
+        final UploadStatusObject other = (UploadStatusObject) obj;
+        if (filename == null) {
+            if (other.filename != null) {
+                return false;
+            }
+        } else if (!filename.equals(other.filename)) {
+            return false;
+        }
+        return true;
     }
 
 }

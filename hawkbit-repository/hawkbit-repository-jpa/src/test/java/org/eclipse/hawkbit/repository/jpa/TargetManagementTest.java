@@ -38,13 +38,13 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
-import org.eclipse.hawkbit.repository.util.WithUser;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 

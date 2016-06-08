@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+
 import com.google.common.net.HttpHeaders;
 
 /**
@@ -45,17 +47,49 @@ public final class IpUtil {
      * @param request
      *            the {@link HttpServletRequest} to determine the IP address
      *            where this request has been sent from
-     * @param forwardHeader
-     *            the header name containing the IP address e.g. forwarded by a
-     *            proxy {@code x-forwarded-for}
+     * @param securityProperties
+     *            hawkBit security properties.
      * @return the {@link URI} based IP address from the client which sent the
      *         request
      */
-    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader) {
-        String ip = request.getHeader(forwardHeader);
-        if (ip == null || (ip = findClientIpAddress(ip)) == null) {
-            ip = request.getRemoteAddr();
+    public static URI getClientIpFromRequest(final HttpServletRequest request,
+            final HawkbitSecurityProperties securityProperties) {
+
+        return getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader(),
+                securityProperties.getClients().isTrackRemoteIp());
+    }
+
+    /**
+     * Retrieves the string based IP address from a given
+     * {@link HttpServletRequest} by either the
+     * {@link HttpHeaders#X_FORWARDED_FOR} or by the
+     * {@link HttpServletRequest#getRemoteAddr()} methods.
+     * 
+     * @param request
+     *            the {@link HttpServletRequest} to determine the IP address
+     *            where this request has been sent from
+     * @param forwardHeader
+     *            the header name containing the IP address e.g. forwarded by a
+     *            proxy {@code x-forwarded-for}
+     * 
+     * @param trackRemoteIp
+     *            to <code>true</code> if remote IP should be tracked.
+     * @return the {@link URI} based IP address from the client which sent the
+     *         request
+     */
+    public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
+            final boolean trackRemoteIp) {
+        String ip;
+
+        if (trackRemoteIp) {
+            ip = request.getHeader(forwardHeader);
+            if (ip == null || (ip = findClientIpAddress(ip)) == null) {
+                ip = request.getRemoteAddr();
+            }
+        } else {
+            ip = "***";
         }
+
         return createHttpUri(ip);
     }
 
