@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -63,7 +61,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.addons.lazyquerycontainer.LazyQueryDefinition;
@@ -71,12 +68,8 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
-import com.vaadin.event.Action.Handler;
-import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -95,11 +88,10 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Concrete implementation of Target table.
- *
  */
 @SpringComponent
 @ViewScope
-public class TargetTable extends AbstractTable<Target, TargetIdName> implements Handler {
+public class TargetTable extends AbstractTable<Target, TargetIdName> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TargetTable.class);
     private static final String TARGET_PINNED = "targetPinned";
@@ -127,15 +119,10 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
     private Button targetPinnedBtn;
 
     private Boolean isTargetPinned = Boolean.FALSE;
-    private ShortcutAction actionSelectAll;
-    private ShortcutAction actionUnSelectAll;
 
     @Override
     protected void init() {
         super.init();
-        addActionHandler(this);
-        actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
-        actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
         setItemDescriptionGenerator(new AssignInstalledDSTooltipGenerator());
     }
 
@@ -261,22 +248,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
     }
 
     @Override
-    public Action[] getActions(final Object target, final Object sender) {
-        return new Action[] { actionSelectAll, actionUnSelectAll };
-    }
-
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        if (actionSelectAll.equals(action)) {
-            selectAll();
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELLECT_ALL));
-        }
-        if (actionUnSelectAll.equals(action)) {
-            unSelectAll();
-        }
-    }
-
-    @Override
     protected void addCustomGeneratedColumns() {
         addGeneratedColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON,
                 (source, itemId, columnId) -> getTagetPinButton(itemId));
@@ -354,7 +325,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         };
     }
 
-    // TODO MR
     private void onTargetDeletedEvent(final List<TargetDeletedEvent> events) {
         final LazyQueryContainer targetContainer = (LazyQueryContainer) getContainerDataSource();
         final List<Object> visibleItemIds = (List<Object>) getVisibleItemIds();
@@ -454,7 +424,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
         pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
-        pinBtn.addClickListener(event -> addPinClickListener(event));
+        pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
             isTargetPinned = Boolean.TRUE;
@@ -931,60 +901,9 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
      */
     public void selectAll() {
 
-        // final PageRequest pageRequest = new OffsetBasedPageRequest(0, size(),
-        // new Sort(SPUIDefinitions.TARGET_TABLE_CREATE_AT_SORT_ORDER,
-        // "createdAt"));
-        // List<TargetIdName> targetIdList;
-        // // is custom filter selected
-        // if
-        // (managementUIState.getTargetTableFilters().getTargetFilterQuery().isPresent())
-        // {
-        // targetIdList = getTargetIdsByCustomFilters(pageRequest);
-        // } else {
-        // targetIdList = getTargetIdsBySimpleFilters(pageRequest);
-        // }
-        // setValue(targetIdList);
-
-        // TODO MR
         // As Vaadin Table only returns the current ItemIds which are visible
         // you don't need to search explicit for them.
         setValue(getItemIds());
-    }
-
-    private List<TargetIdName> getTargetIdsBySimpleFilters(final PageRequest pageRequest) {
-        final Long filterByDistId = managementUIState.getTargetTableFilters().getDistributionSet().isPresent()
-                ? managementUIState.getTargetTableFilters().getDistributionSet().get().getId() : null;
-        final List<TargetUpdateStatus> statusList = new ArrayList<>();
-        if (isFilteredByStatus()) {
-            statusList.addAll(managementUIState.getTargetTableFilters().getClickedStatusTargetTags());
-        }
-        final List<String> tagList = new ArrayList<>();
-        if (isFilteredByTags()) {
-            tagList.addAll(managementUIState.getTargetTableFilters().getClickedTargetTags());
-        }
-        String searchText = managementUIState.getTargetTableFilters().getSearchText().isPresent()
-                ? managementUIState.getTargetTableFilters().getSearchText().get() : null;
-        if (!Strings.isNullOrEmpty(searchText)) {
-            searchText = String.format("%%%s%%", searchText);
-        }
-        final Boolean noTagSelected = managementUIState.getTargetTableFilters().isNoTagSelected();
-
-        final String[] tagArray = tagList.toArray(new String[tagList.size()]);
-
-        List<TargetIdName> targetIdList;
-        targetIdList = targetManagement.findAllTargetIdsByFilters(pageRequest, statusList, searchText, filterByDistId,
-                noTagSelected, tagList.toArray(tagArray));
-        Collections.reverse(targetIdList);
-        return targetIdList;
-    }
-
-    private List<TargetIdName> getTargetIdsByCustomFilters(final PageRequest pageRequest) {
-        List<TargetIdName> targetIdList;
-        final TargetFilterQuery targetFilterQuery = managementUIState.getTargetTableFilters().getTargetFilterQuery()
-                .isPresent() ? managementUIState.getTargetTableFilters().getTargetFilterQuery().get() : null;
-        targetIdList = targetManagement.findAllTargetIdsByTargetFilterQuery(pageRequest, targetFilterQuery);
-        Collections.reverse(targetIdList);
-        return targetIdList;
     }
 
     /**
@@ -1071,10 +990,6 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     private long getTotalTargetsCount() {
         return targetManagement.countTargetsAll();
-    }
-
-    private static TargetIdName getLastSelectedItem(final Set<TargetIdName> values) {
-        return Iterables.getLast(values);
     }
 
     private boolean isFilteredByStatus() {

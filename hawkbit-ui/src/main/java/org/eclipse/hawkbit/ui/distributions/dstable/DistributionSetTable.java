@@ -30,8 +30,6 @@ import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTableEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTableEvent.DistributionSetComponentEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.DragEvent;
@@ -56,7 +54,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -68,7 +65,6 @@ import com.vaadin.ui.UI;
 
 /**
  * Distribution set table.
- *
  */
 @SpringComponent
 @ViewScope
@@ -471,18 +467,6 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     @Override
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvailableDist(!available);
-
-    }
-
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        if (actionSelectAll.equals(action)) {
-            selectAll();
-            eventBus.publish(this, new DistributionSetTableEvent(DistributionSetComponentEvent.SELECT_ALL));
-        }
-        if (actionUnSelectAll.equals(action)) {
-            unSelectAll();
-        }
     }
 
 }

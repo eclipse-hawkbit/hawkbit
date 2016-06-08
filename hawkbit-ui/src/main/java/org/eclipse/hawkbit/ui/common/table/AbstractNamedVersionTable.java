@@ -15,9 +15,6 @@ import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
-import com.vaadin.event.Action.Handler;
-import com.vaadin.event.ShortcutAction;
 
 /**
  * Abstract table to handling {@link NamedVersionedEntity}
@@ -27,14 +24,9 @@ import com.vaadin.event.ShortcutAction;
  * @param <I>
  *            i is the id of the table
  */
-public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, I> extends AbstractTable<E, I>
-        implements Handler {
+public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, I> extends AbstractTable<E, I> {
 
     private static final long serialVersionUID = 780050712209750719L;
-
-    protected ShortcutAction actionSelectAll;
-
-    protected ShortcutAction actionUnSelectAll;
 
     /**
      * Initialize the component.
@@ -42,8 +34,6 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
     @Override
     protected void init() {
         super.init();
-        actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
-        actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
         setMultiSelect(true);
         setSelectable(true);
     }
@@ -62,11 +52,6 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
     protected void updateEntity(final E baseEntity, final Item item) {
         super.updateEntity(baseEntity, item);
         item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
-    }
-
-    @Override
-    public Action[] getActions(final Object target, final Object sender) {
-        return new Action[] { actionSelectAll, actionUnSelectAll };
     }
 
     /**

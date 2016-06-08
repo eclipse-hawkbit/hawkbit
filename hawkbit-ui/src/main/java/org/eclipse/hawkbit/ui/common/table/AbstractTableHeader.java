@@ -36,10 +36,6 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * Parent class for table header.
- * 
- *
- *
- * 
  */
 public abstract class AbstractTableHeader extends VerticalLayout {
 

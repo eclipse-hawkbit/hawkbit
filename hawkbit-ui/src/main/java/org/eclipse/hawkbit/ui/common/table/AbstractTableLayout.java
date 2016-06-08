@@ -21,10 +21,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for table layout.
- * 
- *
- *
- * 
  */
 public abstract class AbstractTableLayout extends VerticalLayout {
 

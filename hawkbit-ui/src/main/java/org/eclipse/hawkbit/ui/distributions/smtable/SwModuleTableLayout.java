@@ -22,9 +22,6 @@ import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Implementation of software module Layout .
- * 
- *
- *
  */
 @SpringComponent
 @ViewScope

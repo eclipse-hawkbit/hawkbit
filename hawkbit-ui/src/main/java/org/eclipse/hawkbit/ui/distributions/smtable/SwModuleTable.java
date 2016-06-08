@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
-import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleTableEvent;
-import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleTableEvent.SoftwareModuleComponentEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -44,8 +42,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
-import com.vaadin.event.Action.Handler;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -66,7 +62,7 @@ import com.vaadin.ui.Window;
  */
 @SpringComponent
 @ViewScope
-public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> implements Handler {
+public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Long> {
 
     private static final long serialVersionUID = 6785314784507424750L;
 
@@ -390,17 +386,6 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     protected void setDataAvailable(final boolean available) {
         manageDistUIState.setNoDataAvilableSwModule(!available);
 
-    }
-
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        if (actionSelectAll.equals(action)) {
-            selectAll();
-            eventBus.publish(this, new SoftwareModuleTableEvent(SoftwareModuleComponentEvent.SELECT_ALL));
-        }
-        if (actionUnSelectAll.equals(action)) {
-            unSelectAll();
-        }
     }
 
 }

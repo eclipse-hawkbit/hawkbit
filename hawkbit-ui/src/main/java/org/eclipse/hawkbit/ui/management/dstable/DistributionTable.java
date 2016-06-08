@@ -53,7 +53,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -639,9 +638,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     /**
      * Added by Saumya Target pin listener.
      *
-     * @param installedDistItemIds
+     * @param installedDistItemId
      *            Item ids of installed distribution set
-     * @param assignedDistTableItemIds
+     * @param assignedDistTableItemId
      *            Item ids of assigned distribution set
      */
     public void styleDistributionSetTable(final Long installedDistItemId, final Long assignedDistTableItemId) {
@@ -656,13 +655,6 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Override
     protected void setDataAvailable(final boolean available) {
         managementUIState.setNoDataAvailableDistribution(!available);
-
-    }
-
-    //TODO MR
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        // TODO Auto-generated method stub
 
     }
 

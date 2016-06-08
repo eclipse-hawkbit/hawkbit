@@ -22,9 +22,6 @@ import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Software module table layout.
- * 
- *
- * 
  */
 @SpringComponent
 @ViewScope

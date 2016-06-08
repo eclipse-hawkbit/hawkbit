@@ -35,7 +35,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -213,14 +212,4 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
     }
 
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        if (actionSelectAll.equals(action)) {
-            selectAll();
-            eventBus.publish(this, new SoftwareModuleEvent());
-        }
-        if (actionUnSelectAll.equals(action)) {
-            unSelectAll();
-        }
-    }
 }

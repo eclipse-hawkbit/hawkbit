@@ -18,26 +18,17 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
-import com.vaadin.event.ShortcutAction;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Target table layout.
- * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
 public class TargetTableLayout extends AbstractTableLayout {
 
     private static final long serialVersionUID = 2248703121998709112L;
-    /**
-     * action for the shortcut key ctrl + 'A'.
-     */
-    private static final ShortcutAction ACTION_CTRL_A = new ShortcutAction("Select All", ShortcutAction.KeyCode.A,
-            new int[] { ShortcutAction.ModifierKey.CTRL });
 
     @Autowired
     private transient EventBus.SessionEventBus eventBus;

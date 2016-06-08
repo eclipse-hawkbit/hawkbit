@@ -15,8 +15,6 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
-import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -27,9 +25,6 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
-import com.vaadin.event.Action;
-import com.vaadin.event.Action.Handler;
-import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
@@ -40,12 +35,8 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Parent class for filter button layout.
- * 
- *
- *
- * 
  */
-public abstract class AbstractFilterButtons extends Table implements Handler {
+public abstract class AbstractFilterButtons extends Table {
 
     private static final long serialVersionUID = 7783305719009746375L;
 
@@ -57,9 +48,6 @@ public abstract class AbstractFilterButtons extends Table implements Handler {
     protected transient EventBus.SessionEventBus eventBus;
 
     private AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
-
-    private ShortcutAction actionSelectAll;
-    private ShortcutAction actionUnSelectAll;
 
     @Autowired
     protected I18N i18n;
@@ -94,8 +82,6 @@ public abstract class AbstractFilterButtons extends Table implements Handler {
         setSelectable(false);
         setSizeFull();
         setMultiSelect(true);
-        actionSelectAll = new ShortcutAction(i18n.get("action.target.table.selectall"));
-        actionUnSelectAll = new ShortcutAction(i18n.get("action.target.table.clear"));
     }
 
     private void setStyle() {
@@ -140,8 +126,7 @@ public abstract class AbstractFilterButtons extends Table implements Handler {
         } else if (id != null && isClickedByDefault(name)) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
-        final DragAndDropWrapper wrapper = createDragAndDropWrapper(typeButton, name, id);
-        return wrapper;
+        return createDragAndDropWrapper(typeButton, name, id);
     }
 
     protected boolean isNoTagSateSelected() {
@@ -209,22 +194,6 @@ public abstract class AbstractFilterButtons extends Table implements Handler {
 
     protected void refreshTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
-    }
-
-    @Override
-    public Action[] getActions(final Object target, final Object sender) {
-        return new Action[] { actionSelectAll, actionUnSelectAll };
-    }
-
-    @Override
-    public void handleAction(final Action action, final Object sender, final Object target) {
-        if (actionSelectAll.equals(action)) {
-            selectAll();
-            eventBus.publish(this, new TargetTableEvent(TargetComponentEvent.SELLECT_ALL));
-        }
-        if (actionUnSelectAll.equals(action)) {
-            unSelectAll();
-        }
     }
 
     /**

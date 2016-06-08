@@ -31,9 +31,6 @@ import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Distribution Set Type filter buttons.
- * 
- *
- * 
  */
 @SpringComponent
 @ViewScope

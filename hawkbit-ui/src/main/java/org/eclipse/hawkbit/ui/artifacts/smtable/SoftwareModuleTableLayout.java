@@ -21,9 +21,6 @@ import com.vaadin.spring.annotation.ViewScope;
 
 /**
  * Software module table layout. (Upload Management)
- * 
- *
- * 
  */
 @SpringComponent
 @ViewScope
