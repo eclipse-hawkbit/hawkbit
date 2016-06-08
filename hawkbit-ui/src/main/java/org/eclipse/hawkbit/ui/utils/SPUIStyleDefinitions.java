@@ -297,7 +297,7 @@ public final class SPUIStyleDefinitions {
     /**
      * Grid style.
      */
-    public static final String SP_GRID = "sp-grid";
+    public static final String METADATA_GRID = "metadata-grid";
 
     /**
      * Constructor.

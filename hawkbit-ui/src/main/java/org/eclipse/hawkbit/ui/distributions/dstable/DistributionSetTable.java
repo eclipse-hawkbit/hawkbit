@@ -516,14 +516,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     }
 
     private void showMetadataDetails(Long itemId) {
-        DistributionSet ds = distributionSetManagement.findDistributionSetById(itemId);
-        if (ds.getMetadata().isEmpty()) {
-            List<DistributionSetMetadata> metadataList = new ArrayList<>();
-            for (int i = 1; i <= 30; i++) {
-                metadataList.add(new DistributionSetMetadata("K-" + i, ds, "V--" + i));
-            }
-            distributionSetManagement.createDistributionSetMetadata(metadataList);
-        }
+        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
         UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds));
     }
 

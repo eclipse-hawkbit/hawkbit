@@ -8,8 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.specifications;
 
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSet_;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule_;
@@ -37,10 +40,14 @@ public final class SoftwareModuleSpecification {
         return (targetRoot, query, cb) -> {
             final Predicate predicate = cb.equal(targetRoot.<Long> get(SoftwareModule_.id), moduleId);
             targetRoot.fetch(SoftwareModule_.type);
+            targetRoot.fetch(SoftwareModule_.metadata, JoinType.LEFT);
+            query.distinct(true);
             return predicate;
         };
     }
+    
 
+    
     /**
      * {@link Specification} for retrieving {@link SoftwareModule}s where its
      * DELETED attribute is false.

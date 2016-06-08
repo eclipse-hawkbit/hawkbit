@@ -56,7 +56,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected List<DistributionSetMetadata> getMetadataList() {
-        return distributionSetManagement.findDistributionSetMetadataByDistributionSetId(getSelectedEntity().getId());
+        return getSelectedEntity().getMetadata();
     }
 
     @Override

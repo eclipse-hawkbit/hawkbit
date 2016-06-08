@@ -324,7 +324,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     private Button createShowArtifactDtlsButton(final String nameVersionStr) {
         final Button showArtifactDtlsBtn = SPUIComponentProvider.getButton(
                 SPUIComponetIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                FontAwesome.FILE_O, SPUIButtonStyleSmallNoBorder.class);
         showArtifactDtlsBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         showArtifactDtlsBtn.setDescription(i18n.get("tooltip.artifact.icon"));
         return showArtifactDtlsBtn;
@@ -413,17 +413,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(Long itemId, String nameVersionStr) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
-        if (swmodule.getMetadata().isEmpty()) {
-            List<SoftwareModuleMetadata> metadataList = new ArrayList<>();
-            for (int i = 1; i <= 30; i++) {
-                metadataList.add(new SoftwareModuleMetadata("K-" + i, swmodule, "V--" + i));
-            }
-            softwareManagement.createSoftwareModuleMetadata(metadataList);
-        }
-
-
-        /* display the window */
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule));
     }
 
