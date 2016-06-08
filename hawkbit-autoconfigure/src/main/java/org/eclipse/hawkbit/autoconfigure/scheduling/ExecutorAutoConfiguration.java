@@ -25,6 +25,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -42,12 +43,21 @@ public class ExecutorAutoConfiguration {
     private AsyncConfigurerThreadpoolProperties asyncConfigurerProperties;
 
     /**
-     * @return ExecutorService for general purpose multi threaded operations.
-     *         Tries an orderly shutdown when destroyed.
+     * @return ExecutorService with security context availability in thread
+     *         execution..
      */
-    @Bean(destroyMethod = "shutdown")
+    @Bean
     @ConditionalOnMissingBean
     public Executor asyncExecutor() {
+        return new DelegatingSecurityContextExecutor(threadPoolExecutor());
+    }
+
+    /**
+     * @return central ThreadPoolExecutor for general purpose multi threaded
+     *         operations. Tries an orderly shutdown when destroyed.
+     */
+    @Bean(destroyMethod = "shutdown")
+    public ThreadPoolExecutor threadPoolExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
                 asyncConfigurerProperties.getQueuesize());
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
@@ -57,21 +67,21 @@ public class ExecutorAutoConfiguration {
         threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> LOGGER.warn(
                 "Reject runnable for centralExecutorService, reached limit of queue size {}",
                 executor.getQueue().size()));
-        return new CloseableDelegatingSecurityContextExecutor(threadPoolExecutor);
+
+        return threadPoolExecutor;
     }
 
     /**
-     * @return the executor for UI background processes. Run immediate shutdown
-     *         when destroyed.
+     * @return the executor for UI background processes.
      */
-    @Bean(name = "uiExecutor", destroyMethod = "shutdownNow")
+    @Bean(name = "uiExecutor")
     @ConditionalOnMissingBean(name = "uiExecutor")
     public Executor uiExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(20);
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 20, 10000, TimeUnit.MILLISECONDS,
                 blockingQueue, new ThreadFactoryBuilder().setNameFormat("ui-executor-pool-%d").build());
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        return new CloseableDelegatingSecurityContextExecutor(threadPoolExecutor);
+        return new DelegatingSecurityContextExecutor(threadPoolExecutor);
     }
 
     /**
