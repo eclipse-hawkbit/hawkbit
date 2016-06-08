@@ -15,8 +15,7 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
-import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +49,6 @@ public class RolloutListHeader extends AbstractGridHeader {
     private transient EventBus.SessionEventBus eventBus;
 
     @Autowired
-    private I18N i18n;
-
-    @Autowired
     private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     @Override
@@ -74,12 +70,12 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected String getSearchBoxId() {
-        return SPUIComponetIdProvider.ROLLOUT_LIST_SEARCH_BOX_ID;
+        return SPUIComponentIdProvider.ROLLOUT_LIST_SEARCH_BOX_ID;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return SPUIComponetIdProvider.ROLLOUT_LIST_SEARCH_RESET_ICON_ID;
+        return SPUIComponentIdProvider.ROLLOUT_LIST_SEARCH_RESET_ICON_ID;
     }
 
     @Override
@@ -90,7 +86,7 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected String getAddIconId() {
-        return SPUIComponetIdProvider.ROLLOUT_ADD_ICON_ID;
+        return SPUIComponentIdProvider.ROLLOUT_ADD_ICON_ID;
     }
 
     @Override

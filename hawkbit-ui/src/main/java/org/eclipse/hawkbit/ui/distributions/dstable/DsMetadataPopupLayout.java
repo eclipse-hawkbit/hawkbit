@@ -11,15 +11,14 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 
 /**
  * Pop up layout to display distribution metadata.
@@ -32,16 +31,19 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+    
+    @Autowired
+    private EntityFactory entityFactory;
 
     @Override
     protected void checkForDuplicate(DistributionSet entity, String value) {
-        distributionSetManagement.findOne(new DsMetadataCompositeKey(entity, value));
+        distributionSetManagement.findOne(entity, value);
     }
 
     @Override
     protected DistributionSetMetadata createMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement
-                .createDistributionSetMetadata(new DistributionSetMetadata(key, entity, value));
+                .createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
@@ -49,7 +51,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected DistributionSetMetadata updateMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement
-                .updateDistributionSetMetadata(new DistributionSetMetadata(key, entity, value));
+                .updateDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
@@ -61,11 +63,11 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
 
     @Override
     protected Object getMetaDataCompositeKey(DistributionSetMetadata metaData) {
-        return metaData.getId();
+        return metaData.getKey();
     }
 
     @Override
     protected void deleteMetadata(String key) {
-        distributionSetManagement.deleteDistributionSetMetadata(new DsMetadataCompositeKey(getSelectedEntity(), key));
+        distributionSetManagement.deleteDistributionSetMetadata(getSelectedEntity(), key);
     }
 }

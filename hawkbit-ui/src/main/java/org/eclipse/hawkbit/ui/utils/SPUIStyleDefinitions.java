@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.utils;
 
 /**
- * Constants required for Style.
+ * RepositoryConstants required for Style.
  *
  *
  *
@@ -240,9 +240,9 @@ public final class SPUIStyleDefinitions {
     public static final String DISABLE_ACTION_TYPE_LAYOUT = "disable-action-type-layout";
 
     /**
-     * Bulk upload progress indicator style.
+     * Upload progress indicator style.
      */
-    public static final String BULK_UPLOAD_PROGRESS_INDICATOR_STYLE = "app-loading";
+    public static final String UPLOAD_PROGRESS_INDICATOR_STYLE = "app-loading";
 
     /**
      * Target filter search progress indicator style.
@@ -293,6 +293,10 @@ public final class SPUIStyleDefinitions {
      * Status pending icon.
      */
     public static final String STATUS_ICON_PENDING = "statusIconPending";
+      /**
+     * Footer layout style.
+     */
+    public static final String FOOTER_LAYOUT = "footer-layout"; 
     
     /**
      * Grid style.

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableHeader;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUITargetDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,22 +175,22 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getSearchBoxId() {
-        return SPUIComponetIdProvider.TARGET_TEXT_FIELD;
+        return SPUIComponentIdProvider.TARGET_TEXT_FIELD;
     }
 
     @Override
     protected String getSearchRestIconId() {
-        return SPUIComponetIdProvider.TARGET_TBL_SEARCH_RESET_ID;
+        return SPUIComponentIdProvider.TARGET_TBL_SEARCH_RESET_ID;
     }
 
     @Override
     protected String getAddIconId() {
-        return SPUIComponetIdProvider.TARGET_TBL_ADD_ICON_ID;
+        return SPUIComponentIdProvider.TARGET_TBL_ADD_ICON_ID;
     }
 
     @Override
     protected String getBulkUploadIconId() {
-        return SPUIComponetIdProvider.TARGET_TBL_BULK_UPLOAD_ICON_ID;
+        return SPUIComponentIdProvider.TARGET_TBL_BULK_UPLOAD_ICON_ID;
     }
 
     @Override
@@ -200,12 +200,12 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getDropFilterId() {
-        return SPUIComponetIdProvider.TARGET_DROP_FILTER_ICON;
+        return SPUIComponentIdProvider.TARGET_DROP_FILTER_ICON;
     }
 
     @Override
     protected String getDropFilterWrapperId() {
-        return SPUIComponetIdProvider.TARGET_FILTER_WRAPPER_ID;
+        return SPUIComponentIdProvider.TARGET_FILTER_WRAPPER_ID;
     }
 
     @Override
@@ -225,7 +225,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getShowFilterButtonLayoutId() {
-        return SPUIComponetIdProvider.SHOW_TARGET_TAGS;
+        return SPUIComponentIdProvider.SHOW_TARGET_TAGS;
     }
 
     @Override
@@ -249,7 +249,7 @@ public class TargetTableHeader extends AbstractTableHeader {
 
     @Override
     protected String getMaxMinIconId() {
-        return SPUIComponetIdProvider.TARGET_MAX_MIN_TABLE_ICON;
+        return SPUIComponentIdProvider.TARGET_MAX_MIN_TABLE_ICON;
     }
 
     @Override
@@ -337,7 +337,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         if (doValidations(event)) {
             final TableTransferable tableTransferable = (TableTransferable) event.getTransferable();
             final Table source = tableTransferable.getSourceComponent();
-            if (source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
+            if (source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)) {
                 final Set<DistributionSetIdName> distributionIdSet = getDropppedDistributionDetails(tableTransferable);
                 if (distributionIdSet != null && !distributionIdSet.isEmpty()) {
                     final DistributionSetIdName distributionSetIdName = distributionIdSet.iterator().next();
@@ -361,7 +361,7 @@ public class TargetTableHeader extends AbstractTableHeader {
             final TableTransferable transferable = (TableTransferable) dragEvent.getTransferable();
             final Table source = transferable.getSourceComponent();
 
-            if (!source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
+            if (!source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)) {
                 notification.displayValidationError(i18n.get("message.action.not.allowed"));
                 isValid = Boolean.FALSE;
             } else {

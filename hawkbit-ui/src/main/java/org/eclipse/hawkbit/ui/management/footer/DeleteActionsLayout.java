@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.management.footer;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.TagManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.footer.AbstractDeleteActionsLayout;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.event.BulkUploadPopupEvent;
@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent.TargetComponentEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
@@ -152,7 +152,7 @@ public class DeleteActionsLayout extends AbstractDeleteActionsLayout {
 
     @Override
     protected String getDeleteAreaId() {
-        return SPUIComponetIdProvider.DELETE_BUTTON_WRAPPER_ID;
+        return SPUIComponentIdProvider.DELETE_BUTTON_WRAPPER_ID;
     }
 
     @Override

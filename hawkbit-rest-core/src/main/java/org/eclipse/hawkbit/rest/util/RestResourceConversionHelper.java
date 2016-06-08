@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.cache.CacheWriteNotify;
+import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +84,7 @@ public final class RestResourceConversionHelper {
      *            from the client
      * @param file
      *            to be write to the client response
-     * @param cacheWriteNotify
+     * @param controllerManagement
      *            to write progress updates to
      * @param statusId
      *            of the UpdateActionStatus
@@ -95,9 +95,9 @@ public final class RestResourceConversionHelper {
      */
     public static ResponseEntity<InputStream> writeFileResponse(final LocalArtifact artifact,
             final HttpServletResponse response, final HttpServletRequest request, final DbArtifact file,
-            final CacheWriteNotify cacheWriteNotify, final Long statusId) {
+            final ControllerManagement controllerManagement, final Long statusId) {
 
-        ResponseEntity<InputStream> result = null;
+        ResponseEntity<InputStream> result;
 
         final String etag = artifact.getSha1Hash();
         final Long lastModified = artifact.getLastModifiedAt() != null ? artifact.getLastModifiedAt()
@@ -143,19 +143,19 @@ public final class RestResourceConversionHelper {
         // full request - no range
         if (ranges.isEmpty() || ranges.get(0).equals(full)) {
             LOG.debug("filename ({}) results into a full request: ", artifact.getFilename());
-            fullfileRequest(artifact, response, file, cacheWriteNotify, statusId, full);
+            fullfileRequest(artifact, response, file, controllerManagement, statusId, full);
             result = new ResponseEntity<>(HttpStatus.OK);
         }
         // standard range request
         else if (ranges.size() == 1) {
             LOG.debug("filename ({}) results into a standard range request: ", artifact.getFilename());
-            standardRangeRequest(artifact, response, file, cacheWriteNotify, statusId, ranges);
+            standardRangeRequest(artifact, response, file, controllerManagement, statusId, ranges);
             result = new ResponseEntity<>(HttpStatus.PARTIAL_CONTENT);
         }
         // multipart range request
         else {
             LOG.debug("filename ({}) results into a multipart range request: ", artifact.getFilename());
-            multipartRangeRequest(artifact, response, file, cacheWriteNotify, statusId, ranges);
+            multipartRangeRequest(artifact, response, file, controllerManagement, statusId, ranges);
             result = new ResponseEntity<>(HttpStatus.PARTIAL_CONTENT);
         }
 
@@ -164,14 +164,15 @@ public final class RestResourceConversionHelper {
     }
 
     private static void fullfileRequest(final LocalArtifact artifact, final HttpServletResponse response,
-            final DbArtifact file, final CacheWriteNotify cacheWriteNotify, final Long statusId, final ByteRange full) {
+            final DbArtifact file, final ControllerManagement controllerManagement, final Long statusId,
+            final ByteRange full) {
         final ByteRange r = full;
         response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
         response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(r.getLength()));
 
         try {
-            copyStreams(file.getFileInputStream(), response.getOutputStream(), cacheWriteNotify, statusId, r.getStart(),
-                    r.getLength());
+            copyStreams(file.getFileInputStream(), response.getOutputStream(), controllerManagement, statusId,
+                    r.getStart(), r.getLength());
         } catch (final IOException e) {
             LOG.error("fullfileRequest of file ({}) failed!", artifact.getFilename(), e);
             throw new FileSteamingFailedException(artifact.getFilename());
@@ -231,7 +232,7 @@ public final class RestResourceConversionHelper {
     }
 
     private static void multipartRangeRequest(final LocalArtifact artifact, final HttpServletResponse response,
-            final DbArtifact file, final CacheWriteNotify cacheWriteNotify, final Long statusId,
+            final DbArtifact file, final ControllerManagement controllerManagement, final Long statusId,
             final List<ByteRange> ranges) {
         response.setContentType("multipart/byteranges; boundary=" + ByteRange.MULTIPART_BOUNDARY);
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
@@ -245,7 +246,7 @@ public final class RestResourceConversionHelper {
                         .println("Content-Range: bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
 
                 // Copy single part range of multi part range.
-                copyStreams(file.getFileInputStream(), response.getOutputStream(), cacheWriteNotify, statusId,
+                copyStreams(file.getFileInputStream(), response.getOutputStream(), controllerManagement, statusId,
                         r.getStart(), r.getLength());
             }
 
@@ -259,7 +260,7 @@ public final class RestResourceConversionHelper {
     }
 
     private static void standardRangeRequest(final LocalArtifact artifact, final HttpServletResponse response,
-            final DbArtifact file, final CacheWriteNotify cacheWriteNotify, final Long statusId,
+            final DbArtifact file, final ControllerManagement controllerManagement, final Long statusId,
             final List<ByteRange> ranges) {
         final ByteRange r = ranges.get(0);
         response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
@@ -267,8 +268,8 @@ public final class RestResourceConversionHelper {
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
         try {
-            copyStreams(file.getFileInputStream(), response.getOutputStream(), cacheWriteNotify, statusId, r.getStart(),
-                    r.getLength());
+            copyStreams(file.getFileInputStream(), response.getOutputStream(), controllerManagement, statusId,
+                    r.getStart(), r.getLength());
         } catch (final IOException e) {
             LOG.error("standardRangeRequest of file ({}) failed!", artifact.getFilename(), e);
             throw new FileSteamingFailedException(artifact.getFilename());
@@ -276,7 +277,7 @@ public final class RestResourceConversionHelper {
     }
 
     private static long copyStreams(final InputStream from, final OutputStream to,
-            final CacheWriteNotify cacheWriteNotify, final Long statusId, final long start, final long length)
+            final ControllerManagement controllerManagement, final Long statusId, final long start, final long length)
             throws IOException {
         checkNotNull(from);
         checkNotNull(to);
@@ -309,13 +310,13 @@ public final class RestResourceConversionHelper {
                 toContinue = false;
             }
 
-            if (cacheWriteNotify != null) {
+            if (controllerManagement != null) {
                 final int newPercent = DoubleMath.roundToInt(total * 100.0 / length, RoundingMode.DOWN);
 
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {
                     progressPercent = newPercent;
-                    cacheWriteNotify.downloadProgressPercent(statusId, progressPercent);
+                    controllerManagement.downloadProgressPercent(statusId, progressPercent);
                 }
             }
         }

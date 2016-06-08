@@ -18,19 +18,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.eventbus.event.TargetCreatedEvent;
 import org.eclipse.hawkbit.eventbus.event.TargetDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.TargetInfoUpdateEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.ManagmentEntityState;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
@@ -55,7 +55,7 @@ import org.eclipse.hawkbit.ui.management.state.TargetTableFilters;
 import org.eclipse.hawkbit.ui.utils.AssignInstalledDSTooltipGenerator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -230,7 +230,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.TARGET_TABLE_ID;
+        return SPUIComponentIdProvider.TARGET_TABLE_ID;
     }
 
     @Override
@@ -332,7 +332,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
-        }        
+        }
         return columnList;
 
     }
@@ -454,8 +454,8 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         pinBtn.setStyleName(pinBtnStyle.toString());
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
-        pinBtn.setId(SPUIComponetIdProvider.TARGET_PIN_ICON + "." + itemId);
-        pinBtn.addClickListener(event -> addPinClickListener(event));
+        pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
+        pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
             isTargetPinned = Boolean.TRUE;
@@ -620,7 +620,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
 
     private Boolean validateTable(final Component compsource, final TableTransferable transferable) {
         final Table source = (Table) compsource;
-        if (!(source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)
+        if (!(source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)
                 || source.getId().startsWith(SPUIDefinitions.TARGET_TAG_ID_PREFIXS))) {
             notification.displayValidationError(i18n.get(ACTION_NOT_ALLOWED_MSG));
             return false;

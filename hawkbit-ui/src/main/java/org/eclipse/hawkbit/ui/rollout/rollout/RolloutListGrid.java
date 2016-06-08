@@ -21,9 +21,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.hawkbit.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutChangeEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -96,8 +96,8 @@ public class RolloutListGrid extends AbstractGrid {
     @Autowired
     private transient RolloutManagement rolloutManagement;
 
-    // @Autowired
-    private final AddUpdateRolloutWindowLayout addUpdateRolloutWindow = new AddUpdateRolloutWindowLayout();
+    @Autowired
+    private AddUpdateRolloutWindowLayout addUpdateRolloutWindow;
 
     @Autowired
     private UINotification uiNotification;
@@ -251,7 +251,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected String getGridId() {
-        return SPUIComponetIdProvider.ROLLOUT_LIST_GRID_ID;
+        return SPUIComponentIdProvider.ROLLOUT_LIST_GRID_ID;
     }
 
     @Override
@@ -297,7 +297,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
+        return this::getDescription;
     }
 
     @Override
@@ -310,10 +310,10 @@ public class RolloutListGrid extends AbstractGrid {
         createRolloutStatusToFontMap();
         getColumn(SPUILabelDefinitions.VAR_STATUS).setRenderer(new HtmlLabelRenderer(), new RolloutStatusConverter());
 
-        getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(event -> onClickOfActionBtn(event)));
+        getColumn(SPUILabelDefinitions.ACTION).setRenderer(new HtmlButtonRenderer(this::onClickOfActionBtn));
 
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
-        customObjectRenderer.addClickListener(event -> onClickOfRolloutName(event));
+        customObjectRenderer.addClickListener(this::onClickOfRolloutName);
         getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
 
     }
@@ -370,7 +370,7 @@ public class RolloutListGrid extends AbstractGrid {
 
     private ContextMenu createContextMenu(final Long rolloutId) {
         final ContextMenu context = new ContextMenu();
-        context.addItemClickListener(event -> menuItemClicked(event));
+        context.addItemClickListener(this::menuItemClicked);
         final Item row = getContainerDataSource().getItem(rolloutId);
         final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();
@@ -617,7 +617,7 @@ public class RolloutListGrid extends AbstractGrid {
             final StatusFontIcon statusFontIcon = statusIconMap.get(value);
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                    SPUIComponetIdProvider.ROLLOUT_STATUS_LABEL_ID);
+                    SPUIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
         }
     }
 
@@ -632,15 +632,13 @@ public class RolloutListGrid extends AbstractGrid {
 
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
-                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Class<? extends TotalTargetCountStatus> targetType, final Locale locale) {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
-                final Class<? extends String> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Class<? extends String> targetType, final Locale locale) {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 
@@ -664,14 +662,13 @@ public class RolloutListGrid extends AbstractGrid {
         private static final long serialVersionUID = 6589305227035220369L;
 
         @Override
-        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale)
-                throws com.vaadin.data.util.converter.Converter.ConversionException {
+        public Long convertToModel(final String value, final Class<? extends Long> targetType, final Locale locale) {
             return null;
         }
 
         @Override
         public String convertToPresentation(final Long value, final Class<? extends String> targetType,
-                final Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+                final Locale locale) {
             if (value == 0) {
                 return "";
             }

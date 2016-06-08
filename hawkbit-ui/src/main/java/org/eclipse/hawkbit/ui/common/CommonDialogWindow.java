@@ -9,13 +9,15 @@
 package org.eclipse.hawkbit.ui.common;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.AbstractOrderedLayout;
@@ -28,8 +30,13 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-@Service
-public class CommonDialogWindow extends Window{
+/**
+ * 
+ * Superclass for pop-up-windows including a minimize and close icon in the
+ * upper right corner and a save and cancel button at the bottom.
+ *
+ */
+public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = -1321949234316858703L;
 
@@ -48,6 +55,11 @@ public class CommonDialogWindow extends Window{
     private Button cancelButton;
 
     private HorizontalLayout buttonsLayout;
+
+    protected ValueChangeListener buttonEnableListener;
+
+    @Autowired
+    private transient UiProperties uiProperties;
 
     public CommonDialogWindow() {
 
@@ -85,6 +97,7 @@ public class CommonDialogWindow extends Window{
         setResizable(true);
         center();
         setModal(true);
+        addStyleName("fontsize");
     }
 
     private HorizontalLayout createActionButtonsLayout(final ClickListener saveButtonClickListener,
@@ -94,25 +107,27 @@ public class CommonDialogWindow extends Window{
         buttonsLayout.setSizeFull();
         buttonsLayout.setSpacing(true);
 
-        saveButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_SAVE, "save", "", "",
-                true, FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
+        saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
+                FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
         saveButton.setSizeUndefined();
+        saveButton.addStyleName("default-color");
         if (null != saveButtonClickListener) {
             saveButton.addClickListener(saveButtonClickListener);
         } else {
-            LOG.warn("No ClickListener for saveButton specified");
+            throw new IllegalArgumentException("no ClickListener for save button specified");
         }
         buttonsLayout.addComponent(saveButton);
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
         buttonsLayout.setExpandRatio(saveButton, 1.0F);
 
-        cancelButton = SPUIComponentProvider.getButton(SPUIComponetIdProvider.SYSTEM_CONFIGURATION_CANCEL, "cancel",
-                "", "", true, FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+        cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
+                FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
         cancelButton.setSizeUndefined();
+        cancelButton.addStyleName("default-color");
         if (null != cancelButtonClickListener) {
             cancelButton.addClickListener(cancelButtonClickListener);
         } else {
-            LOG.warn("No ClickListener for cancelButton specified");
+            throw new IllegalArgumentException("no ClickListener for cancel button specified");
         }
         buttonsLayout.addComponent(cancelButton);
         buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
@@ -140,8 +155,8 @@ public class CommonDialogWindow extends Window{
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
-    
-     public HorizontalLayout getButtonsLayout() {
+
+    public HorizontalLayout getButtonsLayout() {
         return buttonsLayout;
     }
 

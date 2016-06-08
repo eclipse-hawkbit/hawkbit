@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -106,7 +107,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setCancelButtonEnabled(false);
         metadataWindow.setCancelButtonCaption(i18n.get("button.discard"));
         metadataWindow.setCancelButtonIcon(FontAwesome.UNDO);
-        metadataWindow.setId(SPUIComponetIdProvider.METADATA_POPUP_ID);
+        metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
         setUpDetails(entity.getId());
         return metadataWindow;
     }
@@ -202,7 +203,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private TextField createKeyTextField() {
         TextField keyField = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY, true, "", i18n.get("textfield.key"), true, 128);
-        keyField.setId(SPUIComponetIdProvider.METADATA_KEY_FIELD_ID);
+        keyField.setId(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID);
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -212,7 +213,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private TextArea createValueTextField() {
         valueTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.value"), null, ValoTheme.TEXTAREA_TINY,
                 true, null, i18n.get("textfield.value"), 4000);
-        valueTextArea.setId(SPUIComponetIdProvider.METADATA_VALUE_ID);
+        valueTextArea.setId(SPUIComponentIdProvider.METADATA_VALUE_ID);
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.addTextChangeListener(event -> onValueChange(event));
@@ -226,7 +227,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataGrid.setImmediate(true);
         metadataGrid.setHeight("100%");
         metadataGrid.setWidth("100%");
-        metadataGrid.setId(SPUIComponetIdProvider.METDATA_TABLE_ID);
+        metadataGrid.setId(SPUIComponentIdProvider.METDATA_TABLE_ID);
         metadataGrid.setSelectionMode(SelectionMode.SINGLE);
         metadataGrid.setColumnReorderingAllowed(true);
         metadataGrid.setContainerDataSource(getMetadataContainer());
@@ -270,7 +271,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private Button createAddIcon() {
-        addIcon = SPUIComponentProvider.getButton(SPUIComponetIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
+        addIcon = SPUIComponentProvider.getButton(SPUIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
                 null, null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         addIcon.addClickListener(event -> onAdd(event));
         return addIcon;

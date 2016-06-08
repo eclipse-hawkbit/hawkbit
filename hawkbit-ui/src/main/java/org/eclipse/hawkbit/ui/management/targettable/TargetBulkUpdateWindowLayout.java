@@ -17,8 +17,8 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionBeanQuery;
@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.state.TargetBulkUpload;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -159,7 +159,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     private Button getCloseButton() {
-        final Button closeBtn = SPUIComponentProvider.getButton(SPUIComponetIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
+        final Button closeBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.BULK_UPLOAD_CLOSE_BUTTON_ID, "",
                 "", "", true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
         closeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         closeBtn.addClickListener(event -> closePopup());
@@ -168,7 +168,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
     private Button getMinimizeButton() {
         final Button minimizeBtn = SPUIComponentProvider.getButton(
-                SPUIComponetIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
+                SPUIComponentIdProvider.BULK_UPLOAD_MINIMIZE_BUTTON_ID, "", "", "", true, FontAwesome.MINUS,
                 SPUIButtonStyleSmallNoBorder.class);
         minimizeBtn.addStyleName(ValoTheme.BUTTON_BORDERLESS);
         minimizeBtn.addClickListener(event -> minimizeWindow());
@@ -190,7 +190,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         countLabel.addStyleName("bulk-upload-label");
         countLabel.setVisible(false);
         countLabel.setCaptionAsHtml(true);
-        countLabel.setId(SPUIComponetIdProvider.BULK_UPLOAD_COUNT);
+        countLabel.setId(SPUIComponentIdProvider.BULK_UPLOAD_COUNT);
         return countLabel;
     }
 
@@ -198,7 +198,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         final TextArea description = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"),
                 "text-area-style", ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-        description.setId(SPUIComponetIdProvider.BULK_UPLOAD_DESC);
+        description.setId(SPUIComponentIdProvider.BULK_UPLOAD_DESC);
         description.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         description.setWidth("100%");
         return description;
@@ -215,7 +215,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         dsComboBox.setPageLength(7);
         dsComboBox.setContainerDataSource(container);
         dsComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME_VERSION);
-        dsComboBox.setId(SPUIComponetIdProvider.BULK_UPLOAD_DS_COMBO);
+        dsComboBox.setId(SPUIComponentIdProvider.BULK_UPLOAD_DS_COMBO);
         dsComboBox.setWidth("100%");
         return dsComboBox;
     }
@@ -229,7 +229,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
         tokenLayout.setMargin(false);
         tokenLayout.setSizeFull();
         tokenLayout.setHeight("100px");
-        tokenLayout.setId(SPUIComponetIdProvider.BULK_UPLOAD_TAG);
+        tokenLayout.setId(SPUIComponentIdProvider.BULK_UPLOAD_TAG);
         return tokenLayout;
     }
 
@@ -354,7 +354,9 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     }
 
     /**
-     * @return
+     * create and return window
+     * 
+     * @return Window window
      */
     public Window getWindow() {
         managementUIState.setBulkUploadWindowMinimised(false);

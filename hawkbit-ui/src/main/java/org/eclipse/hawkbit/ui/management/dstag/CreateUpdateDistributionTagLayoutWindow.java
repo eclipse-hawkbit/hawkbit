@@ -12,15 +12,17 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
-import org.eclipse.hawkbit.ui.layouts.CreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
@@ -31,13 +33,17 @@ import com.vaadin.ui.UI;
 
 /**
  *
- *
+ * Class for Create/Update Tag Layout of distribution set
+ * 
  */
 @SpringComponent
 @ViewScope
-public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayout {
+public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 444276149954167545L;
+
+    @Autowired
+    private transient EntityFactory entityFactory;
 
     private static final String TARGET_TAG_NAME_DYNAMIC_STYLE = "new-target-tag-name";
     private static final String MSG_TEXTFIELD_NAME = "textfield.name";
@@ -73,7 +79,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> optionValueChanged(event));
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     /**
@@ -101,11 +107,9 @@ public class CreateUpdateDistributionTagLayoutWindow extends CreateUpdateTagLayo
     protected void createNewTag() {
         super.createNewTag();
         if (isNotEmpty(getTagNameValue())) {
-            DistributionSetTag newDistTag = new DistributionSetTag(getTagNameValue());
-            if (isNotEmpty(getTagDescValue())) {
-                newDistTag.setDescription(getTagDescValue());
-            }
-            newDistTag.setColour(ColorPickerConstants.START_COLOR.getCSS());
+            DistributionSetTag newDistTag = entityFactory.generateDistributionSetTag(tagNameValue, tagDescValue,
+                    ColorPickerConstants.START_COLOR.getCSS());
+
             if (isNotEmpty(getColorPicked())) {
                 newDistTag.setColour(getColorPicked());
             }

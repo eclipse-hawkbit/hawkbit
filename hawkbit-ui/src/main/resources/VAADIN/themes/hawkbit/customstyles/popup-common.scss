@@ -11,7 +11,6 @@
 
   //Color picker layout position adjustment
   .rgb-vertical-layout {
- //   margin-top: 100px !important;
     padding-bottom: 12px;
   }
 
@@ -47,4 +46,11 @@
     box-shadow: none !important;
     height: 75px !important;
   }
+  
+   .v-window-fontsize .v-window-closebox,
+   .v-window-fontsize .v-window-maximizebox,
+   .v-window-fontsize .v-window-restorebox {
+  	 font-size: 16px;
+  }
+  
 }
