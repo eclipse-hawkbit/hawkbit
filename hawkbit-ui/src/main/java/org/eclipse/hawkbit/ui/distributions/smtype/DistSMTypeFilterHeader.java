@@ -66,10 +66,9 @@ public class DistSMTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected void settingsIconClicked(final ClickEvent event) {
-        final Window addUpdateWindow = createUpdateSWTypeLayout.getWindow();
-        UI.getCurrent().addWindow(addUpdateWindow);
-        addUpdateWindow.setVisible(Boolean.TRUE);
-
+        final Window window = createUpdateSWTypeLayout.getWindow();
+        UI.getCurrent().addWindow(window);
+        window.setVisible(Boolean.TRUE);
     }
 
     @Override

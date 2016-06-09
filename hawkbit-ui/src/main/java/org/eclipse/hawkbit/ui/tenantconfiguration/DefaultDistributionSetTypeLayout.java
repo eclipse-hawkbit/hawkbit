@@ -91,7 +91,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
         final Iterable<DistributionSetType> distributionSetTypeCollection = distributionSetManagement
                 .findDistributionSetTypesAll(pageReq);
 
-        combobox = SPUIComponentProvider.getComboBox("", "330", null, null, false, "", "label.combobox.tag");
+        combobox = SPUIComponentProvider.getComboBox(null, "", "330", null, null, false, "", "label.combobox.tag");
         combobox.setId(SPUIComponentIdProvider.SYSTEM_CONFIGURATION_DEFAULTDIS_COMBOBOX);
         combobox.setNullSelectionAllowed(false);
         for (final DistributionSetType distributionSetType : distributionSetTypeCollection) {
@@ -154,4 +154,5 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView impl
             changeIcon.setVisible(false);
         }
     }
+
 }

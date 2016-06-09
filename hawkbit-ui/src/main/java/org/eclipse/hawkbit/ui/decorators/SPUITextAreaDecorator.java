@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -37,33 +39,36 @@ public final class SPUITextAreaDecorator {
      *            to set field as mandatory
      * @param data
      *            component data
-     * @param promt
+     * @param prompt
      *            as user for input
      * @param maxLength
      *            maximum characters allowed
      * @return TextArea as comp
      */
-    public static TextArea decorate(String style, String styleName, boolean required, String data, String promt,
-            int maxLength) {
+    public static TextArea decorate(final String caption, final String style, final String styleName,
+            final boolean required, final String data, final String prompt, final int maxLength) {
         final TextArea spUITxtArea = new TextArea();
         // Default settings
         spUITxtArea.setRequired(false);
-        spUITxtArea.addStyleName(ValoTheme.COMBOBOX_SMALL);
+        spUITxtArea.addStyleName(ValoTheme.TEXTAREA_SMALL);
+        if (StringUtils.isNotEmpty(caption)) {
+            spUITxtArea.setCaption(caption);
+        }
         if (required) {
             spUITxtArea.setRequired(true);
         }
         // Add style
-        if (null != style) {
+        if (StringUtils.isNotEmpty(style)) {
             spUITxtArea.setStyleName(style);
         }
         // Add style Name
-        if (null != styleName) {
+        if (StringUtils.isNotEmpty(styleName)) {
             spUITxtArea.addStyleName(styleName);
         }
-        if (null != promt) {
-            spUITxtArea.setInputPrompt(promt);
+        if (StringUtils.isNotEmpty(prompt)) {
+            spUITxtArea.setInputPrompt(prompt);
         }
-        if (null != data) {
+        if (StringUtils.isNotEmpty(data)) {
             spUITxtArea.setData(data);
         }
 

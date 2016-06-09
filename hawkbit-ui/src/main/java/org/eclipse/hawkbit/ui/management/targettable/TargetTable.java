@@ -332,7 +332,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         if (!isMaximized()) {
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_POLL_TIME, "", 0.0F));
             columnList.add(new TableColumn(SPUIDefinitions.TARGET_STATUS_PIN_TOGGLE_ICON, "", 0.0F));
-        }        
+        }
         return columnList;
 
     }
@@ -455,7 +455,7 @@ public class TargetTable extends AbstractTable<Target, TargetIdName> implements 
         pinBtn.setHeightUndefined();
         pinBtn.setData(itemId);
         pinBtn.setId(SPUIComponentIdProvider.TARGET_PIN_ICON + "." + itemId);
-        pinBtn.addClickListener(event -> addPinClickListener(event));
+        pinBtn.addClickListener(this::addPinClickListener);
         if (isPinned(((TargetIdName) itemId).getControllerId())) {
             pinBtn.addStyleName(TARGET_PINNED);
             isTargetPinned = Boolean.TRUE;
