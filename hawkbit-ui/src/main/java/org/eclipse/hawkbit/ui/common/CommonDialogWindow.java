@@ -100,7 +100,7 @@ public class CommonDialogWindow extends Window {
 
         setCaption(caption);
         setContent(mainLayout);
-        setResizable(true);
+        setResizable(false);
         center();
         setModal(true);
         addStyleName("fontsize");
