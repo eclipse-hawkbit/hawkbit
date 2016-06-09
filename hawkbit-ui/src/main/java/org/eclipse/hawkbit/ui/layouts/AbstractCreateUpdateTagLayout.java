@@ -237,6 +237,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             mainLayout.getComponent(1, 0);
             mainLayout.addComponent(colorPickerLayout, 1, 0);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
+        } else {
+            mainLayout.removeComponent(colorPickerLayout);
         }
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
