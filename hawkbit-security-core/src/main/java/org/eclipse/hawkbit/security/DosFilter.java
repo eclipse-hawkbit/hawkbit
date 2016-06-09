@@ -110,7 +110,7 @@ public class DosFilter extends OncePerRequestFilter {
 
         boolean processChain;
 
-        final String ip = IpUtil.getClientIpFromRequest(request, forwardHeader).getHost();
+        final String ip = IpUtil.getClientIpFromRequest(request, forwardHeader, true).getHost();
         if (checkIpFails(ip)) {
             processChain = handleMissingIpAddress(response);
         } else {
