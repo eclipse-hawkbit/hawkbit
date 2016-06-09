@@ -11,11 +11,11 @@ package org.eclipse.hawkbit.ui.layouts;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
@@ -32,7 +32,13 @@ import com.vaadin.ui.components.colorpicker.ColorChangeEvent;
 import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
+/**
+ * 
+ * Superclass defining common properties and methods for creating/updating
+ * types.
+ *
+ */
+public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
@@ -46,7 +52,7 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+        optiongroup.addValueChangeListener(this::createOptionValueChanged);
     }
 
     @Override
@@ -67,7 +73,7 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
         tagNameComboBox.setPageLength(SPUIDefinitions.DIST_TYPE_SIZE);
 
         tagColorPreviewBtn = new Button();
-        tagColorPreviewBtn.setId(SPUIComponetIdProvider.TAG_COLOR_PREVIEW_ID);
+        tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         tagColorPreviewBtn.setStyleName(TAG_DYNAMIC_STYLE);
 
@@ -187,6 +193,7 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
     protected void restoreComponentStyles() {
         super.restoreComponentStyles();
         typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
+        typeKey.addStyleName(SPUIDefinitions.TYPE_KEY);
     }
 
     /**
@@ -298,20 +305,17 @@ public class CreateUpdateTypeLayout extends CreateUpdateTagLayout {
 
     @Override
     protected void save(final ClickEvent event) {
-        // TODO Auto-generated method stub
-
+        // is implemented in the inherited class
     }
 
     @Override
     protected void populateTagNameCombo() {
-        // TODO Auto-generated method stub
-
+        // is implemented in the inherited class
     }
 
     @Override
     protected void setTagDetails(final String tagSelected) {
-        // TODO Auto-generated method stub
-
+        // is implemented in the inherited class
     }
 
 }

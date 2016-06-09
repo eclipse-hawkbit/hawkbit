@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -89,7 +89,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
+        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
     @Override

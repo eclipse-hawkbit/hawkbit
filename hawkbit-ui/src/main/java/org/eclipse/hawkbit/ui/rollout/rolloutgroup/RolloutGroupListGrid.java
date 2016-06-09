@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.eclipse.hawkbit.eventbus.event.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
+import org.eclipse.hawkbit.repository.eventbus.event.RolloutGroupChangeEvent;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -31,7 +31,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -207,7 +207,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected String getGridId() {
-        return SPUIComponetIdProvider.ROLLOUT_GROUP_LIST_GRID_ID;
+        return SPUIComponentIdProvider.ROLLOUT_GROUP_LIST_GRID_ID;
     }
 
     @Override
@@ -238,8 +238,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setRenderer(new HtmlRenderer(),
                 new TotalTargetCountStatusConverter());
         if (permissionChecker.hasRolloutTargetsReadPermission()) {
-            getColumn(ROLLOUT_RENDERER_DATA)
-                    .setRenderer(new RolloutRenderer(event -> onClickOfRolloutGroupName(event)));
+            getColumn(ROLLOUT_RENDERER_DATA).setRenderer(new RolloutRenderer(this::onClickOfRolloutGroupName));
         }
     }
 
@@ -259,7 +258,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
+        return this::getDescription;
     }
 
     private void onClickOfRolloutGroupName(final RendererClickEvent event) {
@@ -324,14 +323,14 @@ public class RolloutGroupListGrid extends AbstractGrid {
         @Override
         public TotalTargetCountStatus convertToModel(final String value,
                 final Class<? extends TotalTargetCountStatus> targetType, final Locale locale)
-                        throws com.vaadin.data.util.converter.Converter.ConversionException {
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return null;
         }
 
         @Override
         public String convertToPresentation(final TotalTargetCountStatus value,
                 final Class<? extends String> targetType, final Locale locale)
-                        throws com.vaadin.data.util.converter.Converter.ConversionException {
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
             return DistributionBarHelper.getDistributionBarAsHTMLString(value.getStatusTotalCountMap());
         }
 
@@ -381,7 +380,7 @@ public class RolloutGroupListGrid extends AbstractGrid {
             final StatusFontIcon statusFontIcon = statusIconMap.get(value);
             final String codePoint = HawkbitCommonUtil.getCodePoint(statusFontIcon);
             return HawkbitCommonUtil.getStatusLabelDetailsInString(codePoint, statusFontIcon.getStyle(),
-                    SPUIComponetIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
+                    SPUIComponentIdProvider.ROLLOUT_GROUP_STATUS_LABEL_ID);
 
         }
 

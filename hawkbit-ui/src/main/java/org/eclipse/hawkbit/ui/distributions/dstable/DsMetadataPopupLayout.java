@@ -14,10 +14,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 
 /**
  * Pop up layout to display distribution metadata.
@@ -44,15 +43,19 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Autowired
     private ManageDistUIState manageDistUIState;
     
+    
+    @Autowired
+    private EntityFactory entityFactory;
+    
     @Override
     protected void checkForDuplicate(DistributionSet entity, String value) {
-        distributionSetManagement.findOne(new DsMetadataCompositeKey(entity, value));
+        distributionSetManagement.findOne(entity, value);
     }
 
     @Override
     protected DistributionSetMetadata createMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement
-                .createDistributionSetMetadata(new DistributionSetMetadata(key, entity, value));
+                .createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
                 manageDistUIState.getLastSelectedDistribution().get() : null;
@@ -69,24 +72,24 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected DistributionSetMetadata updateMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement
-                .updateDistributionSetMetadata(new DistributionSetMetadata(key, entity, value));
+                .updateDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
         return dsMetaData;
     }
 
     @Override
     protected List<DistributionSetMetadata> getMetadataList() {
-        return distributionSetManagement.findDistributionSetMetadataByDistributionSetId(getSelectedEntity().getId());
+        return getSelectedEntity().getMetadata();
     }
 
     @Override
     protected Object getMetaDataCompositeKey(DistributionSetMetadata metaData) {
-        return metaData.getId();
+        return metaData.getKey();
     }
 
     @Override
     protected void deleteMetadata(String key) {
-        distributionSetManagement.deleteDistributionSetMetadata(new DsMetadataCompositeKey(getSelectedEntity(), key));
+        distributionSetManagement.deleteDistributionSetMetadata(getSelectedEntity(), key);
         DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
                 manageDistUIState.getLastSelectedDistribution().get() : null;
         if(lastselectedDS!=null){       

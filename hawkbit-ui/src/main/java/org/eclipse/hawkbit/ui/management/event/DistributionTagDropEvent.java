@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.management.state.DistributionTableFilters;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -74,7 +74,7 @@ public class DistributionTagDropEvent implements DropHandler {
             final TableTransferable tbl = (TableTransferable) event.getTransferable();
             final Table source = tbl.getSourceComponent();
 
-            if (source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
+            if (source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)) {
                 processDistributionDrop(event);
             }
 
@@ -118,7 +118,7 @@ public class DistributionTagDropEvent implements DropHandler {
     }
 
     private boolean validateIfSourceIsDs(final Table source) {
-        if (!source.getId().equals(SPUIComponetIdProvider.DIST_TABLE_ID)) {
+        if (!source.getId().equals(SPUIComponentIdProvider.DIST_TABLE_ID)) {
             notification.displayValidationError(i18n.get(SPUILabelDefinitions.ACTION_NOT_ALLOWED));
             return false;
         }

@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.ui.distributions.event.DistributionsViewAcceptCriteri
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -132,7 +133,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     @Override
     protected String getTableId() {
-        return SPUIComponetIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
+        return SPUIComponentIdProvider.UPLOAD_SOFTWARE_MODULE_TABLE;
     }
 
     @Override
@@ -323,17 +324,16 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     private Button createShowArtifactDtlsButton(final String nameVersionStr) {
         final Button showArtifactDtlsBtn = SPUIComponentProvider.getButton(
-                SPUIComponetIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
-                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+                SPUIComponentIdProvider.SW_TABLE_ATRTIFACT_DETAILS_ICON + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.FILE_O, SPUIButtonStyleSmallNoBorder.class);
         showArtifactDtlsBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         showArtifactDtlsBtn.setDescription(i18n.get("tooltip.artifact.icon"));
         return showArtifactDtlsBtn;
     }
-    
 
     private Button createManageMetadataButton(String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponetIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.PLUS_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
@@ -413,17 +413,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     }
 
     private void showMetadataDetails(Long itemId, String nameVersionStr) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
-        if (swmodule.getMetadata().isEmpty()) {
-            List<SoftwareModuleMetadata> metadataList = new ArrayList<>();
-            for (int i = 1; i <= 30; i++) {
-                metadataList.add(new SoftwareModuleMetadata("K-" + i, swmodule, "V--" + i));
-            }
-            softwareManagement.createSoftwareModuleMetadata(metadataList);
-        }
-
-
-        /* display the window */
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
     }
 

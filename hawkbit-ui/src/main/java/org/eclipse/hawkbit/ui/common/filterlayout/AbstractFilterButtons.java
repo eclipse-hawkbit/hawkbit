@@ -42,11 +42,11 @@ import com.vaadin.ui.themes.ValoTheme;
 public abstract class AbstractFilterButtons extends Table {
 
     private static final long serialVersionUID = 7783305719009746375L;
-    
+
     private static final String DEFAULT_GREEN = "rgb(44,151,32)";
 
     protected static final String FILTER_BUTTON_COLUMN = "filterButton";
-    
+
     @Autowired
     protected transient EventBus.SessionEventBus eventBus;
 
@@ -63,7 +63,7 @@ public abstract class AbstractFilterButtons extends Table {
         createTable();
         eventBus.subscribe(this);
     }
-    
+
     @PreDestroy
     void destroy() {
         eventBus.unsubscribe(this);
@@ -125,8 +125,7 @@ public abstract class AbstractFilterButtons extends Table {
         } else if (id != null && isClickedByDefault(name)) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
-        final DragAndDropWrapper wrapper = createDragAndDropWrapper(typeButton, name, id);
-        return wrapper;
+        return createDragAndDropWrapper(typeButton, name, id);
     }
 
     protected boolean isNoTagSateSelected() {

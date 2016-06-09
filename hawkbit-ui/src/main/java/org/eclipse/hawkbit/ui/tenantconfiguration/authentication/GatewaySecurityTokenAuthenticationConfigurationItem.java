@@ -195,4 +195,5 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         gatewayTokenNameTextField.setValue(getSecurityTokenName());
         gatewayTokenkeyLabel.setValue(getSecurityTokenKey());
     }
+
 }

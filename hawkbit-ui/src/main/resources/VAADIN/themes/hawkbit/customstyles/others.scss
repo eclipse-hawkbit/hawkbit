@@ -10,7 +10,7 @@
 @mixin others {
 
   //Style to display the pending action count
-  .unread {
+  .unread, .error-count {
     @include valo-badge-style;
     position: absolute;
     pointer-events: none;
@@ -20,6 +20,15 @@
     z-index: 1;
     border-radius: $v-border-radius;
     color: $widget-bg;
+  }
+  
+   .error-count {
+    top: round($v-unit-size / -5);
+    right: round($v-unit-size / 1.9);
+  }
+
+	.error-count-color{
+	    @include valo-gradient($color: $red-color);
   }
 
   //Deployment view - Style of count message
@@ -88,7 +97,7 @@
   }
 
   .icon-only {
-  //  margin-bottom: 6px !important;
+    margin-bottom: 6px !important;
   }
 
   //Toggle between pin and status icon

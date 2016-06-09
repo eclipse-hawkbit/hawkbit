@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.common;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -31,6 +32,7 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
     private final Sort sort = new Sort(Direction.ASC, "name");
     private transient Page<SoftwareModuleType> firstPageSwModuleType = null;
     private transient SoftwareManagement softwareManagement;
+    private transient EntityFactory entityFactory;
 
     /**
      * Parametric constructor.
@@ -47,7 +49,14 @@ public class SoftwareModuleTypeBeanQuery extends AbstractBeanQuery<SoftwareModul
 
     @Override
     protected SoftwareModuleType constructBean() {
-        return new SoftwareModuleType();
+        return getEntityFactory().generateSoftwareModuleType();
+    }
+
+    private EntityFactory getEntityFactory() {
+        if (entityFactory == null) {
+            entityFactory = SpringContextHelper.getBean(EntityFactory.class);
+        }
+        return entityFactory;
     }
 
     @Override

@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
@@ -55,6 +57,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Autowired
     private transient SoftwareManagement swTypeManagementService;
 
+    @Autowired
+    private transient EntityFactory entityFactory;
+
     private String singleAssignStr;
     private String multiAssignStr;
     private Label singleAssign;
@@ -64,7 +69,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(event -> createOptionValueChanged(event));
+        optiongroup.addValueChangeListener(this::createOptionValueChanged);
     }
 
     @Override
@@ -111,7 +116,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     public void createWindow() {
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event), null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null);
     }
 
     /**
@@ -226,8 +231,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         }
 
         if (null != typeNameValue && null != typeKeyValue) {
-            SoftwareModuleType newSWType = new SoftwareModuleType(typeKeyValue, typeNameValue, typeDescValue,
-                    assignNumber, colorPicked);
+            SoftwareModuleType newSWType = entityFactory.generateSoftwareModuleType(typeKeyValue, typeNameValue,
+                    typeDescValue, assignNumber);
+            newSWType.setColour(colorPicked);
+
             if (null != typeDescValue) {
                 newSWType.setDescription(typeDescValue);
             }
@@ -279,9 +286,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     protected void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             final String selectedOption = (String) optiongroup.getValue();
-            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTypeStr)) {
+            if (StringUtils.isNotEmpty(selectedOption) && selectedOption.equalsIgnoreCase(updateTypeStr)) {
                 if (null != tagNameComboBox.getValue()) {
-
                     final SoftwareModuleType typeSelected = swTypeManagementService
                             .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
                     if (null != typeSelected) {

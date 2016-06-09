@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetRepository;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerConstants;
-import org.eclipse.hawkbit.ui.colorPicker.ColorPickerHelper;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
+import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
@@ -76,7 +76,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     private transient DistributionSetManagement distributionSetManagement;
 
     @Autowired
-    private transient DistributionSetRepository distributionSetRepository;
+    private transient EntityFactory entityFactory;
 
     private HorizontalLayout distTypeSelectLayout;
     private Table sourceTable;
@@ -343,19 +343,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         final String typeDescValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagDesc.getValue());
         final List<Long> itemIds = (List<Long>) selectedTable.getItemIds();
         if (null != typeNameValue && null != typeKeyValue && null != itemIds && !itemIds.isEmpty()) {
-            DistributionSetType newDistType = new DistributionSetType(typeKeyValue, typeNameValue, typeDescValue);
+            DistributionSetType newDistType = entityFactory.generateDistributionSetType(typeKeyValue, typeNameValue,
+                    typeDescValue);
             for (final Long id : itemIds) {
                 final Item item = selectedTable.getItem(id);
                 final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
                 final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
                 final Boolean isMandatory = mandatoryCheckBox.getValue();
                 final SoftwareModuleType swModuleType = softwareManagement.findSoftwareModuleTypeByName(distTypeName);
-                if (isMandatory) {
-                    newDistType.addMandatoryModuleType(swModuleType);
-
-                } else {
-                    newDistType.addOptionalModuleType(swModuleType);
-                }
+                checkMandatoryAndAddMandatoryModuleType(newDistType, isMandatory, swModuleType);
             }
             if (null != typeDescValue) {
                 newDistType.setDescription(typeDescValue);
@@ -392,7 +388,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             updateDistSetType.setKey(typeKeyValue);
             updateDistSetType.setDescription(null != typeDescValue ? typeDescValue : null);
 
-            if (distributionSetRepository.countByType(existingType) <= 0 && null != itemIds && !itemIds.isEmpty()) {
+            if (distributionSetManagement.countDistributionSetsByType(existingType) <= 0 && null != itemIds
+                    && !itemIds.isEmpty()) {
                 for (final Long id : itemIds) {
                     final Item item = selectedTable.getItem(id);
                     final CheckBox mandatoryCheckBox = (CheckBox) item.getItemProperty(DIST_TYPE_MANDATORY).getValue();
@@ -400,12 +397,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                     final String distTypeName = (String) item.getItemProperty(DIST_TYPE_NAME).getValue();
                     final SoftwareModuleType swModuleType = softwareManagement
                             .findSoftwareModuleTypeByName(distTypeName);
-                    if (isMandatory) {
-                        updateDistSetType.addMandatoryModuleType(swModuleType);
-
-                    } else {
-                        updateDistSetType.addOptionalModuleType(swModuleType);
-                    }
+                    checkMandatoryAndAddMandatoryModuleType(updateDistSetType, isMandatory, swModuleType);
                 }
             }
             updateDistSetType.setColour(ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview()));
@@ -420,6 +412,16 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
 
+    }
+
+    private void checkMandatoryAndAddMandatoryModuleType(final DistributionSetType updateDistSetType,
+            final Boolean isMandatory, final SoftwareModuleType swModuleType) {
+        if (isMandatory) {
+            updateDistSetType.addMandatoryModuleType(swModuleType);
+
+        } else {
+            updateDistSetType.addOptionalModuleType(swModuleType);
+        }
     }
 
     private DistributionSetType removeSWModuleTypesFromDistSetType(final String selectedDistSetType) {
@@ -551,7 +553,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             tagDesc.setValue(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
 
-            if (distributionSetRepository.countByType(selectedTypeTag) <= 0) {
+            if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag) <= 0) {
                 distTypeSelectLayout.setEnabled(true);
                 selectedTable.setEnabled(true);
                 window.setSaveButtonEnabled(true);
@@ -590,17 +592,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         }
     }
 
-    /**
-     * reset the tag name and tag description component border color.
-     */
-    @Override
-    protected void restoreComponentStyles() {
-
-        super.restoreComponentStyles();
-        typeKey.removeStyleName(TYPE_NAME_DYNAMIC_STYLE);
-        typeKey.addStyleName(SPUIDefinitions.DIST_SET_TYPE_KEY);
-    }
-
     @Override
     protected void save(final ClickEvent event) {
 
@@ -623,7 +614,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     public void createWindow() {
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(event), event -> discard(event), null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null);
     }
 
     @Override
@@ -649,6 +640,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
         }
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
+    }
+
+    @Override
+    protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
+
+        super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
+        optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
     }
 
 }

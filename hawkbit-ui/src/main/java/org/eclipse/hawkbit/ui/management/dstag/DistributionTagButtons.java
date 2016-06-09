@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagCreatedBulkEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagDeletedEvent;
-import org.eclipse.hawkbit.eventbus.event.DistributionSetTagUpdateEvent;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagCreatedBulkEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagUpdateEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtons;
@@ -22,7 +23,7 @@ import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.tag.TagIdName;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -54,10 +55,13 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     @Autowired
     private ManagementUIState managementUIState;
 
+    @Autowired
+    private transient EntityFactory entityFactory;
+
     @Override
     public void init(final AbstractFilterButtonClickBehaviour filterButtonClickBehaviour) {
         super.init(filterButtonClickBehaviour);
-        addNewTag(new DistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -92,7 +96,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
 
     @Override
     protected String getButtonsTableId() {
-        return SPUIComponetIdProvider.DISTRIBUTION_TAG_TABLE_ID;
+        return SPUIComponentIdProvider.DISTRIBUTION_TAG_TABLE_ID;
     }
 
     @Override
@@ -139,7 +143,7 @@ public class DistributionTagButtons extends AbstractFilterButtons {
     private void refreshTagTable() {
         ((LazyQueryContainer) getContainerDataSource()).refresh();
         removeGeneratedColumn(FILTER_BUTTON_COLUMN);
-        addNewTag(new DistributionSetTag("NO TAG"));
+        addNewTag(entityFactory.generateDistributionSetTag("NO TAG"));
         addColumn();
     }
 

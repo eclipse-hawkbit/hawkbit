@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.ui.rollout.StatusFontIcon;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.state.RolloutUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -50,12 +50,11 @@ import com.vaadin.spring.annotation.ViewScope;
 public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     private static final long serialVersionUID = -2244756637458984597L;
-  
+
     @Autowired
     private transient RolloutUIState rolloutUIState;
 
     private transient Map<Status, StatusFontIcon> statusIconMap = new EnumMap<>(Status.class);
-
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final RolloutEvent event) {
@@ -131,7 +130,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     @Override
     protected String getGridId() {
-        return SPUIComponetIdProvider.ROLLOUT_GROUP_TARGETS_LIST_GRID_ID;
+        return SPUIComponentIdProvider.ROLLOUT_GROUP_TARGETS_LIST_GRID_ID;
     }
 
     @Override
@@ -161,7 +160,7 @@ public class RolloutGroupTargetsListGrid extends AbstractGrid {
 
     @Override
     protected CellDescriptionGenerator getDescriptionGenerator() {
-        return cell -> getDescription(cell);
+        return this::getDescription;
     }
 
     private void alignColumns() {

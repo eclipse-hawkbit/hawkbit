@@ -502,16 +502,6 @@ public final class SPUIComponetIdProvider {
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
 
     /**
-     * ID for save button in pop-up-windows instance of commonDialogWindow
-     */
-    public static final String SAVE_BUTTON = "common.dialog.window.save";
-
-    /**
-     * ID for cancel button in pop-up-windows instance of commonDialogWindow
-     */
-    public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
-
-    /**
      * Cancel button is.
      */
     public static final String SYSTEM_CONFIGURATION_CANCEL = "system.configuration.cancel";
@@ -907,50 +897,6 @@ public final class SPUIComponetIdProvider {
      * Validation status icon .
      */
     public static final String VALIDATION_STATUS_ICON_ID = "validation.status.icon";
-
-    /**
-     * Software module table - Manage metadata id.
-     */
-    public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";
-    
-    
-    /**
-     * Metadata key id.
-     */
-    public static final String METADATA_KEY_FIELD_ID = "metadata.key.id";
-    
-    /**
-     * Metadata value id.
-     */
-    public static final String METADATA_VALUE_ID = "metadata.value.id";
-    /**
-     * Metadata save id.
-     */
-    public static final String METADTA_SAVE_ICON_ID = "metadata.save.icon.id";
-    
-    /**
-     * Metadata discard id.
-     */
-    public static final String METADTA_DISCARD_ICON_ID = "metadata.discard.icon.id";
-    
-    /**
-     * Metadata add icon id.
-     */
-    public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
-    /**
-     * Metadata table id.
-     */
-    public static final String METDATA_TABLE_ID = "metadata.table.id";
-    
-    /**
-     * Distribution set table - Manage metadata id.
-     */
-    public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
-    
-    /**
-     * Metadata popup id.
-     */
-    public static final String METADATA_POPUP_ID = "metadata.popup.id";
 
     /**
      * /* Private Constructor.

@@ -19,15 +19,16 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
@@ -119,6 +120,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     public void setUpDetails(final Long swId, final M metaData) {
+        keyTextField.clear();
+        valueTextArea.clear();
+        metadataWindow.setSaveButtonEnabled(false);
+        metadataWindow.setCancelButtonEnabled(false);
+        addIcon.setEnabled(true);
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
             populateGrid();
@@ -166,17 +172,22 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         headerLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
         headerLayout.setSpacing(false);
         headerLayout.setMargin(false);
-        headerLayout.setWidth("100%");
-        headerLayout.setHeight("30px");
+        headerLayout.setSizeFull();
         headerLayout.addComponent(headerCaption);
         headerLayout.addComponents(addIcon);
         headerLayout.setComponentAlignment(addIcon, Alignment.MIDDLE_RIGHT);
         headerLayout.setExpandRatio(headerCaption, 1.0F);
-
+        
+        final HorizontalLayout headerWrapperLayout = new HorizontalLayout();
+        headerWrapperLayout.addStyleName("bordered-layout"+" "+"no-border-bottom");
+        headerWrapperLayout.addComponent(headerLayout);
+        headerWrapperLayout.setWidth("100%");
+        headerLayout.setHeight("30px");
+        
         final VerticalLayout tableLayout = new VerticalLayout();
         tableLayout.setSizeFull();
         tableLayout.setHeight("100%");
-        tableLayout.addComponent(headerLayout);
+        tableLayout.addComponent(headerWrapperLayout);
         tableLayout.addComponent(metaDataGrid);
         tableLayout.addStyleName("table-layout");
         tableLayout.setExpandRatio(metaDataGrid, 1.0F);
@@ -203,7 +214,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private TextField createKeyTextField() {
         TextField keyField = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY, true, "", i18n.get("textfield.key"), true, 128);
-        keyField.setId(SPUIComponetIdProvider.METADATA_KEY_FIELD_ID);
+        keyField.setId(SPUIComponentIdProvider.METADATA_KEY_FIELD_ID);
         keyField.addTextChangeListener(event -> onKeyChange(event));
         keyField.setTextChangeEventMode(TextChangeEventMode.EAGER);
         keyField.setWidth("100%");
@@ -213,7 +224,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private TextArea createValueTextField() {
         valueTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.value"), null, ValoTheme.TEXTAREA_TINY,
                 true, null, i18n.get("textfield.value"), 4000);
-        valueTextArea.setId(SPUIComponetIdProvider.METADATA_VALUE_ID);
+        valueTextArea.setId(SPUIComponentIdProvider.METADATA_VALUE_ID);
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
         valueTextArea.addTextChangeListener(event -> onValueChange(event));
@@ -223,11 +234,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     private Grid createMetadataGrid() {
         final Grid metadataGrid = new Grid();
-        metadataGrid.addStyleName(SPUIStyleDefinitions.SP_GRID);
+        metadataGrid.addStyleName(SPUIStyleDefinitions.METADATA_GRID);
         metadataGrid.setImmediate(true);
         metadataGrid.setHeight("100%");
         metadataGrid.setWidth("100%");
-        metadataGrid.setId(SPUIComponetIdProvider.METDATA_TABLE_ID);
+        metadataGrid.setId(SPUIComponentIdProvider.METDATA_TABLE_ID);
         metadataGrid.setSelectionMode(SelectionMode.SINGLE);
         metadataGrid.setColumnReorderingAllowed(true);
         metadataGrid.setContainerDataSource(getMetadataContainer());
@@ -254,7 +265,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                         uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
                         Object selectedRow = metaDataGrid.getSelectedRow();
                         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
-                        metaDataGrid.getSelectionModel().reset();
+//                        metaDataGrid.getSelectionModel().reset();
+                        //force grid to refresh
+                        metaDataGrid.clearSortOrder();
                         if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty() && selectedRow != null) {
                             if (selectedRow.equals(event.getItemId())) {
                                 metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
@@ -269,7 +282,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
 
     private Button createAddIcon() {
-        addIcon = SPUIComponentProvider.getButton(SPUIComponetIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
+        addIcon = SPUIComponentProvider.getButton(SPUIComponentIdProvider.METADTA_ADD_ICON_ID, i18n.get("button.save"),
                 null, null, false, FontAwesome.PLUS, SPUIButtonStyleSmallNoBorder.class);
         addIcon.addClickListener(event -> onAdd(event));
         return addIcon;
@@ -285,7 +298,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         final IndexedContainer swcontactContainer = new IndexedContainer();
         swcontactContainer.addContainerProperty(KEY, String.class, "");
         swcontactContainer.addContainerProperty(VALUE, String.class, "");
-        swcontactContainer.addContainerProperty(DELETE_BUTTON, String.class, FontAwesome.TRASH.getHtml());
+        swcontactContainer.addContainerProperty(DELETE_BUTTON, String.class, FontAwesome.TRASH_O.getHtml());
         return swcontactContainer;
     }
 

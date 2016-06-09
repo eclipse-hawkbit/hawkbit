@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.utils;
 
 /**
- * Constants required for Target.
+ * RepositoryConstants required for Target.
  * 
  *
  * 

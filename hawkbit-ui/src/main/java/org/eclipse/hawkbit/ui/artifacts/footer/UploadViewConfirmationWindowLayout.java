@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.CustomFile;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.AbstractConfirmationWindowLayout;
 import org.eclipse.hawkbit.ui.common.confirmwindow.layout.ConfirmationTab;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private ConfirmationTab createSMDeleteConfirmationTab() {
         final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(SPUIComponetIdProvider.SW_DELETE_ALL);
+        tab.getConfirmAll().setId(SPUIComponentIdProvider.SW_DELETE_ALL);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get("button.delete.all"));
         tab.getConfirmAll().addClickListener(event -> deleteSMAll(tab));
@@ -181,7 +181,7 @@ public class UploadViewConfirmationWindowLayout extends AbstractConfirmationWind
     private ConfirmationTab createSMtypeDeleteConfirmationTab() {
         final ConfirmationTab tab = new ConfirmationTab();
 
-        tab.getConfirmAll().setId(SPUIComponetIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
+        tab.getConfirmAll().setId(SPUIComponentIdProvider.SAVE_DELETE_SW_MODULE_TYPE);
         tab.getConfirmAll().setIcon(FontAwesome.TRASH_O);
         tab.getConfirmAll().setCaption(i18n.get("button.delete.all"));
         tab.getConfirmAll().addClickListener(event -> deleteSMtypeAll(tab));

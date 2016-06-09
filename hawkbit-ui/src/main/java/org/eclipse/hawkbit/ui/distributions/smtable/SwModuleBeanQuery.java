@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.CustomSoftwareModule;
+import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.UserDetailsFormatter;
@@ -75,20 +75,20 @@ public class SwModuleBeanQuery extends AbstractBeanQuery<ProxyBaseSwModuleItem> 
 
     @Override
     protected List<ProxyBaseSwModuleItem> loadBeans(final int startIndex, final int count) {
-        final Slice<CustomSoftwareModule> swModuleBeans;
+        final Slice<AssignedSoftwareModule> swModuleBeans;
         final List<ProxyBaseSwModuleItem> proxyBeans = new ArrayList<>();
 
         swModuleBeans = getSoftwareManagement().findSoftwareModuleOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
                 new OffsetBasedPageRequest(startIndex, count), orderByDistId, searchText, type);
 
-        for (final CustomSoftwareModule swModule : swModuleBeans) {
+        for (final AssignedSoftwareModule swModule : swModuleBeans) {
             proxyBeans.add(getProxyBean(swModule));
         }
 
         return proxyBeans;
     }
 
-    private ProxyBaseSwModuleItem getProxyBean(final CustomSoftwareModule customSoftwareModule) {
+    private ProxyBaseSwModuleItem getProxyBean(final AssignedSoftwareModule customSoftwareModule) {
         final SoftwareModule bean = customSoftwareModule.getSoftwareModule();
         final ProxyBaseSwModuleItem proxyItem = new ProxyBaseSwModuleItem();
         proxyItem.setSwId(bean.getId());

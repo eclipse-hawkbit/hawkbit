@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionsUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -21,7 +22,6 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 
 /**
  * Distribution Set Type filter buttons header.
@@ -37,6 +37,8 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     @Autowired
     private CreateUpdateDistSetTypeLayout createUpdateDistSetTypeLayout;
+
+    private CommonDialogWindow addUpdateWindow;
 
     @Override
     @PostConstruct
@@ -59,9 +61,8 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected void settingsIconClicked(final ClickEvent event) {
-        final Window addUpdateWindow = createUpdateDistSetTypeLayout.getWindow();
+        addUpdateWindow = createUpdateDistSetTypeLayout.getWindow();
         UI.getCurrent().addWindow(addUpdateWindow);
-        addUpdateWindow.setVisible(Boolean.TRUE);
     }
 
     @Override

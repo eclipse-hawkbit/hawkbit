@@ -34,7 +34,6 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
 
     private static final long serialVersionUID = -1388340600522323332L;
 
-    
     @Autowired
     protected SpPermissionChecker permChecker;
 
@@ -64,7 +63,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
         if (hasCreateUpdatePermission() && isAddTagRequired()) {
             config = SPUIComponentProvider.getButton(getConfigureFilterButtonId(), "", "", "", true, FontAwesome.COG,
                     SPUIButtonStyleSmallNoBorder.class);
-            config.addClickListener(event -> settingsIconClicked(event));
+            config.addClickListener(this::settingsIconClicked);
         }
         hideIcon = SPUIComponentProvider.getButton(getHideButtonId(), "", "", "", true, FontAwesome.TIMES,
                 SPUIButtonStyleSmallNoBorder.class);
@@ -92,8 +91,7 @@ public abstract class AbstractFilterHeader extends VerticalLayout {
     }
 
     private Label createHeaderCaption() {
-        final Label captionLabel = SPUIComponentProvider.getLabel(getTitle(), SPUILabelDefinitions.SP_WIDGET_CAPTION);
-        return captionLabel;
+        return SPUIComponentProvider.getLabel(getTitle(), SPUILabelDefinitions.SP_WIDGET_CAPTION);
     }
 
     /**

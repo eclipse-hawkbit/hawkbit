@@ -183,10 +183,11 @@
   }
   
   
-  .sp-grid {
+  .metadata-grid {
   	tr {
   		.icon-only {
          visibility: hidden;
+         color: $discard-icon-color;
         }
     }
   

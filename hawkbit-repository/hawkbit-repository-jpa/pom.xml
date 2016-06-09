@@ -1,0 +1,207 @@
+<!--
+
+    Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.hawkbit</groupId>
+      <version>0.2.0-SNAPSHOT</version>
+      <artifactId>hawkbit-repository</artifactId>
+   </parent>
+   <artifactId>hawkbit-repository-jpa</artifactId>
+   <name>hawkBit :: Repository JPA Implementation</name>
+
+
+   <repositories>
+      <repository>
+         <id>com.ethlo.eclipselink.tools</id>
+         <url>http://ethlo.com/maven</url>
+      </repository>
+   </repositories>
+
+   <pluginRepositories>
+      <pluginRepository>
+         <id>com.ethlo.eclipselink.tools</id>
+         <url>http://ethlo.com/maven</url>
+      </pluginRepository>
+   </pluginRepositories>
+
+
+   <dependencies>
+      <!-- Hawkbit -->
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-api</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-artifact-repository-mongo</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-logging</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.persistence</groupId>
+         <artifactId>org.eclipse.persistence.jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.security</groupId>
+         <artifactId>spring-security-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.flywaydb</groupId>
+         <artifactId>flyway-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-configuration-processor</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>cz.jirutka.rsql</groupId>
+         <artifactId>rsql-parser</artifactId>
+      </dependency>
+
+      <!-- Test -->
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.mariadb.jdbc</groupId>
+         <artifactId>mariadb-java-client</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>javax.el</groupId>
+         <artifactId>javax.el-api</artifactId>
+         <scope>test</scope>
+      </dependency>      
+      <dependency>
+         <groupId>ru.yandex.qatools.allure</groupId>
+         <artifactId>allure-junit-adaptor</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easytesting</groupId>
+         <artifactId>fest-assert</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.bsc.maven</groupId>
+            <artifactId>maven-processor-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>process</id>
+                  <goals>
+                     <goal>process</goal>
+                  </goals>
+                  <phase>generate-sources</phase>
+                  <configuration>
+                     <processors>
+                        <processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+                     </processors>
+                  </configuration>
+               </execution>
+            </executions>
+            <dependencies>
+               <dependency>
+                  <groupId>org.hibernate</groupId>
+                  <artifactId>hibernate-jpamodelgen</artifactId>
+                  <version>${hibernate.version}</version>
+               </dependency>
+            </dependencies>
+         </plugin>
+         <!-- Static weaver for EclipseLink -->
+         <plugin>
+            <groupId>com.ethlo.persistence.tools</groupId>
+            <artifactId>eclipselink-maven-plugin</artifactId>
+            <version>2.6.2</version>
+            <executions>
+               <execution>
+                  <phase>process-classes</phase>
+                  <goals>
+                     <goal>weave</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <dependencies>
+               <dependency>
+                  <groupId>org.eclipse.persistence</groupId>
+                  <artifactId>org.eclipse.persistence.jpa</artifactId>
+                  <version>${eclipselink.version}</version>
+               </dependency>
+               <dependency>
+                  <groupId>org.javassist</groupId>
+                  <artifactId>javassist</artifactId>
+                  <version>3.20.0-GA</version>
+               </dependency>
+            </dependencies>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>test-jar</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+</project>
