@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -37,6 +39,11 @@ public class AmqpProperties {
      * Missing queue fatal.
      */
     private boolean missingQueuesFatal = false;
+
+    /**
+     * Requested heartbeat interval from broker in {@link TimeUnit#SECONDS}.
+     */
+    private int requestedHeartBeat = 60;
 
     /**
      * Is missingQueuesFatal enabled
@@ -102,4 +109,13 @@ public class AmqpProperties {
     public void setReceiverQueue(final String receiverQueue) {
         this.receiverQueue = receiverQueue;
     }
+
+    public int getRequestedHeartBeat() {
+        return requestedHeartBeat;
+    }
+
+    public void setRequestedHeartBeat(final int requestedHeartBeat) {
+        this.requestedHeartBeat = requestedHeartBeat;
+    }
+
 }

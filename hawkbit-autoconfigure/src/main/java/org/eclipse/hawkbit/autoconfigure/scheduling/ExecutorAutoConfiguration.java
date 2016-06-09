@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.autoconfigure.scheduling;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
@@ -94,11 +94,22 @@ public class ExecutorAutoConfiguration {
     }
 
     /**
-     * @return {@link TaskScheduler} for scheduled tasks
+     * @return {@link ScheduledExecutorService} based on
+     *         {@link #threadPoolTaskScheduler()}.
      */
     @Bean
     @ConditionalOnMissingBean
-    public TaskScheduler taskScheduler() {
+    public ScheduledExecutorService scheduledExecutorService() {
+        return threadPoolTaskScheduler().getScheduledExecutor();
+    }
+
+    /**
+     * @return {@link ThreadPoolTaskScheduler} for scheduled operations.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         return new ThreadPoolTaskScheduler();
     }
+
 }
