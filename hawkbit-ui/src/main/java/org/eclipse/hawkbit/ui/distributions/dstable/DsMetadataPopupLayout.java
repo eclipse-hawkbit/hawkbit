@@ -10,11 +10,19 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DsMetadataCompositeKey;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -31,8 +39,11 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     private static final long serialVersionUID = -7778944849012048106L;
 
     @Autowired
-    private DistributionSetManagement distributionSetManagement;
-
+    private transient DistributionSetManagement distributionSetManagement;
+    
+    @Autowired
+    private ManageDistUIState manageDistUIState;
+    
     @Override
     protected void checkForDuplicate(DistributionSet entity, String value) {
         distributionSetManagement.findOne(new DsMetadataCompositeKey(entity, value));
@@ -43,6 +54,15 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         DistributionSetMetadata dsMetaData = distributionSetManagement
                 .createDistributionSetMetadata(new DistributionSetMetadata(key, entity, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
+        DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
+                manageDistUIState.getLastSelectedDistribution().get() : null;
+        if(lastselectedDS!=null){           
+            DistributionSet distSet = distributionSetManagement.findDistributionSetById(lastselectedDS.getId());
+            if((distSet.getName().concat(distSet.getVersion())).equals((dsMetaData.getDistributionSet().getName().
+                                            concat(dsMetaData.getDistributionSet().getVersion())))){
+                eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DISTRIBUTIONSET_METADATA,dsMetaData.getKey())); 
+            }
+        }   
         return dsMetaData;
     }
 
@@ -67,5 +87,14 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected void deleteMetadata(String key) {
         distributionSetManagement.deleteDistributionSetMetadata(new DsMetadataCompositeKey(getSelectedEntity(), key));
+        DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
+                manageDistUIState.getLastSelectedDistribution().get() : null;
+        if(lastselectedDS!=null){       
+            DistributionSet distSet = distributionSetManagement.findDistributionSetById(lastselectedDS.getId());
+            if((distSet.getName().concat(distSet.getVersion())).equals((getSelectedEntity().getName().
+                                            concat(getSelectedEntity().getVersion())))){
+                eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DISTRIBUTIONSET_METADATA,key)); 
+            }    
+        }   
     }
 }

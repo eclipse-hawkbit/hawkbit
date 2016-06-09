@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     @Autowired
     private SpPermissionChecker permissionChecker;
+    
+    protected SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
     private T selectedBaseEntity;
 
@@ -75,7 +78,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     
     private VerticalLayout metadataLayout;
     
-    protected SoftwareModuleMetadatadetailslayout swmMetadataTable;
+   
     
    /**
      * Initialize components.
@@ -149,8 +152,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         detailsTab.setHeight(90, Unit.PERCENTAGE);
         detailsTab.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         detailsTab.setId(getTabSheetId());
-        swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
-        swmMetadataTable.init(getI18n(), getPermissionChecker());
         addTabs(detailsTab);
      }
 
@@ -289,15 +290,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         return descriptionLayout;
     }
     
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.addComponent(swmMetadataTable);
-        return metadataLayout;
-    }
-    
-    
-    /**
+   /**
      * Default caption of header to be displayed when no data row selected in
      * table.
      * 

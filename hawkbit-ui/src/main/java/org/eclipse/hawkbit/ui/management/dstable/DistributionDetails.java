@@ -8,12 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
@@ -47,6 +50,12 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Autowired
     private DistributionTagToken distributionTagToken;
+    
+    @Autowired
+    private transient  DistributionSetManagement distributionSetManagement;
+    
+    @Autowired
+    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
     
@@ -60,11 +69,24 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         softwareModuleTable.init(getI18n(), false, getPermissionChecker(), null, null, null);
         
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
-        dsMetadataTable.init(getI18n(), getPermissionChecker());
+        dsMetadataTable.init(getI18n(), getPermissionChecker(),distributionSetManagement,
+                dsMetadataPopupLayout);
         
         super.init();
     }
 
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final MetadataEvent event) {
+        UI.getCurrent().access(() -> {
+
+            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTIONSET_METADATA){
+                dsMetadataTable.createMetadata(event.getMetadataKey());
+            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTIONSET_METADATA){                                         
+                dsMetadataTable.deleteMetadata(event.getMetadataKey());
+            }
+        });
+    }
+    
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final DistributionTableEvent distributionTableEvent) {
         onBaseEntityEvent(distributionTableEvent);

@@ -524,7 +524,7 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
             }
             distributionSetManagement.createDistributionSetMetadata(metadataList);
         }
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds));
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 
     private String getNameAndVerion(final Object itemId) {

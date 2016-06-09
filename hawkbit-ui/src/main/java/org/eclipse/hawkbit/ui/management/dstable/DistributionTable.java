@@ -22,13 +22,18 @@ import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
+import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.AbstractTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
@@ -63,6 +68,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DragAndDropWrapper;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
@@ -89,6 +95,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Autowired
     private transient TargetManagement targetService;
+    
+    @Autowired
+    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
@@ -219,9 +228,33 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
-                return getPinButton(itemId);
+                HorizontalLayout iconLayout = new HorizontalLayout();
+                final String nameVersionStr = getNameAndVerion(itemId);
+                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails(itemId));
+                iconLayout.addComponent((Button)getPinButton(itemId));
+                iconLayout.addComponent(manageMetaDataBtn);
+                return iconLayout;
             }
+                  
         });
+    }
+    
+    
+    private String getNameAndVerion(final Object itemId) {
+        final Item item = getItem(itemId);
+        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
+        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
+        return name + "." + version;
+    }
+    
+    private Button createManageMetadataButton(String nameVersionStr) {
+        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
+                SPUIComponetIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.PLUS_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        return manageMetadataBtn;
     }
 
     @Override
@@ -656,6 +689,21 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     protected void setDataAvailable(final boolean available) {
         managementUIState.setNoDataAvailableDistribution(!available);
 
+    }
+    
+    private void showMetadataDetails(Object itemId) {
+        final DistributionSetIdName distIdName = (DistributionSetIdName) getContainerDataSource().getItem(itemId)
+                .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();        
+        DistributionSet ds = distributionSetManagement.findDistributionSetById(distIdName.getId());
+        if (ds.getMetadata().isEmpty()) {
+            List<DistributionSetMetadata> metadataList = new ArrayList<>();
+            for (int i = 1; i <= 30; i++) {
+                metadataList.add(new DistributionSetMetadata("K-" + i, ds, "V--" + i));
+            }
+            distributionSetManagement.createDistributionSetMetadata(metadataList);
+        }
+        
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 
 }

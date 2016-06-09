@@ -1,31 +1,53 @@
+/**
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.spring.events.EventBus.SessionEventBus;
+import org.vaadin.spring.events.EventScope;
+import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
+@SpringComponent
+@VaadinSessionScope
 public class DistributionSetMetadatadetailslayout extends Table{
     
     private static final long serialVersionUID = 2913758299611837718L;
+    
+ 
+    private  DistributionSetManagement distributionSetManagement;
+    
+    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributionSetMetadatadetailslayout.class);
 
@@ -36,27 +58,23 @@ public class DistributionSetMetadatadetailslayout extends Table{
     private SpPermissionChecker permissionChecker;
 
     private I18N i18n;
-
-   /**
-     * Initialize software module table- to be displayed in details layout.
-     * 
-     * @param i18n
-     *            I18N
-     * @param isUnassignSoftModAllowed
-     *            boolean flag to check for unassign functionality allowed for
-     *            the view.
-     * @param distributionSetManagement
-     *            DistributionSetManagement
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            SessionEventBus
-     * @param manageDistUIState
-     *            ManageDistUIState
-     */
-    public void init(final I18N i18n, final SpPermissionChecker permissionChecker) {
+    
+    private  Long selectedDSId;
+    
+  /**
+   * 
+   * @param i18n
+   * @param permissionChecker
+   * @param distributionSetManagement
+   * @param dsMetadataPopupLayout
+   */
+    public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
+                     final DistributionSetManagement distributionSetManagement,
+                     final DsMetadataPopupLayout dsMetadataPopupLayout) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
+        this.distributionSetManagement = distributionSetManagement;
+        this.dsMetadataPopupLayout = dsMetadataPopupLayout;
         createDSMetadataTable();
         addCustomGeneratedColumns();
     }
@@ -66,14 +84,14 @@ public class DistributionSetMetadatadetailslayout extends Table{
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
         setSelectable(false);
         setImmediate(true);
-        setContainerDataSource(getSwModuleContainer());
+        setContainerDataSource(getDistSetContainer());
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addDSMetadataTableHeader();
-        setSizeFull(); // check if this style is required
+        setSizeFull(); 
         addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
     }
 
-    private IndexedContainer getSwModuleContainer() {
+    private IndexedContainer getDistSetContainer() {
         final IndexedContainer container = new IndexedContainer();
         container.addContainerProperty(METADATA_KEY, String.class, "");
         setColumnExpandRatio(METADATA_KEY, 0.7f);
@@ -98,34 +116,23 @@ public class DistributionSetMetadatadetailslayout extends Table{
      */
     public void populateDSMetadata(final DistributionSet distributionSet) {
         removeAllItems();
-        List<DistributionSetMetadata> dsMetadtaList = new ArrayList<>();
-        for(int i=1;i<=5;i++){
-            DistributionSetMetadata dsMetadata = new DistributionSetMetadata();
-            dsMetadata.setKey("ReleaseNote AAA" +i);
-            dsMetadata.setValue("ReleaseNote AAA sample data"+i);
-            dsMetadtaList.add(dsMetadata);
-       }
-        if (null != distributionSet) {            
-           /* final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();*/
-            final List<DistributionSetMetadata> dsMetadataList = dsMetadtaList;
+        if (null != distributionSet) { 
+            selectedDSId = distributionSet.getId();
+            final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
             if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
                 dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
             }
          }
-
     }
     
     private void setDSMetadataProperties(final DistributionSetMetadata dsMetadata){
         final Item item = getContainerDataSource().addItem(dsMetadata.getKey());
         item.getItemProperty(METADATA_KEY).setValue(dsMetadata.getKey());
-        if (permissionChecker.hasUpdateDistributionPermission()) {
-            item.getItemProperty(VIEW).setValue(HawkbitCommonUtil.getFormatedLabel("View"));
-        }
-        
+              
     }
     
     protected void addCustomGeneratedColumns() {       
-        addGeneratedColumn(VIEW,
+        addGeneratedColumn(METADATA_KEY,
                 (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
 
@@ -133,16 +140,35 @@ public class DistributionSetMetadatadetailslayout extends Table{
         final Item row1 = getItem(itemId);
         final String metadataKey = (String) row1.getItemProperty(METADATA_KEY).getValue();
 
-        final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), VIEW,
-                "View DistributionSet Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
+        final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
+                "View " +metadataKey+ "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewIcon.setData(metadataKey);
         viewIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
-        //viewIcon.addClickListener(event -> onClickOfDetailButton(event));
+        viewIcon.addClickListener(event -> showMetadataDetails(selectedDSId,metadataKey));
         return viewIcon;
     }
     
     private static String getDetailLinkId(final String name) {
         return new StringBuilder(SPUIComponetIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name)
                 .toString();
+    }
+    
+    private void showMetadataDetails(Long itemId,final String metadataKey) {
+        DistributionSet distSet = distributionSetManagement.findDistributionSetById(itemId);
+       
+        /* display the window */
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(distSet,new DistributionSetMetadata(metadataKey,distSet,null) ));
+    }
+    
+    public void createMetadata(final String metadataKeyName){
+        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
+        final Item item = metadataContainer.addItem(metadataKeyName);
+        item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
+        
+    }
+    
+    public void deleteMetadata(final String metadataKeyName){
+        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
+         metadataContainer.removeItem(metadataKeyName);
     }
 }

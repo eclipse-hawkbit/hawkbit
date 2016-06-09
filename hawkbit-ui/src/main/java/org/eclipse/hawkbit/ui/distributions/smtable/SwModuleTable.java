@@ -424,7 +424,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
 
         /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule));
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
     }
 
 }

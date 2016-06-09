@@ -8,14 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -45,6 +48,24 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
+    
+    @Autowired
+    private transient SoftwareManagement softwareManagement;
+    
+    @Autowired
+    private SwMetadataPopupLayout swMetadataPopupLayout;
+    
+    private VerticalLayout metadataLayout;
+    
+    /**
+     * softwareLayout Initialize the component.
+     */
+    @Override
+    protected void init() {
+        swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
+        swmMetadataTable.init(getI18n(), getPermissionChecker(),softwareManagement,swMetadataPopupLayout);
+        super.init();
+    }
     
     @Override
     protected String getEditButtonId() {
@@ -149,4 +170,11 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     private void populateMetadataDetails(){
         swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
    }
+    private VerticalLayout createMetadataLayout() {
+        metadataLayout = getTabLayout();
+        metadataLayout.setSizeFull();
+        metadataLayout.setId(SPUIDefinitions.SOFTWAREMODULE_METADATA_TAB_ID);
+        metadataLayout.addComponent(swmMetadataTable);
+        return metadataLayout;
+    }
 }

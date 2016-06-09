@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -77,6 +79,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     @Autowired
     private UINotification uiNotification;
+    
+    @Autowired
+    protected transient EventBus.SessionEventBus eventBus;
 
     private TextField keyTextField;
 
@@ -96,9 +101,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void init() {
         createComponents();
         buildLayout();
+        
     }
+    
 
-    public CommonDialogWindow getWindow(final E entity) {
+    public CommonDialogWindow getWindow(final E entity, final M metaData) {
         selectedEntity = entity;
         String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
         metadataWindow = SPUIComponentProvider.getWindow(getMetadataCaption(nameVersion), null,
@@ -107,16 +114,20 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setCancelButtonEnabled(false);
         metadataWindow.setCancelButtonCaption(i18n.get("button.discard"));
         metadataWindow.setCancelButtonIcon(FontAwesome.UNDO);
-        setUpDetails(entity.getId());
+        setUpDetails(entity.getId(),metaData);
         return metadataWindow;
     }
 
-    public void setUpDetails(final Long swId) {
+    public void setUpDetails(final Long swId, final M metaData) {
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
             populateGrid();
             if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
-                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+                if (metaData == null) {
+                    metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+                } else {
+                    metaDataGrid.select(getMetaDataCompositeKey(metaData));
+                }
             }
             metaDataGrid.scrollToStart();
         }

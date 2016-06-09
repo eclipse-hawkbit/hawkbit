@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SaveActionWindowEvent;
 import org.eclipse.hawkbit.ui.distributions.event.SoftwareModuleAssignmentDiscardEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -37,6 +38,7 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayo
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -92,6 +94,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
+    
+    @Autowired
+    private DsMetadataPopupLayout dsMetadataPopupLayout;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
     
@@ -102,6 +107,19 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     private VerticalLayout metadataLayout;
 
     Map<String, StringBuilder> assignedSWModule = new HashMap<>();
+    
+    
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final MetadataEvent event) {
+        UI.getCurrent().access(() -> {
+
+            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTIONSET_METADATA){
+                dsMetadataTable.createMetadata(event.getMetadataKey());
+            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTIONSET_METADATA){                                         
+                dsMetadataTable.deleteMetadata(event.getMetadataKey());
+            }
+        });
+    }
 
     /**
      * softwareLayout Initialize the component.
@@ -112,7 +130,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         softwareModuleTable.init(getI18n(), true, getPermissionChecker(), distributionSetManagement, getEventBus(),
                 manageDistUIState);
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
-        dsMetadataTable.init(getI18n(), getPermissionChecker());
+        dsMetadataTable.init(getI18n(), getPermissionChecker(),distributionSetManagement,
+                dsMetadataPopupLayout);
         super.init();
     }
 
@@ -132,6 +151,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     protected VerticalLayout createMetadataLayout() {
         metadataLayout = getTabLayout();
         metadataLayout.setSizeFull();
+        metadataLayout.setId(SPUIDefinitions.DISTRIBUTIONSET_METADATA_TAB_ID);
         metadataLayout.addComponent(dsMetadataTable);
         return metadataLayout;
     }
