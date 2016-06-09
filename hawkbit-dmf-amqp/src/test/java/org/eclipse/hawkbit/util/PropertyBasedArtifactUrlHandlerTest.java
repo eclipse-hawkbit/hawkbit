@@ -33,6 +33,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Stories("Test to generate the artifact download URL")
 @SpringApplicationConfiguration(classes = { AmqpTestConfiguration.class,
         org.eclipse.hawkbit.RepositoryApplicationConfiguration.class })
+
 public class PropertyBasedArtifactUrlHandlerTest extends AbstractIntegrationTestWithMongoDB {
 
     private static final String HTTPS_LOCALHOST = "https://localhost:8080/";
