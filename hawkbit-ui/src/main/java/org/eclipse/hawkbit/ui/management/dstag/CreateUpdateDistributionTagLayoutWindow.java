@@ -98,6 +98,7 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 updateExistingTag(existingDistTag);
             }
         }
+        window.setSaveButtonEnabled(false);
     }
 
     /**
@@ -159,11 +160,14 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
         if (null != selectedDistTag) {
             tagDesc.setValue(selectedDistTag.getDescription());
+            setTagDescOriginal(selectedDistTag.getDescription());
             if (null == selectedDistTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
+                setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()),
                         selectedDistTag.getColour());
+                setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()));
             }
         }
     }
@@ -181,4 +185,5 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
         setOptionGroupDefaultValue(permChecker.hasCreateDistributionPermission(),
                 permChecker.hasUpdateDistributionPermission());
     }
+
 }

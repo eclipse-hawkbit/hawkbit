@@ -91,11 +91,14 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
         final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
         if (null != selectedTargetTag) {
             tagDesc.setValue(selectedTargetTag.getDescription());
+            setTagDescOriginal(selectedTargetTag.getDescription());
             if (null == selectedTargetTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
+                setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()),
                         selectedTargetTag.getColour());
+                setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()));
             }
         }
     }
@@ -112,6 +115,7 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
                 updateExistingTag(existingTag);
             }
         }
+        window.setSaveButtonEnabled(false);
     }
 
     /**

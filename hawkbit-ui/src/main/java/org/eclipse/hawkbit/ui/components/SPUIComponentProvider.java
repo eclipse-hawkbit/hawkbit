@@ -205,6 +205,8 @@ public final class SPUIComponentProvider {
     /**
      * Get Label UI component. *
      * 
+     * @param caption
+     *            set the caption of the textArea
      * @param style
      *            set style
      * @param styleName

@@ -52,7 +52,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     @Override
     protected void addListeners() {
         super.addListeners();
-        optiongroup.addValueChangeListener(this::createOptionValueChanged);
+        optiongroup.addValueChangeListener(this::optionValueChanged);
     }
 
     @Override
@@ -61,7 +61,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
         createTypeStr = i18n.get("label.create.type");
         updateTypeStr = i18n.get("label.update.type");
         comboLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type"), null);
-        madatoryLabel = getMandatoryLabel();
         colorLabel = SPUIComponentProvider.getLabel(i18n.get("label.choose.type.color"), null);
         colorLabel.addStyleName(SPUIDefinitions.COLOR_LABEL_STYLE);
 
@@ -137,7 +136,8 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
      * @param event
      *            ValueChangeEvent
      */
-    protected void createOptionValueChanged(final ValueChangeEvent event) {
+    @Override
+    protected void optionValueChanged(final ValueChangeEvent event) {
 
         if (updateTypeStr.equals(event.getProperty().getValue())) {
             tagName.clear();
@@ -158,6 +158,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             comboLayout.removeComponent(comboLabel);
             comboLayout.removeComponent(tagNameComboBox);
         }
+        window.setSaveButtonEnabled(false);
         restoreComponentStyles();
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         getColorPickerLayout().getSelPreview()
@@ -236,12 +237,14 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, ColorPickerConstants.DEFAULT_COLOR);
             getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
+            setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
         } else {
             getColorPickerLayout().setSelectedColor(ColorPickerHelper.rgbToColorConverter(color));
             getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, color);
             getPreviewButtonColor(color);
+            setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(color));
         }
     }
 

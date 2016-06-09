@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -49,12 +50,12 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -92,13 +93,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private TextField distNameTextField;
     private TextField distVersionTextField;
-    private Label madatoryLabel;
     private TextArea descTextArea;
     private CheckBox reqMigStepCheckbox;
     private ComboBox distsetTypeNameComboBox;
     private boolean editDistribution = Boolean.FALSE;
     private Long editDistId;
-    private CommonDialogWindow addDistributionWindow;
+    private CommonDialogWindow window;
     private String originalDistName;
     private String originalDistVersion;
     private String originalDistDescription;
@@ -132,7 +132,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         setSizeUndefined();
 
         formLayout = new FormLayout();
-        formLayout.addComponent(madatoryLabel);
         formLayout.addComponent(distsetTypeNameComboBox);
         formLayout.addComponent(distNameTextField);
         formLayout.addComponent(distVersionTextField);
@@ -152,12 +151,14 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
         distNameTextField.setNullRepresentation("");
+        distNameTextField.addTextChangeListener(this::listenerDistNameTextFieldChanged);
 
         distVersionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
         distVersionTextField.setNullRepresentation("");
+        distVersionTextField.addTextChangeListener(this::listenerDistVersionTextFieldChanged);
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
                 false, "", i18n.get("label.combobox.type"));
@@ -171,14 +172,18 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         descTextArea.setId(SPUIComponentIdProvider.DIST_ADD_DESC);
         descTextArea.setNullRepresentation("");
 
-        /* Label for mandatory symbol */
-        madatoryLabel = new Label(i18n.get("label.mandatory.field"));
-        madatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_SMALL);
-
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
+    }
+
+    private void listenerDistNameTextFieldChanged(final TextChangeEvent event) {
+        window.checkMandatoryTextField(event, distNameTextField);
+    }
+
+    private void listenerDistVersionTextFieldChanged(final TextChangeEvent event) {
+        window.checkMandatoryTextField(event, distVersionTextField);
     }
 
     /**
@@ -201,7 +206,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void enableSaveButton() {
-        addDistributionWindow.setSaveButtonEnabled(true);
+        window.setSaveButtonEnabled(true);
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
@@ -210,17 +215,16 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void disableSaveButton() {
-        addDistributionWindow.setSaveButtonEnabled(false);
+        window.setSaveButtonEnabled(false);
     }
 
     private void saveDistribution() {
-        /* add new or update target */
         if (editDistribution) {
             updateDistribution();
         } else {
             addNewDistribution();
         }
-
+        window.setSaveButtonEnabled(false);
     }
 
     /**
@@ -298,8 +302,9 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
      * Close window.
      */
     private void closeThisWindow() {
-        addDistributionWindow.close();
-        UI.getCurrent().removeWindow(addDistributionWindow);
+        window.close();
+        UI.getCurrent().removeWindow(window);
+        window.setSaveButtonEnabled(false);
     }
 
     /**
@@ -398,11 +403,15 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-        if (addDistributionWindow != null) {
-            addDistributionWindow.setSaveButtonEnabled(true);
+        if (window != null) {
+            window.setSaveButtonEnabled(true);
         }
         removeListeners();
         changedComponents.clear();
+
+        if (window != null) {
+            window.resetRequiredFieldsValues();
+        }
     }
 
     private void populateRequiredComponents() {
@@ -482,7 +491,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     public void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
         editDistribution = Boolean.TRUE;
-        addDistributionWindow.setSaveButtonEnabled(false);
+        window.setSaveButtonEnabled(false);
         final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
         if (distSet != null) {
             distNameTextField.setValue(distSet.getName());
@@ -504,17 +513,28 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         }
     }
 
-    // TODO MR requiredFields
     public CommonDialogWindow getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         populateRequiredComponents();
         resetComponents();
-        addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
+        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null, null);
-        addDistributionWindow.getButtonsLayout().removeStyleName("actionButtonsMargin");
+                null, getMandatoryFields());
+        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
 
-        return addDistributionWindow;
+        return window;
+    }
+
+    private Map<String, Boolean> getMandatoryFields() {
+        final Map<String, Boolean> requiredFields = new HashMap<>();
+        final Iterator<Component> iterate = formLayout.iterator();
+        while (iterate.hasNext()) {
+            final Component c = iterate.next();
+            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
+                requiredFields.put(c.getCaption(), null);
+            }
+        }
+        return requiredFields;
     }
 
     /**

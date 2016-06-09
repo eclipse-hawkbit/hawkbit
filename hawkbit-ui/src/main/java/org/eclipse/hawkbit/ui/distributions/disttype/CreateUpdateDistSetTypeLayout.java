@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -37,9 +40,11 @@ import org.vaadin.addons.lazyquerycontainer.LazyQueryContainer;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -94,11 +99,13 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_NAME, true, "",
                 i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_NAME);
+        tagName.addTextChangeListener(this::listenerTagNameTextFieldChanged);
 
         typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY, true, "", i18n.get("textfield.key"),
                 true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
+        typeKey.addTextChangeListener(this::listenerTypeKeyTextFieldChanged);
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC, false, "",
@@ -107,6 +114,15 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         tagDesc.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
+    }
+
+    private void listenerTagNameTextFieldChanged(final TextChangeEvent event) {
+
+        window.checkMandatoryTextField(event, tagName);
+    }
+
+    private void listenerTypeKeyTextFieldChanged(final TextChangeEvent event) {
+        window.checkMandatoryTextField(event, typeKey);
     }
 
     @Override
@@ -247,10 +263,12 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     private void addSMType() {
 
         final Set<Long> selectedIds = (Set<Long>) sourceTable.getValue();
-        if (null != selectedIds && !selectedIds.isEmpty()) {
+        if (selectedIds != null && !selectedIds.isEmpty()) {
             for (final Long id : selectedIds) {
                 addTargetTableData(id);
             }
+
+            window.updateRequiredFields(selectedTable.getId(), Boolean.TRUE);
         }
     }
 
@@ -263,6 +281,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                 addSourceTableData(id);
                 selectedTable.removeItem(id);
             }
+        }
+        if (selectedIds == null || selectedIds.isEmpty()) {
+            window.updateRequiredFields(selectedTable.getId(), Boolean.FALSE);
         }
     }
 
@@ -484,9 +505,9 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
      *            ValueChangeEvent
      */
     @Override
-    protected void createOptionValueChanged(final ValueChangeEvent event) {
+    protected void optionValueChanged(final ValueChangeEvent event) {
 
-        super.createOptionValueChanged(event);
+        super.optionValueChanged(event);
 
         if (updateTypeStr.equals(event.getProperty().getValue())) {
             selectedTable.getContainerDataSource().removeAllItems();
@@ -551,18 +572,17 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         final DistributionSetType selectedTypeTag = fetchDistributionSetType(distSetTypeSelected);
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
+            setTagDescOriginal(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
 
             if (distributionSetManagement.countDistributionSetsByType(selectedTypeTag) <= 0) {
                 distTypeSelectLayout.setEnabled(true);
                 selectedTable.setEnabled(true);
-                window.setSaveButtonEnabled(true);
             } else {
                 uiNotification.displayValidationError(
                         selectedTypeTag.getName() + "  " + i18n.get("message.error.dist.set.type.update"));
                 distTypeSelectLayout.setEnabled(false);
                 selectedTable.setEnabled(false);
-                window.setSaveButtonEnabled(false);
             }
             for (final SoftwareModuleType swModuleType : selectedTypeTag.getOptionalModuleTypes()) {
                 addTargetTableforUpdate(swModuleType, false);
@@ -607,15 +627,30 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             } else {
                 updateDistributionSetType(existingDistTypeByKey);
             }
+            window.setSaveButtonEnabled(false);
         }
     }
 
-    // TODO MR requiredFields
     @Override
     public void createWindow() {
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, getMandatoryFields());
+    }
+
+    private Map<String, Boolean> getMandatoryFields() {
+        final Map<String, Boolean> requiredFields = new HashMap<>();
+        final Iterator<Component> iterate = getFormLayout().iterator();
+        while (iterate.hasNext()) {
+            final Component c = iterate.next();
+            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
+                requiredFields.put(c.getCaption(), null);
+            }
+        }
+        // Selected SoftwareModulesType
+        requiredFields.put(selectedTable.getId(), null);
+
+        return requiredFields;
     }
 
     @Override
