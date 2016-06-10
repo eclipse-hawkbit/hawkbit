@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
@@ -56,6 +57,9 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     
     @Autowired
     private DsMetadataPopupLayout dsMetadataPopupLayout;
+    
+    @Autowired
+    private EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
     
@@ -70,7 +74,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
         dsMetadataTable.init(getI18n(), getPermissionChecker(),distributionSetManagement,
-                dsMetadataPopupLayout);
+                dsMetadataPopupLayout,entityFactory);
         
         super.init();
     }

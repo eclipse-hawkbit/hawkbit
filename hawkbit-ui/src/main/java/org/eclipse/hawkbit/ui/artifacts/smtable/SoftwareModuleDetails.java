@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -55,6 +56,9 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     @Autowired
     private SwMetadataPopupLayout swMetadataPopupLayout;
     
+    @Autowired
+    private EntityFactory entityFactory;
+    
     private VerticalLayout metadataLayout;
     
     /**
@@ -63,7 +67,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     @Override
     protected void init() {
         swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
-        swmMetadataTable.init(getI18n(), getPermissionChecker(),softwareManagement,swMetadataPopupLayout);
+        swmMetadataTable.init(getI18n(), getPermissionChecker(),softwareManagement,swMetadataPopupLayout,entityFactory);
         super.init();
     }
     

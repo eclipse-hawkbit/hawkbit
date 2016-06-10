@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -101,6 +102,9 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Autowired
     private transient DistributionSetManagement distributionSetManagement;
+    
+    @Autowired
+    private EntityFactory entityFactory;
 
     private String notAllowedMsg;
 
@@ -250,7 +254,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     
     private Button createManageMetadataButton(String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponetIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.PLUS_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
@@ -698,7 +702,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (ds.getMetadata().isEmpty()) {
             List<DistributionSetMetadata> metadataList = new ArrayList<>();
             for (int i = 1; i <= 30; i++) {
-                metadataList.add(new DistributionSetMetadata("K-" + i, ds, "V--" + i));
+                metadataList.add(entityFactory.generateDistributionSetMetadata(ds, "key-"+i, "value-"+i));
             }
             distributionSetManagement.createDistributionSetMetadata(metadataList);
         }

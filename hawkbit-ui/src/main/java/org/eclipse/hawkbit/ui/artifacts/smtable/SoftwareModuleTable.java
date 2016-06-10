@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
@@ -29,6 +28,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -51,7 +51,6 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Table.ColumnGenerator;
 
 /**
  * Header of Software module table.
@@ -244,7 +243,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     
     private Button createManageMetadataButton(String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponetIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.PLUS_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
@@ -259,17 +258,8 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
     
     private void showMetadataDetails(Long itemId, String nameVersionStr) {
-        SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(itemId);
-        if (swmodule.getMetadata().isEmpty()) {
-            List<SoftwareModuleMetadata> metadataList = new ArrayList<>();
-            for (int i = 1; i <= 30; i++) {
-                metadataList.add(new SoftwareModuleMetadata("K-" + i, swmodule, "V--" + i));
-            }
-            softwareManagement.createSoftwareModuleMetadata(metadataList);
-        }
-
-
-        /* display the window */
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+                /* display the window */
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
     }
 }

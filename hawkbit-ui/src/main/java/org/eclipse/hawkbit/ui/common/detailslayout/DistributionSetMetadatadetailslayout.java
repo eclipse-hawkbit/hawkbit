@@ -11,22 +11,18 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
-
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -56,10 +52,12 @@ public class DistributionSetMetadatadetailslayout extends Table{
     private static final String VIEW ="view";
 
     private SpPermissionChecker permissionChecker;
+    
+    private EntityFactory entityFactory;
 
     private I18N i18n;
     
-    private  Long selectedDSId;
+    private  Long selectedDistSetId;
     
   /**
    * 
@@ -70,11 +68,13 @@ public class DistributionSetMetadatadetailslayout extends Table{
    */
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
                      final DistributionSetManagement distributionSetManagement,
-                     final DsMetadataPopupLayout dsMetadataPopupLayout) {
+                     final DsMetadataPopupLayout dsMetadataPopupLayout,
+                     final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.distributionSetManagement = distributionSetManagement;
         this.dsMetadataPopupLayout = dsMetadataPopupLayout;
+        this.entityFactory = entityFactory;
         createDSMetadataTable();
         addCustomGeneratedColumns();
     }
@@ -117,7 +117,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
     public void populateDSMetadata(final DistributionSet distributionSet) {
         removeAllItems();
         if (null != distributionSet) { 
-            selectedDSId = distributionSet.getId();
+            selectedDistSetId = distributionSet.getId();
             final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
             if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
                 dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
@@ -144,20 +144,21 @@ public class DistributionSetMetadatadetailslayout extends Table{
                 "View " +metadataKey+ "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewIcon.setData(metadataKey);
         viewIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
-        viewIcon.addClickListener(event -> showMetadataDetails(selectedDSId,metadataKey));
+        viewIcon.addClickListener(event -> showMetadataDetails(selectedDistSetId,metadataKey));
         return viewIcon;
     }
     
     private static String getDetailLinkId(final String name) {
-        return new StringBuilder(SPUIComponetIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name)
+        return new StringBuilder(SPUIComponentIdProvider.DS_METADATA_DETAIL_LINK).append('.').append(name)
                 .toString();
     }
     
-    private void showMetadataDetails(Long itemId,final String metadataKey) {
-        DistributionSet distSet = distributionSetManagement.findDistributionSetById(itemId);
+    private void showMetadataDetails(final Long selectedDistSetId , final String metadataKey) {
+        DistributionSet distSet = distributionSetManagement.findDistributionSetById(selectedDistSetId);
        
         /* display the window */
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(distSet,new DistributionSetMetadata(metadataKey,distSet,null) ));
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(distSet,
+                entityFactory.generateDistributionSetMetadata(distSet, metadataKey, "") ));
     }
     
     public void createMetadata(final String metadataKeyName){

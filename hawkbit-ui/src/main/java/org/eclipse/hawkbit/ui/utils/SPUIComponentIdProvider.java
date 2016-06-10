@@ -956,9 +956,20 @@ public final class SPUIComponentIdProvider {
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
     
     /**
+     * DistributionSet - Metadata button id.
+     */
+    public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
+    
+    /**
      * Metadata popup id.
      */
     public static final String METADATA_POPUP_ID = "metadata.popup.id";
+    
+    /**
+     * DistributionSet table details tab id in Distributions .
+     */
+    public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
+    
     /**
      * /* Private Constructor.
      */

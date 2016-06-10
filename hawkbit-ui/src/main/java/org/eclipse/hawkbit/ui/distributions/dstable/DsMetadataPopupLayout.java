@@ -10,16 +10,12 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
@@ -60,8 +56,7 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
                 manageDistUIState.getLastSelectedDistribution().get() : null;
         if(lastselectedDS!=null){           
-            DistributionSet distSet = distributionSetManagement.findDistributionSetById(lastselectedDS.getId());
-            if((distSet.getName().concat(distSet.getVersion())).equals((dsMetaData.getDistributionSet().getName().
+            if((lastselectedDS.getName().concat(lastselectedDS.getVersion())).equals((dsMetaData.getDistributionSet().getName().
                                             concat(dsMetaData.getDistributionSet().getVersion())))){
                 eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DISTRIBUTIONSET_METADATA,dsMetaData.getKey())); 
             }

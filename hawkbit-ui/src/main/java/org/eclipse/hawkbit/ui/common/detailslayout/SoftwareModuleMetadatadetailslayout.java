@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -61,6 +62,8 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     
     private  Long selectedSWModuleId;
     
+    private EntityFactory entityFactory;
+    
     
    /**
     * 
@@ -71,11 +74,13 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     */
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
                      final SoftwareManagement softwareManagement,
-                     final SwMetadataPopupLayout swMetadataPopupLayout) {
+                     final SwMetadataPopupLayout swMetadataPopupLayout,
+                     final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.softwareManagement = softwareManagement;
         this.swMetadataPopupLayout = swMetadataPopupLayout;
+        this.entityFactory = entityFactory;
         createSWMMetadataTable();
         addCustomGeneratedColumns();
     }
@@ -151,11 +156,12 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
                 .toString();
     }
     
-    private void showMetadataDetails(final Long swModuleId,final String metadataKey) {
-       SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(swModuleId);
+    private void showMetadataDetails(final Long selectedSWModuleId , final String metadataKey) {
+       SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
        
         /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,new SoftwareModuleMetadata(metadataKey,swmodule,null)));
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,
+                entityFactory.generateSoftwareModuleMetadata(swmodule, metadataKey, "")));
     }
     
     public void createMetadata(final String metadataKeyName){

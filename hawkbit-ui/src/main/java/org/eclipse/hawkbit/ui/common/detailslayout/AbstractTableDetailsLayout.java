@@ -24,12 +24,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-<<<<<<< HEAD
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-=======
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
->>>>>>> branch 'feature_manage_sw_ds_metadata' of https://github.com/bsinno/hawkbit
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,10 +74,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private VerticalLayout logLayout;
 
     private VerticalLayout attributesLayout;
-    
-    private VerticalLayout metadataLayout;
-    
-   
+      
     
    /**
      * Initialize components.

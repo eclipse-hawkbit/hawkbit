@@ -8,18 +8,15 @@
  */
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetIdName;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -45,18 +42,13 @@ import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -98,6 +90,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     
     @Autowired
     private DsMetadataPopupLayout dsMetadataPopupLayout;
+    
+    @Autowired
+    private EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
     
@@ -132,7 +127,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
                 manageDistUIState);
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
         dsMetadataTable.init(getI18n(), getPermissionChecker(),distributionSetManagement,
-                dsMetadataPopupLayout);
+                dsMetadataPopupLayout,entityFactory);
         super.init();
     }
 
@@ -406,7 +401,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected String getTabSheetId() {
-        return null;
+        return SPUIComponentIdProvider.DISTRIBUTIONSET_DETAILS_TABSHEET_ID;
     }
 
     @Override
