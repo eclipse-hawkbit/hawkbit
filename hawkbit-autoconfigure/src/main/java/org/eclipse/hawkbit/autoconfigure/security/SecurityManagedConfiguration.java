@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
@@ -61,6 +62,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -76,6 +78,7 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.StaticAllowFromStrategy;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter.XFrameOptionsMode;
@@ -102,6 +105,31 @@ public class SecurityManagedConfiguration {
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
+
+    @Autowired
+    private AuthenticationConfiguration configuration;
+
+    /**
+     * @return the {@link UserAuthenticationFilter} to include into the SP
+     *         security configuration.
+     * @throws Exception
+     *             lazy bean exception maybe if the authentication manager
+     *             cannot be instantiated
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public UserAuthenticationFilter userAuthenticationFilter() throws Exception {
+        return new UserAuthenticationFilterBasicAuth(configuration.getAuthenticationManager());
+    }
+
+    private static final class UserAuthenticationFilterBasicAuth extends BasicAuthenticationFilter
+            implements UserAuthenticationFilter {
+
+        private UserAuthenticationFilterBasicAuth(final AuthenticationManager authenticationManager) {
+            super(authenticationManager);
+        }
+
+    }
 
     /**
      * {@link WebSecurityConfigurer} for the internal SP controller API.
