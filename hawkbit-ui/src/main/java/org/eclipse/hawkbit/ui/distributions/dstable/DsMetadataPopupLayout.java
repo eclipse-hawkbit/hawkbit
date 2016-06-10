@@ -62,11 +62,6 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     }
 
     @Override
-    protected Object getMetaDataCompositeKey(DistributionSetMetadata metaData) {
-        return metaData.getKey();
-    }
-
-    @Override
     protected void deleteMetadata(String key) {
         distributionSetManagement.deleteDistributionSetMetadata(getSelectedEntity(), key);
     }

@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -17,13 +20,11 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.customrenderers.client.renderers.RolloutRendererData;
 import org.eclipse.hawkbit.ui.customrenderers.renderers.HtmlButtonRenderer;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -35,6 +36,7 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -48,6 +50,7 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window.WindowModeChangeEvent;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -77,7 +80,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     @Autowired
     private UINotification uiNotification;
-    
+
     private TextField keyTextField;
 
     private TextArea valueTextArea;
@@ -110,9 +113,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);
+        metadataWindow.addWindowModeChangeListener(event -> onResize(event));
         setUpDetails(entity.getId());
         return metadataWindow;
-        
+
     }
 
     public void setUpDetails(final Long swId) {
@@ -124,6 +128,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         if (swId != null) {
             metaDataGrid.getContainerDataSource().removeAllItems();
             populateGrid();
+            metaDataGrid.getSelectionModel().reset();
             if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
                 metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
             }
@@ -147,8 +152,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     protected abstract List<M> getMetadataList();
 
-    protected abstract Object getMetaDataCompositeKey(M metaData);
-
     protected abstract void deleteMetadata(String key);
 
     private void createComponents() {
@@ -169,13 +172,13 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         headerLayout.addComponents(addIcon);
         headerLayout.setComponentAlignment(addIcon, Alignment.MIDDLE_RIGHT);
         headerLayout.setExpandRatio(headerCaption, 1.0F);
-        
+
         final HorizontalLayout headerWrapperLayout = new HorizontalLayout();
-        headerWrapperLayout.addStyleName("bordered-layout"+" "+"no-border-bottom");
+        headerWrapperLayout.addStyleName("bordered-layout" + " " + "no-border-bottom");
         headerWrapperLayout.addComponent(headerLayout);
         headerWrapperLayout.setWidth("100%");
         headerLayout.setHeight("30px");
-        
+
         final VerticalLayout tableLayout = new VerticalLayout();
         tableLayout.setSizeFull();
         tableLayout.setHeight("100%");
@@ -219,7 +222,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         valueTextArea.setId(SPUIComponentIdProvider.METADATA_VALUE_ID);
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
-        valueTextArea.setHeight(100,Unit.PERCENTAGE);
+        valueTextArea.setHeight(100, Unit.PERCENTAGE);
         valueTextArea.addTextChangeListener(event -> onValueChange(event));
         valueTextArea.setTextChangeEventMode(TextChangeEventMode.EAGER);
         return valueTextArea;
@@ -258,17 +261,17 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                         uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
                         Object selectedRow = metaDataGrid.getSelectedRow();
                         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
-                        //force grid to refresh
-                        metaDataGrid.clearSortOrder();
-                        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty() && selectedRow != null) {
-                            if (selectedRow.equals(event.getItemId())) {
-                                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
-                            } else {
-                                metaDataGrid.select(selectedRow);
-                            }
-                        }
+                        // force grid to refresh
+                metaDataGrid.clearSortOrder();
+                if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty() && selectedRow != null) {
+                    if (selectedRow.equals(event.getItemId())) {
+                        metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+                    } else {
+                        metaDataGrid.select(selectedRow);
                     }
-                });
+                }
+            }
+        });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }
@@ -307,22 +310,21 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void populateGrid() {
         List<M> metadataList = getMetadataList();
         for (final M metaData : metadataList) {
-            addItemToGrid(metaData, getMetaDataCompositeKey(metaData));
+            addItemToGrid(metaData.getKey(), metaData.getValue());
         }
     }
 
-    private void addItemToGrid(final M metaData, final Object metaDataCompositeKey) {
+    private void addItemToGrid(final String key, final String value) {
         final IndexedContainer metadataContainer = (IndexedContainer) metaDataGrid.getContainerDataSource();
-        final Item item = metadataContainer.addItem(metaDataCompositeKey);
-        item.getItemProperty(VALUE).setValue(metaData.getValue());
-        item.getItemProperty(KEY).setValue(metaData.getKey());
+        final Item item = metadataContainer.addItem(key);
+        item.getItemProperty(VALUE).setValue(value);
+        item.getItemProperty(KEY).setValue(key);
     }
 
-    private void updateItemInGrid(final M metaData, final Object metaDataCompositeKey) {
+    private void updateItemInGrid(final String key) {
         final IndexedContainer metadataContainer = (IndexedContainer) metaDataGrid.getContainerDataSource();
-        final Item item = metadataContainer.getItem(metaDataCompositeKey);
+        final Item item = metadataContainer.getItem(key);
         item.getItemProperty(VALUE).setValue(valueTextArea.getValue());
-        item.getItemProperty(KEY).setValue(keyTextField.getValue());
     }
 
     private void onAdd(ClickEvent event) {
@@ -341,10 +343,9 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                 if (!duplicateCheck(entity)) {
                     M metadata = createMetadata(entity, key, value);
                     uiNotification.displaySuccess(i18n.get("message.metadata.saved", metadata.getKey()));
-                    Object metaDataCompositeKey = getMetaDataCompositeKey(metadata);
-                    addItemToGrid(metadata, metaDataCompositeKey);
+                    addItemToGrid(metadata.getKey(), metadata.getValue());
                     metaDataGrid.scrollToEnd();
-                    metaDataGrid.select(metaDataCompositeKey);
+                    metaDataGrid.select(metadata.getKey());
                     addIcon.setEnabled(true);
                     metadataWindow.setSaveButtonEnabled(false);
                     metadataWindow.setCancelButtonEnabled(false);
@@ -352,9 +353,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
             } else {
                 M metadata = updateMetadata(entity, key, value);
                 uiNotification.displaySuccess(i18n.get("message.metadata.updated", metadata.getKey()));
-                Object metaDataCompositeKey = getMetaDataCompositeKey(metadata);
-                updateItemInGrid(metadata, metaDataCompositeKey);
-                metaDataGrid.select(metaDataCompositeKey);
+                updateItemInGrid(metadata.getKey());
+                metaDataGrid.select(metadata.getKey());
                 addIcon.setEnabled(true);
                 metadataWindow.setSaveButtonEnabled(false);
                 metadataWindow.setCancelButtonEnabled(false);
@@ -439,6 +439,25 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         } else {
             metadataWindow.setSaveButtonEnabled(false);
             metadataWindow.setCancelButtonEnabled(false);
+        }
+    }
+
+    private void onResize(WindowModeChangeEvent event) {
+        if (event.getWindowMode() == WindowMode.MAXIMIZED) {
+            metaDataGrid.getColumn(DELETE_BUTTON).setWidth(70);
+        } else {
+            metaDataGrid.getColumn(DELETE_BUTTON).setWidth(50);
+        }
+        //Repopulating the grid (forcing for repaint)- workaround as grid size is not getting adjusted  
+        Map<String, String> keyValueDetails = new LinkedHashMap<>();
+        for (Object key : metaDataGrid.getContainerDataSource().getItemIds()) {
+            Item item = metaDataGrid.getContainerDataSource().getItem(key);
+            String value = (String) item.getItemProperty(VALUE).getValue();
+            keyValueDetails.put((String) key, value);
+        }
+        metaDataGrid.getContainerDataSource().removeAllItems();
+        for (Entry<String, String> entry : keyValueDetails.entrySet()) {
+            addItemToGrid(entry.getKey(), entry.getValue());
         }
     }
 
