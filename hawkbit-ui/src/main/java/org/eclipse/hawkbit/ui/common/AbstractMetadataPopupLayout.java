@@ -108,8 +108,11 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setCancelButtonCaption(i18n.get("button.discard"));
         metadataWindow.setCancelButtonIcon(FontAwesome.UNDO);
         metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
+        metadataWindow.setHeight(550, Unit.PIXELS);
+        metadataWindow.setWidth(800, Unit.PIXELS);
         setUpDetails(entity.getId());
         return metadataWindow;
+        
     }
 
     public void setUpDetails(final Long swId) {
@@ -194,10 +197,10 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         mainLayout.addComponent(metadataFieldsLayout);
         mainLayout.setExpandRatio(tableLayout, 0.5F);
         mainLayout.setExpandRatio(metadataFieldsLayout, 0.5F);
-        mainLayout.setHeight(550, Unit.PIXELS);
-        mainLayout.setWidth(800, Unit.PIXELS);
+        mainLayout.setSizeFull();
         mainLayout.setSpacing(true);
         setCompositionRoot(mainLayout);
+        setSizeFull();
     }
 
     private TextField createKeyTextField() {
@@ -216,6 +219,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         valueTextArea.setId(SPUIComponentIdProvider.METADATA_VALUE_ID);
         valueTextArea.setNullRepresentation("");
         valueTextArea.setSizeFull();
+        valueTextArea.setHeight(100,Unit.PERCENTAGE);
         valueTextArea.addTextChangeListener(event -> onValueChange(event));
         valueTextArea.setTextChangeEventMode(TextChangeEventMode.EAGER);
         return valueTextArea;
@@ -254,7 +258,6 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                         uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
                         Object selectedRow = metaDataGrid.getSelectedRow();
                         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
-//                        metaDataGrid.getSelectionModel().reset();
                         //force grid to refresh
                         metaDataGrid.clearSortOrder();
                         if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty() && selectedRow != null) {

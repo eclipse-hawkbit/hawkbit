@@ -85,11 +85,13 @@ public class CommonDialogWindow extends Window {
 
         if (null != content) {
             mainLayout.addComponent(content);
+            mainLayout.setExpandRatio(content, 1.0F);
         }
         final HorizontalLayout buttonLayout = createActionButtonsLayout(saveButtonClickListener,
                 cancelButtonClickListener);
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
+        mainLayout.setSizeFull();
 
         setCaption(caption);
         setCaptionAsHtml(true);
@@ -104,7 +106,6 @@ public class CommonDialogWindow extends Window {
             final ClickListener cancelButtonClickListener) {
 
         buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
         buttonsLayout.setSpacing(true);
 
         saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
@@ -133,7 +134,7 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
         buttonsLayout.setExpandRatio(cancelButton, 1.0F);
         buttonsLayout.addStyleName("actionButtonsMargin");
-
+        buttonsLayout.setSizeUndefined();
         addHelpLink();
 
         return buttonsLayout;
