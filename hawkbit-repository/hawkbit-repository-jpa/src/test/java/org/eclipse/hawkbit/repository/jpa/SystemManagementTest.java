@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
-import org.eclipse.hawkbit.repository.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.Test;
 
 import ru.yandex.qatools.allure.annotations.Description;

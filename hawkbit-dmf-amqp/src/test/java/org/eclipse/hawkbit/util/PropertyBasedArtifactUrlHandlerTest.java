@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.api.UrlProtocol;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

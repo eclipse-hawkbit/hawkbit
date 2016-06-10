@@ -113,14 +113,6 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DIST_DELETE_MODULE = "dist.delete.module.";
     /**
-     * ID-Dist.Add.save.
-     */
-    public static final String DIST_ADD_SAVE = "dist.add.save";
-    /**
-     * ID-Dist.Add.discard.
-     */
-    public static final String DIST_ADD_DISCARD = "dist.add.discard";
-    /**
      * /** ID-Dist.DELETE.
      */
     public static final String DIST_DELETE_ALL = "dist.delete.all";
@@ -500,6 +492,16 @@ public final class SPUIComponentIdProvider {
      * Button save id.
      */
     public static final String SYSTEM_CONFIGURATION_SAVE = "system.configuration.save";
+
+    /**
+     * ID for save button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String SAVE_BUTTON = "common.dialog.window.save";
+
+    /**
+     * ID for cancel button in pop-up-windows instance of commonDialogWindow
+     */
+    public static final String CANCEL_BUTTON = "common.dialog.window.cancel";
 
     /**
      * Cancel button is.
@@ -897,7 +899,7 @@ public final class SPUIComponentIdProvider {
      * Artifact upload status popup - close button id.
      */
     public static final String UPLOAD_STATUS_POPUP_CLOSE_BUTTON_ID = "artifact.upload.close.button.id";
-    
+
     /**
      * Artifact upload status popup - resize button id.
      */
@@ -907,11 +909,12 @@ public final class SPUIComponentIdProvider {
      * Artifact upload view - upload status button id.
      */
     public static final String UPLOAD_STATUS_BUTTON = "artficat.upload.status.button.id";
-    
+
     /**
      * Artifact uplaod view - uplod status popup id.
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
+
     /**
      * /* Private Constructor.
      */

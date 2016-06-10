@@ -156,6 +156,7 @@ public abstract class AbstractFilterButtons extends Table {
         columnIds.add(FILTER_BUTTON_COLUMN);
         setVisibleColumns(columnIds.toArray());
         setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
+        setColumnWidth(FILTER_BUTTON_COLUMN, 137);
     }
 
     private Button createFilterButton(final Long id, final String name, final String description, final String color,
@@ -180,6 +181,7 @@ public abstract class AbstractFilterButtons extends Table {
             button.setDescription(name);
         }
         button.setData(id == null ? SPUIDefinitions.NO_TAG_BUTTON_ID : itemId);
+
         return button;
     }
 

@@ -34,13 +34,13 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.util.TestdataFactory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;

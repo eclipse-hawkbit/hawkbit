@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.util.WithUser;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
