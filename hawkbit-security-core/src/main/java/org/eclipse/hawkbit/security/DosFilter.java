@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.security;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.hawkbit.security.SecurityConstants.SECURITY_LOG_PREFIX;
+
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -31,25 +33,21 @@ import com.google.common.cache.CacheBuilder;
 /**
  * Filter for protection against denial of service attacks. It reduces the
  * maximum number of request per seconds which can be separately configured for
- * read (GET) and write (PUT/POST/DELETE) requests. requests
- *
- *
- *
- *
+ * read (GET) and write (PUT/POST/DELETE) requests.
  */
 public class DosFilter extends OncePerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(DosFilter.class);
-    private static final Logger LOG_DOS = LoggerFactory.getLogger("server-security.dos");
-    private static final Logger LOG_BLACKLIST = LoggerFactory.getLogger("server-security.blacklist");
+    private static final Logger LOG_DOS = LoggerFactory.getLogger(SECURITY_LOG_PREFIX + ".dos");
+    private static final Logger LOG_BLACKLIST = LoggerFactory.getLogger(SECURITY_LOG_PREFIX + ".blacklist");
 
     private final Pattern ipAdressBlacklist;
 
-    private final Cache<String, AtomicInteger> readCountCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(1, TimeUnit.SECONDS).build();
+    private final Cache<String, AtomicInteger> readCountCache = CacheBuilder.newBuilder().expireAfterAccess(1, SECONDS)
+            .build();
 
-    private final Cache<String, AtomicInteger> writeCountCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(1, TimeUnit.SECONDS).build();
+    private final Cache<String, AtomicInteger> writeCountCache = CacheBuilder.newBuilder().expireAfterAccess(1, SECONDS)
+            .build();
 
     private final Integer maxRead;
     private final Integer maxWrite;
@@ -78,7 +76,7 @@ public class DosFilter extends OncePerRequestFilter {
      */
     public DosFilter(final Integer maxRead, final Integer maxWrite, final String ipDosWhiteListPattern,
             final String ipBlackListPattern, final String forwardHeader) {
-        super();
+
         this.maxRead = maxRead;
         this.maxWrite = maxWrite;
         this.forwardHeader = forwardHeader;
@@ -96,14 +94,6 @@ public class DosFilter extends OncePerRequestFilter {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.springframework.web.filter.OncePerRequestFilter#doFilterInternal(
-     * javax.servlet.http. HttpServletRequest,
-     * javax.servlet.http.HttpServletResponse, javax.servlet.FilterChain)
-     */
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain filterChain) throws ServletException, IOException {
@@ -152,11 +142,9 @@ public class DosFilter extends OncePerRequestFilter {
     }
 
     private static boolean handleMissingIpAddress(final HttpServletResponse response) {
-        boolean processChain;
         LOG.error("Failed to get peer IP adress");
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        processChain = false;
-        return processChain;
+        return false;
     }
 
     private boolean handleWriteRequest(final HttpServletResponse response, final String ip) {
