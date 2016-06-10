@@ -208,6 +208,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         addStyleName("lay-color");
 
         final FormLayout formLayout = new FormLayout();
+        formLayout.setCaption(null);
         formLayout.addComponent(typeComboBox);
         formLayout.addComponent(nameTextField);
         formLayout.addComponent(versionTextField);

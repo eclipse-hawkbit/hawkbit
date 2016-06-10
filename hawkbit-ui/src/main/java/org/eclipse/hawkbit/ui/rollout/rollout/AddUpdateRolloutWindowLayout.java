@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -61,6 +62,7 @@ import com.vaadin.data.Validator;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.ComboBox;
@@ -224,21 +226,22 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setSizeUndefined();
         setRows(9);
         setColumns(3);
+        setStyleName("marginTop");
 
-        addComponent(getLabel("textfield.name"), 0, 0);
+        addComponent(getMandatoryLabel("textfield.name"), 0, 0);
         addComponent(rolloutName, 1, 0);
-        addComponent(getLabel("prompt.distribution.set"), 0, 1);
+        addComponent(getMandatoryLabel("prompt.distribution.set"), 0, 1);
         addComponent(distributionSet, 1, 1);
-        addComponent(getLabel("prompt.target.filter"), 0, 2);
+        addComponent(getMandatoryLabel("prompt.target.filter"), 0, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
         addComponent(totalTargetsLabel, 2, 2);
-        addComponent(getLabel("prompt.number.of.groups"), 0, 3);
+        addComponent(getMandatoryLabel("prompt.number.of.groups"), 0, 3);
         addComponent(noOfGroups, 1, 3);
         addComponent(groupSizeLabel, 2, 3);
-        addComponent(getLabel("prompt.tigger.threshold"), 0, 4);
+        addComponent(getMandatoryLabel("prompt.tigger.threshold"), 0, 4);
         addComponent(triggerThreshold, 1, 4);
         addComponent(getPercentHintLabel(), 2, 4);
-        addComponent(getLabel("prompt.error.threshold"), 0, 5);
+        addComponent(getMandatoryLabel("prompt.error.threshold"), 0, 5);
         addComponent(errorThreshold, 1, 5);
         addComponent(errorThresholdOptionGroup, 2, 5);
         addComponent(getLabel("textfield.description"), 0, 6);
@@ -248,12 +251,19 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         rolloutName.focus();
     }
 
+    private Label getMandatoryLabel(final String key) {
+        final Label mandatoryLabel = getLabel(i18n.get(key));
+        mandatoryLabel.setContentMode(ContentMode.HTML);
+        mandatoryLabel.setValue(mandatoryLabel.getValue().concat(" <span style='color:#ed473b'>*</span>"));
+        return mandatoryLabel;
+    }
+
     private Label getLabel(final String key) {
         return SPUIComponentProvider.getLabel(i18n.get(key), SPUILabelDefinitions.SP_LABEL_SIMPLE);
     }
 
     private TextField getTextfield(final String key) {
-        return SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, true, null, i18n.get(key), true,
+        return SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null, i18n.get(key), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
     }
 
@@ -340,7 +350,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private ComboBox createTargetFilterQueryCombo() {
         final ComboBox targetFilter = SPUIComponentProvider.getComboBox(null, "", "", null, ValoTheme.COMBOBOX_SMALL,
-                true, "", i18n.get("prompt.target.filter"));
+                false, "", i18n.get("prompt.target.filter"));
         targetFilter.setImmediate(true);
         targetFilter.setPageLength(7);
         targetFilter.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
@@ -625,8 +635,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private ComboBox createDistributionSetCombo() {
-        final ComboBox dsSet = SPUIComponentProvider.getComboBox(null, "", "", null, ValoTheme.COMBOBOX_SMALL, true, "",
-                i18n.get("prompt.distribution.set"));
+        final ComboBox dsSet = SPUIComponentProvider.getComboBox(null, "", "", null, ValoTheme.COMBOBOX_SMALL, false,
+                "", i18n.get("prompt.distribution.set"));
         dsSet.setImmediate(true);
         dsSet.setPageLength(7);
         dsSet.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
@@ -685,10 +695,12 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
                     uiNotification
                             .displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
-                    new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
-                    final int groupSize = getGroupSize();
-                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0, groupSize)
-                            .validate(Integer.valueOf(value.toString()));
+                    if (StringUtils.isNotBlank(value.toString())) {
+                        new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                        final int groupSize = getGroupSize();
+                        new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, groupSize), 0,
+                                groupSize).validate(Integer.valueOf(value.toString()));
+                    }
                 }
             }
             // suppress the need of preserve original exception, will blow
@@ -710,9 +722,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             try {
-                new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
-                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
-                        .validate(Integer.valueOf(value.toString()));
+                if (StringUtils.isNotBlank(value.toString())) {
+                    new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
+                            .validate(Integer.valueOf(value.toString()));
+                }
             }
             // suppress the need of preserve original exception, will blow
             // up the
@@ -729,9 +743,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         @Override
         public void validate(final Object value) {
             try {
-                new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
-                new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
-                        .validate(Integer.valueOf(value.toString()));
+                if (StringUtils.isNotBlank(value.toString())) {
+                    new RegexpValidator(NUMBER_REGEXP, i18n.get(MESSAGE_ENTER_NUMBER)).validate(value);
+                    new IntegerRangeValidator(i18n.get(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 500), 0, 500)
+                            .validate(Integer.valueOf(value.toString()));
+                }
             }
             // suppress the need of preserve original exception, will blow
             // up the

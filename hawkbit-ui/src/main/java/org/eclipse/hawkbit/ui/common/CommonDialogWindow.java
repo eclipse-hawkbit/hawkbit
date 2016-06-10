@@ -197,7 +197,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
         setCaption(caption);
         setContent(mainLayout);
-        setResizable(true);
+        setResizable(false);
         center();
         setModal(true);
         addStyleName("fontsize");
