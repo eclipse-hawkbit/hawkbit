@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.mgmt.client;
 
 import org.eclipse.hawkbit.feign.core.client.FeignClientConfiguration;
+import org.eclipse.hawkbit.mgmt.client.scenarios.ConfigurableScenario;
 import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
-import org.eclipse.hawkbit.mgmt.client.scenarios.GettingStartedDefaultScenario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -36,7 +36,7 @@ public class Application implements CommandLineRunner {
     private ClientConfigurationProperties configuration;
 
     @Autowired
-    private GettingStartedDefaultScenario gettingStarted;
+    private ConfigurableScenario configurableScenario;
 
     @Autowired
     private CreateStartedRolloutExample gettingStartedRolloutScenario;
@@ -53,7 +53,7 @@ public class Application implements CommandLineRunner {
         } else {
             // run the getting started scenario which creates a setup of
             // distribution set and software modules to be used
-            gettingStarted.run();
+            configurableScenario.run();
         }
     }
 
@@ -63,8 +63,8 @@ public class Application implements CommandLineRunner {
     }
 
     @Bean
-    public GettingStartedDefaultScenario gettingStartedDefaultScenario() {
-        return new GettingStartedDefaultScenario();
+    public ConfigurableScenario configurableScenario() {
+        return new ConfigurableScenario();
     }
 
     @Bean

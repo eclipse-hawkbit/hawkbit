@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.mgmt.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -33,6 +36,79 @@ public class ClientConfigurationProperties {
      */
     private String password = "admin"; // NOSONAR this password is only used for
                                        // examples
+
+    private final List<Scenario> scenarios = new ArrayList<>();
+
+    public static class Scenario {
+        private int targets = 100;
+        private int distributionSets = 10;
+        private int appModulesPerDistributionSet = 2;
+        private String dsName = "Package";
+        private String smSwName = "Application";
+        private String smFwName = "Firmware";
+        private String targetName = "Device";
+
+        public String getTargetName() {
+            return targetName;
+        }
+
+        public void setTargetName(final String targetName) {
+            this.targetName = targetName;
+        }
+
+        public String getDsName() {
+            return dsName;
+        }
+
+        public void setDsName(final String dsName) {
+            this.dsName = dsName;
+        }
+
+        public String getSmSwName() {
+            return smSwName;
+        }
+
+        public void setSmSwName(final String smSwName) {
+            this.smSwName = smSwName;
+        }
+
+        public String getSmFwName() {
+            return smFwName;
+        }
+
+        public void setSmFwName(final String smFwName) {
+            this.smFwName = smFwName;
+        }
+
+        public int getTargets() {
+            return targets;
+        }
+
+        public int getDistributionSets() {
+            return distributionSets;
+        }
+
+        public int getAppModulesPerDistributionSet() {
+            return appModulesPerDistributionSet;
+        }
+
+        public void setTargets(final int targets) {
+            this.targets = targets;
+        }
+
+        public void setDistributionSets(final int distributionSets) {
+            this.distributionSets = distributionSets;
+        }
+
+        public void setAppModulesPerDistributionSet(final int appModulesPerDistributionSet) {
+            this.appModulesPerDistributionSet = appModulesPerDistributionSet;
+        }
+
+    }
+
+    public List<Scenario> getScenarios() {
+        return scenarios;
+    }
 
     public String getUrl() {
         return url;

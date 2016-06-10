@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class CreateStartedRolloutExample {
 
     /* known software module type name and key */
-    private static final String SM_MODULE_TYPE = "firmware";
+    private static final String SM_MODULE_TYPE = "gettingstarted-rollout-example";
 
     /* known distribution set type name and key */
     private static final String DS_MODULE_TYPE = SM_MODULE_TYPE;

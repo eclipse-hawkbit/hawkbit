@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.mgmt.client.resource.builder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
@@ -65,32 +64,62 @@ public class TargetBuilder {
      * 
      * @return a single entry list of {@link MgmtTargetRequestBody}
      */
-    public List<MgmtTargetRequestBody> build() {
-        return Lists.newArrayList(doBuild(controllerId));
+    public List<MgmtTargetRequestBody> buildAsList() {
+        return Lists.newArrayList(doBuild(""));
+    }
+
+    /**
+     * Builds a single {@link MgmtTargetRequestBody}.
+     * 
+     * @return build {@link MgmtTargetRequestBody}
+     */
+    public MgmtTargetRequestBody build() {
+        return doBuild("");
     }
 
     /**
      * Builds a list of multiple {@link MgmtTargetRequestBody} to create
      * multiple targets at once. An increasing number will be added to the
-     * controllerId of the target. The name and description will remain.
+     * controllerId and name of the target. The description will remain.
      * 
      * @param count
-     *            the amount of software module type bodies which should be
-     *            created
+     *            the amount of target bodies which should be created
+     * @param offset
+     *            for
      * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtTargetRequestBody> buildAsList(final int count) {
-        final ArrayList<MgmtTargetRequestBody> bodyList = Lists.newArrayList();
-        for (int index = 0; index < count; index++) {
-            bodyList.add(doBuild(controllerId + index));
+
+        return buildAsList(0, count);
+    }
+
+    /**
+     * Builds a list of multiple {@link MgmtTargetRequestBody} to create
+     * multiple targets at once. An increasing number will be added to the
+     * controllerId and name of the target starting from the provided offset.
+     * The description will remain.
+     * 
+     * @param count
+     *            the amount of target bodies which should be created
+     * @param offset
+     *            for for index start
+     * @return a list of {@link MgmtSoftwareModuleTypeRequestBodyPost}
+     */
+    public List<MgmtTargetRequestBody> buildAsList(final int offset, final int count) {
+        final List<MgmtTargetRequestBody> bodyList = Lists.newArrayList();
+        for (int index = offset; index < count + offset; index++) {
+            bodyList.add(doBuild(String.valueOf(index)));
         }
         return bodyList;
     }
 
-    private MgmtTargetRequestBody doBuild(final String prefixControllerId) {
+    private MgmtTargetRequestBody doBuild(final String suffix) {
         final MgmtTargetRequestBody body = new MgmtTargetRequestBody();
-        body.setControllerId(prefixControllerId);
-        body.setName(name);
+        body.setControllerId(controllerId + suffix);
+        if (name == null) {
+            name = controllerId;
+        }
+        body.setName(name + suffix);
         body.setDescription(description);
         return body;
     }

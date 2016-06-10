@@ -84,32 +84,48 @@ public class DistributionSetBuilder {
      * @return a single entry list of {@link MgmtDistributionSetRequestBodyPost}
      */
     public List<MgmtDistributionSetRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(name));
+        return Lists.newArrayList(doBuild(""));
     }
 
     /**
      * Builds a list of multiple {@link MgmtDistributionSetRequestBodyPost} to
      * create multiple distribution sets at once. An increasing number will be
-     * added to the name of the distribution set. The version and type will
-     * remain the same.
+     * used for version of the distribution set. The name and type will remain
+     * the same.
      * 
      * @param count
      *            the amount of distribution sets body which should be created
      * @return a list of {@link MgmtDistributionSetRequestBodyPost}
      */
     public List<MgmtDistributionSetRequestBodyPost> buildAsList(final int count) {
+        return buildAsList(0, count);
+    }
+
+    /**
+     * Builds a list of multiple {@link MgmtDistributionSetRequestBodyPost} to
+     * create multiple distribution sets at once. An increasing number will be
+     * used for version of the distribution set starting from given offset. The
+     * name and type will remain the same.
+     * 
+     * @param count
+     *            the amount of distribution sets body which should be created
+     * @param offset
+     *            for for index start
+     * @return a list of {@link MgmtDistributionSetRequestBodyPost}
+     */
+    public List<MgmtDistributionSetRequestBodyPost> buildAsList(final int offset, final int count) {
         final ArrayList<MgmtDistributionSetRequestBodyPost> bodyList = Lists.newArrayList();
-        for (int index = 0; index < count; index++) {
-            bodyList.add(doBuild(name + index));
+        for (int index = offset; index < count + offset; index++) {
+            bodyList.add(doBuild(String.valueOf(index)));
         }
 
         return bodyList;
     }
 
-    private MgmtDistributionSetRequestBodyPost doBuild(final String prefixName) {
+    private MgmtDistributionSetRequestBodyPost doBuild(final String suffix) {
         final MgmtDistributionSetRequestBodyPost body = new MgmtDistributionSetRequestBodyPost();
-        body.setName(prefixName);
-        body.setVersion(version);
+        body.setName(name);
+        body.setVersion(version + suffix);
         body.setType(type);
         body.setDescription(description);
         body.setModules(modules);
