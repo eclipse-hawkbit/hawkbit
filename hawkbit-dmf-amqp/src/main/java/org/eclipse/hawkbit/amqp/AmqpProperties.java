@@ -43,7 +43,7 @@ public class AmqpProperties {
     /**
      * Requested heartbeat interval from broker in {@link TimeUnit#SECONDS}.
      */
-    private int requestedHeartBeat = 60;
+    private int requestedHeartBeat = (int) TimeUnit.SECONDS.toSeconds(60);
 
     /**
      * Is missingQueuesFatal enabled
