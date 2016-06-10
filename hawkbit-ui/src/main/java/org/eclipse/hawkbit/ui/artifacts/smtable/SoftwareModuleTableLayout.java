@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent.SoftwareModuleEventType;
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -72,7 +73,7 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
             public void handleAction(final Action action, final Object sender, final Object target) {
                 if (ACTION_CTRL_A.equals(action)) {
                     smTable.selectAll();
-                    getEventBus().publish(this, new SoftwareModuleEvent());
+                    getEventBus().publish(this, new SoftwareModuleEvent(SoftwareModuleEventType.SELECT_ALL, null));
                 }
             }
 

@@ -11,19 +11,15 @@ package org.eclipse.hawkbit.ui.distributions.event;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
- *
- *
+ * DistributionSetTypeEvent
  */
 public class DistributionSetTypeEvent {
 
     /**
      * DistributionSet type events in the Distribution UI.
-     * 
-     *
-     *
      */
     public enum DistributionSetTypeEnum {
-        ADD_DIST_SET_TYPE, DELETE_DIST_SET_TYPE, UPDATE_DIST_SET_TYPE, ON_VALUE_CHANGE
+        ADD_DIST_SET_TYPE, DELETE_DIST_SET_TYPE, UPDATE_DIST_SET_TYPE, ON_VALUE_CHANGE, SELECT_ALL
     }
 
     private DistributionSetType distributionSetType;

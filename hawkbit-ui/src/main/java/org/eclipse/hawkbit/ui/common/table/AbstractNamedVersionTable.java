@@ -62,11 +62,4 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
         setValue(getItemIds());
     }
 
-    /**
-     * Clear all selections in the table.
-     */
-    public void unSelectAll() {
-        setValue(null);
-    }
-
 }

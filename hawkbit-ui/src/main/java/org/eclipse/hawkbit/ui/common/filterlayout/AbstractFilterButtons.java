@@ -16,7 +16,6 @@ import javax.annotation.PreDestroy;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -48,9 +47,6 @@ public abstract class AbstractFilterButtons extends Table {
     protected transient EventBus.SessionEventBus eventBus;
 
     private AbstractFilterButtonClickBehaviour filterButtonClickBehaviour;
-
-    @Autowired
-    protected I18N i18n;
 
     /**
      * Initialize layout of filter buttons.
@@ -198,16 +194,16 @@ public abstract class AbstractFilterButtons extends Table {
         setContainerDataSource(createButtonsLazyQueryContainer());
     }
 
-    /**
-     * Select all rows in the table.
-     */
-    public void selectAll() {
-        setValue(createButtonsLazyQueryContainer().getItemIds());
-    }
-
-    public void unSelectAll() {
-        setValue(null);
-    }
+    // /**
+    // * Select all rows in the table.
+    // */
+    // public void selectAll() {
+    // setValue(createButtonsLazyQueryContainer().getItemIds());
+    // }
+    //
+    // public void unSelectAll() {
+    // setValue(null);
+    // }
 
     /**
      * Id of the buttons table to be used in test cases.
