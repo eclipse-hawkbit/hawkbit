@@ -12,6 +12,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -30,6 +32,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.support.RetryTemplate;;
 
 /**
  * The spring AMQP configuration which is enabled by using the profile
@@ -39,17 +43,27 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
 public class AmqpConfiguration {
 
-    @Autowired
-    protected AmqpProperties amqpProperties;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
 
     @Autowired
-    protected AmqpDeadletterProperties amqpDeadletterProperties;
+    private AmqpProperties amqpProperties;
+
+    @Autowired
+    private AmqpDeadletterProperties amqpDeadletterProperties;
+
+    @Autowired
+    @Qualifier("threadPoolExecutor")
+    private ThreadPoolExecutor threadPoolExecutor;
 
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
 
     @Configuration
-    protected static class HawkBitRabbitConnectionFactoryCreator {
+    protected static class RabbitConnectionFactoryCreator {
+
+        @Autowired
+        private AmqpProperties amqpProperties;
+
         @Autowired
         @Qualifier("threadPoolExecutor")
         private ThreadPoolExecutor threadPoolExecutor;
@@ -57,15 +71,21 @@ public class AmqpConfiguration {
         @Autowired
         private ScheduledExecutorService scheduledExecutorService;
 
-        @Autowired
-        protected AmqpProperties amqpProperties;
-
+        /**
+         * {@link ConnectionFactory} with enabled publisher confirms and
+         * heartbeat.
+         * 
+         * @param config
+         *            with standard {@link RabbitProperties}
+         * @return {@link ConnectionFactory}
+         */
         @Bean
         public ConnectionFactory rabbitConnectionFactory(final RabbitProperties config) {
             final CachingConnectionFactory factory = new CachingConnectionFactory();
             factory.setRequestedHeartBeat(amqpProperties.getRequestedHeartBeat());
             factory.setExecutor(threadPoolExecutor);
             factory.getRabbitConnectionFactory().setHeartbeatExecutor(scheduledExecutorService);
+            factory.setPublisherConfirms(true);
 
             final String addresses = config.getAddresses();
             factory.setAddresses(addresses);
@@ -84,7 +104,6 @@ public class AmqpConfiguration {
             }
             return factory;
         }
-
     }
 
     /**
@@ -101,14 +120,28 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Method to set the Jackson2JsonMessageConverter.
-     *
-     * @return the Jackson2JsonMessageConverter
+     * @return {@link RabbitTemplate} with automatic retry, published confirms
+     *         and {@link Jackson2JsonMessageConverter}.
      */
     @Bean
     public RabbitTemplate rabbitTemplate() {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(rabbitConnectionFactory);
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+
+        final RetryTemplate retryTemplate = new RetryTemplate();
+        retryTemplate.setBackOffPolicy(new ExponentialBackOffPolicy());
+        rabbitTemplate.setRetryTemplate(retryTemplate);
+
+        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+            if (ack) {
+                LOGGER.debug("Message with correlation ID {} confirmed by broker.", correlationData.getId());
+            } else {
+                LOGGER.error("Broker is unable to handle message with correlation ID {} : {}", correlationData.getId(),
+                        cause);
+            }
+
+        });
+
         return rabbitTemplate;
     }
 
