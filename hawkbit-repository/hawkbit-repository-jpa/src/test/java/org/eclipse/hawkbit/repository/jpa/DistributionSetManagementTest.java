@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -34,12 +35,18 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.fest.assertions.core.Condition;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
@@ -777,34 +784,53 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Deltes a DS that is no in use. Expected behaviour is a soft delete on the database, i.e. only marked as "
-            + "deleted, kept eas refernce and unavailable for future use..")
+    @Description("Deletes a DS that is in use by either target assignment or rollout. Expected behaviour is a soft delete on the database, i.e. only marked as "
+            + "deleted, kept as reference but unavailable for future use..")
     public void deleteAssignedDistributionSet() {
         DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("ds-2");
-        DistributionSet dsAssigned = testdataFactory.createDistributionSet("ds-3");
+        DistributionSet dsToTargetAssigned = testdataFactory.createDistributionSet("ds-3");
+        final DistributionSet dsToRolloutAssigned = testdataFactory.createDistributionSet("ds-4");
 
         ds1 = distributionSetManagement.findDistributionSetByNameAndVersion(ds1.getName(), ds1.getVersion());
         ds2 = distributionSetManagement.findDistributionSetByNameAndVersion(ds2.getName(), ds2.getVersion());
 
         // create assigned DS
-        dsAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsAssigned.getName(),
-                dsAssigned.getVersion());
+        dsToTargetAssigned = distributionSetManagement.findDistributionSetByNameAndVersion(dsToTargetAssigned.getName(),
+                dsToTargetAssigned.getVersion());
         final Target target = new JpaTarget("4712");
         final Target savedTarget = targetManagement.createTarget(target);
         final List<Target> toAssign = new ArrayList<>();
         toAssign.add(savedTarget);
-        deploymentManagement.assignDistributionSet(dsAssigned, toAssign);
+        deploymentManagement.assignDistributionSet(dsToTargetAssigned, toAssign);
 
-        // delete a ds
-        assertThat(distributionSetRepository.findAll()).hasSize(3);
-        distributionSetManagement.deleteDistributionSet(dsAssigned.getId());
+        // create assigned rollout
+        createRolloutByVariables("test", "test", 5, "name==*", dsToRolloutAssigned, "50", "5");
+
+        // delete assigned ds
+        assertThat(distributionSetRepository.findAll()).hasSize(4);
+        distributionSetManagement.deleteDistributionSet(dsToTargetAssigned.getId(), dsToRolloutAssigned.getId());
 
         // not assigned so not marked as deleted
-        assertThat(distributionSetRepository.findAll()).hasSize(3);
+        assertThat(distributionSetRepository.findAll()).hasSize(4);
         assertThat(distributionSetManagement
                 .findDistributionSetsByDeletedAndOrCompleted(pageReq, Boolean.FALSE, Boolean.TRUE).getTotalElements())
                         .isEqualTo(2);
+    }
+
+    private Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition) {
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+        final Rollout rolloutToCreate = new JpaRollout();
+        rolloutToCreate.setName(rolloutName);
+        rolloutToCreate.setDescription(rolloutDescription);
+        rolloutToCreate.setTargetFilterQuery(filterQuery);
+        rolloutToCreate.setDistributionSet(distributionSet);
+        return rolloutManagement.createRollout(rolloutToCreate, groupSize, conditions);
     }
 
     private Target sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Target t,
