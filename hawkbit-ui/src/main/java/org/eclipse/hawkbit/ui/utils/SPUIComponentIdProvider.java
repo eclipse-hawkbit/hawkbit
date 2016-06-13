@@ -970,6 +970,11 @@ public final class SPUIComponentIdProvider {
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
     
     /**
+     * Software Module - Metadata button id.
+     */
+    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
+    
+    /**
      * /* Private Constructor.
      */
     private SPUIComponentIdProvider() {

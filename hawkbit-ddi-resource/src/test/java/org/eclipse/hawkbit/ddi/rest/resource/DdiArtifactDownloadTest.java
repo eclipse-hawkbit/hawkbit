@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -553,3 +552,4 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         downLoadProgress++;
     }
 }
+

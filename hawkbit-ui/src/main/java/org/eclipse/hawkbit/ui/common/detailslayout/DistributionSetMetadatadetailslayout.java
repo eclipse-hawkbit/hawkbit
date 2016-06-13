@@ -106,7 +106,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
     }
 
     private void addDSMetadataTableHeader() {
-        setColumnHeader(METADATA_KEY, i18n.get("label.dist.details.key"));
+        setColumnHeader(METADATA_KEY, i18n.get("header.key"));
     }
 
     /**

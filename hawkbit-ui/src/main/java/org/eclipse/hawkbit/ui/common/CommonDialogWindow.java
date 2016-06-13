@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -58,8 +58,6 @@ public class CommonDialogWindow extends Window {
 
     @Autowired
     private transient UiProperties uiProperties;
-
-    protected ValueChangeListener buttonEnableListener;
 
     private final ClickListener saveButtonClickListener;
 
@@ -106,7 +104,6 @@ public class CommonDialogWindow extends Window {
         final HorizontalLayout buttonLayout = createActionButtonsLayout();
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
-        mainLayout.setSizeFull();
 
         setCaption(caption);
         setCaptionAsHtml(true);
@@ -186,4 +183,7 @@ public class CommonDialogWindow extends Window {
         cancelButton.setIcon(icon);
     }
 
+    public VerticalLayout getMainLayout() {
+        return mainLayout;
+    }
 }

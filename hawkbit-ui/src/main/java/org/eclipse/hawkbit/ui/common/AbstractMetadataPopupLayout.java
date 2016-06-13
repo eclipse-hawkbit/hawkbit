@@ -121,6 +121,8 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
         metadataWindow.setId(SPUIComponentIdProvider.METADATA_POPUP_ID);
         metadataWindow.setHeight(550, Unit.PIXELS);
         metadataWindow.setWidth(800, Unit.PIXELS);
+        metadataWindow.getMainLayout().setSizeFull();
+        metadataWindow.setResizable(true);
         metadataWindow.addWindowModeChangeListener(event -> onResize(event));
         setUpDetails(entity.getId(),metaData);
         return metadataWindow;
