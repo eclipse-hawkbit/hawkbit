@@ -77,7 +77,6 @@ public abstract class AbstractFilterButtons extends Table {
         setDragMode(TableDragMode.NONE);
         setSelectable(false);
         setSizeFull();
-        setMultiSelect(true);
     }
 
     private void setStyle() {
@@ -193,17 +192,6 @@ public abstract class AbstractFilterButtons extends Table {
     protected void refreshTable() {
         setContainerDataSource(createButtonsLazyQueryContainer());
     }
-
-    // /**
-    // * Select all rows in the table.
-    // */
-    // public void selectAll() {
-    // setValue(createButtonsLazyQueryContainer().getItemIds());
-    // }
-    //
-    // public void unSelectAll() {
-    // setValue(null);
-    // }
 
     /**
      * Id of the buttons table to be used in test cases.

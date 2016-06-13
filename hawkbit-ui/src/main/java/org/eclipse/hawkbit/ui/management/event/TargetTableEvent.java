@@ -13,9 +13,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
- *
- *
- *
+ * Class which contains the Event when selecting all entries of the target table
  */
 public class TargetTableEvent extends BaseEntityEvent<Target> {
 

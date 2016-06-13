@@ -8,36 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.distributions.event;
 
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
-import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
-
 /**
- * Class which contains the Event when selecting all entries of a table
+ * Class which contains the Event when selecting all entries of the
+ * softwareModule table
  */
-public class SoftwareModuleTableEvent extends BaseEntityEvent<SoftwareModule> {
+public class SoftwareModuleTableEvent {
 
     /**
      * SoftwareModule table components events.
-     *
      */
     public enum SoftwareModuleComponentEvent {
         SELECT_ALL
     }
 
-    private SoftwareModuleComponentEvent softwareModuleComponentEvent;
-
-    /**
-     * Constructor.
-     * 
-     * @param eventType
-     *            the event type.
-     * @param entity
-     *            the entity
-     */
-    public SoftwareModuleTableEvent(final BaseEntityEventType eventType, final SoftwareModule entity) {
-        super(eventType, entity);
-    }
+    private final SoftwareModuleComponentEvent softwareModuleComponentEvent;
 
     /**
      * The component event.
@@ -46,7 +30,6 @@ public class SoftwareModuleTableEvent extends BaseEntityEvent<SoftwareModule> {
      *            the softwareModule component event.
      */
     public SoftwareModuleTableEvent(final SoftwareModuleComponentEvent softwareModuleComponentEvent) {
-        super(null, null);
         this.softwareModuleComponentEvent = softwareModuleComponentEvent;
     }
 

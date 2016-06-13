@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.ui.common.table.AbstractTableLayout;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
-import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
+import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTableEvent;
+import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTableEvent.DistributionTableComponentEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.event.Action;
@@ -77,7 +77,8 @@ public class DistributionSetTableLayout extends AbstractTableLayout {
             public void handleAction(final Action action, final Object sender, final Object target) {
                 if (ACTION_CTRL_A.equals(action)) {
                     dsTable.selectAll();
-                    getEventBus().publish(this, new DistributionSetTypeEvent(DistributionSetTypeEnum.SELECT_ALL));
+                    getEventBus().publish(this,
+                            new DistributionSetTableEvent(DistributionTableComponentEvent.SELECT_ALL));
                 }
             }
 

@@ -13,19 +13,10 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
- *
- *
- *
+ * Class which contains the Event when selecting all entries of the
+ * distributions table
  */
 public class DistributionTableEvent extends BaseEntityEvent<DistributionSet> {
-
-    /**
-     * DistributionSet table components events.
-     *
-     */
-    public enum DistributionTableComponentEvent {
-        SELECT_ALL
-    }
 
     /**
      * Constructor.
@@ -37,16 +28,6 @@ public class DistributionTableEvent extends BaseEntityEvent<DistributionSet> {
      */
     public DistributionTableEvent(final BaseEntityEventType eventType, final DistributionSet entity) {
         super(eventType, entity);
-    }
-
-    /**
-     * The component event.
-     * 
-     * @param DistributionSetTableEvent
-     *            the distributionSet component event.
-     */
-    public DistributionTableEvent(final DistributionTableComponentEvent distributionComponentEvent) {
-        super(null, null);
     }
 
 }
