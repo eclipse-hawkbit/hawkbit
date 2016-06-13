@@ -45,7 +45,6 @@
       <module>examples</module>
    </modules>
 
-
    <scm>
       <connection>${release.scm.connection}</connection>
       <developerConnection>${release.scm.developerConnection}</developerConnection>
@@ -88,6 +87,7 @@
 
       <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
       <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
+      <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
 
       <!-- Misc libraries versions - START -->
       <validation-api.version>1.1.0.Final</validation-api.version>
@@ -194,7 +194,7 @@
          </plugin>
          <plugin>
             <artifactId>maven-scm-plugin</artifactId>
-            <version>1.9.4</version>
+            <version>${maven.scm.plugin.version}</version>
             <configuration>
                <tag>${project.version}</tag>
             </configuration>
