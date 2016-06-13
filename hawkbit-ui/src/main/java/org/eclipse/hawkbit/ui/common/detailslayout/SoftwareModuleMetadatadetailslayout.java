@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
-import org.eclipse.hawkbit.ui.utils.SPUIComponetIdProvider;
+import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +152,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
     
     private static String getDetailLinkId(final String name) {
-        return new StringBuilder(SPUIComponetIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name)
+        return new StringBuilder(SPUIComponentIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name)
                 .toString();
     }
     

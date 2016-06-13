@@ -243,7 +243,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     
     private Button createManageMetadataButton(String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.PLUS_SQUARE_O, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));

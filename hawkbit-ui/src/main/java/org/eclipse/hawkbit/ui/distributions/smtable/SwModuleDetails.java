@@ -146,7 +146,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected String getTabSheetId() {
-        return null;
+        return SPUIComponentIdProvider.DIST_SW_MODULE_DETAILS_TABSHEET_ID;
     }
 
     private void populateDetails() {

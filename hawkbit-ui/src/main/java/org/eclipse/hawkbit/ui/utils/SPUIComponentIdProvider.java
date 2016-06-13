@@ -955,7 +955,7 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DS_TABLE_MANAGE_METADATA_ID = "dstable.manage.metadata.id";
     
-    /**
+   /**
      * DistributionSet - Metadata button id.
      */
     public static final String DS_METADATA_DETAIL_LINK = "distributionset.metadata.detail.link";
@@ -969,6 +969,16 @@ public final class SPUIComponentIdProvider {
      * DistributionSet table details tab id in Distributions .
      */
     public static final String DISTRIBUTIONSET_DETAILS_TABSHEET_ID = "distributionset.details.tabsheet";
+    
+    /**
+     * Software module table details tab id in Distributions .
+     */
+    public static final String DIST_SW_MODULE_DETAILS_TABSHEET_ID = "dist.sw.module.details.tabsheet";
+    
+    /**
+     * Software Module - Metadata button id.
+     */
+    public static final String SW_METADATA_DETAIL_LINK = "softwaremodule.metadata.detail.link";
     
     /**
      * /* Private Constructor.
