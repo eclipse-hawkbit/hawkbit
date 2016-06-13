@@ -785,7 +785,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Deletes a DS that is in use by either target assignment or rollout. Expected behaviour is a soft delete on the database, i.e. only marked as "
-            + "deleted, kept as refernce but unavailable for future use..")
+            + "deleted, kept as reference but unavailable for future use..")
     public void deleteAssignedDistributionSet() {
         DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("ds-2");
