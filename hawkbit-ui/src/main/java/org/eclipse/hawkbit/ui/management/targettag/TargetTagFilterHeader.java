@@ -34,7 +34,7 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     private I18N i18n;
 
     @Autowired
-    private CreateUpdateTargetTagLayout createUpdateTargetTagLayout;
+    private CreateUpdateTargetTagLayoutWindow createUpdateTargetTagLayout;
 
     @Autowired
     private ManagementUIState managementUIState;

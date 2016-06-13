@@ -271,7 +271,7 @@ public final class SPUIDefinitions {
     /**
      * New Target discard icon id.
      */
-    public static final String NEW_TARGET_DISCARD = "target.add.discard";
+    // public static final String NEW_TARGET_DISCARD = "target.add.discard";
     /**
      * New Target add icon id.
      */
@@ -347,11 +347,12 @@ public final class SPUIDefinitions {
     /**
      * New Target tag save icon id.
      */
-    public static final String NEW_TARGET_TAG_SAVE = "target.tag.add.save";
+    // public static final String NEW_TARGET_TAG_SAVE = "target.tag.add.save";
     /**
      * New Target tag discard icon id.
      */
-    public static final String NEW_TARGET_TAG_DISRACD = "target.tag.add.discard";
+    // public static final String NEW_TARGET_TAG_DISRACD =
+    // "target.tag.add.discard";
     /**
      * New Target tag add icon id.
      */

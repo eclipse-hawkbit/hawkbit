@@ -14,10 +14,10 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -29,29 +29,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Generates window for Software module add or update.
- * 
- *
  */
 @SpringComponent
 @ViewScope
-public class SoftwareModuleAddUpdateWindow implements Serializable {
+public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Serializable {
 
     private static final long serialVersionUID = -5217675246477211483L;
 
@@ -70,7 +66,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
     @Autowired
     private transient EntityFactory entityFactory;
 
-    private Label madatoryLabel;
+    private Label mandatoryLabel;
 
     private TextField nameTextField;
 
@@ -78,15 +74,11 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     private TextField vendorTextField;
 
-    private Button saveSoftware;
-
-    private Button closeWindow;
-
     private ComboBox typeComboBox;
 
     private TextArea descTextArea;
 
-    private Window window;
+    private CommonDialogWindow window;
 
     private String oldDescriptionValue;
 
@@ -102,7 +94,8 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
      * @return reference of {@link com.vaadin.ui.Window} to add new software
      *         module.
      */
-    public Window createAddSoftwareModuleWindow() {
+    public CommonDialogWindow createAddSoftwareModuleWindow() {
+
         editSwModule = Boolean.FALSE;
         createRequiredComponents();
         createWindow();
@@ -118,6 +111,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
      *         module.
      */
     public Window createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
+
         editSwModule = Boolean.TRUE;
         this.baseSwModuleId = baseSwModuleId;
         createRequiredComponents();
@@ -132,57 +126,41 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
 
     private void createRequiredComponents() {
         /* name textfield */
-        nameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
+                true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
 
         /* version text field */
-        versionTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.version"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
+                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
 
         /* Vendor text field */
-        vendorTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
+                false, null, i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         vendorTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
 
-        descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTAREA_TINY, false, null,
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
+                ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION);
         addDescriptionTextChangeListener();
         addVendorTextChangeListener();
 
         /* Label for mandatory symbol */
-        madatoryLabel = new Label(i18n.get("label.mandatory.field"));
-        madatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-        madatoryLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        mandatoryLabel = new Label(i18n.get("label.mandatory.field"));
+        mandatoryLabel.setStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
+        mandatoryLabel.addStyleName(ValoTheme.LABEL_SMALL);
 
-        typeComboBox = SPUIComponentProvider.getComboBox("", "", null, null, false, null,
-                i18n.get("upload.swmodule.type"));
+        typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, true,
+                null, i18n.get("upload.swmodule.type"));
         typeComboBox.setId(SPUIComponentIdProvider.SW_MODULE_TYPE);
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
 
         populateTypeNameCombo();
-
-        /* save or update button */
-        saveSoftware = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SOFT_MODULE_SAVE, "", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveSoftware.addClickListener(event -> {
-            if (editSwModule) {
-                updateSwModule();
-            } else {
-                /* add new or update software module */
-                addNewBaseSoftware();
-            }
-        });
-
-        /* close button */
-        closeWindow = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SOFT_MODULE_DISCARD, "", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        /* Just close this window when this button is clicked */
-        closeWindow.addClickListener(event -> closeThisWindow());
 
         resetOldValues();
     }
@@ -203,68 +181,44 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
     }
 
     /**
-     * Keep UI components on Layout.
+     * Build the window content and get an instance of customDialogWindow
      * 
-     * @return
      */
     private void createWindow() {
-        /* action button layout (save & dicard) */
-        final HorizontalLayout buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
-        buttonsLayout.addComponents(saveSoftware, closeWindow);
-        buttonsLayout.setComponentAlignment(saveSoftware, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(closeWindow, Alignment.BOTTOM_RIGHT);
-        buttonsLayout.addStyleName("window-style");
 
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
         madatoryStarLabel.setWidth(null);
-        final HorizontalLayout hLayout = new HorizontalLayout();
-        hLayout.setSizeFull();
-        hLayout.addComponents(typeComboBox, madatoryStarLabel);
-        hLayout.setComponentAlignment(typeComboBox, Alignment.TOP_LEFT);
-        hLayout.setComponentAlignment(madatoryStarLabel, Alignment.TOP_RIGHT);
-        hLayout.setExpandRatio(typeComboBox, 0.8f);
 
         /*
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
          */
-        final VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setSpacing(Boolean.TRUE);
-        mainLayout.addStyleName("lay-color");
-        mainLayout.addComponent(madatoryLabel);
-        mainLayout.setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
-        mainLayout.addComponent(hLayout);
-        mainLayout.setComponentAlignment(hLayout, Alignment.MIDDLE_LEFT);
-        mainLayout.addComponents(nameTextField, versionTextField, vendorTextField, descTextArea, buttonsLayout);
+        addStyleName("lay-color");
+
+        final FormLayout formLayout = new FormLayout();
+        formLayout.addComponent(mandatoryLabel);
+        formLayout.addComponent(typeComboBox);
+        formLayout.addComponent(nameTextField);
+        formLayout.addComponent(versionTextField);
+        formLayout.addComponent(vendorTextField);
+        formLayout.addComponent(descTextArea);
+
+        setCompositionRoot(formLayout);
 
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW);
-        window.setContent(mainLayout);
-        window.setModal(true);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null);
+        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         nameTextField.focus();
     }
 
     private void addDescriptionTextChangeListener() {
-        descTextArea.addTextChangeListener(event -> {
-            if (event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue)) {
-                saveSoftware.setEnabled(false);
-            } else {
-                saveSoftware.setEnabled(true);
-            }
-        });
+        descTextArea.addTextChangeListener(event -> window.setSaveButtonEnabled(hasDescriptionChanged(event)));
     }
 
     private void addVendorTextChangeListener() {
-        vendorTextField.addTextChangeListener(event -> {
-            if (event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue)) {
-                saveSoftware.setEnabled(false);
-            } else {
-                saveSoftware.setEnabled(true);
-            }
-        });
+        vendorTextField.addTextChangeListener(event -> window.setSaveButtonEnabled(hasVendorChanged(event)));
     }
 
     /**
@@ -276,26 +230,31 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-        if (mandatoryCheck(name, version, type)) {
-            if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
-                uiNotifcation.displayValidationError(
-                        i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-            } else {
-                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
-                        version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
-                if (newBaseSoftwareModule != null) {
-                    /* display success message */
-                    uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {
-                            newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-                    eventBus.publish(this,
-                            new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
-                }
-                // close the window
-                closeThisWindow();
+
+        if (!mandatoryCheck(name, version, type)) {
+            return;
+        }
+
+        if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
+            uiNotifcation.displayValidationError(
+                    i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
+        } else {
+            final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
+                    version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
+            if (newBaseSoftwareModule != null) {
+                /* display success message */
+                uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                        new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
             }
+            // close the window
+            closeThisWindow();
         }
     }
 
+    /**
+     * updates a softwareModule
+     */
     private void updateSwModule() {
         final String newDesc = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String newVendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
@@ -312,6 +271,9 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         closeThisWindow();
     }
 
+    /**
+     * fill the data of a softwareModule in the content of the window
+     */
     private void populateValuesOfSwModule() {
         final SoftwareModule swModle = softwareManagement.findSoftwareModuleById(baseSwModuleId);
         nameTextField.setValue(swModle.getName());
@@ -326,7 +288,7 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
             typeComboBox.addItem(swModle.getType().getName());
         }
         typeComboBox.setValue(swModle.getType().getName());
-        saveSoftware.setEnabled(Boolean.FALSE);
+        window.setSaveButtonEnabled(Boolean.FALSE);
     }
 
     /**
@@ -364,4 +326,21 @@ public class SoftwareModuleAddUpdateWindow implements Serializable {
         }
         return isValid;
     }
+
+    private void saveOrUpdate() {
+        if (editSwModule) {
+            updateSwModule();
+        } else {
+            addNewBaseSoftware();
+        }
+    }
+
+    private boolean hasDescriptionChanged(final TextChangeEvent event) {
+        return !(event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue));
+    }
+
+    private boolean hasVendorChanged(final TextChangeEvent event) {
+        return !(event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue));
+    }
+
 }

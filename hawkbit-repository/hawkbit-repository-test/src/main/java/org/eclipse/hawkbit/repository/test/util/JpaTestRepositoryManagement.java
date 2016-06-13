@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.util;
+package org.eclipse.hawkbit.repository.test.util;
 
 import java.util.List;
 

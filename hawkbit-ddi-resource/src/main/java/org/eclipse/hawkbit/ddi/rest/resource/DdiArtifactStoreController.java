@@ -134,7 +134,7 @@ public class DdiArtifactStoreController implements DdiDlArtifactStoreControllerR
     private Action checkAndReportDownloadByTarget(final HttpServletRequest request, final String targetid,
             final LocalArtifact artifact) {
         final Target target = controllerManagement.updateLastTargetQuery(targetid,
-                IpUtil.getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader()));
+                IpUtil.getClientIpFromRequest(request, securityProperties));
 
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), artifact.getSoftwareModule());

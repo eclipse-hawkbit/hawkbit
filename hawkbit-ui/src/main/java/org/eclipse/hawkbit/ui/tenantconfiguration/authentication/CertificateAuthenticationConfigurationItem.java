@@ -41,10 +41,6 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
     private VerticalLayout detailLayout;
     private TextField caRootAuthorityTextField;
 
-    /**
-     * @param systemManagement
-     *            the system management to retrie the configuration
-     */
     @Autowired
     public CertificateAuthenticationConfigurationItem(
             final TenantConfigurationManagement tenantConfigurationManagement) {
@@ -70,8 +66,8 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         caRootAuthorityLabel.setDescription(
                 "The SSL Issuer iRules.X509 hash, to validate against the controller request certifcate.");
 
-        caRootAuthorityTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null, "",
-                true, 128);
+        caRootAuthorityTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
+                "", true, 128);
         caRootAuthorityTextField.setWidth("500px");
         caRootAuthorityTextField.setImmediate(true);
         caRootAuthorityTextField.addTextChangeListener(event -> caRootAuthorityChanged());
@@ -147,4 +143,5 @@ public class CertificateAuthenticationConfigurationItem extends AbstractAuthenti
         configurationCaRootAuthorityChanged = true;
         notifyConfigurationChanged();
     }
+
 }
