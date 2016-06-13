@@ -49,7 +49,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
-    
+
     @Autowired
     private transient SoftwareManagement softwareManagement;
     
@@ -81,7 +81,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
         detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
+        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
     }
     
     @Override

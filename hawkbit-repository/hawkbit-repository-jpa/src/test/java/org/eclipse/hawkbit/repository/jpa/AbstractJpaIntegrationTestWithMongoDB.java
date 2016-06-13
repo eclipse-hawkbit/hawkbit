@@ -12,7 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.repository.util.AbstractIntegrationTestWithMongoDB;
+import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTestWithMongoDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 

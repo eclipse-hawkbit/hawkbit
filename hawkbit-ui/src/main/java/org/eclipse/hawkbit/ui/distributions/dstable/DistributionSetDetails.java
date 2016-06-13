@@ -341,7 +341,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
+        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
     }
 
     @Override

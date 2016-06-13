@@ -43,7 +43,7 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- *
+ * Layout for the create or update software module type.
  *
  */
 @SpringComponent
@@ -198,25 +198,24 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
     @Override
     protected void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
-                    .findSoftwareModuleTypeByKey(typeKey.getValue());
-            final SoftwareModuleType existingSMTypeByName = swTypeManagementService
-                    .findSoftwareModuleTypeByName(tagName.getValue());
-            if (optiongroup.getValue().equals(createTypeStr)) {
-                if (!checkIsDuplicateByKey(existingSMTypeByKey) && !checkIsDuplicate(existingSMTypeByName)) {
-                    createNewSWModuleType();
-                }
-            } else {
+        if (!mandatoryValuesPresent()) {
+            return;
+        }
 
-                updateSWModuleType(existingSMTypeByName);
+        final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
+                .findSoftwareModuleTypeByKey(typeKey.getValue());
+        final SoftwareModuleType existingSMTypeByName = swTypeManagementService
+                .findSoftwareModuleTypeByName(tagName.getValue());
+        if (optiongroup.getValue().equals(createTypeStr)) {
+            if (!checkIsDuplicateByKey(existingSMTypeByKey) && !checkIsDuplicate(existingSMTypeByName)) {
+                createNewSWModuleType();
             }
+        } else {
+
+            updateSWModuleType(existingSMTypeByName);
         }
     }
 
-    /**
-     * Create new tag.
-     */
     private void createNewSWModuleType() {
         int assignNumber = 0;
         final String colorPicked = ColorPickerHelper.getColorPickedString(getColorPickerLayout().getSelPreview());
@@ -253,9 +252,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         }
     }
 
-    /**
-     * update tag.
-     */
     private void updateSWModuleType(final SoftwareModuleType existingType) {
 
         final String typeNameValue = HawkbitCommonUtil.trimAndNullIfEmpty(tagName.getValue());
@@ -303,31 +299,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
             getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
             mainLayout.addComponent(colorPickerLayout, 1, 0);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
+        } else {
+            mainLayout.removeComponent(colorPickerLayout);
         }
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
-    }
-
-    /**
-     * Covert RGB code to {@Color}.
-     * 
-     * @param value
-     *            RGB vale
-     * @return Color
-     */
-    protected Color rgbToColorConverter(final String value) {
-        if (value.startsWith("rgb")) {
-            final String[] colors = value.substring(value.indexOf('(') + 1, value.length() - 1).split(",");
-            final int red = Integer.parseInt(colors[0]);
-            final int green = Integer.parseInt(colors[1]);
-            final int blue = Integer.parseInt(colors[2]);
-            if (colors.length > 3) {
-                final int alpha = (int) (Double.parseDouble(colors[3]) * 255d);
-                return new Color(red, green, blue, alpha);
-            } else {
-                return new Color(red, green, blue);
-            }
-        }
-        return null;
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.util.TestdataFactory;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;

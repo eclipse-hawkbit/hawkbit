@@ -149,7 +149,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         detailsTab.addStyleName(SPUIStyleDefinitions.DETAILS_LAYOUT_STYLE);
         detailsTab.setId(getTabSheetId());
         addTabs(detailsTab);
-     }
+    }
 
     private void buildLayout() {
         final HorizontalLayout nameEditLayout = new HorizontalLayout();
@@ -212,9 +212,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
-      
     }
-       
+
     protected void populateLog() {
         logLayout.removeAllComponents();
 
@@ -321,7 +320,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     public VerticalLayout getDetailsLayout() {
         return detailsLayout;
     }
-    
+
     private void populateDescription() {
         if (selectedBaseEntity != null) {
             updateDescriptionLayout(i18n.get("label.description"), selectedBaseEntity.getDescription());

@@ -915,8 +915,7 @@ public final class SPUIComponentIdProvider {
      */
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
 
-    
-    /**
+ /**
      * Software module table - Manage metadata id.
      */
     public static final String SW_TABLE_MANAGE_METADATA_ID = "swtable.manage.metadata.id";

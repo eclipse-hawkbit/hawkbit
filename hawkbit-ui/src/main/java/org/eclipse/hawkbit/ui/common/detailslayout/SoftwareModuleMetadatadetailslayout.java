@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.List;
 
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -19,16 +17,12 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
-import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.spring.events.EventBus;
-import org.vaadin.spring.events.EventScope;
-import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -106,7 +100,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     }
 
     private void addSMMetadataTableHeader() {
-        setColumnHeader(METADATA_KEY, i18n.get("label.dist.details.key"));
+        setColumnHeader(METADATA_KEY, i18n.get("header.key"));
     }
 
     /**

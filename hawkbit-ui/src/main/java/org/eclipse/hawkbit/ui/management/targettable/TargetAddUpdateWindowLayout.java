@@ -133,7 +133,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         if (Boolean.TRUE.equals(editTarget)) {
             madatoryLabel.setVisible(Boolean.FALSE);
         }
-        nameTextField.focus();
+        controllerIDTextField.focus();
     }
 
     private void addListeners() {

@@ -62,10 +62,11 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     private EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
+
+    private DistributionSetMetadatadetailslayout dsMetadataTable;
     
     private VerticalLayout metadataLayout;
     
-    private DistributionSetMetadatadetailslayout dsMetadataTable;
 
     @Override
     protected void init() {
@@ -108,14 +109,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
-    }
-    
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.addComponent(dsMetadataTable);
-        return metadataLayout;
+        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
     }
 
     @Override
@@ -152,16 +146,11 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     protected String getTabSheetId() {
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
     }
-    
-    private void populateMetadataDetails(){
-        dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
-   }
 
     @Override
     protected void populateDetailsWidget() {
         softwareModuleTable.populateModule(getSelectedBaseEntity());
         populateDetails(getSelectedBaseEntity());
-        populateMetadataDetails();
 
     }
 
@@ -207,6 +196,13 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     @Override
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
+    }
+    
+    protected VerticalLayout createMetadataLayout() {
+        metadataLayout = getTabLayout();
+        metadataLayout.setSizeFull();
+        metadataLayout.addComponent(dsMetadataTable);
+        return metadataLayout;
     }
 
 }

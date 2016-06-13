@@ -208,35 +208,17 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> save(), event -> closeThisWindow(), null);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         nameTextField.focus();
     }
 
-    /**
-     * add a TextChangeListener to the description TextField
-     */
-    private void addDescriptionTextChangeListener() {
-        descTextArea.addTextChangeListener(event -> {
-            if (event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue)) {
-                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
-            } else {
-                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
-            }
-        });
+   private void addDescriptionTextChangeListener() {
+        descTextArea.addTextChangeListener(event -> window.setSaveButtonEnabled(hasDescriptionChanged(event)));
     }
 
-    /**
-     * add a TextChangeListener to the vendor TextField
-     */
     private void addVendorTextChangeListener() {
-        vendorTextField.addTextChangeListener(event -> {
-            if (event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue)) {
-                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
-            } else {
-                window.setSaveButtonEnabled(hasDescriptionOrVendorChanged(event));
-            }
-        });
+        vendorTextField.addTextChangeListener(event -> window.setSaveButtonEnabled(hasVendorChanged(event)));
     }
 
     /**
@@ -248,23 +230,25 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         final String vendor = HawkbitCommonUtil.trimAndNullIfEmpty(vendorTextField.getValue());
         final String description = HawkbitCommonUtil.trimAndNullIfEmpty(descTextArea.getValue());
         final String type = typeComboBox.getValue() != null ? typeComboBox.getValue().toString() : null;
-        if (mandatoryCheck(name, version, type)) {
-            if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
-                uiNotifcation.displayValidationError(
-                        i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
-            } else {
-                final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
-                        version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
-                if (newBaseSoftwareModule != null) {
-                    /* display success message */
-                    uiNotifcation.displaySuccess(i18n.get("message.save.success", new Object[] {
-                            newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
-                    eventBus.publish(this,
-                            new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
-                }
-                // close the window
-                closeThisWindow();
+
+        if (!mandatoryCheck(name, version, type)) {
+            return;
+        }
+
+        if (HawkbitCommonUtil.isDuplicate(name, version, type)) {
+            uiNotifcation.displayValidationError(
+                    i18n.get("message.duplicate.softwaremodule", new Object[] { name, version }));
+        } else {
+            final SoftwareModule newBaseSoftwareModule = HawkbitCommonUtil.addNewBaseSoftware(entityFactory, name,
+                    version, vendor, softwareManagement.findSoftwareModuleTypeByName(type), description);
+            if (newBaseSoftwareModule != null) {
+                /* display success message */
+                uiNotifcation.displaySuccess(i18n.get("message.save.success",
+                        new Object[] { newBaseSoftwareModule.getName() + ":" + newBaseSoftwareModule.getVersion() }));
+                eventBus.publish(this, new SoftwareModuleEvent(BaseEntityEventType.NEW_ENTITY, newBaseSoftwareModule));
             }
+            // close the window
+            closeThisWindow();
         }
     }
 
@@ -343,29 +327,21 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         return isValid;
     }
 
-    /**
-     * saves or updates a softwareModule depending on the information if it is a
-     * new softwareModule or an existing one
-     */
-    private void save() {
+    private void saveOrUpdate() {
         if (editSwModule) {
             updateSwModule();
         } else {
-            /* add new or update software module */
             addNewBaseSoftware();
         }
     }
 
-    /**
-     * Checks if the description and vendor have changed and set the button
-     * enabled/disabled
-     * 
-     * @param event
-     *            TextChangeEvent
-     * @return Boolean
-     */
-    private boolean hasDescriptionOrVendorChanged(final TextChangeEvent event) {
+
+    private boolean hasDescriptionChanged(final TextChangeEvent event) {
         return !(event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue));
+    }
+
+    private boolean hasVendorChanged(final TextChangeEvent event) {
+        return !(event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue));
     }
 
 }
