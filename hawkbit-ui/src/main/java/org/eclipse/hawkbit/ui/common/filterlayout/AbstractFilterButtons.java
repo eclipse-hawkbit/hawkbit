@@ -125,8 +125,7 @@ public abstract class AbstractFilterButtons extends Table {
         } else if (id != null && isClickedByDefault(name)) {
             filterButtonClickBehaviour.setDefaultClickedButton(typeButton);
         }
-        final DragAndDropWrapper wrapper = createDragAndDropWrapper(typeButton, name, id);
-        return wrapper;
+        return createDragAndDropWrapper(typeButton, name, id);
     }
 
     protected boolean isNoTagSateSelected() {

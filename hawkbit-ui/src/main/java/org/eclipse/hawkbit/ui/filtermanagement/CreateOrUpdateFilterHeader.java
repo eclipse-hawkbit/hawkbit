@@ -69,7 +69,7 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
 
     private static final long serialVersionUID = 7474232427119031474L;
 
-    private static final String breadcrumbCustomFilters = "breadcrumb.target.filter.custom.filters";
+    private static final String BREADCRUMB_CUSTOM_FILTERS = "breadcrumb.target.filter.custom.filters";
 
     @Autowired
     private I18N i18n;
@@ -242,19 +242,20 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
         final Button createFilterViewLink = SPUIComponentProvider.getButton(null, "", "", null, false, null,
                 SPUIButtonStyleSmallNoBorder.class);
         createFilterViewLink.setStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link rollout-caption-links");
-        createFilterViewLink.setDescription(i18n.get(breadcrumbCustomFilters));
-        createFilterViewLink.setCaption(i18n.get(breadcrumbCustomFilters));
+        createFilterViewLink.setDescription(i18n.get(BREADCRUMB_CUSTOM_FILTERS));
+        createFilterViewLink.setCaption(i18n.get(BREADCRUMB_CUSTOM_FILTERS));
         createFilterViewLink.addClickListener(value -> showCustomFiltersView());
 
         return createFilterViewLink;
     }
 
     private TextField createNameTextField() {
-        final TextField nameField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.customfiltername"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        final TextField nameField = SPUIComponentProvider.getTextField(i18n.get("textfield.customfiltername"), "",
+                ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.customfiltername"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameField.setId(SPUIComponentIdProvider.CUSTOM_FILTER_ADD_NAME);
         nameField.setPropertyDataSource(nameLabel);
-        nameField.addTextChangeListener(event -> onFilterNameChange(event));
+        nameField.addTextChangeListener(this::onFilterNameChange);
         return nameField;
     }
 
@@ -451,8 +452,8 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     }
 
     private TextField createSearchField() {
-        final TextField textField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, "", "",
-                true, SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
+        final TextField textField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, "",
+                "", true, SPUILabelDefinitions.TARGET_FILTER_QUERY_TEXT_FIELD_LENGTH);
         textField.setId("custom.query.text.Id");
         textField.addStyleName("target-filter-textfield");
         textField.setWidth(900.0F, Unit.PIXELS);
@@ -490,15 +491,11 @@ public class CreateOrUpdateFilterHeader extends VerticalLayout implements Button
     public void buttonClick(final ClickEvent event) {
         if (SPUIComponentIdProvider.CUSTOM_FILTER_SAVE_ICON.equals(event.getComponent().getId())
                 && manadatoryFieldsPresent()) {
-            if (filterManagementUIState.isCreateFilterViewDisplayed()) {
-                if (!doesAlreadyExists()) {
-                    createTargetFilterQuery();
-                }
+            if (filterManagementUIState.isCreateFilterViewDisplayed() && !doesAlreadyExists()) {
+                createTargetFilterQuery();
             } else {
-                if (!nameTextField.getValue().equals(oldFilterName)) {
-                    if (!doesAlreadyExists()) {
-                        updateCustomFilter();
-                    }
+                if (!nameTextField.getValue().equals(oldFilterName) && !doesAlreadyExists()) {
+                    updateCustomFilter();
                 } else {
                     updateCustomFilter();
                 }

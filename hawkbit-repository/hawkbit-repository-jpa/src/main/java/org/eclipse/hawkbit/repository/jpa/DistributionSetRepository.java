@@ -16,7 +16,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -82,15 +84,26 @@ public interface DistributionSetRepository
     List<DistributionSet> findByModules(JpaSoftwareModule module);
 
     /**
-     * Finds {@link DistributionSet}s based on given ID if they are not assigned
-     * yet to an {@link UpdateAction}, i.e. unused.
+     * Finds {@link DistributionSet}s based on given ID that are assigned yet to
+     * an {@link Action}, i.e. in use.
      *
      * @param ids
      *            to search for
-     * @return
+     * @return list of {@link DistributionSet#getId()}
      */
     @Query("select ac.distributionSet.id from JpaAction ac where ac.distributionSet.id in :ids")
-    List<Long> findAssignedDistributionSetsById(@Param("ids") Long... ids);
+    List<Long> findAssignedToTargetDistributionSetsById(@Param("ids") Long... ids);
+
+    /**
+     * Finds {@link DistributionSet}s based on given ID that are assigned yet to
+     * an {@link Rollout}, i.e. in use.
+     *
+     * @param ids
+     *            to search for
+     * @return list of {@link DistributionSet#getId()}
+     */
+    @Query("select ra.distributionSet.id from JpaRollout ra where ra.distributionSet.id in :ids")
+    List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Long... ids);
 
     /**
      * Saves all given {@link DistributionSet}s.
