@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -40,15 +40,13 @@ public class CommonDialogWindow extends Window {
 
     private static final long serialVersionUID = -1321949234316858703L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(CommonDialogWindow.class);
-
     private final VerticalLayout mainLayout = new VerticalLayout();
 
-    private String caption;
+    private final String caption;
 
-    private Component content;
+    private final Component content;
 
-    private String helpLink;
+    private final String helpLink;
 
     private Button saveButton;
 
@@ -61,22 +59,40 @@ public class CommonDialogWindow extends Window {
     @Autowired
     private transient UiProperties uiProperties;
 
-    public CommonDialogWindow() {
+    protected ValueChangeListener buttonEnableListener;
 
-        init(null, null);
-    }
+    private final ClickListener saveButtonClickListener;
 
+    private final ClickListener cancelButtonClickListener;
+
+    /**
+     * Constructor.
+     * 
+     * @param caption
+     *            the caption
+     * @param content
+     *            the content
+     * @param helpLink
+     *            the helpLinks
+     * @param saveButtonClickListener
+     *            the saveButtonClickListener
+     * @param cancelButtonClickListener
+     *            the cancelButtonClickListener
+     */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener) {
-
+        checkNotNull(saveButtonClickListener);
+        checkNotNull(cancelButtonClickListener);
         this.caption = caption;
         this.content = content;
         this.helpLink = helpLink;
+        this.saveButtonClickListener = saveButtonClickListener;
+        this.cancelButtonClickListener = cancelButtonClickListener;
 
-        init(saveButtonClickListener, cancelButtonClickListener);
+        init();
     }
 
-    public void init(final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener) {
+    private final void init() {
 
         if (content instanceof AbstractOrderedLayout) {
             ((AbstractOrderedLayout) content).setSpacing(true);
@@ -87,8 +103,7 @@ public class CommonDialogWindow extends Window {
             mainLayout.addComponent(content);
             mainLayout.setExpandRatio(content, 1.0F);
         }
-        final HorizontalLayout buttonLayout = createActionButtonsLayout(saveButtonClickListener,
-                cancelButtonClickListener);
+        final HorizontalLayout buttonLayout = createActionButtonsLayout();
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
         mainLayout.setSizeFull();
@@ -96,58 +111,60 @@ public class CommonDialogWindow extends Window {
         setCaption(caption);
         setCaptionAsHtml(true);
         setContent(mainLayout);
-        setResizable(true);
+        setResizable(false);
         center();
         setModal(true);
         addStyleName("fontsize");
     }
 
-    private HorizontalLayout createActionButtonsLayout(final ClickListener saveButtonClickListener,
-            final ClickListener cancelButtonClickListener) {
+    private HorizontalLayout createActionButtonsLayout() {
 
         buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSpacing(true);
-
-        saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
-        saveButton.setSizeUndefined();
-        saveButton.addStyleName("default-color");
-        if (null != saveButtonClickListener) {
-            saveButton.addClickListener(saveButtonClickListener);
-        } else {
-            throw new IllegalArgumentException("no ClickListener for save button specified");
-        }
-        buttonsLayout.addComponent(saveButton);
-        buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
-        buttonsLayout.setExpandRatio(saveButton, 1.0F);
-
-        cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
-                FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
-        cancelButton.setSizeUndefined();
-        cancelButton.addStyleName("default-color");
-        if (null != cancelButtonClickListener) {
-            cancelButton.addClickListener(cancelButtonClickListener);
-        } else {
-            throw new IllegalArgumentException("no ClickListener for cancel button specified");
-        }
-        buttonsLayout.addComponent(cancelButton);
-        buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
-        buttonsLayout.setExpandRatio(cancelButton, 1.0F);
-        buttonsLayout.addStyleName("actionButtonsMargin");
         buttonsLayout.setSizeUndefined();
+        buttonsLayout.setSpacing(true);
+        createSaveButton();
+
+        createCancelButton();
+        buttonsLayout.addStyleName("actionButtonsMargin");
+
         addHelpLink();
 
         return buttonsLayout;
     }
 
+    private void createCancelButton() {
+        cancelButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.CANCEL_BUTTON, "Cancel", "", "", true,
+                FontAwesome.TIMES, SPUIButtonStyleBorderWithIcon.class);
+        cancelButton.setSizeUndefined();
+        cancelButton.addStyleName("default-color");
+        cancelButton.addClickListener(cancelButtonClickListener);
+
+        buttonsLayout.addComponent(cancelButton);
+        buttonsLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
+        buttonsLayout.setExpandRatio(cancelButton, 1.0F);
+    }
+
+    private void createSaveButton() {
+        saveButton = SPUIComponentProvider.getButton(SPUIComponentIdProvider.SAVE_BUTTON, "Save", "", "", true,
+                FontAwesome.SAVE, SPUIButtonStyleBorderWithIcon.class);
+        saveButton.setSizeUndefined();
+        saveButton.addStyleName("default-color");
+        saveButton.addClickListener(saveButtonClickListener);
+        buttonsLayout.addComponent(saveButton);
+        buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
+        buttonsLayout.setExpandRatio(saveButton, 1.0F);
+    }
+
     private void addHelpLink() {
 
-        if (StringUtils.isNotEmpty(helpLink)) {
-            final Link helpLinkComponent = SPUIComponentProvider.getHelpLink(helpLink);
-            buttonsLayout.addComponent(helpLinkComponent);
-            buttonsLayout.setComponentAlignment(helpLinkComponent, Alignment.MIDDLE_RIGHT);
+        if (StringUtils.isEmpty(helpLink)) {
+            return;
         }
+        final Link helpLinkComponent = SPUIComponentProvider.getHelpLink(helpLink);
+        buttonsLayout.addComponent(helpLinkComponent);
+        buttonsLayout.setComponentAlignment(helpLinkComponent, Alignment.MIDDLE_RIGHT);
     }
+
 
     public void setSaveButtonEnabled(final boolean enabled) {
         saveButton.setEnabled(enabled);
@@ -156,11 +173,11 @@ public class CommonDialogWindow extends Window {
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
-
+    
     public HorizontalLayout getButtonsLayout() {
         return buttonsLayout;
     }
-
+    
     public void setCancelButtonCaption(final String caption) {
         cancelButton.setCaption(caption);
     }

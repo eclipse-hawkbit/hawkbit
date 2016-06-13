@@ -293,6 +293,7 @@ public final class SPUIStyleDefinitions {
      * Status pending icon.
      */
     public static final String STATUS_ICON_PENDING = "statusIconPending";
+<<<<<<< HEAD
       /**
      * Footer layout style.
      */
@@ -302,6 +303,13 @@ public final class SPUIStyleDefinitions {
      * Grid style.
      */
     public static final String METADATA_GRID = "metadata-grid";
+=======
+    
+    /**
+     * Footer layout style.
+     */
+    public static final String FOOTER_LAYOUT = "footer-layout"; 
+>>>>>>> refs/heads/master
 
     /**
      * Constructor.

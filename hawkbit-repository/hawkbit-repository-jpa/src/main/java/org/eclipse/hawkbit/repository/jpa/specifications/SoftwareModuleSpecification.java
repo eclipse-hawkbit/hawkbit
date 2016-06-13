@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;

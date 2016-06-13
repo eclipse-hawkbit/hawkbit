@@ -16,14 +16,15 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
-import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
-import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
+<<<<<<< HEAD
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+=======
+>>>>>>> refs/heads/master
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventScope;
@@ -53,6 +54,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Autowired
     private ManageDistUIState manageDistUIState;
+<<<<<<< HEAD
     
     @Autowired
     private transient SoftwareManagement softwareManagement;
@@ -89,6 +91,9 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     }
 
     
+=======
+
+>>>>>>> refs/heads/master
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SoftwareModuleEvent softwareModuleEvent) {
         onBaseEntityEvent(softwareModuleEvent);
@@ -113,9 +118,9 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
     }
 
+<<<<<<< HEAD
     private VerticalLayout createMetadataLayout() {
         metadataLayout = getTabLayout();
         metadataLayout.setSizeFull();
@@ -124,6 +129,8 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         return metadataLayout;
     }
     
+=======
+>>>>>>> refs/heads/master
     @Override
     protected String getDefaultCaption() {
         return getI18n().get("upload.swModuleTable.header");
@@ -192,16 +199,11 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     @Override
     protected void populateDetailsWidget() {
         populateDetails();
-        populateMetadataDetails();
     }
 
     @Override
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
-    
-    private void populateMetadataDetails(){
-        swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
-   }
 
 }

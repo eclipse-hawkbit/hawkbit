@@ -49,7 +49,7 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
 
     @Autowired
     private ArtifactUploadState artifactUploadState;
-    
+
     @Autowired
     private transient SoftwareManagement softwareManagement;
     

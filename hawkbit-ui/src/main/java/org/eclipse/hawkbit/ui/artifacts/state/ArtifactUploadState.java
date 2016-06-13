@@ -53,67 +53,63 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
 
     private Set<Long> selectedSoftwareModules = Collections.emptySet();
 
-    private boolean swTypeFilterClosed = Boolean.FALSE;
+    private boolean swTypeFilterClosed;
 
-    private boolean swModuleTableMaximized = Boolean.FALSE;
+    private boolean swModuleTableMaximized;
 
-    private boolean artifactDetailsMaximized = Boolean.FALSE;
+    private boolean artifactDetailsMaximized;
 
     private final Set<String> selectedDeleteSWModuleTypes = new HashSet<>();
 
-    private boolean noDataAvilableSoftwareModule = Boolean.FALSE;
-    
-    private boolean isStatusPopupMinimized  = Boolean.FALSE;
-    
-    private boolean isUploadCompleted = Boolean.FALSE;
-    
+    private boolean noDataAvilableSoftwareModule;
+
+    private boolean statusPopupMinimized;
+
+    private boolean uploadCompleted;
+
     private List<UploadStatusObject> uploadedFileStatusList = new ArrayList<>();
-    
+
     private final AtomicInteger numberOfFileUploadsExpected = new AtomicInteger();
 
     private final AtomicInteger numberOfFilesActuallyUpload = new AtomicInteger();
-    
+
     private final AtomicInteger numberOfFileUploadsFailed = new AtomicInteger();
 
     public AtomicInteger getNumberOfFileUploadsFailed() {
         return numberOfFileUploadsFailed;
     }
-    
+
     public AtomicInteger getNumberOfFilesActuallyUpload() {
         return numberOfFilesActuallyUpload;
     }
-    
+
     public AtomicInteger getNumberOfFileUploadsExpected() {
         return numberOfFileUploadsExpected;
     }
-    
-    
+
     public List<UploadStatusObject> getUploadedFileStatusList() {
         return uploadedFileStatusList;
     }
-    
-    public void setUploadedFileStatusList(List<UploadStatusObject> uploadedFileStatusList) {
+
+    public void setUploadedFileStatusList(final List<UploadStatusObject> uploadedFileStatusList) {
         this.uploadedFileStatusList = uploadedFileStatusList;
     }
-    
+
     public boolean isUploadCompleted() {
-        return isUploadCompleted;
-    }
-    
-    public void setUploadCompleted(boolean isUploadCompleted) {
-        this.isUploadCompleted = isUploadCompleted;
+        return uploadCompleted;
     }
 
-    
-    public void setStatusPopupMinimized(boolean isStatusPopupMinimized) {
-		this.isStatusPopupMinimized = isStatusPopupMinimized;
-	}
-    
+    public void setUploadCompleted(final boolean uploadCompleted) {
+        this.uploadCompleted = uploadCompleted;
+    }
+
+    public void setStatusPopupMinimized(final boolean statusPopupMinimized) {
+        this.statusPopupMinimized = statusPopupMinimized;
+    }
+
     public boolean isStatusPopupMinimized() {
-		return isStatusPopupMinimized;
-	}
-
-
+        return statusPopupMinimized;
+    }
 
 
 	/**

@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
-import org.eclipse.hawkbit.ui.common.detailslayout.DistributionSetMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsTable;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -62,20 +61,19 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     private EntityFactory entityFactory;
 
     private SoftwareModuleDetailsTable softwareModuleTable;
-    
-    private VerticalLayout metadataLayout;
-    
-    private DistributionSetMetadatadetailslayout dsMetadataTable;
 
     @Override
     protected void init() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
         softwareModuleTable.init(getI18n(), false, getPermissionChecker(), null, null, null);
+<<<<<<< HEAD
         
         dsMetadataTable = new DistributionSetMetadatadetailslayout();
         dsMetadataTable.init(getI18n(), getPermissionChecker(),distributionSetManagement,
                 dsMetadataPopupLayout,entityFactory);
         
+=======
+>>>>>>> refs/heads/master
         super.init();
     }
 
@@ -108,14 +106,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata.tab"), null);
-    }
-    
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.addComponent(dsMetadataTable);
-        return metadataLayout;
     }
 
     @Override
@@ -152,16 +142,11 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     protected String getTabSheetId() {
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_TABSHEET;
     }
-    
-    private void populateMetadataDetails(){
-        dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
-   }
 
     @Override
     protected void populateDetailsWidget() {
         softwareModuleTable.populateModule(getSelectedBaseEntity());
         populateDetails(getSelectedBaseEntity());
-        populateMetadataDetails();
 
     }
 
