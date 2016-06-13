@@ -40,6 +40,7 @@ public class ClientConfigurationProperties {
     private final List<Scenario> scenarios = new ArrayList<>();
 
     public static class Scenario {
+        private String tenant = "DEFAULT";
         private int targets = 100;
         private int distributionSets = 10;
         private int appModulesPerDistributionSet = 2;
@@ -47,6 +48,46 @@ public class ClientConfigurationProperties {
         private String smSwName = "Application";
         private String smFwName = "Firmware";
         private String targetName = "Device";
+        private int artifactsPerSM = 1;
+        private String targetAddress = "amqp:/simulator.replyTo";
+
+        /**
+         * Artifact size. Values can use the suffixed "MB" or "KB" to indicate a
+         * Megabyte or Kilobyte size.
+         */
+        private String artifactSize = "1MB";
+
+        public String getTargetAddress() {
+            return targetAddress;
+        }
+
+        public void setTargetAddress(final String targetAddress) {
+            this.targetAddress = targetAddress;
+        }
+
+        public String getTenant() {
+            return tenant;
+        }
+
+        public void setTenant(final String tenant) {
+            this.tenant = tenant;
+        }
+
+        public int getArtifactsPerSM() {
+            return artifactsPerSM;
+        }
+
+        public void setArtifactsPerSM(final int artifactsPerSM) {
+            this.artifactsPerSM = artifactsPerSM;
+        }
+
+        public String getArtifactSize() {
+            return artifactSize;
+        }
+
+        public void setArtifactSize(final String artifactSize) {
+            this.artifactSize = artifactSize;
+        }
 
         public String getTargetName() {
             return targetName;

@@ -182,6 +182,7 @@ public final class MgmtTargetMapper {
         final Target target = entityFactory.generateTarget(targetRest.getControllerId());
         target.setDescription(targetRest.getDescription());
         target.setName(targetRest.getName());
+        target.getTargetInfo().setAddress(targetRest.getAddress());
         return target;
     }
 

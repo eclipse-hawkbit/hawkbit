@@ -27,6 +27,7 @@ public class TargetBuilder {
     private String controllerId;
     private String name;
     private String description;
+    private String address;
 
     /**
      * @param controllerId
@@ -45,6 +46,16 @@ public class TargetBuilder {
      */
     public TargetBuilder name(final String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * @param address
+     *            the address of the target
+     * @return the builder itself
+     */
+    public TargetBuilder address(final String address) {
+        this.address = address;
         return this;
     }
 
@@ -121,6 +132,7 @@ public class TargetBuilder {
         }
         body.setName(name + suffix);
         body.setDescription(description);
+        body.setAddress(address);
         return body;
     }
 

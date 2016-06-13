@@ -168,7 +168,7 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
 
     /**
      * @param address
-     *            the ipAddress to set
+     *            the target address to set
      *
      * @throws IllegalArgumentException
      *             If the given string violates RFC&nbsp;2396
