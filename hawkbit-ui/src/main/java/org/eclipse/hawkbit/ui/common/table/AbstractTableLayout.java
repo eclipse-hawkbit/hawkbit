@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.common.table;
 
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -32,9 +31,6 @@ public abstract class AbstractTableLayout extends VerticalLayout {
      */
     protected static final ShortcutAction ACTION_CTRL_A = new ShortcutAction("Select All", ShortcutAction.KeyCode.A,
             new int[] { ShortcutAction.ModifierKey.CTRL });
-
-    @Autowired
-    private transient EventBus.SessionEventBus eventBus;
 
     private AbstractTableHeader tableHeader;
 
@@ -126,10 +122,6 @@ public abstract class AbstractTableLayout extends VerticalLayout {
 
     public void setShowFilterButtonVisible(final boolean visible) {
         tableHeader.setFilterButtonsIconVisible(visible);
-    }
-
-    public EventBus.SessionEventBus getEventBus() {
-        return eventBus;
     }
 
 }
