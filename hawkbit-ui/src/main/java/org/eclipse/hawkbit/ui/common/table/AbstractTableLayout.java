@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
+import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Alignment;
@@ -89,10 +90,10 @@ public abstract class AbstractTableLayout extends VerticalLayout {
     /**
      * If any short cut keys required on the table.
      * 
-     * @return true if required else false. Default is 'false'.
+     * @return true if required else false. Default is 'true'.
      */
     protected boolean isShortCutKeysRequired() {
-        return false;
+        return true;
     }
 
     /**
@@ -101,7 +102,27 @@ public abstract class AbstractTableLayout extends VerticalLayout {
      * @return reference of {@link Handler} to handler the short cut keys.
      *         Default is null.
      */
-    protected abstract Handler getShortCutKeysHandler();
+    protected Handler getShortCutKeysHandler() {
+        return new Handler() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void handleAction(final Action action, final Object sender, final Object target) {
+                if (ACTION_CTRL_A.equals(action)) {
+                    table.selectAll();
+                    publishEvent();
+                }
+            }
+
+            @Override
+            public Action[] getActions(final Object target, final Object sender) {
+                return new Action[] { ACTION_CTRL_A };
+            }
+        };
+    }
+
+    protected abstract void publishEvent();
 
     public void setShowFilterButtonVisible(final boolean visible) {
         tableHeader.setFilterButtonsIconVisible(visible);

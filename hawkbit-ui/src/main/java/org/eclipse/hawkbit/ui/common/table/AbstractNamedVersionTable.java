@@ -54,12 +54,4 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
         item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).setValue(baseEntity.getVersion());
     }
 
-    /**
-     * Select all rows in the table.
-     */
-    public void selectAll() {
-        // only contains the ItemIds of the visible items in the table
-        setValue(getItemIds());
-    }
-
 }
