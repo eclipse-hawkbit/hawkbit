@@ -23,7 +23,7 @@ public class SoftwareModuleEvent extends BaseEntityEvent<SoftwareModule> {
      *
      */
     public enum SoftwareModuleEventType {
-        ARTIFACTS_CHANGED, ASSIGN_SOFTWARE_MODULE, SELECT_ALL
+        ARTIFACTS_CHANGED, ASSIGN_SOFTWARE_MODULE
     }
 
     private SoftwareModuleEventType softwareModuleEventType;
