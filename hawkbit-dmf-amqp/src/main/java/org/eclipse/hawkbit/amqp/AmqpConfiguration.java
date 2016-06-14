@@ -59,6 +59,7 @@ public class AmqpConfiguration {
     private ConnectionFactory rabbitConnectionFactory;
 
     @Configuration
+    @ConditionalOnMissingBean(ConnectionFactory.class)
     protected static class RabbitConnectionFactoryCreator {
 
         @Autowired
