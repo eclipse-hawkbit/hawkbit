@@ -89,6 +89,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
         addDSMetadataTableHeader();
         setSizeFull(); 
         addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
+            
     }
 
     private IndexedContainer getDistSetContainer() {

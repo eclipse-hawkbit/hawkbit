@@ -60,6 +60,8 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     private EntityFactory entityFactory;
     
     private VerticalLayout metadataLayout;
+    
+    private SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
    /**
      * softwareLayout Initialize the component.
@@ -179,12 +181,17 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     @Override
     protected void populateDetailsWidget() {
         populateDetails();
+        populateMetadataDetails();
     }
 
     @Override
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
+    
+    private void populateMetadataDetails(){
+        swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
+   }
     
     private VerticalLayout createMetadataLayout() {
         metadataLayout = getTabLayout();

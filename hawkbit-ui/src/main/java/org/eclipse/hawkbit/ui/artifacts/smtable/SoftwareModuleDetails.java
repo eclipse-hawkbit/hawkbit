@@ -61,6 +61,8 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     
     private VerticalLayout metadataLayout;
     
+    private SoftwareModuleMetadatadetailslayout swmMetadataTable;
+    
     /**
      * softwareLayout Initialize the component.
      */

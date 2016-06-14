@@ -692,20 +692,12 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         managementUIState.setNoDataAvailableDistribution(!available);
 
     }
-    
+       
     private void showMetadataDetails(Object itemId) {
         final DistributionSetIdName distIdName = (DistributionSetIdName) getContainerDataSource().getItem(itemId)
-                .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();        
-        DistributionSet ds = distributionSetManagement.findDistributionSetById(distIdName.getId());
-        if (ds.getMetadata().isEmpty()) {
-            List<DistributionSetMetadata> metadataList = new ArrayList<>();
-            for (int i = 1; i <= 30; i++) {
-                metadataList.add(entityFactory.generateDistributionSetMetadata(ds, "key-"+i, "value-"+i));
-            }
-            distributionSetManagement.createDistributionSetMetadata(metadataList);
-        }
-        
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
+                .getItemProperty(SPUILabelDefinitions.VAR_DIST_ID_NAME).getValue();
+        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(distIdName.getId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds, null));
     }
 
 }

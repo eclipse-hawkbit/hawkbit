@@ -57,8 +57,6 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     @Autowired
     private SpPermissionChecker permissionChecker;
     
-    protected SoftwareModuleMetadatadetailslayout swmMetadataTable;
-
     private T selectedBaseEntity;
 
     private Label caption;

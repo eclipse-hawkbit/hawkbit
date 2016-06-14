@@ -151,8 +151,13 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
     protected void populateDetailsWidget() {
         softwareModuleTable.populateModule(getSelectedBaseEntity());
         populateDetails(getSelectedBaseEntity());
+        populateMetadataDetails();
 
     }
+    
+    private void populateMetadataDetails(){
+        dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
+   }
 
     private void populateDetails(final DistributionSet ds) {
         if (ds != null) {
