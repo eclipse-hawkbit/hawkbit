@@ -26,11 +26,16 @@ public class DistributionSetTypeEvent {
 
     private final DistributionSetTypeEnum distributionSetTypeEnum;
 
+    private String distributionSetTypeName;
+
     /**
      * @param distributionSetTypeEnum
+     * @param distributionSetTypeName
      */
-    public DistributionSetTypeEvent(final DistributionSetTypeEnum distributionSetTypeEnum) {
+    public DistributionSetTypeEvent(final DistributionSetTypeEnum distributionSetTypeEnum,
+            final String distributionSetTypeName) {
         this.distributionSetTypeEnum = distributionSetTypeEnum;
+        this.distributionSetTypeName = distributionSetTypeName;
     }
 
     /**
@@ -41,6 +46,14 @@ public class DistributionSetTypeEvent {
             final DistributionSetType distributionSetType) {
         this.distributionSetTypeEnum = distributionSetTypeEnum;
         this.distributionSetType = distributionSetType;
+    }
+
+    public String getDistributionSetTypeName() {
+        return distributionSetTypeName;
+    }
+
+    public void setDistributionSetTypeName(final String distributionSetTypeName) {
+        this.distributionSetTypeName = distributionSetTypeName;
     }
 
     public DistributionSetType getDistributionSetType() {
