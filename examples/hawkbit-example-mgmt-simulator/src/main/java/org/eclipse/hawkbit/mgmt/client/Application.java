@@ -48,7 +48,7 @@ public class Application implements CommandLineRunner {
     private ClientConfigurationProperties configuration;
 
     @Autowired
-    private ConfigurableScenario configurableScenario;
+    private ConfigurableScenario configuredScenario;
 
     @Autowired
     private CreateStartedRolloutExample gettingStartedRolloutScenario;
@@ -63,9 +63,8 @@ public class Application implements CommandLineRunner {
             // run the create and start rollout example
             gettingStartedRolloutScenario.run();
         } else {
-            // run the getting started scenario which creates a setup of
-            // distribution set and software modules to be used
-            configurableScenario.run();
+            // run the configured scenario from properties
+            configuredScenario.run();
         }
     }
 

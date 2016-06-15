@@ -39,8 +39,13 @@ public class ClientConfigurationProperties {
 
     private final List<Scenario> scenarios = new ArrayList<>();
 
+    /**
+     * Simulation {@link Scenario}.
+     *
+     */
     public static class Scenario {
         private String tenant = "DEFAULT";
+        private boolean cleanRepository;
         private int targets = 100;
         private int distributionSets = 10;
         private int appModulesPerDistributionSet = 2;
@@ -50,12 +55,38 @@ public class ClientConfigurationProperties {
         private String targetName = "Device";
         private int artifactsPerSM = 1;
         private String targetAddress = "amqp:/simulator.replyTo";
+        private boolean runRollouts = true;
+        private int rolloutDeploymentGroups = 4;
 
         /**
          * Artifact size. Values can use the suffixed "MB" or "KB" to indicate a
          * Megabyte or Kilobyte size.
          */
         private String artifactSize = "1MB";
+
+        public boolean isCleanRepository() {
+            return cleanRepository;
+        }
+
+        public void setCleanRepository(final boolean cleanRepository) {
+            this.cleanRepository = cleanRepository;
+        }
+
+        public int getRolloutDeploymentGroups() {
+            return rolloutDeploymentGroups;
+        }
+
+        public void setRolloutDeploymentGroups(final int rolloutDeploymentGroups) {
+            this.rolloutDeploymentGroups = rolloutDeploymentGroups;
+        }
+
+        public boolean isRunRollouts() {
+            return runRollouts;
+        }
+
+        public void setRunRollouts(final boolean runRollouts) {
+            this.runRollouts = runRollouts;
+        }
 
         public String getTargetAddress() {
             return targetAddress;

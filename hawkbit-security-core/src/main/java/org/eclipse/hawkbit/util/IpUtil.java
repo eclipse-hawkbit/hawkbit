@@ -26,6 +26,7 @@ import com.google.common.net.HttpHeaders;
  */
 public final class IpUtil {
 
+    private static final String HIDDEN_IP = "***";
     private static final String SCHEME_SEPERATOR = "://";
     private static final String HTTP_SCHEME = "http";
     private static final String AMPQP_SCHEME = "amqp";
@@ -87,7 +88,7 @@ public final class IpUtil {
                 ip = request.getRemoteAddr();
             }
         } else {
-            ip = "***";
+            ip = HIDDEN_IP;
         }
 
         return createHttpUri(ip);
@@ -178,4 +179,17 @@ public final class IpUtil {
     public static boolean isAmqpUri(final URI uri) {
         return uri != null && AMPQP_SCHEME.equals(uri.getScheme());
     }
+
+    /**
+     * Check if the IP address of that {@link URI} is known, i.e. not an AQMP
+     * exchange in DMF case and not HIDDEN_IP in DDI case.
+     * 
+     * @param uri
+     *            the uri
+     * @return <code>true</code> if IP address is actually known by the server
+     */
+    public static boolean isIpAddresKnown(final URI uri) {
+        return uri != null && !(AMPQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
+    }
+
 }

@@ -8,9 +8,14 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 public abstract class SenderService extends MessageService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SenderService.class);
 
     /**
      * Constructor for sender service.
@@ -40,18 +47,25 @@ public abstract class SenderService extends MessageService {
     /**
      * Send a message if the message is not null.
      *
-     * @param adress
+     * @param address
      *            the exchange name
      * @param message
      *            the amqp message which will be send if its not null
      */
-    public void sendMessage(final String adress, final Message message) {
+    public void sendMessage(final String address, final Message message) {
         if (message == null) {
             return;
         }
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
-        rabbitTemplate.setExchange(adress);
-        rabbitTemplate.send(message);
+        final String correlationId = UUID.randomUUID().toString();
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, address, correlationId);
+        } else {
+            LOGGER.debug("Sending message to exchange {} with correlationId {}", address, correlationId);
+        }
+
+        rabbitTemplate.send(address, null, message, new CorrelationData(correlationId));
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+x * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,20 +10,25 @@ package org.eclipse.hawkbit.mgmt.client.scenarios;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties;
 import org.eclipse.hawkbit.mgmt.client.ClientConfigurationProperties.Scenario;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtRolloutClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
-import org.eclipse.hawkbit.mgmt.client.resource.MgmtSystemManagementClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.DistributionSetBuilder;
+import org.eclipse.hawkbit.mgmt.client.resource.builder.RolloutBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleAssigmentBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.mgmt.client.resource.builder.TargetBuilder;
 import org.eclipse.hawkbit.mgmt.client.scenarios.upload.ArtifactFile;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +58,7 @@ public class ConfigurableScenario {
     private MgmtTargetClientResource targetResource;
 
     @Autowired
-    private MgmtSystemManagementClientResource systemManagementResource;
+    private MgmtRolloutClientResource rolloutResource;
 
     @Autowired
     private ClientConfigurationProperties clientConfigurationProperties;
@@ -65,16 +70,93 @@ public class ConfigurableScenario {
 
         LOGGER.info("Running Configurable Scenario...");
 
-        clientConfigurationProperties.getScenarios().parallelStream().forEach(this::createScenario);
+        clientConfigurationProperties.getScenarios().forEach(this::createScenario);
     }
 
     private void createScenario(final Scenario scenario) {
-        systemManagementResource.deleteTenant(scenario.getTenant());
+        if (scenario.isCleanRepository()) {
+            cleanRepository();
+        }
+
         createTargets(scenario);
         createDistributionSets(scenario);
+
+        if (scenario.isRunRollouts()) {
+            runRollouts(scenario);
+        }
+    }
+
+    private void cleanRepository() {
+        LOGGER.info("Cleaning repository");
+        deleteTargets();
+        deleteRollouts();
+        deleteDistributionSets();
+        deleteSoftwareModules();
+        LOGGER.info("Cleaning repository -> Done");
+    }
+
+    private void deleteRollouts() {
+        // TODO: complete this as soon as rollouts can be deleted
+
+    }
+
+    private void deleteSoftwareModules() {
+        PagedList<MgmtSoftwareModule> modules;
+        do {
+            modules = softwareModuleResource.getSoftwareModules(0, 100, null, null).getBody();
+            modules.getContent().forEach(module -> softwareModuleResource.deleteSoftwareModule(module.getModuleId()));
+        } while (modules.getTotal() > 100);
+    }
+
+    private void deleteDistributionSets() {
+        PagedList<MgmtDistributionSet> distributionSets;
+        do {
+            distributionSets = distributionSetResource.getDistributionSets(0, 100, null, null).getBody();
+            distributionSets.getContent().forEach(set -> distributionSetResource.deleteDistributionSet(set.getDsId()));
+        } while (distributionSets.getTotal() > 100);
+    }
+
+    private void deleteTargets() {
+        PagedList<MgmtTarget> targets;
+        do {
+            targets = targetResource.getTargets(0, 100, null, null).getBody();
+            targets.getContent().forEach(target -> targetResource.deleteTarget(target.getControllerId()));
+        } while (targets.getTotal() > 100);
+    }
+
+    private void runRollouts(final Scenario scenario) {
+        distributionSetResource.getDistributionSets(0, scenario.getDistributionSets(), null, null).getBody()
+                .getContent().forEach(set -> runRollout(set, scenario));
+
+    }
+
+    private void runRollout(final MgmtDistributionSet set, final Scenario scenario) {
+        LOGGER.info("Run rollout for set {}", set.getDsId());
+        // create a Rollout
+        final MgmtRolloutResponseBody rolloutResponseBody = rolloutResource
+                .create(new RolloutBuilder().name("Rollout" + set.getName() + set.getVersion())
+                        .groupSize(scenario.getRolloutDeploymentGroups()).targetFilterQuery("name==*")
+                        .distributionSetId(set.getDsId()).successThreshold("80").errorThreshold("5").build())
+                .getBody();
+
+        // start the created Rollout
+        rolloutResource.start(rolloutResponseBody.getRolloutId(), true);
+
+        // wait until rollout is complete
+        do {
+            try {
+                TimeUnit.SECONDS.sleep(35);
+            } catch (final InterruptedException e) {
+                LOGGER.warn("Interrupted!");
+                Thread.currentThread().interrupt();
+            }
+        } while (targetResource.getTargets(0, 1, null, "updateStatus==IN_SYNC").getBody().getTotal() < scenario
+                .getTargets());
+        LOGGER.info("Run rollout for set {} -> Done", set.getDsId());
     }
 
     private void createDistributionSets(final Scenario scenario) {
+        LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
         final byte[] artifact = generateArtifact(scenario);
 
         distributionSetResource
@@ -87,6 +169,8 @@ public class ConfigurableScenario {
                     modules.forEach(module -> assign.id(module.getModuleId()));
                     distributionSetResource.assignSoftwareModules(dsSet.getDsId(), assign.build());
                 });
+
+        LOGGER.info("Creating {} distribution sets -> Done", scenario.getDistributionSets());
     }
 
     private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet,
@@ -110,8 +194,10 @@ public class ConfigurableScenario {
         return modules;
     }
 
-    private byte[] generateArtifact(final Scenario scenario) {
-        // create random object
+    private static byte[] generateArtifact(final Scenario scenario) {
+
+        // Exception squid:S2245 - not used for cryptographic function
+        @SuppressWarnings("squid:S2245")
         final Random random = new Random();
 
         // create byte array
@@ -124,14 +210,18 @@ public class ConfigurableScenario {
     }
 
     private void createTargets(final Scenario scenario) {
+        LOGGER.info("Creating {} targets", scenario.getTargets());
+
         for (int i = 0; i < scenario.getTargets() / 100; i++) {
             targetResource.createTargets(new TargetBuilder().controllerId(scenario.getTargetName())
                     .address(scenario.getTargetAddress()).buildAsList(i * 100,
-                            (i + 1) * 100 > scenario.getTargets() ? scenario.getTargets() - i * 100 : 100));
+                            (i + 1) * 100 > scenario.getTargets() ? (scenario.getTargets() - (i * 100)) : 100));
         }
+
+        LOGGER.info("Creating {} targets -> Done", scenario.getTargets());
     }
 
-    private int parseSize(final String s) {
+    private static int parseSize(final String s) {
         final String size = s.toUpperCase();
         if (size.endsWith("KB")) {
             return Integer.valueOf(size.substring(0, size.length() - 2)) * 1024;

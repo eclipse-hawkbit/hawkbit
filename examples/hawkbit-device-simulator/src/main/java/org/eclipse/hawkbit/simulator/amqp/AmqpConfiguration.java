@@ -12,6 +12,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -22,22 +24,22 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 /**
  * The spring AMQP configuration to use a AMQP for communication with SP update
  * server.
- *
- *
- *
  */
 @Configuration
 @EnableConfigurationProperties(AmqpProperties.class)
 public class AmqpConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
 
     @Autowired
     protected AmqpProperties amqpProperties;
@@ -45,19 +47,30 @@ public class AmqpConfiguration {
     @Autowired
     private ConnectionFactory connectionFactory;
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
     /**
-     * Create jackson message converter bean.
-     *
-     * @return the jackson message converter
+     * @return {@link RabbitTemplate} with automatic retry, published confirms
+     *         and {@link Jackson2JsonMessageConverter}.
      */
     @Bean
-    public MessageConverter jsonMessageConverter() {
-        final Jackson2JsonMessageConverter jackson2JsonMessageConverter = new Jackson2JsonMessageConverter();
-        rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter);
-        return jackson2JsonMessageConverter;
+    public RabbitTemplate rabbitTemplate() {
+        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+
+        final RetryTemplate retryTemplate = new RetryTemplate();
+        retryTemplate.setBackOffPolicy(new ExponentialBackOffPolicy());
+        rabbitTemplate.setRetryTemplate(retryTemplate);
+
+        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+            if (ack) {
+                LOGGER.debug("Message with correlation ID {} confirmed by broker.", correlationData.getId());
+            } else {
+                LOGGER.error("Broker is unable to handle message with correlation ID {} : {}", correlationData.getId(),
+                        cause);
+            }
+
+        });
+
+        return rabbitTemplate;
     }
 
     /**
@@ -138,8 +151,8 @@ public class AmqpConfiguration {
         final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         containerFactory.setDefaultRequeueRejected(false);
         containerFactory.setConnectionFactory(connectionFactory);
-        containerFactory.setConcurrentConsumers(20);
-        containerFactory.setMaxConcurrentConsumers(20);
+        containerFactory.setConcurrentConsumers(3);
+        containerFactory.setMaxConcurrentConsumers(10);
         containerFactory.setPrefetchCount(20);
         return containerFactory;
     }

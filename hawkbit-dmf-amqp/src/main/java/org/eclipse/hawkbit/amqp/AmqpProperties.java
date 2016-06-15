@@ -38,12 +38,25 @@ public class AmqpProperties {
     /**
      * Missing queue fatal.
      */
-    private boolean missingQueuesFatal = false;
+    private boolean missingQueuesFatal;
 
     /**
      * Requested heartbeat interval from broker in {@link TimeUnit#SECONDS}.
      */
     private int requestedHeartBeat = (int) TimeUnit.SECONDS.toSeconds(60);
+
+    /**
+     * Sets an upper limit to the number of consumers.
+     */
+    private int maxConcurrentConsumers = 10;
+
+    public int getMaxConcurrentConsumers() {
+        return maxConcurrentConsumers;
+    }
+
+    public void setMaxConcurrentConsumers(final int maxConcurrentConsumers) {
+        this.maxConcurrentConsumers = maxConcurrentConsumers;
+    }
 
     /**
      * Is missingQueuesFatal enabled
