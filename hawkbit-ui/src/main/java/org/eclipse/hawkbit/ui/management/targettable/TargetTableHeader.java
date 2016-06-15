@@ -398,7 +398,7 @@ public class TargetTableHeader extends AbstractTableHeader {
         getFilterDroppedInfo().setSizeFull();
         getFilterDroppedInfo().addComponent(filteredDistLabel);
         getFilterDroppedInfo().addComponent(filterLabelClose);
-        getFilterDroppedInfo().setExpandRatio(filteredDistLabel, 1.0f);
+        getFilterDroppedInfo().setExpandRatio(filteredDistLabel, 1.0F);
         eventbus.publish(this, TargetFilterEvent.FILTER_BY_DISTRIBUTION);
     }
 
