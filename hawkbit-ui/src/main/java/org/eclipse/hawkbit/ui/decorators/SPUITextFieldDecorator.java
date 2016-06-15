@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -27,8 +29,9 @@ public final class SPUITextFieldDecorator {
     }
 
     /**
-     * Decorate.
      * 
+     * @param caption
+     *            set the caption of the textfield
      * @param style
      *            set style
      * @param styleName
@@ -37,7 +40,7 @@ public final class SPUITextFieldDecorator {
      *            to set field as mandatory
      * @param data
      *            component data
-     * @param promt
+     * @param prompt
      *            prompt user for input
      * @param immediate
      *            as for display
@@ -45,9 +48,13 @@ public final class SPUITextFieldDecorator {
      *            maximum characters allowed
      * @return Text field as decorated
      */
-    public static TextField decorate(String style, String styleName, boolean required, String data, String promt,
-            boolean immediate, int maxLengthAllowed) {
+    public static TextField decorate(final String caption, final String style, final String styleName,
+            final boolean required, final String data, final String prompt, final boolean immediate,
+            final int maxLengthAllowed) {
         final TextField spUITxtFld = new TextField();
+        if (StringUtils.isNotEmpty(caption)) {
+            spUITxtFld.setCaption(caption);
+        }
         // Default settings
         spUITxtFld.setRequired(false);
         spUITxtFld.addStyleName(ValoTheme.TEXTFIELD_SMALL);
@@ -58,17 +65,17 @@ public final class SPUITextFieldDecorator {
             spUITxtFld.setImmediate(true);
         }
         // Add style
-        if (null != style) {
+        if (StringUtils.isNotEmpty(style)) {
             spUITxtFld.setStyleName(style);
         }
         // Add style Name
-        if (null != styleName) {
+        if (StringUtils.isNotEmpty(styleName)) {
             spUITxtFld.addStyleName(styleName);
         }
-        if (null != promt) {
-            spUITxtFld.setInputPrompt(promt);
+        if (StringUtils.isNotEmpty(prompt)) {
+            spUITxtFld.setInputPrompt(prompt);
         }
-        if (null != data) {
+        if (StringUtils.isNotEmpty(data)) {
             spUITxtFld.setData(data);
         }
         if (maxLengthAllowed > 0) {

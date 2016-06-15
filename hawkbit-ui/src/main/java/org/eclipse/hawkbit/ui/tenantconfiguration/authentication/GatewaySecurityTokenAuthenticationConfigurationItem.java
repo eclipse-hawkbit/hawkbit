@@ -74,8 +74,8 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
 
         detailLayout = new VerticalLayout();
         detailLayout.setImmediate(true);
-        gatewayTokenNameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, false, null, "",
-                true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        gatewayTokenNameTextField = SPUIComponentProvider.getTextField(null, "", ValoTheme.TEXTFIELD_TINY, false, null,
+                "", true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         gatewayTokenNameTextField.setImmediate(true);
         // hide text field until we support multiple gateway tokens for a tenan
         gatewayTokenNameTextField.setVisible(false);
@@ -195,4 +195,5 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Abstrac
         gatewayTokenNameTextField.setValue(getSecurityTokenName());
         gatewayTokenkeyLabel.setValue(getSecurityTokenKey());
     }
+
 }

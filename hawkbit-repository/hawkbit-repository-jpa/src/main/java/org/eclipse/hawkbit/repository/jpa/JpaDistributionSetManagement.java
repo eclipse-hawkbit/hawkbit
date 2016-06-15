@@ -171,7 +171,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void deleteDistributionSet(final Long... distributionSetIDs) {
         final List<Long> toHardDelete = new ArrayList<>();
 
-        final List<Long> assigned = distributionSetRepository.findAssignedDistributionSetsById(distributionSetIDs);
+        final List<Long> assigned = distributionSetRepository
+                .findAssignedToTargetDistributionSetsById(distributionSetIDs);
+        assigned.addAll(distributionSetRepository.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
 
         // soft delete assigned
         if (!assigned.isEmpty()) {

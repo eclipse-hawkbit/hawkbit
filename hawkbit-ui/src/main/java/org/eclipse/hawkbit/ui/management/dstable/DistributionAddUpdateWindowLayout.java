@@ -22,10 +22,10 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
+import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
-import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -47,21 +47,17 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -70,7 +66,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @ViewScope
-public class DistributionAddUpdateWindowLayout extends VerticalLayout {
+public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private static final long serialVersionUID = -5602182034230568435L;
 
@@ -94,8 +90,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     @Autowired
     private transient EntityFactory entityFactory;
 
-    private Button saveDistributionBtn;
-    private Button discardDistributionBtn;
     private TextField distNameTextField;
     private TextField distVersionTextField;
     private Label madatoryLabel;
@@ -104,7 +98,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private ComboBox distsetTypeNameComboBox;
     private boolean editDistribution = Boolean.FALSE;
     private Long editDistId;
-    private Window addDistributionWindow;
+    private CommonDialogWindow addDistributionWindow;
     private String originalDistName;
     private String originalDistVersion;
     private String originalDistDescription;
@@ -117,6 +111,8 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     private TextChangeListener distVersionTextFieldListener;
     private ValueChangeListener distsetTypeNameComboBoxListener;
 
+    private FormLayout formLayout;
+
     /**
      * Initialize Distribution Add and Edit Window.
      */
@@ -127,53 +123,51 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void buildLayout() {
-        /* action button layout ( save & discard ) */
-        final HorizontalLayout buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
-        buttonsLayout.setStyleName("dist-buttons-horz-layout");
-        buttonsLayout.addComponents(saveDistributionBtn, discardDistributionBtn);
-        buttonsLayout.setComponentAlignment(saveDistributionBtn, Alignment.BOTTOM_LEFT);
-        buttonsLayout.setComponentAlignment(discardDistributionBtn, Alignment.BOTTOM_RIGHT);
-        buttonsLayout.addStyleName("window-style");
 
         /*
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
          */
-        setSpacing(Boolean.TRUE);
         addStyleName("lay-color");
         setSizeUndefined();
-        addComponents(madatoryLabel, distsetTypeNameComboBox, distNameTextField, distVersionTextField, descTextArea,
-                reqMigStepCheckbox);
 
-        addComponent(buttonsLayout);
-        setComponentAlignment(madatoryLabel, Alignment.MIDDLE_LEFT);
+        formLayout = new FormLayout();
+        formLayout.addComponent(madatoryLabel);
+        formLayout.addComponent(distsetTypeNameComboBox);
+        formLayout.addComponent(distNameTextField);
+        formLayout.addComponent(distVersionTextField);
+        formLayout.addComponent(descTextArea);
+        formLayout.addComponent(reqMigStepCheckbox);
+
+        setCompositionRoot(formLayout);
+
         distNameTextField.focus();
-
     }
 
     /**
      * Create required UI components.
      */
     private void createRequiredComponents() {
-        distNameTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        distNameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
+                true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
         distNameTextField.setNullRepresentation("");
 
-        distVersionTextField = SPUIComponentProvider.getTextField("", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("textfield.version"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        distVersionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
+                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
         distVersionTextField.setNullRepresentation("");
 
-        distsetTypeNameComboBox = SPUIComponentProvider.getComboBox("", "", null, "", false, "",
-                i18n.get("label.combobox.type"));
+        distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
+                false, "", i18n.get("label.combobox.type"));
         distsetTypeNameComboBox.setImmediate(true);
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(SPUIComponentIdProvider.DIST_ADD_DISTSETTYPE);
 
-        descTextArea = SPUIComponentProvider.getTextArea("text-area-style", ValoTheme.TEXTAREA_TINY, false, null,
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
+                ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.DIST_ADD_DESC);
         descTextArea.setNullRepresentation("");
 
@@ -185,16 +179,6 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
-
-        /* save or update button */
-        saveDistributionBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.DIST_ADD_SAVE, "", "", "", true,
-                FontAwesome.SAVE, SPUIButtonStyleSmallNoBorder.class);
-        saveDistributionBtn.addClickListener(event -> saveDistribution());
-
-        /* close button */
-        discardDistributionBtn = SPUIComponentProvider.getButton(SPUIComponentIdProvider.DIST_ADD_DISCARD, "", "", "",
-                true, FontAwesome.TIMES, SPUIButtonStyleSmallNoBorder.class);
-        discardDistributionBtn.addClickListener(event -> discardDistribution());
     }
 
     /**
@@ -217,7 +201,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void enableSaveButton() {
-        saveDistributionBtn.setEnabled(true);
+        addDistributionWindow.setSaveButtonEnabled(true);
     }
 
     private DistributionSetType getDefaultDistributionSetType() {
@@ -226,7 +210,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     }
 
     private void disableSaveButton() {
-        saveDistributionBtn.setEnabled(false);
+        addDistributionWindow.setSaveButtonEnabled(false);
     }
 
     private void saveDistribution() {
@@ -414,7 +398,9 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         distsetTypeNameComboBox.removeStyleName(SPUIStyleDefinitions.SP_COMBOFIELD_ERROR);
         descTextArea.clear();
         reqMigStepCheckbox.clear();
-        saveDistributionBtn.setEnabled(true);
+        if (addDistributionWindow != null) {
+            addDistributionWindow.setSaveButtonEnabled(true);
+        }
         removeListeners();
         changedComponents.clear();
     }
@@ -496,7 +482,7 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     public void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
         editDistribution = Boolean.TRUE;
-        saveDistributionBtn.setEnabled(false);
+        addDistributionWindow.setSaveButtonEnabled(false);
         final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
         if (distSet != null) {
             distNameTextField.setValue(distSet.getName());
@@ -518,13 +504,15 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
         }
     }
 
-    public Window getWindow() {
+    public CommonDialogWindow getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         populateRequiredComponents();
         resetComponents();
         addDistributionWindow = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW);
-        addDistributionWindow.setContent(this);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
+                null);
+        addDistributionWindow.getButtonsLayout().removeStyleName("actionButtonsMargin");
+
         return addDistributionWindow;
     }
 
@@ -544,4 +532,5 @@ public class DistributionAddUpdateWindowLayout extends VerticalLayout {
     public void setOriginalDistSetTYpe(final String originalDistSetType) {
         this.originalDistSetType = originalDistSetType;
     }
+
 }

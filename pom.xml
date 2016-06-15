@@ -68,6 +68,8 @@
       <jackson.version>2.5.5</jackson.version>
       <hibernate-validator.version>5.2.4.Final</hibernate-validator.version>
       <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
+      <spring-amqp.version>1.6.0.RELEASE</spring-amqp.version>
+      <spring-hateoas.version>0.18.0.RELEASE</spring-hateoas.version>
       <!--  Support for MongoDB 3 -->
       <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
       <mongodb.version>3.2.2</mongodb.version>

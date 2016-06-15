@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -29,6 +31,8 @@ public final class SPUIComboBoxDecorator {
     /**
      * Decorate.
      * 
+     * @param caption
+     *            caption of the combobox
      * @param height
      *            as H
      * @param width
@@ -41,39 +45,42 @@ public final class SPUIComboBoxDecorator {
      *            as T|F
      * @param data
      *            as data
-     * @param promt
+     * @param prompt
      *            as promt
      * @return ComboBox as comp
      */
-    public static ComboBox decorate(final String height, final String width, final String style, final String styleName,
-            final boolean required, final String data, final String promt) {
+    public static ComboBox decorate(final String caption, final String height, final String width, final String style,
+            final String styleName, final boolean required, final String data, final String prompt) {
         final ComboBox spUICombo = new ComboBox();
         // Default settings
         spUICombo.setRequired(required);
         spUICombo.addStyleName(ValoTheme.COMBOBOX_TINY);
 
+        if (StringUtils.isNotEmpty(caption)) {
+            spUICombo.setCaption(caption);
+        }
         // Add style
-        if (null != style) {
+        if (StringUtils.isNotEmpty(style)) {
             spUICombo.setStyleName(style);
         }
         // Add style Name
-        if (null != styleName) {
+        if (StringUtils.isNotEmpty(styleName)) {
             spUICombo.addStyleName(styleName);
         }
         // Add height
-        if (null != height) {
+        if (StringUtils.isNotEmpty(height)) {
             spUICombo.setHeight(height);
         }
         // AddWidth
-        if (null != width) {
+        if (StringUtils.isNotEmpty(width)) {
             spUICombo.setWidth(width);
         }
-        // Set promt
-        if (null != promt) {
-            spUICombo.setInputPrompt(promt);
+        // Set prompt
+        if (StringUtils.isNotEmpty(prompt)) {
+            spUICombo.setInputPrompt(prompt);
         }
         // Set Data
-        if (null != data) {
+        if (StringUtils.isNotEmpty(data)) {
             spUICombo.setData(data);
         }
 
