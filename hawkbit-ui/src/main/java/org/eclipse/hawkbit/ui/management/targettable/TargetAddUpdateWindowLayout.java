@@ -86,6 +86,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
      * Initialize the Add Update Window Component for Target.
      */
     public void init() {
+        
+        setSizeUndefined();
         /* create components */
         createRequiredComponents();
         /* display components in layout */
