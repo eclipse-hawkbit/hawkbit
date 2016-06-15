@@ -195,7 +195,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
          * (controller Id, name & description) and action buttons layout
          */
         addStyleName("lay-color");
-        setSizeUndefined();
 
         final FormLayout formLayout = new FormLayout();
         formLayout.addComponent(mandatoryLabel);
