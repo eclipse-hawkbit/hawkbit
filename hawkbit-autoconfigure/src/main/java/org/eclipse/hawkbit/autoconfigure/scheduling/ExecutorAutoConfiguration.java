@@ -61,13 +61,11 @@ public class ExecutorAutoConfiguration {
     public ThreadPoolExecutor threadPoolExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
                 asyncConfigurerProperties.getQueuesize());
-        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
+        return new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
                 asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
                 TimeUnit.MILLISECONDS, blockingQueue,
                 new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build(),
                 new PoolSizeExceededPolicy());
-
-        return threadPoolExecutor;
     }
 
     private static class PoolSizeExceededPolicy extends CallerRunsPolicy {
