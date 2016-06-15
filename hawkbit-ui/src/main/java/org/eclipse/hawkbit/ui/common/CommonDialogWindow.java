@@ -14,8 +14,11 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
+import org.eclipse.hawkbit.ui.layouts.AbstractCreateUpdateTagLayout;
+import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -224,9 +227,18 @@ public class CommonDialogWindow extends Window implements Serializable {
         if (existsMandatoryFieldsInWindowContent()) {
             // final Label madatoryLabel = new
             // Label(i18n.get("label.mandatory.field"));
-            final Label madatoryLabel = new Label("* Mandatory Field");
-            madatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
-            mainLayout.addComponent(madatoryLabel);
+            final Label mandatoryLabel = new Label("* Mandatory Field");
+            mandatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
+
+            if (content instanceof TargetAddUpdateWindowLayout) {
+                ((TargetAddUpdateWindowLayout) content).getFormLayout().addComponent(mandatoryLabel);
+            } else if (content instanceof SoftwareModuleAddUpdateWindow) {
+                ((SoftwareModuleAddUpdateWindow) content).getFormLayout().addComponent(mandatoryLabel);
+            } else if (content instanceof AbstractCreateUpdateTagLayout) {
+                ((AbstractCreateUpdateTagLayout) content).getMainLayout().addComponent(mandatoryLabel);
+            }
+
+            mainLayout.addComponent(mandatoryLabel);
         }
     }
 

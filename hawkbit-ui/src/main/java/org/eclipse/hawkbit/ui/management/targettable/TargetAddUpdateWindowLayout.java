@@ -334,4 +334,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         window.addStyleName("target-update-window");
     }
 
+    public FormLayout getFormLayout() {
+        return formLayout;
+    }
+
 }

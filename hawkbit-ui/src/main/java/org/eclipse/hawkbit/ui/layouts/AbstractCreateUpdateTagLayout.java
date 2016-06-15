@@ -690,4 +690,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         this.tagDescOriginal = tagDescOriginal;
     }
 
+    public GridLayout getMainLayout() {
+        return mainLayout;
+    }
+
 }

@@ -92,6 +92,8 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
     private Long baseSwModuleId;
 
+    private FormLayout formLayout;
+
     /**
      * Create window for new software module.
      * 
@@ -207,7 +209,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
          */
         addStyleName("lay-color");
 
-        final FormLayout formLayout = new FormLayout();
+        formLayout = new FormLayout();
         formLayout.setCaption(null);
         formLayout.addComponent(typeComboBox);
         formLayout.addComponent(nameTextField);
@@ -367,6 +369,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
     private boolean hasVendorChanged(final TextChangeEvent event) {
         return !(event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue));
+    }
+
+    public FormLayout getFormLayout() {
+        return formLayout;
     }
 
 }
