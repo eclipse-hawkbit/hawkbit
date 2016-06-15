@@ -203,83 +203,154 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new MultiTenantJpaTransactionManager();
     }
 
+    /**
+     * {@link JpaSystemManagement} bean.
+     * 
+     * @return a new {@link SystemManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public SystemManagement systemManagement() {
         return new JpaSystemManagement();
     }
 
+    /**
+     * {@link JpaReportManagement} bean.
+     * 
+     * @return a new {@link ReportManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public ReportManagement reportManagement() {
         return new JpaReportManagement();
     }
 
+    /**
+     * {@link JpaDistributionSetManagement} bean.
+     * 
+     * @return a new {@link DistributionSetManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public DistributionSetManagement distributionSetManagement() {
         return new JpaDistributionSetManagement();
     }
 
+    /**
+     * {@link JpaTenantStatsManagement} bean.
+     * 
+     * @return a new {@link TenantStatsManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public TenantStatsManagement tenantStatsManagement() {
         return new JpaTenantStatsManagement();
     }
 
+    /**
+     * {@link JpaTenantConfigurationManagement} bean.
+     * 
+     * @return a new {@link TenantConfigurationManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public TenantConfigurationManagement tenantConfigurationManagement() {
         return new JpaTenantConfigurationManagement();
     }
 
+    /**
+     * {@link JpaTenantConfigurationManagement} bean.
+     * 
+     * @return a new {@link TenantConfigurationManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public TargetManagement targetManagement() {
         return new JpaTargetManagement();
     }
 
+    /**
+     * {@link JpaTargetFilterQueryManagement} bean.
+     * 
+     * @return a new {@link TargetFilterQueryManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public TargetFilterQueryManagement targetFilterQueryManagement() {
         return new JpaTargetFilterQueryManagement();
     }
 
+    /**
+     * {@link JpaTagManagement} bean.
+     * 
+     * @return a new {@link TagManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public TagManagement tagManagement() {
         return new JpaTagManagement();
     }
 
+    /**
+     * {@link JpaSoftwareManagement} bean.
+     * 
+     * @return a new {@link SoftwareManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public SoftwareManagement softwareManagement() {
         return new JpaSoftwareManagement();
     }
 
+    /**
+     * {@link JpaRolloutManagement} bean.
+     * 
+     * @return a new {@link RolloutManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public RolloutManagement rolloutManagement() {
         return new JpaRolloutManagement();
     }
 
+    /**
+     * {@link JpaRolloutGroupManagement} bean.
+     * 
+     * @return a new {@link RolloutGroupManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public RolloutGroupManagement rolloutGroupManagement() {
         return new JpaRolloutGroupManagement();
     }
 
+    /**
+     * {@link JpaDeploymentManagement} bean.
+     * 
+     * @return a new {@link DeploymentManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public DeploymentManagement deploymentManagement() {
         return new JpaDeploymentManagement();
     }
 
+    /**
+     * {@link JpaControllerManagement} bean.
+     * 
+     * @return a new {@link ControllerManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     public ControllerManagement controllerManagement() {
         return new JpaControllerManagement();
     }
+
+    /**
+     * {@link JpaArtifactManagement} bean.
+     * 
+     * @return a new {@link ArtifactManagement}
+     */
 
     @Bean
     @ConditionalOnMissingBean
@@ -287,6 +358,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new JpaArtifactManagement();
     }
 
+    /**
+     * {@link JpaEntityFactory} bean.
+     * 
+     * @return a new {@link EntityFactory}
+     */
     @Bean
     @ConditionalOnMissingBean
     public EntityFactory entityFactory() {

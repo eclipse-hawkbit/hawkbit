@@ -25,7 +25,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (isAuthentifactionInvalid(authentication)) {
+        if (isAuthenticationInvalid(authentication)) {
             return null;
         }
 
@@ -39,7 +39,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
         return authentication.getPrincipal().toString();
     }
 
-    private static boolean isAuthentifactionInvalid(final Authentication authentication) {
+    private static boolean isAuthenticationInvalid(final Authentication authentication) {
         return authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null;
     }
 }
