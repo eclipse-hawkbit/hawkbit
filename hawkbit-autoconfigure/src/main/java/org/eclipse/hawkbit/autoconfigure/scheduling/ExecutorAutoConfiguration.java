@@ -13,6 +13,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -63,12 +64,20 @@ public class ExecutorAutoConfiguration {
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
                 asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
                 TimeUnit.MILLISECONDS, blockingQueue,
-                new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build());
-        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> LOGGER.warn(
-                "Reject runnable for centralExecutorService, reached limit of queue size {}",
-                executor.getQueue().size()));
+                new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build(),
+                new PoolSizeExceededPolicy());
 
         return threadPoolExecutor;
+    }
+
+    private static class PoolSizeExceededPolicy extends CallerRunsPolicy {
+        @Override
+        public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
+            LOGGER.warn(
+                    "Caller has to run on its own instead of centralExecutorService, reached limit of queue size {}",
+                    executor.getQueue().size());
+            super.rejectedExecution(r, executor);
+        }
     }
 
     /**
