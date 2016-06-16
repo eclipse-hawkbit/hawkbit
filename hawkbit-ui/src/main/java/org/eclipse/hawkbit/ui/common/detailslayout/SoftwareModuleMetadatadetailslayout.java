@@ -139,7 +139,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
                 "View" + metadataKey +" Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewLink.setData(metadataKey);
         if(permissionChecker.hasUpdateDistributionPermission()) {
-            viewLink.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
+            viewLink.addStyleName(ValoTheme.BUTTON_TINY+" "+ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link");
             viewLink.addClickListener(event -> showMetadataDetails(selectedSWModuleId,metadataKey));
         }
         return viewLink;

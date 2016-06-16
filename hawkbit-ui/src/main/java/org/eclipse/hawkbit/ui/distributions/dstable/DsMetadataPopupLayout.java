@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.common.DistributionSetIdName;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
+import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.spring.annotation.SpringComponent;
@@ -39,6 +40,9 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Autowired
     private ManageDistUIState manageDistUIState;
     
+    @Autowired
+    private ManagementUIState managementUIState;
+    
     
     @Autowired
     private EntityFactory entityFactory;
@@ -53,14 +57,18 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         DistributionSetMetadata dsMetaData = distributionSetManagement
                 .createDistributionSetMetadata(entityFactory.generateDistributionSetMetadata(entity, key, value));
         setSelectedEntity(dsMetaData.getDistributionSet());
-        DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
+        DistributionSetIdName lastselectedDistDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
                 manageDistUIState.getLastSelectedDistribution().get() : null;
-        if(lastselectedDS!=null){           
-            if((lastselectedDS.getName().concat(lastselectedDS.getVersion())).equals((dsMetaData.getDistributionSet().getName().
-                                            concat(dsMetaData.getDistributionSet().getVersion())))){
-                eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DISTRIBUTIONSET_METADATA,dsMetaData.getKey())); 
+        DistributionSetIdName lastselectedManageDS =  managementUIState.getLastSelectedDistribution().isPresent() ? 
+                managementUIState.getLastSelectedDistribution().get() : null;        
+        if((lastselectedDistDS!=null && (lastselectedDistDS.getName().concat(lastselectedDistDS.getVersion())).equals((dsMetaData.getDistributionSet().getName().
+                                            concat(dsMetaData.getDistributionSet().getVersion()))))){
+                eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DIST_DISTRIBUTIONSET_METADATA,dsMetaData.getKey())); 
+            }else if((lastselectedManageDS!=null && (lastselectedManageDS.getName().concat(lastselectedManageDS.getVersion())).equals((dsMetaData.getDistributionSet().getName().
+                             concat(dsMetaData.getDistributionSet().getVersion()))))){                
+                   eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_MANAGE_DISTRIBUTIONSET_METADATA,dsMetaData.getKey()));
             }
-        }   
+           
         return dsMetaData;
     }
 
@@ -80,14 +88,16 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Override
     protected void deleteMetadata(String key) {
         distributionSetManagement.deleteDistributionSetMetadata(getSelectedEntity(), key);
-        DistributionSetIdName lastselectedDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
+        DistributionSetIdName lastselectedDistDS =  manageDistUIState.getLastSelectedDistribution().isPresent() ? 
                 manageDistUIState.getLastSelectedDistribution().get() : null;
-        if(lastselectedDS!=null){       
-            DistributionSet distSet = distributionSetManagement.findDistributionSetById(lastselectedDS.getId());
-            if((distSet.getName().concat(distSet.getVersion())).equals((getSelectedEntity().getName().
-                                            concat(getSelectedEntity().getVersion())))){
-                eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DISTRIBUTIONSET_METADATA,key)); 
-            }    
-        }   
-    }
+        DistributionSetIdName lastselectedManageDS =  managementUIState.getLastSelectedDistribution().isPresent() ? 
+                managementUIState.getLastSelectedDistribution().get() : null;        
+                
+        if(lastselectedDistDS!=null && lastselectedDistDS.getId().equals(getSelectedEntity().getId())){       
+              eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DIST_DISTRIBUTIONSET_METADATA,key)); 
+         }else if(lastselectedManageDS!=null && lastselectedManageDS.getId().equals(getSelectedEntity().getId())){
+                   eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_MANAGE_DISTRIBUTIONSET_METADATA,key));             
+         }
+    }   
+    
 }

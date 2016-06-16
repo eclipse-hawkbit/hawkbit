@@ -190,6 +190,10 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
     protected void publishEntityAfterValueChange(final DistributionSet distributionSet) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, distributionSet));
         eventBus.publish(this, DistributionsUIEvent.ORDER_BY_DISTRIBUTION);
+        if(distributionSet!=null){
+            manageDistUIState.setLastSelectedEntity(new DistributionSetIdName(distributionSet.getId(), 
+                    distributionSet.getName(),distributionSet.getVersion()));
+        }    
     }
 
     @Override

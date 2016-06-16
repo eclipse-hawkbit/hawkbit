@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent.MetadataUIEvent;
@@ -37,6 +38,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     private transient SoftwareManagement softwareManagement;
     
     @Autowired
+    private ArtifactUploadState artifactUploadState;
+    
+    @Autowired
     private EntityFactory entityFactory;
     
     @Autowired
@@ -51,12 +55,16 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     protected SoftwareModuleMetadata createMetadata(SoftwareModule entity, String key, String value) {
         SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(entity, key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
-      final Long swModuleId =  manageDistUIState.getSelectedBaseSwModuleId().isPresent() ? manageDistUIState.getSelectedBaseSwModuleId().get() : null;
-      SoftwareModule swModule = softwareManagement.findSoftwareModuleById(swModuleId);
-      if((swModule.getName().concat(swModule.getVersion())).equals((swMetadata.getSoftwareModule().getName().
-                                      concat(swMetadata.getSoftwareModule().getVersion())))){
-           eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWAREMODULE_METADATA,swMetadata.getKey()));
-      }  
+      final Long selectedDistSWModuleId =  manageDistUIState.getSelectedBaseSwModuleId().isPresent() ? 
+               manageDistUIState.getSelectedBaseSwModuleId().get() : null;
+      final SoftwareModule selectedUploadSWModule= artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ?
+              artifactUploadState.getSelectedBaseSoftwareModule().get() : null;
+      if(selectedDistSWModuleId!=null && selectedDistSWModuleId.equals(swMetadata.getSoftwareModule().getId())){
+           eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DIST_SOFTWAREMODULE_METADATA,swMetadata.getKey()));
+      }else if(selectedUploadSWModule!=null && (selectedUploadSWModule.getName().concat(selectedUploadSWModule.getVersion()).
+                                 equals(entity.getName().concat(entity.getVersion())))){
+          eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_UPLOAD_SOFTWAREMODULE_METADATA,swMetadata.getKey()));
+      }
         return swMetadata;
     }
 
@@ -76,12 +84,16 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     @Override
     protected void deleteMetadata(String key) {
         softwareManagement.deleteSoftwareModuleMetadata(getSelectedEntity(), key);
-        final Long swModuleId =  manageDistUIState.getSelectedBaseSwModuleId().isPresent() ? manageDistUIState.getSelectedBaseSwModuleId().get() : null;
-        SoftwareModule swModule = softwareManagement.findSoftwareModuleById(swModuleId);
-        if((swModule.getName().concat(swModule.getVersion())).equals((getSelectedEntity().getName().
-                                        concat(getSelectedEntity().getVersion())))){
-             eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWAREMODULE_METADATA,key));
-        }  
+        final Long selectedDistSWModuleId =  manageDistUIState.getSelectedBaseSwModuleId().isPresent() ?
+                manageDistUIState.getSelectedBaseSwModuleId().get() : null;
+        final SoftwareModule selectedUploadSWModule= artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ?
+                        artifactUploadState.getSelectedBaseSoftwareModule().get() : null;          
+        if(selectedDistSWModuleId!=null && selectedDistSWModuleId.equals(getSelectedEntity().getId())){        
+             eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DIST_SOFTWAREMODULE_METADATA,key));
+        }else if(selectedUploadSWModule!=null && (selectedUploadSWModule.getName().concat(selectedUploadSWModule.getVersion()).
+                equals(getSelectedEntity().getName().concat(getSelectedEntity().getVersion())))){
+            eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_UPLOAD_SOFTWAREMODULE_METADATA,key));
+        }
     }
 
 }

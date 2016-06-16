@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -72,6 +73,19 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
         swmMetadataTable.init(getI18n(), getPermissionChecker(),softwareManagement,swMetadataPopupLayout,entityFactory);
         super.init();
     }
+    
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final MetadataEvent event) {
+        UI.getCurrent().access(() -> {
+
+            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_UPLOAD_SOFTWAREMODULE_METADATA){
+                swmMetadataTable.createMetadata(event.getMetadataKey());
+            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_UPLOAD_SOFTWAREMODULE_METADATA){                                         
+                swmMetadataTable.deleteMetadata(event.getMetadataKey());
+            }
+        });
+    }
+    
     
     @Override
     protected String getEditButtonId() {

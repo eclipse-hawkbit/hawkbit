@@ -78,9 +78,9 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     void onEvent(final MetadataEvent event) {
         UI.getCurrent().access(() -> {
 
-            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWAREMODULE_METADATA){
+            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DIST_SOFTWAREMODULE_METADATA){
                 swmMetadataTable.createMetadata(event.getMetadataKey());
-            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWAREMODULE_METADATA){                                         
+            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DIST_SOFTWAREMODULE_METADATA){                                         
                 swmMetadataTable.deleteMetadata(event.getMetadataKey());
             }
         });
@@ -111,7 +111,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
         detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
-    }
+     }
 
     @Override
     protected String getDefaultCaption() {

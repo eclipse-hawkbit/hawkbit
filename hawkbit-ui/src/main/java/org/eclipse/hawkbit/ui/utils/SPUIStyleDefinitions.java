@@ -136,6 +136,11 @@ public final class SPUIStyleDefinitions {
      * Artifact Details icon in Distribution View.
      */
     public static final String ARTIFACT_DTLS_ICON = "swm-artifact-dtls-icon";
+    
+   /**
+    * Distribution metadata icon style.
+    */
+   public static final String DS_METADATA_ICON = "ds-metadata-icon";
 
     /**
      * Target table style.

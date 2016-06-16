@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
+import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableFilterEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
@@ -91,7 +92,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
 
     @Autowired
     private ManagementViewAcceptCriteria managementViewAcceptCriteria;
-
+  
     @Autowired
     private transient TargetManagement targetService;
     
@@ -255,6 +256,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
                 SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
         return manageMetadataBtn;
     }
@@ -281,6 +283,10 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     @Override
     protected void publishEntityAfterValueChange(final DistributionSet selectedLastEntity) {
         eventBus.publish(this, new DistributionTableEvent(BaseEntityEventType.SELECTED_ENTITY, selectedLastEntity));
+        if(selectedLastEntity!=null){
+            managementUIState.setLastSelectedDistribution(new DistributionSetIdName(selectedLastEntity.getId(), 
+                    selectedLastEntity.getName(),selectedLastEntity.getVersion()));
+        }
     }
 
     @Override
@@ -299,7 +305,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
         if (isMaximized()) {
             return columnList;
         }
-        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.1F));
+        columnList.add(new TableColumn(SPUILabelDefinitions.PIN_COLUMN, StringUtils.EMPTY, 0.2F));
         return columnList;
     }
 

@@ -109,9 +109,9 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     void onEvent(final MetadataEvent event) {
         UI.getCurrent().access(() -> {
 
-            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTIONSET_METADATA){
+            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DIST_DISTRIBUTIONSET_METADATA){
                 dsMetadataTable.createMetadata(event.getMetadataKey());
-            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTIONSET_METADATA){                                         
+            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DIST_DISTRIBUTIONSET_METADATA){                                         
                 dsMetadataTable.deleteMetadata(event.getMetadataKey());
             }
         });

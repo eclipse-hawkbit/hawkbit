@@ -144,7 +144,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
         final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
                 "View " +metadataKey+ "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewIcon.setData(metadataKey);
-        viewIcon.addStyleName(ValoTheme.LINK_SMALL + " " + "on-focus-no-border link");
+        viewIcon.addStyleName(ValoTheme.BUTTON_TINY+" "+ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link");
         viewIcon.addClickListener(event -> showMetadataDetails(selectedDistSetId,metadataKey));
         return viewIcon;
     }
