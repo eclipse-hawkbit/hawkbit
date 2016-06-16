@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -34,7 +35,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Test filter software module test type by name")
     public void testFilterByParameterName() {
-        assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==Firmware", 1);
+        assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==" + Constants.SMT_DEFAULT_OS_NAME, 1);
     }
 
     @Test
