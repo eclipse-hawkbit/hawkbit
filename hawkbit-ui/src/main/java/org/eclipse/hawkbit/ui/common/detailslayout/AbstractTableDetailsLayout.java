@@ -56,7 +56,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     @Autowired
     private SpPermissionChecker permissionChecker;
-    
+
     private T selectedBaseEntity;
 
     private Label caption;
@@ -72,9 +72,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private VerticalLayout logLayout;
 
     private VerticalLayout attributesLayout;
-      
-    
-   /**
+
+    /**
      * Initialize components.
      */
     @PostConstruct

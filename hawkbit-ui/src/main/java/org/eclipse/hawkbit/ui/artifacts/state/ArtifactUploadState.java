@@ -111,8 +111,7 @@ public class ArtifactUploadState implements ManagmentEntityState<Long>, Serializ
         return statusPopupMinimized;
     }
 
-
-	/**
+    /**
      * Set software.
      *
      * @return

@@ -552,4 +552,3 @@ public class DdiArtifactDownloadTest extends AbstractRestIntegrationTestWithMong
         downLoadProgress++;
     }
 }
-

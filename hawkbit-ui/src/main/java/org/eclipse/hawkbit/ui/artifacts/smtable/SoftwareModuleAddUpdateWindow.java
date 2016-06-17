@@ -213,7 +213,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         nameTextField.focus();
     }
 
-   private void addDescriptionTextChangeListener() {
+    private void addDescriptionTextChangeListener() {
         descTextArea.addTextChangeListener(event -> window.setSaveButtonEnabled(hasDescriptionChanged(event)));
     }
 
@@ -334,7 +334,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
             addNewBaseSoftware();
         }
     }
-
 
     private boolean hasDescriptionChanged(final TextChangeEvent event) {
         return !(event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue));

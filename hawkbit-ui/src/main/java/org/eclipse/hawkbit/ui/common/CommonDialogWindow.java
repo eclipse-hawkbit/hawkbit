@@ -11,11 +11,9 @@ package org.eclipse.hawkbit.ui.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleBorderWithIcon;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -55,9 +53,6 @@ public class CommonDialogWindow extends Window {
     private HorizontalLayout buttonsLayout;
 
     protected ValueChangeListener buttonEnableListener;
-
-    @Autowired
-    private transient UiProperties uiProperties;
 
     private final ClickListener saveButtonClickListener;
 
