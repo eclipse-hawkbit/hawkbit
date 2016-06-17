@@ -96,7 +96,6 @@ import com.google.common.eventbus.EventBus;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-@Service
 public class JpaDeploymentManagement implements DeploymentManagement {
     private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 

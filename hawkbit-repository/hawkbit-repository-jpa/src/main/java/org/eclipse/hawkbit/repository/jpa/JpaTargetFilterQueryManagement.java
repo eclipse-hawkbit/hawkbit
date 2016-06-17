@@ -40,7 +40,6 @@ import com.google.common.base.Strings;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-@Service
 public class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
 
     @Autowired
