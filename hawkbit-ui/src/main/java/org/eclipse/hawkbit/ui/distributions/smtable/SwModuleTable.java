@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.distributions.smtable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsLayout;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -181,21 +179,16 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
     protected void addCustomGeneratedColumns() {
 
         addGeneratedColumn(SPUILabelDefinitions.ARTIFACT_ICON, new ColumnGenerator() {
-
             private static final long serialVersionUID = -5982361782989980277L;
-
             @Override
             public Object generateCell(final Table source, final Object itemId, final Object columnId) {
                 HorizontalLayout iconLayout = new HorizontalLayout();
-                
                 // add artifactory details popup
                 final String nameVersionStr = getNameAndVerion(itemId);
                 final Button showArtifactDtlsBtn = createShowArtifactDtlsButton(nameVersionStr);
                 final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
-
                 showArtifactDtlsBtn.addClickListener(event -> showArtifactDetailsWindow((Long) itemId, nameVersionStr));
-                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId, nameVersionStr));
-
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId));
                 iconLayout.addComponent(showArtifactDtlsBtn);
                 iconLayout.addComponent(manageMetaDataBtn);
                 return iconLayout;
@@ -414,7 +407,7 @@ public class SwModuleTable extends AbstractNamedVersionTable<SoftwareModule, Lon
 
     }
 
-    private void showMetadataDetails(Long itemId, String nameVersionStr) {
+    private void showMetadataDetails(Long itemId) {
         SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
         UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
     }
