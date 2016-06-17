@@ -67,19 +67,19 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
         addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
-        addStyleName("details-layout");
         setSelectable(false);
         setImmediate(true);
         setContainerDataSource(getSwModuleMetadataContainer());
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addSMMetadataTableHeader();
         setSizeFull();
+        //same as height of other tabs in details tabsheet
+        setHeight(116,Unit.PIXELS);
     }
 
     private IndexedContainer getSwModuleMetadataContainer() {
         final IndexedContainer container = new IndexedContainer();
         container.addContainerProperty(METADATA_KEY, String.class, "");
-        setColumnExpandRatio(METADATA_KEY, 0.7f);
         setColumnAlignment(METADATA_KEY, Align.LEFT);
         return container;
     }
@@ -95,7 +95,6 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
      */
     public void populateSMMetadata(final SoftwareModule swModule) {
         removeAllItems();
-
         if (null != swModule) {
             selectedSWModuleId = swModule.getId();
             final List<SoftwareModuleMetadata> swMetadataList = swModule.getMetadata();

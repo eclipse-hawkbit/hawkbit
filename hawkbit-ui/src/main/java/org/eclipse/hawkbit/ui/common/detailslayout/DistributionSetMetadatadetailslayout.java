@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.ui.Button;
@@ -86,6 +87,8 @@ public class DistributionSetMetadatadetailslayout extends Table{
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addDSMetadataTableHeader();
         setSizeFull(); 
+        //same as height of other tabs in details tabsheet
+        setHeight(116,Unit.PIXELS);
     }
 
     private IndexedContainer getDistSetContainer() {
