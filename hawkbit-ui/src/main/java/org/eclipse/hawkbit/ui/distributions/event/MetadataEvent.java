@@ -8,31 +8,41 @@
  */
 package org.eclipse.hawkbit.ui.distributions.event;
 
-public class MetadataEvent {
-    
-    public enum MetadataUIEvent {
-        CREATE_MANAGE_DISTRIBUTIONSET_METADATA,DELETE_MANAGE_DISTRIBUTIONSET_METADATA,
-        CREATE_DIST_DISTRIBUTIONSET_METADATA,DELETE_DIST_DISTRIBUTIONSET_METADATA,
-        CREATE_UPLOAD_SOFTWAREMODULE_METADATA,DELETE_UPLOAD_SOFTWAREMODULE_METADATA,
-        CREATE_DIST_SOFTWAREMODULE_METADATA,DELETE_DIST_SOFTWAREMODULE_METADATA;
+import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
+public class MetadataEvent {
+
+    public enum MetadataUIEvent {
+        CREATE_DISTRIBUTION_SET_METADATA, DELETE_DISTRIBUTION_SET_METADATA, DELETE_SOFTWARE_MODULE_METADATA, CREATE_SOFTWARE_MODULE_METADATA;
     }
-    
-    private String metadataKey;   
 
     private MetadataUIEvent metadataUIEvent;
 
-    public MetadataEvent(MetadataUIEvent metadataUIEvent, String metadataKey) {
-       this.metadataUIEvent = metadataUIEvent;
-       this.metadataKey = metadataKey;
+    private DistributionSetMetadata distributionSetMetadata;
+
+    private SoftwareModuleMetadata softwareModuleMetadata;
+
+    public MetadataEvent(MetadataUIEvent metadataUIEvent, final DistributionSetMetadata distributionSetMetadata) {
+        this.metadataUIEvent = metadataUIEvent;
+        this.distributionSetMetadata = distributionSetMetadata;
+    }
+
+    public MetadataEvent(MetadataUIEvent metadataUIEvent, final SoftwareModuleMetadata softwareModuleMetadata) {
+        this.metadataUIEvent = metadataUIEvent;
+        this.softwareModuleMetadata = softwareModuleMetadata;
     }
 
     public MetadataUIEvent getMetadataUIEvent() {
-           return metadataUIEvent;
-       }
-    
-    public String getMetadataKey() {
-        return metadataKey;
+        return metadataUIEvent;
+    }
+
+    public DistributionSetMetadata getDistributionSetMetadata() {
+        return distributionSetMetadata;
+    }
+
+    public SoftwareModuleMetadata getSoftwareModuleMetadata() {
+        return softwareModuleMetadata;
     }
 
 }

@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleIdName;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
@@ -68,10 +69,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private static final String UNASSIGN_SOFT_MODULE = "unassignSoftModule";
     
-    private static final String DS_METADA_KEY = "Key";
-    
-    private static final String VIEW ="view";
-
     @Autowired
     private ManageDistUIState manageDistUIState;
 
@@ -104,15 +101,19 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
     
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final MetadataEvent event) {
-        UI.getCurrent().access(() -> {
-
-            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DIST_DISTRIBUTIONSET_METADATA){
-                dsMetadataTable.createMetadata(event.getMetadataKey());
-            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DIST_DISTRIBUTIONSET_METADATA){                                         
-                dsMetadataTable.deleteMetadata(event.getMetadataKey());
-            }
-        });
+        UI.getCurrent()
+                .access(() -> {
+                    DistributionSetMetadata dsMetadata = event.getDistributionSetMetadata();
+                    if (dsMetadata != null && isDistributionSetSelected(dsMetadata.getDistributionSet())) {
+                        if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DISTRIBUTION_SET_METADATA) {
+                            dsMetadataTable.createMetadata(event.getDistributionSetMetadata().getKey());
+                        } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA) {
+                            dsMetadataTable.deleteMetadata(event.getDistributionSetMetadata().getKey());
+                        }
+                    }
+                });
     }
+        
 
     /**
      * softwareLayout Initialize the component.
@@ -398,4 +399,10 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
 
+    private boolean isDistributionSetSelected(DistributionSet ds) {
+        DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState
+                .getLastSelectedDistribution().get() : null;
+        return ds != null && lastselectedDistDS != null && lastselectedDistDS.getName().equals(ds.getName())
+                && lastselectedDistDS.getVersion().endsWith(ds.getVersion());
+    }
 }

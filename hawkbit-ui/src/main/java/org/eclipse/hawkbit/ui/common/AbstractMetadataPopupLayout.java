@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -162,7 +163,7 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
 
     protected abstract List<M> getMetadataList();
 
-    protected abstract void deleteMetadata(String key);
+    protected abstract void deleteMetadata(E entity, String key, String value);
 
     private void createComponents() {
         keyTextField = createKeyTextField();
@@ -262,12 +263,14 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     private void onDelete(RendererClickEvent event) {
         Item item = metaDataGrid.getContainerDataSource().getItem(event.getItemId());
         String key = (String) item.getItemProperty(KEY).getValue();
+        String value = (String) item.getItemProperty(VALUE).getValue();
+
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(
                 i18n.get("caption.metadata.delete.action.confirmbox"),
                 i18n.get("message.confirm.delete.metadata", key), i18n.get("button.ok"), i18n.get("button.cancel"),
                 ok -> {
                     if (ok) {
-                        deleteMetadata(key);
+                        deleteMetadata(getSelectedEntity(), key, value);
                         uiNotification.displaySuccess(i18n.get("message.metadata.deleted.successfully", key));
                         Object selectedRow = metaDataGrid.getSelectedRow();
                         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());

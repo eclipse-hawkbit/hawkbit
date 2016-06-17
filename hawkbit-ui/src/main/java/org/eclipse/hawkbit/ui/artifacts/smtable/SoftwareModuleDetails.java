@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
@@ -73,14 +74,18 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final MetadataEvent event) {
-        UI.getCurrent().access(() -> {
-
-            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_UPLOAD_SOFTWAREMODULE_METADATA){
-                swmMetadataTable.createMetadata(event.getMetadataKey());
-            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_UPLOAD_SOFTWAREMODULE_METADATA){                                         
-                swmMetadataTable.deleteMetadata(event.getMetadataKey());
-            }
-        });
+        UI.getCurrent()
+                .access(() -> {
+                    SoftwareModuleMetadata softwareModuleMetadata = event.getSoftwareModuleMetadata();
+                    if (softwareModuleMetadata != null
+                            && isSoftwareModuleSelected(softwareModuleMetadata.getSoftwareModule())) {
+                        if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
+                            swmMetadataTable.createMetadata(event.getSoftwareModuleMetadata().getKey());
+                        } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
+                            swmMetadataTable.deleteMetadata(event.getSoftwareModuleMetadata().getKey());
+                        }
+                    }
+                });
     }
     
     
@@ -187,4 +192,12 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     private void populateMetadataDetails(){
         swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
    }
+    
+    private boolean isSoftwareModuleSelected(SoftwareModule softwareModule) {
+        final SoftwareModule selectedUploadSWModule = artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ? artifactUploadState
+                .getSelectedBaseSoftwareModule().get() : null;
+        return softwareModule != null && selectedUploadSWModule != null
+                && selectedUploadSWModule.getName().equals(softwareModule.getName())
+                && selectedUploadSWModule.getVersion().equals(softwareModule.getVersion());
+    }
 }

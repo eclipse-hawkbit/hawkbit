@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
@@ -73,14 +74,18 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
       
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final MetadataEvent event) {
-        UI.getCurrent().access(() -> {
-
-            if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_DIST_SOFTWAREMODULE_METADATA){
-                swmMetadataTable.createMetadata(event.getMetadataKey());
-            }else if(event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_DIST_SOFTWAREMODULE_METADATA){                                         
-                swmMetadataTable.deleteMetadata(event.getMetadataKey());
-            }
-        });
+        UI.getCurrent()
+                .access(() -> {
+                    SoftwareModuleMetadata softwareModuleMetadata = event.getSoftwareModuleMetadata();
+                    if (softwareModuleMetadata != null
+                            && isSoftwareModuleSelected(softwareModuleMetadata.getSoftwareModule())) {
+                        if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
+                            swmMetadataTable.createMetadata(event.getSoftwareModuleMetadata().getKey());
+                        } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
+                            swmMetadataTable.deleteMetadata(event.getSoftwareModuleMetadata().getKey());
+                        }
+                    }
+                });
     }
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
@@ -186,8 +191,15 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
     
-    private void populateMetadataDetails(){
+    private void populateMetadataDetails() {
         swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
-   }
-    
+    }
+
+    private boolean isSoftwareModuleSelected(SoftwareModule softwareModule) {
+        final Long selectedDistSWModuleId = manageDistUIState.getSelectedBaseSwModuleId().isPresent() ? manageDistUIState
+                .getSelectedBaseSwModuleId().get() : null;
+        return softwareModule != null && selectedDistSWModuleId != null
+                && selectedDistSWModuleId.equals(softwareModule.getId());
+    }
+
 }

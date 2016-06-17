@@ -36,16 +36,16 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Autowired
     private transient SoftwareManagement softwareManagement;
-    
+
     @Autowired
     private ArtifactUploadState artifactUploadState;
-    
+
     @Autowired
     private EntityFactory entityFactory;
-    
+
     @Autowired
     private ManageDistUIState manageDistUIState;
-      
+
     @Override
     protected void checkForDuplicate(SoftwareModule entity, String value) {
         softwareManagement.findSoftwareModuleMetadata(entity, value);
@@ -53,24 +53,17 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Override
     protected SoftwareModuleMetadata createMetadata(SoftwareModule entity, String key, String value) {
-        SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(entity, key, value));
+        SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entityFactory
+                .generateSoftwareModuleMetadata(entity, key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
-      final Long selectedDistSWModuleId =  manageDistUIState.getSelectedBaseSwModuleId().isPresent() ? 
-               manageDistUIState.getSelectedBaseSwModuleId().get() : null;
-      final SoftwareModule selectedUploadSWModule= artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ?
-              artifactUploadState.getSelectedBaseSoftwareModule().get() : null;
-      if(selectedDistSWModuleId!=null && selectedDistSWModuleId.equals(swMetadata.getSoftwareModule().getId())){
-           eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_DIST_SOFTWAREMODULE_METADATA,swMetadata.getKey()));
-      }else if(selectedUploadSWModule!=null && (selectedUploadSWModule.getName().concat(selectedUploadSWModule.getVersion()).
-                                 equals(entity.getName().concat(entity.getVersion())))){
-          eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_UPLOAD_SOFTWAREMODULE_METADATA,swMetadata.getKey()));
-      }
+        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata));
         return swMetadata;
     }
 
     @Override
     protected SoftwareModuleMetadata updateMetadata(SoftwareModule entity, String key, String value) {
-        SoftwareModuleMetadata swMetadata = softwareManagement.updateSoftwareModuleMetadata(entityFactory.generateSoftwareModuleMetadata(entity, key, value));
+        SoftwareModuleMetadata swMetadata = softwareManagement.updateSoftwareModuleMetadata(entityFactory
+                .generateSoftwareModuleMetadata(entity, key, value));
         setSelectedEntity(swMetadata.getSoftwareModule());
         return swMetadata;
     }
@@ -80,20 +73,11 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         return getSelectedEntity().getMetadata();
     }
 
-
     @Override
-    protected void deleteMetadata(String key) {
-        softwareManagement.deleteSoftwareModuleMetadata(getSelectedEntity(), key);
-        final Long selectedDistSWModuleId =  manageDistUIState.getSelectedBaseSwModuleId().isPresent() ?
-                manageDistUIState.getSelectedBaseSwModuleId().get() : null;
-        final SoftwareModule selectedUploadSWModule= artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ?
-                        artifactUploadState.getSelectedBaseSoftwareModule().get() : null;          
-        if(selectedDistSWModuleId!=null && selectedDistSWModuleId.equals(getSelectedEntity().getId())){        
-             eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DIST_SOFTWAREMODULE_METADATA,key));
-        }else if(selectedUploadSWModule!=null && (selectedUploadSWModule.getName().concat(selectedUploadSWModule.getVersion()).
-                equals(getSelectedEntity().getName().concat(getSelectedEntity().getVersion())))){
-            eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_UPLOAD_SOFTWAREMODULE_METADATA,key));
-        }
+    protected void deleteMetadata(SoftwareModule entity, String key, String value) {
+        SoftwareModuleMetadata swMetadata = entityFactory.generateSoftwareModuleMetadata(entity, key, value);
+        softwareManagement.deleteSoftwareModuleMetadata(entity, key);
+        eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA, swMetadata));
     }
 
 }
