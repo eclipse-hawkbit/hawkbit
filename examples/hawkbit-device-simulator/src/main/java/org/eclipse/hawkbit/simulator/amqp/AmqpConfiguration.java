@@ -149,7 +149,7 @@ public class AmqpConfiguration {
     @Bean(name = { "listenerContainerFactory" })
     public SimpleRabbitListenerContainerFactory listenerContainerFactory() {
         final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
-        containerFactory.setDefaultRequeueRejected(false);
+        containerFactory.setDefaultRequeueRejected(true);
         containerFactory.setConnectionFactory(connectionFactory);
         containerFactory.setConcurrentConsumers(3);
         containerFactory.setMaxConcurrentConsumers(10);

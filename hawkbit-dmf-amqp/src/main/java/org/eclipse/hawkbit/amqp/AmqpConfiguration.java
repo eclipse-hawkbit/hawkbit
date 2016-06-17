@@ -241,7 +241,7 @@ public class AmqpConfiguration {
     @Bean(name = { "listenerContainerFactory" })
     public SimpleRabbitListenerContainerFactory listenerContainerFactory() {
         final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
-        containerFactory.setDefaultRequeueRejected(false);
+        containerFactory.setDefaultRequeueRejected(true);
         containerFactory.setConnectionFactory(rabbitConnectionFactory);
         containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
         containerFactory.setTaskExecutor(taskExecutor);
