@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.ui.Button;
@@ -81,6 +80,44 @@ public class DistributionSetMetadatadetailslayout extends Table{
         createDSMetadataTable();
         addCustomGeneratedColumns();
     }
+    
+
+    /**
+     * Populate software module metadata.
+     * 
+     * @param distributionSet
+     */
+    public void populateDSMetadata(final DistributionSet distributionSet) {
+        removeAllItems();
+        if (null != distributionSet) { 
+            selectedDistSetId = distributionSet.getId();
+            final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
+            if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
+                dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
+            }
+         }
+    }
+    
+    /**
+     * Create metadata .
+     * 
+     * @param metadataKeyName
+     */
+    public void createMetadata(final String metadataKeyName){
+        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
+        final Item item = metadataContainer.addItem(metadataKeyName);
+        item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
+    }
+    
+    /**
+     * Delete metadata.
+     * 
+     * @param metadataKeyName
+     */
+    public void deleteMetadata(final String metadataKeyName){
+        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
+         metadataContainer.removeItem(metadataKeyName);
+    }
 
     private void createDSMetadataTable() {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
@@ -115,21 +152,6 @@ public class DistributionSetMetadatadetailslayout extends Table{
         setColumnHeader(METADATA_KEY, i18n.get("header.key"));
     }
 
-    /**
-     * Populate software module table.
-     * 
-     * @param distributionSet
-     */
-    public void populateDSMetadata(final DistributionSet distributionSet) {
-        removeAllItems();
-        if (null != distributionSet) { 
-            selectedDistSetId = distributionSet.getId();
-            final List<DistributionSetMetadata> dsMetadataList = distributionSet.getMetadata();
-            if (null != dsMetadataList && !dsMetadataList.isEmpty()) {
-                dsMetadataList.forEach(dsMetadata -> setDSMetadataProperties(dsMetadata));
-            }
-         }
-    }
     
     private void setDSMetadataProperties(final DistributionSetMetadata dsMetadata){
         final Item item = getContainerDataSource().addItem(dsMetadata.getKey());
@@ -137,7 +159,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
               
     }
     
-    protected void addCustomGeneratedColumns() {       
+    private void addCustomGeneratedColumns() {       
         addGeneratedColumn(METADATA_KEY,
                 (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
@@ -165,25 +187,4 @@ public class DistributionSetMetadatadetailslayout extends Table{
                 entityFactory.generateDistributionSetMetadata(distSet, metadataKey, "") ));
     }
     
-    /**
-     * Create Metadata link  in metadata tab.
-     * @param metadataKeyName
-     *       Name of the metadata link.   
-     */
-    public void createMetadata(final String metadataKeyName){
-        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-        final Item item = metadataContainer.addItem(metadataKeyName);
-        item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
-        
-    }
-    
-    /**
-     * Delete Metadata link  in metadata tab.
-     * @param metadataKeyName
-     *      Name of the metadata link. 
-     */
-    public void deleteMetadata(final String metadataKeyName){
-        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-         metadataContainer.removeItem(metadataKeyName);
-    }
 }

@@ -69,6 +69,44 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
         addCustomGeneratedColumns();
     }
 
+    /**
+     * Populate software module metadata table.
+     * 
+     * @param swModule
+     */
+    public void populateSMMetadata(final SoftwareModule swModule) {
+        removeAllItems();
+        if (null != swModule) {
+            selectedSWModuleId = swModule.getId();
+            final List<SoftwareModuleMetadata> swMetadataList = swModule.getMetadata();
+            if (null != swMetadataList && !swMetadataList.isEmpty()) {
+                swMetadataList.forEach(swMetadata -> setSWMetadataProperties(swMetadata));
+            }
+        }
+    }
+    
+    /**
+     * Create metadata.
+     * 
+     * @param metadataKeyName
+     */
+    public void createMetadata(final String metadataKeyName) {
+        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
+        final Item item = metadataContainer.addItem(metadataKeyName);
+        item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
+
+    }
+
+    /**
+     * Delete metadata.
+     * 
+     * @param metadataKeyName
+     */
+    public void deleteMetadata(final String metadataKeyName) {
+        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
+        metadataContainer.removeItem(metadataKeyName);
+    }
+
     private void createSWMMetadataTable() {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
@@ -94,29 +132,13 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
         setColumnHeader(METADATA_KEY, i18n.get("header.key"));
     }
 
-    /**
-     * Populate software module metadata table.
-     * 
-     * @param swModule
-     */
-    public void populateSMMetadata(final SoftwareModule swModule) {
-        removeAllItems();
-        if (null != swModule) {
-            selectedSWModuleId = swModule.getId();
-            final List<SoftwareModuleMetadata> swMetadataList = swModule.getMetadata();
-            if (null != swMetadataList && !swMetadataList.isEmpty()) {
-                swMetadataList.forEach(swMetadata -> setSWMetadataProperties(swMetadata));
-            }
-        }
-
-    }
 
     private void setSWMetadataProperties(final SoftwareModuleMetadata swMetadata) {
         final Item item = getContainerDataSource().addItem(swMetadata.getKey());
         item.getItemProperty(METADATA_KEY).setValue(swMetadata.getKey());
     }
 
-    protected void addCustomGeneratedColumns() {
+    private void addCustomGeneratedColumns() {
         addGeneratedColumn(METADATA_KEY, (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
 
@@ -144,27 +166,4 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
                         entityFactory.generateSoftwareModuleMetadata(swmodule, metadataKey, "")));
     }
 
-    /**
-     * Create Metadata link in metadata tab.
-     * @param metadataKeyName
-     *           name of the metadata.
-     */
-    
-    public void createMetadata(final String metadataKeyName) {
-        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-        final Item item = metadataContainer.addItem(metadataKeyName);
-        item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
-
-    }
-
-    /**
-     * Delete metadata link in metadata tab.
-     * @param metadataKeyName
-     *          name of the metadata.
-     */
-    public void deleteMetadata(final String metadataKeyName) {
-        final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-        metadataContainer.removeItem(metadataKeyName);
-    }
-
-}
+ }
