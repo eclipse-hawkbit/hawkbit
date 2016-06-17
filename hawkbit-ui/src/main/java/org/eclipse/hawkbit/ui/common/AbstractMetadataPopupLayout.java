@@ -17,7 +17,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -108,6 +107,15 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
     }
     
 
+    /**
+     * Returns metadata popup.
+     * 
+     * @param entity
+     *            entity for which metadata data is displayed
+     * @param metaData
+     *            metadata to be selected
+     * @return @link{CommonDialogWindow}
+     */
     public CommonDialogWindow getWindow(final E entity, final M metaData) {
         selectedEntity = entity;
         String nameVersion = HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
