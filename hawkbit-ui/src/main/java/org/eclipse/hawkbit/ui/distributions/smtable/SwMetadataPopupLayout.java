@@ -50,7 +50,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     protected void checkForDuplicate(SoftwareModule entity, String value) {
         softwareManagement.findSoftwareModuleMetadata(entity, value);
     }
-
+    /**
+     *  Create metadata for SWModule.
+     */    
     @Override
     protected SoftwareModuleMetadata createMetadata(SoftwareModule entity, String key, String value) {
         SoftwareModuleMetadata swMetadata = softwareManagement.createSoftwareModuleMetadata(entityFactory
@@ -59,7 +61,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA, swMetadata));
         return swMetadata;
     }
-
+    /**
+     * Update metadata  for SWModule.
+     */
     @Override
     protected SoftwareModuleMetadata updateMetadata(SoftwareModule entity, String key, String value) {
         SoftwareModuleMetadata swMetadata = softwareManagement.updateSoftwareModuleMetadata(entityFactory
@@ -72,7 +76,10 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
     protected List<SoftwareModuleMetadata> getMetadataList() {
         return getSelectedEntity().getMetadata();
     }
-
+    
+    /**
+     * delete metadata for SWModule.
+     */
     @Override
     protected void deleteMetadata(SoftwareModule entity, String key, String value) {
         SoftwareModuleMetadata swMetadata = entityFactory.generateSoftwareModuleMetadata(entity, key, value);

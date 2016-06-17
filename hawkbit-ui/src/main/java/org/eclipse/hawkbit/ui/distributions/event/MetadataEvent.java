@@ -10,7 +10,11 @@ package org.eclipse.hawkbit.ui.distributions.event;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
-
+/**
+ * 
+ * Metadata Events.
+ *
+ */
 public class MetadataEvent {
 
     public enum MetadataUIEvent {

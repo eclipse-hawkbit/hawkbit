@@ -31,6 +31,12 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * 
+ * SoftwareModule Metadata details layout.
+ *
+ */
+
 @SpringComponent
 @ViewScope
 public class SoftwareModuleMetadatadetailslayout extends Table {
@@ -49,7 +55,7 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
     private Long selectedSWModuleId;
 
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
             final SoftwareManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
@@ -138,6 +144,12 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
                         entityFactory.generateSoftwareModuleMetadata(swmodule, metadataKey, "")));
     }
 
+    /**
+     * Create Metadata link in metadata tab.
+     * @param metadataKeyName
+     *           name of the metadata.
+     */
+    
     public void createMetadata(final String metadataKeyName) {
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
         final Item item = metadataContainer.addItem(metadataKeyName);
@@ -145,6 +157,11 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
 
     }
 
+    /**
+     * Delete metadata link in metadata tab.
+     * @param metadataKeyName
+     *          name of the metadata.
+     */
     public void deleteMetadata(final String metadataKeyName) {
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
         metadataContainer.removeItem(metadataKeyName);

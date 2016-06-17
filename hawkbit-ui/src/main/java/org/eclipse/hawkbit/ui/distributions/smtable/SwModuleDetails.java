@@ -71,7 +71,13 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         super.init();
     }
     
-      
+    /**
+     * MetadataEvent.
+     *
+     * @param event
+     *            as instance of {@link MetadataEvent}
+     */
+    
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final MetadataEvent event) {
         UI.getCurrent()

@@ -33,6 +33,12 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
+/**
+ * 
+ * DistributionSet Metadata details layout.
+ *
+ */
+
 @SpringComponent
 @VaadinSessionScope
 public class DistributionSetMetadatadetailslayout extends Table{
@@ -50,7 +56,7 @@ public class DistributionSetMetadatadetailslayout extends Table{
 
     private SpPermissionChecker permissionChecker;
     
-    private EntityFactory entityFactory;
+    private transient EntityFactory entityFactory;
 
     private I18N i18n;
     
@@ -159,6 +165,11 @@ public class DistributionSetMetadatadetailslayout extends Table{
                 entityFactory.generateDistributionSetMetadata(distSet, metadataKey, "") ));
     }
     
+    /**
+     * Create Metadata link  in metadata tab.
+     * @param metadataKeyName
+     *       Name of the metadata link.   
+     */
     public void createMetadata(final String metadataKeyName){
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
         final Item item = metadataContainer.addItem(metadataKeyName);
@@ -166,6 +177,11 @@ public class DistributionSetMetadatadetailslayout extends Table{
         
     }
     
+    /**
+     * Delete Metadata link  in metadata tab.
+     * @param metadataKeyName
+     *      Name of the metadata link. 
+     */
     public void deleteMetadata(final String metadataKeyName){
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
          metadataContainer.removeItem(metadataKeyName);

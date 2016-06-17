@@ -41,7 +41,10 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected void checkForDuplicate(DistributionSet entity, String value) {
         distributionSetManagement.findOne(entity, value);
     }
-
+    /**
+     * Create metadata for DistributionSet.
+     */
+    
     @Override
     protected DistributionSetMetadata createMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement.createDistributionSetMetadata(entityFactory
@@ -51,6 +54,9 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         return dsMetaData;
     }
 
+    /**
+     * Update metadata for DistributionSet.
+     */
     @Override
     protected DistributionSetMetadata updateMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement.updateDistributionSetMetadata(entityFactory
@@ -63,6 +69,10 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     protected List<DistributionSetMetadata> getMetadataList() {
         return getSelectedEntity().getMetadata();
     }
+    
+    /**
+     * Update metadata for DistributionSet.
+     */
 
     @Override
     protected void deleteMetadata(DistributionSet entity, String key, String value) {
