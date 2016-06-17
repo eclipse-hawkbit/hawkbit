@@ -21,8 +21,6 @@ import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -35,41 +33,27 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SpringComponent
 @ViewScope
-public class SoftwareModuleMetadatadetailslayout extends Table {   
-  
+public class SoftwareModuleMetadatadetailslayout extends Table {
 
     private static final long serialVersionUID = 2913758299611838818L;
-        
-  
-    
-    private static final Logger LOG = LoggerFactory.getLogger(SoftwareModuleMetadatadetailslayout.class);
 
     private static final String METADATA_KEY = "Key";
-    
+
     private SpPermissionChecker permissionChecker;
-    
-    private SoftwareManagement  softwareManagement;
-    
+
+    private SoftwareManagement softwareManagement;
+
     private SwMetadataPopupLayout swMetadataPopupLayout;
 
     private I18N i18n;
-    
-    private  Long selectedSWModuleId;
-    
+
+    private Long selectedSWModuleId;
+
     private EntityFactory entityFactory;
-    
-    
-   /**
-    * 
-    * @param i18n
-    * @param permissionChecker
-    * @param softwareManagement
-    * @param swMetadataPopupLayout
-    */
+
     public void init(final I18N i18n, final SpPermissionChecker permissionChecker,
-                     final SoftwareManagement softwareManagement,
-                     final SwMetadataPopupLayout swMetadataPopupLayout,
-                     final EntityFactory entityFactory) {
+            final SoftwareManagement softwareManagement, final SwMetadataPopupLayout swMetadataPopupLayout,
+            final EntityFactory entityFactory) {
         this.i18n = i18n;
         this.permissionChecker = permissionChecker;
         this.softwareManagement = softwareManagement;
@@ -82,13 +66,14 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
     private void createSWMMetadataTable() {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
+        addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
+        addStyleName("details-layout");
         setSelectable(false);
         setImmediate(true);
         setContainerDataSource(getSwModuleMetadataContainer());
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addSMMetadataTableHeader();
         setSizeFull();
-        addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
     }
 
     private IndexedContainer getSwModuleMetadataContainer() {
@@ -110,64 +95,60 @@ public class SoftwareModuleMetadatadetailslayout extends Table {
      */
     public void populateSMMetadata(final SoftwareModule swModule) {
         removeAllItems();
-        
-        if (null != swModule) {   
+
+        if (null != swModule) {
             selectedSWModuleId = swModule.getId();
             final List<SoftwareModuleMetadata> swMetadataList = swModule.getMetadata();
             if (null != swMetadataList && !swMetadataList.isEmpty()) {
                 swMetadataList.forEach(swMetadata -> setSWMetadataProperties(swMetadata));
             }
-         }
+        }
 
     }
-    
-    private void setSWMetadataProperties(final SoftwareModuleMetadata swMetadata){
+
+    private void setSWMetadataProperties(final SoftwareModuleMetadata swMetadata) {
         final Item item = getContainerDataSource().addItem(swMetadata.getKey());
         item.getItemProperty(METADATA_KEY).setValue(swMetadata.getKey());
     }
-    
-    protected void addCustomGeneratedColumns() {       
-        addGeneratedColumn(METADATA_KEY,
-                (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
+
+    protected void addCustomGeneratedColumns() {
+        addGeneratedColumn(METADATA_KEY, (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
 
-    private Button customMetadataDetailButton(final String itemId) {
-        final Item row1 = getItem(itemId);
-        final String metadataKey = (String) row1.getItemProperty(METADATA_KEY).getValue();
-
-        final Button viewLink = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
-                "View" + metadataKey +" Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
+    private Button customMetadataDetailButton(final String metadataKey) {
+        final Button viewLink = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey, "View"
+                + metadataKey + " Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewLink.setData(metadataKey);
-        if(permissionChecker.hasUpdateDistributionPermission()) {
-            viewLink.addStyleName(ValoTheme.BUTTON_TINY+" "+ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link");
-            viewLink.addClickListener(event -> showMetadataDetails(selectedSWModuleId,metadataKey));
+        if (permissionChecker.hasUpdateDistributionPermission()) {
+            viewLink.addStyleName(ValoTheme.BUTTON_TINY + " " + ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link"
+                    + " " + "text-style");
+            viewLink.addClickListener(event -> showMetadataDetails(selectedSWModuleId, metadataKey));
         }
         return viewLink;
     }
-    
+
     private static String getDetailLinkId(final String name) {
-        return new StringBuilder(SPUIComponentIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name)
-                .toString();
+        return new StringBuilder(SPUIComponentIdProvider.SW_METADATA_DETAIL_LINK).append('.').append(name).toString();
     }
-    
-    private void showMetadataDetails(final Long selectedSWModuleId , final String metadataKey) {
-       SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
-       
+
+    private void showMetadataDetails(final Long selectedSWModuleId, final String metadataKey) {
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleById(selectedSWModuleId);
         /* display the window */
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,
-                entityFactory.generateSoftwareModuleMetadata(swmodule, metadataKey, "")));
+        UI.getCurrent().addWindow(
+                swMetadataPopupLayout.getWindow(swmodule,
+                        entityFactory.generateSoftwareModuleMetadata(swmodule, metadataKey, "")));
     }
-    
-    public void createMetadata(final String metadataKeyName){
+
+    public void createMetadata(final String metadataKeyName) {
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
         final Item item = metadataContainer.addItem(metadataKeyName);
         item.getItemProperty(METADATA_KEY).setValue(metadataKeyName);
-        
+
     }
-    
-    public void deleteMetadata(final String metadataKeyName){
+
+    public void deleteMetadata(final String metadataKeyName) {
         final IndexedContainer metadataContainer = (IndexedContainer) getContainerDataSource();
-         metadataContainer.removeItem(metadataKeyName);
+        metadataContainer.removeItem(metadataKeyName);
     }
-   
+
 }

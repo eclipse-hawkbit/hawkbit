@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
 import org.eclipse.hawkbit.ui.distributions.state.ManageDistUIState;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -58,8 +57,6 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
     
     @Autowired
     private EntityFactory entityFactory;
-    
-    private VerticalLayout metadataLayout;
     
     private SoftwareModuleMetadatadetailslayout swmMetadataTable;
 
@@ -110,7 +107,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
+        detailsTab.addTab(swmMetadataTable, getI18n().get("caption.metadata"), null);
      }
 
     @Override
@@ -193,12 +190,4 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
    }
     
-    private VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.setId(SPUIDefinitions.SOFTWAREMODULE_METADATA_TAB_ID);
-        metadataLayout.addComponent(swmMetadataTable);
-        return metadataLayout;
-    }
-
 }

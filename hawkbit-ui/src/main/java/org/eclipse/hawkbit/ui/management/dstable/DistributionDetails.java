@@ -65,9 +65,6 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     private DistributionSetMetadatadetailslayout dsMetadataTable;
     
-    private VerticalLayout metadataLayout;
-    
-
     @Override
     protected void init() {
         softwareModuleTable = new SoftwareModuleDetailsTable();
@@ -109,7 +106,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
+        detailsTab.addTab(dsMetadataTable, getI18n().get("caption.metadata"), null);
     }
 
     @Override
@@ -203,11 +200,4 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
     
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.addComponent(dsMetadataTable);
-        return metadataLayout;
-    }
-
 }

@@ -274,16 +274,23 @@ public abstract class AbstractMetadataPopupLayout<E extends NamedVersionedEntity
                         Object selectedRow = metaDataGrid.getSelectedRow();
                         metaDataGrid.getContainerDataSource().removeItem(event.getItemId());
                         // force grid to refresh
-                        metaDataGrid.clearSortOrder();
-                        if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty() && selectedRow != null) {
-                            if (selectedRow.equals(event.getItemId())) {
-                                metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
-                            } else {
-                                metaDataGrid.select(selectedRow);
-                            }
+                metaDataGrid.clearSortOrder();
+                if (!metaDataGrid.getContainerDataSource().getItemIds().isEmpty()) {
+                    if (selectedRow != null) {
+                        if (selectedRow.equals(event.getItemId())) {
+                            metaDataGrid.select(metaDataGrid.getContainerDataSource().getIdByIndex(0));
+                        } else {
+                            metaDataGrid.select(selectedRow);
                         }
                     }
-                });
+                } else {
+                    keyTextField.clear();
+                    keyTextField.setEnabled(true);
+                    valueTextArea.clear();
+                    metaDataGrid.select(null);
+                }
+            }
+        });
         UI.getCurrent().addWindow(confirmDialog.getWindow());
         confirmDialog.getWindow().bringToFront();
     }

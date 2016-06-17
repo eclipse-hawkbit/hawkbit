@@ -21,8 +21,6 @@ import org.eclipse.hawkbit.ui.distributions.dstable.DsMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
@@ -44,8 +42,6 @@ public class DistributionSetMetadatadetailslayout extends Table{
     private  DistributionSetManagement distributionSetManagement;
     
     private DsMetadataPopupLayout dsMetadataPopupLayout;
-
-    private static final Logger LOG = LoggerFactory.getLogger(DistributionSetMetadatadetailslayout.class);
 
     private static final String METADATA_KEY = "Key";
     
@@ -82,14 +78,14 @@ public class DistributionSetMetadatadetailslayout extends Table{
     private void createDSMetadataTable() {
         addStyleName(ValoTheme.TABLE_NO_HORIZONTAL_LINES);
         addStyleName(ValoTheme.TABLE_NO_STRIPES);
+        addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
+        addStyleName("details-layout");
         setSelectable(false);
         setImmediate(true);
         setContainerDataSource(getDistSetContainer());
         setColumnHeaderMode(ColumnHeaderMode.EXPLICIT);
         addDSMetadataTableHeader();
         setSizeFull(); 
-        addStyleName(SPUIStyleDefinitions.SW_MODULE_TABLE);
-            
     }
 
     private IndexedContainer getDistSetContainer() {
@@ -137,15 +133,13 @@ public class DistributionSetMetadatadetailslayout extends Table{
                 (source, itemId, columnId) -> customMetadataDetailButton((String) itemId));
     }
 
-    private Button customMetadataDetailButton(final String itemId) {
-        final Item row1 = getItem(itemId);
-        final String metadataKey = (String) row1.getItemProperty(METADATA_KEY).getValue();
-
-        final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey,
-                "View " +metadataKey+ "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
+    private Button customMetadataDetailButton(final String metadataKey) {
+        final Button viewIcon = SPUIComponentProvider.getButton(getDetailLinkId(metadataKey), metadataKey, "View "
+                + metadataKey + "  Metadata details", null, false, null, SPUIButtonStyleSmallNoBorder.class);
         viewIcon.setData(metadataKey);
-        viewIcon.addStyleName(ValoTheme.BUTTON_TINY+" "+ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link");
-        viewIcon.addClickListener(event -> showMetadataDetails(selectedDistSetId,metadataKey));
+        viewIcon.addStyleName(ValoTheme.BUTTON_TINY + " " + ValoTheme.BUTTON_LINK + " " + "on-focus-no-border link"
+                + " " + "text-style");
+        viewIcon.addClickListener(event -> showMetadataDetails(selectedDistSetId, metadataKey));
         return viewIcon;
     }
     

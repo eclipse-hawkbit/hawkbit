@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.ui.management.dstable.DistributionAddUpdateWindowLayo
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventScope;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -100,8 +99,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     private VerticalLayout tagsLayout;
     
-    private VerticalLayout metadataLayout;
-
     Map<String, StringBuilder> assignedSWModule = new HashMap<>();
     
     
@@ -144,14 +141,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         populateMetadataDetails();
     }
     
-    protected VerticalLayout createMetadataLayout() {
-        metadataLayout = getTabLayout();
-        metadataLayout.setSizeFull();
-        metadataLayout.setId(SPUIDefinitions.DISTRIBUTIONSET_METADATA_TAB_ID);
-        metadataLayout.addComponent(dsMetadataTable);
-        return metadataLayout;
-    }
-
     private void populateModule() {
         softwareModuleTable.populateModule(getSelectedBaseEntity());
         showUnsavedAssignment();
@@ -341,7 +330,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         detailsTab.addTab(createSoftwareModuleTab(), getI18n().get("caption.softwares.distdetail.tab"), null);
         detailsTab.addTab(createTagsLayout(), getI18n().get("caption.tags.tab"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
-        detailsTab.addTab(createMetadataLayout(), getI18n().get("caption.metadata"), null);
+        detailsTab.addTab(dsMetadataTable, getI18n().get("caption.metadata"), null);
     }
 
     @Override
