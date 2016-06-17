@@ -110,7 +110,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected String tagNameValue;
     protected String tagDescValue;
 
-    private Color selectedColorOriginal;
+    protected Color selectedColorOriginal;
     private String tagDescOriginal;
 
     protected void createWindow() {
@@ -189,7 +189,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC, false, "", i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-
         tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
@@ -211,7 +210,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         window.checkMandatoryTextField(event, tagName);
     }
 
-    private void listenerTagDescTextAreaChanged(final TextChangeEvent event) {
+    protected void listenerTagDescTextAreaChanged(final TextChangeEvent event) {
 
         window.checkChanges(event.getText(), tagDescOriginal);
     }
@@ -416,6 +415,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
      */
     protected void createDynamicStyleForComponents(final TextField tagName, final TextArea tagDesc,
             final String taregtTagColor) {
+
         tagName.removeStyleName(SPUIDefinitions.TAG_NAME);
         tagDesc.removeStyleName(SPUIDefinitions.TAG_DESC);
         getTargetDynamicStyles(taregtTagColor);

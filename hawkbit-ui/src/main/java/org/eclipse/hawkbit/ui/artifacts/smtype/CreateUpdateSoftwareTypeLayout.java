@@ -103,10 +103,10 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-
         tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
+        tagDesc.addTextChangeListener(this::listenerTagDescTextAreaChanged);
 
         singleMultiOptionGroup();
     }

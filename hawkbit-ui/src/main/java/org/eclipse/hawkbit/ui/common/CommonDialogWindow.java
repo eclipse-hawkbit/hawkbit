@@ -149,7 +149,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     public void updateRequiredFields(final String fieldId, final Boolean filled) {
 
-        getRequiredFields().put(fieldId, Boolean.TRUE);
+        getRequiredFields().put(fieldId, filled);
         checkMandatoryFields();
     }
 

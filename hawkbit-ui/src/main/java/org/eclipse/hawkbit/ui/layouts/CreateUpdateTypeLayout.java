@@ -45,6 +45,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     protected String createTypeStr;
     protected String updateTypeStr;
     protected TextField typeKey;
+    protected String typeKeyOriginal;
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
@@ -185,6 +186,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelPreview().getColor());
         }
+        window.checkColorChange(colorPickerLayout.getSelectedColor(), selectedColorOriginal);
     }
 
     /**
@@ -319,6 +321,24 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     @Override
     protected void setTagDetails(final String tagSelected) {
         // is implemented in the inherited class
+    }
+
+    @Override
+    public Color getSelectedColorOriginal() {
+        return selectedColorOriginal;
+    }
+
+    @Override
+    public void setSelectedColorOriginal(final Color selectedColorOriginal) {
+        this.selectedColorOriginal = selectedColorOriginal;
+    }
+
+    public String getTypeKeyOriginal() {
+        return typeKeyOriginal;
+    }
+
+    public void setTypeKeyOriginal(final String typeKeyOriginal) {
+        this.typeKeyOriginal = typeKeyOriginal;
     }
 
 }
