@@ -32,7 +32,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;;
 
@@ -58,9 +57,6 @@ public class AmqpConfiguration {
 
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
-
-    @Autowired
-    private TaskExecutor taskExecutor;
 
     @Configuration
     protected static class RabbitConnectionFactoryCreator {
@@ -201,8 +197,8 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the Binding {@link AmqpConfiguration#receiverQueueFromSp()} to
-     * {@link AmqpConfiguration#senderConnectorToSpExchange()}.
+     * Create the Binding {@link AmqpConfiguration#receiverQueue()} to
+     * {@link AmqpConfiguration#senderExchange()}.
      *
      * @return the binding and create the queue and exchange
      */
@@ -244,9 +240,9 @@ public class AmqpConfiguration {
         containerFactory.setDefaultRequeueRejected(true);
         containerFactory.setConnectionFactory(rabbitConnectionFactory);
         containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
-        containerFactory.setTaskExecutor(taskExecutor);
-        containerFactory.setConcurrentConsumers(3);
+        containerFactory.setConcurrentConsumers(amqpProperties.getInitialConcurrentConsumers());
         containerFactory.setMaxConcurrentConsumers(amqpProperties.getMaxConcurrentConsumers());
+        containerFactory.setPrefetchCount(amqpProperties.getPrefetchCount());
         return containerFactory;
     }
 

@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -47,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -111,12 +113,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         super(defaultTemplate);
     }
 
-    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
-    private Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
-            @Header(MessageHeaderKey.TENANT) final String tenant) {
-        return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
-    }
-
     /**
      * Method to handle all incoming amqp messages.
      *
@@ -124,14 +120,17 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            incoming message
      * @param type
      *            the message type
-     * @param contentType
-     *            the contentType of the message
      * @param tenant
      *            the contentType of the message
-     * @param virtualHost
-     *            the virtual host
+     * 
      * @return a message if <null> no message is send back to sender
      */
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue}", containerFactory = "listenerContainerFactory")
+    public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
+            @Header(MessageHeaderKey.TENANT) final String tenant) {
+        return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
+    }
+
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
         checkContentTypeJson(message);
         final SecurityContext oldContext = SecurityContextHolder.getContext();
@@ -153,6 +152,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
+        } catch (final IllegalArgumentException ex) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
+        } catch (final TenantNotExistException teex) {
+            throw new AmqpRejectAndDontRequeueException(teex);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -421,7 +424,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private void checkContentTypeJson(final Message message) {
+    private static void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
             return;

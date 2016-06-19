@@ -50,6 +50,34 @@ public class AmqpProperties {
      */
     private int maxConcurrentConsumers = 10;
 
+    /**
+     * Tells the broker how many messages to send to each consumer in a single
+     * request. Often this can be set quite high to improve throughput.
+     */
+    private int prefetchCount = 10;
+
+    /**
+     * Initial number of consumers. Is scaled up if necessary up to
+     * {@link #maxConcurrentConsumers}.
+     */
+    private int initialConcurrentConsumers = 3;
+
+    public int getPrefetchCount() {
+        return prefetchCount;
+    }
+
+    public void setPrefetchCount(final int prefetchCount) {
+        this.prefetchCount = prefetchCount;
+    }
+
+    public int getInitialConcurrentConsumers() {
+        return initialConcurrentConsumers;
+    }
+
+    public void setInitialConcurrentConsumers(final int initialConcurrentConsumers) {
+        this.initialConcurrentConsumers = initialConcurrentConsumers;
+    }
+
     public int getMaxConcurrentConsumers() {
         return maxConcurrentConsumers;
     }
