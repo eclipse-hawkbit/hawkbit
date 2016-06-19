@@ -90,7 +90,7 @@ public class SoftwareModuleBuilder {
      * @return a single entry list of {@link MgmtSoftwareModuleRequestBodyPost}
      */
     public List<MgmtSoftwareModuleRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(name));
+        return Lists.newArrayList(doBuild(""));
     }
 
     /**

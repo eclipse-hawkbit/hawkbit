@@ -35,9 +35,10 @@ import feign.Feign;
 import feign.Logger;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.jackson.JacksonDecoder;
+import feign.slf4j.Slf4jLogger;
 
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients("org.eclipse.hawkbit.mgmt.client.resource")
 @EnableConfigurationProperties(ClientConfigurationProperties.class)
 @Configuration
 @AutoConfigureAfter(FeignClientConfiguration.class)
@@ -84,6 +85,11 @@ public class Application implements CommandLineRunner {
     }
 
     @Bean
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
+
+    @Bean
     public MgmtSoftwareModuleClientResource uploadSoftwareModule() {
         final ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -92,13 +98,13 @@ public class Application implements CommandLineRunner {
         return Feign.builder().contract(new IgnoreMultipleConsumersProducersSpringMvcContract())
                 .requestInterceptor(
                         new BasicAuthRequestInterceptor(configuration.getUsername(), configuration.getPassword()))
-                .logger(new Logger.ErrorLogger()).encoder(new FeignMultipartEncoder())
+                .logger(new Slf4jLogger()).encoder(new FeignMultipartEncoder())
                 .decoder(new ResponseEntityDecoder(new JacksonDecoder(mapper)))
                 .target(MgmtSoftwareModuleClientResource.class,
                         configuration.getUrl() + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING);
     }
 
-    private boolean containsArg(final String containsArg, final String... args) {
+    private static boolean containsArg(final String containsArg, final String... args) {
         for (final String arg : args) {
             if (arg.equalsIgnoreCase(containsArg)) {
                 return true;

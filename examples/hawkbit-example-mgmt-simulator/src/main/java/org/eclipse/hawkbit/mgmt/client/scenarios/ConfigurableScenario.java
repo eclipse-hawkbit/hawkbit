@@ -1,5 +1,5 @@
 /**
-x * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -159,10 +159,9 @@ public class ConfigurableScenario {
         LOGGER.info("Creating {} distribution sets", scenario.getDistributionSets());
         final byte[] artifact = generateArtifact(scenario);
 
-        distributionSetResource
-                .createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName()).type("os_app")
-                        .version("1.0.").buildAsList(scenario.getDistributionSets()))
-                .getBody().parallelStream().forEach(dsSet -> {
+        distributionSetResource.createDistributionSets(new DistributionSetBuilder().name(scenario.getDsName())
+                .type("os_app").version("1.0.").buildAsList(scenario.getDistributionSets())).getBody()
+                .forEach(dsSet -> {
                     final List<MgmtSoftwareModule> modules = addModules(scenario, dsSet, artifact);
 
                     final SoftwareModuleAssigmentBuilder assign = new SoftwareModuleAssigmentBuilder();
@@ -175,13 +174,13 @@ public class ConfigurableScenario {
 
     private List<MgmtSoftwareModule> addModules(final Scenario scenario, final MgmtDistributionSet dsSet,
             final byte[] artifact) {
-        final List<MgmtSoftwareModule> modules = softwareModuleResource.createSoftwareModules(
-                new SoftwareModuleBuilder().name(scenario.getSmFwName()).version(dsSet.getVersion()).type("os").build())
+        final List<MgmtSoftwareModule> modules = softwareModuleResource
+                .createSoftwareModules(new SoftwareModuleBuilder().name(scenario.getSmFwName() + "-os")
+                        .version(dsSet.getVersion()).type("os").build())
                 .getBody();
-        modules.addAll(softwareModuleResource
-                .createSoftwareModules(
-                        new SoftwareModuleBuilder().name(scenario.getSmSwName()).version(dsSet.getVersion() + ".")
-                                .type("application").buildAsList(scenario.getAppModulesPerDistributionSet()))
+        modules.addAll(softwareModuleResource.createSoftwareModules(
+                new SoftwareModuleBuilder().name(scenario.getSmSwName() + "-app").version(dsSet.getVersion() + ".")
+                        .type("application").buildAsList(scenario.getAppModulesPerDistributionSet()))
                 .getBody());
 
         for (int x = 0; x < scenario.getArtifactsPerSM(); x++) {

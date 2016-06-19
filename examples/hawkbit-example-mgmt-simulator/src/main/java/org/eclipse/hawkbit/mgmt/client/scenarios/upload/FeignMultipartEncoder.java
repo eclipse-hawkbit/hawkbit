@@ -1,5 +1,10 @@
 /**
- * Copyright (c) 2011-2015 Bosch Software Innovations GmbH, Germany. All rights reserved.
+ * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.eclipse.hawkbit.mgmt.client.scenarios.upload;
 
@@ -100,16 +105,16 @@ public class FeignMultipartEncoder implements Encoder {
         }
     }
 
-    private boolean isMultipartFile(final Object object) {
+    private static boolean isMultipartFile(final Object object) {
         return object instanceof MultipartFile;
     }
 
-    private class HttpOutputMessageImpl implements HttpOutputMessage {
+    private static final class HttpOutputMessageImpl implements HttpOutputMessage {
 
         private final OutputStream body;
         private final HttpHeaders headers;
 
-        public HttpOutputMessageImpl(final OutputStream body, final HttpHeaders headers) {
+        private HttpOutputMessageImpl(final OutputStream body, final HttpHeaders headers) {
             this.body = body;
             this.headers = headers;
         }

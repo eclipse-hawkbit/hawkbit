@@ -44,7 +44,6 @@ public class ClientConfigurationProperties {
      *
      */
     public static class Scenario {
-        private String tenant = "DEFAULT";
         private boolean cleanRepository;
         private int targets = 100;
         private int distributionSets = 10;
@@ -94,14 +93,6 @@ public class ClientConfigurationProperties {
 
         public void setTargetAddress(final String targetAddress) {
             this.targetAddress = targetAddress;
-        }
-
-        public String getTenant() {
-            return tenant;
-        }
-
-        public void setTenant(final String tenant) {
-            this.tenant = tenant;
         }
 
         public int getArtifactsPerSM() {
