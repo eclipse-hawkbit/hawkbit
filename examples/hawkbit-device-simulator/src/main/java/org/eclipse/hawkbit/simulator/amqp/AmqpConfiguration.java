@@ -20,11 +20,13 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,6 +73,42 @@ public class AmqpConfiguration {
         });
 
         return rabbitTemplate;
+    }
+
+    @Configuration
+    protected static class RabbitConnectionFactoryCreator {
+
+        /**
+         * {@link ConnectionFactory} with enabled publisher confirms and
+         * heartbeat.
+         * 
+         * @param config
+         *            with standard {@link RabbitProperties}
+         * @return {@link ConnectionFactory}
+         */
+        @Bean
+        public ConnectionFactory rabbitConnectionFactory(final RabbitProperties config) {
+            final CachingConnectionFactory factory = new CachingConnectionFactory();
+            factory.setRequestedHeartBeat(60);
+            factory.setPublisherConfirms(true);
+
+            final String addresses = config.getAddresses();
+            factory.setAddresses(addresses);
+            if (config.getHost() != null) {
+                factory.setHost(config.getHost());
+                factory.setPort(config.getPort());
+            }
+            if (config.getUsername() != null) {
+                factory.setUsername(config.getUsername());
+            }
+            if (config.getPassword() != null) {
+                factory.setPassword(config.getPassword());
+            }
+            if (config.getVirtualHost() != null) {
+                factory.setVirtualHost(config.getVirtualHost());
+            }
+            return factory;
+        }
     }
 
     /**

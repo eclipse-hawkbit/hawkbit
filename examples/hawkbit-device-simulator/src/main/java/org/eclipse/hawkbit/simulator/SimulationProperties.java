@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.simulator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice.Protocol;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -68,9 +69,9 @@ public class SimulationProperties {
         private String endpoint = "http://localhost:8080";
 
         /**
-         * Poll time in case of DDI API based simulation.
+         * Poll time in {@link TimeUnit#SECONDS} for simulated devices.
          */
-        private int pollDelay = 30;
+        private int pollDelay = (int) TimeUnit.MINUTES.toSeconds(30);
 
         /**
          * Optional gateway token for DDI API based simulation.

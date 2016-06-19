@@ -27,7 +27,7 @@ public abstract class AbstractSimulatedDevice {
     private UpdateStatus updateStatus = new UpdateStatus(ResponseStatus.SUCCESSFUL, "Simulation complete!");
     private Protocol protocol = Protocol.DMF_AMQP;
     private String targetSecurityToken;
-
+    private int pollDelaySec;
     private int nextPollCounterSec;
 
     /**
@@ -84,13 +84,26 @@ public abstract class AbstractSimulatedDevice {
      *            the ID of the simulated device
      * @param tenant
      *            the tenant of the simulated device
+     * @param int
+     *            pollDelaySec
      */
-    AbstractSimulatedDevice(final String id, final String tenant, final Protocol protocol) {
+    AbstractSimulatedDevice(final String id, final String tenant, final Protocol protocol, final int pollDelaySec) {
         this.id = id;
         this.tenant = tenant;
         this.status = Status.UNKNWON;
         this.progress = 0.0;
         this.protocol = protocol;
+        this.pollDelaySec = pollDelaySec;
+    }
+
+    abstract public void poll();
+
+    public int getPollDelaySec() {
+        return pollDelaySec;
+    }
+
+    public void setPollDelaySec(final int pollDelaySec) {
+        this.pollDelaySec = pollDelaySec;
     }
 
     /**

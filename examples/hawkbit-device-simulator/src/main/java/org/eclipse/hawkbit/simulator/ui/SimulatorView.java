@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.ui;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
@@ -167,7 +167,7 @@ public class SimulatorView extends VerticalLayout implements View {
     @SuppressWarnings("unchecked")
     @Subscribe
     public void pollCounterUpdate(final NextPollCounterUpdate update) {
-        final List<AbstractSimulatedDevice> devices = update.getDevices();
+        final Collection<AbstractSimulatedDevice> devices = update.getDevices();
         this.getUI().access(() -> devices.forEach(device -> {
             final BeanItem<AbstractSimulatedDevice> item = beanContainer.getItem(device.getId());
             if (item != null) {
