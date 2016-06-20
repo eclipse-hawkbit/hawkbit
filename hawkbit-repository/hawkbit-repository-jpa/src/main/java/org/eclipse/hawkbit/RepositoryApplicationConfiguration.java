@@ -11,6 +11,7 @@ package org.eclipse.hawkbit;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
@@ -27,6 +28,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +42,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
- * General configuration for the SP Repository.
+ * General configuration for hawlBit's Repository.
  *
  */
 @EnableJpaRepositories(basePackages = { "org.eclipse.hawkbit.repository.jpa" })
@@ -50,6 +52,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
+@EnableConfigurationProperties(RepositoryProperties.class)
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
