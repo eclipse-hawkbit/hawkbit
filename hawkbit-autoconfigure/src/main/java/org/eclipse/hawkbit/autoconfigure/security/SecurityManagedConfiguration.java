@@ -83,6 +83,7 @@ import org.springframework.security.web.header.writers.frameoptions.StaticAllowF
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter.XFrameOptionsMode;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.session.SessionManagementFilter;
 import org.vaadin.spring.security.VaadinSecurityContext;
 import org.vaadin.spring.security.annotation.EnableVaadinSecurity;
 import org.vaadin.spring.security.web.VaadinDefaultRedirectStrategy;
@@ -333,7 +334,7 @@ public class SecurityManagedConfiguration {
             }, RequestHeaderAuthenticationFilter.class)
                     .addFilterAfter(
                             new AuthenticationSuccessTenantMetadataCreationFilter(tenantAware, systemManagement),
-                            RequestHeaderAuthenticationFilter.class)
+                            SessionManagementFilter.class)
                     .authorizeRequests().anyRequest().authenticated()
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
