@@ -302,6 +302,11 @@ public final class SPUIComponentIdProvider {
      * tag color preview button id.
      */
     public static final String TAG_COLOR_PREVIEW_ID = "tag.color.preview";
+
+    /**
+     * Id for ColorPickerLayout
+     */
+    public static final String COLOR_PICKER_LAYOUT = "color.picker.layout";
     /**
      * Confirmation dialogue OK button id.
      */
