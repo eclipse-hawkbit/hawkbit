@@ -717,6 +717,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
             mainLayout.addComponent(colorPickerLayout, 1, 0);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
+        } else {
+            mainLayout.removeComponent(colorPickerLayout);
         }
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }

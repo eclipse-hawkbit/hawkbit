@@ -175,11 +175,7 @@ public final class UserDetailsFormatter {
     private static UserDetails loadUserByUsername(final String username) {
         final UserDetailsService userDetailsService = SpringContextHelper.getBean(UserDetailsService.class);
         try {
-            final UserDetails loadUserByUsername = userDetailsService.loadUserByUsername(username);
-            if (loadUserByUsername == null) {
-                throw new UsernameNotFoundException("User not found " + username);
-            }
-            return loadUserByUsername;
+            return userDetailsService.loadUserByUsername(username);
         } catch (final UsernameNotFoundException e) {
             return new User(username, "", Collections.emptyList());
         }

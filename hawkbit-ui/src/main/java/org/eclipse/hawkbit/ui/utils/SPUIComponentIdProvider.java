@@ -177,6 +177,10 @@ public final class SPUIComponentIdProvider {
      */
     public static final String DIST_MODULE_COMBO = "dist.module.combo.";
     /**
+     * ID for Distribution Tag ComboBox
+     */
+    public static final String DIST_TAG_COMBO = "dist.tag.combo";
+    /**
      * ID-Dist.PIN.
      */
     public static final String DIST_PIN_BUTTON = "dist.pin.button";
@@ -302,11 +306,14 @@ public final class SPUIComponentIdProvider {
      * tag color preview button id.
      */
     public static final String TAG_COLOR_PREVIEW_ID = "tag.color.preview";
-
     /**
      * Id for ColorPickerLayout
      */
     public static final String COLOR_PICKER_LAYOUT = "color.picker.layout";
+    /**
+     * Id for OptionGroup Create/Update tag
+     */
+    public static final String OPTION_GROUP = "create.update.tag";
     /**
      * Confirmation dialogue OK button id.
      */

@@ -24,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
  *
  */
 @Validated
-@Service
 public class JpaTenantStatsManagement implements TenantStatsManagement {
 
     @Autowired

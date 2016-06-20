@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static org.springframework.context.annotation.AdviceMode.ASPECTJ;
+import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
+
 import java.io.IOException;
 import java.net.URI;
 
@@ -46,18 +50,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.ServletListenerRegistrationBean;
 import org.springframework.cache.Cache;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -72,6 +77,8 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.StaticAllowFromStrategy;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter.XFrameOptionsMode;
@@ -83,30 +90,49 @@ import org.vaadin.spring.security.web.VaadinRedirectStrategy;
 import org.vaadin.spring.security.web.authentication.VaadinAuthenticationSuccessHandler;
 import org.vaadin.spring.security.web.authentication.VaadinUrlAuthenticationSuccessHandler;
 
-import com.google.common.collect.Lists;
-
 /**
- * All configurations related to SP authentication and authorization layer.
- *
- *
- *
+ * All configurations related to HawkBit's authentication and authorization
+ * layer.
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true, mode = ASPECTJ, proxyTargetClass = true, securedEnabled = true)
 @EnableWebMvcSecurity
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
+@Order(value = HIGHEST_PRECEDENCE)
 public class SecurityManagedConfiguration {
+
     private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
 
+    @Autowired
+    private AuthenticationConfiguration configuration;
+
+    /**
+     * @return the {@link UserAuthenticationFilter} to include into the SP
+     *         security configuration.
+     * @throws Exception
+     *             lazy bean exception maybe if the authentication manager
+     *             cannot be instantiated
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public UserAuthenticationFilter userAuthenticationFilter() throws Exception {
+        return new UserAuthenticationFilterBasicAuth(configuration.getAuthenticationManager());
+    }
+
+    private static final class UserAuthenticationFilterBasicAuth extends BasicAuthenticationFilter
+            implements UserAuthenticationFilter {
+
+        private UserAuthenticationFilterBasicAuth(final AuthenticationManager authenticationManager) {
+            super(authenticationManager);
+        }
+
+    }
+
     /**
      * {@link WebSecurityConfigurer} for the internal SP controller API.
-     *
-     *
-     *
      */
     @Configuration
     @Order(300)
@@ -114,19 +140,25 @@ public class SecurityManagedConfiguration {
 
         @Autowired
         private ControllerManagement controllerManagement;
+
         @Autowired
         private TenantConfigurationManagement tenantConfigurationManagement;
+
         @Autowired
         private TenantAware tenantAware;
+
         @Autowired
         private DdiSecurityProperties ddiSecurityConfiguration;
+
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
+
         @Autowired
         private SystemSecurityContext systemSecurityContext;
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
+
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
@@ -164,16 +196,19 @@ public class SecurityManagedConfiguration {
             }
 
             if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
+
                 LOG.info(
-                        "******************\n** Anonymous controller security enabled, should only use for developing purposes **\n******************");
+                        "******************\n** Anonymous controller security enabled, should only be used for developing purposes **\n******************");
+
                 final AnonymousAuthenticationFilter anoymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
-                        Lists.newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
+                        newArrayList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS),
                                 new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_DOWNLOAD_ROLE)));
                 anoymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
                 httpSec.requestMatchers().antMatchers("/*/controller/v1/**", "/*/controller/artifacts/v1/**").and()
                         .securityContext().disable().anonymous().authenticationFilter(anoymousFilter);
             } else {
+
                 httpSec.addFilter(securityHeaderFilter).addFilter(securityTokenFilter)
                         .addFilter(gatewaySecurityTokenFilter).addFilter(controllerAnonymousDownloadFilter)
                         .antMatcher("/*/controller/**").anonymous().disable().authorizeRequests().anyRequest()
@@ -186,6 +221,7 @@ public class SecurityManagedConfiguration {
 
         @Override
         protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+
             auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
                     ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
@@ -200,6 +236,7 @@ public class SecurityManagedConfiguration {
     @Bean
     @Order(50)
     public FilterRegistrationBean dosFilter() {
+
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
 
         filterRegBean.setFilter(new DosFilter(securityProperties.getDos().getFilter().getMaxRead(),
@@ -207,6 +244,7 @@ public class SecurityManagedConfiguration {
                 securityProperties.getDos().getFilter().getWhitelist(), securityProperties.getClients().getBlacklist(),
                 securityProperties.getClients().getRemoteIpHeader()));
         filterRegBean.addUrlPatterns("/{tenant}/controller/v1/*", "/rest/*");
+
         return filterRegBean;
     }
 
@@ -219,22 +257,21 @@ public class SecurityManagedConfiguration {
     @Bean
     @Order(100)
     public FilterRegistrationBean eTagFilter() {
+
         final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
-        // eclude the URLs for downloading artifacts, so no eTag is generated in
-        // the
-        // ShallowEtagHeaderFilter, just using the SH1 hash of the artifact
-        // itself as 'ETag', because
-        // otherwise the file will be copied in memory!
+        // Exclude the URLs for downloading artifacts, so no eTag is generated
+        // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
+        // artifact itself as 'ETag', because otherwise the file will be copied
+        // in memory!
         filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter(
                 "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", "/{tenant}/controller/artifacts/**",
                 "/{targetid}/softwaremodules/{softwareModuleId}/artifacts/**"));
+
         return filterRegBean;
     }
 
     /**
      * Security configuration for the REST management API of the health url.
-     *
-     *
      */
     @Configuration
     @Order(310)
@@ -249,28 +286,34 @@ public class SecurityManagedConfiguration {
 
     /**
      * Security configuration for the REST management API.
-     *
-     *
      */
     @Configuration
     @Order(350)
     public static class RestSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
         @Autowired
         private UserAuthenticationFilter userAuthenticationFilter;
+
         @Autowired
         private SystemManagement systemManagement;
+
         @Autowired
         private TenantAware tenantAware;
+
         @Autowired
-        private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
+        private SecurityProperties springSecurityProperties;
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
+
+            final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
+            basicAuthEntryPoint.setRealmName(springSecurityProperties.getBasic().getRealm());
 
             HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system.*").csrf().disable();
             if (springSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
+
             httpSec.addFilterBefore(new Filter() {
                 @Override
                 public void init(final FilterConfig filterConfig) throws ServletException {
@@ -296,12 +339,13 @@ public class SecurityManagedConfiguration {
                     .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/**")
                     .hasAnyAuthority(SpPermission.SYSTEM_DIAG);
+
+            httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
         }
     }
 
     /**
      * {@link WebSecurityConfigurer} for external (management) access.
-     *
      */
     @Configuration
     @Order(400)
@@ -311,10 +355,13 @@ public class SecurityManagedConfiguration {
         private static final String XFRAME_OPTION_DENY = "DENY";
         private static final String XFRAME_OPTION_SAMEORIGIN = "SAMEORIGIN";
         private static final String XFAME_OPTION_ALLOW_FROM = "ALLOW-FROM";
+
         @Autowired
         private VaadinSecurityContext vaadinSecurityContext;
+
         @Autowired
         private org.springframework.boot.autoconfigure.security.SecurityProperties springSecurityProperties;
+
         @Autowired
         private HawkbitSecurityProperties securityProperties;
 
@@ -346,10 +393,13 @@ public class SecurityManagedConfiguration {
          */
         @Bean
         public VaadinAuthenticationSuccessHandler redirectSaveHandler() {
+
             final VaadinUrlAuthenticationSuccessHandler handler = new TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler();
+
             handler.setRedirectStrategy(vaadinRedirectStrategy());
             handler.setDefaultTargetUrl("/UI/");
             handler.setTargetUrlParameter("r");
+
             return handler;
         }
 
@@ -371,7 +421,8 @@ public class SecurityManagedConfiguration {
             // configuration xframe-option
             final String confXframeOption = securityProperties.getXframe().getOption();
             final String confAllowFromUri = securityProperties.getXframe().getAllowfrom();
-            if (confXframeOption.equals(XFAME_OPTION_ALLOW_FROM) && confAllowFromUri.isEmpty()) {
+
+            if (XFAME_OPTION_ALLOW_FROM.equals(confXframeOption) && confAllowFromUri.isEmpty()) {
                 // if allow-from option is specified but no allowFromUri throw
                 // exception
                 throw new IllegalStateException("hawkbit.server.security.xframe.option has been specified as ALLOW-FROM"
@@ -380,9 +431,8 @@ public class SecurityManagedConfiguration {
             }
 
             // workaround regex: we need to exclude the URL /UI/HEARTBEAT here
-            // because we bound the
-            // vaadin application to /UI and not to root, described in
-            // vaadin-forum:
+            // because we bound the vaadin application to /UI and not to root,
+            // described in vaadin-forum:
             // https://vaadin.com/forum#!/thread/3200565.
             HttpSecurity httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/UI.*$")
                     // disable as CSRF is handled by Vaadin
@@ -391,8 +441,9 @@ public class SecurityManagedConfiguration {
             if (springSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             } else {
+
                 LOG.info(
-                        "\"******************\\n** Requires HTTPS Security has been disabled for UI, should only use for developing purposes **\\n******************\"");
+                        "\"******************\\n** Requires HTTPS Security has been disabled for UI, should only be used for developing purposes **\\n******************\"");
             }
 
             // for UI integrator we allow frame integration on same origin
@@ -441,9 +492,6 @@ public class SecurityManagedConfiguration {
 
     /**
      * A Websecruity config to handle and filter the download ids.
-     *
-     *
-     *
      */
     @Configuration
     @EnableWebSecurity
@@ -459,6 +507,7 @@ public class SecurityManagedConfiguration {
 
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
+
             final HttpDownloadAuthenticationFilter downloadIdAuthenticationFilter = new HttpDownloadAuthenticationFilter(
                     downloadIdCache);
             downloadIdAuthenticationFilter.setAuthenticationManager(authenticationManager());
@@ -476,32 +525,21 @@ public class SecurityManagedConfiguration {
             auth.authenticationProvider(new PreAuthTokenSourceTrustAuthenticationProvider(
                     ddiSecurityConfiguration.getRp().getTrustedIPs()));
         }
-
     }
-
 }
 
 /**
  * After a successful login on the UI we need to ensure to create the tenant
  * meta data within SP.
- *
- *
  */
 class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends VaadinUrlAuthenticationSuccessHandler {
 
     @Autowired
     private SystemManagement systemManagement;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.vaadin.spring.security.web.authentication.
-     * SavedRequestAwareVaadinAuthenticationSuccessHandler
-     * #onAuthenticationSuccess(org.springframework.security.core.
-     * Authentication)
-     */
     @Override
     public void onAuthenticationSuccess(final Authentication authentication) throws Exception {
+
         if (authentication.getClass().equals(TenantUserPasswordAuthenticationToken.class)) {
             systemManagement
                     .getTenantMetadata(((TenantUserPasswordAuthenticationToken) authentication).getTenant().toString());
@@ -515,14 +553,13 @@ class TenantMetadataSavedRequestAwareVaadinAuthenticationSuccessHandler extends 
             // has been fixed.
             systemManagement.getTenantMetadata("DEFAULT");
         }
+
         super.onAuthenticationSuccess(authentication);
     }
 }
 
 /**
  * Sevletfilter to create metadata after successful authentication over RESTful.
- *
- *
  */
 class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
 
@@ -543,11 +580,13 @@ class AuthenticationSuccessTenantMetadataCreationFilter implements Filter {
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
+
         final String currentTenant = tenantAware.getCurrentTenant();
         if (currentTenant != null) {
             // lazy initialize tenant meta data after successful authentication
             systemManagement.getTenantMetadata(currentTenant);
         }
+
         chain.doFilter(request, response);
     }
 

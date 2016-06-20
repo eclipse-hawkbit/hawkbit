@@ -129,13 +129,13 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
          */
-
+        setSizeUndefined();
         formLayout = new FormLayout();
         formLayout.addComponent(controllerIDTextField);
         formLayout.addComponent(nameTextField);
         formLayout.addComponent(descTextArea);
         
-        nameTextField.focus();
+        controllerIDTextField.focus();
     }
 
     private void addListeners() {

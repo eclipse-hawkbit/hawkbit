@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -65,9 +67,12 @@ public class AmqpConfiguration {
      * @return the queue
      */
     @Bean
-    public Queue receiverConnectorQueueFromSp() {
-        return new Queue(amqpProperties.getReceiverConnectorQueueFromSp(), true, false, false,
-                getDeadLetterExchangeArgs());
+    public Queue receiverConnectorQueueFromHawkBit() {
+        final Map<String, Object> arguments = getDeadLetterExchangeArgs();
+        arguments.putAll(getTTLMaxArgs());
+
+        return QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).withArguments(arguments)
+                .build();
     }
 
     /**
@@ -89,7 +94,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public Binding bindReceiverQueueToSpExchange() {
-        return BindingBuilder.bind(receiverConnectorQueueFromSp()).to(exchangeQueueToConnector());
+        return BindingBuilder.bind(receiverConnectorQueueFromHawkBit()).to(exchangeQueueToConnector());
     }
 
     /**
@@ -99,7 +104,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue deadLetterQueue() {
-        return new Queue(amqpProperties.getDeadLetterQueue(), true, false, true);
+        return QueueBuilder.nonDurable(amqpProperties.getDeadLetterQueue()).withArguments(getTTLMaxArgs()).build();
     }
 
     /**
@@ -142,6 +147,13 @@ public class AmqpConfiguration {
     private Map<String, Object> getDeadLetterExchangeArgs() {
         final Map<String, Object> args = new HashMap<>();
         args.put("x-dead-letter-exchange", amqpProperties.getDeadLetterExchange());
+        return args;
+    }
+
+    private static Map<String, Object> getTTLMaxArgs() {
+        final Map<String, Object> args = new HashMap<>();
+        args.put("x-message-ttl", Duration.ofDays(1).toMillis());
+        args.put("x-max-length", 100_000);
         return args;
     }
 

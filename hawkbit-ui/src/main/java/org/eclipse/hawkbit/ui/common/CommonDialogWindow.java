@@ -36,6 +36,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
@@ -186,6 +187,9 @@ public class CommonDialogWindow extends Window implements Serializable {
         if (content instanceof AbstractOrderedLayout) {
             ((AbstractOrderedLayout) content).setSpacing(true);
             ((AbstractOrderedLayout) content).setMargin(true);
+        }
+        if (content instanceof GridLayout) {
+            addStyleName("");
         }
 
         if (null != content) {

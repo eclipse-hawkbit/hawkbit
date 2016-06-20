@@ -23,7 +23,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
  *
  *
  */
-
 @Configuration
 @EnableAsync
 @ConditionalOnMissingBean(AsyncConfigurer.class)

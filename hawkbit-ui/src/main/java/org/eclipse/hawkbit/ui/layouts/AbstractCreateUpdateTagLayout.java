@@ -198,6 +198,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
                 i18n.get("label.combobox.tag"));
         tagNameComboBox.addStyleName(SPUIDefinitions.FILTER_TYPE_COMBO_STYLE);
         tagNameComboBox.setImmediate(true);
+        tagNameComboBox.setId(SPUIComponentIdProvider.DIST_TAG_COMBO);
 
         tagColorPreviewBtn = new Button();
         tagColorPreviewBtn.setId(SPUIComponentIdProvider.TAG_COLOR_PREVIEW_ID);
@@ -266,6 +267,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             mainLayout.getComponent(1, 0);
             mainLayout.addComponent(colorPickerLayout, 1, 0);
             mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
+        } else {
+            mainLayout.removeComponent(colorPickerLayout);
         }
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
@@ -478,6 +481,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
         optiongroup = new OptionGroup("Select Action");
+        optiongroup.setId(SPUIComponentIdProvider.OPTION_GROUP);
         optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         optiongroup.addStyleName("custom-option-group");
         optiongroup.setNullSelectionAllowed(false);

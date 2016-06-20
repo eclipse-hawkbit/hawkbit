@@ -6,17 +6,19 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.util;
+package org.eclipse.hawkbit.security;
 
 /**
- * Repository support for tests.
- *
+ * Constants related to security.
  */
-@FunctionalInterface
-public interface TestRepositoryManagement {
-    /**
-     * Empty the test repository.
-     */
-    void clearTestRepository();
+public final class SecurityConstants {
 
+    /**
+     * Logger prefix used for security logging.
+     */
+    public static final String SECURITY_LOG_PREFIX = "server-security";
+
+    private SecurityConstants() {
+
+    }
 }

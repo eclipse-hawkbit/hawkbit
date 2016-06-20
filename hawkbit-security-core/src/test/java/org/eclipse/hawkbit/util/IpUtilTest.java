@@ -50,13 +50,32 @@ public class IpUtilTest {
         when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
 
         // test
-        final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "bumlux");
+        final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "bumlux", true);
 
         // verify
         assertThat(remoteAddr).as("The remote address should be as the known client IP address")
                 .isEqualTo(knownRemoteClientIP);
         verify(requestMock, times(1)).getHeader("bumlux");
         verify(requestMock, times(1)).getRemoteAddr();
+    }
+
+    @Test
+    @Description("Tests create uri from request with masked IP when IP tracking is disabled")
+    public void maskRemoteAddrIfDisabled() {
+        // known values
+        final URI knownRemoteClientIP = IpUtil.createHttpUri("***");
+        // mock
+        when(requestMock.getHeader(HttpHeaders.X_FORWARDED_FOR)).thenReturn(null);
+        when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
+
+        // test
+        final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "bumlux", false);
+
+        // verify
+        assertThat(remoteAddr).as("The remote address should be as the known client IP address")
+                .isEqualTo(knownRemoteClientIP);
+        verify(requestMock, times(0)).getHeader("bumlux");
+        verify(requestMock, times(0)).getRemoteAddr();
     }
 
     @Test
@@ -69,7 +88,7 @@ public class IpUtilTest {
         when(requestMock.getRemoteAddr()).thenReturn(null);
 
         // test
-        final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "X-Forwarded-For");
+        final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, "X-Forwarded-For", true);
 
         // verify
         assertThat(remoteAddr).as("The remote address should be as the known client IP address")
