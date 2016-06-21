@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.eventbus.event.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
@@ -69,6 +70,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 
 /**
@@ -345,6 +347,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final ActionStatus actionStatus = entityFactory.generateActionStatus();
         actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
+
+        if (!Strings.isNullOrEmpty(message.getMessageProperties().getCorrelationIdString())) {
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
+                    + message.getMessageProperties().getCorrelationIdString());
+        }
 
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(System.currentTimeMillis());
