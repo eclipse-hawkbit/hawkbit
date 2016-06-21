@@ -96,7 +96,11 @@ public abstract class AbstractSimulatedDevice {
         this.pollDelaySec = pollDelaySec;
     }
 
-    abstract public void poll();
+    /**
+     * Can be called by a scheduler to trigger a device polling, like in real
+     * scenarios devices are frequently asking for updates etc.
+     */
+    public abstract void poll();
 
     public int getPollDelaySec() {
         return pollDelaySec;
