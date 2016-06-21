@@ -127,7 +127,7 @@
       <sonar.links.homepage>https://projects.eclipse.org/projects/iot.hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <!-- Jacoco version to use -->
-      <jacoco.version>0.7.6.201602180812</jacoco.version>
+      <jacoco.version>0.7.7.201606060606</jacoco.version>
       <!-- The Sonar Jacoco Listener for JUnit to extract coverage details
          per test -->
       <sonar-jacoco-listeners.version>1.4</sonar-jacoco-listeners.version>
