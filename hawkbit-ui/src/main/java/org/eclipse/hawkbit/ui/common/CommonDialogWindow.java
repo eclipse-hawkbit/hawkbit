@@ -109,9 +109,15 @@ public class CommonDialogWindow extends Window implements Serializable {
     public void checkMandatoryTextField(final TextChangeEvent event, final AbstractTextField textfield) {
 
         if (StringUtils.isNotBlank(event.getText())) {
-            getRequiredFields().put(textfield.getCaption(), Boolean.TRUE);
+            if (StringUtils.isNotBlank(textfield.getCaption())) {
+                getRequiredFields().put(textfield.getCaption(), Boolean.TRUE);
+            }
+            getRequiredFields().put(textfield.getId(), Boolean.TRUE);
         } else {
-            getRequiredFields().put(textfield.getCaption(), Boolean.FALSE);
+            if (StringUtils.isNotBlank(textfield.getCaption())) {
+                getRequiredFields().put(textfield.getCaption(), Boolean.FALSE);
+            }
+            getRequiredFields().put(textfield.getId(), Boolean.FALSE);
         }
         checkMandatoryFields();
     }
@@ -189,7 +195,7 @@ public class CommonDialogWindow extends Window implements Serializable {
             ((AbstractOrderedLayout) content).setMargin(true);
         }
         if (content instanceof GridLayout) {
-            addStyleName("");
+            addStyleName("marginTop");
         }
 
         if (null != content) {

@@ -928,6 +928,11 @@ public final class SPUIComponentIdProvider {
     public static final String UPLOAD_STATUS_POPUP_ID = "artifact.upload.status.popup.id";
 
     /**
+     * Table multiselect for selecting DistType
+     */
+    public static final String SELECT_DIST_TYPE = "select-dist-type";
+
+    /**
      * /* Private Constructor.
      */
     private SPUIComponentIdProvider() {

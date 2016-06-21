@@ -52,9 +52,6 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Add and Update Target.
- *
- *
- *
  */
 @SpringComponent
 @VaadinSessionScope

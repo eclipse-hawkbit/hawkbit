@@ -113,7 +113,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_DESC, false, "",
                 i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
-
         tagDesc.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");

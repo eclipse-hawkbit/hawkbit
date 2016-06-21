@@ -54,7 +54,22 @@
   }
   
  .v-gridlayout .v-gridlayout-marginTop {
-  	padding-top: 20px !important;
+  	margin-top: 20px !important;
   }
   
+ .v-slot .v-slot-marginTop {
+  	margin-top: 20px !important;
+  }
+  
+ .v-gridlayout-marginTop {
+  	margin-top: 20px !important;
+  }
+  
+ .v-slot-marginTop {
+  	margin-top: 20px !important;
+  }
+  
+   .marginTop {
+  	margin-top: 20px !important;
+  }
 }
