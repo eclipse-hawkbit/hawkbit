@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
@@ -43,25 +42,30 @@ public class ConfigurableScenario {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurableScenario.class);
 
-    @Autowired
-    private MgmtDistributionSetClientResource distributionSetResource;
+    private final MgmtDistributionSetClientResource distributionSetResource;
 
-    @Autowired
-    @Qualifier("mgmtSoftwareModuleClientResource")
-    private MgmtSoftwareModuleClientResource softwareModuleResource;
+    private final MgmtSoftwareModuleClientResource softwareModuleResource;
 
-    @Autowired
-    @Qualifier("uploadSoftwareModule")
-    private MgmtSoftwareModuleClientResource uploadSoftwareModule;
+    private final MgmtSoftwareModuleClientResource uploadSoftwareModule;
 
-    @Autowired
-    private MgmtTargetClientResource targetResource;
+    private final MgmtTargetClientResource targetResource;
 
-    @Autowired
-    private MgmtRolloutClientResource rolloutResource;
+    private final MgmtRolloutClientResource rolloutResource;
 
-    @Autowired
-    private ClientConfigurationProperties clientConfigurationProperties;
+    private final ClientConfigurationProperties clientConfigurationProperties;
+
+    public ConfigurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
+            @Qualifier("mgmtSoftwareModuleClientResource") final MgmtSoftwareModuleClientResource softwareModuleResource,
+            @Qualifier("uploadSoftwareModule") final MgmtSoftwareModuleClientResource uploadSoftwareModule,
+            final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
+            final ClientConfigurationProperties clientConfigurationProperties) {
+        this.distributionSetResource = distributionSetResource;
+        this.softwareModuleResource = softwareModuleResource;
+        this.uploadSoftwareModule = uploadSoftwareModule;
+        this.targetResource = targetResource;
+        this.rolloutResource = rolloutResource;
+        this.clientConfigurationProperties = clientConfigurationProperties;
+    }
 
     /**
      * Run the default getting started scenario.

@@ -10,12 +10,16 @@ package org.eclipse.hawkbit.mgmt.client;
 
 import org.eclipse.hawkbit.feign.core.client.FeignClientConfiguration;
 import org.eclipse.hawkbit.feign.core.client.IgnoreMultipleConsumersProducersSpringMvcContract;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtDistributionSetClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtRolloutClientResource;
 import org.eclipse.hawkbit.mgmt.client.resource.MgmtSoftwareModuleClientResource;
+import org.eclipse.hawkbit.mgmt.client.resource.MgmtTargetClientResource;
 import org.eclipse.hawkbit.mgmt.client.scenarios.ConfigurableScenario;
 import org.eclipse.hawkbit.mgmt.client.scenarios.CreateStartedRolloutExample;
 import org.eclipse.hawkbit.mgmt.client.scenarios.upload.FeignMultipartEncoder;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -75,8 +79,13 @@ public class Application implements CommandLineRunner {
     }
 
     @Bean
-    public ConfigurableScenario configurableScenario() {
-        return new ConfigurableScenario();
+    public ConfigurableScenario configurableScenario(final MgmtDistributionSetClientResource distributionSetResource,
+            @Qualifier("mgmtSoftwareModuleClientResource") final MgmtSoftwareModuleClientResource softwareModuleResource,
+            @Qualifier("uploadSoftwareModule") final MgmtSoftwareModuleClientResource uploadSoftwareModule,
+            final MgmtTargetClientResource targetResource, final MgmtRolloutClientResource rolloutResource,
+            final ClientConfigurationProperties clientConfigurationProperties) {
+        return new ConfigurableScenario(distributionSetResource, softwareModuleResource, uploadSoftwareModule,
+                targetResource, rolloutResource, clientConfigurationProperties);
     }
 
     @Bean
