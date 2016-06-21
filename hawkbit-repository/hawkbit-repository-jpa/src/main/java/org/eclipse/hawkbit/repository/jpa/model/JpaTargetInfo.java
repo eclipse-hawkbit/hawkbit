@@ -37,6 +37,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -173,10 +174,16 @@ public class JpaTargetInfo implements Persistable<Long>, TargetInfo {
      * @throws IllegalArgumentException
      *             If the given string violates RFC&nbsp;2396
      */
+    @Override
     public void setAddress(final String address) {
         // check if this is a real URI
         if (address != null) {
-            URI.create(address);
+            try {
+                URI.create(address);
+            } catch (final IllegalArgumentException e) {
+                throw new InvalidTargetAddressException(
+                        "The given address " + address + " violates the RFC-2396 specification", e);
+            }
         }
 
         this.address = address;
