@@ -42,9 +42,4 @@ public class DistributionTableLayout extends AbstractTableLayout {
         super.init(dsTableHeader, dsTable, distributionDetails);
     }
 
-    @Override
-    protected void publishEvent() {
-        // nothing to publish
-    }
-
 }

@@ -42,9 +42,4 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
         super.init(smTableHeader, smTable, softwareModuleDetails);
     }
 
-    @Override
-    protected void publishEvent() {
-        // nothing to publish
-    }
-
 }

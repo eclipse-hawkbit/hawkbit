@@ -41,10 +41,4 @@ public class SwModuleTableLayout extends AbstractTableLayout {
     void init() {
         super.init(swModuleTableHeader, swModuleTable, swModuleDetails);
     }
-
-    @Override
-    protected void publishEvent() {
-        // nothing to publish
-    }
-
 }

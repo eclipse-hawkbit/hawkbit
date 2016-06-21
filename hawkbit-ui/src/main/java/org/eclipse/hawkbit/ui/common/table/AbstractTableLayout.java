@@ -9,11 +9,12 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.server.Page;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -24,22 +25,16 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public abstract class AbstractTableLayout extends VerticalLayout {
 
-    private static final long serialVersionUID = 8611248179949245460L;
-
-    /**
-     * action for the shortcut key ctrl + 'A'.
-     */
-    protected static final ShortcutAction ACTION_CTRL_A = new ShortcutAction("Select All", ShortcutAction.KeyCode.A,
-            new int[] { ShortcutAction.ModifierKey.CTRL });
+    private static final long serialVersionUID = 1L;
 
     private AbstractTableHeader tableHeader;
 
-    private AbstractTable table;
+    private AbstractTable<?, ?> table;
 
-    private AbstractTableDetailsLayout detailsLayout;
+    private AbstractTableDetailsLayout<?> detailsLayout;
 
-    protected void init(final AbstractTableHeader tableHeader, final AbstractTable table,
-            final AbstractTableDetailsLayout detailsLayout) {
+    protected void init(final AbstractTableHeader tableHeader, final AbstractTable<?, ?> table,
+            final AbstractTableDetailsLayout<?> detailsLayout) {
         this.tableHeader = tableHeader;
         this.table = table;
         this.detailsLayout = detailsLayout;
@@ -63,24 +58,24 @@ public abstract class AbstractTableLayout extends VerticalLayout {
         if (isShortCutKeysRequired()) {
             final Panel tablePanel = new Panel();
             tablePanel.setStyleName("table-panel");
-            tablePanel.setHeight(100.0f, Unit.PERCENTAGE);
+            tablePanel.setHeight(100.0F, Unit.PERCENTAGE);
             tablePanel.setContent(table);
             tablePanel.addActionHandler(getShortCutKeysHandler());
             tablePanel.addStyleName(ValoTheme.PANEL_BORDERLESS);
             tableHeaderLayout.addComponent(tablePanel);
             tableHeaderLayout.setComponentAlignment(tablePanel, Alignment.TOP_CENTER);
-            tableHeaderLayout.setExpandRatio(tablePanel, 1.0f);
+            tableHeaderLayout.setExpandRatio(tablePanel, 1.0F);
         } else {
             tableHeaderLayout.addComponent(table);
             tableHeaderLayout.setComponentAlignment(table, Alignment.TOP_CENTER);
-            tableHeaderLayout.setExpandRatio(table, 1.0f);
+            tableHeaderLayout.setExpandRatio(table, 1.0F);
         }
 
         addComponent(tableHeaderLayout);
         addComponent(detailsLayout);
         setComponentAlignment(tableHeaderLayout, Alignment.TOP_CENTER);
         setComponentAlignment(detailsLayout, Alignment.TOP_CENTER);
-        setExpandRatio(tableHeaderLayout, 1.0f);
+        setExpandRatio(tableHeaderLayout, 1.0F);
     }
 
     /**
@@ -99,29 +94,51 @@ public abstract class AbstractTableLayout extends VerticalLayout {
      *         Default is null.
      */
     protected Handler getShortCutKeysHandler() {
-        return new Handler() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void handleAction(final Action action, final Object sender, final Object target) {
-                if (ACTION_CTRL_A.equals(action)) {
-                    table.selectAll();
-                    publishEvent();
-                }
-            }
-
-            @Override
-            public Action[] getActions(final Object target, final Object sender) {
-                return new Action[] { ACTION_CTRL_A };
-            }
-        };
+        return new TableShortCutHandler();
     }
 
-    protected abstract void publishEvent();
+    protected void publishEvent() {
+        // can be override by subclasses
+    }
 
     public void setShowFilterButtonVisible(final boolean visible) {
         tableHeader.setFilterButtonsIconVisible(visible);
+    }
+
+    private class TableShortCutHandler implements Handler {
+
+        private static final String SELECT_ALL_TEXT = "Select All";
+        private final ShortcutAction selectAllAction = new ShortcutAction(SELECT_ALL_TEXT, ShortcutAction.KeyCode.A,
+                new int[] { ShortcutAction.ModifierKey.CTRL });
+
+        private final ShortcutAction selectAllMacAction = new ShortcutAction(SELECT_ALL_TEXT, ShortcutAction.KeyCode.A,
+                new int[] { ShortcutAction.ModifierKey.META });
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void handleAction(final Action action, final Object sender, final Object target) {
+            if (!isSelecAllAction(action)) {
+                return;
+            }
+            table.selectAll();
+            publishEvent();
+        }
+
+        private boolean isSelecAllAction(final Action action) {
+            return selectAllAction.equals(action) || selectAllMacAction.equals(action);
+        }
+
+        @Override
+        public Action[] getActions(final Object target, final Object sender) {
+
+            final WebBrowser webBrowser = Page.getCurrent().getWebBrowser();
+            if (webBrowser.isMacOSX()) {
+                return new Action[] { selectAllMacAction };
+            }
+
+            return new Action[] { selectAllAction };
+        }
     }
 
 }
