@@ -35,7 +35,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * 
- * Default getting started scenario.
+ * A configurable scenario which runs the configured scenarios.
+ * 
+ * @see {@link ClientConfigurationProperties#getScenarios()}
  *
  */
 public class ConfigurableScenario {
