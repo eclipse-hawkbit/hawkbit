@@ -9,12 +9,11 @@
 package org.eclipse.hawkbit.ui.common.table;
 
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractTableDetailsLayout;
+import org.eclipse.hawkbit.ui.utils.ShortCutModifierUtils;
 
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
-import com.vaadin.server.Page;
-import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -109,34 +108,21 @@ public abstract class AbstractTableLayout extends VerticalLayout {
 
         private static final String SELECT_ALL_TEXT = "Select All";
         private final ShortcutAction selectAllAction = new ShortcutAction(SELECT_ALL_TEXT, ShortcutAction.KeyCode.A,
-                new int[] { ShortcutAction.ModifierKey.CTRL });
-
-        private final ShortcutAction selectAllMacAction = new ShortcutAction(SELECT_ALL_TEXT, ShortcutAction.KeyCode.A,
-                new int[] { ShortcutAction.ModifierKey.META });
+                new int[] { ShortCutModifierUtils.getCtrlOrMetaModifier() });
 
         private static final long serialVersionUID = 1L;
 
         @Override
         public void handleAction(final Action action, final Object sender, final Object target) {
-            if (!isSelecAllAction(action)) {
+            if (!selectAllAction.equals(action)) {
                 return;
             }
             table.selectAll();
             publishEvent();
         }
 
-        private boolean isSelecAllAction(final Action action) {
-            return selectAllAction.equals(action) || selectAllMacAction.equals(action);
-        }
-
         @Override
         public Action[] getActions(final Object target, final Object sender) {
-
-            final WebBrowser webBrowser = Page.getCurrent().getWebBrowser();
-            if (webBrowser.isMacOSX()) {
-                return new Action[] { selectAllMacAction };
-            }
-
             return new Action[] { selectAllAction };
         }
     }
