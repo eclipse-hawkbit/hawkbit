@@ -11,9 +11,37 @@ package org.eclipse.hawkbit;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.ReportManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaArtifactManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaControllerManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaDeploymentManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaDistributionSetManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaEntityFactory;
+import org.eclipse.hawkbit.repository.jpa.JpaReportManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaRolloutGroupManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaRolloutManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaSoftwareManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaSystemManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTagManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTargetManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
@@ -27,6 +55,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -37,12 +66,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
- * General configuration for hawlBit's Repository.
+ * General configuration for hawkBit's Repository.
  *
  */
 @EnableJpaRepositories(basePackages = { "org.eclipse.hawkbit.repository.jpa" })
@@ -53,6 +83,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @ComponentScan
 @EnableAutoConfiguration
 @EnableConfigurationProperties(RepositoryProperties.class)
+@EnableScheduling
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
@@ -175,5 +206,171 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public PlatformTransactionManager transactionManager() {
         return new MultiTenantJpaTransactionManager();
+    }
+
+    /**
+     * {@link JpaSystemManagement} bean.
+     * 
+     * @return a new {@link SystemManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public SystemManagement systemManagement() {
+        return new JpaSystemManagement();
+    }
+
+    /**
+     * {@link JpaReportManagement} bean.
+     * 
+     * @return a new {@link ReportManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ReportManagement reportManagement() {
+        return new JpaReportManagement();
+    }
+
+    /**
+     * {@link JpaDistributionSetManagement} bean.
+     * 
+     * @return a new {@link DistributionSetManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public DistributionSetManagement distributionSetManagement() {
+        return new JpaDistributionSetManagement();
+    }
+
+    /**
+     * {@link JpaTenantStatsManagement} bean.
+     * 
+     * @return a new {@link TenantStatsManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantStatsManagement tenantStatsManagement() {
+        return new JpaTenantStatsManagement();
+    }
+
+    /**
+     * {@link JpaTenantConfigurationManagement} bean.
+     * 
+     * @return a new {@link TenantConfigurationManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantConfigurationManagement tenantConfigurationManagement() {
+        return new JpaTenantConfigurationManagement();
+    }
+
+    /**
+     * {@link JpaTenantConfigurationManagement} bean.
+     * 
+     * @return a new {@link TenantConfigurationManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TargetManagement targetManagement() {
+        return new JpaTargetManagement();
+    }
+
+    /**
+     * {@link JpaTargetFilterQueryManagement} bean.
+     * 
+     * @return a new {@link TargetFilterQueryManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TargetFilterQueryManagement targetFilterQueryManagement() {
+        return new JpaTargetFilterQueryManagement();
+    }
+
+    /**
+     * {@link JpaTagManagement} bean.
+     * 
+     * @return a new {@link TagManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TagManagement tagManagement() {
+        return new JpaTagManagement();
+    }
+
+    /**
+     * {@link JpaSoftwareManagement} bean.
+     * 
+     * @return a new {@link SoftwareManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public SoftwareManagement softwareManagement() {
+        return new JpaSoftwareManagement();
+    }
+
+    /**
+     * {@link JpaRolloutManagement} bean.
+     * 
+     * @return a new {@link RolloutManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public RolloutManagement rolloutManagement() {
+        return new JpaRolloutManagement();
+    }
+
+    /**
+     * {@link JpaRolloutGroupManagement} bean.
+     * 
+     * @return a new {@link RolloutGroupManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public RolloutGroupManagement rolloutGroupManagement() {
+        return new JpaRolloutGroupManagement();
+    }
+
+    /**
+     * {@link JpaDeploymentManagement} bean.
+     * 
+     * @return a new {@link DeploymentManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public DeploymentManagement deploymentManagement() {
+        return new JpaDeploymentManagement();
+    }
+
+    /**
+     * {@link JpaControllerManagement} bean.
+     * 
+     * @return a new {@link ControllerManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ControllerManagement controllerManagement() {
+        return new JpaControllerManagement();
+    }
+
+    /**
+     * {@link JpaArtifactManagement} bean.
+     * 
+     * @return a new {@link ArtifactManagement}
+     */
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ArtifactManagement artifactManagement() {
+        return new JpaArtifactManagement();
+    }
+
+    /**
+     * {@link JpaEntityFactory} bean.
+     * 
+     * @return a new {@link EntityFactory}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public EntityFactory entityFactory() {
+        return new JpaEntityFactory();
     }
 }

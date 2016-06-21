@@ -60,8 +60,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -76,8 +74,6 @@ import org.springframework.validation.annotation.Validated;
  * JPA implementation of {@link RolloutManagement}.
  */
 @Validated
-@Service
-@EnableScheduling
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class JpaRolloutManagement implements RolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolloutManagement.class);

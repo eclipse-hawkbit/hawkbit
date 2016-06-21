@@ -75,17 +75,8 @@ public class TargetBuilder {
      * 
      * @return a single entry list of {@link MgmtTargetRequestBody}
      */
-    public List<MgmtTargetRequestBody> buildAsList() {
+    public List<MgmtTargetRequestBody> build() {
         return Lists.newArrayList(doBuild(""));
-    }
-
-    /**
-     * Builds a single {@link MgmtTargetRequestBody}.
-     * 
-     * @return build {@link MgmtTargetRequestBody}
-     */
-    public MgmtTargetRequestBody build() {
-        return doBuild("");
     }
 
     /**

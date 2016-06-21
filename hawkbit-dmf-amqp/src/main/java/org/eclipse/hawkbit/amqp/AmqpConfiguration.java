@@ -59,6 +59,7 @@ public class AmqpConfiguration {
     private ConnectionFactory rabbitConnectionFactory;
 
     @Configuration
+    @ConditionalOnMissingBean(ConnectionFactory.class)
     protected static class RabbitConnectionFactoryCreator {
 
         @Autowired
@@ -134,12 +135,10 @@ public class AmqpConfiguration {
 
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
-                LOGGER.debug("Message with correlation ID {} confirmed by broker.", correlationData.getId());
+                LOGGER.debug("Message with {} confirmed by broker.", correlationData);
             } else {
-                LOGGER.error("Broker is unable to handle message with correlation ID {} : {}", correlationData.getId(),
-                        cause);
+                LOGGER.error("Broker is unable to handle message with {} : {}", correlationData, cause);
             }
-
         });
 
         return rabbitTemplate;

@@ -45,7 +45,6 @@
       <module>examples</module>
    </modules>
 
-
    <scm>
       <connection>${release.scm.connection}</connection>
       <developerConnection>${release.scm.developerConnection}</developerConnection>
@@ -87,6 +86,10 @@
       <vaadin.addon.dbar-addon.version>1.2.0</vaadin.addon.dbar-addon.version>
       <vaadin.addon.contextmenu.version>4.5</vaadin.addon.contextmenu.version>
       <!-- Vaadin versions - END -->
+
+      <maven.processor.plugin.version>3.1.0</maven.processor.plugin.version>
+      <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
+      <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
 
       <!-- Misc libraries versions - START -->
       <validation-api.version>1.1.0.Final</validation-api.version>
@@ -155,6 +158,15 @@
    <build>
       <plugins>
          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <compilerArgument>-Xlint:all</compilerArgument>
+                <showWarnings>true</showWarnings>
+                <showDeprecation>true</showDeprecation>
+            </configuration>
+         </plugin>  
+         <plugin>
             <groupId>com.mycila</groupId>
             <artifactId>license-maven-plugin</artifactId>
             <version>2.11</version>
@@ -184,7 +196,7 @@
          </plugin>
          <plugin>
             <artifactId>maven-scm-plugin</artifactId>
-            <version>1.9.4</version>
+            <version>${maven.scm.plugin.version}</version>
             <configuration>
                <tag>${project.version}</tag>
             </configuration>
@@ -192,7 +204,6 @@
          <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.version}</version>
             <executions>
                <execution>
                   <id>prepare-ut-agent</id>
@@ -233,6 +244,7 @@
             </executions>
          </plugin>
       </plugins>
+      
       <pluginManagement>
          <plugins>
             <plugin>
@@ -276,7 +288,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
-               <version>2.17</version>
+               <version>${maven.surefire.plugin.version}</version>
                <configuration>
                   <reuseForks>true</reuseForks>
                   <forkCount>1</forkCount>
@@ -350,9 +362,13 @@
             <plugin>
                <groupId>org.jacoco</groupId>
                <artifactId>jacoco-maven-plugin</artifactId>
-               <version>${jacoco.maven.version}</version>
+               <version>${jacoco.version}</version>
             </plugin>
-
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>${maven.processor.plugin.version}</version>
+            </plugin>
          </plugins>
       </pluginManagement>
    </build>
