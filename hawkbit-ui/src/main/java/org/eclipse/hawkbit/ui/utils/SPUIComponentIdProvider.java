@@ -817,19 +817,31 @@ public final class SPUIComponentIdProvider {
      * Rollout target filter query combo id.
      */
     public static final String ROLLOUT_TARGET_FILTER_COMBO_ID = "rollout.target.filter.combo.id";
+
     /**
      * Rollout action button id.
      */
-    public static final String ROLLOUT_ACTION_BUTTON_ID = "rollout.action.button.id";
+    public static final String ROLLOUT_ACTION_ID = "rollout.action.button.id";
+
+    /**
+     * Rollout start button id.
+     */
+    public static final String ROLLOUT_START_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
+
     /**
      * Rollout pause button id.
      */
-    public static final String ROLLOUT_PAUSE_BUTTON_ID = "rollout.pause.button.id";
+    public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".10";
 
     /**
      * Rollout resume button id.
      */
-    public static final String ROLLOUT_RESUME_BUTTON_ID = "rollout.resume.button.id";
+    public static final String ROLLOUT_RESUME_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
+
+    /**
+     * Rollout resume button id.
+     */
+    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".12";
 
     /**
      * Rollout save or start option group id.

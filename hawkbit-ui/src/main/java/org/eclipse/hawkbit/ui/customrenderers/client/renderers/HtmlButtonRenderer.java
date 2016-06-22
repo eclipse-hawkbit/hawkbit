@@ -15,31 +15,56 @@ import com.vaadin.client.widget.grid.RendererCellReference;
 
 /**
  * 
- * Renders button with provided HTML content.
- * Used to display button with icons.
+ * Renders button with provided HTML content. Used to display button with icons.
+ * 
+ * 
+ * 
  *
  */
 public class HtmlButtonRenderer extends ButtonRenderer {
+
+    public static final String DISABLE_VALUE = "_Disabled_";
+
     @Override
-    public void render(RendererCellReference cell, String text, Button button) {
+    public void render(final RendererCellReference cell, final String text, final Button button) {
+        final boolean buttonEnable = isButtonEnable(cell.getElement().getClassName());
         if (text != null) {
             button.setHTML(text);
         }
-        applystyles(button);
+        applystyles(button, buttonEnable);
         // this is to allow the button to disappear, if the text is null
         button.setVisible(text != null);
-        button.getElement().setId("rollout.action.button.id");
+
+        button.getElement().setId("rollout.action.button.id." + cell.getColumnIndex());
+
+        button.setEnabled(buttonEnable);
+
     }
 
-    private void applystyles(Button button) {
+    /**
+     * see here https://vaadin.com/forum#!/thread/9418390/9765924
+     * 
+     * @param text
+     *            the button text
+     * @return is button enable.
+     */
+    private static boolean isButtonEnable(final String text) {
+        return !text.contains(DISABLE_VALUE);
+    }
+
+    private void applystyles(final Button button, final boolean buttonEnable) {
         button.setStyleName(VButton.CLASSNAME);
         button.addStyleName(getStyle("tiny"));
         button.addStyleName(getStyle("borderless"));
         button.addStyleName(getStyle("icon-only"));
         button.addStyleName(getStyle("button-no-border"));
+
+        if (buttonEnable) {
+            return;
+        }
+        button.addStyleName("v-disabled");
     }
-    
-    
+
     private String getStyle(final String style) {
         return new StringBuilder(style).append(" ").append(VButton.CLASSNAME).append("-").append(style).toString();
     }
