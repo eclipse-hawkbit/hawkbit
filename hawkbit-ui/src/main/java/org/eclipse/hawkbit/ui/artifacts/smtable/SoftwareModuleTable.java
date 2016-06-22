@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;

@@ -525,5 +525,50 @@ public class DistributionSetTable extends AbstractNamedVersionTable<Distribution
         final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
         return name + "." + version;
     }
+    
+    @Override
+    protected void addCustomGeneratedColumns() {
+        addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
+            private static final long serialVersionUID = 117186282275065399L;
+
+            @Override
+            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
+                final String nameVersionStr = getNameAndVerion(itemId);
+                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails(((DistributionSetIdName) itemId).getId()));
+                return manageMetaDataBtn;
+            }
+        });
+    }
+    
+    @Override
+    protected List<TableColumn> getTableVisibleColumns() {
+        final List<TableColumn> columnList = super.getTableVisibleColumns();
+        if (!isMaximized()) {
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
+        }
+        return columnList;
+    }
+
+    private Button createManageMetadataButton(String nameVersionStr) {
+        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        return manageMetadataBtn;
+    }
+
+    private void showMetadataDetails(Long itemId) {
+        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(itemId);
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
+    }
+
+    private String getNameAndVerion(final Object itemId) {
+        final Item item = getItem(itemId);
+        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
+        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
+        return name + "." + version;
+    }
 
 }
