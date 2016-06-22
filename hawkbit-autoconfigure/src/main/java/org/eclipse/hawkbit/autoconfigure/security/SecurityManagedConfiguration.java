@@ -272,20 +272,6 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Security configuration for the REST management API of the health url.
-     */
-    @Configuration
-    @Order(310)
-    public static class HealthSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        @Override
-        protected void configure(final HttpSecurity http) throws Exception {
-            http.regexMatcher("/system/health").csrf().disable().httpBasic().and().sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        }
-    }
-
-    /**
      * Security configuration for the REST management API.
      */
     @Configuration
@@ -310,7 +296,7 @@ public class SecurityManagedConfiguration {
             final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
             basicAuthEntryPoint.setRealmName(springSecurityProperties.getBasic().getRealm());
 
-            HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system.*").csrf().disable();
+            HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
             if (springSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
@@ -337,9 +323,7 @@ public class SecurityManagedConfiguration {
                             SessionManagementFilter.class)
                     .authorizeRequests().anyRequest().authenticated()
                     .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
-                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/**")
-                    .hasAnyAuthority(SpPermission.SYSTEM_DIAG);
+                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
 
             httpSec.httpBasic().and().exceptionHandling().authenticationEntryPoint(basicAuthEntryPoint);
         }
