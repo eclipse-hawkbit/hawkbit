@@ -396,6 +396,12 @@ public final class SpPermission {
         public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION
                 + HAS_AUTH_SUFFIX;
 
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#SYSTEM_MONITOR}
+         */
+        public static final String HAS_AUTH_SYSTEM_MONITOR = HAS_AUTH_PREFIX + SYSTEM_MONITOR + HAS_AUTH_SUFFIX;
+
         private SpringEvalExpressions() {
             // utility class
         }
