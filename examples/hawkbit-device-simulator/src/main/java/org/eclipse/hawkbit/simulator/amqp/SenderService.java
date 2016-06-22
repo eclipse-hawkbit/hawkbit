@@ -58,6 +58,7 @@ public abstract class SenderService extends MessageService {
         }
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
         final String correlationId = UUID.randomUUID().toString();
+        message.getMessageProperties().setCorrelationId(correlationId.getBytes());
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, address, correlationId);

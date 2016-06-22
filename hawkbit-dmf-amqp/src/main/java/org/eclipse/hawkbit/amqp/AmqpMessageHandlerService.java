@@ -70,7 +70,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
 
 /**
@@ -348,9 +347,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionStatus actionStatus = entityFactory.generateActionStatus();
         actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
 
-        if (!Strings.isNullOrEmpty(message.getMessageProperties().getCorrelationIdString())) {
+        if (message.getMessageProperties().getCorrelationId().length > 0) {
             actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + message.getMessageProperties().getCorrelationIdString());
+                    + message.getMessageProperties().getCorrelationId());
         }
 
         actionStatus.setAction(action);
