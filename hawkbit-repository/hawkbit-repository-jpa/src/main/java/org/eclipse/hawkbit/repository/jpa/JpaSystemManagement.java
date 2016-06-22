@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,10 +33,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cache.interceptor.SimpleKeyGenerator;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +46,6 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 @Validated
-@Service
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
     @Autowired
     private EntityManager entityManager;
@@ -108,7 +104,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Autowired
     private TenancyCacheManager cacheManager;
 
-    private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
+    @Autowired
+    private SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
@@ -154,9 +154,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    @Bean
     public KeyGenerator currentTenantKeyGenerator() {
-        return new CurrentTenantKeyGenerator();
+        return currentTenantCacheKeyGenerator.currentTenantKeyGenerator();
     }
 
     @Override
@@ -169,11 +168,12 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         // Create if it does not exist
         if (result == null) {
             try {
-                createInitialTenant.set(tenant);
+                currentTenantCacheKeyGenerator.getCreateInitialTenant().set(tenant);
                 cacheManager.getCache("currentTenant").evict(currentTenantKeyGenerator().generate(null, null));
+                applicationContext.getBean("currentTenantKeyGenerator");
                 return tenantMetaDataRepository.save(new JpaTenantMetaData(createStandardSoftwareDataSetup(), tenant));
             } finally {
-                createInitialTenant.remove();
+                currentTenantCacheKeyGenerator.getCreateInitialTenant().remove();
             }
         }
 
@@ -239,7 +239,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     // tenant is not cached anyway already.
     @Transactional(propagation = Propagation.NOT_SUPPORTED, isolation = Isolation.READ_UNCOMMITTED)
     public String currentTenant() {
-        final String initialTenantCreation = createInitialTenant.get();
+        final String initialTenantCreation = currentTenantCacheKeyGenerator.getCreateInitialTenant().get();
         if (initialTenantCreation == null) {
             final TenantMetaData findByTenant = tenantMetaDataRepository
                     .findByTenantIgnoreCase(tenantAware.getCurrentTenant());
@@ -258,29 +258,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         }
 
         return tenantMetaDataRepository.save((JpaTenantMetaData) metaData);
-    }
-
-    /**
-     * A implementation of the {@link KeyGenerator} to generate a key based on
-     * either the {@code createInitialTenant} thread local and the
-     * {@link TenantAware}, but in case we are in a tenant creation with its
-     * default types we need to use the tenant the current tenant which is
-     * currently created and not the one currently in the {@link TenantAware}.
-     *
-     */
-    public class CurrentTenantKeyGenerator implements KeyGenerator {
-        @Override
-        // Exception squid:S923 - override
-        @SuppressWarnings({ "squid:S923" })
-        public Object generate(final Object target, final Method method, final Object... params) {
-            final String initialTenantCreation = createInitialTenant.get();
-            if (initialTenantCreation == null) {
-                return SimpleKeyGenerator.generateKey(tenantAware.getCurrentTenant().toUpperCase(),
-                        tenantAware.getCurrentTenant().toUpperCase());
-            }
-            return SimpleKeyGenerator.generateKey(initialTenantCreation.toUpperCase(),
-                    initialTenantCreation.toUpperCase());
-        }
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {

@@ -9,7 +9,16 @@
 package org.eclipse.hawkbit.im.authentication;
 
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -34,6 +43,8 @@ import org.springframework.security.core.GrantedAuthority;
  *
  */
 public final class SpPermission {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpPermission.class);
 
     /**
      * Permission to read the targets from the
@@ -137,6 +148,53 @@ public final class SpPermission {
 
     private SpPermission() {
         // Constants only
+    }
+
+    /**
+     * Return all permission.
+     * 
+     * @return all permission
+     */
+    public static Collection<String> getAllAuthorities() {
+        return getAllAuthorities(Collections.emptyList());
+    }
+
+    /**
+     * Return all permission.
+     * 
+     * @param exclusionRoles
+     *            roles which will excluded
+     * @return all permissions
+     */
+    public static Collection<String> getAllAuthorities(final String... exclusionRoles) {
+        return getAllAuthorities(Arrays.asList(exclusionRoles));
+    }
+
+    /**
+     * Return all permission.
+     * 
+     * @param exclusionRoles
+     *            roles which will excluded
+     * @return all permissions
+     */
+    public static Collection<String> getAllAuthorities(final Collection<String> exclusionRoles) {
+        final List<String> allPermissions = new ArrayList<>();
+        final Field[] declaredFields = SpPermission.class.getDeclaredFields();
+        for (final Field field : declaredFields) {
+            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
+                field.setAccessible(true);
+                try {
+                    final String role = (String) field.get(null);
+                    if (!(exclusionRoles.contains(role))) {
+                        allPermissions.add(role);
+                    }
+                } catch (final IllegalAccessException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+
+            }
+        }
+        return allPermissions;
     }
 
     /**
