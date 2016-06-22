@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -93,12 +94,14 @@ public class CommonDialogWindow extends Window {
 
         if (null != content) {
             mainLayout.addComponent(content);
+            mainLayout.setExpandRatio(content, 1.0F);
         }
         final HorizontalLayout buttonLayout = createActionButtonsLayout();
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
 
         setCaption(caption);
+        setCaptionAsHtml(true);
         setContent(mainLayout);
         setResizable(false);
         center();
@@ -109,9 +112,8 @@ public class CommonDialogWindow extends Window {
     private HorizontalLayout createActionButtonsLayout() {
 
         buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
+        buttonsLayout.setSizeUndefined();
         buttonsLayout.setSpacing(true);
-
         createSaveButton();
 
         createCancelButton();
@@ -155,6 +157,7 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setComponentAlignment(helpLinkComponent, Alignment.MIDDLE_RIGHT);
     }
 
+
     public void setSaveButtonEnabled(final boolean enabled) {
         saveButton.setEnabled(enabled);
     }
@@ -162,9 +165,20 @@ public class CommonDialogWindow extends Window {
     public void setCancelButtonEnabled(final boolean enabled) {
         cancelButton.setEnabled(enabled);
     }
-
+    
     public HorizontalLayout getButtonsLayout() {
         return buttonsLayout;
     }
+    
+    public void setCancelButtonCaption(final String caption) {
+        cancelButton.setCaption(caption);
+    }
 
+    public void setCancelButtonIcon(final Resource icon) {
+        cancelButton.setIcon(icon);
+    }
+
+    public VerticalLayout getMainLayout() {
+        return mainLayout;
+    }
 }

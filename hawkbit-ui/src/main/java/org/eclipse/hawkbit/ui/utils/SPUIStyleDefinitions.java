@@ -136,6 +136,11 @@ public final class SPUIStyleDefinitions {
      * Artifact Details icon in Distribution View.
      */
     public static final String ARTIFACT_DTLS_ICON = "swm-artifact-dtls-icon";
+    
+   /**
+    * Distribution metadata icon style.
+    */
+   public static final String DS_METADATA_ICON = "ds-metadata-icon";
 
     /**
      * Target table style.
@@ -293,6 +298,10 @@ public final class SPUIStyleDefinitions {
      * Status pending icon.
      */
     public static final String STATUS_ICON_PENDING = "statusIconPending";
+    /**
+     * Grid style.
+     */
+    public static final String METADATA_GRID = "metadata-grid";
     
     /**
      * Footer layout style.
