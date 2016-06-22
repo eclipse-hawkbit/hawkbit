@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.management.event.ManagementUIEvent;
 import org.eclipse.hawkbit.ui.management.event.PinUnpinEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.management.state.ManagementUIState;
-import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;

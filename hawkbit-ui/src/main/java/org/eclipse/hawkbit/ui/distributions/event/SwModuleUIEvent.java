@@ -13,6 +13,6 @@ package org.eclipse.hawkbit.ui.distributions.event;
  *
  */
 public enum SwModuleUIEvent {
-    HIDE_FILTER_BY_TYPE, SHOW_FILTER_BY_TYPE, DELETED_ALL_SOFWARE;
+    HIDE_FILTER_BY_TYPE, SHOW_FILTER_BY_TYPE, DELETED_ALL_SOFWARE ;
 
 }

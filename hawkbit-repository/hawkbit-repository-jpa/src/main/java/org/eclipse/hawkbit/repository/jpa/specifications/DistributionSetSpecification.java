@@ -83,6 +83,7 @@ public final class DistributionSetSpecification {
             targetRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
             targetRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
             targetRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
+            targetRoot.fetch(JpaDistributionSet_.metadata, JoinType.LEFT);
             query.distinct(true);
 
             return predicate;
