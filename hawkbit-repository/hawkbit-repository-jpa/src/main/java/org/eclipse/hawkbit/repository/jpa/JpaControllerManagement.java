@@ -253,7 +253,6 @@ public class JpaControllerManagement implements ControllerManagement {
     public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus) {
         final JpaAction action = (JpaAction) actionStatus.getAction();
 
-        // TODO: test
         // if action is already closed we accept further status updates on if
         // permitted so by configuration. This is especially use full if the
         // action status feedback channel order from the device cannot be
