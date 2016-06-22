@@ -281,8 +281,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descriptionLayout = getTabLayout();
         return descriptionLayout;
     }
-
-    /**
+    
+   /**
      * Default caption of header to be displayed when no data row selected in
      * table.
      * 

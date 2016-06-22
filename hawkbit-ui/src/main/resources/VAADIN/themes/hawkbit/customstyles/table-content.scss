@@ -48,9 +48,6 @@
   .distributionPin {
     line-height: 15px;
     background-color: none;
-    margin-bottom: 0 !important;
-    margin-right: 0 !important;
-    padding: 0;
     font-weight: normal;
   }
 
@@ -143,4 +140,8 @@
     line-height: 21px;
     border: 1px solid $widget-border-color;
   }
+  
+  .ds-metadata-icon{
+  	line-height:15px;
+   }
 }

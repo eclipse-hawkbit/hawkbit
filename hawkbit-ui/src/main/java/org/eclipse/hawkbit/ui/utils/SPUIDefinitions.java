@@ -1016,6 +1016,16 @@ public final class SPUIDefinitions {
      * Rollout action column property.
      */
     public static final String ROLLOUT_ACTION = "rollout-action";
+    
+    /**
+     * DistributionSet Metadata tab Id
+     */
+    public static final String DISTRIBUTIONSET_METADATA_TAB_ID = "distSet.metadata.tab.id";
+    
+    /**
+     * SoftwareModule Metadata tab Id
+     */
+    public static final String SOFTWAREMODULE_METADATA_TAB_ID = "swModule.metadata.tab.id";
 
     /**
      * /** Constructor.
