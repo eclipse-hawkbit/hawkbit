@@ -8,11 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractNamedVersionedEntityTableDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleMetadatadetailslayout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.distributions.event.MetadataEvent;
+import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +51,44 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     @Autowired
     private ArtifactUploadState artifactUploadState;
 
+    @Autowired
+    private transient SoftwareManagement softwareManagement;
+    
+    @Autowired
+    private SwMetadataPopupLayout swMetadataPopupLayout;
+    
+    @Autowired
+    private EntityFactory entityFactory;
+    
+    private SoftwareModuleMetadatadetailslayout swmMetadataTable;
+    
+    /**
+     * softwareLayout Initialize the component.
+     */
+    @Override
+    protected void init() {
+        swmMetadataTable = new SoftwareModuleMetadatadetailslayout();
+        swmMetadataTable.init(getI18n(), getPermissionChecker(),softwareManagement,swMetadataPopupLayout,entityFactory);
+        super.init();
+    }
+    
+    @EventBusListenerMethod(scope = EventScope.SESSION)
+    void onEvent(final MetadataEvent event) {
+        UI.getCurrent()
+                .access(() -> {
+                    SoftwareModuleMetadata softwareModuleMetadata = event.getSoftwareModuleMetadata();
+                    if (softwareModuleMetadata != null
+                            && isSoftwareModuleSelected(softwareModuleMetadata.getSoftwareModule())) {
+                        if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.CREATE_SOFTWARE_MODULE_METADATA) {
+                            swmMetadataTable.createMetadata(event.getSoftwareModuleMetadata().getKey());
+                        } else if (event.getMetadataUIEvent() == MetadataEvent.MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA) {
+                            swmMetadataTable.deleteMetadata(event.getSoftwareModuleMetadata().getKey());
+                        }
+                    }
+                });
+    }
+    
+    
     @Override
     protected String getEditButtonId() {
         return SPUIComponentIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
@@ -55,8 +99,9 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
         detailsTab.addTab(createDetailsLayout(), getI18n().get("caption.tab.details"), null);
         detailsTab.addTab(createDescriptionLayout(), getI18n().get("caption.tab.description"), null);
         detailsTab.addTab(createLogLayout(), getI18n().get("caption.logs.tab"), null);
+        detailsTab.addTab(swmMetadataTable, getI18n().get("caption.metadata"), null);
     }
-
+    
     @Override
     protected void onEdit(final ClickEvent event) {
         final Window addSoftwareModule = softwareModuleAddUpdateWindow
@@ -81,6 +126,8 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
             updateSoftwareModuleDetailsLayout(HawkbitCommonUtil.SP_STRING_EMPTY, HawkbitCommonUtil.SP_STRING_EMPTY,
                     maxAssign);
         }
+        
+        populateMetadataDetails();
     }
 
     private void updateSoftwareModuleDetailsLayout(final String type, final String vendor, final String maxAssign) {
@@ -140,5 +187,17 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
     @Override
     protected String getDetailsHeaderCaptionId() {
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
+    }
+    
+    private void populateMetadataDetails(){
+        swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
+   }
+    
+    private boolean isSoftwareModuleSelected(SoftwareModule softwareModule) {
+        final SoftwareModule selectedUploadSWModule = artifactUploadState.getSelectedBaseSoftwareModule().isPresent() ? artifactUploadState
+                .getSelectedBaseSoftwareModule().get() : null;
+        return softwareModule != null && selectedUploadSWModule != null
+                && selectedUploadSWModule.getName().equals(softwareModule.getName())
+                && selectedUploadSWModule.getVersion().equals(softwareModule.getVersion());
     }
 }

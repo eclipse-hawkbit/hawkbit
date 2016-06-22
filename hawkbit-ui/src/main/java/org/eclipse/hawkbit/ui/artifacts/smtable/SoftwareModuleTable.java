@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,4 +213,26 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         artifactUploadState.setNoDataAvilableSoftwareModule(!available);
     }
 
+    
+    private Button createManageMetadataButton(String nameVersionStr) {
+        final Button manageMetadataBtn = SPUIComponentProvider.getButton(
+                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        return manageMetadataBtn;
+    }
+    
+    private String getNameAndVerion(final Object itemId) {
+        final Item item = getItem(itemId);
+        final String name = (String) item.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
+        final String version = (String) item.getItemProperty(SPUILabelDefinitions.VAR_VERSION).getValue();
+        return name + "." + version;
+    }
+    
+    private void showMetadataDetails(Long itemId, String nameVersionStr) {
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
+                /* display the window */
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule,null));
+    }
 }
