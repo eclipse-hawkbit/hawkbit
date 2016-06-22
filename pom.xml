@@ -69,6 +69,7 @@
       <hibernate-validator.version>5.2.4.Final</hibernate-validator.version>
       <spring-cloud-connectors.version>1.2.0.RELEASE</spring-cloud-connectors.version>
       <spring-amqp.version>1.6.0.RELEASE</spring-amqp.version>
+      <rabbitmq.version>3.6.2</rabbitmq.version>
       <spring-hateoas.version>0.18.0.RELEASE</spring-hateoas.version>
       <!--  Support for MongoDB 3 -->
       <spring-data-releasetrain.version>Fowler-SR1</spring-data-releasetrain.version>
@@ -525,6 +526,11 @@
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${rabbitmq.version}</version>
          </dependency>
          <!-- RSQL / FIQL parser -->
          <dependency>
