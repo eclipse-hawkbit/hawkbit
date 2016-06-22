@@ -36,6 +36,9 @@ public final class PermissionUtils {
 
         for (final String role : roles) {
             authorities.add(new SimpleGrantedAuthority(role));
+            // add spring security ROLE authority which is indicated by the
+            // `ROLE_` prefix
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
         }
 
         return authorities;
