@@ -17,10 +17,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 
 /**
- * Software module table layout.
- * 
- *
- * 
+ * Software module table layout. (Upload Management)
  */
 @SpringComponent
 @ViewScope
@@ -44,4 +41,5 @@ public class SoftwareModuleTableLayout extends AbstractTableLayout {
     void init() {
         super.init(smTableHeader, smTable, softwareModuleDetails);
     }
+
 }

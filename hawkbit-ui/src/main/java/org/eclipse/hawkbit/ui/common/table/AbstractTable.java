@@ -153,6 +153,16 @@ public abstract class AbstractTable<E extends NamedEntity, I> extends Table {
         }
     }
 
+    /**
+     * Select all rows in the table.
+     */
+    protected void selectAll() {
+        if (isMultiSelect()) {
+            // only contains the ItemIds of the visible items in the table
+            setValue(getItemIds());
+        }
+    }
+
     private void setColumnProperties() {
         final List<TableColumn> columnList = getTableVisibleColumns();
         final List<Object> swColumnIds = new ArrayList<>();
