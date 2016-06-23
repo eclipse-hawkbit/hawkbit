@@ -243,6 +243,11 @@ public final class SPUIComponentIdProvider {
     public static final String DISCARD_SW_MODULE_TYPE = "save.actions.popup.discard.sw.module.type";
 
     /**
+     * Action history table cancel Id.
+     */
+    public static final String ACTION_DETAILS_SOFT_ID = "action.details.soft.group";
+
+    /**
      * ID - Label.
      */
     public static final String ACTION_LABEL = "save.actions.popup.actionMsg";
