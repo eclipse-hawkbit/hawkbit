@@ -272,7 +272,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         }
     }
     
-    private void populateMetadataDetails(){
+    @Override
+    protected void populateMetadataDetails(){
         dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
    }
     
@@ -399,10 +400,30 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
 
+    @Override
+    protected Boolean isMetadataIconToBeDisplayed() {
+        return true;
+    }
+    
+    @Override
+    protected String getShowMetadataButtonId() {
+        DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState
+                .getLastSelectedDistribution().get() : null;
+        return SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + lastselectedDistDS.getName() + "."
+                + lastselectedDistDS.getVersion();
+    }
+    
     private boolean isDistributionSetSelected(DistributionSet ds) {
         DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState
                 .getLastSelectedDistribution().get() : null;
         return ds != null && lastselectedDistDS != null && lastselectedDistDS.getName().equals(ds.getName())
                 && lastselectedDistDS.getVersion().endsWith(ds.getVersion());
+    }
+
+
+    @Override
+    protected void showMetadata(ClickEvent event) {
+        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 }

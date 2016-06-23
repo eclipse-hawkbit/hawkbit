@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
@@ -45,6 +46,9 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
 
     @Autowired
     private ManageDistUIState manageDistUIState;
+
+    @Autowired
+    protected SpPermissionChecker permChecker;
 
     @Override
     protected void checkForDuplicate(SoftwareModule entity, String value) {
@@ -85,6 +89,16 @@ public class SwMetadataPopupLayout extends AbstractMetadataPopupLayout<SoftwareM
         SoftwareModuleMetadata swMetadata = entityFactory.generateSoftwareModuleMetadata(entity, key, value);
         softwareManagement.deleteSoftwareModuleMetadata(entity, key);
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_SOFTWARE_MODULE_METADATA, swMetadata));
+    }
+    
+    @Override
+    protected boolean hasCreatePermission() {
+        return permChecker.hasCreateDistributionPermission();
+    }
+    
+    @Override
+    protected boolean hasUpdatePermission() {
+        return permChecker.hasUpdateDistributionPermission();
     }
 
 }

@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SpPermissionChecker;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.ui.common.AbstractMetadataPopupLayout;
@@ -37,14 +38,17 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
     @Autowired
     private EntityFactory entityFactory;
 
+    @Autowired
+    protected SpPermissionChecker permChecker;
+
     @Override
     protected void checkForDuplicate(DistributionSet entity, String value) {
         distributionSetManagement.findOne(entity, value);
     }
+    
     /**
      * Create metadata for DistributionSet.
      */
-    
     @Override
     protected DistributionSetMetadata createMetadata(DistributionSet entity, String key, String value) {
         DistributionSetMetadata dsMetaData = distributionSetManagement.createDistributionSetMetadata(entityFactory
@@ -79,5 +83,15 @@ public class DsMetadataPopupLayout extends AbstractMetadataPopupLayout<Distribut
         DistributionSetMetadata dsMetaData = entityFactory.generateDistributionSetMetadata(entity, key, value);
         distributionSetManagement.deleteDistributionSetMetadata(entity, key);
         eventBus.publish(this, new MetadataEvent(MetadataUIEvent.DELETE_DISTRIBUTION_SET_METADATA, dsMetaData));
+    }
+    
+    @Override
+    protected boolean hasCreatePermission() {
+        return permChecker.hasCreateDistributionPermission();
+    }
+    
+    @Override
+    protected boolean hasUpdatePermission() {
+        return permChecker.hasUpdateDistributionPermission();
     }
 }
