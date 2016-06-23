@@ -176,7 +176,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     public CommonDialogWindow getWindow() {
         window = SPUIComponentProvider.getWindow(i18n.get("caption.configure.rollout"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard(),
-                uiProperties.getLinks().getDocumentation().getRolloutView(), getMandatoryFields(), getEditedFields());
+                uiProperties.getLinks().getDocumentation().getRolloutView(), getMandatoryFields(), getEditedFields(),
+                i18n);
         return window;
     }
 

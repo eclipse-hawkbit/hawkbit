@@ -77,7 +77,7 @@ public class CommonDialogWindow extends Window implements Serializable {
     private final Map<String, Boolean> editedFields;
 
     @Autowired
-    private I18N i18n;
+    private final I18N i18n;
 
     /**
      * Constructor.
@@ -95,7 +95,7 @@ public class CommonDialogWindow extends Window implements Serializable {
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
-            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields) {
+            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields, final I18N i18n) {
         checkNotNull(saveButtonClickListener);
         checkNotNull(cancelButtonClickListener);
         this.caption = caption;
@@ -105,7 +105,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         this.cancelButtonClickListener = cancelButtonClickListener;
         this.requiredFields = requiredFields;
         this.editedFields = editedFields;
-
+        this.i18n = i18n;
         init();
     }
 
@@ -259,9 +259,7 @@ public class CommonDialogWindow extends Window implements Serializable {
     private void createMandatoryLabel() {
 
         if (existsMandatoryFieldsInWindowContent()) {
-            // final Label madatoryLabel = new
-            // Label(i18n.get("label.mandatory.field"));
-            final Label mandatoryLabel = new Label("* Mandatory Field");
+            final Label mandatoryLabel = new Label(i18n.get("label.mandatory.field"));
             mandatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
 
             if (content instanceof TargetAddUpdateWindowLayout) {

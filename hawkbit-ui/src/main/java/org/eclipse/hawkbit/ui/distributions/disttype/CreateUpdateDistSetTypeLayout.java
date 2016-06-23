@@ -318,7 +318,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         for (final Iterator itemIterator = originalSelectedTableContainer.getItemIds().iterator(); itemIterator
                 .hasNext();) {
             final long itemId = (Long) itemIterator.next();
-            if (!selectedTableContainer.containsId(itemId)) {
+            if (selectedTableContainer.size() > 0 && !selectedTableContainer.containsId(itemId)) {
                 return Boolean.TRUE;
             }
         }
@@ -678,7 +678,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, getMandatoryFields(),
-                getEditedFields());
+                getEditedFields(), i18n);
     }
 
     private Map<String, Boolean> getMandatoryFields() {
@@ -692,7 +692,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         }
         // Selected SoftwareModulesType
         requiredFields.put(selectedTable.getId(), null);
-
         return requiredFields;
     }
 

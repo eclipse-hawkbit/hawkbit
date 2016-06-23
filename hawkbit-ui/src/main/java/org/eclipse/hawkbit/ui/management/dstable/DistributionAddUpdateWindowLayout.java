@@ -523,7 +523,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null, getMandatoryFields(), null);
+                null, getMandatoryFields(), null, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         return window;
     }

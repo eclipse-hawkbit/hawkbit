@@ -133,7 +133,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, getMandatoryFields(),
-                getEditedFields());
+                getEditedFields(), i18n);
     }
 
     private Map<String, Boolean> getMandatoryFields() {

@@ -117,7 +117,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         reset();
         setWindow(
                 SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null, SPUIDefinitions.CREATE_UPDATE_WINDOW,
-                        this, this::save, this::discard, null, getMandatoryFields(), getEditedFields()));
+                        this, this::save, this::discard, null, getMandatoryFields(), getEditedFields(), i18n));
     }
 
     private Map<String, Boolean> getMandatoryFields() {
