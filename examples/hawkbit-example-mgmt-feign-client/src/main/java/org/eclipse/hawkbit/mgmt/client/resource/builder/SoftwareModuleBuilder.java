@@ -90,13 +90,13 @@ public class SoftwareModuleBuilder {
      * @return a single entry list of {@link MgmtSoftwareModuleRequestBodyPost}
      */
     public List<MgmtSoftwareModuleRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(name));
+        return Lists.newArrayList(doBuild(""));
     }
 
     /**
      * Builds a list of multiple {@link MgmtSoftwareModuleRequestBodyPost} to
      * create multiple software module at once. An increasing number will be
-     * added to the name of the software module. The version and type will
+     * added to the version of the software module. The name and type will
      * remain the same.
      * 
      * @param count
@@ -106,16 +106,16 @@ public class SoftwareModuleBuilder {
     public List<MgmtSoftwareModuleRequestBodyPost> buildAsList(final int count) {
         final ArrayList<MgmtSoftwareModuleRequestBodyPost> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
-            bodyList.add(doBuild(name + index));
+            bodyList.add(doBuild(String.valueOf(index)));
         }
 
         return bodyList;
     }
 
-    private MgmtSoftwareModuleRequestBodyPost doBuild(final String prefixName) {
+    private MgmtSoftwareModuleRequestBodyPost doBuild(final String suffix) {
         final MgmtSoftwareModuleRequestBodyPost body = new MgmtSoftwareModuleRequestBodyPost();
-        body.setName(prefixName);
-        body.setVersion(version);
+        body.setName(name);
+        body.setVersion(version + suffix);
         body.setType(type);
         body.setVendor(vendor);
         body.setDescription(description);

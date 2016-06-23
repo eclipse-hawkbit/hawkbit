@@ -35,14 +35,21 @@ import com.google.common.collect.Lists;
 public class SpReceiverService extends ReceiverService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReceiverService.class);
 
-    public static final String SOFTWARE_MODULE_FIRMWARE = "firmware";
-
     private final SpSenderService spSenderService;
 
     private final DeviceSimulatorUpdater deviceUpdater;
 
     /**
      * Constructor.
+     * 
+     * @param rabbitTemplate
+     *            for sending messages
+     * @param amqpProperties
+     *            for amqp configuration
+     * @param spSenderService
+     *            to send messages
+     * @param deviceUpdater
+     *            simulator service for updates
      */
     @Autowired
     public SpReceiverService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties,

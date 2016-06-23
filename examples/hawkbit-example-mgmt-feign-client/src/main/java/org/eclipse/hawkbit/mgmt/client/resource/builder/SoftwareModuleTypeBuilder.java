@@ -69,7 +69,7 @@ public class SoftwareModuleTypeBuilder {
      *         {@link MgmtSoftwareModuleTypeRequestBodyPost}
      */
     public List<MgmtSoftwareModuleTypeRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(key, name));
+        return Lists.newArrayList(doBuild(""));
     }
 
     /**
@@ -85,15 +85,15 @@ public class SoftwareModuleTypeBuilder {
     public List<MgmtSoftwareModuleTypeRequestBodyPost> buildAsList(final int count) {
         final ArrayList<MgmtSoftwareModuleTypeRequestBodyPost> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
-            bodyList.add(doBuild(key + index, name + index));
+            bodyList.add(doBuild(String.valueOf(index)));
         }
         return bodyList;
     }
 
-    private MgmtSoftwareModuleTypeRequestBodyPost doBuild(final String prefixKey, final String prefixName) {
+    private MgmtSoftwareModuleTypeRequestBodyPost doBuild(final String suffix) {
         final MgmtSoftwareModuleTypeRequestBodyPost body = new MgmtSoftwareModuleTypeRequestBodyPost();
-        body.setKey(prefixKey);
-        body.setName(prefixName);
+        body.setKey(key + suffix);
+        body.setName(name + suffix);
         body.setDescription(description);
         body.setMaxAssignments(maxAssignments);
         return body;

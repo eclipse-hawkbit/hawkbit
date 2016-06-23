@@ -16,9 +16,18 @@ import java.util.concurrent.TimeUnit;
 
 public interface TargetInfo extends Serializable {
     /**
-     * @return the address under whioch the target can be reached
+     * @return the address under which the target can be reached
      */
     URI getAddress();
+
+    /**
+     * @param address
+     *            the target address to set
+     *
+     * @throws IllegalArgumentException
+     *             If the given string violates RFC&nbsp;2396
+     */
+    void setAddress(String address);
 
     /**
      * @return {@link Target} this info element belongs to.

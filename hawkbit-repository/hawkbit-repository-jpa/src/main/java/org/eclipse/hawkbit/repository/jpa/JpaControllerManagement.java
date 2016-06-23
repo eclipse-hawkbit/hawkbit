@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -91,6 +92,9 @@ public class JpaControllerManagement implements ControllerManagement {
 
     @Autowired
     private HawkbitSecurityProperties securityProperties;
+
+    @Autowired
+    private RepositoryProperties repositoryProperties;
 
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
@@ -249,12 +253,23 @@ public class JpaControllerManagement implements ControllerManagement {
     public Action addUpdateActionStatus(@NotNull final ActionStatus actionStatus) {
         final JpaAction action = (JpaAction) actionStatus.getAction();
 
-        if (!action.isActive()) {
+        // if action is already closed we accept further status updates if
+        // permitted so by configuration. This is especially useful if the
+        // action status feedback channel order from the device cannot be
+        // guaranteed. However, if an action is closed we do not accept further
+        // close messages.
+        if (actionIsNotActiveButIntermediateFeedbackStillAllowed(actionStatus, action)) {
             LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
                     actionStatus.getId(), action.getId());
             return action;
         }
         return handleAddUpdateActionStatus((JpaActionStatus) actionStatus, action);
+    }
+
+    private boolean actionIsNotActiveButIntermediateFeedbackStillAllowed(final ActionStatus actionStatus,
+            final JpaAction action) {
+        return !action.isActive() && (repositoryProperties.isRejectActionStatusForClosedAction()
+                || (Status.ERROR.equals(actionStatus.getStatus()) || Status.FINISHED.equals(actionStatus.getStatus())));
     }
 
     /**
@@ -284,8 +299,7 @@ public class JpaControllerManagement implements ControllerManagement {
         case CANCELED:
         case WARNING:
         case RUNNING:
-            DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.PENDING, false, targetInfoRepository,
-                    entityManager);
+            handleIntermediateFeedback(mergedAction, mergedTarget);
             break;
         default:
             break;
@@ -296,6 +310,16 @@ public class JpaControllerManagement implements ControllerManagement {
         LOG.debug("addUpdateActionStatus {} for target {} is finished.", action.getId(), mergedTarget.getId());
 
         return actionRepository.save(mergedAction);
+    }
+
+    private void handleIntermediateFeedback(final JpaAction mergedAction, final JpaTarget mergedTarget) {
+        // we change the target state only if the action is still running
+        // otherwise this is considered as late feedback that does not have
+        // an impact on the state anymore.
+        if (mergedAction.isActive()) {
+            DeploymentHelper.updateTargetInfo(mergedTarget, TargetUpdateStatus.PENDING, false, targetInfoRepository,
+                    entityManager);
+        }
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {

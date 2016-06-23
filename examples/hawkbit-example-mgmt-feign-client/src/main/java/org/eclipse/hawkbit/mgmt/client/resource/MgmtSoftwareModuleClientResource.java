@@ -24,9 +24,10 @@ import feign.Param;
 /**
  * Client binding for the SoftwareModule resource of the management API.
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
+@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
 public interface MgmtSoftwareModuleClientResource extends MgmtSoftwareModuleRestApi {
 
+    @Override
     @RequestMapping(method = RequestMethod.POST, value = "/{softwareModuleId}/artifacts")
     ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @Param("file") final MultipartFile file,
