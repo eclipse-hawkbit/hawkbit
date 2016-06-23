@@ -47,10 +47,10 @@ public final class SPUIWindowDecorator {
     public static CommonDialogWindow getDeocratedWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
             final ClickListener cancelButtonClickListener, final String helpLink,
-            final Map<String, Boolean> requiredFields) {
+            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields) {
 
         final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-                cancelButtonClickListener, requiredFields);
+                cancelButtonClickListener, requiredFields, editedFields);
         if (null != id) {
             window.setId(id);
         }

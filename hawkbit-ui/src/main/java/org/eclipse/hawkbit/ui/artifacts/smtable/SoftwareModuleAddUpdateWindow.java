@@ -193,7 +193,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         oldVendorValue = null;
 
         if (window != null) {
-            window.resetRequiredFieldsValues();
+            window.resetMandatoryAndEditedFields();
         }
     }
 
@@ -223,7 +223,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
-                getMandatoryFields(formLayout));
+                getMandatoryFields(formLayout), null);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         nameTextField.focus();
     }

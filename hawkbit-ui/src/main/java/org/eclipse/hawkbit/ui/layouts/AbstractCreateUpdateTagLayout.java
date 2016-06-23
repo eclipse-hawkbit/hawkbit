@@ -115,8 +115,9 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     protected void createWindow() {
         reset();
-        setWindow(SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, getMandatoryFields()));
+        setWindow(
+                SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null, SPUIDefinitions.CREATE_UPDATE_WINDOW,
+                        this, this::save, this::discard, null, getMandatoryFields(), getEditedFields()));
     }
 
     private Map<String, Boolean> getMandatoryFields() {
@@ -129,6 +130,13 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             }
         }
         return requiredFields;
+    }
+
+    protected Map<String, Boolean> getEditedFields() {
+        final Map<String, Boolean> changeMap = new HashMap<>();
+        changeMap.put(tagDesc.getCaption(), Boolean.FALSE);
+        changeMap.put(colorPickerLayout.getId(), Boolean.FALSE);
+        return changeMap;
     }
 
     /**
@@ -213,7 +221,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     protected void listenerTagDescTextAreaChanged(final TextChangeEvent event) {
 
-        window.checkChanges(event.getText(), tagDescOriginal);
+        window.checkChanges(tagDesc.getCaption(), event.getText(), tagDescOriginal);
     }
 
     protected void buildLayout() {
@@ -375,7 +383,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         tagPreviewBtnClicked = false;
 
         if (window != null) {
-            window.resetRequiredFieldsValues();
+            window.resetMandatoryAndEditedFields();
         }
     }
 
@@ -466,7 +474,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             colorPickerLayout.getColorSelect().setColor(colorPickerLayout.getSelPreview().getColor());
         }
 
-        window.checkColorChange(colorPickerLayout.getSelectedColor(), selectedColorOriginal);
+        window.checkColorChange(colorPickerLayout.getId(), colorPickerLayout.getSelectedColor(), selectedColorOriginal);
     }
 
     protected void closeWindow() {

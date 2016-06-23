@@ -186,7 +186,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelPreview().getColor());
         }
-        window.checkColorChange(colorPickerLayout.getSelectedColor(), selectedColorOriginal);
+        window.checkColorChange(colorPickerLayout.getId(), colorPickerLayout.getSelectedColor(), selectedColorOriginal);
     }
 
     /**
@@ -206,6 +206,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
         optiongroup = new OptionGroup("Select Action");
+        optiongroup.setId(SPUIComponentIdProvider.OPTION_GROUP);
         optiongroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         optiongroup.addStyleName("custom-option-group");
         optiongroup.setNullSelectionAllowed(false);

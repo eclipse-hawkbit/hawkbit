@@ -74,6 +74,8 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private Map<String, Boolean> requiredFields;
 
+    private final Map<String, Boolean> editedFields;
+
     @Autowired
     private I18N i18n;
 
@@ -93,7 +95,7 @@ public class CommonDialogWindow extends Window implements Serializable {
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
-            final Map<String, Boolean> requiredFields) {
+            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields) {
         checkNotNull(saveButtonClickListener);
         checkNotNull(cancelButtonClickListener);
         this.caption = caption;
@@ -102,6 +104,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         this.saveButtonClickListener = saveButtonClickListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
         this.requiredFields = requiredFields;
+        this.editedFields = editedFields;
 
         init();
     }
@@ -110,32 +113,32 @@ public class CommonDialogWindow extends Window implements Serializable {
 
         if (StringUtils.isNotBlank(event.getText())) {
             if (StringUtils.isNotBlank(textfield.getCaption())) {
-                getRequiredFields().put(textfield.getCaption(), Boolean.TRUE);
+                requiredFields.put(textfield.getCaption(), Boolean.TRUE);
             }
             getRequiredFields().put(textfield.getId(), Boolean.TRUE);
         } else {
             if (StringUtils.isNotBlank(textfield.getCaption())) {
-                getRequiredFields().put(textfield.getCaption(), Boolean.FALSE);
+                requiredFields.put(textfield.getCaption(), Boolean.FALSE);
             }
-            getRequiredFields().put(textfield.getId(), Boolean.FALSE);
+            requiredFields.put(textfield.getId(), Boolean.FALSE);
         }
-        checkMandatoryFields();
+        checkMandatoryFieldsFilled();
     }
 
     public void checkMandatoryComboBox(final ValueChangeEvent event, final AbstractSelect select) {
 
         if (event.getProperty().getValue() != null) {
             if (StringUtils.isNotBlank(select.getCaption())) {
-                getRequiredFields().put(select.getCaption(), Boolean.TRUE);
+                requiredFields.put(select.getCaption(), Boolean.TRUE);
             }
-            getRequiredFields().put(select.getId(), Boolean.TRUE);
+            requiredFields.put(select.getId(), Boolean.TRUE);
         } else {
             if (StringUtils.isNotBlank(select.getCaption())) {
-                getRequiredFields().put(select.getCaption(), Boolean.FALSE);
+                requiredFields.put(select.getCaption(), Boolean.FALSE);
             }
-            getRequiredFields().put(select.getId(), Boolean.FALSE);
+            requiredFields.put(select.getId(), Boolean.FALSE);
         }
-        checkMandatoryFields();
+        checkMandatoryFieldsFilled();
     }
 
     /**
@@ -143,7 +146,7 @@ public class CommonDialogWindow extends Window implements Serializable {
      * mandatory fields are filled the save button is enabled. Otherwise the
      * save button is disabled.
      */
-    private void checkMandatoryFields() {
+    private void checkMandatoryFieldsFilled() {
 
         for (final Map.Entry<String, Boolean> entry : requiredFields.entrySet()) {
             if (entry.getValue() == null || entry.getValue().equals(Boolean.FALSE)) {
@@ -154,35 +157,56 @@ public class CommonDialogWindow extends Window implements Serializable {
         saveButton.setEnabled(true);
     }
 
-    public void updateRequiredFields(final String fieldId, final Boolean filled) {
+    private void checkExistsChanges() {
 
-        getRequiredFields().put(fieldId, filled);
-        checkMandatoryFields();
+        if (editedFields == null) {
+            return;
+        }
+        for (final Map.Entry<String, Boolean> entry : editedFields.entrySet()) {
+            if (entry.getValue() != null && entry.getValue().equals(Boolean.TRUE)) {
+                saveButton.setEnabled(true);
+                return;
+            }
+        }
+        saveButton.setEnabled(false);
     }
 
-    public void checkChanges(final String newText, final String oldText) {
+    public void updateRequiredFields(final String fieldId, final Boolean filled) {
+
+        requiredFields.put(fieldId, filled);
+        checkMandatoryFieldsFilled();
+    }
+
+    public void checkChanges(final String fieldName, final String newText, final String oldText) {
 
         if ((StringUtils.isNotBlank(newText) && !newText.equals(oldText))
                 || (StringUtils.isNotBlank(oldText) && !oldText.equals(newText))) {
-            saveButton.setEnabled(true);
+            editedFields.put(fieldName, Boolean.TRUE);
         } else {
-            saveButton.setEnabled(false);
+            editedFields.put(fieldName, Boolean.FALSE);
         }
+        checkExistsChanges();
     }
 
-    public void checkColorChange(final Color newColor, final Color oldColor) {
+    public void checkColorChange(final String fieldName, final Color newColor, final Color oldColor) {
 
         if (newColor.equals(oldColor)) {
-            setSaveButtonEnabled(false);
+            editedFields.put(fieldName, Boolean.FALSE);
         } else {
-            setSaveButtonEnabled(true);
+            editedFields.put(fieldName, Boolean.TRUE);
         }
+        checkExistsChanges();
     }
 
-    public void resetRequiredFieldsValues() {
-        // Reset mandatory fields are filled marker
-        if (getRequiredFields() != null) {
-            for (final Map.Entry<String, Boolean> entry : getRequiredFields().entrySet()) {
+    public void resetMandatoryAndEditedFields() {
+        resetFields(requiredFields);
+        resetFields(editedFields);
+    }
+
+    private void resetFields(final Map<String, Boolean> fields) {
+        // Reset mandatory fields are filled marker / fields are edited marker
+        if (fields != null) {
+            for (final Map.Entry<String, Boolean> entry : fields.entrySet()) {
                 entry.setValue(null);
             }
         }

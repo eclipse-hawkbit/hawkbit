@@ -179,11 +179,15 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void listenerDistNameTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, distNameTextField);
+        if (!editDistribution) {
+            window.checkMandatoryTextField(event, distNameTextField);
+        }
     }
 
     private void listenerDistVersionTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, distVersionTextField);
+        if (!editDistribution) {
+            window.checkMandatoryTextField(event, distVersionTextField);
+        }
     }
 
     /**
@@ -410,7 +414,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         changedComponents.clear();
 
         if (window != null) {
-            window.resetRequiredFieldsValues();
+            window.resetMandatoryAndEditedFields();
         }
     }
 
@@ -519,9 +523,8 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         resetComponents();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null, getMandatoryFields());
+                null, getMandatoryFields(), null);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
-
         return window;
     }
 

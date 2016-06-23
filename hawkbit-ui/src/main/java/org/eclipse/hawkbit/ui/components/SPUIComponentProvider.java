@@ -154,9 +154,9 @@ public final class SPUIComponentProvider {
     public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
             final ClickListener cancelButtonClickListener, final String helpLink,
-            final Map<String, Boolean> requiredFields) {
+            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields) {
         return SPUIWindowDecorator.getDeocratedWindow(caption, id, type, content, saveButtonClickListener,
-                cancelButtonClickListener, helpLink, requiredFields);
+                cancelButtonClickListener, helpLink, requiredFields, editedFields);
     }
 
     /**

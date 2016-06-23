@@ -244,7 +244,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), event -> discardTargetListner(), null, getMandatoryFields());
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), event -> discardTargetListner(), null, getMandatoryFields(), null);
         return window;
     }
     
@@ -259,7 +259,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         }
         return requiredFields;
     }
-
+    
     /**
      * clear all fields of Target Edit Window.
      */
@@ -274,7 +274,7 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         editTarget = Boolean.FALSE;
 
         if (window != null) {
-            window.resetRequiredFieldsValues();
+            window.resetMandatoryAndEditedFields();
         }
     }
 

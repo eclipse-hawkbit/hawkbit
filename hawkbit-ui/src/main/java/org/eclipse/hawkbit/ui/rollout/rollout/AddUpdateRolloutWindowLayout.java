@@ -150,26 +150,47 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextArea targetFilterQuery;
 
+    private Boolean updateMode = Boolean.FALSE;
+
+    private String distributionSetOriginal;
+
+    private Object actionGroupOriginal;
+
+    private String rolloutNameOriginal;
+
+    private String errorThresholdOriginal;;
+
+    private String triggerThresholdOriginal;
+
+    private String descriptionOriginal;
+
     /**
      * Create components and layout.
      */
     public void init() {
-
         setSizeUndefined();
         createRequiredComponents();
         buildLayout();
     }
 
     public CommonDialogWindow getWindow() {
-
         window = SPUIComponentProvider.getWindow(i18n.get("caption.configure.rollout"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard(),
-                uiProperties.getLinks().getDocumentation().getRolloutView(), getMandatoryFields());
+                uiProperties.getLinks().getDocumentation().getRolloutView(), getMandatoryFields(), getEditedFields());
         return window;
     }
 
-    private Map<String, Boolean> getMandatoryFields() {
+    public CommonDialogWindow createUpdateWindow() {
+        updateMode = Boolean.TRUE;
+        return getWindow();
+    }
 
+    public CommonDialogWindow createAddWindow() {
+        updateMode = Boolean.FALSE;
+        return getWindow();
+    }
+
+    private Map<String, Boolean> getMandatoryFields() {
         final Map<String, Boolean> requiredFields = new HashMap<>();
         requiredFields.put(rolloutName.getId(), null);
         requiredFields.put(distributionSet.getId(), null);
@@ -195,16 +216,14 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         setDefaultSaveStartGroupOption();
         totalTargetsLabel.setVisible(false);
         groupSizeLabel.setVisible(false);
-        removeComponent(targetFilterQuery);
-        if (getComponent(1, 3) == null) {
-            addComponent(targetFilterQueryCombo, 1, 3);
-        }
+        removeComponent(1, 2);
+        addComponent(targetFilterQueryCombo, 1, 2);
         actionTypeOptionGroupLayout.selectDefaultOption();
         totalTargetsCount = 0L;
         rolloutForEdit = null;
 
         if (window != null) {
-            window.resetRequiredFieldsValues();
+            window.resetMandatoryAndEditedFields();
         }
     }
 
@@ -284,7 +303,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         noOfGroups = createNoOfGroupsField();
         groupSizeLabel = createGroupSizeLabel();
-        triggerThreshold = createTriggerThresold();
+        triggerThreshold = createTriggerThreshold();
         errorThreshold = createErrorThreshold();
         description = createDescription();
         errorThresholdOptionGroup = createErrorThresholdOptionGroup();
@@ -293,6 +312,20 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         totalTargetsLabel = createTotalTargetsLabel();
         targetFilterQuery = createTargetFilterQuery();
         actionTypeOptionGroupLayout.addStyleName(SPUIStyleDefinitions.ROLLOUT_ACTION_TYPE_LAYOUT);
+        actionTypeOptionGroupLayout.getActionTypeOptionGroup()
+                .addValueChangeListener(this::listenerActionGroupValueChanged);
+    }
+
+    private void listenerActionGroupValueChanged(final ValueChangeEvent event) {
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryComboBox(event, actionTypeOptionGroupLayout.getActionTypeOptionGroup());
+            }
+            if (event.getProperty().getValue() != null) {
+                window.checkChanges(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getId(),
+                        event.getProperty().getValue().toString(), actionGroupOriginal.toString());
+            }
+        }
     }
 
     private Label createGroupSizeLabel() {
@@ -578,7 +611,18 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         descriptionField.setId(SPUIComponentIdProvider.ROLLOUT_DESCRIPTION_ID);
         descriptionField.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
         descriptionField.setSizeUndefined();
+        descriptionField.addTextChangeListener(this::listenerDescriptionTextFieldChanged);
         return descriptionField;
+    }
+
+    private void listenerDescriptionTextFieldChanged(final TextChangeEvent event) {
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryTextField(event, description);
+                return;
+            }
+            window.checkChanges(description.getId(), event.getText(), descriptionOriginal);
+        }
     }
 
     private TextField createErrorThreshold() {
@@ -592,11 +636,16 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void listenerErrorThresholdTextFieldChanged(final TextChangeEvent event) {
-
-        window.checkMandatoryTextField(event, errorThreshold);
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryTextField(event, errorThreshold);
+                return;
+            }
+            window.checkChanges(errorThreshold.getId(), event.getText(), errorThresholdOriginal);
+        }
     }
 
-    private TextField createTriggerThresold() {
+    private TextField createTriggerThreshold() {
         final TextField thresholdField = getTextfield("prompt.tigger.threshold");
         thresholdField.setId(SPUIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID);
         thresholdField.addValidator(new ThresholdFieldValidator());
@@ -607,7 +656,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void listenerTriggerThresholdTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, triggerThreshold);
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryTextField(event, triggerThreshold);
+                return;
+            }
+            window.checkChanges(triggerThreshold.getId(), event.getText(), triggerThresholdOriginal);
+        }
     }
 
     private TextField createNoOfGroupsField() {
@@ -622,7 +677,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void listenerNoOfGroupsTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, noOfGroups);
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryTextField(event, noOfGroups);
+                return;
+            }
+            window.checkChanges(noOfGroups.getId(), event.getText(), noOfGroups.getValue());
+        }
     }
 
     private void onGroupNumberChange() {
@@ -647,7 +708,16 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void listenerDistributionSetChanged(final ValueChangeEvent event) {
-        window.checkMandatoryComboBox(event, distributionSet);
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryComboBox(event, distributionSet);
+                return;
+            }
+            if (event.getProperty().getValue() != null) {
+                window.checkChanges(distributionSet.getId(), event.getProperty().getValue().toString(),
+                        distributionSetOriginal);
+            }
+        }
     }
 
     private void populateDistributionSet() {
@@ -673,7 +743,13 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     private void listenerRolloutNameTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, rolloutName);
+        if (window != null) {
+            if (!updateMode) {
+                window.checkMandatoryTextField(event, rolloutName);
+                return;
+            }
+            window.checkChanges(rolloutName.getId(), event.getText(), rolloutNameOriginal);
+        }
     }
 
     private String getRolloutName() {
@@ -691,7 +767,8 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         public void validate(final Object value) {
             try {
                 if (HawkbitCommonUtil.trimAndNullIfEmpty(noOfGroups.getValue()) == null
-                        || HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null) {
+                        || (HawkbitCommonUtil.trimAndNullIfEmpty((String) targetFilterQueryCombo.getValue()) == null
+                                && targetFilterQuery.getValue() == null)) {
                     uiNotification
                             .displayValidationError(i18n.get("message.rollout.noofgroups.or.targetfilter.missing"));
                 } else {
@@ -781,12 +858,42 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         noOfGroups.setEnabled(false);
         targetFilterQuery.setValue(rolloutForEdit.getTargetFilterQuery());
-        removeComponent(targetFilterQueryCombo);
-        addComponent(targetFilterQuery, 1, 3);
+        removeComponent(1, 2);
+        addComponent(targetFilterQuery, 1, 2);
 
         totalTargetsCount = targetManagement.countTargetByTargetFilterQuery(rolloutForEdit.getTargetFilterQuery());
         totalTargetsLabel.setValue(getTotalTargetMessage());
         totalTargetsLabel.setVisible(true);
+
+        setOriginalValues();
+    }
+
+    private void setOriginalValues() {
+        distributionSetOriginal = distributionSet.getValue().toString();
+        actionGroupOriginal = actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue();
+        rolloutNameOriginal = rolloutName.getValue();
+        triggerThresholdOriginal = triggerThreshold.getValue();
+        errorThresholdOriginal = errorThreshold.getValue();
+        descriptionOriginal = description.getValue();
+    }
+
+    private Map<String, Boolean> getEditedFields() {
+        final Map<String, Boolean> changeMap = new HashMap<>();
+        if (rolloutForEdit == null) {
+            return changeMap;
+        }
+        if (rolloutForEdit.getStatus() != RolloutStatus.READY) {
+            changeMap.put(rolloutName.getId(), Boolean.FALSE);
+            changeMap.put(description.getId(), Boolean.FALSE);
+        } else {
+            changeMap.put(rolloutName.getId(), Boolean.FALSE);
+            changeMap.put(distributionSet.getId(), Boolean.FALSE);
+            changeMap.put(triggerThreshold.getId(), Boolean.FALSE);
+            changeMap.put(errorThreshold.getId(), Boolean.FALSE);
+            changeMap.put(description.getId(), Boolean.FALSE);
+            changeMap.put(actionTypeOptionGroupLayout.getActionTypeOptionGroup().getId(), Boolean.FALSE);
+        }
+        return changeMap;
     }
 
     private void disableRequiredFieldsOnEdit() {
@@ -852,7 +959,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         public String getValue() {
             return value;
         }
-
     }
 
     enum ERRORTHRESOLDOPTIONS {
@@ -870,6 +976,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         public String getValue() {
             return value;
         }
-
     }
+
 }
