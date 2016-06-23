@@ -290,6 +290,21 @@ public final class SPUIComponentIdProvider {
     public static final String ACTION_HISTORY_TABLE_ID = "action.history.tableId";
 
     /**
+     * Action history table cancel Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_CANCEL_ID = "action.history.table.action.cancel";
+
+    /**
+     * Action history table force Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCE_ID = "action.history.table.action.force";
+
+    /**
+     * Action history table force quit Id.
+     */
+    public static final String ACTION_HISTORY_TABLE_FORCE_QUIT_ID = "action.history.table.action.force.quit";
+
+    /**
      * Target filter wrapper id.
      */
     public static final String TARGET_FILTER_WRAPPER_ID = "target-drop-filter";
@@ -826,7 +841,7 @@ public final class SPUIComponentIdProvider {
     /**
      * Rollout start button id.
      */
-    public static final String ROLLOUT_START_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
+    public static final String ROLLOUT_RUN_BUTTON_ID = ROLLOUT_ACTION_ID + ".9";
 
     /**
      * Rollout pause button id.
@@ -836,12 +851,7 @@ public final class SPUIComponentIdProvider {
     /**
      * Rollout resume button id.
      */
-    public static final String ROLLOUT_RESUME_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
-
-    /**
-     * Rollout resume button id.
-     */
-    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".12";
+    public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".11";
 
     /**
      * Rollout save or start option group id.

@@ -88,6 +88,11 @@ public final class SPUIDefinitions {
     public static final String ACTION_HIS_TBL_STATUS = "Status";
 
     /**
+     * Actions column
+     */
+    public static final String ACTIONS_COLUMN = "Actions";
+
+    /**
      * Action history messages of particular action update.
      */
     public static final String ACTION_HIS_TBL_MSGS = "Messages";

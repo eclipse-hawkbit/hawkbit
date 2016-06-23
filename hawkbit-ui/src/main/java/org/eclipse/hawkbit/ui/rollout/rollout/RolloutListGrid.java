@@ -14,6 +14,7 @@ import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_CLOSE_TAG;
 import static org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil.HTML_UL_OPEN_TAG;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -74,11 +75,9 @@ public class RolloutListGrid extends AbstractGrid {
 
     private static final String UPDATE_OPTION = "Update";
 
-    private static final String RESUME_OPTION = "Resume";
-
     private static final String PAUSE_OPTION = "Pause";
 
-    private static final String START_OPTION = "Start";
+    private static final String RUN_OPTION = "Run";
 
     private static final String DS_TYPE = "type";
 
@@ -193,12 +192,9 @@ public class RolloutListGrid extends AbstractGrid {
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS,
                 TotalTargetCountStatus.class, null, false, false);
 
-        rolloutGridContainer.addContainerProperty(START_OPTION, String.class, FontAwesome.PLAY.getHtml(), false, false);
+        rolloutGridContainer.addContainerProperty(RUN_OPTION, String.class, FontAwesome.PLAY.getHtml(), false, false);
 
         rolloutGridContainer.addContainerProperty(PAUSE_OPTION, String.class, FontAwesome.PAUSE.getHtml(), false,
-                false);
-
-        rolloutGridContainer.addContainerProperty(RESUME_OPTION, String.class, FontAwesome.FORWARD.getHtml(), false,
                 false);
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
@@ -225,18 +221,15 @@ public class RolloutListGrid extends AbstractGrid {
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMinimumWidth(40);
         getColumn(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS).setMaximumWidth(100);
 
-        getColumn(START_OPTION).setMinimumWidth(35);
-        getColumn(START_OPTION).setMaximumWidth(35);
+        getColumn(RUN_OPTION).setMinimumWidth(25);
+        getColumn(RUN_OPTION).setMaximumWidth(25);
 
-        getColumn(PAUSE_OPTION).setMinimumWidth(35);
-        getColumn(PAUSE_OPTION).setMaximumWidth(35);
-
-        getColumn(RESUME_OPTION).setMinimumWidth(35);
-        getColumn(RESUME_OPTION).setMaximumWidth(35);
+        getColumn(PAUSE_OPTION).setMinimumWidth(25);
+        getColumn(PAUSE_OPTION).setMaximumWidth(25);
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
-            getColumn(UPDATE_OPTION).setMinimumWidth(35);
-            getColumn(UPDATE_OPTION).setMaximumWidth(35);
+            getColumn(UPDATE_OPTION).setMinimumWidth(25);
+            getColumn(UPDATE_OPTION).setMaximumWidth(25);
         }
 
         getColumn(SPUILabelDefinitions.VAR_TOTAL_TARGETS_COUNT_STATUS).setMinimumWidth(280);
@@ -262,16 +255,16 @@ public class RolloutListGrid extends AbstractGrid {
                 .setHeaderCaption(i18n.get("header.detail.status"));
         getColumn(SPUILabelDefinitions.VAR_STATUS).setHeaderCaption(i18n.get("header.status"));
 
-        getColumn(START_OPTION).setHeaderCaption(i18n.get("header.action.start"));
+        getColumn(RUN_OPTION).setHeaderCaption(i18n.get("header.action.run"));
         getColumn(PAUSE_OPTION).setHeaderCaption(i18n.get("header.action.pause"));
-        getColumn(RESUME_OPTION).setHeaderCaption(i18n.get("header.action.resume"));
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION).setHeaderCaption(i18n.get("header.action.update"));
         }
 
-        getDefaultHeaderRow().join(START_OPTION, PAUSE_OPTION, RESUME_OPTION, UPDATE_OPTION)
-                .setText(i18n.get("header.action"));
+        final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION);
+        join.setText(i18n.get("header.action"));
+        join.getComponent().addStyleName("centeralign");
     }
 
     @Override
@@ -292,9 +285,8 @@ public class RolloutListGrid extends AbstractGrid {
         columnList.add(SPUILabelDefinitions.VAR_NUMBER_OF_GROUPS);
         columnList.add(SPUILabelDefinitions.VAR_TOTAL_TARGETS);
 
-        columnList.add(START_OPTION);
+        columnList.add(RUN_OPTION);
         columnList.add(PAUSE_OPTION);
-        columnList.add(RESUME_OPTION);
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             columnList.add(UPDATE_OPTION);
@@ -346,14 +338,11 @@ public class RolloutListGrid extends AbstractGrid {
         customObjectRenderer.addClickListener(this::onClickOfRolloutName);
         getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
 
-        getColumn(START_OPTION)
-                .setRenderer(new HtmlButtonRenderer(clickEvent -> startRolloutAsync((Long) clickEvent.getItemId())));
+        getColumn(RUN_OPTION)
+                .setRenderer(new HtmlButtonRenderer(clickEvent -> startOrResumeRollout((Long) clickEvent.getItemId())));
 
         getColumn(PAUSE_OPTION)
                 .setRenderer(new HtmlButtonRenderer(clickEvent -> pauseRollout((Long) clickEvent.getItemId())));
-
-        getColumn(RESUME_OPTION)
-                .setRenderer(new HtmlButtonRenderer(clickEvent -> resumeRollout((Long) clickEvent.getItemId())));
 
         if (permissionChecker.hasRolloutUpdatePermission()) {
             getColumn(UPDATE_OPTION)
@@ -411,35 +400,24 @@ public class RolloutListGrid extends AbstractGrid {
         uiNotification.displaySuccess(i18n.get("message.rollout.paused", rolloutName));
     }
 
-    private void resumeRollout(final Long rolloutId) {
+    private void startOrResumeRollout(final Long rolloutId) {
         final Item row = getContainerDataSource().getItem(rolloutId);
 
         final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
                 .getValue();
+        final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
 
-        if (!RolloutStatus.PAUSED.equals(rolloutStatus)) {
+        if (RolloutStatus.READY.equals(rolloutStatus)) {
+            rolloutManagement.startRolloutAsync(rolloutManagement.findRolloutByName(rolloutName));
+            uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
             return;
         }
 
-        final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-
-        rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(rolloutId));
-        uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
-    }
-
-    private void startRolloutAsync(final Long rolloutId) {
-        final Item row = getContainerDataSource().getItem(rolloutId);
-
-        final RolloutStatus rolloutStatus = (RolloutStatus) row.getItemProperty(SPUILabelDefinitions.VAR_STATUS)
-                .getValue();
-
-        if (!RolloutStatus.READY.equals(rolloutStatus)) {
+        if (RolloutStatus.PAUSED.equals(rolloutStatus)) {
+            rolloutManagement.resumeRollout(rolloutManagement.findRolloutById(rolloutId));
+            uiNotification.displaySuccess(i18n.get("message.rollout.resumed", rolloutName));
             return;
         }
-
-        final String rolloutName = (String) row.getItemProperty(SPUILabelDefinitions.VAR_NAME).getValue();
-        rolloutManagement.startRolloutAsync(rolloutManagement.findRolloutByName(rolloutName));
-        uiNotification.displaySuccess(i18n.get("message.rollout.started", rolloutName));
     }
 
     private void updateRollout(final Long rolloutId) {
@@ -518,9 +496,8 @@ public class RolloutListGrid extends AbstractGrid {
         private final Container.Indexed containerDataSource;
 
         static {
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(START_OPTION, RolloutStatus.READY);
+            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(RUN_OPTION, RolloutStatus.READY);
             EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(PAUSE_OPTION, RolloutStatus.RUNNING);
-            EXPECTED_ROLLOUT_STATUS_ENABLE_BUTTON.put(RESUME_OPTION, RolloutStatus.PAUSED);
         }
 
         /**
@@ -548,9 +525,21 @@ public class RolloutListGrid extends AbstractGrid {
                 return null;
             }
 
+            if (RUN_OPTION.equals(cellReference.getPropertyId())) {
+                return getStatus(cellReference, RolloutStatus.READY, RolloutStatus.PAUSED);
+            }
+
+            if (PAUSE_OPTION.equals(cellReference.getPropertyId())) {
+                return getStatus(cellReference, RolloutStatus.RUNNING);
+            }
+
+            return null;
+        }
+
+        private String getStatus(final CellReference cellReference, final RolloutStatus... expectedRolloutStatus) {
             final RolloutStatus currentRolloutStatus = getRolloutStatus(cellReference.getItemId());
 
-            if (expectedRolloutStatus.equals(currentRolloutStatus)) {
+            if (Arrays.asList(expectedRolloutStatus).contains(currentRolloutStatus)) {
                 return null;
             }
 
