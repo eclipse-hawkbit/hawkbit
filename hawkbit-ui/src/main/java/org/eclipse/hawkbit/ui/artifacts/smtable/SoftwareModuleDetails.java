@@ -200,4 +200,23 @@ public class SoftwareModuleDetails extends AbstractNamedVersionedEntityTableDeta
                 && selectedUploadSWModule.getName().equals(softwareModule.getName())
                 && selectedUploadSWModule.getVersion().equals(softwareModule.getVersion());
     }
+    
+    @Override
+    protected Boolean isMetadataIconToBeDisplayed() {
+        return true;
+    }
+    
+    @Override
+    protected String getShowMetadataButtonId() {
+        SoftwareModule selectedBaseEntity = getSelectedBaseEntity();
+        return SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + selectedBaseEntity.getName() + "."
+                + selectedBaseEntity.getVersion();
+    }
+
+    @Override
+    protected void showMetadata(ClickEvent event) {
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(getSelectedBaseEntity(),null));
+            
+    }
+    
 }
