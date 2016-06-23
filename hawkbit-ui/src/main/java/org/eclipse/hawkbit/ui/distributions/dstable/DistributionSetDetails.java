@@ -420,7 +420,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
                 && lastselectedDistDS.getVersion().endsWith(ds.getVersion());
     }
 
-
     @Override
     protected void showMetadata(ClickEvent event) {
         DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
