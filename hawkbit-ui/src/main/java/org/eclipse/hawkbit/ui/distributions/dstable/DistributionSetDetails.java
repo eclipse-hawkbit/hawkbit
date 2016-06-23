@@ -272,7 +272,8 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         }
     }
     
-    private void populateMetadataDetails(){
+    @Override
+    protected void populateMetadataDetails(){
         dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
    }
     
@@ -404,6 +405,11 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         return true;
     }
     
+     @Override
+    protected Boolean isMetadataIconToBeDisplayed() {
+        return true;
+    }
+    
     @Override
     protected String getShowMetadataButtonId() {
         DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState
@@ -422,6 +428,7 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
 
     @Override
     protected void showMetadata(ClickEvent event) {
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(getSelectedBaseEntity(),null));        
+        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
 }

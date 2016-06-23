@@ -221,6 +221,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
+        populateMetadataDetails();
     }
 
     protected void populateLog() {
@@ -339,6 +340,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     protected abstract void populateDetailsWidget();
+    
+    protected abstract void populateMetadataDetails();
 
     protected Long getSelectedBaseEntityId() {
         return selectedBaseEntity == null ? null : selectedBaseEntity.getId();

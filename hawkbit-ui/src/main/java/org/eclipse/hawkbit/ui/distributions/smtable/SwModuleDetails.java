@@ -197,7 +197,8 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
         return SPUIComponentIdProvider.TARGET_DETAILS_HEADER_LABEL_ID;
     }
     
-    private void populateMetadataDetails() {
+    @Override
+    protected void populateMetadataDetails() {
         swmMetadataTable.populateSMMetadata(getSelectedBaseEntity());
     }
 
@@ -222,6 +223,7 @@ public class SwModuleDetails extends AbstractNamedVersionedEntityTableDetailsLay
 
     @Override
     protected void showMetadata(ClickEvent event) {
-        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(getSelectedBaseEntity(),null));
+        SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(swMetadataPopupLayout.getWindow(swmodule, null));
     }
 }

@@ -263,4 +263,9 @@ public class TargetDetails extends AbstractTableDetailsLayout<Target> {
         //No implementation required
     }
 
+    @Override
+    protected void populateMetadataDetails() {
+        //No implementation required
+    }
+
 }

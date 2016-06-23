@@ -158,7 +158,9 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     }
     
-    private void populateMetadataDetails(){
+    
+    @Override
+    protected void populateMetadataDetails(){
         dsMetadataTable.populateDSMetadata(getSelectedBaseEntity());
    }
 
@@ -227,7 +229,8 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void showMetadata(ClickEvent event) {
-        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(getSelectedBaseEntity(),null));        
+        DistributionSet ds = distributionSetManagement.findDistributionSetByIdWithDetails(getSelectedBaseEntityId());
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(ds,null));
     }
     
 }
