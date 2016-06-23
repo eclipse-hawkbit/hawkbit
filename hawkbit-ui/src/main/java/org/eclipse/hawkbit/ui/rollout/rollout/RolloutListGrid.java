@@ -264,7 +264,6 @@ public class RolloutListGrid extends AbstractGrid {
 
         final HeaderCell join = getDefaultHeaderRow().join(RUN_OPTION, PAUSE_OPTION, UPDATE_OPTION);
         join.setText(i18n.get("header.action"));
-        join.getComponent().addStyleName("centeralign");
     }
 
     @Override
