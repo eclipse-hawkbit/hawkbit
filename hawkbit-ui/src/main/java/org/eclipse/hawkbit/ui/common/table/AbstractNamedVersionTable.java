@@ -28,6 +28,16 @@ public abstract class AbstractNamedVersionTable<E extends NamedVersionedEntity, 
 
     private static final long serialVersionUID = 780050712209750719L;
 
+    /**
+     * Initialize the component.
+     */
+    @Override
+    protected void init() {
+        super.init();
+        setMultiSelect(true);
+        setSelectable(true);
+    }
+
     @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
