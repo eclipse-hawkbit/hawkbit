@@ -12,11 +12,16 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Implementation for {@link MultipartFile} for hawkBit artifact upload.
+ *
+ */
 public class ArtifactFile implements MultipartFile {
 
     private final String name;
@@ -55,9 +60,9 @@ public class ArtifactFile implements MultipartFile {
             final byte[] content) {
         Assert.hasLength(name, "Name must not be null");
         this.name = name;
-        this.originalFilename = originalFilename != null ? originalFilename : "";
+        this.originalFilename = Optional.ofNullable(originalFilename).orElse("");
         this.contentType = contentType;
-        this.content = content != null ? content : new byte[0];
+        this.content = Optional.ofNullable(content).orElse(new byte[0]);
     }
 
     @Override

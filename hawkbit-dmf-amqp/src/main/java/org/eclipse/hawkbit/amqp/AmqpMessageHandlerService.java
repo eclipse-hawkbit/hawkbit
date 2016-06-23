@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -344,16 +345,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionUpdateStatus actionUpdateStatus = convertMessage(message, ActionUpdateStatus.class);
         final Action action = checkActionExist(message, actionUpdateStatus);
 
-        final ActionStatus actionStatus = entityFactory.generateActionStatus();
-        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
-
-        if (message.getMessageProperties().getCorrelationId().length > 0) {
-            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
-                    + message.getMessageProperties().getCorrelationId());
-        }
-
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(System.currentTimeMillis());
+        final ActionStatus actionStatus = createActionStatus(message, actionUpdateStatus, action);
 
         switch (actionUpdateStatus.getActionStatus()) {
         case DOWNLOAD:
@@ -389,6 +381,21 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         if (!addUpdateActionStatus.isActive()) {
             lookIfUpdateAvailable(action.getTarget());
         }
+    }
+
+    private ActionStatus createActionStatus(final Message message, final ActionUpdateStatus actionUpdateStatus,
+            final Action action) {
+        final ActionStatus actionStatus = entityFactory.generateActionStatus();
+        actionUpdateStatus.getMessage().forEach(actionStatus::addMessage);
+
+        if (ArrayUtils.isNotEmpty(message.getMessageProperties().getCorrelationId())) {
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message correlation-id "
+                    + message.getMessageProperties().getCorrelationId());
+        }
+
+        actionStatus.setAction(action);
+        actionStatus.setOccurredAt(System.currentTimeMillis());
+        return actionStatus;
     }
 
     private Action getUpdateActionStatus(final ActionStatus actionStatus) {

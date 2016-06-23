@@ -42,6 +42,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  */
 public class ConfigurableScenario {
 
+    private static final int PAGE_SIZE = 100;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurableScenario.class);
 
     private final MgmtDistributionSetClientResource distributionSetResource;
@@ -109,25 +111,25 @@ public class ConfigurableScenario {
     private void deleteSoftwareModules() {
         PagedList<MgmtSoftwareModule> modules;
         do {
-            modules = softwareModuleResource.getSoftwareModules(0, 100, null, null).getBody();
+            modules = softwareModuleResource.getSoftwareModules(0, PAGE_SIZE, null, null).getBody();
             modules.getContent().forEach(module -> softwareModuleResource.deleteSoftwareModule(module.getModuleId()));
-        } while (modules.getTotal() > 100);
+        } while (modules.getTotal() > PAGE_SIZE);
     }
 
     private void deleteDistributionSets() {
         PagedList<MgmtDistributionSet> distributionSets;
         do {
-            distributionSets = distributionSetResource.getDistributionSets(0, 100, null, null).getBody();
+            distributionSets = distributionSetResource.getDistributionSets(0, PAGE_SIZE, null, null).getBody();
             distributionSets.getContent().forEach(set -> distributionSetResource.deleteDistributionSet(set.getDsId()));
-        } while (distributionSets.getTotal() > 100);
+        } while (distributionSets.getTotal() > PAGE_SIZE);
     }
 
     private void deleteTargets() {
         PagedList<MgmtTarget> targets;
         do {
-            targets = targetResource.getTargets(0, 100, null, null).getBody();
+            targets = targetResource.getTargets(0, PAGE_SIZE, null, null).getBody();
             targets.getContent().forEach(target -> targetResource.deleteTarget(target.getControllerId()));
-        } while (targets.getTotal() > 100);
+        } while (targets.getTotal() > PAGE_SIZE);
     }
 
     private void runRollouts(final Scenario scenario) {
@@ -217,10 +219,11 @@ public class ConfigurableScenario {
     private void createTargets(final Scenario scenario) {
         LOGGER.info("Creating {} targets", scenario.getTargets());
 
-        for (int i = 0; i < scenario.getTargets() / 100; i++) {
-            targetResource.createTargets(new TargetBuilder().controllerId(scenario.getTargetName())
-                    .address(scenario.getTargetAddress()).buildAsList(i * 100,
-                            (i + 1) * 100 > scenario.getTargets() ? (scenario.getTargets() - (i * 100)) : 100));
+        for (int i = 0; i < (scenario.getTargets() / PAGE_SIZE); i++) {
+            targetResource.createTargets(
+                    new TargetBuilder().controllerId(scenario.getTargetName()).address(scenario.getTargetAddress())
+                            .buildAsList(i * PAGE_SIZE, (i + 1) * PAGE_SIZE > scenario.getTargets()
+                                    ? (scenario.getTargets() - (i * PAGE_SIZE)) : PAGE_SIZE));
         }
 
         LOGGER.info("Creating {} targets -> Done", scenario.getTargets());

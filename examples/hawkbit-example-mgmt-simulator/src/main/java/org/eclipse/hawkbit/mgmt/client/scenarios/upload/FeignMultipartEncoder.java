@@ -40,7 +40,7 @@ public class FeignMultipartEncoder implements Encoder {
     private final HttpHeaders multipartHeaders = new HttpHeaders();
     private final HttpHeaders jsonHeaders = new HttpHeaders();
 
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     public FeignMultipartEncoder() {
         multipartHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -48,11 +48,8 @@ public class FeignMultipartEncoder implements Encoder {
     }
 
     @Override
-    public void encode(final Object object, final Type bodyType, final RequestTemplate template)
-            throws EncodeException {
-
+    public void encode(final Object object, final Type bodyType, final RequestTemplate template) {
         encodeMultipartFormRequest(object, template);
-
     }
 
     private void encodeMultipartFormRequest(final Object value, final RequestTemplate template) {
@@ -66,8 +63,7 @@ public class FeignMultipartEncoder implements Encoder {
     }
 
     @SuppressWarnings("unchecked")
-    private void encodeRequest(final Object value, final HttpHeaders requestHeaders, final RequestTemplate template)
-            throws EncodeException {
+    private void encodeRequest(final Object value, final HttpHeaders requestHeaders, final RequestTemplate template) {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         final HttpOutputMessage dummyRequest = new HttpOutputMessageImpl(outputStream, requestHeaders);
         try {
@@ -148,12 +144,6 @@ public class FeignMultipartEncoder implements Encoder {
         @Override
         public String getFilename() {
             return this.filename;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException, IllegalStateException {
-            return super.getInputStream(); // To change body of generated
-                                           // methods, choose Tools | Templates.
         }
 
         @Override
