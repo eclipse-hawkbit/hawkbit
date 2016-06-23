@@ -101,7 +101,7 @@ public class DistributionSetTypeBuilder {
      *         {@link MgmtDistributionSetTypeRequestBodyPost}
      */
     public List<MgmtDistributionSetTypeRequestBodyPost> build() {
-        return Lists.newArrayList(doBuild(name, key));
+        return Lists.newArrayList(doBuild(""));
     }
 
     /**
@@ -118,16 +118,16 @@ public class DistributionSetTypeBuilder {
     public List<MgmtDistributionSetTypeRequestBodyPost> buildAsList(final int count) {
         final ArrayList<MgmtDistributionSetTypeRequestBodyPost> bodyList = Lists.newArrayList();
         for (int index = 0; index < count; index++) {
-            bodyList.add(doBuild(name + index, key + index));
+            bodyList.add(doBuild(String.valueOf(index)));
         }
         return bodyList;
 
     }
 
-    private MgmtDistributionSetTypeRequestBodyPost doBuild(final String prefixName, final String prefixKey) {
+    private MgmtDistributionSetTypeRequestBodyPost doBuild(final String suffix) {
         final MgmtDistributionSetTypeRequestBodyPost body = new MgmtDistributionSetTypeRequestBodyPost();
-        body.setKey(prefixKey);
-        body.setName(prefixName);
+        body.setKey(key + suffix);
+        body.setName(name + suffix);
         body.setDescription(description);
         body.setMandatorymodules(mandatorymodules);
         body.setOptionalmodules(optionalmodules);

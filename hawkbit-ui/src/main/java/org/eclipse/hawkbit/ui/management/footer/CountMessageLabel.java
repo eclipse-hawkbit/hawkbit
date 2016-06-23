@@ -95,7 +95,7 @@ public class CountMessageLabel extends Label {
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final TargetTableEvent event) {
-        if (TargetTableEvent.TargetComponentEvent.SELLECT_ALL == event.getTargetComponentEvent()
+        if (TargetTableEvent.TargetComponentEvent.SELECT_ALL == event.getTargetComponentEvent()
                 || TargetComponentEvent.REFRESH_TARGETS == event.getTargetComponentEvent()) {
             displayTargetCountStatus();
         }

@@ -46,6 +46,7 @@ public class DefaultAmqpSenderService implements AmqpSenderService {
 
         final String correlationId = UUID.randomUUID().toString();
         final String exchange = extractExchange(replyTo);
+        message.getMessageProperties().setCorrelationId(correlationId.getBytes());
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message {} to exchange {} with correlationId {}", message, exchange, correlationId);

@@ -256,6 +256,7 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
         return name + "." + version;
     }
     
+    
     private void showMetadataDetails(Long itemId, String nameVersionStr) {
         SoftwareModule swmodule = softwareManagement.findSoftwareModuleWithDetails(itemId);
                 /* display the window */

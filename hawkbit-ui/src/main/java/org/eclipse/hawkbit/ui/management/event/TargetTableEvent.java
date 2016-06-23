@@ -13,9 +13,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEvent;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 
 /**
- *
- *
- *
+ * Class which contains the Event when selecting all entries of the target table
  */
 public class TargetTableEvent extends BaseEntityEvent<Target> {
 
@@ -24,7 +22,7 @@ public class TargetTableEvent extends BaseEntityEvent<Target> {
      *
      */
     public enum TargetComponentEvent {
-        REFRESH_TARGETS, SELLECT_ALL, BULK_TARGET_CREATED, BULK_UPLOAD_COMPLETED, BULK_TARGET_UPLOAD_STARTED, BULK_UPLOAD_PROCESS_STARTED
+        REFRESH_TARGETS, SELECT_ALL, BULK_TARGET_CREATED, BULK_UPLOAD_COMPLETED, BULK_TARGET_UPLOAD_STARTED, BULK_UPLOAD_PROCESS_STARTED
     }
 
     private TargetComponentEvent targetComponentEvent;

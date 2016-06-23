@@ -606,24 +606,7 @@ public class JpaTargetManagement implements TargetManagement {
         }
         final List<Target> savedTargets = new ArrayList<>();
         for (final Target t : targets) {
-            final Target myTarget = createTarget(t);
-            savedTargets.add(myTarget);
-        }
-        return savedTargets;
-    }
-
-    @Override
-    @Modifying
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public List<Target> createTargets(final Collection<Target> targets, final TargetUpdateStatus status,
-            final Long lastTargetQuery, final URI address) {
-        if (targetRepository.countByControllerIdIn(
-                targets.stream().map(target -> target.getControllerId()).collect(Collectors.toList())) > 0) {
-            throw new EntityAlreadyExistsException();
-        }
-        final List<Target> savedTargets = new ArrayList<>();
-        for (final Target t : targets) {
-            final Target myTarget = createTarget(t, status, lastTargetQuery, address);
+            final Target myTarget = createTarget(t, TargetUpdateStatus.UNKNOWN, null, t.getTargetInfo().getAddress());
             savedTargets.add(myTarget);
         }
         return savedTargets;

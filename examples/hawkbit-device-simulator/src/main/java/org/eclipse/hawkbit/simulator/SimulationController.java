@@ -66,7 +66,7 @@ public class SimulationController {
             @RequestParam(value = "tenant", defaultValue = "DEFAULT") final String tenant,
             @RequestParam(value = "api", defaultValue = "dmf") final String api,
             @RequestParam(value = "endpoint", defaultValue = "http://localhost:8080") final String endpoint,
-            @RequestParam(value = "polldelay", defaultValue = "30") final int pollDelay,
+            @RequestParam(value = "polldelay", defaultValue = "1800") final int pollDelay,
             @RequestParam(value = "gatewaytoken", defaultValue = "") final String gatewayToken)
             throws MalformedURLException {
 

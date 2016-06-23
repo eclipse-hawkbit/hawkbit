@@ -15,6 +15,6 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  * Client binding for the TargetTag resource of the management API.
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING)
+@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING)
 public interface MgmtTargetTagClientResource extends MgmtTargetTagRestApi {
 }

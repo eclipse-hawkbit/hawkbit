@@ -196,8 +196,8 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the Binding {@link AmqpConfiguration#receiverQueueFromSp()} to
-     * {@link AmqpConfiguration#senderConnectorToSpExchange()}.
+     * Create the Binding {@link AmqpConfiguration#receiverQueue()} to
+     * {@link AmqpConfiguration#senderExchange()}.
      *
      * @return the binding and create the queue and exchange
      */
@@ -236,9 +236,12 @@ public class AmqpConfiguration {
     @Bean(name = { "listenerContainerFactory" })
     public SimpleRabbitListenerContainerFactory listenerContainerFactory() {
         final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
-        containerFactory.setDefaultRequeueRejected(false);
+        containerFactory.setDefaultRequeueRejected(true);
         containerFactory.setConnectionFactory(rabbitConnectionFactory);
         containerFactory.setMissingQueuesFatal(amqpProperties.isMissingQueuesFatal());
+        containerFactory.setConcurrentConsumers(amqpProperties.getInitialConcurrentConsumers());
+        containerFactory.setMaxConcurrentConsumers(amqpProperties.getMaxConcurrentConsumers());
+        containerFactory.setPrefetchCount(amqpProperties.getPrefetchCount());
         return containerFactory;
     }
 

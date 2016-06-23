@@ -87,9 +87,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's MD5 hash.
-     *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
+     * 
      * @param md5Hash
      *            the md5-hash of the file to lookup.
      * @return The gridfs file object or {@code null} if no file exists.
@@ -100,9 +98,7 @@ public class ArtifactStore implements ArtifactRepository {
 
     /**
      * Retrieves a {@link GridFSDBFile} from the store by it's object id.
-     *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
+     * 
      * @param id
      *            the id of the file to lookup.
      * @return The gridfs file object or {@code null} if no file exists.
@@ -231,15 +227,13 @@ public class ArtifactStore implements ArtifactRepository {
      * @return a paged list of artifacts mapped from the given dbFiles
      */
     private List<DbArtifact> map(final List<GridFSDBFile> dbFiles) {
-        return dbFiles.stream().map(dbFile -> map(dbFile)).collect(Collectors.toList());
+        return dbFiles.stream().map(this::map).collect(Collectors.toList());
     }
 
     /**
      * Retrieves a list of {@link GridFSDBFile} from the store by all SHA1
      * hashes.
-     *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
+     * 
      * @param sha1Hashes
      *            the sha1-hashes of the files to lookup.
      * @return list of artifacts
@@ -252,8 +246,6 @@ public class ArtifactStore implements ArtifactRepository {
     /**
      * Retrieves a list of {@link GridFSDBFile} from the store by all ids.
      *
-     * @param tenant
-     *            the tenant to retrieve the artifacts from, ignore case.
      * @param ids
      *            the ids of the files to lookup.
      * @return list of artfiacts

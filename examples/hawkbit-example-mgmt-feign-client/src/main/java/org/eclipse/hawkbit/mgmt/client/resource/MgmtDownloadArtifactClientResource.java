@@ -16,7 +16,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
  * A feign-client interface declaration which allows to build a feign-client
  * stub.
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
+@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
 public interface MgmtDownloadArtifactClientResource extends MgmtDownloadArtifactRestApi {
 
 }

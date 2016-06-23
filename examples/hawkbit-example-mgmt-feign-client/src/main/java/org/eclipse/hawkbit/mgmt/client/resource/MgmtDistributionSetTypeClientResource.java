@@ -16,7 +16,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
  * Client binding for the DistributionSetType resource of the management API.
  *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
+@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
 public interface MgmtDistributionSetTypeClientResource extends MgmtDistributionSetTypeRestApi {
 
 }
