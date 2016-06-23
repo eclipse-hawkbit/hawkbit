@@ -253,7 +253,7 @@ public class DistributionTable extends AbstractNamedVersionTable<DistributionSet
     
     private Button createManageMetadataButton(String nameVersionStr) {
         final Button manageMetadataBtn = SPUIComponentProvider.getButton(
-                SPUIComponentIdProvider.SW_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
+                SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + nameVersionStr, "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.ARTIFACT_DTLS_ICON);
         manageMetadataBtn.addStyleName(SPUIStyleDefinitions.DS_METADATA_ICON);

@@ -206,11 +206,28 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
         return SPUIComponentIdProvider.DISTRIBUTION_DETAILS_HEADER_LABEL_ID;
     }
     
+    @Override
+    protected Boolean isMetadataIconToBeDisplayed() {
+        return true;
+    }
+    
+    @Override
+    protected String getShowMetadataButtonId() {
+        DistributionSetIdName lastselectedDistDS = managementUIState.getLastSelectedDistribution().isPresent() ? managementUIState
+                .getLastSelectedDistribution().get() : null;
+        return SPUIComponentIdProvider.DS_TABLE_MANAGE_METADATA_ID + "." + lastselectedDistDS.getName() + "."
+                + lastselectedDistDS.getVersion();
+    }
     private boolean isDistributionSetSelected(DistributionSet ds) {
         DistributionSetIdName lastselectedManageDS = managementUIState.getLastSelectedDistribution().isPresent() ? managementUIState
                 .getLastSelectedDistribution().get() : null;
         return ds!=null && lastselectedManageDS != null && lastselectedManageDS.getName().equals(ds.getName())
                 && lastselectedManageDS.getVersion().endsWith(ds.getVersion());
+    }
+
+    @Override
+    protected void showMetadata(ClickEvent event) {
+        UI.getCurrent().addWindow(dsMetadataPopupLayout.getWindow(getSelectedBaseEntity(),null));        
     }
     
 }
