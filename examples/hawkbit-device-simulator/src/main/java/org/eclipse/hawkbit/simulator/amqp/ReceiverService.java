@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.amqp;
 
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -55,7 +56,7 @@ public abstract class ReceiverService extends MessageService {
         if (contentType != null && contentType.contains("json")) {
             return;
         }
-        throw new IllegalArgumentException("Content-Type is not JSON compatible");
+        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
 }

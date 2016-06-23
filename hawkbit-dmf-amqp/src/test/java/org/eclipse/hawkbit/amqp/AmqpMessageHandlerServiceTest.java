@@ -59,6 +59,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -170,7 +171,7 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no replyTo header was set");
-        } catch (final IllegalArgumentException exception) {
+        } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
 
@@ -184,7 +185,7 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no thingID was set");
-        } catch (final IllegalArgumentException exception) {
+        } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
     }
@@ -200,7 +201,7 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, type, TENANT, "vHost");
             fail("IllegalArgumentException was excepeted due to unknown message type");
-        } catch (final IllegalArgumentException exception) {
+        } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
     }
@@ -213,21 +214,21 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted due to unknown message type");
-        } catch (final IllegalArgumentException e) {
+        } catch (final AmqpRejectAndDontRequeueException e) {
         }
 
         try {
             messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted due to unknown topic");
-        } catch (final IllegalArgumentException e) {
+        } catch (final AmqpRejectAndDontRequeueException e) {
         }
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted because there was no event topic");
-        } catch (final IllegalArgumentException exception) {
+        } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
 
@@ -246,7 +247,7 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no action id was set");
-        } catch (final IllegalArgumentException exception) {
+        } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
     }
@@ -263,7 +264,7 @@ public class AmqpMessageHandlerServiceTest {
         try {
             amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, "vHost");
             fail("IllegalArgumentException was excepeted since no action id was set");
-        } catch (final IllegalArgumentException exception) {
+        } catch (final AmqpRejectAndDontRequeueException exception) {
             // test ok - exception was excepted
         }
 

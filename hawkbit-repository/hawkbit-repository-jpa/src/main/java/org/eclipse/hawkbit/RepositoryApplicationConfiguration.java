@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.ReportManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -56,6 +57,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -70,7 +72,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
- * General configuration for the SP Repository.
+ * General configuration for hawkBit's Repository.
  *
  */
 @EnableJpaRepositories(basePackages = { "org.eclipse.hawkbit.repository.jpa" })
@@ -80,6 +82,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
+@EnableConfigurationProperties(RepositoryProperties.class)
 @EnableScheduling
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**

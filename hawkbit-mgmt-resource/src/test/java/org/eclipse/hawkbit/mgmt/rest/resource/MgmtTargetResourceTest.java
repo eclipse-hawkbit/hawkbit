@@ -40,11 +40,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetInfo;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -109,8 +109,8 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
         actions.get(0).setStatus(Status.FINISHED);
-        controllerManagament.addUpdateActionStatus(entityFactory.generateActionStatus(actions.get(0),
-                Status.FINISHED, System.currentTimeMillis(), "testmessage"));
+        controllerManagament.addUpdateActionStatus(entityFactory.generateActionStatus(actions.get(0), Status.FINISHED,
+                System.currentTimeMillis(), "testmessage"));
 
         final PageRequest pageRequest = new PageRequest(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
         final ActionStatus status = deploymentManagement
@@ -682,6 +682,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
         final Target test1 = entityFactory.generateTarget("id1");
         test1.setDescription("testid1");
         test1.setName("testname1");
+        test1.getTargetInfo().setAddress("amqp://test123/foobar");
         final Target test2 = entityFactory.generateTarget("id2");
         test2.setDescription("testid2");
         test2.setName("testname2");
@@ -704,6 +705,7 @@ public class MgmtTargetResourceTest extends AbstractRestIntegrationTest {
                 .andExpect(jsonPath("[0].description", equalTo("testid1")))
                 .andExpect(jsonPath("[0].createdAt", not(equalTo(0))))
                 .andExpect(jsonPath("[0].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[0].address", equalTo("amqp://test123/foobar")))
                 .andExpect(jsonPath("[1].name", equalTo("testname2")))
                 .andExpect(jsonPath("[1].createdBy", equalTo("bumlux")))
                 .andExpect(jsonPath("[1].controllerId", equalTo("id2")))
