@@ -68,28 +68,24 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
             @RequestParam(value = "sha1sum", required = false) final String sha1Sum) {
 
-        Artifact result;
-        if (!file.isEmpty()) {
-            String fileName = optionalFileName;
-
-            if (null == fileName) {
-                fileName = file.getOriginalFilename();
-            }
-
-            try {
-                result = artifactManagement.createLocalArtifact(file.getInputStream(), softwareModuleId, fileName,
-                        md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(),
-                        false, file.getContentType());
-            } catch (final IOException e) {
-                LOG.error("Failed to store artifact", e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else {
+        if (file.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        String fileName = optionalFileName;
 
-        return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponse(result), HttpStatus.CREATED);
+        if (fileName == null) {
+            fileName = file.getOriginalFilename();
+        }
 
+        try {
+            final Artifact result = artifactManagement.createLocalArtifact(file.getInputStream(), softwareModuleId,
+                    fileName, md5Sum == null ? null : md5Sum.toLowerCase(),
+                    sha1Sum == null ? null : sha1Sum.toLowerCase(), false, file.getContentType());
+            return new ResponseEntity<>(MgmtSoftwareModuleMapper.toResponse(result), HttpStatus.CREATED);
+        } catch (final IOException e) {
+            LOG.error("Failed to store artifact", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

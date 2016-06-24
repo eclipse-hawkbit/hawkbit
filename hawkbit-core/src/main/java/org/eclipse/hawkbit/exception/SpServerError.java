@@ -90,10 +90,6 @@ public enum SpServerError {
     /**
     *
     */
-    SP_ARTIFACT_UPLOAD_FILE_LIMIT_EXCEEDED("hawkbit.server.error.artifact.uploadFailed.sizelimitexceeded", "Upload of artifact failed as the file exceeds its maximum permitted size"),
-    /**
-    *
-    */
     SP_INSUFFICIENT_PERMISSION("hawkbit.server.error.insufficientpermission", "Insufficient Permission"),
 
     /**
