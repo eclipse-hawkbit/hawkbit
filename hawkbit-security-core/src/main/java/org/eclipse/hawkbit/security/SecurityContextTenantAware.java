@@ -24,9 +24,6 @@ import org.springframework.security.core.context.SecurityContextImpl;
  * {@link Authentication#getDetails()} which holds the
  * {@link TenantAwareAuthenticationDetails} object.
  *
- *
- *
- *
  */
 public class SecurityContextTenantAware implements TenantAware {
 
@@ -65,6 +62,11 @@ public class SecurityContextTenantAware implements TenantAware {
         return securityContext;
     }
 
+    /**
+     * An {@link Authentication} implementation to delegate to an existing
+     * {@link Authentication} object except setting the details specifically for
+     * a specific tenant.
+     */
     private class AuthenticationDelegate implements Authentication {
         private static final long serialVersionUID = 1L;
 
@@ -74,7 +76,6 @@ public class SecurityContextTenantAware implements TenantAware {
         private AuthenticationDelegate(final Authentication delegate, final String tenant) {
             this.delegate = delegate;
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
-
         }
 
         @Override
