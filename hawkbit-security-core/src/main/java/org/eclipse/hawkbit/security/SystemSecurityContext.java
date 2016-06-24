@@ -72,7 +72,7 @@ public class SystemSecurityContext {
             logger.debug("entering system code execution");
             return tenantAware.runAsTenant(tenantAware.getCurrentTenant(), () -> {
                 try {
-                    setSystemContext();
+                    setSystemContext(oldContext);
                     return callable.call();
                 } catch (final Exception e) {
                     throw Throwables.propagate(e);
@@ -93,9 +93,10 @@ public class SystemSecurityContext {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
     }
 
-    private static void setSystemContext() {
+    private static void setSystemContext(final SecurityContext oldContext) {
+        final Authentication oldAuthentication = oldContext.getAuthentication();
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
-        securityContextImpl.setAuthentication(new SystemCodeAuthentication());
+        securityContextImpl.setAuthentication(new SystemCodeAuthentication(oldAuthentication));
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
@@ -104,6 +105,11 @@ public class SystemSecurityContext {
         private static final long serialVersionUID = 1L;
         private static final List<SimpleGrantedAuthority> AUTHORITIES = Collections
                 .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+        private final Authentication oldAuthentication;
+
+        private SystemCodeAuthentication(final Authentication oldAuthentication) {
+            this.oldAuthentication = oldAuthentication;
+        }
 
         @Override
         public String getName() {
@@ -117,17 +123,17 @@ public class SystemSecurityContext {
 
         @Override
         public Object getCredentials() {
-            return null;
+            return oldAuthentication != null ? oldAuthentication.getCredentials() : null;
         }
 
         @Override
         public Object getDetails() {
-            return null;
+            return oldAuthentication != null ? oldAuthentication.getDetails() : null;
         }
 
         @Override
         public Object getPrincipal() {
-            return null;
+            return oldAuthentication != null ? oldAuthentication.getPrincipal() : null;
         }
 
         @Override
