@@ -63,6 +63,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
 
     private Button editButton;
 
+    private Button manageMetadataBtn;
+    
     private TabSheet detailsTab;
 
     private VerticalLayout detailsLayout;
@@ -137,6 +139,12 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
 
+        manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false,
+                FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
+        manageMetadataBtn.setId(getEditButtonId());
+        manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
+        manageMetadataBtn.addClickListener(this::showMetadata);    
+            
         editButton.setEnabled(false);
 
         detailsTab = SPUIComponentProvider.getDetailsTabSheet();
@@ -156,6 +164,10 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         if (hasEditPermission()) {
             nameEditLayout.addComponent(editButton);
             nameEditLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
+            if (isMetadataIconToBeDisplayed()) {
+                nameEditLayout.addComponent(manageMetadataBtn);
+                nameEditLayout.setComponentAlignment(manageMetadataBtn, Alignment.TOP_RIGHT);
+            }
         }
         nameEditLayout.setExpandRatio(caption, 1.0F);
         nameEditLayout.addStyleName(SPUIStyleDefinitions.WIDGET_TITLE);
@@ -209,6 +221,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         populateLog();
         populateDescription();
         populateDetailsWidget();
+        populateMetadataDetails();
     }
 
     protected void populateLog() {
@@ -281,8 +294,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
         descriptionLayout = getTabLayout();
         return descriptionLayout;
     }
-
-    /**
+    
+   /**
      * Default caption of header to be displayed when no data row selected in
      * table.
      * 
@@ -327,6 +340,8 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     }
 
     protected abstract void populateDetailsWidget();
+    
+    protected abstract void populateMetadataDetails();
 
     protected Long getSelectedBaseEntityId() {
         return selectedBaseEntity == null ? null : selectedBaseEntity.getId();
@@ -335,5 +350,11 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     protected abstract String getDetailsHeaderCaptionId();
 
     protected abstract String getName();
+
+    protected abstract String getShowMetadataButtonId();
+    
+    protected abstract Boolean isMetadataIconToBeDisplayed();
+    
+    protected abstract void showMetadata(Button.ClickEvent event);
 
 }
