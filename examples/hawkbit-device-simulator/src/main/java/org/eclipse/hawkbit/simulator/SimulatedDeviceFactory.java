@@ -45,7 +45,7 @@ public class SimulatedDeviceFactory {
      */
     public AbstractSimulatedDevice createSimulatedDevice(final String id, final String tenant,
             final Protocol protocol) {
-        return createSimulatedDevice(id, tenant, protocol, 30, null, null);
+        return createSimulatedDevice(id, tenant, protocol, 1800, null, null);
     }
 
     /**

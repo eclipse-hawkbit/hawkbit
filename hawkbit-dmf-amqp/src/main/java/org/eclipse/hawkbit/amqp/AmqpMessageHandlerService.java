@@ -116,7 +116,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     /**
-     * Method to handle all incoming amqp messages.
+     * Method to handle all incoming DMF amqp messages.
      *
      * @param message
      *            incoming message
@@ -131,6 +131,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     public Message onMessage(final Message message, @Header(MessageHeaderKey.TYPE) final String type,
             @Header(MessageHeaderKey.TENANT) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
+    }
+
+    @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.authenticationReceiverQueue}", containerFactory = "listenerContainerFactory")
+    public Message onAuthenticationRequest(final Message message,
+            @Header(MessageHeaderKey.TENANT) final String tenant) {
+        return onAuthenticationRequest(message);
     }
 
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
@@ -149,8 +155,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 final EventTopic eventTopic = EventTopic.valueOf(topicValue);
                 handleIncomingEvent(message, eventTopic);
                 break;
-            case AUTHENTIFICATION:
-                return handleAuthentifiactionMessage(message);
+
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
@@ -162,6 +167,20 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             SecurityContextHolder.setContext(oldContext);
         }
         return null;
+    }
+
+    public Message onAuthenticationRequest(final Message message) {
+        checkContentTypeJson(message);
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            return handleAuthentifiactionMessage(message);
+        } catch (final IllegalArgumentException ex) {
+            throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
+        } catch (final TenantNotExistException teex) {
+            throw new AmqpRejectAndDontRequeueException(teex);
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
     }
 
     private Message handleAuthentifiactionMessage(final Message message) {

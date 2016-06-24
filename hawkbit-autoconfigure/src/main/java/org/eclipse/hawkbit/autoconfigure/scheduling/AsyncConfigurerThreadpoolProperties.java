@@ -33,6 +33,11 @@ public class AsyncConfigurerThreadpoolProperties {
     private Integer maxthreads = 20;
 
     /**
+     * Core processing threads for scheduled event executor.
+     */
+    private Integer schedulerThreads = 3;
+
+    /**
      * When the number of threads is greater than the core, this is the maximum
      * time that excess idle threads will wait for new tasks before terminating.
      */
@@ -68,6 +73,14 @@ public class AsyncConfigurerThreadpoolProperties {
 
     public void setIdletimeout(final Long idletimeout) {
         this.idletimeout = idletimeout;
+    }
+
+    public Integer getSchedulerThreads() {
+        return schedulerThreads;
+    }
+
+    public void setSchedulerThreads(final Integer schedulerThreads) {
+        this.schedulerThreads = schedulerThreads;
     }
 
 }

@@ -122,8 +122,8 @@ public class AmqpConfiguration {
         final Map<String, Object> arguments = getDeadLetterExchangeArgs();
         arguments.putAll(getTTLMaxArgs());
 
-        return QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).withArguments(arguments)
-                .build();
+        return QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
+                .withArguments(arguments).build();
     }
 
     /**
@@ -133,12 +133,12 @@ public class AmqpConfiguration {
      */
     @Bean
     public FanoutExchange exchangeQueueToConnector() {
-        return new FanoutExchange(amqpProperties.getSenderForSpExchange());
+        return new FanoutExchange(amqpProperties.getSenderForSpExchange(), false, true);
     }
 
     /**
      * Create the Binding
-     * {@link AmqpConfiguration#receiverConnectorQueueFromSp()} to
+     * {@link AmqpConfiguration#receiverConnectorQueueFromHawkBit()} to
      * {@link AmqpConfiguration#exchangeQueueToConnector()}.
      *
      * @return the binding and create the queue and exchange
@@ -165,7 +165,7 @@ public class AmqpConfiguration {
      */
     @Bean
     public FanoutExchange exchangeDeadLetter() {
-        return new FanoutExchange(amqpProperties.getDeadLetterExchange());
+        return new FanoutExchange(amqpProperties.getDeadLetterExchange(), false, true);
     }
 
     /**

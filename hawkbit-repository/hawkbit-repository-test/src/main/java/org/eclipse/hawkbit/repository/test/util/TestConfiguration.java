@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 import com.google.common.eventbus.AsyncEventBus;
@@ -99,7 +99,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     public Executor asyncExecutor() {
-        return new DelegatingSecurityContextExecutor(Executors.newSingleThreadExecutor());
+        return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
     }
 
     @Bean
