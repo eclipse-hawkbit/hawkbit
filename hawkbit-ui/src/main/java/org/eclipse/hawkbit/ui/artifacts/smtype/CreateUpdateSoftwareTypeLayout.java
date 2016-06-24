@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -92,13 +91,15 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
-        tagName.addTextChangeListener(this::listenerTagNameTextFieldChanged);
+        tagName.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTagName()));
+        tagName.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, tagName));
 
         typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY, true, "", i18n.get("textfield.key"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
-        typeKey.addTextChangeListener(this::typeKeyTextFieldChanged);
+        typeKey.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTypeKey()));
+        typeKey.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, typeKey));
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
@@ -106,17 +107,9 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
-        tagDesc.addTextChangeListener(this::listenerTagDescTextAreaChanged);
+        tagDesc.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTagDesc()));
 
         singleMultiOptionGroup();
-    }
-
-    private void listenerTagNameTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, tagName);
-    }
-
-    private void typeKeyTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, typeKey);
     }
 
     @Override
@@ -142,7 +135,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         while (iterate.hasNext()) {
             final Component c = iterate.next();
             if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getCaption(), null);
+                requiredFields.put(c.getId(), Boolean.FALSE);
             }
         }
         return requiredFields;
@@ -164,6 +157,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         } else {
             assignOptiongroup.setEnabled(true);
         }
+        assignOptiongroup.select(singleAssignStr);
     }
 
     /**
@@ -195,18 +189,19 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
+        setOriginalTagName(targetTagSelected);
         final SoftwareModuleType selectedTypeTag = swTypeManagementService
                 .findSoftwareModuleTypeByName(targetTagSelected);
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
-            setTagDescOriginal(selectedTypeTag.getDescription());
+            setOriginalTagDesc(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
+            setOriginalTypeKey(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == Integer.MAX_VALUE) {
                 assignOptiongroup.setValue(multiAssignStr);
             } else {
                 assignOptiongroup.setValue(singleAssignStr);
             }
-
             setColorPickerComponentsColor(selectedTypeTag.getColour());
         }
     }
@@ -245,7 +240,7 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
             updateSWModuleType(existingSMTypeByName);
         }
-        window.setSaveButtonEnabled(false);
+        // window.setSaveButtonEnabled(false);
     }
 
     private void createNewSWModuleType() {

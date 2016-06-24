@@ -33,10 +33,8 @@ import com.vaadin.ui.components.colorpicker.ColorSelector;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * 
  * Superclass defining common properties and methods for creating/updating
  * types.
- *
  */
 public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
 
@@ -45,7 +43,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     protected String createTypeStr;
     protected String updateTypeStr;
     protected TextField typeKey;
-    protected String typeKeyOriginal;
+    protected String originalTypeKey;
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
@@ -152,14 +150,13 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
         } else {
             typeKey.setEnabled(true);
             tagName.setEnabled(true);
-            window.setSaveButtonEnabled(true);
             tagName.clear();
             tagDesc.clear();
             typeKey.clear();
             comboLayout.removeComponent(comboLabel);
             comboLayout.removeComponent(tagNameComboBox);
         }
-        window.setSaveButtonEnabled(false);
+        window.reset();
         restoreComponentStyles();
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         getColorPickerLayout().getSelPreview()
@@ -186,7 +183,8 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelPreview().getColor());
         }
-        window.checkColorChange(colorPickerLayout.getId(), colorPickerLayout.getSelectedColor(), selectedColorOriginal);
+        window.checkColorChange(colorPickerLayout.getId(), colorPickerLayout.getSelectedColor(),
+                getOriginalSelectedColor());
     }
 
     /**
@@ -324,22 +322,12 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
         // is implemented in the inherited class
     }
 
-    @Override
-    public Color getSelectedColorOriginal() {
-        return selectedColorOriginal;
+    public String getOriginalTypeKey() {
+        return originalTypeKey;
     }
 
-    @Override
-    public void setSelectedColorOriginal(final Color selectedColorOriginal) {
-        this.selectedColorOriginal = selectedColorOriginal;
-    }
-
-    public String getTypeKeyOriginal() {
-        return typeKeyOriginal;
-    }
-
-    public void setTypeKeyOriginal(final String typeKeyOriginal) {
-        this.typeKeyOriginal = typeKeyOriginal;
+    public void setOriginalTypeKey(final String originalTypeKey) {
+        this.originalTypeKey = originalTypeKey;
     }
 
 }

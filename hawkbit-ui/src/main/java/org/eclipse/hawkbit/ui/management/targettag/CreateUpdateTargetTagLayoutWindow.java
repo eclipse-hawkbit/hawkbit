@@ -88,10 +88,11 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
+        setOriginalTagName(targetTagSelected);
         final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
         if (null != selectedTargetTag) {
             tagDesc.setValue(selectedTargetTag.getDescription());
-            setTagDescOriginal(selectedTargetTag.getDescription());
+            setOriginalTagDesc(selectedTargetTag.getDescription());
             if (null == selectedTargetTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
                 setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
@@ -115,7 +116,6 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
                 updateExistingTag(existingTag);
             }
         }
-        window.setSaveButtonEnabled(false);
     }
 
     /**

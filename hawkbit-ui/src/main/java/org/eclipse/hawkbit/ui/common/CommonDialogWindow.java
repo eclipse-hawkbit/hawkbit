@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.ui.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -22,16 +24,14 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetAddUpdateWindowLayout
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.colorpicker.Color;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
@@ -74,9 +74,8 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private Map<String, Boolean> requiredFields;
 
-    private final Map<String, Boolean> editedFields;
+    private Map<String, Boolean> editedFields;
 
-    @Autowired
     private final I18N i18n;
 
     /**
@@ -104,41 +103,155 @@ public class CommonDialogWindow extends Window implements Serializable {
         this.saveButtonClickListener = saveButtonClickListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
         this.requiredFields = requiredFields;
+        if (requiredFields == null) {
+            this.requiredFields = Collections.emptyMap();
+        }
+
         this.editedFields = editedFields;
+        if (editedFields == null) {
+            this.editedFields = Collections.emptyMap();
+        }
         this.i18n = i18n;
         init();
     }
 
-    public void checkMandatoryTextField(final TextChangeEvent event, final AbstractTextField textfield) {
-
-        if (StringUtils.isNotBlank(event.getText())) {
-            if (StringUtils.isNotBlank(textfield.getCaption())) {
-                requiredFields.put(textfield.getCaption(), Boolean.TRUE);
-            }
-            getRequiredFields().put(textfield.getId(), Boolean.TRUE);
-        } else {
-            if (StringUtils.isNotBlank(textfield.getCaption())) {
-                requiredFields.put(textfield.getCaption(), Boolean.FALSE);
-            }
-            requiredFields.put(textfield.getId(), Boolean.FALSE);
+    /**
+     * Checks if all mandatory fields are filled, and if there are changes in
+     * the current field. If yes, the save button will be enabled.
+     * 
+     * @param event
+     *            TextChangeEvent
+     * @param originalValue
+     *            original Value of the current field
+     */
+    public void checkMandatoryEditedTextField(final TextChangeEvent event, final String originalValue) {
+        final Component component = event.getComponent();
+        if (!(component instanceof AbstractComponent)) {
+            throw new IllegalStateException("Only AbstractComponent not allow");
         }
-        checkMandatoryFieldsFilled();
+
+        if (requiredFields.containsKey(component.getId())) {
+            final boolean isTextChangeNotEmpty = StringUtils.isNotBlank(event.getText());
+            setRequiredFieldChangeValue((AbstractComponent) component, isTextChangeNotEmpty);
+        }
+        checkChanges(component.getId(), event.getText(), originalValue);
+        checkSaveButtonEnabled();
     }
 
-    public void checkMandatoryComboBox(final ValueChangeEvent event, final AbstractSelect select) {
-
-        if (event.getProperty().getValue() != null) {
-            if (StringUtils.isNotBlank(select.getCaption())) {
-                requiredFields.put(select.getCaption(), Boolean.TRUE);
-            }
-            requiredFields.put(select.getId(), Boolean.TRUE);
-        } else {
-            if (StringUtils.isNotBlank(select.getCaption())) {
-                requiredFields.put(select.getCaption(), Boolean.FALSE);
-            }
-            requiredFields.put(select.getId(), Boolean.FALSE);
+    /**
+     * Checks if all mandatory fields are filled, and if there are changes in
+     * the current field. If yes, the save button will be enabled.
+     * 
+     * @param event
+     *            ValueChangeEvent
+     * @param component
+     *            current Component
+     * @param originalValue
+     *            original Value of the current field
+     */
+    public void checkMandatoryEditedValue(final ValueChangeEvent event, final AbstractComponent component,
+            final String originalValue) {
+        final boolean isChangedValueNotNull = event.getProperty().getValue() != null;
+        if (requiredFields.containsKey(component.getId())) {
+            setRequiredFieldChangeValue(component, isChangedValueNotNull);
         }
-        checkMandatoryFieldsFilled();
+        if (event.getProperty().getValue() != null) {
+            checkChanges(component.getId(), event.getProperty().getValue().toString(), originalValue);
+        } else {
+            checkChanges(component.getId(), null, originalValue);
+        }
+        checkSaveButtonEnabled();
+    }
+
+    /**
+     * Checks if all mandatory fields are filled, and if there are changes in
+     * the current field. (Boolean) If yes, the save button will be enabled.
+     * 
+     * @param event
+     *            ValueChangeEvent
+     * @param component
+     *            current Component
+     * @param originalValue
+     *            original Boolean Value of the current field
+     */
+    public void checkMandatoryEditedValueBoolean(final ValueChangeEvent event, final AbstractComponent component,
+            final Boolean originalValue) {
+        final boolean isChangedValueNotNull = event.getProperty().getValue() != null;
+        if (requiredFields.containsKey(component.getId())) {
+            setRequiredFieldChangeValue(component, isChangedValueNotNull);
+        }
+        final Boolean changed = (Boolean) event.getProperty().getValue();
+        editedFields.put(component.getId(), BooleanUtils.compare(changed, originalValue) != 0);
+        checkSaveButtonEnabled();
+    }
+
+    /**
+     * Updates the map of required fields if a value is set. (e.g. on Update
+     * when editing a component)
+     * 
+     * @param event
+     *            ValueChangeEvent
+     * @param component
+     *            current Component
+     */
+    public void setRequiredFieldWhenUpdate(final ValueChangeEvent event, final AbstractComponent component) {
+        final boolean isChangedValueNotNull = event.getProperty().getValue() != null;
+        setRequiredFieldChangeValue(component, isChangedValueNotNull);
+    }
+
+    /**
+     * * Updates the map of required fields if a value is set. (e.g. on Update
+     * when editing a component)
+     * 
+     * @param fieldId
+     *            Id of the current component
+     * @param filled
+     *            Boolean if field is filled
+     */
+    public void updateRequiredFields(final String fieldId, final Boolean filled) {
+
+        requiredFields.put(fieldId, filled);
+        checkSaveButtonEnabled();
+    }
+
+    /**
+     * Checks if Color is changed
+     * 
+     * @param fieldId
+     *            Id of the current component
+     * @param newColor
+     *            new Color
+     * @param oldColor
+     *            old Color
+     */
+    public void checkColorChange(final String fieldId, final Color newColor, final Color oldColor) {
+        editedFields.put(fieldId, !newColor.equals(oldColor));
+        checkSaveButtonEnabled();
+    }
+
+    /**
+     * Updates the map of fields which can be edited.
+     * 
+     * @param fieldId
+     *            Id of the current component
+     * @param hasTextValueChanged
+     *            Boolean if value has changed
+     */
+    public void updateEditedFields(final String fieldId, final Boolean hasTextValueChanged) {
+        editedFields.put(fieldId, hasTextValueChanged);
+        checkSaveButtonEnabled();
+    }
+
+    /**
+     * Resets the map of mandatory and edited Fields and disable the save button
+     */
+    public void reset() {
+        saveButton.setEnabled(false);
+        resetFields();
+    }
+
+    private void setRequiredFieldChangeValue(final AbstractComponent component, final boolean isTextChangeNotEmpty) {
+        requiredFields.put(component.getId(), isTextChangeNotEmpty);
     }
 
     /**
@@ -146,69 +259,23 @@ public class CommonDialogWindow extends Window implements Serializable {
      * mandatory fields are filled the save button is enabled. Otherwise the
      * save button is disabled.
      */
-    private void checkMandatoryFieldsFilled() {
+    private void checkSaveButtonEnabled() {
+        saveButton.setEnabled(!requiredFields.containsValue(Boolean.FALSE) && editedFields.containsValue(Boolean.TRUE));
+    }
 
+    private void checkChanges(final String fieldName, final String newText, final String oldText) {
+        final boolean hasTextValueChanged = (StringUtils.isNotBlank(newText) && !newText.equals(oldText))
+                || (StringUtils.isNotBlank(oldText) && !oldText.equals(newText));
+        editedFields.put(fieldName, hasTextValueChanged);
+    }
+
+    private void resetFields() {
         for (final Map.Entry<String, Boolean> entry : requiredFields.entrySet()) {
-            if (entry.getValue() == null || entry.getValue().equals(Boolean.FALSE)) {
-                saveButton.setEnabled(false);
-                return;
-            }
+            entry.setValue(Boolean.FALSE);
         }
-        saveButton.setEnabled(true);
-    }
 
-    private void checkExistsChanges() {
-
-        if (editedFields == null) {
-            return;
-        }
         for (final Map.Entry<String, Boolean> entry : editedFields.entrySet()) {
-            if (entry.getValue() != null && entry.getValue().equals(Boolean.TRUE)) {
-                saveButton.setEnabled(true);
-                return;
-            }
-        }
-        saveButton.setEnabled(false);
-    }
-
-    public void updateRequiredFields(final String fieldId, final Boolean filled) {
-
-        requiredFields.put(fieldId, filled);
-        checkMandatoryFieldsFilled();
-    }
-
-    public void checkChanges(final String fieldName, final String newText, final String oldText) {
-
-        if ((StringUtils.isNotBlank(newText) && !newText.equals(oldText))
-                || (StringUtils.isNotBlank(oldText) && !oldText.equals(newText))) {
-            editedFields.put(fieldName, Boolean.TRUE);
-        } else {
-            editedFields.put(fieldName, Boolean.FALSE);
-        }
-        checkExistsChanges();
-    }
-
-    public void checkColorChange(final String fieldName, final Color newColor, final Color oldColor) {
-
-        if (newColor.equals(oldColor)) {
-            editedFields.put(fieldName, Boolean.FALSE);
-        } else {
-            editedFields.put(fieldName, Boolean.TRUE);
-        }
-        checkExistsChanges();
-    }
-
-    public void resetMandatoryAndEditedFields() {
-        resetFields(requiredFields);
-        resetFields(editedFields);
-    }
-
-    private void resetFields(final Map<String, Boolean> fields) {
-        // Reset mandatory fields are filled marker / fields are edited marker
-        if (fields != null) {
-            for (final Map.Entry<String, Boolean> entry : fields.entrySet()) {
-                entry.setValue(null);
-            }
+            entry.setValue(Boolean.FALSE);
         }
     }
 
@@ -258,20 +325,22 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private void createMandatoryLabel() {
 
-        if (existsMandatoryFieldsInWindowContent()) {
-            final Label mandatoryLabel = new Label(i18n.get("label.mandatory.field"));
-            mandatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
-
-            if (content instanceof TargetAddUpdateWindowLayout) {
-                ((TargetAddUpdateWindowLayout) content).getFormLayout().addComponent(mandatoryLabel);
-            } else if (content instanceof SoftwareModuleAddUpdateWindow) {
-                ((SoftwareModuleAddUpdateWindow) content).getFormLayout().addComponent(mandatoryLabel);
-            } else if (content instanceof AbstractCreateUpdateTagLayout) {
-                ((AbstractCreateUpdateTagLayout) content).getMainLayout().addComponent(mandatoryLabel);
-            }
-
-            mainLayout.addComponent(mandatoryLabel);
+        if (!existsMandatoryFieldsInWindowContent()) {
+            return;
         }
+
+        final Label mandatoryLabel = new Label(i18n.get("label.mandatory.field"));
+        mandatoryLabel.addStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR + " " + ValoTheme.LABEL_TINY);
+
+        if (content instanceof TargetAddUpdateWindowLayout) {
+            ((TargetAddUpdateWindowLayout) content).getFormLayout().addComponent(mandatoryLabel);
+        } else if (content instanceof SoftwareModuleAddUpdateWindow) {
+            ((SoftwareModuleAddUpdateWindow) content).getFormLayout().addComponent(mandatoryLabel);
+        } else if (content instanceof AbstractCreateUpdateTagLayout) {
+            ((AbstractCreateUpdateTagLayout) content).getMainLayout().addComponent(mandatoryLabel);
+        }
+
+        mainLayout.addComponent(mandatoryLabel);
     }
 
     private void createCancelButton() {
@@ -292,18 +361,14 @@ public class CommonDialogWindow extends Window implements Serializable {
         saveButton.setSizeUndefined();
         saveButton.addStyleName("default-color");
         saveButton.addClickListener(saveButtonClickListener);
-        saveButton.setEnabled(!existsMandatoryFieldsInWindowContent());
+        saveButton.setEnabled(false);
         buttonsLayout.addComponent(saveButton);
         buttonsLayout.setComponentAlignment(saveButton, Alignment.MIDDLE_RIGHT);
         buttonsLayout.setExpandRatio(saveButton, 1.0F);
     }
 
     private boolean existsMandatoryFieldsInWindowContent() {
-
-        if (requiredFields != null && requiredFields.size() > 0) {
-            return true;
-        }
-        return false;
+        return !requiredFields.isEmpty();
     }
 
     private void addHelpLink() {

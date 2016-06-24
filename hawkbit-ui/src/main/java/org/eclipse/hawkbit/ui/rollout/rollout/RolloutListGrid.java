@@ -67,9 +67,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
- * 
  * Rollout list grid component.
- *
  */
 @SpringComponent
 @ViewScope
@@ -159,7 +157,6 @@ public class RolloutListGrid extends AbstractGrid {
         }
         item.getItemProperty(ROLLOUT_RENDERER_DATA)
                 .setValue(new RolloutRendererData(rollout.getName(), rollout.getStatus().toString()));
-
     }
 
     @Override
@@ -200,7 +197,6 @@ public class RolloutListGrid extends AbstractGrid {
 
         rolloutGridContainer.addContainerProperty(SPUILabelDefinitions.ACTION, String.class,
                 FontAwesome.CIRCLE_O.getHtml(), false, false);
-
     }
 
     @Override
@@ -292,7 +288,6 @@ public class RolloutListGrid extends AbstractGrid {
         for (final Object propertyId : columnsToBeHidden) {
             getColumn(propertyId).setHidden(true);
         }
-
     }
 
     @Override
@@ -315,7 +310,6 @@ public class RolloutListGrid extends AbstractGrid {
         final RolloutRenderer customObjectRenderer = new RolloutRenderer(RolloutRendererData.class);
         customObjectRenderer.addClickListener(this::onClickOfRolloutName);
         getColumn(ROLLOUT_RENDERER_DATA).setRenderer(customObjectRenderer);
-
     }
 
     private void createRolloutStatusToFontMap() {
@@ -437,8 +431,8 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void onUpdate(final ContextMenuData contextMenuData) {
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow();
         addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
-        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.createUpdateWindow();
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
@@ -684,7 +678,6 @@ public class RolloutListGrid extends AbstractGrid {
         public Class<String> getPresentationType() {
             return String.class;
         }
-
     }
 
 }

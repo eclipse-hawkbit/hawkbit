@@ -32,8 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
 import org.vaadin.spring.events.EventBus;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractField;
@@ -84,9 +82,15 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
     private CommonDialogWindow window;
 
-    private String oldDescriptionValue;
+    private String originalDescriptionValue;
 
-    private String oldVendorValue;
+    private String originalVendorValue;
+
+    private String originalNameValue;
+
+    private String originalVersionValue;
+
+    private String originalComboBoxValue;
 
     private Boolean editSwModule = Boolean.FALSE;
 
@@ -135,26 +139,31 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
-        nameTextField.addTextChangeListener(this::listenerNameTextFieldChanged);
+        nameTextField.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalNameValue));
+        nameTextField.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, nameTextField));
 
         /* version text field */
         versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
-        versionTextField.addTextChangeListener(this::listenerVersionTextFieldChanged);
+        versionTextField
+                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalVersionValue));
+        versionTextField.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, versionTextField));
 
         /* Vendor text field */
         vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
                 false, null, i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         vendorTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
+        vendorTextField
+                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalVendorValue));
 
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
                 ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION);
-        addDescriptionTextChangeListener();
-        addVendorTextChangeListener();
+        descTextArea
+                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDescriptionValue));
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, true,
                 null, i18n.get("upload.swmodule.type"));
@@ -162,42 +171,39 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         typeComboBox.setStyleName(SPUIDefinitions.COMBO_BOX_SPECIFIC_STYLE + " " + ValoTheme.COMBOBOX_TINY);
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
-        typeComboBox.addValueChangeListener(this::listenerTypeComboBoxChanged);
-
         populateTypeNameCombo();
-
-        resetOldValues();
-    }
-
-    private void listenerNameTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, nameTextField);
-    }
-
-    private void listenerVersionTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, versionTextField);
-    }
-
-    private void listenerTypeComboBoxChanged(final ValueChangeEvent event) {
-        window.checkMandatoryComboBox(event, typeComboBox);
+        typeComboBox.addValueChangeListener(
+                event -> window.checkMandatoryEditedValue(event, typeComboBox, originalComboBoxValue));
     }
 
     private void populateTypeNameCombo() {
         typeComboBox.setContainerDataSource(HawkbitCommonUtil.createLazyQueryContainer(
                 new BeanQueryFactory<SoftwareModuleTypeBeanQuery>(SoftwareModuleTypeBeanQuery.class)));
         typeComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
-
     }
 
-    private void resetOldValues() {
-        oldDescriptionValue = null;
-        oldVendorValue = null;
+    private void resetComponents() {
+
+        vendorTextField.clear();
+        nameTextField.clear();
+        versionTextField.clear();
+        descTextArea.clear();
+        typeComboBox.clear();
+
+        originalDescriptionValue = null;
+        originalVendorValue = null;
+        originalComboBoxValue = null;
+        originalNameValue = null;
+        originalVersionValue = null;
 
         if (window != null) {
-            window.resetMandatoryAndEditedFields();
+            window.reset();
         }
     }
 
     private void createWindow() {
+
+        resetComponents();
 
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
@@ -223,9 +229,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
-                getMandatoryFields(formLayout), null, i18n);
+                getMandatoryFields(formLayout), geEditedFields(), i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
-        nameTextField.focus();
+        typeComboBox.focus();
     }
 
     private Map<String, Boolean> getMandatoryFields(final FormLayout formLayout) {
@@ -234,18 +240,20 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         while (iterate.hasNext()) {
             final Component c = iterate.next();
             if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getCaption(), null);
+                requiredFields.put(c.getId(), Boolean.FALSE);
             }
         }
         return requiredFields;
     }
 
-    private void addDescriptionTextChangeListener() {
-        descTextArea.addTextChangeListener(event -> window.setSaveButtonEnabled(hasDescriptionChanged(event)));
-    }
-
-    private void addVendorTextChangeListener() {
-        vendorTextField.addTextChangeListener(event -> window.setSaveButtonEnabled(hasVendorChanged(event)));
+    private Map<String, Boolean> geEditedFields() {
+        final Map<String, Boolean> editedFields = new HashMap<>();
+        editedFields.put(typeComboBox.getId(), Boolean.FALSE);
+        editedFields.put(nameTextField.getId(), Boolean.FALSE);
+        editedFields.put(vendorTextField.getId(), Boolean.FALSE);
+        editedFields.put(versionTextField.getId(), Boolean.FALSE);
+        editedFields.put(descTextArea.getId(), Boolean.FALSE);
+        return editedFields;
     }
 
     /**
@@ -309,13 +317,13 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getVendor()));
         descTextArea.setValue(swModle.getDescription() == null ? HawkbitCommonUtil.SP_STRING_EMPTY
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getDescription()));
-        oldDescriptionValue = descTextArea.getValue();
-        oldVendorValue = vendorTextField.getValue();
+        originalDescriptionValue = descTextArea.getValue();
+        originalVendorValue = vendorTextField.getValue();
+        originalComboBoxValue = swModle.getType().getName();
         if (swModle.getType().isDeleted()) {
             typeComboBox.addItem(swModle.getType().getName());
         }
         typeComboBox.setValue(swModle.getType().getName());
-        window.setSaveButtonEnabled(Boolean.FALSE);
     }
 
     /**
@@ -324,7 +332,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
     private void closeThisWindow() {
         window.close();
         UI.getCurrent().removeWindow(window);
-        window.setSaveButtonEnabled(false);
     }
 
     /**
@@ -361,15 +368,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         } else {
             addNewBaseSoftware();
         }
-        window.setSaveButtonEnabled(false);
-    }
-
-    private boolean hasDescriptionChanged(final TextChangeEvent event) {
-        return !(event.getText().equals(oldDescriptionValue) && vendorTextField.getValue().equals(oldVendorValue));
-    }
-
-    private boolean hasVendorChanged(final TextChangeEvent event) {
-        return !(event.getText().equals(oldVendorValue) && descTextArea.getValue().equals(oldDescriptionValue));
     }
 
     public FormLayout getFormLayout() {

@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -35,15 +34,12 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus;
 
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -57,7 +53,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @VaadinSessionScope
 public class TargetAddUpdateWindowLayout extends CustomComponent {
     private static final long serialVersionUID = -6659290471705262389L;
-    
+
     @Autowired
     private I18N i18n;
 
@@ -69,10 +65,10 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     @Autowired
     private transient UINotification uINotification;
-    
+
     @Autowired
     private transient EntityFactory entityFactory;
-    
+
     private TextField controllerIDTextField;
     private TextField nameTextField;
     private TextArea descTextArea;
@@ -81,47 +77,47 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private FormLayout formLayout;
     private CommonDialogWindow window;
 
-    private String oldTargetName;
-    private String oldTargetDesc;
-    
+    private String originalTargetName;
+    private String originalTargetDesc;
+    private String originalControllerId;
+
     /**
      * Initialize the Add Update Window Component for Target.
      */
     public void init() {
-        /* create components */
         createRequiredComponents();
-        /* display components in layout */
         buildLayout();
-        /* register all listeners related to the Window */
-        addListeners();
         setCompositionRoot(formLayout);
     }
 
     private void createRequiredComponents() {
         /* Textfield for controller Id */
-        controllerIDTextField = SPUIComponentProvider.getTextField( i18n.get("prompt.target.id"), "", ValoTheme.TEXTFIELD_TINY, true, null,
-                i18n.get("prompt.target.id"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        controllerIDTextField = SPUIComponentProvider.getTextField(i18n.get("prompt.target.id"), "",
+                ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("prompt.target.id"), true,
+                SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         controllerIDTextField.setId(SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        controllerIDTextField.addTextChangeListener(this::listenerControllerIDTextFieldChanged);
+        controllerIDTextField
+                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalControllerId));
+        controllerIDTextField
+                .addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, controllerIDTextField));
 
         /* Textfield for target name */
-        nameTextField = SPUIComponentProvider.getTextField( i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
+        nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
+                false, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponentIdProvider.TARGET_ADD_NAME);
+        nameTextField.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTargetName));
 
         /* Textarea for target description */
-        descTextArea = SPUIComponentProvider.getTextArea( i18n.get("textfield.description"), "text-area-style", ValoTheme.TEXTFIELD_TINY, false, null,
-                i18n.get("textfield.description"), SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
+        descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
+                ValoTheme.TEXTFIELD_TINY, false, null, i18n.get("textfield.description"),
+                SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.TARGET_ADD_DESC);
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
-    }
-    
-    private void listenerControllerIDTextFieldChanged(final TextChangeEvent event) {
-        window.checkMandatoryTextField(event, controllerIDTextField);
+        descTextArea.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTargetDesc));
     }
 
     private void buildLayout() {
-        
+
         /*
          * The main layout of the window contains mandatory info, textboxes
          * (controller Id, name & description) and action buttons layout
@@ -131,55 +127,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         formLayout.addComponent(controllerIDTextField);
         formLayout.addComponent(nameTextField);
         formLayout.addComponent(descTextArea);
-        
+
         controllerIDTextField.focus();
     }
-
-    private void addListeners() {
-
-        addTargetNameChangeListner();
-        addTargetDescChangeListner();
-    }
-
-    private void addTargetNameChangeListner() {
-        nameTextField.addTextChangeListener(new TextChangeListener() {
-
-            /**
-             *
-             */
-            private static final long serialVersionUID = 1761855781481115921L;
-
-            @Override
-            public void textChange(final TextChangeEvent event) {
-                if (event.getText().equals(oldTargetName) && descTextArea.getValue().equals(oldTargetDesc)) {
-                    window.setSaveButtonEnabled(false);
-                } else {
-                    window.setSaveButtonEnabled(true);
-                }
-
-            }
-        });
-    }
-
-    private void addTargetDescChangeListner() {
-        descTextArea.addTextChangeListener(new TextChangeListener() {
-
-            /**
-             *
-             */
-            private static final long serialVersionUID = 5770734934988115068L;
-
-            @Override
-            public void textChange(final TextChangeEvent event) {
-                if (event.getText().equals(oldTargetDesc) && nameTextField.getValue().equals(oldTargetName)) {
-                    window.setSaveButtonEnabled(false);
-                } else {
-                    window.setSaveButtonEnabled(true);
-                }
-
-            }
-        });
-    } 
 
     /**
      * Update the Target if modified.
@@ -210,7 +160,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         } else {
             addNewTarget();
         }
-        window.setSaveButtonEnabled(false);
     }
 
     private void discardTargetListner() {
@@ -244,37 +193,49 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(), event -> discardTargetListner(), null, getMandatoryFields(), null, i18n);
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(),
+                event -> discardTargetListner(), null, getMandatoryFields(), getEditedFields(), i18n);
         return window;
     }
-    
+
     private Map<String, Boolean> getMandatoryFields() {
         final Map<String, Boolean> requiredFields = new HashMap<>();
         final Iterator<Component> iterate = formLayout.iterator();
         while (iterate.hasNext()) {
             final Component c = iterate.next();
             if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getCaption(), null);
+                requiredFields.put(c.getId(), Boolean.FALSE);
             }
         }
         return requiredFields;
     }
-    
+
+    private Map<String, Boolean> getEditedFields() {
+        final Map<String, Boolean> editedFields = new HashMap<>();
+        editedFields.put(controllerIDTextField.getId(), Boolean.FALSE);
+        editedFields.put(nameTextField.getId(), Boolean.FALSE);
+        editedFields.put(descTextArea.getId(), Boolean.FALSE);
+        return editedFields;
+    }
+
     /**
      * clear all fields of Target Edit Window.
      */
     public void resetComponents() {
         nameTextField.clear();
         nameTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
-        controllerIDTextField.setEnabled(true);
-        controllerIDTextField.setReadOnly(false);
+        controllerIDTextField.setEnabled(Boolean.TRUE);
         controllerIDTextField.removeStyleName(SPUIStyleDefinitions.SP_TEXTFIELD_ERROR);
         controllerIDTextField.clear();
         descTextArea.clear();
         editTarget = Boolean.FALSE;
 
+        originalControllerId = null;
+        originalTargetDesc = null;
+        originalTargetName = null;
+
         if (window != null) {
-            window.resetMandatoryAndEditedFields();
+            window.reset();
         }
     }
 
@@ -282,7 +243,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         editTarget = Boolean.FALSE;
         window.close();
         UI.getCurrent().removeWindow(window);
-        window.setSaveButtonEnabled(false);
     }
 
     private void setTargetValues(final Target target, final String name, final String description) {
@@ -303,7 +263,8 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
     private boolean duplicateCheck(final String newControlllerId) {
         final Target existingTarget = targetManagement.findTargetByControllerID(newControlllerId.trim());
         if (existingTarget != null) {
-            uINotification.displayValidationError(i18n.get("message.target.duplicate.check", new Object[] {newControlllerId}));
+            uINotification.displayValidationError(
+                    i18n.get("message.target.duplicate.check", new Object[] { newControlllerId }));
             return false;
         } else {
             return true;
@@ -319,15 +280,15 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         editTarget = Boolean.TRUE;
         final Target target = targetManagement.findTargetByControllerID(controllerId);
         controllerIDTextField.setValue(target.getControllerId());
-        controllerIDTextField.setReadOnly(Boolean.TRUE);
+        controllerIDTextField.setEnabled(Boolean.FALSE);
         nameTextField.setValue(target.getName());
         if (target.getDescription() != null) {
             descTextArea.setValue(target.getDescription());
         }
-        window.setSaveButtonEnabled(Boolean.FALSE);
 
-        oldTargetDesc = descTextArea.getValue();
-        oldTargetName = nameTextField.getValue();
+        originalTargetDesc = descTextArea.getValue();
+        originalTargetName = nameTextField.getValue();
+        originalControllerId = controllerIDTextField.getValue();
         window.addStyleName("target-update-window");
     }
 

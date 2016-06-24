@@ -32,9 +32,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.UI;
 
 /**
- *
  * Class for Create/Update Tag Layout of distribution set
- * 
  */
 @SpringComponent
 @ViewScope
@@ -98,7 +96,6 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 updateExistingTag(existingDistTag);
             }
         }
-        window.setSaveButtonEnabled(false);
     }
 
     /**
@@ -157,10 +154,11 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
+        setOriginalTagName(distTagSelected);
         final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
         if (null != selectedDistTag) {
             tagDesc.setValue(selectedDistTag.getDescription());
-            setTagDescOriginal(selectedDistTag.getDescription());
+            setOriginalTagDesc(selectedDistTag.getDescription());
             if (null == selectedDistTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
                 setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
