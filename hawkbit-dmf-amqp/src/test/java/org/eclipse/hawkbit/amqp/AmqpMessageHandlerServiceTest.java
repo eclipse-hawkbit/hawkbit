@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetInfo;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,6 +113,9 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    @Mock
+    private SystemSecurityContext systemSecurityContextMock;
+
     @Before
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
@@ -124,6 +128,7 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService.setHostnameResolver(hostnameResolverMock);
         amqpMessageHandlerService.setEventBus(eventBus);
         amqpMessageHandlerService.setEntityFactory(entityFactoryMock);
+        amqpMessageHandlerService.setSystemSecurityContext(systemSecurityContextMock);
 
     }
 
@@ -363,6 +368,8 @@ public class AmqpMessageHandlerServiceTest {
         final List<SoftwareModule> softwareModuleList = createSoftwareModuleList();
         when(controllerManagementMock.findSoftwareModulesByDistributionSet(Matchers.any()))
                 .thenReturn(softwareModuleList);
+
+        when(systemSecurityContextMock.runAsSystem(anyObject())).thenReturn("securityToken");
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
