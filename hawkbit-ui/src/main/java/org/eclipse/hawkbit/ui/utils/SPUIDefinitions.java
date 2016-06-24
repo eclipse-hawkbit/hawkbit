@@ -88,7 +88,7 @@ public final class SPUIDefinitions {
     public static final String ACTION_HIS_TBL_STATUS = "Status";
 
     /**
-     * Actions column
+     * Actions column.
      */
     public static final String ACTIONS_COLUMN = "Actions";
 
