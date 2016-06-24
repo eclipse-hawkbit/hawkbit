@@ -8,13 +8,15 @@
  */
 package org.eclipse.hawkbit.security;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collection;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 
 /**
  * A {@link TenantAware} implemenation which retrieves the ID of the tenant from
@@ -22,14 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * {@link Authentication#getDetails()} which holds the
  * {@link TenantAwareAuthenticationDetails} object.
  *
- *
- *
- *
  */
 public class SecurityContextTenantAware implements TenantAware {
-
-    private static final ThreadLocal<String> TENANT_THREAD_LOCAL = new ThreadLocal<>();
-    private static final ThreadLocal<AtomicInteger> RUN_AS_DEPTH = new ThreadLocal<>();
 
     /*
      * (non-Javadoc)
@@ -38,9 +34,6 @@ public class SecurityContextTenantAware implements TenantAware {
      */
     @Override
     public String getCurrentTenant() {
-        if (TENANT_THREAD_LOCAL.get() != null) {
-            return TENANT_THREAD_LOCAL.get();
-        }
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context.getAuthentication() != null) {
             final Object authDetails = context.getAuthentication().getDetails();
@@ -51,29 +44,88 @@ public class SecurityContextTenantAware implements TenantAware {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see hawkbit.server.tenancy.TenantAware#runAsTenant(java.lang.String,
-     * java.util.concurrent.Callable)
-     */
     @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> callable) {
-        AtomicInteger runAsDepth = RUN_AS_DEPTH.get();
-        if (runAsDepth == null) {
-            runAsDepth = new AtomicInteger(1);
-            RUN_AS_DEPTH.set(runAsDepth);
-        } else {
-            runAsDepth.incrementAndGet();
-        }
-        TENANT_THREAD_LOCAL.set(tenant);
+        final SecurityContext originalContext = SecurityContextHolder.getContext();
         try {
+            SecurityContextHolder.setContext(buildSecurityContext(tenant));
             return callable.run();
         } finally {
-            if (runAsDepth.decrementAndGet() <= 0) {
-                RUN_AS_DEPTH.remove();
-                TENANT_THREAD_LOCAL.remove();
-            }
+            SecurityContextHolder.setContext(originalContext);
+        }
+    }
+
+    private SecurityContext buildSecurityContext(final String tenant) {
+        final SecurityContextImpl securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(
+                new AuthenticationDelegate(SecurityContextHolder.getContext().getAuthentication(), tenant));
+        return securityContext;
+    }
+
+    /**
+     * An {@link Authentication} implementation to delegate to an existing
+     * {@link Authentication} object except setting the details specifically for
+     * a specific tenant.
+     */
+    private class AuthenticationDelegate implements Authentication {
+        private static final long serialVersionUID = 1L;
+
+        private final Authentication delegate;
+        private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+
+        private AuthenticationDelegate(final Authentication delegate, final String tenant) {
+            this.delegate = delegate;
+            tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
+        }
+
+        @Override
+        public boolean equals(final Object another) {
+            return delegate.equals(another);
+        }
+
+        @Override
+        public String toString() {
+            return delegate.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public String getName() {
+            return delegate.getName();
+        }
+
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return delegate.getAuthorities();
+        }
+
+        @Override
+        public Object getCredentials() {
+            return delegate.getCredentials();
+        }
+
+        @Override
+        public Object getDetails() {
+            return tenantAwareAuthenticationDetails;
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return delegate.getPrincipal();
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return delegate.isAuthenticated();
+        }
+
+        @Override
+        public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
+            delegate.setAuthenticated(isAuthenticated);
         }
     }
 }
