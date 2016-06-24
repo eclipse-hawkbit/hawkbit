@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +105,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     @Autowired
     private EntityFactory entityFactory;
+
+    @Autowired
+    private SystemSecurityContext systemSecurityContext;
 
     /**
      * Constructor.
@@ -313,9 +317,10 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DistributionSet distributionSet = action.getDistributionSet();
         final List<SoftwareModule> softwareModuleList = controllerManagement
                 .findSoftwareModulesByDistributionSet(distributionSet);
+        final String targetSecurityToken = systemSecurityContext.runAsSystem(() -> target.getSecurityToken());
         eventBus.post(new TargetAssignDistributionSetEvent(target.getOptLockRevision(), target.getTenant(),
                 target.getControllerId(), action.getId(), softwareModuleList, target.getTargetInfo().getAddress(),
-                target.getSecurityToken()));
+                targetSecurityToken));
 
     }
 
