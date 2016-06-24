@@ -478,4 +478,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         this.entityFactory = entityFactory;
     }
 
+    void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
+        this.systemSecurityContext = systemSecurityContext;
+    }
 }
