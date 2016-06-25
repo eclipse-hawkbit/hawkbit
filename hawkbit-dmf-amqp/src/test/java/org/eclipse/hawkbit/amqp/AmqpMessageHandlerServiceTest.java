@@ -278,14 +278,13 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests that an download request is denied for an artifact which does not exists")
     public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -297,7 +296,7 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
     public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -308,8 +307,7 @@ public class AmqpMessageHandlerServiceTest {
                 .thenThrow(EntityNotFoundException.class);
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -321,7 +319,7 @@ public class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
     public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
-        final MessageProperties messageProperties = createMessageProperties(MessageType.AUTHENTIFICATION);
+        final MessageProperties messageProperties = createMessageProperties(null);
         final TenantSecurityToken securityToken = new TenantSecurityToken(TENANT, "123", FileResource.sha1("12345"));
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
                 messageProperties);
@@ -339,8 +337,7 @@ public class AmqpMessageHandlerServiceTest {
         when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
         // test
-        final Message onMessage = amqpMessageHandlerService.onMessage(message, MessageType.AUTHENTIFICATION.name(),
-                TENANT, "vHost");
+        final Message onMessage = amqpMessageHandlerService.onAuthenticationRequest(message);
 
         // verify
         final DownloadResponse downloadResponse = (DownloadResponse) messageConverter.fromMessage(onMessage);
@@ -418,7 +415,9 @@ public class AmqpMessageHandlerServiceTest {
 
     private MessageProperties createMessageProperties(final MessageType type, final String replyTo) {
         final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader(MessageHeaderKey.TYPE, type.name());
+        if (type != null) {
+            messageProperties.setHeader(MessageHeaderKey.TYPE, type.name());
+        }
         messageProperties.setHeader(MessageHeaderKey.TENANT, TENANT);
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messageProperties.setReplyTo(replyTo);
