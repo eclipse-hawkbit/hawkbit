@@ -145,7 +145,7 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the DMF API receiver queue for
+     * Create the DMF API receiver queue for retrieving DMF messages.
      *
      * @return the receiver queue
      */
