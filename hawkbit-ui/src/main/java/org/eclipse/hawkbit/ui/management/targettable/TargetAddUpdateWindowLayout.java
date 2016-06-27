@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +22,7 @@ import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -36,8 +36,6 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
@@ -194,20 +192,9 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(),
-                event -> discardTargetListner(), null, getMandatoryFields(), getEditedFields(), i18n);
+                event -> discardTargetListner(), null, CommonDialogWindowHelper.getMandatoryFields(formLayout),
+                getEditedFields(), i18n);
         return window;
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
     }
 
     private Map<String, Boolean> getEditedFields() {

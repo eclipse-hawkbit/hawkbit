@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.layouts;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.annotation.PreDestroy;
@@ -24,6 +23,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -38,11 +38,9 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
@@ -115,21 +113,9 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     protected void createWindow() {
         reset();
-        setWindow(
-                SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null, SPUIDefinitions.CREATE_UPDATE_WINDOW,
-                        this, this::save, this::discard, null, getMandatoryFields(), getEditedFields(), i18n));
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), null);
-            }
-        }
-        return requiredFields;
+        setWindow(SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null,
+                CommonDialogWindowHelper.getMandatoryFields(formLayout), getEditedFields(), i18n));
     }
 
     protected Map<String, Boolean> getEditedFields() {
@@ -344,7 +330,9 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             comboLayout.removeComponent(comboLabel);
             comboLayout.removeComponent(tagNameComboBox);
         }
-        window.reset();
+        if (window != null) {
+            window.reset();
+        }
         // close the color picker layout
         tagPreviewBtnClicked = false;
         // reset the selected color - Set default color

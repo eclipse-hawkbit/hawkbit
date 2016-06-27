@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -25,6 +22,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -37,10 +35,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
@@ -125,20 +121,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     public void createWindow() {
         reset();
         window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, getMandatoryFields(),
-                getEditedFields(), i18n);
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = getFormLayout().iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null,
+                CommonDialogWindowHelper.getMandatoryFields(getFormLayout()), getEditedFields(), i18n);
     }
 
     /**

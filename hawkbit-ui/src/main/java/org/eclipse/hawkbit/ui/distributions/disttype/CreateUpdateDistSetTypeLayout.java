@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -43,7 +44,6 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -91,8 +91,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
 
     private IndexedContainer originalSelectedTableContainer;
 
-    private String originalTypeKey;
-
     @Override
     protected void createRequiredComponents() {
 
@@ -109,7 +107,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.DIST_SET_TYPE_KEY, true, "", i18n.get("textfield.key"),
                 true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_DISTRIBUTION_TYPE_KEY);
-        typeKey.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTypeKey));
+        typeKey.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTypeKey()));
         typeKey.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, typeKey));
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
@@ -268,24 +266,26 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     private void addSMType() {
 
         final Set<Long> selectedIds = (Set<Long>) sourceTable.getValue();
-        if (selectedIds != null && !selectedIds.isEmpty()) {
-            for (final Long id : selectedIds) {
-                addTargetTableData(id);
-            }
-            window.updateRequiredFields(selectedTable.getId(), hasContentChanged());
+        if (selectedIds == null) {
+            return;
         }
+        for (final Long id : selectedIds) {
+            addTargetTableData(id);
+        }
+        window.updateRequiredFields(selectedTable.getId(), hasContentChanged());
     }
 
     private void removeSMType() {
 
         @SuppressWarnings("unchecked")
         final Set<Long> selectedIds = (Set<Long>) selectedTable.getValue();
-        if (selectedIds != null && !selectedIds.isEmpty()) {
-            for (final Long id : selectedIds) {
-                addSourceTableData(id);
-                selectedTable.removeItem(id);
-                window.updateRequiredFields(selectedTable.getId(), hasContentChanged());
-            }
+        if (selectedIds == null) {
+            return;
+        }
+        for (final Long id : selectedIds) {
+            addSourceTableData(id);
+            selectedTable.removeItem(id);
+            window.updateRequiredFields(selectedTable.getId(), hasContentChanged());
         }
     }
 
@@ -294,6 +294,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         if (originalSelectedTableContainer == null) {
             originalSelectedTableContainer = new IndexedContainer();
         }
+        // is new softwareModule added?
         for (final Iterator itemIterator = selectedTableContainer.getItemIds().iterator(); itemIterator.hasNext();) {
             final long itemId = (Long) itemIterator.next();
             if (!originalSelectedTableContainer.containsId(itemId)) {
@@ -302,6 +303,7 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             }
         }
 
+        // is softwareModule removed and at least one softwareModule is selected
         for (final Iterator itemIterator = originalSelectedTableContainer.getItemIds().iterator(); itemIterator
                 .hasNext();) {
             final long itemId = (Long) itemIterator.next();
@@ -311,9 +313,6 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
             }
         }
 
-        if (selectedTableContainer.size() > 0) {
-            window.updateRequiredFields(selectedTable.getId(), Boolean.TRUE);
-        }
         return Boolean.FALSE;
     }
 
@@ -621,20 +620,20 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     @SuppressWarnings("unchecked")
     private void addTargetTableforUpdate(final SoftwareModuleType swModuleType, final boolean mandatory) {
 
-        Item saveTblitem;
-        if (selectedTableContainer != null) {
-            saveTblitem = selectedTableContainer.addItem(swModuleType.getId());
-            sourceTable.removeItem(swModuleType.getId());
-            saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
-            saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
-            final CheckBox mandatoryCheckbox = (CheckBox) selectedTableContainer
-                    .getContainerProperty(swModuleType.getId(), DIST_TYPE_MANDATORY).getValue();
-            mandatoryCheckbox.addValueChangeListener(this::listenerMandatoryCheckboxChanged);
-
-            final Item originalItem = originalSelectedTableContainer.addItem(swModuleType.getId());
-            originalItem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
-            originalItem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
+        if (selectedTableContainer == null) {
+            return;
         }
+        final Item saveTblitem = selectedTableContainer.addItem(swModuleType.getId());
+        sourceTable.removeItem(swModuleType.getId());
+        saveTblitem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
+        saveTblitem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
+        final CheckBox mandatoryCheckbox = (CheckBox) selectedTableContainer
+                .getContainerProperty(swModuleType.getId(), DIST_TYPE_MANDATORY).getValue();
+        mandatoryCheckbox.addValueChangeListener(this::listenerMandatoryCheckboxChanged);
+
+        final Item originalItem = originalSelectedTableContainer.addItem(swModuleType.getId());
+        originalItem.getItemProperty(DIST_TYPE_NAME).setValue(swModuleType.getName());
+        originalItem.getItemProperty(DIST_TYPE_MANDATORY).setValue(new CheckBox("", mandatory));
     }
 
     @Override
@@ -660,15 +659,8 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
                 getEditedFields(), i18n);
     }
 
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = getFormLayout().iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
+    protected Map<String, Boolean> getMandatoryFields() {
+        final Map<String, Boolean> requiredFields = CommonDialogWindowHelper.getMandatoryFields(getFormLayout());
         // Selected SoftwareModulesType
         requiredFields.put(selectedTable.getId(), Boolean.FALSE);
         return requiredFields;
@@ -718,14 +710,14 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
     }
 
-    @Override
-    public String getOriginalTypeKey() {
-        return originalTypeKey;
-    }
-
-    @Override
-    public void setOriginalTypeKey(final String originalTypeKey) {
-        this.originalTypeKey = originalTypeKey;
-    }
+    // @Override
+    // public String getOriginalTypeKey() {
+    // return originalTypeKey;
+    // }
+    //
+    // @Override
+    // public void setOriginalTypeKey(final String originalTypeKey) {
+    // this.originalTypeKey = originalTypeKey;
+    // }
 
 }

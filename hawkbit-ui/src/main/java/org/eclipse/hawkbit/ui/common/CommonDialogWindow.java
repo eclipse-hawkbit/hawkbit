@@ -127,7 +127,7 @@ public class CommonDialogWindow extends Window implements Serializable {
     public void checkMandatoryEditedTextField(final TextChangeEvent event, final String originalValue) {
         final Component component = event.getComponent();
         if (!(component instanceof AbstractComponent)) {
-            throw new IllegalStateException("Only AbstractComponent are allowed");
+            throw new IllegalStateException("Only AbstractComponents are allowed");
         }
 
         if (requiredFields.containsKey(component.getId())) {
@@ -155,10 +155,10 @@ public class CommonDialogWindow extends Window implements Serializable {
         if (requiredFields.containsKey(component.getId())) {
             setRequiredFieldChangeValue(component, isChangedValueNotNull);
         }
-        if (event.getProperty().getValue() != null) {
-            checkChanges(component.getId(), event.getProperty().getValue().toString(), originalValue);
-        } else {
+        if (event.getProperty().getValue() == null) {
             checkChanges(component.getId(), null, originalValue);
+        } else {
+            checkChanges(component.getId(), event.getProperty().getValue().toString(), originalValue);
         }
         checkSaveButtonEnabled();
     }
@@ -390,14 +390,6 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     public HorizontalLayout getButtonsLayout() {
         return buttonsLayout;
-    }
-
-    public Map<String, Boolean> getRequiredFields() {
-        return requiredFields;
-    }
-
-    public void setRequiredFields(final Map<String, Boolean> requiredFields) {
-        this.requiredFields = requiredFields;
     }
 
 }

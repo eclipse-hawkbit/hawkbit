@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -21,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -34,9 +34,7 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
@@ -229,21 +227,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
-                getMandatoryFields(formLayout), geEditedFields(), i18n);
+                CommonDialogWindowHelper.getMandatoryFields(formLayout), geEditedFields(), i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         typeComboBox.focus();
-    }
-
-    private Map<String, Boolean> getMandatoryFields(final FormLayout formLayout) {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
     }
 
     private Map<String, Boolean> geEditedFields() {

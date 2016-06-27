@@ -41,7 +41,7 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     protected String createTypeStr;
     protected String updateTypeStr;
     protected TextField typeKey;
-    protected String originalTypeKey;
+    private String originalTypeKey;
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
