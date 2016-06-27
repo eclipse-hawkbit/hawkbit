@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -38,6 +39,8 @@ public final class SoftwareModuleSpecification {
         return (targetRoot, query, cb) -> {
             final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaSoftwareModule_.id), moduleId);
             targetRoot.fetch(JpaSoftwareModule_.type);
+            targetRoot.fetch(JpaSoftwareModule_.metadata,JoinType.LEFT);
+            query.distinct(true);
             return predicate;
         };
     }

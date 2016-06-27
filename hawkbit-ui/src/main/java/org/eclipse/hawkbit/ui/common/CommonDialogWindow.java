@@ -93,12 +93,14 @@ public class CommonDialogWindow extends Window {
 
         if (null != content) {
             mainLayout.addComponent(content);
+            mainLayout.setExpandRatio(content, 1.0F);
         }
         final HorizontalLayout buttonLayout = createActionButtonsLayout();
         mainLayout.addComponent(buttonLayout);
         mainLayout.setComponentAlignment(buttonLayout, Alignment.TOP_CENTER);
 
         setCaption(caption);
+        setCaptionAsHtml(true);
         setContent(mainLayout);
         setResizable(false);
         center();
@@ -109,9 +111,8 @@ public class CommonDialogWindow extends Window {
     private HorizontalLayout createActionButtonsLayout() {
 
         buttonsLayout = new HorizontalLayout();
-        buttonsLayout.setSizeFull();
+        buttonsLayout.setSizeUndefined();
         buttonsLayout.setSpacing(true);
-
         createSaveButton();
 
         createCancelButton();
@@ -155,16 +156,16 @@ public class CommonDialogWindow extends Window {
         buttonsLayout.setComponentAlignment(helpLinkComponent, Alignment.MIDDLE_RIGHT);
     }
 
+
     public void setSaveButtonEnabled(final boolean enabled) {
         saveButton.setEnabled(enabled);
     }
-
-    public void setCancelButtonEnabled(final boolean enabled) {
-        cancelButton.setEnabled(enabled);
-    }
-
+    
     public HorizontalLayout getButtonsLayout() {
         return buttonsLayout;
     }
-
+    
+    public VerticalLayout getMainLayout() {
+        return mainLayout;
+    }
 }

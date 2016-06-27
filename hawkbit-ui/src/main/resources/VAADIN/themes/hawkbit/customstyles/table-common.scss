@@ -182,6 +182,7 @@
     float: right;
   }
   
+   
   .v-button-generatedColumnPadding {
   	height: 28px;
 	padding: 0 6px !important;
@@ -189,5 +190,31 @@
 	border-radius: 4px;
   }
   
+  .metadata-grid {
+  	tr {
+  		.icon-only {
+         visibility: hidden;
+         color: $discard-icon-color;
+        }
+    }
   
+  	tr.v-grid-row-selected{
+  		.icon-only .v-icon {
+  		 color : $widget-bg;
+  	    }
+  	}
+  	
+  	tr.v-grid-row-selected:hover {
+  	 .icon-only {
+        visibility: visible;
+        color: $widget-bg !important;
+      }
+  	 }
+  	 
+  	 tr:hover {
+      .icon-only {
+        visibility: visible;
+      }
+    }
+  }
 }
