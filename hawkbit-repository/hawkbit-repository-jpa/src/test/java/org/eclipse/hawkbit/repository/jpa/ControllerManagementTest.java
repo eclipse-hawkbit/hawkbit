@@ -17,6 +17,7 @@ import java.util.List;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -26,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -34,6 +36,8 @@ import ru.yandex.qatools.allure.annotations.Stories;
 @Features("Component Tests - Repository")
 @Stories("Controller Management")
 public class ControllerManagementTest extends AbstractJpaIntegrationTest {
+    @Autowired
+    private RepositoryProperties repositoryProperties;
 
     @Test
     @Description("Controller adds a new action status.")
@@ -94,7 +98,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
-    public void tryToFinishUpdateProcessMoreThenOnce() {
+    public void tryToFinishUpdateProcessMoreThanOnce() {
 
         // mock
         final Target target = new JpaTarget("Rabbit");
@@ -120,16 +124,101 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
 
+        // try with disabled late feedback
+        repositoryProperties.setRejectActionStatusForClosedAction(true);
         final ActionStatus actionStatusMessage3 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
                 System.currentTimeMillis());
         actionStatusMessage3.addMessage("finish");
-        controllerManagament.addUpdateActionStatus(actionStatusMessage3);
-
-        targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus();
+        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage3);
 
         // test
         assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.ERROR);
 
+        // try with enabled late feedback
+        repositoryProperties.setRejectActionStatusForClosedAction(false);
+        final ActionStatus actionStatusMessage4 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
+                System.currentTimeMillis());
+        actionStatusMessage4.addMessage("finish");
+        controllerManagament.addUpdateActionStatus(actionStatusMessage3);
+
+        // test
+        assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.ERROR);
+
+    }
+
+    @Test
+    @Description("Controller trys to send an update feedback after it has been finished which is reject as the repository is "
+            + "configured to reject that.")
+    public void sendUpdatesForFinishUpdateProcessDropedIfDisabled() {
+        repositoryProperties.setRejectActionStatusForClosedAction(true);
+
+        final Action action = prepareFinishedUpdate("Rabbit");
+
+        final ActionStatus actionStatusMessage1 = new JpaActionStatus(action, Action.Status.RUNNING,
+                System.currentTimeMillis());
+        actionStatusMessage1.addMessage("got some additional feedback");
+        controllerManagament.addUpdateActionStatus(actionStatusMessage1);
+
+        // nothing changed as "feedback after close" is disabled
+        assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action).getNumberOfElements()).isEqualTo(3);
+    }
+
+    @Test
+    @Description("Controller trys to send an update feedback after it has been finished which is actepted as the repository is "
+            + "configured to accept them.")
+    public void sendUpdatesForFinishUpdateProcessAcceptedIfEnabled() {
+        repositoryProperties.setRejectActionStatusForClosedAction(false);
+
+        Action action = prepareFinishedUpdate("Rabbit");
+
+        final ActionStatus actionStatusMessage1 = new JpaActionStatus(action, Action.Status.RUNNING,
+                System.currentTimeMillis());
+        actionStatusMessage1.addMessage("got some additional feedback");
+        action = controllerManagament.addUpdateActionStatus(actionStatusMessage1);
+
+        // nothing changed as "feedback after close" is disabled
+        assertThat(targetManagement.findTargetByControllerID("Rabbit").getTargetInfo().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(4);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, action).getNumberOfElements()).isEqualTo(4);
+    }
+
+    private Action prepareFinishedUpdate(final String controllerId) {
+        // mock
+        final Target target = new JpaTarget(controllerId);
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = targetManagement.createTarget(target);
+        final List<Target> toAssign = new ArrayList<>();
+        toAssign.add(savedTarget);
+        savedTarget = deploymentManagement.assignDistributionSet(ds, toAssign).getAssignedEntity().iterator().next();
+        Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget).get(0);
+
+        // test and verify
+        final ActionStatus actionStatusMessage = new JpaActionStatus(savedAction, Action.Status.RUNNING,
+                System.currentTimeMillis());
+        actionStatusMessage.addMessage("running");
+        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage);
+        assertThat(targetManagement.findTargetByControllerID(controllerId).getTargetInfo().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        final ActionStatus actionStatusMessage2 = new JpaActionStatus(savedAction, Action.Status.FINISHED,
+                System.currentTimeMillis());
+        actionStatusMessage2.addMessage("finish");
+        savedAction = controllerManagament.addUpdateActionStatus(actionStatusMessage2);
+
+        // test
+        assertThat(targetManagement.findTargetByControllerID(controllerId).getTargetInfo().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+
+        assertThat(actionStatusRepository.findAll(pageReq).getNumberOfElements()).isEqualTo(3);
+        assertThat(deploymentManagement.findActionStatusByAction(pageReq, savedAction).getNumberOfElements())
+                .isEqualTo(3);
+
+        return savedAction;
     }
 }

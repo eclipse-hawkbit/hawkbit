@@ -15,6 +15,6 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 /**
  *
  */
-@FeignClient(url = "${hawkbit.url:localhost:8080}/" + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE)
+@FeignClient(url = "${hawkbit.url:localhost:8080}" + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE)
 public interface MgmtDownloadClientResource extends MgmtDownloadRestApi {
 }

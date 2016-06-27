@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.simulator.event;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
 
@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.simulator.AbstractSimulatedDevice;
  */
 public class NextPollCounterUpdate {
 
-    private final List<AbstractSimulatedDevice> devices;
+    private final Collection<AbstractSimulatedDevice> devices;
 
     /**
      * Creates poll timer update event.
@@ -28,14 +28,14 @@ public class NextPollCounterUpdate {
      * @param devices
      *            the devices which progress has been updated
      */
-    public NextPollCounterUpdate(final List<AbstractSimulatedDevice> devices) {
+    public NextPollCounterUpdate(final Collection<AbstractSimulatedDevice> devices) {
         this.devices = devices;
     }
 
     /**
      * @return the devices of the event
      */
-    public List<AbstractSimulatedDevice> getDevices() {
+    public Collection<AbstractSimulatedDevice> getDevices() {
         return devices;
     }
 

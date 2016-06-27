@@ -76,7 +76,6 @@ public class GenerateDialog extends Window {
 
         pollDelayTextField = createRequiredTextfield("poll delay (sec)", new ObjectProperty<Integer>(10),
                 FontAwesome.CLOCK_O, new RangeValidator<Integer>("Must be between 1 and 60", Integer.class, 1, 60));
-        pollDelayTextField.setVisible(false);
 
         pollUrlTextField = createRequiredTextfield("base poll URL endpoint", "http://localhost:8080",
                 FontAwesome.FLAG_O, new RegexpValidator(
@@ -193,7 +192,6 @@ public class GenerateDialog extends Window {
         protocolGroup.select(Protocol.DMF_AMQP);
         protocolGroup.addValueChangeListener(event -> {
             final boolean directDeviceOptionSelected = event.getProperty().getValue().equals(Protocol.DDI_HTTP);
-            pollDelayTextField.setVisible(directDeviceOptionSelected);
             pollUrlTextField.setVisible(directDeviceOptionSelected);
             gatewayTokenTextField.setVisible(directDeviceOptionSelected);
         });

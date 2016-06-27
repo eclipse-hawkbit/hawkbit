@@ -23,7 +23,6 @@ public class DDISimulatedDevice extends AbstractSimulatedDevice {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DDISimulatedDevice.class);
 
-    private final int pollDelaySec;
     private final ControllerResource controllerResource;
 
     private final DeviceSimulatorUpdater deviceUpdater;
@@ -45,11 +44,9 @@ public class DDISimulatedDevice extends AbstractSimulatedDevice {
      */
     public DDISimulatedDevice(final String id, final String tenant, final int pollDelaySec,
             final ControllerResource controllerResource, final DeviceSimulatorUpdater deviceUpdater) {
-        super(id, tenant, Protocol.DDI_HTTP);
-        this.pollDelaySec = pollDelaySec;
+        super(id, tenant, Protocol.DDI_HTTP, pollDelaySec);
         this.controllerResource = controllerResource;
         this.deviceUpdater = deviceUpdater;
-        setNextPollCounterSec(pollDelaySec);
     }
 
     @Override
@@ -58,13 +55,10 @@ public class DDISimulatedDevice extends AbstractSimulatedDevice {
         removed = true;
     }
 
-    public int getPollDelaySec() {
-        return pollDelaySec;
-    }
-
     /**
      * Polls the base URL for the DDI API interface.
      */
+    @Override
     public void poll() {
         if (!removed) {
             final String basePollJson = controllerResource.get(getTenant(), getId());

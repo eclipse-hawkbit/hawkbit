@@ -31,19 +31,74 @@ public class AmqpProperties {
     private String deadLetterExchange = "dmf.connector.deadletter";
 
     /**
-     * DMF API receiving queue.
+     * DMF API receiving queue for EVENT or THING_CREATED message.
      */
     private String receiverQueue = "dmf_receiver";
 
     /**
+     * Authentication request called by 3rd party artifact storages for download
+     * authorizations.
+     */
+    private String authenticationReceiverQueue = "authentication_receiver";
+
+    /**
      * Missing queue fatal.
      */
-    private boolean missingQueuesFatal = false;
+    private boolean missingQueuesFatal;
 
     /**
      * Requested heartbeat interval from broker in {@link TimeUnit#SECONDS}.
      */
     private int requestedHeartBeat = (int) TimeUnit.SECONDS.toSeconds(60);
+
+    /**
+     * Sets an upper limit to the number of consumers.
+     */
+    private int maxConcurrentConsumers = 10;
+
+    /**
+     * Tells the broker how many messages to send to each consumer in a single
+     * request. Often this can be set quite high to improve throughput.
+     */
+    private int prefetchCount = 10;
+
+    /**
+     * Initial number of consumers. Is scaled up if necessary up to
+     * {@link #maxConcurrentConsumers}.
+     */
+    private int initialConcurrentConsumers = 3;
+
+    public String getAuthenticationReceiverQueue() {
+        return authenticationReceiverQueue;
+    }
+
+    public void setAuthenticationReceiverQueue(final String authenticationReceiverQueue) {
+        this.authenticationReceiverQueue = authenticationReceiverQueue;
+    }
+
+    public int getPrefetchCount() {
+        return prefetchCount;
+    }
+
+    public void setPrefetchCount(final int prefetchCount) {
+        this.prefetchCount = prefetchCount;
+    }
+
+    public int getInitialConcurrentConsumers() {
+        return initialConcurrentConsumers;
+    }
+
+    public void setInitialConcurrentConsumers(final int initialConcurrentConsumers) {
+        this.initialConcurrentConsumers = initialConcurrentConsumers;
+    }
+
+    public int getMaxConcurrentConsumers() {
+        return maxConcurrentConsumers;
+    }
+
+    public void setMaxConcurrentConsumers(final int maxConcurrentConsumers) {
+        this.maxConcurrentConsumers = maxConcurrentConsumers;
+    }
 
     /**
      * Is missingQueuesFatal enabled
@@ -106,16 +161,16 @@ public class AmqpProperties {
         return receiverQueue;
     }
 
-    public void setReceiverQueue(final String receiverQueue) {
-        this.receiverQueue = receiverQueue;
-    }
-
     public int getRequestedHeartBeat() {
         return requestedHeartBeat;
     }
 
     public void setRequestedHeartBeat(final int requestedHeartBeat) {
         this.requestedHeartBeat = requestedHeartBeat;
+    }
+
+    public void setReceiverQueue(final String receiverQueue) {
+        this.receiverQueue = receiverQueue;
     }
 
 }

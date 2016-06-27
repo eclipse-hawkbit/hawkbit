@@ -8,12 +8,11 @@
  */
 package org.eclipse.hawkbit.simulator;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.simulator.event.NextPollCounterUpdate;
 import org.slf4j.Logger;
@@ -51,18 +50,17 @@ public class NextPollTimeController {
     private class NextPollUpdaterRunnable implements Runnable {
         @Override
         public void run() {
-            final List<AbstractSimulatedDevice> devices = repository.getAll().stream()
-                    .filter(device -> device instanceof DDISimulatedDevice).collect(Collectors.toList());
+            final Collection<AbstractSimulatedDevice> devices = repository.getAll();
 
             devices.forEach(device -> {
                 int nextCounter = device.getNextPollCounterSec() - 1;
-                if (nextCounter < 0 && device instanceof DDISimulatedDevice) {
+                if (nextCounter < 0) {
                     try {
-                        pollService.submit(() -> ((DDISimulatedDevice) device).poll());
+                        pollService.submit(() -> device.poll());
                     } catch (final IllegalStateException e) {
                         LOGGER.trace("Device could not be polled", e);
                     }
-                    nextCounter = ((DDISimulatedDevice) device).getPollDelaySec();
+                    nextCounter = device.getPollDelaySec();
                 }
 
                 device.setNextPollCounterSec(nextCounter);
