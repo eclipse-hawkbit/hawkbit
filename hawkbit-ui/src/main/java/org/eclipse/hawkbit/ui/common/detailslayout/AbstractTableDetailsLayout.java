@@ -138,14 +138,14 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
                 SPUIButtonStyleSmallNoBorder.class);
         editButton.setId(getEditButtonId());
         editButton.addClickListener(this::onEdit);
+        editButton.setEnabled(false);
 
         manageMetadataBtn = SPUIComponentProvider.getButton("", "", "", null, false,
                 FontAwesome.LIST_ALT, SPUIButtonStyleSmallNoBorder.class);
         manageMetadataBtn.setId(getEditButtonId());
         manageMetadataBtn.setDescription(i18n.get("tooltip.metadata.icon"));
         manageMetadataBtn.addClickListener(this::showMetadata);    
-            
-        editButton.setEnabled(false);
+        manageMetadataBtn.setEnabled(false);
 
         detailsTab = SPUIComponentProvider.getDetailsTabSheet();
         detailsTab.setImmediate(true);
@@ -213,6 +213,7 @@ public abstract class AbstractTableDetailsLayout<T extends NamedEntity> extends 
     private void populateData(final T selectedBaseEntity) {
         this.selectedBaseEntity = selectedBaseEntity;
         editButton.setEnabled(selectedBaseEntity != null);
+        manageMetadataBtn.setEnabled(selectedBaseEntity != null);
         if (selectedBaseEntity == null) {
             setName(getDefaultCaption(), StringUtils.EMPTY);
         } else {
