@@ -23,15 +23,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.repository.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.LocalArtifact;
+import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTestWithMongoDB;
@@ -43,6 +45,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.jayway.jsonpath.JsonPath;
 
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -227,6 +232,45 @@ public class DdiDeploymentBaseTest extends AbstractRestIntegrationTestWithMongoD
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
+    }
+
+    @Test
+    @Description("Checks that the deployementBase URL changes when the action is switched from soft to forced in TIMEFORCED case.")
+    public void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
+        // Prepare test data
+        final Target target = targetManagement.createTarget(entityFactory.generateTarget("4712"));
+        final DistributionSet ds = testdataFactory.createDistributionSet("", true);
+
+        final DistributionSetAssignmentResult result = deploymentManagement.assignDistributionSet(ds.getId(),
+                ActionType.TIMEFORCED, System.currentTimeMillis() + 1_000, target.getControllerId());
+
+        final Action action = deploymentManagement.findActiveActionsByTarget(result.getAssignedEntity().get(0)).get(0);
+
+        MvcResult mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+
+        final String urlBeforeSwitch = JsonPath.compile("_links.deploymentBase.href")
+                .read(mvcResult.getResponse().getContentAsString()).toString();
+
+        // Time is not yet over, so we should see the same URL
+        mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+        assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
+                .toString()).isEqualTo(urlBeforeSwitch)
+                        .startsWith("http://localhost/" + tenantAware.getCurrentTenant()
+                                + "/controller/v1/4712/deploymentBase/" + action.getId());
+
+        // After the time is over we should see a new etag
+        TimeUnit.MILLISECONDS.sleep(1_000);
+
+        mvcResult = mvc.perform(get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
+
+        assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
+                .toString()).isNotEqualTo(urlBeforeSwitch);
     }
 
     @Test
