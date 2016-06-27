@@ -37,6 +37,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
@@ -153,10 +154,10 @@ public final class SPUIComponentProvider {
      */
     public static CommonDialogWindow getWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
-            final ClickListener cancelButtonClickListener, final String helpLink,
-            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields, final I18N i18n) {
+            final ClickListener cancelButtonClickListener, final String helpLink, final FormLayout formLayout,
+            final I18N i18n) {
         return SPUIWindowDecorator.getDeocratedWindow(caption, id, type, content, saveButtonClickListener,
-                cancelButtonClickListener, helpLink, requiredFields, editedFields, i18n);
+                cancelButtonClickListener, helpLink, formLayout, i18n);
     }
 
     /**

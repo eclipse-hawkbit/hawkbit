@@ -139,31 +139,22 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_NAME);
-        nameTextField.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalNameValue));
-        nameTextField.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, nameTextField));
 
         /* version text field */
         versionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         versionTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VERSION);
-        versionTextField
-                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalVersionValue));
-        versionTextField.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, versionTextField));
 
         /* Vendor text field */
         vendorTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.vendor"), "", ValoTheme.TEXTFIELD_TINY,
                 false, null, i18n.get("textfield.vendor"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         vendorTextField.setId(SPUIComponentIdProvider.SOFT_MODULE_VENDOR);
-        vendorTextField
-                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalVendorValue));
 
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
                 ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION);
-        descTextArea
-                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDescriptionValue));
 
         typeComboBox = SPUIComponentProvider.getComboBox(i18n.get("upload.swmodule.type"), "", "", null, null, true,
                 null, i18n.get("upload.swmodule.type"));
@@ -172,8 +163,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         typeComboBox.setNewItemsAllowed(Boolean.FALSE);
         typeComboBox.setImmediate(Boolean.TRUE);
         populateTypeNameCombo();
-        typeComboBox.addValueChangeListener(
-                event -> window.checkMandatoryEditedValue(event, typeComboBox, originalComboBoxValue));
     }
 
     private void populateTypeNameCombo() {
@@ -195,10 +184,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         originalComboBoxValue = null;
         originalNameValue = null;
         originalVersionValue = null;
-
-        if (window != null) {
-            window.reset();
-        }
     }
 
     private void createWindow() {
@@ -229,7 +214,7 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         /* add main layout to the window */
         window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
-                getMandatoryFields(formLayout), geEditedFields(), i18n);
+                formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         typeComboBox.focus();
     }

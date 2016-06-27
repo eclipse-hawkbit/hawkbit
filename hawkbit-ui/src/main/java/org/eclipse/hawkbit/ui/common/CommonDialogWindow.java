@@ -11,10 +11,12 @@ package org.eclipse.hawkbit.ui.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -25,17 +27,17 @@ import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeNotifier;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -45,12 +47,13 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
- * Superclass for pop-up-windows including a minimize and close icon in the
- * upper right corner and a save and cancel button at the bottom.
+ * TODO: AbstractColorPicker und FlexibleOptionGroupItemComponent Superclass for
+ * pop-up-windows including a minimize and close icon in the upper right corner
+ * and a save and cancel button at the bottom.
  */
 public class CommonDialogWindow extends Window implements Serializable {
 
-    private static final long serialVersionUID = -1321949234316858703L;
+    private static final long serialVersionUID = 1L;
 
     private final VerticalLayout mainLayout = new VerticalLayout();
 
@@ -72,9 +75,9 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private final ClickListener cancelButtonClickListener;
 
-    private Map<String, Boolean> requiredFields;
+    private Map<Component, Object> orginalValues;
 
-    private Map<String, Boolean> editedFields;
+    private final List<AbstractField<?>> allComponents;
 
     private final I18N i18n;
 
@@ -94,7 +97,7 @@ public class CommonDialogWindow extends Window implements Serializable {
      */
     public CommonDialogWindow(final String caption, final Component content, final String helpLink,
             final ClickListener saveButtonClickListener, final ClickListener cancelButtonClickListener,
-            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields, final I18N i18n) {
+            final FormLayout formLayout, final I18N i18n) {
         checkNotNull(saveButtonClickListener);
         checkNotNull(cancelButtonClickListener);
         this.caption = caption;
@@ -102,180 +105,21 @@ public class CommonDialogWindow extends Window implements Serializable {
         this.helpLink = helpLink;
         this.saveButtonClickListener = saveButtonClickListener;
         this.cancelButtonClickListener = cancelButtonClickListener;
-        this.requiredFields = requiredFields;
-        if (requiredFields == null) {
-            this.requiredFields = Collections.emptyMap();
-        }
-
-        this.editedFields = editedFields;
-        if (editedFields == null) {
-            this.editedFields = Collections.emptyMap();
-        }
+        this.allComponents = getAllComponents(formLayout);
         this.i18n = i18n;
         init();
     }
 
-    /**
-     * Checks if all mandatory fields are filled, and if there are changes in
-     * the current field. If yes, the save button will be enabled.
-     * 
-     * @param event
-     *            TextChangeEvent
-     * @param originalValue
-     *            original Value of the current field
-     */
-    public void checkMandatoryEditedTextField(final TextChangeEvent event, final String originalValue) {
-        final Component component = event.getComponent();
-        if (!(component instanceof AbstractComponent)) {
-            throw new IllegalStateException("Only AbstractComponent are allowed");
-        }
-
-        if (requiredFields.containsKey(component.getId())) {
-            final boolean isTextChangeNotEmpty = StringUtils.isNotBlank(event.getText());
-            setRequiredFieldChangeValue((AbstractComponent) component, isTextChangeNotEmpty);
-        }
-        checkChanges(component.getId(), event.getText(), originalValue);
-        checkSaveButtonEnabled();
+    public void setSaveButtonEnabled(final boolean enabled) {
+        saveButton.setEnabled(enabled);
     }
 
-    /**
-     * Checks if all mandatory fields are filled, and if there are changes in
-     * the current field. If yes, the save button will be enabled.
-     * 
-     * @param event
-     *            ValueChangeEvent
-     * @param component
-     *            current Component
-     * @param originalValue
-     *            original Value of the current field
-     */
-    public void checkMandatoryEditedValue(final ValueChangeEvent event, final AbstractComponent component,
-            final String originalValue) {
-        final boolean isChangedValueNotNull = event.getProperty().getValue() != null;
-        if (requiredFields.containsKey(component.getId())) {
-            setRequiredFieldChangeValue(component, isChangedValueNotNull);
-        }
-        if (event.getProperty().getValue() != null) {
-            checkChanges(component.getId(), event.getProperty().getValue().toString(), originalValue);
-        } else {
-            checkChanges(component.getId(), null, originalValue);
-        }
-        checkSaveButtonEnabled();
+    public void setCancelButtonEnabled(final boolean enabled) {
+        cancelButton.setEnabled(enabled);
     }
 
-    /**
-     * Checks if all mandatory fields are filled, and if there are changes in
-     * the current field. (Boolean) If yes, the save button will be enabled.
-     * 
-     * @param event
-     *            ValueChangeEvent
-     * @param component
-     *            current Component
-     * @param originalValue
-     *            original Boolean Value of the current field
-     */
-    public void checkMandatoryEditedValueBoolean(final ValueChangeEvent event, final AbstractComponent component,
-            final Boolean originalValue) {
-        final boolean isChangedValueNotNull = event.getProperty().getValue() != null;
-        if (requiredFields.containsKey(component.getId())) {
-            setRequiredFieldChangeValue(component, isChangedValueNotNull);
-        }
-        final Boolean changed = (Boolean) event.getProperty().getValue();
-        editedFields.put(component.getId(), BooleanUtils.compare(changed, originalValue) != 0);
-        checkSaveButtonEnabled();
-    }
-
-    /**
-     * Updates the map of required fields if a value is set. (e.g. on Update
-     * when editing a component)
-     * 
-     * @param event
-     *            ValueChangeEvent
-     * @param component
-     *            current Component
-     */
-    public void setRequiredFieldWhenUpdate(final ValueChangeEvent event, final AbstractComponent component) {
-        final boolean isChangedValueNotNull = event.getProperty().getValue() != null;
-        setRequiredFieldChangeValue(component, isChangedValueNotNull);
-    }
-
-    /**
-     * * Updates the map of required fields if a value is set. (e.g. on Update
-     * when editing a component)
-     * 
-     * @param fieldId
-     *            Id of the current component
-     * @param filled
-     *            Boolean if field is filled
-     */
-    public void updateRequiredFields(final String fieldId, final Boolean filled) {
-        requiredFields.put(fieldId, filled);
-        checkSaveButtonEnabled();
-    }
-
-    /**
-     * Checks if Color is changed
-     * 
-     * @param fieldId
-     *            Id of the current component
-     * @param newColor
-     *            new Color
-     * @param oldColor
-     *            old Color
-     */
-    public void checkColorChange(final String fieldId, final Color newColor, final Color oldColor) {
-        editedFields.put(fieldId, !newColor.equals(oldColor));
-        checkSaveButtonEnabled();
-    }
-
-    /**
-     * Updates the map of fields which can be edited.
-     * 
-     * @param fieldId
-     *            Id of the current component
-     * @param hasTextValueChanged
-     *            Boolean if value has changed
-     */
-    public void updateEditedFields(final String fieldId, final Boolean hasTextValueChanged) {
-        editedFields.put(fieldId, hasTextValueChanged);
-        checkSaveButtonEnabled();
-    }
-
-    /**
-     * Resets the map of mandatory and edited Fields and disable the save button
-     */
-    public void reset() {
-        saveButton.setEnabled(false);
-        resetFields();
-    }
-
-    private void setRequiredFieldChangeValue(final AbstractComponent component, final boolean isTextChangeNotEmpty) {
-        requiredFields.put(component.getId(), isTextChangeNotEmpty);
-    }
-
-    /**
-     * Checks the mandatory fields in the pop-up-window content. If all
-     * mandatory fields are filled the save button is enabled. Otherwise the
-     * save button is disabled.
-     */
-    private void checkSaveButtonEnabled() {
-        saveButton.setEnabled(!requiredFields.containsValue(Boolean.FALSE) && editedFields.containsValue(Boolean.TRUE));
-    }
-
-    private void checkChanges(final String fieldName, final String newText, final String oldText) {
-        final boolean hasTextValueChanged = (StringUtils.isNotBlank(newText) && !newText.equals(oldText))
-                || (StringUtils.isNotBlank(oldText) && !oldText.equals(newText));
-        editedFields.put(fieldName, hasTextValueChanged);
-    }
-
-    private void resetFields() {
-        for (final Map.Entry<String, Boolean> entry : requiredFields.entrySet()) {
-            entry.setValue(Boolean.FALSE);
-        }
-
-        for (final Map.Entry<String, Boolean> entry : editedFields.entrySet()) {
-            entry.setValue(Boolean.FALSE);
-        }
+    public HorizontalLayout getButtonsLayout() {
+        return buttonsLayout;
     }
 
     private final void init() {
@@ -304,6 +148,85 @@ public class CommonDialogWindow extends Window implements Serializable {
         center();
         setModal(true);
         addStyleName("fontsize");
+        setOrginaleValues();
+        addListeners();
+    }
+
+    private final void setOrginaleValues() {
+        for (final AbstractField<?> field : allComponents) {
+            orginalValues.put(field, field.getValue());
+        }
+    }
+
+    private final void addListeners() {
+        for (final AbstractField<?> field : allComponents) {
+            field.addValueChangeListener(event -> saveButton.setEnabled(isSaveButtonEnabled()));
+            if (field instanceof TextChangeNotifier) {
+                ((TextChangeNotifier) field)
+                        .addTextChangeListener(event -> saveButton.setEnabled(isSaveButtonEnabled()));
+            }
+        }
+
+        saveButton.addClickListener(event -> save());
+    }
+
+    private void save() {
+        saveButton.setEnabled(false);
+        setOrginaleValues();
+    }
+
+    private boolean isSaveButtonEnabled() {
+        return isMandatoyFieldNotEmpty() && isValuesChanged();
+    }
+
+    private boolean isValuesChanged() {
+        for (final AbstractField<?> field : allComponents) {
+            final Object currentValue = field.getValue();
+            final Object orginalValue = orginalValues.get(field);
+
+            if (!Objects.equals(currentValue, orginalValue)) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    private boolean shouldMandatoryLabelShown() {
+        for (final AbstractField<?> field : allComponents) {
+            if (field.isRequired()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isMandatoyFieldNotEmpty() {
+        for (final AbstractField<?> field : allComponents) {
+            // TODO empty string.
+            if (field.isRequired() && field.getValue() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<AbstractField<?>> getAllComponents(final AbstractLayout abstractLayout) {
+        final List<AbstractField<?>> components = new ArrayList<>();
+
+        final Iterator<Component> iterate = abstractLayout.iterator();
+        while (iterate.hasNext()) {
+            final Component c = iterate.next();
+            if (c instanceof AbstractLayout) {
+                components.addAll(getAllComponents((AbstractLayout) c));
+            }
+
+            if (c instanceof AbstractField) {
+                components.add((AbstractField<?>) c);
+            }
+        }
+        return components;
     }
 
     private HorizontalLayout createActionButtonsLayout() {
@@ -324,7 +247,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private void createMandatoryLabel() {
 
-        if (!existsMandatoryFieldsInWindowContent()) {
+        if (!shouldMandatoryLabelShown()) {
             return;
         }
 
@@ -366,10 +289,6 @@ public class CommonDialogWindow extends Window implements Serializable {
         buttonsLayout.setExpandRatio(saveButton, 1.0F);
     }
 
-    private boolean existsMandatoryFieldsInWindowContent() {
-        return !requiredFields.isEmpty();
-    }
-
     private void addHelpLink() {
 
         if (StringUtils.isEmpty(helpLink)) {
@@ -378,26 +297,6 @@ public class CommonDialogWindow extends Window implements Serializable {
         final Link helpLinkComponent = SPUIComponentProvider.getHelpLink(helpLink);
         buttonsLayout.addComponent(helpLinkComponent);
         buttonsLayout.setComponentAlignment(helpLinkComponent, Alignment.MIDDLE_RIGHT);
-    }
-
-    public void setSaveButtonEnabled(final boolean enabled) {
-        saveButton.setEnabled(enabled);
-    }
-
-    public void setCancelButtonEnabled(final boolean enabled) {
-        cancelButton.setEnabled(enabled);
-    }
-
-    public HorizontalLayout getButtonsLayout() {
-        return buttonsLayout;
-    }
-
-    public Map<String, Boolean> getRequiredFields() {
-        return requiredFields;
-    }
-
-    public void setRequiredFields(final Map<String, Boolean> requiredFields) {
-        this.requiredFields = requiredFields;
     }
 
 }

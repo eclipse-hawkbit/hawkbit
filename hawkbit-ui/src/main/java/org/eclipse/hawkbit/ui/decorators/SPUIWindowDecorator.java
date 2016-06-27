@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.decorators;
 
-import java.util.Map;
-
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -17,6 +15,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Window;
 
 /**
@@ -47,11 +46,11 @@ public final class SPUIWindowDecorator {
      */
     public static CommonDialogWindow getDeocratedWindow(final String caption, final String id, final String type,
             final Component content, final ClickListener saveButtonClickListener,
-            final ClickListener cancelButtonClickListener, final String helpLink,
-            final Map<String, Boolean> requiredFields, final Map<String, Boolean> editedFields, final I18N i18n) {
+            final ClickListener cancelButtonClickListener, final String helpLink, final FormLayout formLayout,
+            final I18N i18n) {
 
         final CommonDialogWindow window = new CommonDialogWindow(caption, content, helpLink, saveButtonClickListener,
-                cancelButtonClickListener, requiredFields, editedFields, i18n);
+                cancelButtonClickListener, formLayout, i18n);
         if (null != id) {
             window.setId(id);
         }
