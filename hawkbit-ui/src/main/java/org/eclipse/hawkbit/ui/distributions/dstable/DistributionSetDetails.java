@@ -405,11 +405,6 @@ public class DistributionSetDetails extends AbstractNamedVersionedEntityTableDet
         return true;
     }
     
-     @Override
-    protected Boolean isMetadataIconToBeDisplayed() {
-        return true;
-    }
-    
     @Override
     protected String getShowMetadataButtonId() {
         DistributionSetIdName lastselectedDistDS = manageDistUIState.getLastSelectedDistribution().isPresent() ? manageDistUIState

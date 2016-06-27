@@ -8,14 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.ui.artifacts.event.SMFilterEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.UploadArtifactUIEvent;
@@ -23,10 +21,14 @@ import org.eclipse.hawkbit.ui.artifacts.event.UploadViewAcceptCriteria;
 import org.eclipse.hawkbit.ui.artifacts.state.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.common.table.AbstractNamedVersionTable;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
+import org.eclipse.hawkbit.ui.distributions.smtable.SwMetadataPopupLayout;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.TableColumn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.addons.lazyquerycontainer.BeanQueryFactory;
@@ -40,8 +42,11 @@ import com.vaadin.data.Item;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
@@ -62,6 +67,9 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
 
     @Autowired
     private UploadViewAcceptCriteria uploadViewAcceptCriteria;
+    
+    @Autowired
+    private SwMetadataPopupLayout swMetadataPopupLayout;
 
     @EventBusListenerMethod(scope = EventScope.SESSION)
     void onEvent(final SMFilterEvent filterEvent) {
@@ -182,9 +190,25 @@ public class SoftwareModuleTable extends AbstractNamedVersionTable<SoftwareModul
     }
 
     @Override
+    protected void addCustomGeneratedColumns() {
+        addGeneratedColumn(SPUILabelDefinitions.METADATA_ICON, new ColumnGenerator() {
+            private static final long serialVersionUID = 117186282275044399L;
+
+            @Override
+            public Object generateCell(final Table source, final Object itemId, final Object columnId) {
+                final String nameVersionStr = getNameAndVerion(itemId);
+                final Button manageMetaDataBtn = createManageMetadataButton(nameVersionStr);
+                manageMetaDataBtn.addClickListener(event -> showMetadataDetails((Long) itemId, nameVersionStr));
+                return manageMetaDataBtn;
+            }
+        });
+    }
+    
+    @Override
     protected List<TableColumn> getTableVisibleColumns() {
         final List<TableColumn> columnList = super.getTableVisibleColumns();
         if (!isMaximized()) {
+            columnList.add(new TableColumn(SPUILabelDefinitions.METADATA_ICON, "", 0.1F));
             return columnList;
         }
         columnList.add(new TableColumn(SPUILabelDefinitions.VAR_VENDOR, i18n.get("header.vendor"), 0.1F));
