@@ -106,15 +106,13 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
     @Override
     public void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagStr)) {
-                if (!checkIsDuplicate(existingTag)) {
-                    createNewTag();
-                }
-            } else {
-                updateExistingTag(existingTag);
+        final TargetTag existingTag = tagManagement.findTargetTag(tagName.getValue());
+        if (optiongroup.getValue().equals(createTagStr)) {
+            if (!checkIsDuplicate(existingTag)) {
+                createNewTag();
             }
+        } else {
+            updateExistingTag(existingTag);
         }
     }
 

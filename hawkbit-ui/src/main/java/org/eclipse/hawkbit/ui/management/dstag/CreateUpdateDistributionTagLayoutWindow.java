@@ -85,16 +85,13 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
      */
     @Override
     public void save(final ClickEvent event) {
-        if (mandatoryValuesPresent()) {
-            final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
-            if (optiongroup.getValue().equals(createTagStr)) {
-                if (!checkIsDuplicate(existingDistTag)) {
-                    createNewTag();
-                }
-            } else {
-
-                updateExistingTag(existingDistTag);
+        final DistributionSetTag existingDistTag = tagManagement.findDistributionSetTag(tagName.getValue());
+        if (optiongroup.getValue().equals(createTagStr)) {
+            if (!checkIsDuplicate(existingDistTag)) {
+                createNewTag();
             }
+        } else {
+            updateExistingTag(existingDistTag);
         }
     }
 

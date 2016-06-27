@@ -127,7 +127,7 @@ public class CommonDialogWindow extends Window implements Serializable {
     public void checkMandatoryEditedTextField(final TextChangeEvent event, final String originalValue) {
         final Component component = event.getComponent();
         if (!(component instanceof AbstractComponent)) {
-            throw new IllegalStateException("Only AbstractComponent not allow");
+            throw new IllegalStateException("Only AbstractComponent are allowed");
         }
 
         if (requiredFields.containsKey(component.getId())) {
@@ -209,7 +209,6 @@ public class CommonDialogWindow extends Window implements Serializable {
      *            Boolean if field is filled
      */
     public void updateRequiredFields(final String fieldId, final Boolean filled) {
-
         requiredFields.put(fieldId, filled);
         checkSaveButtonEnabled();
     }

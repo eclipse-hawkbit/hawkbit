@@ -223,11 +223,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
 
     @Override
     protected void save(final ClickEvent event) {
-        if (!mandatoryValuesPresent()) {
-            window.setSaveButtonEnabled(false);
-            return;
-        }
-
         final SoftwareModuleType existingSMTypeByKey = swTypeManagementService
                 .findSoftwareModuleTypeByKey(typeKey.getValue());
         final SoftwareModuleType existingSMTypeByName = swTypeManagementService
@@ -237,10 +232,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 createNewSWModuleType();
             }
         } else {
-
             updateSWModuleType(existingSMTypeByName);
         }
-        // window.setSaveButtonEnabled(false);
     }
 
     private void createNewSWModuleType() {

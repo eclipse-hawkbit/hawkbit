@@ -639,19 +639,16 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
 
     @Override
     protected void save(final ClickEvent event) {
-
-        if (mandatoryValuesPresent()) {
-            final DistributionSetType existingDistTypeByKey = distributionSetManagement
-                    .findDistributionSetTypeByKey(typeKey.getValue());
-            final DistributionSetType existingDistTypeByName = distributionSetManagement
-                    .findDistributionSetTypeByName(tagName.getValue());
-            if (optiongroup.getValue().equals(createTypeStr)) {
-                if (!checkIsDuplicateByKey(existingDistTypeByKey) && !checkIsDuplicate(existingDistTypeByName)) {
-                    createNewDistributionSetType();
-                }
-            } else {
-                updateDistributionSetType(existingDistTypeByKey);
+        final DistributionSetType existingDistTypeByKey = distributionSetManagement
+                .findDistributionSetTypeByKey(typeKey.getValue());
+        final DistributionSetType existingDistTypeByName = distributionSetManagement
+                .findDistributionSetTypeByName(tagName.getValue());
+        if (optiongroup.getValue().equals(createTypeStr)) {
+            if (!checkIsDuplicateByKey(existingDistTypeByKey) && !checkIsDuplicate(existingDistTypeByName)) {
+                createNewDistributionSetType();
             }
+        } else {
+            updateDistributionSetType(existingDistTypeByKey);
         }
     }
 

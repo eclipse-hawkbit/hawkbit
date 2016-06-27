@@ -17,9 +17,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
-import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 
-import com.google.common.base.Strings;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
@@ -287,24 +285,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             }
         }
         return Boolean.FALSE;
-    }
-
-    @Override
-    protected Boolean mandatoryValuesPresent() {
-        if (Strings.isNullOrEmpty(tagName.getValue()) || Strings.isNullOrEmpty(typeKey.getValue())) {
-            if (optiongroup.getValue().equals(createTypeStr)) {
-                displayValidationError(SPUILabelDefinitions.MISSING_TYPE_NAME_KEY);
-            }
-            if (optiongroup.getValue().equals(updateTypeStr)) {
-                if (null == tagNameComboBox.getValue()) {
-                    displayValidationError(i18n.get("message.error.missing.tagName"));
-                } else {
-                    displayValidationError(SPUILabelDefinitions.MISSING_TAG_NAME);
-                }
-            }
-            return Boolean.FALSE;
-        }
-        return Boolean.TRUE;
     }
 
     @Override
