@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -37,10 +34,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.components.colorpicker.ColorChangeListener;
@@ -91,15 +86,11 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_NAME, true, "", i18n.get("textfield.name"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_NAME);
-        tagName.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTagName()));
-        tagName.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, tagName));
 
         typeKey = SPUIComponentProvider.getTextField(i18n.get("textfield.key"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_KEY, true, "", i18n.get("textfield.key"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         typeKey.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_KEY);
-        typeKey.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTypeKey()));
-        typeKey.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, typeKey));
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TYPE_DESC, false, "",
@@ -107,7 +98,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
         tagDesc.setId(SPUIDefinitions.NEW_SOFTWARE_TYPE_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
-        tagDesc.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, getOriginalTagDesc()));
 
         singleMultiOptionGroup();
     }
@@ -122,23 +112,8 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     }
 
     @Override
-    public void createWindow() {
-        reset();
-        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.type"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, this::save, this::discard, null, getMandatoryFields(),
-                getEditedFields(), i18n);
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = getFormLayout().iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
+    protected String getWindowCaption() {
+        return i18n.get("caption.add.type");
     }
 
     /**
@@ -189,14 +164,11 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
     @Override
     protected void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        setOriginalTagName(targetTagSelected);
         final SoftwareModuleType selectedTypeTag = swTypeManagementService
                 .findSoftwareModuleTypeByName(targetTagSelected);
         if (null != selectedTypeTag) {
             tagDesc.setValue(selectedTypeTag.getDescription());
-            setOriginalTagDesc(selectedTypeTag.getDescription());
             typeKey.setValue(selectedTypeTag.getKey());
-            setOriginalTypeKey(selectedTypeTag.getKey());
             if (selectedTypeTag.getMaxAssignments() == Integer.MAX_VALUE) {
                 assignOptiongroup.setValue(multiAssignStr);
             } else {

@@ -431,8 +431,8 @@ public class RolloutListGrid extends AbstractGrid {
     }
 
     private void onUpdate(final ContextMenuData contextMenuData) {
-        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow();
         addUpdateRolloutWindow.populateData(contextMenuData.getRolloutId());
+        final CommonDialogWindow addTargetWindow = addUpdateRolloutWindow.getWindow();
         addTargetWindow.setCaption(i18n.get("caption.update.rollout"));
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);

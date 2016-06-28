@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.TargetIdName;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.management.event.TargetTableEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -36,8 +36,6 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.VaadinSessionScope;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
@@ -96,16 +94,10 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("prompt.target.id"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         controllerIDTextField.setId(SPUIComponentIdProvider.TARGET_ADD_CONTROLLER_ID);
-        controllerIDTextField
-                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalControllerId));
-        controllerIDTextField
-                .addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, controllerIDTextField));
-
         /* Textfield for target name */
         nameTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.name"), "", ValoTheme.TEXTFIELD_TINY,
                 false, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         nameTextField.setId(SPUIComponentIdProvider.TARGET_ADD_NAME);
-        nameTextField.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTargetName));
 
         /* Textarea for target description */
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
@@ -113,7 +105,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.TARGET_ADD_DESC);
         descTextArea.setNullRepresentation(HawkbitCommonUtil.SP_STRING_EMPTY);
-        descTextArea.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTargetDesc));
     }
 
     private void buildLayout() {
@@ -192,22 +183,10 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
 
     public Window getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.target"), null,
+        window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.target"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveTargetListner(),
-                event -> discardTargetListner(), null, getMandatoryFields(), getEditedFields(), i18n);
+                event -> discardTargetListner(), null, formLayout, i18n);
         return window;
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
     }
 
     private Map<String, Boolean> getEditedFields() {
@@ -234,9 +213,6 @@ public class TargetAddUpdateWindowLayout extends CustomComponent {
         originalTargetDesc = null;
         originalTargetName = null;
 
-        if (window != null) {
-            window.reset();
-        }
     }
 
     private void closeThisWindow() {

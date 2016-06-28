@@ -8,10 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.layouts;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.SpPermissionChecker;
@@ -24,6 +20,7 @@ import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -38,11 +35,9 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.colorpicker.Color;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.GridLayout;
@@ -103,42 +98,13 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected GridLayout mainLayout;
     protected VerticalLayout contentLayout;
 
-    protected boolean tagPreviewBtnClicked = false;
+    protected boolean tagPreviewBtnClicked;
 
     private String colorPicked;
     protected String tagNameValue;
     protected String tagDescValue;
 
-    private Color originalSelectedColor;
-    private String originalTagDesc;
-    private String originalTagName;
-
-    protected void createWindow() {
-        reset();
-        setWindow(
-                SPUIComponentProvider.getWindow(i18n.get("caption.add.tag"), null, SPUIDefinitions.CREATE_UPDATE_WINDOW,
-                        this, this::save, this::discard, null, getMandatoryFields(), getEditedFields(), i18n));
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), null);
-            }
-        }
-        return requiredFields;
-    }
-
-    protected Map<String, Boolean> getEditedFields() {
-        final Map<String, Boolean> changeMap = new HashMap<>();
-        changeMap.put(tagName.getId(), Boolean.FALSE);
-        changeMap.put(colorPickerLayout.getId(), Boolean.FALSE);
-        changeMap.put(tagDesc.getId(), Boolean.FALSE);
-        return changeMap;
-    }
+    protected abstract String getWindowCaption();
 
     /**
      * Save new tag / update new tag.
@@ -171,7 +137,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         setSizeUndefined();
         createRequiredComponents();
         buildLayout();
-        createWindow();
         addListeners();
         eventBus.subscribe(this);
     }
@@ -193,8 +158,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_NAME, true, "", i18n.get("textfield.name"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         tagName.setId(SPUIDefinitions.NEW_TARGET_TAG_NAME);
-        tagName.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTagName));
-        tagName.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, tagName));
 
         tagDesc = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "",
                 ValoTheme.TEXTFIELD_TINY + " " + SPUIDefinitions.TAG_DESC, false, "", i18n.get("textfield.description"),
@@ -202,7 +165,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         tagDesc.setId(SPUIDefinitions.NEW_TARGET_TAG_DESC);
         tagDesc.setImmediate(true);
         tagDesc.setNullRepresentation("");
-        tagDesc.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalTagDesc));
 
         tagNameComboBox = SPUIComponentProvider.getComboBox(null, "", "", null, null, false, "",
                 i18n.get("label.combobox.tag"));
@@ -245,6 +207,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         mainLayout.setSizeFull();
         mainLayout.addComponent(contentLayout, 0, 0);
 
+        colorPickerLayout.setVisible(false);
+        mainLayout.addComponent(colorPickerLayout, 1, 0);
+        mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
+
         setCompositionRoot(mainLayout);
         tagName.focus();
     }
@@ -264,13 +230,10 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
     protected void previewButtonClicked() {
         if (!tagPreviewBtnClicked) {
             setColor();
-            mainLayout.getComponent(1, 0);
-            mainLayout.addComponent(colorPickerLayout, 1, 0);
-            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
-        } else {
-            mainLayout.removeComponent(colorPickerLayout);
         }
+
         tagPreviewBtnClicked = !tagPreviewBtnClicked;
+        colorPickerLayout.setVisible(tagPreviewBtnClicked);
     }
 
     private void setColor() {
@@ -307,6 +270,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         } else {
             resetTagNameField();
         }
+        window.setOrginaleValues();
     }
 
     protected void resetTagNameField() {
@@ -314,7 +278,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         tagName.clear();
         tagDesc.clear();
         restoreComponentStyles();
-        mainLayout.removeComponent(colorPickerLayout);
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
@@ -344,7 +307,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             comboLayout.removeComponent(comboLabel);
             comboLayout.removeComponent(tagNameComboBox);
         }
-        window.reset();
         // close the color picker layout
         tagPreviewBtnClicked = false;
         // reset the selected color - Set default color
@@ -352,7 +314,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         colorPickerLayout.getSelPreview()
                 .setColor(ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-        mainLayout.removeComponent(colorPickerLayout);
+        window.setOrginaleValues();
     }
 
     /**
@@ -367,16 +329,12 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         // hide target name combo
         comboLayout.removeComponent(comboLabel);
         comboLayout.removeComponent(tagNameComboBox);
-        mainLayout.removeComponent(colorPickerLayout);
 
         // Default green color
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
 
-        if (window != null) {
-            window.reset();
-        }
     }
 
     /**
@@ -466,7 +424,9 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             colorPickerLayout.getColorSelect().setColor(colorPickerLayout.getSelPreview().getColor());
         }
 
-        window.checkColorChange(colorPickerLayout.getId(), colorPickerLayout.getSelectedColor(), originalSelectedColor);
+        // TODO:
+        // window.checkColorChange(colorPickerLayout.getId(),
+        // colorPickerLayout.getSelectedColor(), originalSelectedColor);
     }
 
     protected void closeWindow() {
@@ -519,11 +479,9 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
 
     public CommonDialogWindow getWindow() {
         reset();
+        window = SPUIWindowDecorator.getWindow(getWindowCaption(), null, SPUIDefinitions.CREATE_UPDATE_WINDOW, this,
+                this::save, this::discard, null, mainLayout, i18n);
         return window;
-    }
-
-    public void setWindow(final CommonDialogWindow window) {
-        this.window = window;
     }
 
     /**
@@ -677,40 +635,8 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         return formLayout;
     }
 
-    public Color getSelectedColorOriginal() {
-        return originalSelectedColor;
-    }
-
-    public void setSelectedColorOriginal(final Color selectedColorOriginal) {
-        this.originalSelectedColor = selectedColorOriginal;
-    }
-
     public GridLayout getMainLayout() {
         return mainLayout;
-    }
-
-    public Color getOriginalSelectedColor() {
-        return originalSelectedColor;
-    }
-
-    public void setOriginalSelectedColor(final Color originalSelectedColor) {
-        this.originalSelectedColor = originalSelectedColor;
-    }
-
-    public String getOriginalTagDesc() {
-        return originalTagDesc;
-    }
-
-    public void setOriginalTagDesc(final String originalTagDesc) {
-        this.originalTagDesc = originalTagDesc;
-    }
-
-    public String getOriginalTagName() {
-        return originalTagName;
-    }
-
-    public void setOriginalTagName(final String originalTagName) {
-        this.originalTagName = originalTagName;
     }
 
 }

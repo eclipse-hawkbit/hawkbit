@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +24,7 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.management.event.DistributionTableEvent;
 import org.eclipse.hawkbit.ui.management.event.DragEvent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
@@ -44,10 +44,8 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
@@ -137,18 +135,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
                 true, null, i18n.get("textfield.name"), true, SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distNameTextField.setId(SPUIComponentIdProvider.DIST_ADD_NAME);
         distNameTextField.setNullRepresentation("");
-        distNameTextField.addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDistName));
-        distNameTextField.addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, distNameTextField));
 
         distVersionTextField = SPUIComponentProvider.getTextField(i18n.get("textfield.version"), "",
                 ValoTheme.TEXTFIELD_TINY, true, null, i18n.get("textfield.version"), true,
                 SPUILabelDefinitions.TEXT_FIELD_MAX_LENGTH);
         distVersionTextField.setId(SPUIComponentIdProvider.DIST_ADD_VERSION);
         distVersionTextField.setNullRepresentation("");
-        distVersionTextField
-                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDistVersion));
-        distVersionTextField
-                .addValueChangeListener(event -> window.setRequiredFieldWhenUpdate(event, distVersionTextField));
 
         distsetTypeNameComboBox = SPUIComponentProvider.getComboBox(i18n.get("label.combobox.type"), "", "", null, "",
                 false, "", i18n.get("label.combobox.type"));
@@ -156,23 +148,17 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         distsetTypeNameComboBox.setNullSelectionAllowed(false);
         distsetTypeNameComboBox.setId(SPUIComponentIdProvider.DIST_ADD_DISTSETTYPE);
         populateDistSetTypeNameCombo();
-        distsetTypeNameComboBox.addValueChangeListener(
-                event -> window.checkMandatoryEditedValue(event, distsetTypeNameComboBox, originalDistSetType));
 
         descTextArea = SPUIComponentProvider.getTextArea(i18n.get("textfield.description"), "text-area-style",
                 ValoTheme.TEXTAREA_TINY, false, null, i18n.get("textfield.description"),
                 SPUILabelDefinitions.TEXT_AREA_MAX_LENGTH);
         descTextArea.setId(SPUIComponentIdProvider.DIST_ADD_DESC);
         descTextArea.setNullRepresentation("");
-        descTextArea
-                .addTextChangeListener(event -> window.checkMandatoryEditedTextField(event, originalDistDescription));
 
         reqMigStepCheckbox = SPUIComponentProvider.getCheckBox(i18n.get("checkbox.dist.required.migration.step"),
                 "dist-checkbox-style", null, false, "");
         reqMigStepCheckbox.addStyleName(ValoTheme.CHECKBOX_SMALL);
         reqMigStepCheckbox.setId(SPUIComponentIdProvider.DIST_ADD_MIGRATION_CHECK);
-        reqMigStepCheckbox.addValueChangeListener(
-                event -> window.checkMandatoryEditedValueBoolean(event, reqMigStepCheckbox, originalReqMigStep));
     }
 
     /**
@@ -374,9 +360,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         originalDistVersion = null;
         originalReqMigStep = Boolean.FALSE;
 
-        if (window != null) {
-            window.reset();
-        }
     }
 
     private void populateRequiredComponents() {
@@ -408,42 +391,18 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
             originalDistDescription = distSet.getDescription();
             originalReqMigStep = distSet.isRequiredMigrationStep();
             originalDistSetType = distSet.getType().getName();
-            window.updateEditedFields(distsetTypeNameComboBox.getId(), Boolean.FALSE);
-            window.updateEditedFields(reqMigStepCheckbox.getId(), Boolean.FALSE);
         }
     }
 
     public CommonDialogWindow getWindow() {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        window = SPUIComponentProvider.getWindow(i18n.get("caption.add.new.dist"), null,
-                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
-                null, getMandatoryFields(), getEditedFields(), i18n);
-        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         populateRequiredComponents();
         resetComponents();
+        window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
+                SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
+                null, formLayout, i18n);
+        window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         return window;
-    }
-
-    private Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
-    }
-
-    private Map<String, Boolean> getEditedFields() {
-        final Map<String, Boolean> editedFields = new HashMap<>();
-        editedFields.put(distsetTypeNameComboBox.getId(), Boolean.FALSE);
-        editedFields.put(distNameTextField.getId(), Boolean.FALSE);
-        editedFields.put(distVersionTextField.getId(), Boolean.FALSE);
-        editedFields.put(descTextArea.getId(), Boolean.FALSE);
-        editedFields.put(reqMigStepCheckbox.getId(), Boolean.FALSE);
-        return editedFields;
     }
 
     /**

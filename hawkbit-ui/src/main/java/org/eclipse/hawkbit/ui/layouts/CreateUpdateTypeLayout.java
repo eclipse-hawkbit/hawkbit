@@ -34,14 +34,13 @@ import com.vaadin.ui.themes.ValoTheme;
  * Superclass defining common properties and methods for creating/updating
  * types.
  */
-public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
+public abstract class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
 
     private static final long serialVersionUID = 5732904956185988397L;
 
     protected String createTypeStr;
     protected String updateTypeStr;
     protected TextField typeKey;
-    protected String originalTypeKey;
 
     public static final String TYPE_NAME_DYNAMIC_STYLE = "new-tag-name";
     private static final String TYPE_DESC_DYNAMIC_STYLE = "new-tag-desc";
@@ -154,7 +153,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             comboLayout.removeComponent(comboLabel);
             comboLayout.removeComponent(tagNameComboBox);
         }
-        window.reset();
         restoreComponentStyles();
         getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
         getColorPickerLayout().getSelPreview()
@@ -181,8 +179,11 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, colorPickedPreview);
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelPreview().getColor());
         }
-        window.checkColorChange(colorPickerLayout.getId(), colorPickerLayout.getSelectedColor(),
-                getOriginalSelectedColor());
+
+        // TODO:
+        // window.checkColorChange(colorPickerLayout.getId(),
+        // colorPickerLayout.getSelectedColor(),
+        // getOriginalSelectedColor());
     }
 
     /**
@@ -236,14 +237,12 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, ColorPickerConstants.DEFAULT_COLOR);
             getPreviewButtonColor(ColorPickerConstants.DEFAULT_COLOR);
-            setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
         } else {
             getColorPickerLayout().setSelectedColor(ColorPickerHelper.rgbToColorConverter(color));
             getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
             getColorPickerLayout().getColorSelect().setColor(getColorPickerLayout().getSelectedColor());
             createDynamicStyleForComponents(tagName, typeKey, tagDesc, color);
             getPreviewButtonColor(color);
-            setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(color));
         }
     }
 
@@ -300,14 +299,6 @@ public class CreateUpdateTypeLayout extends AbstractCreateUpdateTagLayout {
     @Override
     protected void setTagDetails(final String tagSelected) {
         // is implemented in the inherited class
-    }
-
-    public String getOriginalTypeKey() {
-        return originalTypeKey;
-    }
-
-    public void setOriginalTypeKey(final String originalTypeKey) {
-        this.originalTypeKey = originalTypeKey;
     }
 
 }

@@ -151,18 +151,14 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
     @Override
     public void setTagDetails(final String distTagSelected) {
         tagName.setValue(distTagSelected);
-        setOriginalTagName(distTagSelected);
         final DistributionSetTag selectedDistTag = tagManagement.findDistributionSetTag(distTagSelected);
         if (null != selectedDistTag) {
             tagDesc.setValue(selectedDistTag.getDescription());
-            setOriginalTagDesc(selectedDistTag.getDescription());
             if (null == selectedDistTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
-                setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()),
                         selectedDistTag.getColour());
-                setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(selectedDistTag.getColour()));
             }
         }
     }
@@ -181,4 +177,8 @@ public class CreateUpdateDistributionTagLayoutWindow extends AbstractCreateUpdat
                 permChecker.hasUpdateDistributionPermission());
     }
 
+    @Override
+    protected String getWindowCaption() {
+        return i18n.get("caption.add.tag");
+    }
 }

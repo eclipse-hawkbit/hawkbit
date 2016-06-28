@@ -88,18 +88,14 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
     @Override
     public void setTagDetails(final String targetTagSelected) {
         tagName.setValue(targetTagSelected);
-        setOriginalTagName(targetTagSelected);
         final TargetTag selectedTargetTag = tagManagement.findTargetTag(targetTagSelected);
         if (null != selectedTargetTag) {
             tagDesc.setValue(selectedTargetTag.getDescription());
-            setOriginalTagDesc(selectedTargetTag.getDescription());
             if (null == selectedTargetTag.getColour()) {
                 setTagColor(getColorPickerLayout().getDefaultColor(), ColorPickerConstants.DEFAULT_COLOR);
-                setSelectedColorOriginal(getColorPickerLayout().getDefaultColor());
             } else {
                 setTagColor(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()),
                         selectedTargetTag.getColour());
-                setSelectedColorOriginal(ColorPickerHelper.rgbToColorConverter(selectedTargetTag.getColour()));
             }
         }
     }
@@ -150,6 +146,11 @@ public class CreateUpdateTargetTagLayoutWindow extends AbstractCreateUpdateTagLa
 
         super.reset();
         setOptionGroupDefaultValue(permChecker.hasCreateTargetPermission(), permChecker.hasUpdateTargetPermission());
+    }
+
+    @Override
+    protected String getWindowCaption() {
+        return i18n.get("caption.add.tag");
     }
 
 }

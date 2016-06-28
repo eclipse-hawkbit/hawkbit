@@ -9,9 +9,6 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
@@ -21,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.common.table.BaseEntityEventType;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
+import org.eclipse.hawkbit.ui.decorators.SPUIWindowDecorator;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.I18N;
 import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
@@ -34,9 +32,7 @@ import org.vaadin.spring.events.EventBus;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
@@ -82,16 +78,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
     private CommonDialogWindow window;
 
-    private String originalDescriptionValue;
-
-    private String originalVendorValue;
-
-    private String originalNameValue;
-
-    private String originalVersionValue;
-
-    private String originalComboBoxValue;
-
     private Boolean editSwModule = Boolean.FALSE;
 
     private Long baseSwModuleId;
@@ -126,8 +112,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         this.baseSwModuleId = baseSwModuleId;
         createRequiredComponents();
         createWindow();
-        /* populate selected target values to edit. */
-        populateValuesOfSwModule();
         nameTextField.setEnabled(false);
         versionTextField.setEnabled(false);
         typeComboBox.setEnabled(false);
@@ -178,12 +162,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         versionTextField.clear();
         descTextArea.clear();
         typeComboBox.clear();
-
-        originalDescriptionValue = null;
-        originalVendorValue = null;
-        originalComboBoxValue = null;
-        originalNameValue = null;
-        originalVersionValue = null;
     }
 
     private void createWindow() {
@@ -193,11 +171,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
         madatoryStarLabel.setWidth(null);
-
-        /*
-         * The main layout of the window contains mandatory info, textboxes
-         * (controller Id, name & description) and action buttons layout
-         */
         addStyleName("lay-color");
         setSizeUndefined();
 
@@ -211,39 +184,14 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         setCompositionRoot(formLayout);
 
-        /* add main layout to the window */
-        window = SPUIComponentProvider.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
+        populateValuesOfSwModule();
+        window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
                 formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
         typeComboBox.focus();
     }
 
-    private Map<String, Boolean> getMandatoryFields(final FormLayout formLayout) {
-        final Map<String, Boolean> requiredFields = new HashMap<>();
-        final Iterator<Component> iterate = formLayout.iterator();
-        while (iterate.hasNext()) {
-            final Component c = iterate.next();
-            if (c instanceof AbstractField && ((AbstractField) c).isRequired()) {
-                requiredFields.put(c.getId(), Boolean.FALSE);
-            }
-        }
-        return requiredFields;
-    }
-
-    private Map<String, Boolean> geEditedFields() {
-        final Map<String, Boolean> editedFields = new HashMap<>();
-        editedFields.put(typeComboBox.getId(), Boolean.FALSE);
-        editedFields.put(nameTextField.getId(), Boolean.FALSE);
-        editedFields.put(vendorTextField.getId(), Boolean.FALSE);
-        editedFields.put(versionTextField.getId(), Boolean.FALSE);
-        editedFields.put(descTextArea.getId(), Boolean.FALSE);
-        return editedFields;
-    }
-
-    /**
-     * Add new SW module.
-     */
     private void addNewBaseSoftware() {
         final String name = HawkbitCommonUtil.trimAndNullIfEmpty(nameTextField.getValue());
         final String version = HawkbitCommonUtil.trimAndNullIfEmpty(versionTextField.getValue());
@@ -302,9 +250,6 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getVendor()));
         descTextArea.setValue(swModle.getDescription() == null ? HawkbitCommonUtil.SP_STRING_EMPTY
                 : HawkbitCommonUtil.trimAndNullIfEmpty(swModle.getDescription()));
-        originalDescriptionValue = descTextArea.getValue();
-        originalVendorValue = vendorTextField.getValue();
-        originalComboBoxValue = swModle.getType().getName();
         if (swModle.getType().isDeleted()) {
             typeComboBox.addItem(swModle.getType().getName());
         }
