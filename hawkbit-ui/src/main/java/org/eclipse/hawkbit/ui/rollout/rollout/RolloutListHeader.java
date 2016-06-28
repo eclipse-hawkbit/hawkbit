@@ -91,8 +91,7 @@ public class RolloutListHeader extends AbstractGridHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        addUpdateRolloutWindow.resetComponents();
-        final Window addTargetWindow = addUpdateRolloutWindow.getWindow();
+        final Window addTargetWindow = addUpdateRolloutWindow.getWindow(null);
         UI.getCurrent().addWindow(addTargetWindow);
         addTargetWindow.setVisible(Boolean.TRUE);
 

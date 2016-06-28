@@ -155,8 +155,9 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         buildLayout();
     }
 
-    public CommonDialogWindow getWindow() {
+    public CommonDialogWindow getWindow(final Long rolloutId) {
         resetComponents();
+        populateData(rolloutId);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard(),
                 uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
@@ -728,8 +729,11 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
      * @param rolloutId
      *            rollout id
      */
-    public void populateData(final Long rolloutId) {
-        resetComponents();
+    private void populateData(final Long rolloutId) {
+        if (rolloutId == null) {
+            return;
+        }
+
         editRolloutEnabled = Boolean.TRUE;
         rolloutForEdit = rolloutManagement.findRolloutById(rolloutId);
         rolloutName.setValue(rolloutForEdit.getName());

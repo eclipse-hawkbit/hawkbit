@@ -348,6 +348,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
 
     private void populateValuesOfDistribution(final Long editDistId) {
         this.editDistId = editDistId;
+
         if (editDistId == null) {
             return;
         }
@@ -368,13 +369,12 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         if (distSet.getDescription() != null) {
             descTextArea.setValue(distSet.getDescription());
         }
-        populateDistSetTypeNameCombo();
     }
 
     public CommonDialogWindow getWindow(final Long editDistId) {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
         resetComponents();
-
+        populateDistSetTypeNameCombo();
         populateValuesOfDistribution(editDistId);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
@@ -386,7 +386,7 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     /**
      * Populate DistributionSet Type name combo.
      */
-    public void populateDistSetTypeNameCombo() {
+    private void populateDistSetTypeNameCombo() {
         distsetTypeNameComboBox.setContainerDataSource(getDistSetTypeLazyQueryContainer());
         distsetTypeNameComboBox.setItemCaptionPropertyId(SPUILabelDefinitions.VAR_NAME);
         distsetTypeNameComboBox.setValue(getDefaultDistributionSetType().getName());
