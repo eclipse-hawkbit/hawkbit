@@ -219,7 +219,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
             if (String.class.equals(field.getType())) {
                 orginalValue = Strings.emptyToNull((String) orginalValue);
-                currentValue = Strings.emptyToNull((String) orginalValue);
+                currentValue = Strings.emptyToNull((String) currentValue);
             }
             if (!Objects.equals(orginalValue, currentValue)) {
                 return true;

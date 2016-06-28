@@ -146,22 +146,6 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
     private TextArea targetFilterQuery;
 
-    private String originalDistributionSet;
-
-    private Object originalActionGroup;
-
-    private String originalRolloutName;
-
-    private String originalErrorThreshold;
-
-    private String originalTriggerThreshold;
-
-    private String originalDescription;
-
-    private String originalTargetFilterQueryCombo;
-
-    private String originalNoOfGroups;
-
     /**
      * Create components and layout.
      */
@@ -172,7 +156,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
     }
 
     public CommonDialogWindow getWindow() {
-
+        resetComponents();
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.configure.rollout"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> onRolloutSave(), event -> onDiscard(),
                 uiProperties.getLinks().getDocumentation().getRolloutView(), this, i18n);
@@ -222,20 +206,35 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
 
         addComponent(getMandatoryLabel("textfield.name"), 0, 0);
         addComponent(rolloutName, 1, 0);
+        rolloutName.setRequired(true);
+
         addComponent(getMandatoryLabel("prompt.distribution.set"), 0, 1);
         addComponent(distributionSet, 1, 1);
+        distributionSet.setRequired(true);
+
         addComponent(getMandatoryLabel("prompt.target.filter"), 0, 2);
         addComponent(targetFilterQueryCombo, 1, 2);
+        targetFilterQueryCombo.setRequired(true);
+
         addComponent(totalTargetsLabel, 2, 2);
+
         addComponent(getMandatoryLabel("prompt.number.of.groups"), 0, 3);
         addComponent(noOfGroups, 1, 3);
+        noOfGroups.setRequired(true);
+
         addComponent(groupSizeLabel, 2, 3);
+
         addComponent(getMandatoryLabel("prompt.tigger.threshold"), 0, 4);
         addComponent(triggerThreshold, 1, 4);
+        triggerThreshold.setRequired(true);
+
         addComponent(getPercentHintLabel(), 2, 4);
+
         addComponent(getMandatoryLabel("prompt.error.threshold"), 0, 5);
         addComponent(errorThreshold, 1, 5);
+        errorThreshold.setRequired(true);
         addComponent(errorThresholdOptionGroup, 2, 5);
+
         addComponent(getLabel("textfield.description"), 0, 6);
         addComponent(description, 1, 6, 2, 6);
         addComponent(actionTypeOptionGroupLayout, 0, 7, 2, 7);
@@ -752,20 +751,7 @@ public class AddUpdateRolloutWindowLayout extends GridLayout {
         totalTargetsLabel.setValue(getTotalTargetMessage());
         totalTargetsLabel.setVisible(true);
 
-        setOriginalValues();
-    }
-
-    private void setOriginalValues() {
-        originalDistributionSet = distributionSet.getValue().toString();
-        originalActionGroup = actionTypeOptionGroupLayout.getActionTypeOptionGroup().getValue();
-        originalRolloutName = rolloutName.getValue();
-        originalTriggerThreshold = triggerThreshold.getValue();
-        originalErrorThreshold = errorThreshold.getValue();
-        originalDescription = description.getValue();
-        originalNoOfGroups = noOfGroups.getValue();
-        if (targetFilterQueryCombo.getValue() != null) {
-            originalTargetFilterQueryCombo = targetFilterQueryCombo.getValue().toString();
-        }
+        window.setOrginaleValues();
     }
 
     private void disableRequiredFieldsOnEdit() {

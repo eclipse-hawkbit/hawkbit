@@ -11,13 +11,11 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent;
 import org.eclipse.hawkbit.ui.artifacts.event.SoftwareModuleTypeEvent.SoftwareModuleTypeEnum;
-import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.SoftwareModuleTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -34,7 +32,6 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
@@ -264,37 +261,6 @@ public class CreateUpdateSoftwareTypeLayout extends CreateUpdateTypeLayout
             uiNotification.displayValidationError(i18n.get("message.tag.update.mandatory"));
         }
 
-    }
-
-    /**
-     * Open color picker on click of preview button. Auto select the color based
-     * on target tag if already selected.
-     */
-    @Override
-    protected void previewButtonClicked() {
-        if (!tagPreviewBtnClicked) {
-            final String selectedOption = (String) optiongroup.getValue();
-            if (StringUtils.isNotEmpty(selectedOption) && selectedOption.equalsIgnoreCase(updateTypeStr)) {
-                if (null != tagNameComboBox.getValue()) {
-                    final SoftwareModuleType typeSelected = swTypeManagementService
-                            .findSoftwareModuleTypeByName(tagNameComboBox.getValue().toString());
-                    if (null != typeSelected) {
-                        getColorPickerLayout().setSelectedColor(typeSelected.getColour() != null
-                                ? ColorPickerHelper.rgbToColorConverter(typeSelected.getColour())
-                                : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                    }
-                } else {
-                    getColorPickerLayout().setSelectedColor(
-                            ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                }
-            }
-            getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-            mainLayout.addComponent(colorPickerLayout, 1, 0);
-            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
-        } else {
-            mainLayout.removeComponent(colorPickerLayout);
-        }
-        tagPreviewBtnClicked = !tagPreviewBtnClicked;
     }
 
     @Override

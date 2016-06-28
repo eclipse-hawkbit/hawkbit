@@ -655,47 +655,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
     }
 
     @Override
-    protected void previewButtonClicked() {
-        if (!tagPreviewBtnClicked) {
-            final String selectedOption = (String) optiongroup.getValue();
-            if (null != selectedOption && selectedOption.equalsIgnoreCase(updateTypeStr)
-                    && null != tagNameComboBox.getValue()) {
-
-                final DistributionSetType existedDistType = distributionSetManagement
-                        .findDistributionSetTypeByKey(tagNameComboBox.getValue().toString());
-                if (null != existedDistType) {
-                    getColorPickerLayout().setSelectedColor(existedDistType.getColour() != null
-                            ? ColorPickerHelper.rgbToColorConverter(existedDistType.getColour())
-                            : ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                } else {
-                    getColorPickerLayout().setSelectedColor(
-                            ColorPickerHelper.rgbToColorConverter(ColorPickerConstants.DEFAULT_COLOR));
-                }
-            }
-            getColorPickerLayout().getSelPreview().setColor(getColorPickerLayout().getSelectedColor());
-            mainLayout.addComponent(colorPickerLayout, 1, 0);
-            mainLayout.setComponentAlignment(colorPickerLayout, Alignment.MIDDLE_CENTER);
-        } else {
-            mainLayout.removeComponent(colorPickerLayout);
-        }
-        tagPreviewBtnClicked = !tagPreviewBtnClicked;
-    }
-
-    @Override
     protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
         super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
         optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
     }
 
-    // @Override
-    // public String getOriginalTypeKey() {
-    // return originalTypeKey;
-    // }
-    //
-    // @Override
-    // public void setOriginalTypeKey(final String originalTypeKey) {
-    // this.originalTypeKey = originalTypeKey;
-    // }
 
 }
