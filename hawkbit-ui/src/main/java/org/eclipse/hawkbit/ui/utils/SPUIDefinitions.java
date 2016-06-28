@@ -269,10 +269,6 @@ public final class SPUIDefinitions {
      */
     public static final String NEW_TARGET_SAVE = "target.add.save";
     /**
-     * New Target discard icon id.
-     */
-    // public static final String NEW_TARGET_DISCARD = "target.add.discard";
-    /**
      * New Target add icon id.
      */
     public static final String NEW_TARGET_ADD_ICON = "NewTargetAddIcon";

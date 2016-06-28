@@ -84,6 +84,7 @@ public class ColorPickerLayout extends GridLayout {
         slider.setImmediate(true);
         slider.setWidth("150px");
         slider.addStyleName(styleName);
+        slider.setId(SPUIComponentIdProvider.COLOR_PICKER_RED_SLIDER);
         return slider;
     }
 
