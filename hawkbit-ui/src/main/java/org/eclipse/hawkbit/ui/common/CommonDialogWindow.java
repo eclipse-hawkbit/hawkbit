@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleAddUpdateWindow;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -31,6 +33,7 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -204,7 +207,7 @@ public class CommonDialogWindow extends Window implements Serializable {
             Object value = field.getValue();
 
             if (field instanceof Table) {
-                value = ((Table) field).getContainerDataSource().getItemIds();
+                value = Sets.newHashSet(((Table) field).getContainerDataSource().getItemIds());
             }
             orginalValues.put(field, value);
         }
@@ -214,13 +217,15 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private final void addListeners() {
         for (final AbstractField<?> field : allComponents) {
-            field.addValueChangeListener(new ChangeListener(field));
+
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
             }
 
             if (field instanceof Table) {
                 ((Table) field).addItemSetChangeListener(new ChangeListener(field));
+            } else {
+                field.addValueChangeListener(new ChangeListener(field));
             }
         }
 
@@ -236,22 +241,42 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     private boolean isValuesChanged(final Component currentChangedComponent, final Object newValue) {
         for (final AbstractField<?> field : allComponents) {
-            Object orginalValue = orginalValues.get(field);
-            Object currentValue = field.getValue();
-            if (field.equals(currentChangedComponent)) {
-                currentValue = newValue;
-            }
+            final Object orginalValue = orginalValues.get(field);
+            final Object currentValue = getCurrentVaue(currentChangedComponent, newValue, field);
 
-            if (String.class.equals(field.getType())) {
-                orginalValue = Strings.emptyToNull((String) orginalValue);
-                currentValue = Strings.emptyToNull((String) currentValue);
-            }
-            if (!Objects.equals(orginalValue, currentValue)) {
+            if (!isValueEquals(field, orginalValue, currentValue)) {
                 return true;
             }
 
         }
         return false;
+    }
+
+    private boolean isValueEquals(final AbstractField<?> field, final Object orginalValue, final Object currentValue) {
+        if (Set.class.equals(field.getType())) {
+            return CollectionUtils.isEqualCollection(CollectionUtils.emptyIfNull((Collection<?>) orginalValue),
+                    CollectionUtils.emptyIfNull((Collection<?>) currentValue));
+        }
+
+        if (String.class.equals(field.getType())) {
+            return Objects.equals(Strings.emptyToNull((String) orginalValue),
+                    Strings.emptyToNull((String) currentValue));
+        }
+
+        return Objects.equals(orginalValue, currentValue);
+    }
+
+    private Object getCurrentVaue(final Component currentChangedComponent, final Object newValue,
+            final AbstractField<?> field) {
+        Object currentValue = field.getValue();
+        if (field instanceof Table) {
+            currentValue = ((Table) field).getContainerDataSource().getItemIds();
+        }
+
+        if (field.equals(currentChangedComponent)) {
+            currentValue = newValue;
+        }
+        return currentValue;
     }
 
     private boolean shouldMandatoryLabelShown() {
@@ -269,17 +294,14 @@ public class CommonDialogWindow extends Window implements Serializable {
                 .collect(Collectors.toList());
 
         for (final AbstractField<?> field : requiredComponents) {
-            Object value = field.getValue();
-            if (field.equals(currentChangedComponent)) {
-                value = newValue;
-            }
+            Object value = getCurrentVaue(currentChangedComponent, newValue, field);
 
             if (String.class.equals(field.getType())) {
                 value = Strings.emptyToNull((String) value);
             }
 
             if (Set.class.equals(field.getType())) {
-                value = emptyToNull((Set<?>) value);
+                value = emptyToNull((Collection<?>) value);
             }
 
             if (value == null) {
@@ -290,7 +312,7 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     }
 
-    private static Object emptyToNull(final Set<?> c) {
+    private static Object emptyToNull(final Collection<?> c) {
         return (c == null || c.isEmpty()) ? null : c;
     }
 
@@ -407,7 +429,12 @@ public class CommonDialogWindow extends Window implements Serializable {
 
         @Override
         public void containerItemSetChange(final ItemSetChangeEvent event) {
-            saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(field, event.getContainer().getItemIds()));
+            if (!(field instanceof Table)) {
+                return;
+            }
+            final Table table = (Table) field;
+            saveButton.setEnabled(
+                    isSaveButtonEnabledAfterValueChange(table, table.getContainerDataSource().getItemIds()));
         }
 
     }
