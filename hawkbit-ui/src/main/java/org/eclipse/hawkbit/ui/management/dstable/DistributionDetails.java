@@ -77,8 +77,7 @@ public class DistributionDetails extends AbstractNamedVersionedEntityTableDetail
 
     @Override
     protected void onEdit(final ClickEvent event) {
-        distributionAddUpdateWindowLayout.populateValuesOfDistribution(getSelectedBaseEntityId());
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
+        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(getSelectedBaseEntityId());
         newDistWindow.setCaption(getI18n().get("caption.update.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);

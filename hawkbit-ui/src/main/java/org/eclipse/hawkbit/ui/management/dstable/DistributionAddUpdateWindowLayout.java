@@ -90,11 +90,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     private boolean editDistribution = Boolean.FALSE;
     private Long editDistId;
     private CommonDialogWindow window;
-    private String originalDistName;
-    private String originalDistVersion;
-    private String originalDistDescription;
-    private Boolean originalReqMigStep;
-    private String originalDistSetType;
 
     private FormLayout formLayout;
 
@@ -108,11 +103,6 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
     }
 
     private void buildLayout() {
-
-        /*
-         * The main layout of the window contains mandatory info, textboxes
-         * (controller Id, name & description) and action buttons layout
-         */
         addStyleName("lay-color");
         setSizeUndefined();
 
@@ -354,50 +344,38 @@ public class DistributionAddUpdateWindowLayout extends CustomComponent {
         descTextArea.clear();
         reqMigStepCheckbox.clear();
 
-        originalDistDescription = null;
-        originalDistName = null;
-        originalDistSetType = null;
-        originalDistVersion = null;
-        originalReqMigStep = Boolean.FALSE;
-
     }
 
-    private void populateRequiredComponents() {
+    private void populateValuesOfDistribution(final Long editDistId) {
+        this.editDistId = editDistId;
+        if (editDistId == null) {
+            return;
+        }
+
+        final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
+        if (distSet == null) {
+            return;
+        }
+
+        editDistribution = Boolean.TRUE;
+        distNameTextField.setValue(distSet.getName());
+        distVersionTextField.setValue(distSet.getVersion());
+        if (distSet.getType().isDeleted()) {
+            distsetTypeNameComboBox.addItem(distSet.getType().getName());
+        }
+        distsetTypeNameComboBox.setValue(distSet.getType().getName());
+        reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
+        if (distSet.getDescription() != null) {
+            descTextArea.setValue(distSet.getDescription());
+        }
         populateDistSetTypeNameCombo();
     }
 
-    /**
-     * populate data.
-     *
-     * @param editDistId
-     */
-    public void populateValuesOfDistribution(final Long editDistId) {
-        this.editDistId = editDistId;
-        editDistribution = Boolean.TRUE;
-        final DistributionSet distSet = distributionSetManagement.findDistributionSetByIdWithDetails(editDistId);
-        if (distSet != null) {
-            distNameTextField.setValue(distSet.getName());
-            distVersionTextField.setValue(distSet.getVersion());
-            if (distSet.getType().isDeleted()) {
-                distsetTypeNameComboBox.addItem(distSet.getType().getName());
-            }
-            distsetTypeNameComboBox.setValue(distSet.getType().getName());
-            reqMigStepCheckbox.setValue(distSet.isRequiredMigrationStep());
-            if (distSet.getDescription() != null) {
-                descTextArea.setValue(distSet.getDescription());
-            }
-            originalDistName = distSet.getName();
-            originalDistVersion = distSet.getVersion();
-            originalDistDescription = distSet.getDescription();
-            originalReqMigStep = distSet.isRequiredMigrationStep();
-            originalDistSetType = distSet.getType().getName();
-        }
-    }
-
-    public CommonDialogWindow getWindow() {
+    public CommonDialogWindow getWindow(final Long editDistId) {
         eventBus.publish(this, DragEvent.HIDE_DROP_HINT);
-        populateRequiredComponents();
         resetComponents();
+
+        populateValuesOfDistribution(editDistId);
         window = SPUIWindowDecorator.getWindow(i18n.get("caption.add.new.dist"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveDistribution(), event -> discardDistribution(),
                 null, formLayout, i18n);

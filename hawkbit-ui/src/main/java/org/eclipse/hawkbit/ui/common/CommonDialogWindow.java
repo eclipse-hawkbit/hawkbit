@@ -31,6 +31,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 
 import com.google.common.base.Strings;
+import com.vaadin.data.Container.ItemSetChangeEvent;
+import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
@@ -50,6 +52,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -132,6 +135,18 @@ public class CommonDialogWindow extends Window implements Serializable {
         for (final AbstractField<?> field : allComponents) {
             removeTextListener(field);
             removeValueChangeListener(field);
+            removeItemSetChangeistener(field);
+        }
+    }
+
+    private void removeItemSetChangeistener(final AbstractField<?> field) {
+        if (!(field instanceof Table)) {
+            return;
+        }
+        for (final Object listener : field.getListeners(ItemSetChangeEvent.class)) {
+            if (listener instanceof ChangeListener) {
+                ((Table) field).removeItemSetChangeListener((ChangeListener) listener);
+            }
         }
     }
 
@@ -186,8 +201,14 @@ public class CommonDialogWindow extends Window implements Serializable {
 
     public final void setOrginaleValues() {
         for (final AbstractField<?> field : allComponents) {
-            orginalValues.put(field, field.getValue());
+            Object value = field.getValue();
+
+            if (field instanceof Table) {
+                value = ((Table) field).getContainerDataSource().getItemIds();
+            }
+            orginalValues.put(field, value);
         }
+
         saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(null, null));
     }
 
@@ -196,6 +217,10 @@ public class CommonDialogWindow extends Window implements Serializable {
             field.addValueChangeListener(new ChangeListener(field));
             if (field instanceof TextChangeNotifier) {
                 ((TextChangeNotifier) field).addTextChangeListener(new ChangeListener(field));
+            }
+
+            if (field instanceof Table) {
+                ((Table) field).addItemSetChangeListener(new ChangeListener(field));
             }
         }
 
@@ -360,7 +385,7 @@ public class CommonDialogWindow extends Window implements Serializable {
         return this.buttonsLayout;
     }
 
-    private class ChangeListener implements ValueChangeListener, TextChangeListener {
+    private class ChangeListener implements ValueChangeListener, TextChangeListener, ItemSetChangeListener {
 
         private final Field<?> field;
 
@@ -378,6 +403,11 @@ public class CommonDialogWindow extends Window implements Serializable {
         @Override
         public void valueChange(final ValueChangeEvent event) {
             saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(field, field.getValue()));
+        }
+
+        @Override
+        public void containerItemSetChange(final ItemSetChangeEvent event) {
+            saveButton.setEnabled(isSaveButtonEnabledAfterValueChange(field, event.getContainer().getItemIds()));
         }
 
     }

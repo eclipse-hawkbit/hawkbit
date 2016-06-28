@@ -154,7 +154,7 @@ public class DistributionTableHeader extends AbstractTableHeader {
 
     @Override
     protected void addNewItem(final ClickEvent event) {
-        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow();
+        final Window newDistWindow = distributionAddUpdateWindowLayout.getWindow(null);
         newDistWindow.setCaption(i18n.get("caption.add.new.dist"));
         UI.getCurrent().addWindow(newDistWindow);
         newDistWindow.setVisible(Boolean.TRUE);

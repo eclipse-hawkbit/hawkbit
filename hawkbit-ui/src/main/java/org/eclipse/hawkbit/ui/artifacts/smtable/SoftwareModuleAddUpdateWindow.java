@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.io.Serializable;
 
+import javax.annotation.PostConstruct;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -39,7 +41,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -85,17 +86,21 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
     private FormLayout formLayout;
 
     /**
+     * Initialize Distribution Add and Edit Window.
+     */
+    @PostConstruct
+    void init() {
+        createRequiredComponents();
+    }
+
+    /**
      * Create window for new software module.
      * 
      * @return reference of {@link com.vaadin.ui.Window} to add new software
      *         module.
      */
     public CommonDialogWindow createAddSoftwareModuleWindow() {
-
-        editSwModule = Boolean.FALSE;
-        createRequiredComponents();
-        createWindow();
-        return window;
+        return createUpdateSoftwareModuleWindow(null);
     }
 
     /**
@@ -106,15 +111,11 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
      * @return reference of {@link com.vaadin.ui.Window} to update software
      *         module.
      */
-    public Window createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
-
-        editSwModule = Boolean.TRUE;
+    public CommonDialogWindow createUpdateSoftwareModuleWindow(final Long baseSwModuleId) {
         this.baseSwModuleId = baseSwModuleId;
-        createRequiredComponents();
+        resetComponents();
+        populateValuesOfSwModule();
         createWindow();
-        nameTextField.setEnabled(false);
-        versionTextField.setEnabled(false);
-        typeComboBox.setEnabled(false);
         return window;
     }
 
@@ -162,12 +163,10 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
         versionTextField.clear();
         descTextArea.clear();
         typeComboBox.clear();
+        editSwModule = Boolean.FALSE;
     }
 
     private void createWindow() {
-
-        resetComponents();
-
         final Label madatoryStarLabel = new Label("*");
         madatoryStarLabel.setStyleName("v-caption v-required-field-indicator");
         madatoryStarLabel.setWidth(null);
@@ -184,11 +183,15 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
 
         setCompositionRoot(formLayout);
 
-        populateValuesOfSwModule();
         window = SPUIWindowDecorator.getWindow(i18n.get("upload.caption.add.new.swmodule"), null,
                 SPUIDefinitions.CREATE_UPDATE_WINDOW, this, event -> saveOrUpdate(), event -> closeThisWindow(), null,
                 formLayout, i18n);
         window.getButtonsLayout().removeStyleName("actionButtonsMargin");
+
+        nameTextField.setEnabled(!editSwModule);
+        versionTextField.setEnabled(!editSwModule);
+        typeComboBox.setEnabled(!editSwModule);
+
         typeComboBox.focus();
     }
 
@@ -243,6 +246,9 @@ public class SoftwareModuleAddUpdateWindow extends CustomComponent implements Se
      * fill the data of a softwareModule in the content of the window
      */
     private void populateValuesOfSwModule() {
+        if (baseSwModuleId == null) {
+            return;
+        }
         final SoftwareModule swModle = softwareManagement.findSoftwareModuleById(baseSwModuleId);
         nameTextField.setValue(swModle.getName());
         versionTextField.setValue(swModle.getVersion());

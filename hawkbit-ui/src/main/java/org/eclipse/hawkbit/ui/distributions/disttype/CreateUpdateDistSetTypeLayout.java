@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -18,7 +17,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.colorpicker.ColorPickerConstants;
 import org.eclipse.hawkbit.ui.colorpicker.ColorPickerHelper;
 import org.eclipse.hawkbit.ui.common.DistributionSetTypeBeanQuery;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -26,7 +24,6 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmallNoBorder;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent;
 import org.eclipse.hawkbit.ui.distributions.event.DistributionSetTypeEvent.DistributionSetTypeEnum;
 import org.eclipse.hawkbit.ui.layouts.CreateUpdateTypeLayout;
-import org.eclipse.hawkbit.ui.utils.CommonDialogWindowHelper;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
@@ -647,19 +644,11 @@ public class CreateUpdateDistSetTypeLayout extends CreateUpdateTypeLayout
         return i18n.get("caption.add.type");
     }
 
-    protected Map<String, Boolean> getMandatoryFields() {
-        final Map<String, Boolean> requiredFields = CommonDialogWindowHelper.getMandatoryFields(getFormLayout());
-        // Selected SoftwareModulesType
-        requiredFields.put(selectedTable.getId(), Boolean.FALSE);
-        return requiredFields;
-    }
-
     @Override
     protected void createOptionGroup(final boolean hasCreatePermission, final boolean hasUpdatePermission) {
 
         super.createOptionGroup(hasCreatePermission, hasUpdatePermission);
         optiongroup.setId(SPUIDefinitions.CREATE_OPTION_GROUP_DISTRIBUTION_SET_TYPE_ID);
     }
-
 
 }

@@ -331,6 +331,7 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
         comboLayout.removeComponent(tagNameComboBox);
 
         // Default green color
+        colorPickerLayout.setVisible(false);
         colorPickerLayout.setSelectedColor(colorPickerLayout.getDefaultColor());
         colorPickerLayout.getSelPreview().setColor(colorPickerLayout.getSelectedColor());
         tagPreviewBtnClicked = false;
@@ -424,9 +425,6 @@ public abstract class AbstractCreateUpdateTagLayout extends CustomComponent
             colorPickerLayout.getColorSelect().setColor(colorPickerLayout.getSelPreview().getColor());
         }
 
-        // TODO:
-        // window.checkColorChange(colorPickerLayout.getId(),
-        // colorPickerLayout.getSelectedColor(), originalSelectedColor);
     }
 
     protected void closeWindow() {
