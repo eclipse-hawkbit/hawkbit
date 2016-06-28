@@ -155,9 +155,9 @@ public class CustomTargetBeanQuery extends AbstractBeanQuery<ProxyTarget> {
             size = getTargetManagement().countTargetByTargetFilterQuery(filterQuery);
         }
         getFilterManagementUIState().setTargetsCountAll(size);
-        if (size > SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES) {
-            getFilterManagementUIState().setTargetsTruncated(size - SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES);
-            size = SPUIDefinitions.MAX_TARGET_TABLE_ENTRIES;
+        if (size > SPUIDefinitions.MAX_TABLE_ENTRIES) {
+            getFilterManagementUIState().setTargetsTruncated(size - SPUIDefinitions.MAX_TABLE_ENTRIES);
+            size = SPUIDefinitions.MAX_TABLE_ENTRIES;
         } else {
             getFilterManagementUIState().setTargetsTruncated(null);
         }

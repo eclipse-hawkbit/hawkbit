@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TagManagement;
+import org.eclipse.hawkbit.repository.eventbus.event.DistributionDeletedEvent;
 import org.eclipse.hawkbit.repository.eventbus.event.DistributionSetTagAssigmentResultEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityLockedException;
@@ -54,6 +55,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -101,6 +103,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
+
+    @Autowired
+    private TenantAware tenantAware;
 
     @Override
     public DistributionSet findDistributionSetByIdWithDetails(final Long distid) {
@@ -168,32 +173,39 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public void deleteDistributionSet(final Long... distributionSetIDs) {
-        final List<Long> toHardDelete = new ArrayList<>();
+	public void deleteDistributionSet(final Long... distributionSetIDs) {
+		final List<Long> toHardDelete = new ArrayList<>();
 
-        final List<Long> assigned = distributionSetRepository
-                .findAssignedToTargetDistributionSetsById(distributionSetIDs);
-        assigned.addAll(distributionSetRepository.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
+		final List<Long> assigned = distributionSetRepository
+				.findAssignedToTargetDistributionSetsById(distributionSetIDs);
+		assigned.addAll(distributionSetRepository
+				.findAssignedToRolloutDistributionSetsById(distributionSetIDs));
 
-        // soft delete assigned
-        if (!assigned.isEmpty()) {
-            distributionSetRepository.deleteDistributionSet(assigned.toArray(new Long[assigned.size()]));
-        }
+		// soft delete assigned
+		if (!assigned.isEmpty()) {
+			distributionSetRepository.deleteDistributionSet(assigned
+					.toArray(new Long[assigned.size()]));
+		}
 
-        // mark the rest as hard delete
-        for (final Long setId : distributionSetIDs) {
-            if (!assigned.contains(setId)) {
-                toHardDelete.add(setId);
-            }
-        }
+		// mark the rest as hard delete
+		for (final Long setId : distributionSetIDs) {
+			if (!assigned.contains(setId)) {
+				toHardDelete.add(setId);
+			}
+		}
 
-        // hard delete the rest if exixts
-        if (!toHardDelete.isEmpty()) {
-            // don't give the delete statement an empty list, JPA/Oracle cannot
-            // handle the empty list
-            distributionSetRepository.deleteByIdIn(toHardDelete);
-        }
-    }
+		// hard delete the rest if exixts
+		if (!toHardDelete.isEmpty()) {
+			// don't give the delete statement an empty list, JPA/Oracle cannot
+			// handle the empty list
+			distributionSetRepository.deleteByIdIn(toHardDelete);
+		}
+
+		afterCommit.afterCommit(() -> eventBus
+				.post(new DistributionDeletedEvent(tenantAware
+						.getCurrentTenant(), distributionSetIDs)));
+
+	}
 
     @Override
     @Modifying
